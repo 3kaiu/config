@@ -1,3 +1,6 @@
+console.log('匹配到了，输出3-$response---->',$response)
+console.log('匹配到了，输出4---$request-->',$request)
+
 let body = JSON.parse($response.body);
 
 // 清空 EntranceTabItems 数组
