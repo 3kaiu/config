@@ -1,18 +1,18 @@
 [Script]
 # 去除监控配置
-^https:\/\/rmonitor\.qq\.com\/appconfig\/v7\/config\/90b012e687 url script-request-body https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/disable_monitoring.js,
+^https:\/\/rmonitor\.qq\.com\/appconfig\/v7\/config\/90b012e687 url script-request-body https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/disable_monitoring.js
 
 # 修改客户端配置
-^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/client\/getconf url script-request-body https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/init.js,
+^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/client\/getconf url script-request-body https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/init.js
 
 # 去除发现页中的标签
-^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/user\/getsimplediscover url script-request-body https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/filter.js,
+^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/user\/getsimplediscover url script-request-body https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/filter.js
 
 # 去除账户页面中的标签
-^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v3\/user\/getaccountpage url script-request-body https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/filter2.js,
+^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v3\/user\/getaccountpage url script-request-body https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/filter2.js
 
 # 去除视频广告的标签
-^https:\/\/h5\.if\.qidian\.com\/argus\/api\/v1\/video\/adv\/mainPage url script-request-body https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/filter3.js,
+^https:\/\/h5\.if\.qidian\.com\/argus\/api\/v1\/video\/adv\/mainPage url script-request-body https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/filter3.js
 
 [mitm]
 hostname = rmonitor.qq.com, magev6.if.qidian.com, h5.if.qidian.com
