@@ -1,20 +1,11 @@
 // Quantumult X Rewrite Script
 
 [Script]
-# 去除监控配置
-http-response ^https:\/\/rmonitor\.qq\.com\/appconfig\/v7\/config\/90b012e687 script-path=https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/disable_monitoring.js, requires-body=true, tag=测试去除监控
-
-# 修改客户端配置
-http-response ^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/client\/getconf script-path=https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/init.js, requires-body=true, tag=测试修改
-
-# 去除发现页中的标签
-http-response ^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/user\/getsimplediscover script-path=https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/filter.js, requires-body=true, tag=去除tab
-
-# 去除账户页面中的标签
-http-response ^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v3\/user\/getaccountpage script-path=https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/filter2.js, requires-body=true, tag=去除tab2
-
-# 去除视频广告的标签
-http-response ^https:\/\/h5\.if\.qidian\.com\/argus\/api\/v1\/video\/adv\/mainPage script-path=https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/filter3.js, requires-body=true, tag=去除tab3
+http-response ^https:\/\/rmonitor\.qq\.com\/appconfig\/v7\/config\/90b012e687 script-path=https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/disable_monitoring.js, requires-body = true, tag = 测试去除监控
+http-response ^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/client\/getconf script-path=https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/init.js, requires-body = true, tag = 测试修改
+http-response ^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/user\/getsimplediscover script-path=https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/filter.js, requires-body = true, tag = 去除tab
+http-response ^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v3\/user\/getaccountpage script-path=https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/filter2.js, requires-body = true, tag = 去除tab2
+http-response ^https:\/\/h5\.if\.qidian\.com\/argus\/api\/v1\/video\/adv\/mainPage script-path=https://raw.githubusercontent.com/3kaiu/config/refs/heads/main/qidian/filter3.js, requires-body = true, tag = 去除tab3
 
 [mitm]
-hostname = rmonitor.qq.com, magev6.if.qidian.com, h5.if.qidian.com
+hostname = rmonitor.qq.com, magev6.if.qidian.com
