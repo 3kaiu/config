@@ -1,5 +1,7 @@
 let body = JSON.parse($response.body);
 
+console.log('匹配到了，输出----->',body)
+
 body.Data.BenefitButtonList = [body.Data.BenefitButtonList[0]];
 body.Data.Data.DianNiangWorldSwitch = 0;
 body.Data.FunctionButtonList = [];
