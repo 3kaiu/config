@@ -1,5 +1,5 @@
 if ($response) {
-  console.log($response,'<-------------response')
+  console.log($response.body,'<-------------response')
   try {
     const body = JSON.parse($response.body);
     body.Data.BenefitButtonList = [body.Data.BenefitButtonList[0]];
