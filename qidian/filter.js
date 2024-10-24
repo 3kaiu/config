@@ -1,6 +1,14 @@
-let body = JSON.parse($response.body);
+if ($response) {
+  const data = $response.body;
+  console.log("🚀🚀->>>>>>>>>>> init初始化");
+  try {
+    const body = JSON.parse(data);
+    body.Data.Items = [];
 
-body.Data.Items = [];
-
-// 返回修改后的 body
-$done({ body: JSON.stringify(body) });
+    $done({ body: JSON.stringify(body) });
+  } catch (error) {
+    console.log("JSON Parse error:", error);
+  }
+} else {
+  console.error("Response is undefined⚠️警告->>>>>>>>>>>>>>>>");
+}
