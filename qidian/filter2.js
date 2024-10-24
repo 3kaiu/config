@@ -1,7 +1,8 @@
 if ($response) {
-  console.log($response.body,'<-------------response')
+  const data = $response.body;
+  console.log("🚀🚀->>>>>>>>>>>", data);
   try {
-    const body = $response.body
+    const body = JSON.parse(data);
     body.Data.BenefitButtonList = [body.Data.BenefitButtonList[0]];
     body.Data.Data.DianNiangWorldSwitch = 0;
     body.Data.FunctionButtonList = [];
