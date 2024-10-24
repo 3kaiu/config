@@ -1,4 +1,5 @@
 if ($response) {
+  console.log($response,'<-------------response')
   try {
     const body = JSON.parse($response.body);
     body.Data.BenefitButtonList = [body.Data.BenefitButtonList[0]];
@@ -17,7 +18,7 @@ if ($response) {
 
     $done({ body: JSON.stringify(body) });
   } catch (error) {
-    console.error("JSON Parse error:", error);
+    console.log("JSON Parse error:", error);
   }
 } else {
   console.error("Response is undefined⚠️警告->>>>>>>>>>>>>>>>");
