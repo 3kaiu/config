@@ -1,7 +1,7 @@
 if ($response) {
   console.log($response.body,'<-------------response')
   try {
-    const body = JSON.parse($response.body);
+    const body = $response.body
     body.Data.BenefitButtonList = [body.Data.BenefitButtonList[0]];
     body.Data.Data.DianNiangWorldSwitch = 0;
     body.Data.FunctionButtonList = [];
