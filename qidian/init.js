@@ -5,7 +5,6 @@ body.Data.PushDialogFrequency = Number.MAX_SAFE_INTEGER;
 body.Data.FreshmanCarryOnPlatSwitch = 0;
 body.Data.NotificationPageBackPushNoticeFrequency = "360";
 body.Data.EnableMonitorLog = 0;
-body.Data.Freshman.WelfareTab = 1;
 body.Data.UGCPushNoticeFrequency = "360";
 body.Data.PushDialogScenes = [];
 body.Data.PushNoticeFrequency = 0;
