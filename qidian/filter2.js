@@ -4,7 +4,6 @@ if ($response) {
   try {
     const body = JSON.parse(data);
     body.Data.BenefitButtonList = [body.Data.BenefitButtonList[0]];
-    body.Data.Data.DianNiangWorldSwitch = 0;
     body.Data.FunctionButtonList = [];
     body.Data.BottomButtonList = [];
     body.Data.Member = {};
