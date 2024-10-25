@@ -4,7 +4,7 @@ if ($response) {
   console.log("filter8" + data);
   try {
     const body = JSON.parse(data);
-    
+
     body.Data.CouponPrice = 0;
     body.Data.CouponPrice = 0;
     body.Data.ReadingCouponsPrice = 0;
@@ -32,6 +32,96 @@ if ($response) {
       TotalCount: 10,
       CanUseChapterCard: 1,
       Detail: [
+        {
+          Amount: 10,
+          RuleId: 0,
+          Tip: "2024年11月02日过期",
+          LimitType: 0,
+          Count: 1,
+          Desc: "*全场通用，以章节卡说明为准",
+          DiscountId: "10_0",
+          Name: "10点章节卡",
+        },
+        {
+          Amount: 10,
+          RuleId: 0,
+          Tip: "2024年11月02日过期",
+          LimitType: 0,
+          Count: 1,
+          Desc: "*全场通用，以章节卡说明为准",
+          DiscountId: "10_0",
+          Name: "10点章节卡",
+        },
+        {
+          Amount: 10,
+          RuleId: 0,
+          Tip: "2024年11月02日过期",
+          LimitType: 0,
+          Count: 1,
+          Desc: "*全场通用，以章节卡说明为准",
+          DiscountId: "10_0",
+          Name: "10点章节卡",
+        },
+        {
+          Amount: 10,
+          RuleId: 0,
+          Tip: "2024年11月02日过期",
+          LimitType: 0,
+          Count: 1,
+          Desc: "*全场通用，以章节卡说明为准",
+          DiscountId: "10_0",
+          Name: "10点章节卡",
+        },
+        {
+          Amount: 10,
+          RuleId: 0,
+          Tip: "2024年11月02日过期",
+          LimitType: 0,
+          Count: 1,
+          Desc: "*全场通用，以章节卡说明为准",
+          DiscountId: "10_0",
+          Name: "10点章节卡",
+        },
+        {
+          Amount: 10,
+          RuleId: 0,
+          Tip: "2024年11月02日过期",
+          LimitType: 0,
+          Count: 1,
+          Desc: "*全场通用，以章节卡说明为准",
+          DiscountId: "10_0",
+          Name: "10点章节卡",
+        },
+        {
+          Amount: 10,
+          RuleId: 0,
+          Tip: "2024年11月02日过期",
+          LimitType: 0,
+          Count: 1,
+          Desc: "*全场通用，以章节卡说明为准",
+          DiscountId: "10_0",
+          Name: "10点章节卡",
+        },
+        {
+          Amount: 10,
+          RuleId: 0,
+          Tip: "2024年11月02日过期",
+          LimitType: 0,
+          Count: 1,
+          Desc: "*全场通用，以章节卡说明为准",
+          DiscountId: "10_0",
+          Name: "10点章节卡",
+        },
+        {
+          Amount: 10,
+          RuleId: 0,
+          Tip: "2024年11月02日过期",
+          LimitType: 0,
+          Count: 1,
+          Desc: "*全场通用，以章节卡说明为准",
+          DiscountId: "10_0",
+          Name: "10点章节卡",
+        },
         {
           Amount: 10,
           RuleId: 0,
