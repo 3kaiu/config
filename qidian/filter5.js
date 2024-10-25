@@ -1,9 +1,11 @@
 if ($response) {
   const data = $response.body;
-  console.log("🚀🚀->>>>>>>>>>> filter4");
+  console.log("🚀🚀->>>>>>>>>>> filter5");
   try {
     const body = JSON.parse(data);
     body.Data.RiskCong.NewCaptcha = 20
+    body.Data.RiskCong.CaptchaType = 1
+    body.Data.RiskCong.BanId = 0
 
     $done({ body: JSON.stringify(body) });
   } catch (error) {
