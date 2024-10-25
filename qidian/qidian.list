@@ -6,4 +6,5 @@ hostname = rmonitor.qq.com, magev6.if.qidian.com, h5.if.qidian.com
 ^https?:\/\/magev6\.if\.qidian\.com\/argus\/api\/v3\/user\/getaccountpage url script-response-body https://github.com/3kaiu/config/raw/main/qidian/filter2.js
 ^https?:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/adv\/getadvlistbatch url script-response-body https://github.com/3kaiu/config/raw/main/qidian/filter4.js
 ^https?:\/\/h5\.if\.qidian\.com\/argus\/api\/v1\/common\/risk\/check url script-response-body https://github.com/3kaiu/config/raw/main/qidian/filter5.js
+^https?:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/followsubscribe\/showChapterEndModule url script-response-body https://github.com/3kaiu/config/raw/main/qidian/filter6.js
 ^https?:\/\/h5\.if\.qidian\.com\/argus\/api\/v1\/video\/adv\/mainPage url script-response-body https://github.com/3kaiu/config/raw/main/qidian/filter3.js
