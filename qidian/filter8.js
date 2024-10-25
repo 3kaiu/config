@@ -4,8 +4,7 @@ if ($response) {
   console.log("filter8" + data);
   try {
     const body = JSON.parse(data);
-    body.Result = 401;
-    body.Message = '已订阅';
+
     boday.Data.ChapterCardV2 = {
       TotalAmount: 100,
       ABRule: 1,
@@ -43,6 +42,7 @@ if ($response) {
     body.Data.PriceInfo.OriginPointPrice = -1;
     body.Data.PriceInfo.PointDiscountType = -1;
     body.Data.PriceInfo.ChapterType = 0;
+    body.Data.PriceInfo.OriginPointPrice = 0;
 
     $done({ body: JSON.stringify(body) });
   } catch (error) {
