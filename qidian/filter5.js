@@ -1,6 +1,7 @@
 if ($response) {
   const data = $response.body;
   console.log("🚀🚀->>>>>>>>>>> filter5");
+  console.log('filter5' + data)
   try {
     const body = JSON.parse(data);
     body.Data.RiskCong.NewCaptcha = 20
