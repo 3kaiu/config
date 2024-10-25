@@ -30,14 +30,14 @@ if ($response) {
       ABRule: 1,
       Hint: "可选择章节卡，大额章节卡建议批量订阅使用",
       TotalCount: 10,
-      CanUseChapterCard: 0,
+      CanUseChapterCard: 1,
       Detail: [
         {
-          Amount: 100,
+          Amount: 10,
           RuleId: 0,
           Tip: "2024年11月02日过期",
           LimitType: 0,
-          Count: 10,
+          Count: 1,
           Desc: "*全场通用，以章节卡说明为准",
           DiscountId: "10_0",
           Name: "10点章节卡",
