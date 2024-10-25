@@ -1,8 +1,8 @@
 if ($response) {
   const data = $response.body;
   console.log("🚀🚀->>>>>>>>>>> filter7");
-  console.log('filter7: ' + data);
-  
+  console.log("filter7: " + data);
+
   try {
     const body = JSON.parse(data);
 
@@ -21,7 +21,7 @@ if ($response) {
       let totalPrice = 0;
       const lastTwoItems = dataArray.slice(-2);
 
-      lastTwoItems.forEach(item => {
+      lastTwoItems.forEach((item) => {
         totalPrice += item.Price;
 
         // 将价格相关的属性设置为 0
@@ -36,7 +36,13 @@ if ($response) {
 
       // 更新 ReadingCouponsPrice
       body.Data.ReadingCouponsPrice -= totalPrice; // 使用 -= 进行减少
-      body.Data.IsMemberBook = -1;
+      body.Data.IsMemberBook = 1;
+      body.Data.FreeBalance = 2000;
+      body.Data.WordsBalance = 2000;
+      body.Data.DQBalance = 2000;
+      body.Data.EnableBookUnitBuy = 1;
+      body.Data.Balance = 2000;
+      body.Data.NewWordBalance = 2000;
     } else {
       console.error("dataArray is not valid or has fewer than 2 items.");
     }
