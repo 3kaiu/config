@@ -30,7 +30,7 @@ if ($response) {
       ABRule: 1,
       Hint: "可选择章节卡，大额章节卡建议批量订阅使用",
       TotalCount: 12,
-      CanUseChapterCard: 0,
+      CanUseChapterCard: 1,
       Detail: [
         {
           Amount: 10,
