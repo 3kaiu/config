@@ -26,14 +26,14 @@ if ($response) {
     body.Data.PriceInfo.OriginPointPrice = 0;
 
     body.Data.ChapterCardV2 = {
-      TotalAmount: 120,
+      TotalAmount: 140,
       ABRule: 1,
       Hint: "可选择章节卡，大额章节卡建议批量订阅使用",
-      TotalCount: 11,
-      CanUseChapterCard: 1,
+      TotalCount: 12,
+      CanUseChapterCard: 0,
       Detail: [
         {
-          Amount: 100,
+          Amount: 10,
           RuleId: 0,
           Tip: "2024年11月02日过期",
           LimitType: 0,
@@ -44,10 +44,10 @@ if ($response) {
         },
         {
           Amount: 20,
-          RuleId: 1,
+          RuleId: 0,
           Tip: "2024年11月02日过期",
           LimitType: 0,
-          Count: 1,
+          Count: 2,
           Desc: "*全场通用，以章节卡说明为准",
           DiscountId: "20_0",
           Name: "20点章节卡",
