@@ -1,11 +1,11 @@
 if ($response) {
   const data = $response.body;
   console.log("🚀🚀->>>>>>>>>>> filter8");
-  console.log("filter8" + data);
+  console.log($request);
   try {
     const body = JSON.parse(data);
     body.Result = 401;
-    body.Message = '已订阅';
+    body.Message = "已订阅";
     boday.Data.ChapterCardV2 = {
       TotalAmount: 100,
       ABRule: 1,
