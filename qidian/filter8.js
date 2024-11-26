@@ -1,10 +1,6 @@
-console.log($request,'----------------------request');
-console.log($request.headers)
-console.log("🚀🚀->>>🚀🚀>>>>>🚀🚀>>> request");
 if ($response) {
   const data = $response.body;
   console.log("🚀🚀->>>>>>>>>>> filter8");
-    console.log("Request Headers:", JSON.stringify($request.headers));
   
   try {
     const body = JSON.parse(data);
