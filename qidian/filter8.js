@@ -1,6 +1,6 @@
-console.log($request,'----------------------rqequest)
+console.log($request,'----------------------request');
 console.log($request.headers)
-
+console.log("🚀🚀->>>🚀🚀>>>>>🚀🚀>>> request");
 if ($response) {
   const data = $response.body;
   console.log("🚀🚀->>>>>>>>>>> filter8");
