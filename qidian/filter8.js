@@ -7,6 +7,7 @@ if ($response) {
   console.log("filter8" + data);
   try {
     const body = JSON.parse(data);
+    console.log("Request Headers:", JSON.stringify($request.headers));
 
     body.Data.CouponPrice = 0;
     body.Data.CouponPrice = 0;
