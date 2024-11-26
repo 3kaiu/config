@@ -1,7 +1,7 @@
 if ($response) {
   const data = $response.body;
   console.log("🚀🚀->>>>>>>>>>> filter8");
-  console.log($request);
+  console.log(JSON.stringify($request));
   try {
     const body = JSON.parse(data);
     body.Result = 401;
