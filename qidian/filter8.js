@@ -1,3 +1,6 @@
+console.log($request,'----------------------rqequest)
+console.log($request.headers)
+
 if ($response) {
   const data = $response.body;
   console.log("🚀🚀->>>>>>>>>>> filter8");
