@@ -5,14 +5,12 @@ const $ = new Env("起点读书通用脚本");
 const URL_HANDLERS = {
   "/argus/api/v1/video/adv/finishWatch": handleAdFinishWatch,
   "/argus/api/v1/video/adv/mainPage": filterMainPage,
-  "/argus/api/v3/user/getaccountpage":rewriteAccountPage,
+  "/argus/api/v3/user/getaccountpage": rewriteAccountPage,
 };
 
 !(async () => {
   const url = $request.url;
   const path = new URL(url).pathname;
-  console.log(JSON.stringify($request),'------------<')
-  console.log(JSON.stringify(new URL(url)))
 
   // 查找匹配的处理函数
   const handler = URL_HANDLERS[path] || defaultHandler;
@@ -106,8 +104,20 @@ function filterMainPage(request, response) {
   }
 }
 
-function rewriteAccountPage(request,response){
-    
+function rewriteAccountPage(request, response) {
+  if (response) {
+    const body = JSON.parse(response.body);
+    body.Data.PursueBookCard = { ShowTab: 1, Url: "" };
+    body.Data.BenefitButtonList = [];
+    body.Data.FunctionButtonList = [];
+    body.Data.BottomButtonList = [];
+    body.Data.Member = {};
+    body.Data.SchoolText = "";
+    body.Data.SchoolUrl = "";
+    body.Data.SchoolImage = "";
+
+    $done({ body: JSON.stringify(body) });
+  }
 }
 
 // Env 类（简化版）
