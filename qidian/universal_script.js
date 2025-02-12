@@ -5,11 +5,14 @@ const $ = new Env("起点读书通用脚本");
 const URL_HANDLERS = {
   "/argus/api/v1/video/adv/finishWatch": handleAdFinishWatch,
   "/argus/api/v1/video/adv/mainPage": filterMainPage,
+  "/argus/api/v3/user/getaccountpage":rewriteAccountPage,
 };
 
 !(async () => {
   const url = $request.url;
   const path = new URL(url).pathname;
+  console.log(JSON.stringify($request),'------------<')
+  console.log(JSON.stringify(new URL(url)))
 
   // 查找匹配的处理函数
   const handler = URL_HANDLERS[path] || defaultHandler;
@@ -29,7 +32,6 @@ const URL_HANDLERS = {
 
 // 默认处理函数
 function defaultHandler(request, response) {
-  console.log("未匹配到特定逻辑，跳过处理");
   $done();
 }
 
@@ -102,6 +104,10 @@ function filterMainPage(request, response) {
     body.Data.BaizeModule = {};
     $done({ body: JSON.stringify(body) });
   }
+}
+
+function rewriteAccountPage(request,response){
+    
 }
 
 // Env 类（简化版）
