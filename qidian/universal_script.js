@@ -45,19 +45,20 @@ function handleAdFinishWatch(request) {
 
   // 智能重放控制器
   const replayEngine = () => {
+    console.log('-----正在进行1111')
     // 终止条件判断
     if (replayCount >= REPLAY_MAX) {
       console.log("🏁 已完成所有重放任务");
       $.setdata("0", "qidian_replay_counter"); // 重置计数器
       return;
     }
-
+    console.log('-----正在进行22222')
     // 构造带标识的请求头
     const signedHeaders = {
       ...request.headers,
       [replayTag]: `v2/${Date.now()}` // 动态签名防检测
     };
-
+    console.log('-----正在进行3333')
     // 发送重放请求
     $task.fetch({
       ...request,
