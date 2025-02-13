@@ -100,6 +100,8 @@ function filterMainPage(_, response) {
 function rewriteAccountPage(_, response) {
   try {
     const body = JSON.parse(response.body);
+    
+    // 账户页面清理配置
     const cleanConfig = {
       PursueBookCard: { ShowTab: 1, Url: "" },
       BenefitButtonList: [],
@@ -112,7 +114,6 @@ function rewriteAccountPage(_, response) {
     };
 
     Object.assign(body.Data, cleanConfig);
-    $notify('测试’，1，2)
     $done({ body: JSON.stringify(body) });
   } catch (e) {
     console.error("❌ 账户页处理失败:", e);
