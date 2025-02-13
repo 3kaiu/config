@@ -102,16 +102,18 @@ function filterMainPage(request, response) {
 function rewriteAccountPage(_, response) {
   try {
     const body = JSON.parse(response.body);
-    const body = JSON.parse(response.body);
-    body.Data.PursueBookCard = { ShowTab: 1, Url: "" };
-    body.Data.BenefitButtonList = [];
-    body.Data.FunctionButtonList = [];
-    body.Data.BottomButtonList = [];
-    body.Data.Member = {};
-    body.Data.SchoolText = "";
-    body.Data.SchoolUrl = "";
-    body.Data.SchoolImage = "";
+    const cleanConfig = {
+      PursueBookCard: { ShowTab: 1, Url: "" },
+      BenefitButtonList: [],
+      FunctionButtonList: [],
+      BottomButtonList: [],
+      Member: {},
+      SchoolText: "",
+      SchoolUrl: "",
+      SchoolImage: ""
+    };
 
+    Object.assign(body.Data, cleanConfig);
     $done({ body: JSON.stringify(body) });
   } catch (e) {
     console.error("❌ 账户页处理失败:", e);
