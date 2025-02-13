@@ -19,8 +19,9 @@ const URL_HANDLERS = {
   // 执行处理函数
   try {
     await handler($request, $response);
-  } catch (e) {
-    console.error(`处理 URL ${url} 时出错:`, e);
+  }catch (e) {
+    console.error(`❌ 处理异常：${e.stack}`);
+    $.msg("脚本错误", e.name, e.message);
   } finally {
     $done();
   }
