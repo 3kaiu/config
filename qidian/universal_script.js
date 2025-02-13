@@ -10,6 +10,7 @@ const URL_HANDLERS = new Map([
 
 !(async () => {
   try {
+    console.log('进来脚本了----------------------')
     const url = new URL($request.url);
     const handler = URL_HANDLERS.get(url.pathname) || defaultHandler;
     
