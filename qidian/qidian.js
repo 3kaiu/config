@@ -4,4 +4,4 @@ https?:\/\/(magev6\.if\.qidian\.com|h5\.if\.qidian\.com)\/.* url script-request-
 https?:\/\/(magev6\.if\.qidian\.com|h5\.if\.qidian\.com)\/.* url script-response-body https://github.com/3kaiu/config/raw/main/qidian/universal_script.js
 
 [MITM]
-hostname = rmonitor.qq.com, magev6.if.qidian.com, h5.if.qidian.com
+hostname = magev6.if.qidian.com, h5.if.qidian.com
