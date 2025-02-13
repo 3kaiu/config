@@ -13,7 +13,8 @@ const URL_HANDLERS = {
 
   // 查找匹配的处理函数
   const handler = URL_HANDLERS[path] || defaultHandler;
-  console.log(`处理 URL: ${url}, 使用处理器: ${handler.name}`);
+  console.log(`ℹ️ 处理请求：${url.pathname}`);
+    console.log(`🔧 使用处理器：${handler.name}`);
 
   // 执行处理函数
   try {
@@ -110,6 +111,7 @@ function rewriteAccountPage(_, response) {
     };
 
     Object.assign(body.Data, cleanConfig);
+    $.msg('测试',1,2)
     $done({ body: JSON.stringify(body) });
   } catch (e) {
     console.error("❌ 账户页处理失败:", e);
