@@ -13,15 +13,13 @@ const URL_HANDLERS = {
 
   // 查找匹配的处理函数
   const handler = URL_HANDLERS[path] || defaultHandler;
-  console.log(`ℹ️ 处理请求：${url.pathname}`);
-    console.log(`🔧 使用处理器：${handler.name}`);
+  console.log(`处理 URL: ${url}, 使用处理器: ${handler.name}`);
 
   // 执行处理函数
   try {
     await handler($request, $response);
-  }catch (e) {
-    console.error(`❌ 处理异常：${e.stack}`);
-    $.msg("脚本错误", e.name, e.message);
+  } catch (e) {
+    console.error(`处理 URL ${url} 时出错:`, e);
   } finally {
     $done();
   }
@@ -29,101 +27,96 @@ const URL_HANDLERS = {
   .catch((e) => $.logErr(e))
   .finally(() => $.done());
 
+// 默认处理函数
+function defaultHandler(request, response) {
+  $done();
+}
 
-function handleAdFinishWatch(request) {
-  const REPLAY_MAX = 7;
-  const replayTag = "X-Replayed";
-  
-  if (request.headers[replayTag]) {
-    console.log("⏩ 跳过重放请求");
+// 广告观看完成处理函数
+function handleAdFinishWatch(request, response) {
+  // 定义一个全局计数器
+  let replayCount = 0;
+
+  // 重放请求函数
+  function replayRequest(request) {
+    // 检查是否已经重放 7 次
+    if (replayCount >= 7) {
+      console.log("重放 7 次已完成，结束重放。");
+      $done();
+      return;
+    }
+
+    // 标记重放的请求，防止其进入重写规则
+    request.headers["X-Replayed"] = "true";
+
+    // 发送重放请求
+    $task
+      .fetch({
+        method: request.method,
+        url: request.url,
+        headers: request.headers,
+        body: request.body,
+      })
+      .then(
+        (response) => {
+          // 处理响应
+          console.log(`重放次数: ${replayCount + 1}, Response:`, response);
+          replayCount++;
+
+          // 使用 setTimeout 避免递归调用导致的栈溢出
+          setTimeout(() => replayRequest(request), 0);
+        },
+        (error) => {
+          // 处理错误
+          console.error("重放失败:", error);
+          $done();
+        }
+      );
+  }
+  if (request.headers["X-Replayed"] === "true") {
+    console.log("当前请求为重放请求，跳过重写规则。");
     $done();
     return;
   }
 
-  let replayCount = Number($.getdata("replayCount") || 0;
-  
-  const replayRequest = () => {
-    if (replayCount >= REPLAY_MAX) {
-      console.log("✅ 已完成7次重放");
-      $.setdata("0", "replayCount");
-      return;
-    }
-
-    request.headers[replayTag] = "true";
-    $task.fetch({
-      ...request,
-      headers: {...request.headers, [replayTag]: "true"}
-    }).then(resp => {
-      replayCount++;
-      $.setdata(replayCount.toString(), "replayCount");
-      console.log(`🔄 重放次数：${replayCount}/${REPLAY_MAX}`);
-      if (replayCount < REPLAY_MAX) setTimeout(replayRequest, 100);
-    });
-  };
-
-  console.log("🎬 开始广告奖励循环");
-  replayRequest();
+  // 如果是第一次请求，开始重放
+  console.log("捕获到第一次请求，开始重放。");
+  replayRequest(request);
 }
-
 
 // 过滤主页面广告处理函数
-function filterMainPage(_, response) {
-  try {
-    const body = JSON.parse(response.body);
-    
-    // 模块清理清单
-    const cleanModules = [
-      'EntranceTabItems',
-      'MonthBenefitModule',
-      'BaizeModule'
+function filterMainPage(request, response) {
+  if (response) {
+    let body = JSON.parse(response.body);
+
+    body.Data.EntranceTabItems = [];
+
+    // 确保从 CountdownBenefitModule 中提取 TaskList 的正确元素
+    body.Data.CountdownBenefitModule.TaskList = [
+      body.Data.CountdownBenefitModule.TaskList[0],
+      body.Data.CountdownBenefitModule.TaskList[1],
     ];
-    
-    cleanModules.forEach(key => {
-      body.Data[key] = Array.isArray(body.Data[key]) ? [] : {};
-    });
 
-    // 保留必要任务项
-    if (body.Data.CountdownBenefitModule?.TaskList?.length >= 2) {
-      body.Data.CountdownBenefitModule.TaskList = [
-        body.Data.CountdownBenefitModule.TaskList[0],
-        body.Data.CountdownBenefitModule.TaskList[1]
-      ];
-    }
-
+    body.Data.MonthBenefitModule = {};
+    body.Data.BaizeModule = {};
     $done({ body: JSON.stringify(body) });
-  } catch (e) {
-    console.error("❌ 主页面处理失败:", e);
-    $done();
   }
 }
 
-function rewriteAccountPage(_, response) {
-  try {
+function rewriteAccountPage(request, response) {
+  if (response) {
     const body = JSON.parse(response.body);
-    
-    // 账户页面清理配置
-    const cleanConfig = {
-      PursueBookCard: { ShowTab: 1, Url: "" },
-      BenefitButtonList: [],
-      FunctionButtonList: [],
-      BottomButtonList: [],
-      Member: {},
-      SchoolText: "",
-      SchoolUrl: "",
-      SchoolImage: ""
-    };
+    body.Data.PursueBookCard = { ShowTab: 1, Url: "" };
+    body.Data.BenefitButtonList = [];
+    body.Data.FunctionButtonList = [];
+    body.Data.BottomButtonList = [];
+    body.Data.Member = {};
+    body.Data.SchoolText = "";
+    body.Data.SchoolUrl = "";
+    body.Data.SchoolImage = "";
 
-    Object.assign(body.Data, cleanConfig);
     $done({ body: JSON.stringify(body) });
-  } catch (e) {
-    console.error("❌ 账户页处理失败:", e);
-    $done();
   }
-}
-
-function defaultHandler() {
-  console.log("⏭️ 未匹配的请求，跳过处理");
-  $done();
 }
 
 // Env 类（简化版）
