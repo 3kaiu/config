@@ -112,7 +112,7 @@ function rewriteAccountPage(_, response) {
     };
 
     Object.assign(body.Data, cleanConfig);
-    $.msg('测试',1,2)
+    console.log(JSON.stringify($))
     $done({ body: JSON.stringify(body) });
   } catch (e) {
     console.error("❌ 账户页处理失败:", e);
