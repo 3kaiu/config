@@ -28,63 +28,15 @@ const URL_HANDLERS = {
   .finally(() => $.done());
 
 function handleAdFinishWatch(request) {
-  const REPLAY_MAX = 7; // 需要重放的总次数
-  const REPLAY_INTERVAL = 300; // 每次请求间隔(ms)
-  const replayTag = "X-Replayed-Token";
-
-  // 拦截重放请求的回环
-  if (request.headers[replayTag]) {
-    console.log("⏭️ 跳过已标记的重放请求");
-    $done();
-    return;
-  }
-
-  // 初始化计数器（使用持久化存储）
-  let replayCount = parseInt($.getdata("qidian_replay_counter") || 0);
-  console.log(`📊 当前进度：${replayCount}/${REPLAY_MAX}`);
-
-  // 智能重放控制器
   const replayEngine = () => {
-    console.log('-----正在进行1111')
-    // 终止条件判断
-    if (replayCount >= REPLAY_MAX) {
-      console.log("🏁 已完成所有重放任务");
-      $.setdata("0", "qidian_replay_counter"); // 重置计数器
-      return;
-    }
-    console.log('-----正在进行22222')
-    // 构造带标识的请求头
-    const signedHeaders = {
-      ...request.headers,
-      [replayTag]: `v2/${Date.now()}` // 动态签名防检测
-    };
-    console.log('-----正在进行3333')
-    // 发送重放请求
     $task.fetch({
-      ...request,
-      headers: signedHeaders
-    }).then(response => {
-      // 成功回调
-      replayCount++;
-      $.setdata(replayCount.toString(), "qidian_replay_counter");
-      console.log(`✅ 第 ${replayCount} 次奖励获取成功`);
-      
-      // 进度显示优化
-      const progress = Math.round((replayCount / REPLAY_MAX) * 100);
-      $.msg("广告奖励", `进度: ${progress}%`, `已完成 ${replayCount} 次`);
-
-      // 继续下一轮（带随机延迟）
-      setTimeout(replayEngine, REPLAY_INTERVAL + Math.random() * 200);
-    }).catch(error => {
-      // 错误处理
-      console.error(`❌ 第 ${replayCount+1} 次失败:`, error);
-      $.msg("奖励获取失败", error.statusCode || "网络错误", error.error);
-    });
-  };
+      ...request
+    })}
 
   // 首次执行（立即启动）
   console.log("🚀 启动广告奖励加速引擎");
-  replayEngine();
+  for(let i = 0;i<7;i++){
+    replayEngine()
 }
 
 function filterMainPage(_, response) {
