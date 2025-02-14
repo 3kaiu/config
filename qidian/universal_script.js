@@ -38,7 +38,7 @@ function handleAdFinishWatch(request) {
   console.log("🚀 启动广告奖励加速引擎");
   for(let i = 0;i<7;i++){
     replayEngine()
-}
+}}
 
 function filterMainPage(_, response) {
   try {
