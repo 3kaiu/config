@@ -29,6 +29,7 @@ const URL_HANDLERS = {
 
 function handleAdFinishWatch(request) {
   const replayEngine = () => {
+    console.log("进去了-----")
     $task.fetch({
       ...request
     })}
