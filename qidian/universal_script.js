@@ -4,7 +4,8 @@ const $ = new Env("起点读书通用脚本");
 const URL_HANDLERS = {
   "/argus/api/v1/video/adv/finishWatch": handleAdFinishWatch,
   "/argus/api/v1/video/adv/mainPage": filterMainPage,
-  "/argus/api/v3/user/getaccountpage": rewriteAccountPage,
+	"/argus/api/v3/user/getaccountpage": rewriteAccountPage,
+	"/argus/api/v1/readtime/scoremall/checkinrewardpage",rewardPage,
 };
 
 !(async () => {
@@ -29,29 +30,31 @@ const URL_HANDLERS = {
 
 function handleAdFinishWatch(request) {
   const replayEngine = () => {
-    console.log("进去了-----")
+    console.log("进去了-----");
     $task.fetch({
-      ...request
-    })}
+      ...request,
+    });
+  };
 
   // 首次执行（立即启动）
   console.log("🚀 启动广告奖励加速引擎");
-  for(let i = 0;i<7;i++){
-    replayEngine()
-}}
+  for (let i = 0; i < 7; i++) {
+    replayEngine();
+  }
+}
 
 function filterMainPage(_, response) {
   try {
     const body = JSON.parse(response.body);
-    
+
     // 模块清理清单
     const cleanModules = [
-      'EntranceTabItems',
-      'MonthBenefitModule',
-      'BaizeModule'
+      "EntranceTabItems",
+      "MonthBenefitModule",
+      "BaizeModule",
     ];
-    
-    cleanModules.forEach(key => {
+
+    cleanModules.forEach((key) => {
       body.Data[key] = Array.isArray(body.Data[key]) ? [] : {};
     });
 
@@ -59,7 +62,7 @@ function filterMainPage(_, response) {
     if (body.Data.CountdownBenefitModule?.TaskList?.length >= 2) {
       body.Data.CountdownBenefitModule.TaskList = [
         body.Data.CountdownBenefitModule.TaskList[0],
-        body.Data.CountdownBenefitModule.TaskList[1]
+        body.Data.CountdownBenefitModule.TaskList[1],
       ];
     }
 
@@ -73,7 +76,7 @@ function filterMainPage(_, response) {
 function rewriteAccountPage(_, response) {
   try {
     const body = JSON.parse(response.body);
-    
+
     // 账户页面清理配置
     const cleanConfig = {
       PursueBookCard: { ShowTab: 1, Url: "" },
@@ -83,13 +86,24 @@ function rewriteAccountPage(_, response) {
       Member: {},
       SchoolText: "",
       SchoolUrl: "",
-      SchoolImage: ""
+      SchoolImage: "",
     };
 
     Object.assign(body.Data, cleanConfig);
     $done({ body: JSON.stringify(body) });
   } catch (e) {
     console.error("❌ 账户页处理失败:", e);
+    $done();
+  }
+}
+
+function rewardPage(_, response) {
+	try {
+		const body = JSON.parse(response.body);
+		body.Data.Balance = "300"
+    $done({ body: JSON.stringify(body) });
+	}catch(e){
+    console.error("❌ 兑换页处理失败:", e);
     $done();
   }
 }
