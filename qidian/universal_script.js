@@ -4,8 +4,8 @@ const $ = new Env("起点读书通用脚本");
 const URL_HANDLERS = {
   "/argus/api/v1/video/adv/finishWatch": handleAdFinishWatch,
   "/argus/api/v1/video/adv/mainPage": filterMainPage,
-	"/argus/api/v3/user/getaccountpage": rewriteAccountPage,
-	"/argus/api/v1/readtime/scoremall/checkinrewardpage",rewardPage,
+  "/argus/api/v3/user/getaccountpage": rewriteAccountPage,
+  "/argus/api/v1/readtime/scoremall/checkinrewardpage":rewardPage,
 };
 
 !(async () => {
@@ -98,11 +98,11 @@ function rewriteAccountPage(_, response) {
 }
 
 function rewardPage(_, response) {
-	try {
-		const body = JSON.parse(response.body);
-		body.Data.Balance = "300"
+try {
+	const body = JSON.parse(response.body);
+	body.Data.Balance = "300"
     $done({ body: JSON.stringify(body) });
-	}catch(e){
+}catch(e){
     console.error("❌ 兑换页处理失败:", e);
     $done();
   }
