@@ -15,6 +15,7 @@
 ### 1. 起点全能助手
 - **功能**: 激励视频自动重放、底部导航栏精简、账户页面去广告净化。
 - **订阅链接**: `https://raw.githubusercontent.com/3kaiu/config/main/Rewrite/qidian.snippet`
+- **脚本路径**: `Scripts/Qidian.js`
 - **使用方法**: 在 QX 的 `[rewrite_remote]` 中添加上述订阅链接即可，脚本和 MITM 将自动生效。
 
 ---
