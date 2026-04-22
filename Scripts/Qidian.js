@@ -45,8 +45,8 @@ const TASK_MAPPING = {
 // --- 核心函数 ---
 
 /**
- * 智能重放算法
- * 采用指数随机退避策略，模拟真人点击间隔
+ * 极速重放算法
+ * 移除延迟等待，采用 Promise.all 实现全并发瞬间重放，解决时效性导致失败的问题
  */
 async function handleReplay(request) {
   const body = request.body || "";
@@ -56,15 +56,17 @@ async function handleReplay(request) {
   const task = TASK_MAPPING[match];
   $.log(`🚀 识别到任务: ${task.name}`);
 
-  // 为了安全，我们只重放 count - 1 次（因为当前已经成功手动完成了一次）
+  // 减去已经手动成功的一次
   const replayCount = task.count - 1;
+  if (replayCount <= 0) {
+    $.log(`ℹ️ 无需重复执行`);
+    return;
+  }
   
-  for (let i = 0; i < replayCount; i++) {
-    // 算法优化：3~6秒随机间隔 + 步进延迟
-    const delay = 3000 + Math.random() * 3000 + (i * 500);
-    $.log(`⏳ 等待 ${Math.round(delay)}ms 后进行第 ${i + 1}/${replayCount} 次自动重放...`);
-    await $.wait(delay);
+  $.log(`⚡ 抛弃间隔，开始极速并发 ${replayCount} 次重放...`);
 
+  // 构建并发请求任务组
+  const replayTasks = Array.from({ length: replayCount }, async (_, i) => {
     const res = await $.fetch({
       url: request.url,
       method: "POST",
@@ -73,14 +75,18 @@ async function handleReplay(request) {
     });
 
     if (res && res.statusCode === 200) {
-      $.log(`✅ 第 ${i + 1} 次重放成功`);
+      $.log(`✅ 重放 [${i + 1}/${replayCount}] 成功`);
     } else {
-      $.log(`⚠️ 第 ${i + 1} 次重放可能失败 (状态码: ${res ? res.statusCode : "未知"})`);
+      $.log(`⚠️ 重放 [${i + 1}/${replayCount}] 可能失败 (状态码: ${res ? res.statusCode : "未知"})`);
     }
-  }
+  });
+
+  // 瞬间同时发起所有请求，等待全部执行完毕
+  await Promise.all(replayTasks);
   
-  $.notify("起点任务全自动完成", "", `${task.name} 共 ${task.count} 次任务已全部闭环`);
+  $.notify("起点任务全自动完成", "", `${task.name} 共 ${task.count} 次任务已极速闭环`);
 }
+
 
 /**
  * 路径化净化算法
