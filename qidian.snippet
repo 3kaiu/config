@@ -1,0 +1,13 @@
+#!name=起点全能助手
+#!desc=起点视频自动重放与页面净化
+#!author=3kaiu
+
+[rewrite_local]
+# 自动重放 (需拦截请求体以获取 taskId)
+^https:\/\/h5\.if\.qidian\.com\/argus\/api\/v1\/video\/adv\/finishWatch url script-request-body https://raw.githubusercontent.com/3kaiu/config/main/qidian_master.js
+
+# 页面净化 (响应体拦截)
+^https:\/\/h5\.if\.qidian\.com\/argus\/api\/(v1\/video\/adv\/mainPage|v3\/user\/getaccountpage) url script-response-body https://raw.githubusercontent.com/3kaiu/config/main/qidian_master.js
+
+[mitm]
+hostname = h5.if.qidian.com, druid.if.qidian.com
