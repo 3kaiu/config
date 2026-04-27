@@ -33,8 +33,9 @@ host, aegis.cdn-go.cn, reject
 ^https?:\/\/ii\.gdt\.qq\.com\/gdt_inner_view url script-response-body https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js
 ^https?:\/\/api-access\.pangolin-sdk-toutiao\d*\.com\/api\/ad\/union\/sdk\/get_ads url script-response-body https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js
 
-# 2. 自动重放 (需拦截请求体以获取 taskId)
+# 2. 自动重放与签到 Token 窃取
 ^https:\/\/h5\.if\.qidian\.com\/argus\/api\/v1\/video\/adv\/finishWatch url script-request-body https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js
+^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/client\/getconf url script-request-header https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js
 
 # 3. 终极深度净化 (全局去广告、客户端配置覆盖、页面净化、书架特权广告秒杀)
 ^https:\/\/(h5|magev6)\.if\.qidian\.com\/argus\/api\/(v1\/video\/adv\/mainPage|v3\/user\/getaccountpage|v1\/user\/getsimplediscover|v[12]\/adv\/getadvlistbatch|v1\/client\/getconf|v1\/bookshelf\/getHoverAdv|v1\/bookshelf\/getad|v1\/client\/iosad|v4\/client\/getsplashscreen) url script-response-body https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js

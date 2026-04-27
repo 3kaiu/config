@@ -68,21 +68,32 @@ const CONFIG = {
 // 🚀 主入口程序 (Main Execution)
 // ==========================================
 !(async () => {
+  // 识别是否为 Cron 定时任务运行
+  if (typeof $request === "undefined") {
+    await handleCron();
+    return;
+  }
+
   const { url, method } = $request;
   
-  // A. 第三方广告 SDK 秒播逻辑
-  if (url.includes("/gdt_inner_view") || url.includes("/get_ads")) {
+  // A. 签到 Token 窃取 (拦截请求头)
+  if (url.includes("/v1/client/getconf") && !$response) {
+    handleTokenSteal($request);
+  }
+
+  // B. 第三方广告 SDK 秒播逻辑
+  else if (url.includes("/gdt_inner_view") || url.includes("/get_ads")) {
     handleAdSkip($response);
   }
   else {
     const path = new URL(url).pathname;
 
-    // B. 自动重放逻辑
+    // C. 自动重放逻辑
     if (path === "/argus/api/v1/video/adv/finishWatch" && method === "POST") {
       await handleReplay($request);
     } 
     
-    // C. 底层超级配置覆写
+    // D. 底层超级配置覆写
     else if (path.includes("/v1/client/getconf")) {
       handleClientConfig($response);
     }
@@ -195,7 +206,54 @@ function handleAdSkip(response) {
 }
 
 /**
- * 极速并发重放算法
+ * 窃取用户身份 Token
+ */
+function handleTokenSteal(request) {
+  if (request.headers) {
+    $.set(request.headers, "Qidian_Headers");
+    $.log("✨ 成功窃取并保存起点身份 Token，已准备好自动签到");
+  }
+  $.done();
+}
+
+/**
+ * 每日静默全自动签到 (Cron 触发)
+ */
+async function handleCron() {
+  $.log("⏰ 开始执行起点全自动静默签到...");
+  const headers = $.get("Qidian_Headers");
+  if (!headers) {
+    $.log("❌ 缺少起点 Token，请先打开一次起点 App 获取！");
+    $.notify("起点全能助手", "自动签到失败", "请先打开一次起点App获取Token");
+    $.done();
+    return;
+  }
+  
+  // 伪造完整的签到请求
+  const res = await $.fetch({
+    url: "https://magev6.if.qidian.com/argus/api/v2/checkin/checkin",
+    method: "GET",
+    headers: headers
+  });
+
+  if (res && res.body) {
+    try {
+      const obj = JSON.parse(res.body);
+      if (obj.Result === 0) {
+        $.notify("起点全能助手", "🎉 每日签到成功", `获得奖励: ${obj.Message || "硬币/经验已入账"}`);
+        $.log(`✅ 签到成功: ${res.body}`);
+      } else {
+        $.notify("起点全能助手", "⚠️ 签到异常/已签到", obj.Message || "未知状态");
+      }
+    } catch (e) {
+      $.log(`❌ 签到解析失败: ${e}`);
+    }
+  }
+  $.done();
+}
+
+/**
+ * 极速并发重放算法 (加入智能 TCP 抖动防封)
  */
 async function handleReplay(request) {
   const body = request.body || "";
@@ -213,8 +271,9 @@ async function handleReplay(request) {
     return;
   }
   
-  $.log(`⚡ 触发 ${replayCount} 次极速并发重放...`);
+  $.log(`⚡ 触发 ${replayCount} 次并发重放 (附带 15ms 智能抖动)...`);
   const replayTasks = Array.from({ length: replayCount }, async (_, i) => {
+    await $.wait(i * 15); // 智能排队防封
     const res = await $.fetch({
       url: request.url,
       method: "POST",
