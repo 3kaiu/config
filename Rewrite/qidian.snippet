@@ -1,7 +1,12 @@
 #!name=起点全能助手
-#!desc=起点视频自动重放与页面净化
+#!desc=起点视频自动重放、页面净化与广告视频秒播
 #!author=3kaiu
 
+# 广点通广告秒播 (拦截响应体修改视频时长)
+^https?:\/\/ii\.gdt\.qq\.com\/gdt_inner_view url script-response-body https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js
+
+# 穿山甲广告秒播 (可选备用)
+^https?:\/\/api-access\.pangolin-sdk-toutiao\d*\.com\/api\/ad\/union\/sdk\/get_ads url script-response-body https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js
 
 # 自动重放 (需拦截请求体以获取 taskId)
 ^https:\/\/h5\.if\.qidian\.com\/argus\/api\/v1\/video\/adv\/finishWatch url script-request-body https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js
@@ -10,4 +15,4 @@
 ^https:\/\/h5\.if\.qidian\.com\/argus\/api\/(v1\/video\/adv\/mainPage|v3\/user\/getaccountpage) url script-response-body https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js
 
 [mitm]
-hostname = h5.if.qidian.com, druid.if.qidian.com
+hostname = h5.if.qidian.com, druid.if.qidian.com, ii.gdt.qq.com, api-access.pangolin-sdk-toutiao*.com

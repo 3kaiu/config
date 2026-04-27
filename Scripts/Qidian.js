@@ -1,7 +1,7 @@
 /**
- * 📚 起点全能助手 (Pro版)
+ * 📚 起点全能助手 (Pro+版)
  * 集成通用 Env v2.0 深度优化算法
- * 功能：智能重放、路径化页面净化
+ * 功能：智能重放、路径化页面净化、广告视频秒播（跳过等待）
  */
 
 const $ = new Env("起点助手");
@@ -28,16 +28,25 @@ const TASK_MAPPING = {
 // --- 主程序 ---
 !(async () => {
   const { url, method } = $request;
-  const path = new URL(url).pathname;
-
-  // 1. 自动重放逻辑 (POST 请求)
-  if (path === "/argus/api/v1/video/adv/finishWatch" && method === "POST") {
-    await handleReplay($request);
-  } 
   
-  // 2. 页面净化逻辑 (GET 响应)
-  else if (CLEAN_RULES[path]) {
-    await handleClean(path, $response);
+  // 1. 新增：广点通/穿山甲广告秒播逻辑 (拦截底层广告 SDK 响应)
+  if (url.includes("/gdt_inner_view") || url.includes("/get_ads")) {
+    handleAdSkip($response);
+  }
+  else {
+    const path = new URL(url).pathname;
+
+    // 2. 自动重放逻辑 (POST 请求)
+    if (path === "/argus/api/v1/video/adv/finishWatch" && method === "POST") {
+      await handleReplay($request);
+    } 
+    
+    // 3. 页面净化逻辑 (GET 响应)
+    else if (CLEAN_RULES[path]) {
+      await handleClean(path, $response);
+    } else {
+      $.done();
+    }
   }
 
 })().catch(e => $.log(`运行时错误: ${e}`)).finally(() => $.done());
@@ -45,27 +54,48 @@ const TASK_MAPPING = {
 // --- 核心函数 ---
 
 /**
+ * [新增] 广告秒播算法 (跳过15/30秒等待)
+ * 使用正则替换广告时长为1秒，避免全量解析超大 JSON 导致 QX 内存溢出
+ */
+function handleAdSkip(response) {
+  try {
+    let body = response.body
+      .replace(/"video_duration":\s*\d+/g, '"video_duration":1')
+      .replace(/"video_timelife":\s*\d+/g, '"video_timelife":1')
+      .replace(/"duration":\s*\d+/g, '"duration":1')
+      .replace(/"play_time":\s*\d+/g, '"play_time":1');
+    
+    $.log("✨ 成功拦截广告下发，视频时长已强制修改为 1 秒");
+    $.done({ body });
+  } catch (e) {
+    $.log(`❌ 广告时长修改失败: ${e}`);
+    $.done();
+  }
+}
+
+/**
  * 极速重放算法
- * 移除延迟等待，采用 Promise.all 实现全并发瞬间重放，解决时效性导致失败的问题
  */
 async function handleReplay(request) {
   const body = request.body || "";
   const match = Object.keys(TASK_MAPPING).find(id => body.includes(id));
   
-  if (!match) return;
+  if (!match) {
+    $.done(); 
+    return;
+  }
   const task = TASK_MAPPING[match];
   $.log(`🚀 识别到任务: ${task.name}`);
 
-  // 减去已经手动成功的一次
   const replayCount = task.count - 1;
   if (replayCount <= 0) {
     $.log(`ℹ️ 无需重复执行`);
+    $.done();
     return;
   }
   
   $.log(`⚡ 抛弃间隔，开始极速并发 ${replayCount} 次重放...`);
 
-  // 构建并发请求任务组
   const replayTasks = Array.from({ length: replayCount }, async (_, i) => {
     const res = await $.fetch({
       url: request.url,
@@ -81,23 +111,21 @@ async function handleReplay(request) {
     }
   });
 
-  // 瞬间同时发起所有请求，等待全部执行完毕
-  await Promise.all(replayTasks);
+  // 并发等待期间放行原始请求，避免原生请求被卡死
+  $.done(); 
   
+  await Promise.all(replayTasks);
   $.notify("起点任务全自动完成", "", `${task.name} 共 ${task.count} 次任务已极速闭环`);
 }
 
-
 /**
  * 路径化净化算法
- * 使用 Env.clean 递归处理 JSON，无需手动写 filter
  */
 async function handleClean(path, response) {
   try {
     let obj = JSON.parse(response.body);
     const rules = CLEAN_RULES[path];
     
-    // 调用通用库的深度清理算法
     obj = $.clean(obj, rules);
     
     $.log(`✨ 页面净化完成: ${path}`);
@@ -108,5 +136,5 @@ async function handleClean(path, response) {
   }
 }
 
-// --- 注入增强型 Env (QX 专用极简版) ---
+// --- 注入增强型 Env (保持原有代码不变) ---
 function Env(n){this.name=n;this.startTime=Date.now();this.log=(...m)=>console.log(`[${this.name}] [${new Date().toLocaleTimeString()}] ${m.join(" ")}`);this.wait=(ms)=>new Promise(r=>setTimeout(r,ms));this.done=(v={})=>$done(v);this.get=(k)=>{let v=$prefs.valueForKey(k);try{return JSON.parse(v)}catch(e){return v}};this.set=(v,k)=>{let val=typeof v==="object"?JSON.stringify(v):v;$prefs.setValueForKey(val,k)};this.fetch=async(o)=>{try{return await $task.fetch(o)}catch(e){return null}};this.clean=(obj,ps)=>{if(!obj||!ps)return obj;ps.forEach(p=>{let ks=p.split("."),c=obj;for(let i=0;i<ks.length-1;i++){let k=ks[i];if(k.includes("[")&&k.includes("]")){let[ak,f]=k.split(/[\[\]]/),[fk,fv]=f.split("=");if(c[ak]){c[ak]=c[ak].filter(item=>item[fk]!==fv);return}}c=c[k];if(!c)break}if(c)delete c[ks[ks.length-1]]});return obj};this.notify=(t,s,b)=>$notify(t,s,b)}
