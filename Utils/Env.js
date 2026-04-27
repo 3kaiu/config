@@ -8,7 +8,6 @@ class Env {
   constructor(name) {
     this.name = name;
     this.startTime = Date.now();
-    this.log(`🔔 初始化成功`);
   }
 
   // --- 基础工具 ---
@@ -22,12 +21,10 @@ class Env {
   }
 
   done(val = {}) {
-    const duration = ((Date.now() - this.startTime) / 1000).toFixed(2);
-    this.log(`🏁 执行结束 (耗时: ${duration}s)`);
     $done(val);
   }
 
-  // --- 持久化存储 (自动 JSON 处理) ---
+  // --- 持久化存储 ---
   get(key) {
     let val = $prefs.valueForKey(key);
     try { return JSON.parse(val); } catch (e) { return val; }
@@ -35,30 +32,19 @@ class Env {
 
   set(val, key) {
     let value = typeof val === "object" ? JSON.stringify(val) : val;
-    return $prefs.setValueForKey(value, key);
-  }
-
-  remove(key) {
-    return $prefs.removeValueForKey(key);
+    $prefs.setValueForKey(value, key);
   }
 
   // --- 高级网络请求 ---
-  // 支持自动超时和简化响应处理
   async fetch(options) {
-    options.timeout = options.timeout || 5000;
     try {
-      const res = await $task.fetch(options);
-      res.json = () => JSON.parse(res.body);
-      return res;
+      return await $task.fetch(options);
     } catch (e) {
-      this.log(`❌ 请求失败: ${options.url}, 错误: ${e}`);
       return null;
     }
   }
 
   // --- JSON 深度清理算法 ---
-  // 根据路径删除对象中的多余字段
-  // path: "data.modules[name=我的福利]" 或 "data.navigation[0]"
   clean(obj, paths) {
     if (!obj || !paths) return obj;
     paths.forEach(path => {
@@ -67,20 +53,18 @@ class Env {
       for (let i = 0; i < keys.length - 1; i++) {
         let key = keys[i];
         if (key.includes("[") && key.includes("]")) {
-          // 处理数组过滤逻辑，例如 modules[name=广告]
           let [arrKey, filter] = key.split(/[\[\]]/);
           let [fKey, fVal] = filter.split("=");
           if (current[arrKey]) {
             current[arrKey] = current[arrKey].filter(item => item[fKey] !== fVal);
-            return; // 过滤后直接返回
+            return;
           }
         }
         current = current[key];
         if (!current) break;
       }
       if (current) {
-        const lastKey = keys[keys.length - 1];
-        delete current[lastKey];
+        delete current[keys[keys.length - 1]];
       }
     });
     return obj;
@@ -90,3 +74,6 @@ class Env {
     $notify(title, subtitle, body);
   }
 }
+
+// 供业务脚本直接使用的极简压缩版 Env
+// function Env(n){this.name=n;this.startTime=Date.now();this.log=(...m)=>console.log(`[${this.name}] [${new Date().toLocaleTimeString()}] ${m.join(" ")}`);this.wait=(ms)=>new Promise(r=>setTimeout(r,ms));this.done=(v={})=>$done(v);this.get=(k)=>{let v=$prefs.valueForKey(k);try{return JSON.parse(v)}catch(e){return v}};this.set=(v,k)=>{let val=typeof v==="object"?JSON.stringify(v):v;$prefs.setValueForKey(val,k)};this.fetch=async(o)=>{try{return await $task.fetch(o)}catch(e){return null}};this.clean=(obj,ps)=>{if(!obj||!ps)return obj;ps.forEach(p=>{let ks=p.split("."),c=obj;for(let i=0;i<ks.length-1;i++){let k=ks[i];if(k.includes("[")&&k.includes("]")){let[ak,f]=k.split(/[\[\]]/),[fk,fv]=f.split("=");if(c[ak]){c[ak]=c[ak].filter(item=>item[fk]!==fv);return}}c=c[k];if(!c)break}if(c)delete c[ks[ks.length-1]]});return obj};this.notify=(t,s,b)=>$notify(t,s,b)}

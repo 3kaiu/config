@@ -3,26 +3,36 @@
  * Use this as a starting point for new scripts.
  */
 
-// 1. 初始化环境 (引入库文件内容或使用远程加载)
-// 注意：在 QX 中由于无法 require 外部文件，通常建议将 Env.js 内容贴在脚本末尾，或者使用通用模板
+// 1. 初始化环境 
+// 复制本目录下最新的 Env.js 压缩版代码置于文件底部。
 const $ = new Env("新脚本名称");
 
 // 2. 逻辑处理
 !(async () => {
   $.log("脚本开始执行");
   
-  const myData = $.getdata("my_key") || "默认值";
+  // 演示：持久化数据读取
+  const myData = $.get("my_key") || "默认值";
   $.log(`读取到数据: ${myData}`);
   
-  // 示例网络请求
-  // $.get({ url: "https://httpbin.org/get" }, (err, res, body) => {
-  //   $.log(body);
-  //   $.notify("请求成功", "", "查看日志了解详情");
-  // });
+  // 演示：现代风格网络请求
+  /*
+  const res = await $.fetch({
+    url: "https://httpbin.org/get",
+    method: "GET"
+  });
+
+  if (res && res.statusCode === 200) {
+    $.log("请求成功");
+    $.notify("执行成功", "", "查看日志了解详情");
+  } else {
+    $.log("请求失败或超时");
+  }
+  */
 
 })()
   .catch((e) => $.log(`执行出错: ${e}`))
   .finally(() => $.done());
 
-// --- 以下粘贴 Env.js 内容以保证脚本独立运行 ---
-function Env(n){/*...*/}
+// --- 以下粘贴 Env.js 极简压缩版代码以保证脚本独立运行 ---
+function Env(n){this.name=n;this.startTime=Date.now();this.log=(...m)=>console.log(`[${this.name}] [${new Date().toLocaleTimeString()}] ${m.join(" ")}`);this.wait=(ms)=>new Promise(r=>setTimeout(r,ms));this.done=(v={})=>$done(v);this.get=(k)=>{let v=$prefs.valueForKey(k);try{return JSON.parse(v)}catch(e){return v}};this.set=(v,k)=>{let val=typeof v==="object"?JSON.stringify(v):v;$prefs.setValueForKey(val,k)};this.fetch=async(o)=>{try{return await $task.fetch(o)}catch(e){return null}};this.clean=(obj,ps)=>{if(!obj||!ps)return obj;ps.forEach(p=>{let ks=p.split("."),c=obj;for(let i=0;i<ks.length-1;i++){let k=ks[i];if(k.includes("[")&&k.includes("]")){let[ak,f]=k.split(/[\[\]]/),[fk,fv]=f.split("=");if(c[ak]){c[ak]=c[ak].filter(item=>item[fk]!==fv);return}}c=c[k];if(!c)break}if(c)delete c[ks[ks.length-1]]});return obj};this.notify=(t,s,b)=>$notify(t,s,b)}

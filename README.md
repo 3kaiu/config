@@ -1,22 +1,45 @@
-# 📚 Rewrite Scripts & Configs
+# 📚 Quantumult X / Surge 脚本与重写库
 
-这是一个专门用于存放 Quantumult X / Surge / Loon 等代理软件的自定义重写脚本与配置片段的通用仓库。
+本仓库专为 iOS 代理软件（Quantumult X / Surge）设计，致力于提供极致性能的自动化助手、页面净化及第三方请求劫持脚本。
 
-## 📁 目录结构说明
-
-- **`/Scripts`**
-  存放所有具体的 JavaScript 脚本逻辑（例如：UI 净化、API 修改、自动签到重放等）。
-  
-- **`/Rewrite`**
-  存放代理软件可直接订阅的配置文件片段（Snippet）。这些文件内部通过远程链接引用 `/Scripts` 目录下的具体脚本，并配置了所需的重写规则（Rewrite）及主机名（MITM）。
-
-## 🚀 现有模块
-
-### 1. 起点全能助手
-- **功能**: 激励视频自动重放、底部导航栏精简、账户页面去广告净化。
-- **订阅链接**: `https://raw.githubusercontent.com/3kaiu/config/main/Rewrite/qidian.snippet`
-- **脚本路径**: `Scripts/Qidian.js`
-- **使用方法**: 在 QX 的 `[rewrite_remote]` 中添加上述订阅链接即可，脚本和 MITM 将自动生效。
+## 🌟 核心理念
+- **极速并发**：彻底摒弃传统的 `setTimeout` 延迟任务流，利用 `Promise.all` 实现全并发请求重放，毫秒级闭环。
+- **底层劫持**：通过深度拦截底层第三方广告 SDK（广点通、穿山甲）的下发响应，在应用层实现“秒播”、“跳过”。
+- **动态净化**：引入通用的 `Env` 深度 JSON 清理算法，基于对象路径（Object Path）精准剔除冗余模块，无需手写繁琐的拦截规则。
 
 ---
-*Generated with AI.*
+
+## 🚀 核心模块介绍
+
+### 1. 起点全能助手 (Pro+ Max)
+专为起点客户端打造的终极增强插件，让你在阅读体验和福利获取上达到完美平衡。
+
+#### ✨ 功能特性
+- **🎁 福利秒刷 (1秒提现 9 份奖励)**
+  自动拦截广点通/穿山甲广告，将强制 15 秒/30 秒视频时长**篡改为 1 秒**。播放结束瞬间，脚本利用无锁并发极速发送剩余的 8 次 `finishWatch` 校验请求，1 秒内完成全天 9 次视频奖励。
+- **🚫 全局零广告**
+  无感拦截起点所有原生流内广告、底部 Tab 广告、评论区广告的分发请求，还你极简阅读体验。
+- **🧹 冗余模块清理**
+  深度净化“发现”页、“我的账户”页的无用推广标签、游戏中心及活动中心，只留最核心功能。
+
+#### 📥 安装与订阅
+在 Quantumult X 的配置文件 `[rewrite_remote]` 或重写界面中，添加以下订阅链接即可一键生效：
+
+```text
+https://raw.githubusercontent.com/3kaiu/config/main/Rewrite/qidian.snippet
+```
+
+> **注意**: 请务必在 QX 中开启并信任 `MITM`（HTTPS 解密），否则脚本无法劫持起点的加密通信。
+
+---
+
+## 📁 目录架构
+| 目录 | 说明 |
+| --- | --- |
+| `/Rewrite` | 存放可直接订阅的 `.snippet` 重写规则片段。 |
+| `/Scripts` | 存放具体执行逻辑的 JavaScript 脚本（如 `Qidian.js`）。 |
+| `/Utils` | 存放核心环境封装库 `Env.js`（支持跨平台兼容，自动处理持久化与日志）。 |
+| `/Templates` | 开发新脚本的标准模板（内置最新极简版 Env 引擎）。 |
+
+---
+*Created and maintained with ❤️ by 3kaiu.*
