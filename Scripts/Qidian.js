@@ -1,7 +1,7 @@
 /**
- * 📚 起点全能助手 (Pro+ Max版)
+ * 📚 起点全能助手 (Pro+ Max 终极版)
  * 集成通用 Env v2.0 深度优化算法
- * 功能：智能重放、全局页面净化、原生广告拦截、底层配置覆写、广告视频秒播
+ * 功能：智能重放、全局页面净化、特权原生广告拦截、底层配置覆写、广告视频秒播
  * 作者：3kaiu
  */
 
@@ -17,7 +17,7 @@ const CONFIG = {
     "1218712929269776388": { name: "系列2(福利任务)", count: 3 }
   },
 
-  // 2. 页面净化规则
+  // 2. 页面净化规则 (基于 JSON 路径)
   CleanRules: {
     "/argus/api/v1/video/adv/mainPage": [
       "data.bottomNavigation[name=发现]",
@@ -33,23 +33,30 @@ const CONFIG = {
       "Data.Items[ShowName=游戏中心f]",
       "Data.Items[ShowName=游戏中心]",
       "Data.Items[ShowName=新活动中心]"
+    ],
+    // 清空书架悬浮窗广告
+    "/argus/api/v1/bookshelf/getHoverAdv": [
+      "Data.ItemList"
+    ],
+    // 清空开屏特供广告源
+    "/argus/api/v4/client/getsplashscreen": [
+      "Data.List"
     ]
   },
 
   // 3. 客户端超级配置覆写 (Client Config Overrides)
-  // 用于关闭底层开屏广告、第三方 SDK 开关及冗余弹窗
   ClientConfigOverrides: {
-    "PangleEnable": "0",                  // 彻底关闭穿山甲广告 SDK
-    "DisableQidianBurryReport": "1",      // 禁用起点内部核心埋点数据上报
-    "DisableNewabInBI": "1",              // 禁用新的 BI 埋点
+    "PangleEnable": "0",                  // 关闭穿山甲 SDK
+    "DisableQidianBurryReport": "1",      // 禁用核心埋点
+    "DisableNewabInBI": "1",              // 禁用 BI 埋点
     "SplashScreenInterval": "0",          // 开屏间隔置0
     "BusinessSplashCoolDownTime": "99999",// 商业开屏广告冷却时间拉满
-    "PushDialogFrequency": "0",           // 关闭推屏弹窗频率
+    "PushDialogFrequency": "0",           // 关闭推屏弹窗
     "EnableMonitorLog": "0",              // 关闭监控日志
-    "EnableBeaconFullBurry": "0"          // 关闭信标全量埋点
+    "EnableBeaconFullBurry": "0"          // 关闭信标打点
   },
 
-  // 4. 原生广告放行白名单
+  // 4. 原生广告放行白名单 (保证看视频功能正常)
   AdWhitelist: ["ioscheckin", "reward", "video"],
 
   // 5. 视频广告时长强制跳过设定 (单位: 秒)
@@ -63,34 +70,38 @@ const CONFIG = {
 !(async () => {
   const { url, method } = $request;
   
-  // A. 第三方广告 SDK 秒播逻辑 (广点通/穿山甲)
+  // A. 第三方广告 SDK 秒播逻辑
   if (url.includes("/gdt_inner_view") || url.includes("/get_ads")) {
     handleAdSkip($response);
   }
   else {
     const path = new URL(url).pathname;
 
-    // B. 自动重放逻辑 (拦截 POST 请求体)
+    // B. 自动重放逻辑
     if (path === "/argus/api/v1/video/adv/finishWatch" && method === "POST") {
       await handleReplay($request);
     } 
     
-    // C. 底层配置强力覆写
+    // C. 底层超级配置覆写
     else if (path.includes("/v1/client/getconf")) {
       handleClientConfig($response);
     }
 
-    // D. 全局原生广告拦截 (拦截业务线广告分发)
+    // D. 全局原生广告及特权广告拦截
     else if (path.includes("/adv/getadvlistbatch")) {
       handleGlobalAdBlock(url, $response);
     }
+    // 书架横幅广告与 iOS 特供广告源置空拦截
+    else if (path.includes("/bookshelf/getad") || path.includes("/client/iosad")) {
+      handleDirectAdKill($response);
+    }
 
-    // E. 页面模块净化逻辑 (基于 CleanRules)
+    // E. 页面模块与特权弹窗净化逻辑
     else if (CONFIG.CleanRules[path]) {
       handleClean(path, $response);
     } 
     
-    // 未匹配任何规则直接放行
+    // 未匹配放行
     else {
       $.done();
     }
@@ -104,8 +115,28 @@ const CONFIG = {
 // ==========================================
 
 /**
+ * 粗暴秒杀专用特权广告 (如书架广告)
+ */
+function handleDirectAdKill(response) {
+  try {
+    let obj = JSON.parse(response.body);
+    // 直接移除 Data 内容或置为默认空响应
+    if (obj.Data) {
+      if (typeof obj.Data === "object") {
+        obj.Data = { Show: 0 }; // 针对 bookshelf/getad
+      } else {
+        obj.Data = null;
+      }
+    }
+    $.log("✨ 终极去广告：已秒杀书架与 iOS 特供广告");
+    $.done({ body: JSON.stringify(obj) });
+  } catch (e) {
+    $.done();
+  }
+}
+
+/**
  * 客户端全局超级配置篡改
- * 强行关闭后台下发的广告引擎开关、弹窗开关与监控打点
  */
 function handleClientConfig(response) {
   try {
@@ -116,12 +147,9 @@ function handleClientConfig(response) {
           obj.Data[key] = value;
         }
       }
-      // 暴击：直接移除广点通对象配置
-      if (obj.Data.GDT) {
-        delete obj.Data.GDT;
-      }
+      if (obj.Data.GDT) delete obj.Data.GDT;
     }
-    $.log("✨ 深度优化：已成功覆盖底层超级开关及屏蔽埋点");
+    $.log("✨ 深度优化：已成功覆盖底层超级开关");
     $.done({ body: JSON.stringify(obj) });
   } catch (e) {
     $.log(`❌ 客户端配置覆写失败: ${e}`);
@@ -134,19 +162,15 @@ function handleClientConfig(response) {
  */
 function handleGlobalAdBlock(url, response) {
   if (CONFIG.AdWhitelist.some(keyword => url.includes(keyword))) {
-    $.log("⚠️ 放行福利看视频广告位下发");
     $.done();
     return;
   }
   try {
     let obj = JSON.parse(response.body);
-    if (obj && obj.Data) {
-      obj.Data = []; 
-    }
-    $.log("✨ 全局去广告：已拦截常规原生广告下发");
+    if (obj && obj.Data) obj.Data = []; 
+    $.log("✨ 全局去广告：已拦截常规原生广告");
     $.done({ body: JSON.stringify(obj) });
   } catch (e) {
-    $.log(`❌ 原生广告拦截解析失败: ${e}`);
     $.done();
   }
 }
@@ -166,7 +190,6 @@ function handleAdSkip(response) {
     $.log(`✨ 成功拦截底层广告 SDK，视频时长强制设为 ${s} 秒`);
     $.done({ body });
   } catch (e) {
-    $.log(`❌ 广告时长篡改失败: ${e}`);
     $.done();
   }
 }
@@ -186,12 +209,11 @@ async function handleReplay(request) {
 
   const replayCount = task.count - 1;
   if (replayCount <= 0) {
-    $.log(`ℹ️ 任务配置为无需重复执行`);
     $.done();
     return;
   }
   
-  $.log(`⚡ 抛弃时序延迟，触发 ${replayCount} 次极速并发重放...`);
+  $.log(`⚡ 触发 ${replayCount} 次极速并发重放...`);
   const replayTasks = Array.from({ length: replayCount }, async (_, i) => {
     const res = await $.fetch({
       url: request.url,
@@ -199,11 +221,8 @@ async function handleReplay(request) {
       headers: request.headers,
       body: request.body
     });
-
     if (res && res.statusCode === 200) {
       $.log(`✅ 重放 [${i + 1}/${replayCount}] 成功`);
-    } else {
-      $.log(`⚠️ 重放 [${i + 1}/${replayCount}] 异常`);
     }
   });
 
@@ -220,14 +239,23 @@ function handleClean(path, response) {
     let obj = JSON.parse(response.body);
     const rules = CONFIG.CleanRules[path];
     obj = $.clean(obj, rules);
-    $.log(`✨ 页面模块净化完成: ${path}`);
+    
+    // 如果净化后的节点刚好为空，直接初始化为空数组确保安全
+    if (path.includes("getsplashscreen")) {
+      if (!obj.Data) obj.Data = {};
+      if (!obj.Data.List) obj.Data.List = [];
+    }
+    if (path.includes("getHoverAdv")) {
+      if (!obj.Data) obj.Data = {};
+      if (!obj.Data.ItemList) obj.Data.ItemList = [];
+    }
+
+    $.log(`✨ 页面模块/弹窗净化完成: ${path}`);
     $.done({ body: JSON.stringify(obj) });
   } catch (e) {
-    $.log(`❌ 页面净化解析失败: ${e}`);
     $.done();
   }
 }
-
 
 // ==========================================
 // 📦 底层运行环境 (Environment Wrapper)
