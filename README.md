@@ -9,6 +9,7 @@
 | 日常稳定使用 | `QX.conf` |
 | Apple 系统增强 | `QX.conf` + `QX-Optional-Apple.conf` |
 | 单 App 广告残留 | `QX.conf` + `QX-Optional-Ads.conf` |
+| 只给某个 App 去广告 | `QX.conf` + `Profile/Ads/*.conf` |
 | B 站区域 / 双语字幕 | `QX.conf` + `QX-Optional-Media.conf` |
 | WARP / 链路接管 | `QX.conf` + `QX-Optional-Network.conf` |
 
@@ -36,6 +37,17 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Media.co
 https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Network.conf
 ```
 
+单 App 广告配置：
+
+```text
+https://raw.githubusercontent.com/3kaiu/config/main/Profile/Ads/Weibo.conf
+https://raw.githubusercontent.com/3kaiu/config/main/Profile/Ads/Applet.conf
+https://raw.githubusercontent.com/3kaiu/config/main/Profile/Ads/Zhihu.conf
+https://raw.githubusercontent.com/3kaiu/config/main/Profile/Ads/Baidu.conf
+https://raw.githubusercontent.com/3kaiu/config/main/Profile/Ads/Ximalaya.conf
+https://raw.githubusercontent.com/3kaiu/config/main/Profile/Ads/Web.conf
+```
+
 起点模块：
 
 ```text
@@ -51,13 +63,28 @@ https://raw.githubusercontent.com/3kaiu/config/main/Rewrite/qidian.snippet
 - 起点自动化与页面净化
 - 按需开启的 Apple / Bilibili / WARP 扩展
 
+## 去广告维护方式
+
+- 基础盘使用自维护的精选去广告组合，不直接把外部大包当默认真相。
+- 专项去广告总入口在 `QX-Optional-Ads.conf`，但它只聚合本仓库内的单 App 配置。
+- 单 App 粒度配置放在 `Profile/Ads/`，用法更接近可莉插件生态。
+- 选材会参考可莉插件生态的覆盖面，以及墨鱼、blackmatrix7 的规则仓库。
+- 参考来源记录在 `Rewrite/Ads/SOURCES.md`。
+- 已失效或只适配少数目标的小众规则，不再混进通用广告包。
+
 ## 配置分级
 
 - `QX.conf`：基础盘，默认长期使用
 - `QX-Optional-Apple.conf`：Apple 系统级增强
 - `QX-Optional-Ads.conf`：专项去广告增强
+- `Profile/Ads/*.conf`：单 App 粒度广告配置
 - `QX-Optional-Media.conf`：媒体区域与字幕增强
 - `QX-Optional-Network.conf`：链路级接管
+
+## 已知冲突
+
+- 基础盘里的 `AllInOne` 已做“起点兼容裁剪”，会通过资源解析器剔除 `gdt / pangolin` 冲突规则。
+- 如果你手动额外导入原版 `AllInOne`，`起点全能助手` 仍可能失效，因为奖励视频脚本拿不到原始响应体。
 
 ## 导入建议
 
