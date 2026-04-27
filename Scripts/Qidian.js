@@ -1,7 +1,7 @@
 /**
  * 📚 起点全能助手 (Pro+ Max版)
  * 集成通用 Env v2.0 深度优化算法
- * 功能：智能重放、全局页面净化、原生广告拦截、广告视频秒播
+ * 功能：智能重放、全局页面净化、原生广告拦截、底层配置覆写、广告视频秒播
  * 作者：3kaiu
  */
 
@@ -12,14 +12,12 @@ const $ = new Env("起点助手");
 // ==========================================
 const CONFIG = {
   // 1. 自动重放任务映射
-  // Key: taskId, Value: { name: 任务名称, count: 需重放的总次数 }
   TaskMapping: {
     "1218712929269776384": { name: "系列1(激励视频)", count: 9 },
     "1218712929269776388": { name: "系列2(福利任务)", count: 3 }
   },
 
   // 2. 页面净化规则
-  // Key: API 路径, Value: 需移除的 JSON 节点路径数组
   CleanRules: {
     "/argus/api/v1/video/adv/mainPage": [
       "data.bottomNavigation[name=发现]",
@@ -38,11 +36,23 @@ const CONFIG = {
     ]
   },
 
-  // 3. 原生广告放行白名单
-  // 若 URL 包含以下关键字，则不对其广告进行屏蔽（以防导致福利视频无法加载）
+  // 3. 客户端超级配置覆写 (Client Config Overrides)
+  // 用于关闭底层开屏广告、第三方 SDK 开关及冗余弹窗
+  ClientConfigOverrides: {
+    "PangleEnable": "0",                  // 彻底关闭穿山甲广告 SDK
+    "DisableQidianBurryReport": "1",      // 禁用起点内部核心埋点数据上报
+    "DisableNewabInBI": "1",              // 禁用新的 BI 埋点
+    "SplashScreenInterval": "0",          // 开屏间隔置0
+    "BusinessSplashCoolDownTime": "99999",// 商业开屏广告冷却时间拉满
+    "PushDialogFrequency": "0",           // 关闭推屏弹窗频率
+    "EnableMonitorLog": "0",              // 关闭监控日志
+    "EnableBeaconFullBurry": "0"          // 关闭信标全量埋点
+  },
+
+  // 4. 原生广告放行白名单
   AdWhitelist: ["ioscheckin", "reward", "video"],
 
-  // 4. 视频广告时长强制跳过设定 (单位: 秒)
+  // 5. 视频广告时长强制跳过设定 (单位: 秒)
   VideoSkipSeconds: 1
 };
 
@@ -65,12 +75,17 @@ const CONFIG = {
       await handleReplay($request);
     } 
     
-    // C. 全局原生广告拦截 (拦截业务线广告分发)
+    // C. 底层配置强力覆写
+    else if (path.includes("/v1/client/getconf")) {
+      handleClientConfig($response);
+    }
+
+    // D. 全局原生广告拦截 (拦截业务线广告分发)
     else if (path.includes("/adv/getadvlistbatch")) {
       handleGlobalAdBlock(url, $response);
     }
 
-    // D. 页面模块净化逻辑 (基于 CleanRules)
+    // E. 页面模块净化逻辑 (基于 CleanRules)
     else if (CONFIG.CleanRules[path]) {
       handleClean(path, $response);
     } 
@@ -89,21 +104,44 @@ const CONFIG = {
 // ==========================================
 
 /**
+ * 客户端全局超级配置篡改
+ * 强行关闭后台下发的广告引擎开关、弹窗开关与监控打点
+ */
+function handleClientConfig(response) {
+  try {
+    let obj = JSON.parse(response.body);
+    if (obj && obj.Data) {
+      for (const [key, value] of Object.entries(CONFIG.ClientConfigOverrides)) {
+        if (obj.Data.hasOwnProperty(key)) {
+          obj.Data[key] = value;
+        }
+      }
+      // 暴击：直接移除广点通对象配置
+      if (obj.Data.GDT) {
+        delete obj.Data.GDT;
+      }
+    }
+    $.log("✨ 深度优化：已成功覆盖底层超级开关及屏蔽埋点");
+    $.done({ body: JSON.stringify(obj) });
+  } catch (e) {
+    $.log(`❌ 客户端配置覆写失败: ${e}`);
+    $.done();
+  }
+}
+
+/**
  * 原生广告分发拦截
- * 清空常规流内、底部 Tab 广告，放行白名单内的福利广告位
  */
 function handleGlobalAdBlock(url, response) {
-  // 检查白名单
   if (CONFIG.AdWhitelist.some(keyword => url.includes(keyword))) {
     $.log("⚠️ 放行福利看视频广告位下发");
     $.done();
     return;
   }
-
   try {
     let obj = JSON.parse(response.body);
     if (obj && obj.Data) {
-      obj.Data = []; // 清空所有常规广告下发
+      obj.Data = []; 
     }
     $.log("✨ 全局去广告：已拦截常规原生广告下发");
     $.done({ body: JSON.stringify(obj) });
@@ -115,12 +153,10 @@ function handleGlobalAdBlock(url, response) {
 
 /**
  * 第三方广告秒播算法
- * 拦截 SDK 响应，将视频强制配置为 Config.VideoSkipSeconds
  */
 function handleAdSkip(response) {
   try {
     const s = CONFIG.VideoSkipSeconds;
-    // 使用正则批量篡改时间，避免超大 JSON Parse 导致 QX 崩溃
     let body = response.body
       .replace(/"video_duration":\s*\d+/g, `"video_duration":${s}`)
       .replace(/"video_timelife":\s*\d+/g, `"video_timelife":${s}`)
@@ -140,14 +176,11 @@ function handleAdSkip(response) {
  */
 async function handleReplay(request) {
   const body = request.body || "";
-  
-  // 匹配 TaskId
   const match = Object.keys(CONFIG.TaskMapping).find(id => body.includes(id));
   if (!match) {
     $.done(); 
     return;
   }
-
   const task = CONFIG.TaskMapping[match];
   $.log(`🚀 识别到自动化任务: ${task.name}`);
 
@@ -159,8 +192,6 @@ async function handleReplay(request) {
   }
   
   $.log(`⚡ 抛弃时序延迟，触发 ${replayCount} 次极速并发重放...`);
-
-  // 构建并发请求队列
   const replayTasks = Array.from({ length: replayCount }, async (_, i) => {
     const res = await $.fetch({
       url: request.url,
@@ -172,13 +203,11 @@ async function handleReplay(request) {
     if (res && res.statusCode === 200) {
       $.log(`✅ 重放 [${i + 1}/${replayCount}] 成功`);
     } else {
-      $.log(`⚠️ 重放 [${i + 1}/${replayCount}] 异常 (状态码: ${res ? res.statusCode : "N/A"})`);
+      $.log(`⚠️ 重放 [${i + 1}/${replayCount}] 异常`);
     }
   });
 
-  // 并发等待期间优先放行用户的原始请求，确保 App 不卡顿
   $.done(); 
-  
   await Promise.all(replayTasks);
   $.notify("起点自动化助手", "", `${task.name} 共 ${task.count} 次任务极速闭环完成`);
 }
@@ -190,9 +219,7 @@ function handleClean(path, response) {
   try {
     let obj = JSON.parse(response.body);
     const rules = CONFIG.CleanRules[path];
-    
     obj = $.clean(obj, rules);
-    
     $.log(`✨ 页面模块净化完成: ${path}`);
     $.done({ body: JSON.stringify(obj) });
   } catch (e) {

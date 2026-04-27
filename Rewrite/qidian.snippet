@@ -1,16 +1,31 @@
 #!name=起点全能助手
-#!desc=起点视频自动重放、页面净化与全局去广告秒播
+#!desc=起点极速自动重放、深度页面净化、全局去广告与防跟踪
 #!author=3kaiu
 
-# 广点通/穿山甲广告秒播 (拦截底层广告SDK修改视频时长)
+# ==========================================
+# 🛑 硬件级网络阻断 (拦截遥测与上报)
+# ==========================================
+host, path.book.qq.com, reject
+host, rmonitor.qq.com, reject
+host, unitelogreport.reader.qq.com, reject
+host-keyword, qreport, reject
+
+# ==========================================
+# ⚡ 核心劫持重写 (请求与响应体修改)
+# ==========================================
+
+# 1. 广点通/穿山甲广告秒播 (拦截底层广告SDK修改视频时长)
 ^https?:\/\/ii\.gdt\.qq\.com\/gdt_inner_view url script-response-body https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js
 ^https?:\/\/api-access\.pangolin-sdk-toutiao\d*\.com\/api\/ad\/union\/sdk\/get_ads url script-response-body https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js
 
-# 自动重放 (需拦截请求体以获取 taskId)
+# 2. 自动重放 (需拦截请求体以获取 taskId)
 ^https:\/\/h5\.if\.qidian\.com\/argus\/api\/v1\/video\/adv\/finishWatch url script-request-body https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js
 
-# 全局去广告与页面净化 (响应体拦截)
-^https:\/\/(h5|magev6)\.if\.qidian\.com\/argus\/api\/(v1\/video\/adv\/mainPage|v3\/user\/getaccountpage|v1\/user\/getsimplediscover|v[12]\/adv\/getadvlistbatch) url script-response-body https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js
+# 3. 深度优化逻辑 (全局去广告、客户端配置覆盖、页面净化)
+^https:\/\/(h5|magev6)\.if\.qidian\.com\/argus\/api\/(v1\/video\/adv\/mainPage|v3\/user\/getaccountpage|v1\/user\/getsimplediscover|v[12]\/adv\/getadvlistbatch|v1\/client\/getconf) url script-response-body https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js
 
+# ==========================================
+# 🌐 抓包解密范围声明
+# ==========================================
 [mitm]
 hostname = h5.if.qidian.com, magev6.if.qidian.com, druid.if.qidian.com, ii.gdt.qq.com, api-access.pangolin-sdk-toutiao*.com
