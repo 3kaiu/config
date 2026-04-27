@@ -3,27 +3,27 @@
 #!author=3kaiu
 
 # ==========================================
-# 🛑 硬件级网络阻断 (无死角拦截遥测与第三方 SDK)
+# 🛑 网络阻断 (使用合法 rewrite reject 语法拦截遥测与第三方 SDK)
 # ==========================================
 # 起点内部行为监控
-host, path.book.qq.com, reject
-host, rmonitor.qq.com, reject
-host, unitelogreport.reader.qq.com, reject
-host-keyword, qreport, reject
+^https?:\/\/path\.book\.qq\.com\/ url reject
+^https?:\/\/rmonitor\.qq\.com\/ url reject
+^https?:\/\/unitelogreport\.reader\.qq\.com\/ url reject
+^https?:\/\/[^\/]*qreport[^\/]*\/ url reject
 
 # 字节跳动 (Volcengine) 监控与行为分析
-host, apmplus.volces.com, reject
-host, mssdk.volces.com, reject
-host, tobapplog.ctobsnssdk.com, reject
+^https?:\/\/apmplus\.volces\.com\/ url reject
+^https?:\/\/mssdk\.volces\.com\/ url reject
+^https?:\/\/tobapplog\.ctobsnssdk\.com\/ url reject
 
 # 腾讯广告打点与智研云监控
-host, sdkreport.e.qq.com, reject
-host, publiclog.zhiyan.tencent-cloud.net, reject
-host, zhiyan.monitor.tencent-cloud.net, reject
+^https?:\/\/sdkreport\.e\.qq\.com\/ url reject
+^https?:\/\/publiclog\.zhiyan\.tencent-cloud\.net\/ url reject
+^https?:\/\/zhiyan\.monitor\.tencent-cloud\.net\/ url reject
 
 # 极光推送统计与其他 SDK
-host, ali-stats.jpush.cn, reject
-host, aegis.cdn-go.cn, reject
+^https?:\/\/ali-stats\.jpush\.cn\/ url reject
+^https?:\/\/aegis\.cdn-go\.cn\/ url reject
 
 # ==========================================
 # ⚡ 核心劫持重写 (请求与响应体强力修改)

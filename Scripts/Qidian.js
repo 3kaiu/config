@@ -60,7 +60,10 @@ const CONFIG = {
   AdWhitelist: ["ioscheckin", "reward", "video"],
 
   // 5. 视频广告时长强制跳过设定 (单位: 秒)
-  VideoSkipSeconds: 1
+  VideoSkipSeconds: 1,
+
+  // 6. 需要递归修改的广告字段
+  AdDurationKeys: ["video_duration", "video_timelife", "duration", "play_time"]
 };
 
 
@@ -118,7 +121,10 @@ const CONFIG = {
     }
   }
 
-})().catch(e => $.log(`运行时全局异常: ${e}`)).finally(() => $.done());
+})().catch(e => {
+  $.log(`运行时全局异常: ${e}`);
+  $.done();
+});
 
 
 // ==========================================
@@ -130,7 +136,11 @@ const CONFIG = {
  */
 function handleDirectAdKill(response) {
   try {
-    let obj = JSON.parse(response.body);
+    const obj = safeJsonParse(response.body);
+    if (!obj) {
+      $.done();
+      return;
+    }
     // 直接移除 Data 内容或置为默认空响应
     if (obj.Data) {
       if (typeof obj.Data === "object") {
@@ -151,12 +161,14 @@ function handleDirectAdKill(response) {
  */
 function handleClientConfig(response) {
   try {
-    let obj = JSON.parse(response.body);
+    const obj = safeJsonParse(response.body);
+    if (!obj) {
+      $.done();
+      return;
+    }
     if (obj && obj.Data) {
       for (const [key, value] of Object.entries(CONFIG.ClientConfigOverrides)) {
-        if (obj.Data.hasOwnProperty(key)) {
-          obj.Data[key] = value;
-        }
+        obj.Data[key] = value;
       }
       if (obj.Data.GDT) delete obj.Data.GDT;
     }
@@ -177,7 +189,11 @@ function handleGlobalAdBlock(url, response) {
     return;
   }
   try {
-    let obj = JSON.parse(response.body);
+    const obj = safeJsonParse(response.body);
+    if (!obj) {
+      $.done();
+      return;
+    }
     if (obj && obj.Data) obj.Data = []; 
     $.log("✨ 全局去广告：已拦截常规原生广告");
     $.done({ body: JSON.stringify(obj) });
@@ -192,12 +208,20 @@ function handleGlobalAdBlock(url, response) {
 function handleAdSkip(response) {
   try {
     const s = CONFIG.VideoSkipSeconds;
-    let body = response.body
+    const obj = safeJsonParse(response.body);
+    if (obj) {
+      patchDurationFields(obj, CONFIG.AdDurationKeys, s);
+      $.log(`✨ 成功拦截底层广告 SDK，视频时长强制设为 ${s} 秒`);
+      $.done({ body: JSON.stringify(obj) });
+      return;
+    }
+
+    const body = String(response.body || "")
       .replace(/"video_duration":\s*\d+/g, `"video_duration":${s}`)
       .replace(/"video_timelife":\s*\d+/g, `"video_timelife":${s}`)
       .replace(/"duration":\s*\d+/g, `"duration":${s}`)
       .replace(/"play_time":\s*\d+/g, `"play_time":${s}`);
-    
+
     $.log(`✨ 成功拦截底层广告 SDK，视频时长强制设为 ${s} 秒`);
     $.done({ body });
   } catch (e) {
@@ -277,17 +301,21 @@ async function handleReplay(request) {
     const res = await $.fetch({
       url: request.url,
       method: "POST",
-      headers: request.headers,
+      headers: normalizeReplayHeaders(request.headers),
       body: request.body
     });
     if (res && res.statusCode === 200) {
       $.log(`✅ 重放 [${i + 1}/${replayCount}] 成功`);
+      return true;
     }
+    $.log(`⚠️ 重放 [${i + 1}/${replayCount}] 失败`);
+    return false;
   });
 
-  $.done(); 
-  await Promise.all(replayTasks);
-  $.notify("起点自动化助手", "", `${task.name} 共 ${task.count} 次任务极速闭环完成`);
+  const results = await Promise.allSettled(replayTasks);
+  const successCount = results.filter(item => item.status === "fulfilled" && item.value).length;
+  $.notify("起点自动化助手", "", `${task.name} 共完成 ${successCount + 1}/${task.count} 次任务`);
+  $.done();
 }
 
 /**
@@ -295,7 +323,11 @@ async function handleReplay(request) {
  */
 function handleClean(path, response) {
   try {
-    let obj = JSON.parse(response.body);
+    let obj = safeJsonParse(response.body);
+    if (!obj) {
+      $.done();
+      return;
+    }
     const rules = CONFIG.CleanRules[path];
     obj = $.clean(obj, rules);
     
@@ -320,3 +352,74 @@ function handleClean(path, response) {
 // 📦 底层运行环境 (Environment Wrapper)
 // ==========================================
 function Env(n){this.name=n;this.startTime=Date.now();this.log=(...m)=>console.log(`[${this.name}] [${new Date().toLocaleTimeString()}] ${m.join(" ")}`);this.wait=(ms)=>new Promise(r=>setTimeout(r,ms));this.done=(v={})=>$done(v);this.get=(k)=>{let v=$prefs.valueForKey(k);try{return JSON.parse(v)}catch(e){return v}};this.set=(v,k)=>{let val=typeof v==="object"?JSON.stringify(v):v;$prefs.setValueForKey(val,k)};this.fetch=async(o)=>{try{return await $task.fetch(o)}catch(e){return null}};this.clean=(obj,ps)=>{if(!obj||!ps)return obj;ps.forEach(p=>{let ks=p.split("."),c=obj;for(let i=0;i<ks.length-1;i++){let k=ks[i];if(k.includes("[")&&k.includes("]")){let[ak,f]=k.split(/[\[\]]/),[fk,fv]=f.split("=");if(c[ak]){c[ak]=c[ak].filter(item=>item[fk]!==fv);return}}c=c[k];if(!c)break}if(c)delete c[ks[ks.length-1]]});return obj};this.notify=(t,s,b)=>$notify(t,s,b)}
+
+function safeJsonParse(body) {
+  try {
+    return JSON.parse(body);
+  } catch (e) {
+    return null;
+  }
+}
+
+function normalizeReplayHeaders(headers = {}) {
+  const nextHeaders = { ...headers };
+  delete nextHeaders["Content-Length"];
+  delete nextHeaders["content-length"];
+  return nextHeaders;
+}
+
+function patchDurationFields(value, keys, nextValue) {
+  if (!value || typeof value !== "object") return;
+  if (Array.isArray(value)) {
+    value.forEach(item => patchDurationFields(item, keys, nextValue));
+    return;
+  }
+
+  for (const [key, item] of Object.entries(value)) {
+    if (keys.includes(key) && typeof item === "number") {
+      value[key] = nextValue;
+      continue;
+    }
+    patchDurationFields(item, keys, nextValue);
+  }
+}
+
+function parseSelector(segment) {
+  const match = /^([^[\]]+)(?:\[([^=\]]+)=([^\]]+)\])?$/.exec(segment);
+  if (!match) return { key: segment };
+  return { key: match[1], filterKey: match[2], filterValue: match[3] };
+}
+
+function applyCleanRule(target, segments, index = 0) {
+  if (!target || index >= segments.length) return;
+  const { key, filterKey, filterValue } = parseSelector(segments[index]);
+  const current = target[key];
+
+  if (current == null) return;
+
+  if (index === segments.length - 1) {
+    if (filterKey && Array.isArray(current)) {
+      target[key] = current.filter(item => String(item?.[filterKey]) !== filterValue);
+      return;
+    }
+    delete target[key];
+    return;
+  }
+
+  if (filterKey && Array.isArray(current)) {
+    current
+      .filter(item => String(item?.[filterKey]) === filterValue)
+      .forEach(item => applyCleanRule(item, segments, index + 1));
+    return;
+  }
+
+  applyCleanRule(current, segments, index + 1);
+}
+
+Env.prototype.clean = function(obj, paths) {
+  if (!obj || !Array.isArray(paths)) return obj;
+  paths.forEach(path => applyCleanRule(obj, path.split(".")));
+  return obj;
+};
+
+$.clean = Env.prototype.clean;

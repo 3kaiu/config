@@ -1,45 +1,82 @@
-# 📚 Quantumult X / Surge 脚本与重写库
+# Quantumult X 配置库
 
-本仓库专为 iOS 代理软件（Quantumult X / Surge）设计，致力于提供极致性能的自动化助手、页面净化及第三方请求劫持脚本。
+这个仓库只做一件事：给 Quantumult X 提供一套更稳、更轻的主配置，以及少量自维护脚本。
 
-## 🌟 核心理念
-- **极速并发**：彻底摒弃传统的 `setTimeout` 延迟任务流，利用 `Promise.all` 实现全并发请求重放，毫秒级闭环。
-- **底层劫持**：通过深度拦截底层第三方广告 SDK（广点通、穿山甲）的下发响应，在应用层实现“秒播”、“跳过”。
-- **动态净化**：引入通用的 `Env` 深度 JSON 清理算法，基于对象路径（Object Path）精准剔除冗余模块，无需手写繁琐的拦截规则。
+## 选择建议
 
----
+| 需求 | 导入项 |
+| --- | --- |
+| 日常稳定使用 | `QX.conf` |
+| Apple 系统增强 | `QX.conf` + `QX-Optional-Apple.conf` |
+| 单 App 广告残留 | `QX.conf` + `QX-Optional-Ads.conf` |
+| B 站区域 / 双语字幕 | `QX.conf` + `QX-Optional-Media.conf` |
+| WARP / 链路接管 | `QX.conf` + `QX-Optional-Network.conf` |
 
-## 🚀 核心模块介绍
+## 默认策略
 
-### 1. 起点全能助手 (Pro+ Max)
-专为起点客户端打造的终极增强插件，让你在阅读体验和福利获取上达到完美平衡。
+- 主配置优先性能和稳定性，不再默认叠加过多重写模块。
+- 去广告分两层：`filter` 先拦主机级请求，`rewrite` 再处理必须改写的响应。
+- 系统级增强、区域解锁、WARP 这类高介入功能默认按需开启，不放进基础盘。
+- `MITM` 只覆盖基础盘默认启用功能，避免无关域名长期解密。
 
-#### ✨ 功能特性
-- **🎁 福利秒刷 (1秒提现 9 份奖励)**
-  自动拦截广点通/穿山甲广告，将强制 15 秒/30 秒视频时长**篡改为 1 秒**。播放结束瞬间，脚本利用无锁并发极速发送剩余的 8 次 `finishWatch` 校验请求，1 秒内完成全天 9 次视频奖励。
-- **🚫 全局零广告**
-  无感拦截起点所有原生流内广告、底部 Tab 广告、评论区广告的分发请求，还你极简阅读体验。
-- **🧹 冗余模块清理**
-  深度净化“发现”页、“我的账户”页的无用推广标签、游戏中心及活动中心，只留最核心功能。
+## 快速使用
 
-#### 📥 安装与订阅
-在 Quantumult X 的配置文件 `[rewrite_remote]` 或重写界面中，添加以下订阅链接即可一键生效：
+主配置：
+
+```text
+https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
+```
+
+可选增强：
+
+```text
+https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Apple.conf
+https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Ads.conf
+https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Media.conf
+https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Network.conf
+```
+
+起点模块：
 
 ```text
 https://raw.githubusercontent.com/3kaiu/config/main/Rewrite/qidian.snippet
 ```
 
-> **注意**: 请务必在 QX 中开启并信任 `MITM`（HTTPS 解密），否则脚本无法劫持起点的加密通信。
+启用脚本相关功能前，先在 Quantumult X 中开启并信任 `MITM`。
 
----
+## 当前保留的重点能力
 
-## 📁 目录架构
-| 目录 | 说明 |
-| --- | --- |
-| `/Rewrite` | 存放可直接订阅的 `.snippet` 重写规则片段。 |
-| `/Scripts` | 存放具体执行逻辑的 JavaScript 脚本（如 `Qidian.js`）。 |
-| `/Utils` | 存放核心环境封装库 `Env.js`（支持跨平台兼容，自动处理持久化与日志）。 |
-| `/Templates` | 开发新脚本的标准模板（内置最新极简版 Env 引擎）。 |
+- 基础分流与测速
+- 常规去广告
+- 起点自动化与页面净化
+- 按需开启的 Apple / Bilibili / WARP 扩展
 
----
-*Created and maintained with ❤️ by 3kaiu.*
+## 配置分级
+
+- `QX.conf`：基础盘，默认长期使用
+- `QX-Optional-Apple.conf`：Apple 系统级增强
+- `QX-Optional-Ads.conf`：专项去广告增强
+- `QX-Optional-Media.conf`：媒体区域与字幕增强
+- `QX-Optional-Network.conf`：链路级接管
+
+## 导入建议
+
+- 先导入 `QX.conf`
+- 再根据需要单独添加一个或多个 Optional 文件
+- 不建议一次性把全部 Optional 文件一起叠加
+- 优先按“单一目标”增加模块，不要把 Optional 当成新的基础盘
+
+## 不建议直接引入的内容
+
+- Loon 插件原格式
+- 多套大而全去广告模块同时全开
+- 未区分主功能和可选功能的懒人全家桶
+
+原因很简单：这套仓库以 QX 为主，优先控制匹配成本、MITM 范围和规则冲突。
+
+## 目录
+
+- `Profile/`：主配置
+- `Rewrite/`：QX 可订阅重写片段
+- `Scripts/`：脚本
+- `Templates/`：脚本模板
