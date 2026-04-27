@@ -1,7 +1,7 @@
 /**
- * 📚 起点全能助手 (Pro+版)
+ * 📚 起点全能助手 (Pro+ Max版)
  * 集成通用 Env v2.0 深度优化算法
- * 功能：智能重放、路径化页面净化、广告视频秒播（跳过等待）
+ * 功能：智能重放、全局页面净化、原生广告拦截、广告视频秒播
  */
 
 const $ = new Env("起点助手");
@@ -17,6 +17,11 @@ const CLEAN_RULES = {
     "data.functionModules[moduleName=精彩活动]",
     "data.functionModules[moduleName=我要推广]",
     "data.functionModules[moduleName=我的礼品]"
+  ],
+  "/argus/api/v1/user/getsimplediscover": [
+    "Data.Items[ShowName=游戏中心f]",
+    "Data.Items[ShowName=游戏中心]",
+    "Data.Items[ShowName=新活动中心]"
   ]
 };
 
@@ -29,7 +34,7 @@ const TASK_MAPPING = {
 !(async () => {
   const { url, method } = $request;
   
-  // 1. 新增：广点通/穿山甲广告秒播逻辑 (拦截底层广告 SDK 响应)
+  // 1. 广点通/穿山甲广告秒播逻辑
   if (url.includes("/gdt_inner_view") || url.includes("/get_ads")) {
     handleAdSkip($response);
   }
@@ -41,7 +46,12 @@ const TASK_MAPPING = {
       await handleReplay($request);
     } 
     
-    // 3. 页面净化逻辑 (GET 响应)
+    // 3. 全局原生广告分发拦截 (放行福利相关位)
+    else if (path.includes("/adv/getadvlistbatch")) {
+      handleGlobalAdBlock(url, $response);
+    }
+
+    // 4. 页面净化逻辑 (GET 响应)
     else if (CLEAN_RULES[path]) {
       await handleClean(path, $response);
     } else {
@@ -54,8 +64,32 @@ const TASK_MAPPING = {
 // --- 核心函数 ---
 
 /**
- * [新增] 广告秒播算法 (跳过15/30秒等待)
- * 使用正则替换广告时长为1秒，避免全量解析超大 JSON 导致 QX 内存溢出
+ * 原生广告分发拦截
+ * 清空大部分流内广告、底部 Tab 广告，但必须放行福利和签到的视频位
+ */
+function handleGlobalAdBlock(url, response) {
+  // 放行福利和签到相关的广告位，否则将无法触发看视频
+  if (url.includes("ioscheckin") || url.includes("reward") || url.includes("video")) {
+    $.log("⚠️ 放行福利看视频广告位下发");
+    $.done();
+    return;
+  }
+
+  try {
+    let obj = JSON.parse(response.body);
+    if (obj && obj.Data) {
+      obj.Data = []; // 清空所有常规广告下发
+    }
+    $.log("✨ 全局去广告：已拦截常规广告位下发");
+    $.done({ body: JSON.stringify(obj) });
+  } catch (e) {
+    $.log(`❌ 广告拦截失败: ${e}`);
+    $.done();
+  }
+}
+
+/**
+ * 广告秒播算法 (跳过15/30秒等待)
  */
 function handleAdSkip(response) {
   try {
@@ -111,7 +145,6 @@ async function handleReplay(request) {
     }
   });
 
-  // 并发等待期间放行原始请求，避免原生请求被卡死
   $.done(); 
   
   await Promise.all(replayTasks);
@@ -136,5 +169,5 @@ async function handleClean(path, response) {
   }
 }
 
-// --- 注入增强型 Env (保持原有代码不变) ---
+// --- 注入增强型 Env (保持不变) ---
 function Env(n){this.name=n;this.startTime=Date.now();this.log=(...m)=>console.log(`[${this.name}] [${new Date().toLocaleTimeString()}] ${m.join(" ")}`);this.wait=(ms)=>new Promise(r=>setTimeout(r,ms));this.done=(v={})=>$done(v);this.get=(k)=>{let v=$prefs.valueForKey(k);try{return JSON.parse(v)}catch(e){return v}};this.set=(v,k)=>{let val=typeof v==="object"?JSON.stringify(v):v;$prefs.setValueForKey(val,k)};this.fetch=async(o)=>{try{return await $task.fetch(o)}catch(e){return null}};this.clean=(obj,ps)=>{if(!obj||!ps)return obj;ps.forEach(p=>{let ks=p.split("."),c=obj;for(let i=0;i<ks.length-1;i++){let k=ks[i];if(k.includes("[")&&k.includes("]")){let[ak,f]=k.split(/[\[\]]/),[fk,fv]=f.split("=");if(c[ak]){c[ak]=c[ak].filter(item=>item[fk]!==fv);return}}c=c[k];if(!c)break}if(c)delete c[ks[ks.length-1]]});return obj};this.notify=(t,s,b)=>$notify(t,s,b)}
