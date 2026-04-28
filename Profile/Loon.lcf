@@ -131,17 +131,17 @@ https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Loon.plu
 https://kelee.one/Tool/Loon/Lpx/QuickSearch.lpx, tag=快捷搜索, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Apple 服务增强 (iRingo — 按需开启)
+# Apple 服务增强 (iRingo)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://github.com/NSRingo/Maps/releases/latest/download/iRingo.Maps.plugin, tag=iRingo地图, enabled=false
-https://github.com/NSRingo/LocationService/releases/latest/download/iRingo.LocationService.plugin, tag=iRingo定位, enabled=false
-https://github.com/NSRingo/WeatherKit/releases/latest/download/iRingo.WeatherKit.plugin, tag=iRingo天气, enabled=false
-https://github.com/NSRingo/Weather/raw/main/modules/Weather.plugin, tag=iRingo天气增强, enabled=false
+https://github.com/NSRingo/Maps/releases/latest/download/iRingo.Maps.plugin, tag=iRingo地图, enabled=true
+https://github.com/NSRingo/LocationService/releases/latest/download/iRingo.LocationService.plugin, tag=iRingo定位, enabled=true
+https://github.com/NSRingo/WeatherKit/releases/latest/download/iRingo.WeatherKit.plugin, tag=iRingo天气, enabled=true
+https://github.com/NSRingo/Weather/raw/main/modules/Weather.plugin, tag=iRingo天气增强, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 媒体增强 (按需开启)
+# 媒体增强
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://github.com/DualSubs/Universal/releases/latest/download/DualSubs.Universal.plugin, tag=双语字幕, enabled=false
+https://github.com/DualSubs/Universal/releases/latest/download/DualSubs.Universal.plugin, tag=双语字幕, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 应用增强 (自维护 — 脚本层)

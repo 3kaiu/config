@@ -34,8 +34,8 @@ Script 层 (自维护): qidian.plugin (GDT视频替换 + finishWatch重放 + cro
 | 可莉去广告 | Remove_ads_by_keli / QiDian / YouTube | ✅ |
 | 工具 | Sub-Store / QuickSearch | ✅ |
 | 自维护 | 起点全能助手 / YouTube增强 / 智慧房东 | ✅ |
-| Apple | iRingo 地图/定位/天气 ×4 | 🔘 |
-| 媒体 | DualSubs 双语字幕 | 🔘 |
+| Apple | iRingo 地图/定位/天气 ×4 | ✅ |
+| 媒体 | DualSubs 双语字幕 | ✅ |
 
 ### 代理加速
 
