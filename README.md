@@ -35,7 +35,19 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Media.co
 https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Network.conf
 ```
 
-## Loon 配置架构 (v2.3)
+## Loon 配置架构 (v3.0)
+
+### Qidian v3.0 更新 (基于 2026-04 五批次 2500+ 抓包深度重构)
+
+| 对比 | v2.x | v3.0 |
+|------|------|------|
+| 追踪域名 REJECT | 12 个 | **25 个** |
+| API 端点覆盖 | 8 个 | **13 个** |
+| ClientConfigOverrides | 8 项 | **16 项** |
+| CleanRules 路径 | 6 条 | **9 条** |
+| AdDurationKeys | 5 个 | **8 个** |
+| AdWhitelist | 4 个 | **9 个** |
+| getconfSpecify 隔离 | includes | endsWith 精确匹配 ✅ |
 
 ### 规则分层
 
@@ -44,57 +56,26 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Network.
     ↓
 可莉 REMOTE RULE × 6 (REGION + LAN + Telegram + Netflix + TikTok + AI)
     ↓
-Blackmatrix7 REMOTE RULE × 3 (广告 + 隐私 + 国内外域名)
+Blackmatrix7 REMOTE RULE × 3 (广告 + 隐私 + 域名分流)
     ↓
-可莉 PLUGIN × 7 (Block_HTTPDNS → BlockAdvertisers → Prevent_DNS_Leaks → Node_detection → BoxJs → Script-Hub → QuickSearch)
-    ↓
-Blackmatrix7 PLUGIN × 2 (SafeRedirect 安全重定向 + Startup 开屏去广告)
-    ↓
-自维护 PLUGIN × 2 (起点 + YouTube)
+可莉 PLUGIN × 7 + Blackmatrix7 × 2 + 自维护 × 2 + 社区 × 3 = **14 个**
     ↓
 FINAL → 兜底策略组
 ```
 
-### 完整覆盖率 (9 层全部就位)
+### 9 层全覆盖
 
 | 层 | 内容 |
 |---|------|
-| **节点** | 8 地区 Remote Filter 自动分组 + url-test tolerance=100 |
-| **规则 (Remote Rule)** | KeLi ×6 (IP级 + Telegram/Netflix/TikTok/AI) + Blackmatrix7 ×3 |
-| **插件 (Plugin)** | KeLi ×7 + Blackmatrix7 ×2 + 自维护 ×2 + Sub-Store + Gallery + 节点看板 = **14 个** |
-| **脚本 (Script)** | JD cron 签到 + Qidian.js (5 bug已修复) + YouTube 脚本拦截 |
-| **复写 (Rewrite)** | SafeRedirect.plugin — 60 条 HTTP→HTTPS 安全重定向 + 追踪参数清除 |
-| **DNS** | DoH×3 + DoH3×2 + hijack-dns 11 IP + Host 映射 12 大厂 |
-| **MITM** | Apple/起点/YouTube/GDT/穿山甲 + 插件 %APPEND% 追加 |
-| **数据持久化** | BoxJs.lpx + Sub-Store.lpx |
-| **其他 (General)** | 22 项参数 (sni-sniffing, disable-stun, disconnect-on-policy-change...) |
-
-### 可莉生态集成
-
-| 资源 | 类型 | 功能 |
-|------|------|------|
-| `REGION_SPLITTER.lsr` | Remote Rule | 国内 IP 自动分流到直连 |
-| `LAN_SPLITTER.lsr` | Remote Rule | 局域网 IP 自动分流 |
-| `Telegram.lsr` | Remote Rule | Telegram 精准分流 |
-| `Netflix.lsr` | Remote Rule | Netflix 精准分流 |
-| `TikTok.lsr` | Remote Rule | TikTok 精准分流 |
-| `AI.lsr` | Remote Rule | ChatGPT/Gemini/Claude AI 分流 |
-| `Block_HTTPDNS.lpx` | Plugin (pin) | 屏蔽 App 私建 HTTPDNS |
-| `BlockAdvertisers.lpx` | Plugin (pin) | 动态广告拦截增强 |
-| `Prevent_DNS_Leaks.lpx` | Plugin | 防止 DNS 泄露 |
-| `Node_detection_tool.lpx` | Plugin | 节点实时检测 |
-| `BoxJs.lpx` | Plugin | 脚本数据持久化引擎 |
-| `Script-Hub.lpx` | Plugin | 签到/比价/解锁脚本中心 |
-| `QuickSearch.lpx` | Plugin | Spotlight/Safari 快捷搜索 |
-| `geodata.kelee.one` | GEOIP/ASN | 可莉 CDN 加速数据库 |
-| `Remote Filter` | 节点分组 | 按地区自动分类节点 |
-
-### 新增 Rewrite 层 (v2.3)
-
-| 资源 | 类型 | 功能 |
-|------|------|------|
-| `SafeRedirect.plugin` | Plugin (Rewrite) | 60 条 HTTP→HTTPS 安全重定向 + 去除追踪参数 |
-| `startup.lnplugin` | Plugin (Script) | 京东/B站/爱奇艺/美团/嘀嗒/多点 等 10+ App 开屏去广告 |
+| **节点** | 8 地区 Filter + url-test tolerance=100 |
+| **规则** | KeLi ×6 + Blackmatrix7 ×3 + 本地 |
+| **插件** | 14 个 (可莉 7 + BM7 2 + 自维护 2 + 社区 3) |
+| **脚本** | Qidian v3.0 + YouTube + JD |
+| **复写** | SafeRedirect.plugin 60 条 |
+| **DNS** | DoH×3 + DoH3×2 + hijack 11 IP + Host 12 |
+| **MITM** | 全域名 + 插件 %APPEND% |
+| **持久化** | BoxJs + Sub-Store |
+| **General** | 22 项参数 |
 
 ### DNS 泄露防御 (三层)
 
