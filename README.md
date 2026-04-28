@@ -35,18 +35,18 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Media.co
 https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Network.conf
 ```
 
-## Loon 配置架构 (v2.1)
+## Loon 配置架构 (v2.2)
 
 ### 规则分层
 
 ```
 本地规则 (Apple/微信直连 + 广告 SDK 白名单)
     ↓
-可莉生态 REMOTE RULE (REGION_SPLITTER + LAN_SPLITTER — IP 级)
+可莉 REMOTE RULE (REGION_SPLITTER + LAN_SPLITTER — IP 级)
     ↓
 Blackmatrix7 REMOTE RULE (域名级广告/隐私/国内外分流)
     ↓
-可莉生态 PLUGIN (Block_HTTPDNS + BlockAdvertisers + Prevent_DNS_Leaks)
+可莉 PLUGIN × 7 (Block_HTTPDNS → BlockAdvertisers → Prevent_DNS_Leaks → Node_detection → BoxJs → Script-Hub → QuickSearch)
     ↓
 自维护 PLUGIN (起点 + YouTube)
     ↓
@@ -59,14 +59,28 @@ FINAL → 兜底策略组
 |------|------|------|
 | `REGION_SPLITTER.lsr` | Remote Rule | 国内 IP 自动分流到直连 |
 | `LAN_SPLITTER.lsr` | Remote Rule | 局域网 IP 自动分流 |
-| `Block_HTTPDNS.lpx` | Plugin | 屏蔽 App 私建 HTTPDNS |
-| `BlockAdvertisers.lpx` | Plugin | 动态广告拦截增强 |
+| `Block_HTTPDNS.lpx` | Plugin (pin) | 屏蔽 App 私建 HTTPDNS |
+| `BlockAdvertisers.lpx` | Plugin (pin) | 动态广告拦截增强 |
 | `Prevent_DNS_Leaks.lpx` | Plugin | 防止 DNS 泄露 |
 | `Node_detection_tool.lpx` | Plugin | 节点实时检测 |
+| `BoxJs.lpx` | Plugin | 脚本数据持久化引擎 |
+| `Script-Hub.lpx` | Plugin | 签到/比价/解锁脚本中心 |
+| `QuickSearch.lpx` | Plugin | Spotlight/Safari 快捷搜索 |
 | `geodata.kelee.one` | GEOIP/ASN | 可莉 CDN 加速数据库 |
 | `Remote Filter` | 节点分组 | 按地区自动分类节点 |
 
-更多可莉插件请访问 [hub.kelee.one](https://hub.kelee.one) 或参考 [luestr/ProxyResource](https://github.com/luestr/ProxyResource)
+### DNS 泄露防御 (三层)
+
+1. **hijack-dns** — 劫持所有知名 DNS IP（Google/Cloudflare/国内），强制走 FakeIP
+2. **Prevent_DNS_Leaks.lpx** — 可莉插件级 DNS 泄露防护
+3. **Block_HTTPDNS.lpx** — 阻止 App 绕过 DNS 使用 HTTPDNS
+
+### YouTube 增强
+
+- 代理分流到 Proxy 策略组
+- 脚本级广告拦截（app2smile — 首页瀑布流 + 播放页推荐广告）
+- MITM 解密 youtubei.googleapis.com
+- `binary-body-mode=true` 支持 Protobuf 响应解析更多可莉插件请访问 [hub.kelee.one](https://hub.kelee.one) 或参考 [luestr/ProxyResource](https://github.com/luestr/ProxyResource)
 
 ### 代理加速
 

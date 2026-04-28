@@ -1,8 +1,12 @@
 #!name=YouTube 增强
-#!desc=代理分流 · MITM解密 · 画中画解锁
+#!desc=去广告 · 画中画 · 后台播放 · 代理分流
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/YouTube.png
+
+[Script]
+# YouTube 去广告 (app2smile — 首页瀑布流 + 播放页推荐广告)
+http-response ^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(browse|next|player|search|reel\/reel_watch_sequence) script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/youtube.js, requires-body=true, binary-body-mode=true, max-size=2097152, timeout=15, tag=YouTube去广告
 
 [Rule]
 DOMAIN-SUFFIX, googlevideo.com, Proxy
@@ -13,4 +17,4 @@ DOMAIN, youtubei.googleapis.com, Proxy
 DOMAIN, yt3.ggpht.com, Proxy
 
 [MitM]
-hostname = *.googlevideo.com, *.youtube.com, youtubei.googleapis.com, *.ytimg.com, *.ggpht.com
+hostname = %APPEND% youtubei.googleapis.com
