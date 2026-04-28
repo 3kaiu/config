@@ -61,7 +61,7 @@ real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.pin
 
 [Proxy Group]
 Proxy = select, Auto
-Auto = url-test, url = http://cp.cloudflare.com/generate_204, interval = 600, tolerance = 100
+Auto = url-test, 全球节点, url = http://cp.cloudflare.com/generate_204, interval = 600, tolerance = 100
 Final = select, Proxy, DIRECT
 
 [Rule]
