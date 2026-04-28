@@ -1,6 +1,6 @@
 # ═══════════════════════════════════════════════════════════
-#  Loon 配置 (Loon.lcf) — v3.9
-#  核心: .lcf 后缀 · 三路分流 · 双层去广告 · 审计全量修复
+#  Loon 配置 (Loon.lcf) — v3.10
+#  核心: .lcf 后缀 · 三路分流 · 双层去广告 · 日志静默
 #  引擎支持: iOS Loon 3.3.9+
 # ═══════════════════════════════════════════════════════════
 
@@ -20,9 +20,9 @@ disconnect-on-policy-change = false
 geoip-url = https://geodata.kelee.one/Country-Masaiki.mmdb
 ipasn-url = https://geodata.kelee.one/GeoLite2-ASN-P3TERX.mmdb
 resource-parser = https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store-parser.loon.min.js
-allow-wifi-access = true
+allow-wifi-access = false
 wifi-access-http-port = 7222
-wifi-access-socks5-port = 6221
+wifi-access-socks5-port = 6225
 test-timeout = 5
 internet-test-url = http://cp.cloudflare.com/generate_204
 proxy-test-url = http://cp.cloudflare.com/generate_204
@@ -112,7 +112,7 @@ https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 https://kelee.one/Tool/Loon/Lpx/Block_HTTPDNS.lpx, pin=true, enabled=true
 https://kelee.one/Tool/Loon/Lpx/BlockAdvertisers.lpx, pin=true, enabled=true
-https://kelee.one/Tool/Loon/Lpx/Prevent_DNS_Leaks.lpx, policy=Proxy, enabled=true
+https://kelee.one/Tool/Loon/Lpx/Prevent_DNS_Leaks.lpx, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 基础增强 (Blackmatrix7)
@@ -130,7 +130,7 @@ https://kelee.one/Tool/Loon/Lpx/YouTube_remove_ads.lpx, tag=YouTube去广告, en
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 工具
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Loon.plugin, tag=Sub-Store, enabled=true
+https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Loon.plugin, tag=Sub-Store, pin=true, enabled=true
 https://kelee.one/Tool/Loon/Lpx/QuickSearch.lpx, tag=快捷搜索, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -153,6 +153,7 @@ https://raw.githubusercontent.com/3kaiu/config/main/Plugin/qidian.plugin, tag=�
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/youtube.plugin, tag=YouTube增强, enabled=true
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/zhihuifangdong.plugin, tag=智慧房东, enabled=true
 
+# 可在此添加自定义 Rewrite 规则
 [MitM]
 skip-server-cert-verify = true
 # 核心 MITM (YouTube 域名 + Apple 系统; 起点/智慧房东/其他由插件注入)
