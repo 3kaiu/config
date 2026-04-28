@@ -4,7 +4,7 @@
 
 | 平台 | 主配置 | 生态 |
 |------|--------|------|
-| Loon | `Loon.conf` | 可莉 + Blackmatrix7 + 自维护 |
+| Loon | `Loon.lcf` | 可莉 + Blackmatrix7 + 自维护 |
 | Quantumult X | `QX.conf` | 可莉 + Blackmatrix7 + 自维护 |
 
 ## 快速导入
@@ -12,7 +12,7 @@
 ### Loon
 
 ```
-https://raw.githubusercontent.com/3kaiu/config/main/Profile/Loon.conf
+https://raw.githubusercontent.com/3kaiu/config/main/Profile/Loon.lcf
 ```
 
 自维护插件：
@@ -121,7 +121,7 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Network.
 
 ```
 Profile/
-  Loon.conf          # Loon 主配置
+  Loon.lcf          # Loon 主配置
   QX.conf            # Quantumult X 主配置
 Plugin/
   qidian.plugin      # 起点全能助手
