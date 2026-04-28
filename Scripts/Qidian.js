@@ -56,7 +56,11 @@ const CONFIG = {
   if (url.includes("/v1/client/getconf") && !$response) {
     handleTokenSteal($request);
   }
-  // B. 广告 SDK 秒播
+  // B. GDT 视频拦截 — 返回 1 秒视频
+  else if (url.includes(".mp4") && url.includes("adsmind.gdtimg.com")) {
+    handleVideoReplace();
+  }
+  // C. 广告 SDK 秒播
   else if (url.includes("/gdt_inner_view") || url.includes("/get_ads")) {
     handleAdSkip($response);
   }
@@ -179,13 +183,22 @@ function handleClientConfig(response) {
 function handleAdSkip(response) {
   try {
     const s = CONFIG.VideoSkipSeconds;
+    const ONE_SEC_VIDEO = "https://raw.githubusercontent.com/3kaiu/config/main/Assets/1s.mp4";
     const obj = safeJsonParse(response.body);
+
     if (obj) {
+      // 替换所有视频 URL 为 1 秒占位视频
+      replaceVideoUrls(obj, ONE_SEC_VIDEO);
+      // 递归修改所有时长字段
       patchDurationFields(obj, CONFIG.AdDurationKeys, s);
       $.done({ body: JSON.stringify(obj) });
       return;
     }
-    const body = String(response.body || "")
+
+    // 非 JSON 回退：正则替换
+    let body = String(response.body || "");
+    body = body
+      .replace(/"video":\s*"https?:\/\/[^"]+\.mp4[^"]*"/g, `"video":"${ONE_SEC_VIDEO}"`)
       .replace(/"video_duration":\s*\d+/g, `"video_duration":${s}`)
       .replace(/"video_timelife":\s*\d+/g, `"video_timelife":${s}`)
       .replace(/"duration":\s*\d+/g, `"duration":${s}`)
@@ -325,6 +338,20 @@ function handleDailyRec(response) {
   } catch (e) { $.done(); }
 }
 
+// 预编码的 1 秒 MP4 (H.264 320x240 黑屏, 655 bytes)
+const ONE_SEC_MP4_BASE64 = "AAAAFGZ0eXBpc29tAAAAAWlzb20AAAJKbW9vdgAAAGhtdmhkAAAAAAAAAAAAAAAAAAAD6AAAA+gAAQAAAQAAAAAAAAAAAAAAAAEAAAABAAAAAQAAAAEAAAABAAAAAQAAAAEAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB2nRyYWsAAABcdGtoZAAAAAcAAAAAAAAAAAAAAAEAAAAAAAAD6AAAAAAAAAAAAAAAAAEAAAAAAQAAAAEAAAABAAAAAQAAAAEAAAABAAAAAQAAAAEAAAABAAABQAAAAPAAAAAAAXZtZGlhAAAAIG1kaGQAAAAAAAAAAAAAAAAAAAPoAAAD6FXEAAAAAAAtaGRscgAAAAAAAAAAdmlkZQAAAAAAAAAAAAAAAFZpZGVvSGFuZGxlcgAAAAEhbWluZgAAABR2bWhkAAAAAAAAAAAAAAAAAAAAKGRpbmYAAAAgZHJlZgAAAAAAAAABAAAAEHVybCAAAAAAAAAAAQAAAN1zdGJsAAAAdXN0c2QAAAAAAAAAAQAAAGVhdmMxAAAAAAAAAAEAAAAAAAAAAAAAAAABQADwAEgAAABIAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFwFCAB7/4QAIQgAeq0B4FgABAAQ4gAAAAAAAGHN0dHMAAAAAAAAAAQAAAAEAAAPoAAAAHHN0c2MAAAAAAAAAAQAAAAEAAAABAAAAAQAAABhzdHN6AAAAAAAAAAAAAAABAAAAKQAAABRzdGNvAAAAAAAAAAEAAAJmAAAAMW1kYXQAAAABZ0IAHqtAeBYAAAABaM44gAAAAAFliIQAR//89S5qCCNTGQASiA==";
+
+function handleVideoReplace() {
+  try {
+    const mp4 = Uint8Array.from(atob(ONE_SEC_MP4_BASE64), c => c.charCodeAt(0));
+    $.log("已替换 GDT 视频为 1 秒");
+    $.done({ body: mp4 });
+  } catch (e) {
+    $.log(`视频替换失败: ${e}`);
+    $.done();
+  }
+}
+
 function handleAdListBatch(url, response) {
   if (CONFIG.AdWhitelist.some(kw => url.includes(kw))) {
     $.done();
@@ -405,6 +432,21 @@ function patchDurationFields(value, keys, nextValue) {
       continue;
     }
     patchDurationFields(item, keys, nextValue);
+  }
+}
+
+function replaceVideoUrls(obj, newUrl) {
+  if (!obj || typeof obj !== "object") return;
+  if (Array.isArray(obj)) {
+    obj.forEach(item => replaceVideoUrls(item, newUrl));
+    return;
+  }
+  for (const [key, val] of Object.entries(obj)) {
+    if (key === "video" && typeof val === "string" && val.includes(".mp4")) {
+      obj[key] = newUrl;
+      continue;
+    }
+    replaceVideoUrls(val, newUrl);
   }
 }
 
