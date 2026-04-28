@@ -1,91 +1,40 @@
 /**
- * 📚 起点全能助手 Pro v3.0
- * 基于 2026-04 五批次 ×553+ 抓包深度重构
+ * 📚 起点全能助手 v3.3
+ * 基于 2026-04 五批次抓包 + app2smile 方案融合
  * 作者：3kaiu
  */
 const $ = new Env("起点助手");
 
-// ==========================================
-// ⚙️ 配置区
-// ==========================================
 const CONFIG = {
   TaskMapping: {
     "1218712929269776384": { name: "激励视频", count: 9 },
     "1218712929269776388": { name: "福利任务", count: 3 }
   },
 
-  // 页面净化 (支持 v1/v2/v3 通用匹配)
   CleanRules: {
-    // 视频广告首页 (v1/v2 共用)
-    "video/adv/mainPage": [
-      "Data.DailyBenefitModule.TaskList"
-    ],
-    // 视频广告弹窗
-    "video/adv/mainPageDialog": [
-      "Data"
-    ],
-    // 批量广告获取
-    "adv/getadvlistbatch": [
-      "Data"
-    ],
-    // 书架悬浮广告
-    "bookshelf/getHoverAdv": [
-      "Data.ItemList"
-    ],
-    "bookshelf/getTopOperation": [
-      "Data"
-    ],
-    // 开屏广告
-    "client/getsplashscreen": [
-      "Data.List"
-    ],
-    // 发现页模块
-    "user/getsimplediscover": [
-      "Data.Items[ShowName=游戏中心f]",
-      "Data.Items[ShowName=游戏中心]",
-      "Data.Items[ShowName=新活动中心]",
-      "Data.Items[ShowName=红包广场]"
-    ],
-    // 每日推荐
-    "widget/daily/rec": [
-      "Data"
-    ],
-    // 红点推送
-    "reddot/getdot": [
-      "Data"
-    ]
+    "video/adv/mainPage":       ["Data.DailyBenefitModule.TaskList"],
+    "video/adv/mainPageDialog": ["Data"],
+    "bookshelf/getHoverAdv":    ["Data.ItemList"],
+    "bookshelf/getTopOperation":["Data"],
+    "user/getsimplediscover":   ["Data.Items[ShowName=游戏中心f]","Data.Items[ShowName=游戏中心]","Data.Items[ShowName=新活动中心]","Data.Items[ShowName=红包广场]"],
+    "widget/daily/rec":         ["Data"],
+    "reddot/getdot":            ["Data"]
   },
 
-  // 直接置空 (无需路径匹配，直接杀)
-  DirectKillPaths: [
-    "bookshelf/getad",
-    "client/iosad",
-    "adv/getadvlistbatch"
-  ],
+  DirectKillPaths: ["bookshelf/getad", "client/iosad"],
 
-  // 客户端配置覆写
   ClientConfigOverrides: {
-    "PangleEnable": "0",
-    "DisableQidianBurryReport": "1",
-    "DisableNewabInBI": "1",
-    "SplashScreenInterval": "0",
-    "SplashScreenRoundCount": "0",
-    "BusinessSplashCoolDownTime": "99999",
-    "PushDialogFrequency": "0",
-    "EnableMonitorLog": "0",
-    "EnableBeaconFullBurry": "0",
-    "DailyRecommendGray": "0",
-    "EnableSubscriptionAward": "0",
-    "ReloadExposureEnabled": "false",
-    "QDABRegularReportTimeSpan": "999999",
-    "QDABReportMinThreshold": "999999",
-    "RankBuryPoint": "0",
-    "CheckInPushSwitchReport": "0",
-    "UserGrowthEnable": "0",
-    "IsReceiveFreeReading": "0"
+    "PangleEnable": "0", "DisableQidianBurryReport": "1", "DisableNewabInBI": "1",
+    "SplashScreenInterval": "0", "SplashScreenRoundCount": "0",
+    "BusinessSplashCoolDownTime": "99999", "PushDialogFrequency": "0",
+    "EnableMonitorLog": "0", "EnableBeaconFullBurry": "0",
+    "DailyRecommendGray": "0", "EnableSubscriptionAward": "0",
+    "ReloadExposureEnabled": "false", "QDABRegularReportTimeSpan": "999999",
+    "QDABReportMinThreshold": "999999", "RankBuryPoint": "0",
+    "CheckInPushSwitchReport": "0", "UserGrowthEnable": "0",
+    "IsReceiveFreeReading": "0", "WolfEye": 0
   },
 
-  // 广告放行白名单 (保证奖励视频、签到等功5能正常)
   AdWhitelist: ["ioscheckin", "reward", "video", "flzx", "costume", "buqian", "normaltask", "limitegg", "redpocket"],
 
   VideoSkipSeconds: 1,
@@ -119,15 +68,31 @@ const CONFIG = {
     if (path.endsWith("/video/adv/finishWatch") && method === "POST") {
       await handleReplay($request);
     }
-    // D. 客户端配置覆写 (精确匹配，排除 getconfSpecify)
+    // D. 客户端配置覆写 (精确匹配 getconf)
     else if (path.endsWith("/v1/client/getconf")) {
       handleClientConfig($response);
     }
-    // E. 直接置空杀广告
+    // E. 开屏广告 — 直接置空 List
+    else if (path.includes("getsplashscreen")) {
+      handleSplashScreen($response);
+    }
+    // F. Deeplink — 阻止冷启动跳转精选页
+    else if (path.includes("deeplink/geturl")) {
+      handleDeeplink($response);
+    }
+    // G. 每日推荐 — 清空
+    else if (path.includes("dailyrecommend")) {
+      handleDailyRec($response);
+    }
+    // H. 批量广告获取 (检查白名单)
+    else if (path.includes("adv/getadvlistbatch")) {
+      handleAdListBatch(url, $response);
+    }
+    // I. 直接置空杀广告 (书架/iosad)
     else if (CONFIG.DirectKillPaths.some(p => path.includes(p))) {
       handleDirectAdKill(url, $response);
     }
-    // F. 页面净化
+    // I. 页面净化
     else if (matchCleanRule(path)) {
       handleClean(path, $response);
     }
@@ -181,14 +146,29 @@ function handleClientConfig(response) {
   try {
     const obj = safeJsonParse(response.body);
     if (!obj || !obj.Data) { $.done(); return; }
+
+    // 基础覆盖
     for (const [k, v] of Object.entries(CONFIG.ClientConfigOverrides)) {
       obj.Data[k] = v;
     }
+
+    // app2smile 方案: 弹窗 / 青少年模式 / 悬浮图标 / 搜索用户
+    if (obj.Data.ActivityPopup) obj.Data.ActivityPopup = null;
+    if (obj.Data.CloudSetting && obj.Data.CloudSetting.TeenShowFreq) obj.Data.CloudSetting.TeenShowFreq = "0";
+    if (obj.Data.ActivityIcon) {
+      obj.Data.ActivityIcon.StartTime = 0;
+      obj.Data.ActivityIcon.EndTime = 0;
+      delete obj.Data.ActivityIcon.Actionurl;
+      delete obj.Data.ActivityIcon.Icon;
+    }
+    obj.Data.EnableSearchUser = "1";
+
     // 删除 GDT 配置 + 广告位置配置
     if (obj.Data.GDT) delete obj.Data.GDT;
     if (obj.Data.AdVideoPositionConfig) obj.Data.AdVideoPositionConfig = [];
     if (obj.Data.AbtestUrls) delete obj.Data.AbtestUrls;
-    $.log("✨ 已覆盖客户端超级开关 (v3.0)");
+
+    $.log("✨ 已覆盖客户端超级开关");
     $.done({ body: JSON.stringify(obj) });
   } catch (e) {
     $.log(`❌ 配置覆写失败: ${e}`);
@@ -312,9 +292,61 @@ function handleClean(path, response) {
   }
 }
 
-// ==========================================
-// 🔧 工具函数
-// ==========================================
+function handleSplashScreen(response) {
+  try {
+    const obj = safeJsonParse(response.body);
+    if (!obj || !obj.Data) { $.done(); return; }
+    obj.Data.List = null;
+    if (obj.Data.EnableGDT === 1) obj.Data.EnableGDT = 0;
+    $.log("✨ 已清除开屏广告");
+    $.done({ body: JSON.stringify(obj) });
+  } catch (e) { $.done(); }
+}
+
+function handleDeeplink(response) {
+  try {
+    const obj = safeJsonParse(response.body);
+    if (obj && obj.Data && obj.Data.ActionUrl) {
+      obj.Data.ActionUrl = "";
+      $.log("✨ 已阻止冷启动跳转精选页");
+    }
+    $.done({ body: JSON.stringify(obj) });
+  } catch (e) { $.done(); }
+}
+
+function handleDailyRec(response) {
+  try {
+    const obj = safeJsonParse(response.body);
+    if (obj && obj.Data && obj.Data.Items) {
+      obj.Data.Items = [];
+      $.log("✨ 已清除每日推荐");
+    }
+    $.done({ body: JSON.stringify(obj) });
+  } catch (e) { $.done(); }
+}
+
+function handleAdListBatch(url, response) {
+  if (CONFIG.AdWhitelist.some(kw => url.includes(kw))) {
+    $.done();
+    return;
+  }
+  try {
+    const obj = safeJsonParse(response.body);
+    if (!obj) { $.done(); return; }
+    // 清空广告数据，保持结构完整
+    if (obj.Data) {
+      if (typeof obj.Data === "object" && !Array.isArray(obj.Data)) {
+        for (const key of Object.keys(obj.Data)) {
+          if (Array.isArray(obj.Data[key])) obj.Data[key] = [];
+        }
+      } else if (Array.isArray(obj.Data)) {
+        obj.Data = [];
+      }
+    }
+    $.log("✨ 已拦截批量广告");
+    $.done({ body: JSON.stringify(obj) });
+  } catch (e) { $.done(); }
+}
 function Env(n) {
   this.name = n;
   this.isL = typeof $loon !== "undefined";

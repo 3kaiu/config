@@ -13,17 +13,18 @@ http-response ^https?:\/\/api-access\.pangolin-sdk-toutiao\d*\.com\/api\/ad\/uni
 http-request ^https:\/\/h5\.if\.qidian\.com\/argus\/api\/v[12]\/video\/adv\/finishWatch script-path=https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js, requires-body=true, timeout=30, tag=自动重放
 http-request ^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/client\/getconf script-path=https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js, requires-body=false, timeout=10, tag=获取Token
 
-# 全局深度净化 (v3.0 — 覆盖 8 个 API 类别)
-http-response ^https:\/\/(h5|magev6)\.if\.qidian\.com\/argus\/api\/(v[12]\/video\/adv\/mainPage|v[12]\/video\/adv\/mainPageDialog|v[12]\/adv\/getadvlistbatch|v1\/user\/getsimplediscover|v1\/bookshelf\/getHoverAdv|v1\/bookshelf\/getTopOperation|v1\/bookshelf\/getad|v1\/client\/getconf$|v1\/client\/iosad|v4\/client\/getsplashscreen|v1\/widget\/daily\/rec|v1\/reddot\/getdot) script-path=https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js, requires-body=true, timeout=10, tag=深度净化
+# 全局深度净化 (v3.3 — 融入 app2smile 方案)
+http-response ^https:\/\/(h5|magev6)\.if\.qidian\.com\/argus\/api\/(v[12]\/video\/adv\/mainPage|v[12]\/video\/adv\/mainPageDialog|v[12]\/adv\/getadvlistbatch|v[12]\/deeplink\/geturl|v[12]\/dailyrecommend\/getdailyrecommend|v1\/user\/getsimplediscover|v1\/bookshelf\/getHoverAdv|v1\/bookshelf\/getTopOperation|v1\/bookshelf\/getad|v1\/client\/getconf$|v1\/client\/iosad|v4\/client\/getsplashscreen|v1\/widget\/daily\/rec|v1\/reddot\/getdot) script-path=https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js, requires-body=true, timeout=10, tag=深度净化
 
 # 自动签到定时任务
 cron "0 9 * * *" script-path=https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js, tag=起点每日静默签到, timeout=30
 
 [Rule]
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 追踪/监控/埋点 SDK — 强力阻绝 (v3.0 扩展)
+# 追踪/监控/埋点 SDK — 强力阻绝
+# 注意: GDT 视频 CDN 不放 REJECT，否则奖励视频无法加载
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# -- 腾讯系追踪 --
+# -- 腾讯系追踪 (不含广告素材 CDN) --
 DOMAIN, rmonitor.qq.com, REJECT
 DOMAIN, unitelogreport.reader.qq.com, REJECT
 DOMAIN, sdkreport.e.qq.com, REJECT
@@ -33,14 +34,13 @@ DOMAIN, galileotelemetry.tencent.com, REJECT
 DOMAIN, tangram.e.qq.com, REJECT
 DOMAIN, gatherer.m.qq.com, REJECT
 DOMAIN, dl.tiku.qq.com, REJECT
-DOMAIN, hd.ctobsnssdk.com, REJECT
 DOMAIN, path.book.qq.com, REJECT
-DOMAIN, c.gdt.qq.com, REJECT
 
 # -- 字节/穿山甲追踪 --
 DOMAIN, apmplus.volces.com, REJECT
 DOMAIN, mssdk.volces.com, REJECT
 DOMAIN, tobapplog.ctobsnssdk.com, REJECT
+DOMAIN, hd.ctobsnssdk.com, REJECT
 DOMAIN-KEYWORD, pglstatp-toutiao, REJECT
 DOMAIN-KEYWORD, zijieapi, REJECT
 DOMAIN-KEYWORD, bytescm, REJECT
@@ -51,10 +51,7 @@ DOMAIN, fockrt.yuewen.com, REJECT
 DOMAIN, aegis.cdn-go.cn, REJECT
 DOMAIN, ali-stats.jpush.cn, REJECT
 
-# -- 广告素材 CDN --
-DOMAIN, wallpaper-1258344696.file.myqcloud.com, REJECT
-
-# -- 其他第三方 --
+# -- 其他 --
 DOMAIN-KEYWORD, qreport, REJECT
 
 [MitM]
