@@ -14,47 +14,28 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/Loon.lcf
 https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 ```
 
-## Loon 配置 (v3.7)
+## Loon 配置 (v3.8)
 
-### 三路分流
+### 去广告架构 (双层互补)
 
 ```
-🇨🇳 国内 → DIRECT   REGION_SPLITTER (IP级) + China.list (域名级) + Host DNS下沉
-🌍 国外 → Proxy    Global.list (域名级) + FINAL 兜底
-🚫 广告 → REJECT   Advertising.list + Privacy.list + BlockAdvertisers 插件
+Rewite 层 (可莉): Remove_ads_by_keli + QiDian_remove_ads + YouTube_remove_ads
+                    ↓ json-replace / json-del / reject-dict
+Script 层 (自维护): qidian.plugin (GDT视频替换 + finishWatch重放 + cron签到)
+                    ↓ http-response / http-request
 ```
 
-### 插件 (9 个)
+### 插件 (20 个)
 
-| 来源 | 插件 | 作用 |
-|------|------|------|
-| 可莉 | Block_HTTPDNS | 屏蔽 HTTPDNS |
-| 可莉 | BlockAdvertisers | 动态广告拦截 |
-| 可莉 | Prevent_DNS_Leaks | DNS 泄露防护 |
-| BM7 | SafeRedirect | 60 条安全重定向 |
-| BM7 | startup.lnplugin | 10+ App 开屏去广告 |
-| 社区 | Sub-Store | 订阅管理器 |
-| 自维护 | qidian.plugin | 起点全能助手 Pro v3.6 |
-| 自维护 | youtube.plugin | YouTube 去广告 |
-| 自维护 | zhihuifangdong.plugin | 智慧房东广告屏蔽 |
-
-### 起点插件 (v3.6)
-
-| 功能 | 实现 |
-|------|------|
-| GDT 视频 1s 替换 | URL 替换 + MP4 下载拦截 双层方案 |
-| 自动重放 | finishWatch × N 并发回放 |
-| KeLi 全清 | 11 个 API 直接拒绝 + getconf 精确删 key |
-| 营销模块 | BenefitButtonList 删除 (福利中心/活动中心/我的阅历) |
-| 追踪域名 | 26 个 REJECT 规则 (腾讯/字节/阅文) |
-| 每日签到 | cron 09:00 静默签到 |
-| 页面净化 | 9 条 CleanRules 路径 |
-
-### DNS 防御
-
-1. `hijack-dns` — 劫持知名 DNS IP，强制 FakeIP
-2. `Prevent_DNS_Leaks.lpx` — 可莉插件级防护
-3. `Block_HTTPDNS.lpx` — 阻止 App HTTPDNS 绕过
+| 层级 | 插件 | 默认 |
+|------|------|:---:|
+| 内核 | Block_HTTPDNS / BlockAdvertisers / Prevent_DNS_Leaks | ✅ |
+| 基础 | SafeRedirect / 开屏去广告 | ✅ |
+| 可莉去广告 | Remove_ads_by_keli / QiDian / YouTube | ✅ |
+| 工具 | Sub-Store / QuickSearch | ✅ |
+| 自维护 | 起点全能助手 / YouTube增强 / 智慧房东 | ✅ |
+| Apple | iRingo 地图/定位/天气 ×4 | 🔘 |
+| 媒体 | DualSubs 双语字幕 | 🔘 |
 
 ### 代理加速
 

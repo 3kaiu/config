@@ -1,6 +1,6 @@
 # ═══════════════════════════════════════════════════════════
-#  Loon 配置 (Loon.lcf) — v3.7
-#  核心: .lcf 后缀 · 三路分流 · GDT 视频替换 · DoH 国际化
+#  Loon 配置 (Loon.lcf) — v3.8
+#  核心: .lcf 后缀 · 三路分流 · 双层去广告 (Rewrite + Script)
 #  引擎支持: iOS Loon 3.3.9+
 # ═══════════════════════════════════════════════════════════
 
@@ -105,28 +105,49 @@ https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/
 
 [Plugin]
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 内核插件 (可莉)
+# 内核 (可莉 — pin 固定)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 https://kelee.one/Tool/Loon/Lpx/Block_HTTPDNS.lpx, pin=true, enabled=true
 https://kelee.one/Tool/Loon/Lpx/BlockAdvertisers.lpx, pin=true, enabled=true
 https://kelee.one/Tool/Loon/Lpx/Prevent_DNS_Leaks.lpx, policy=Proxy, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 增强插件 (Blackmatrix7)
+# 基础增强 (Blackmatrix7)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/SafeRedirect/SafeRedirect.plugin, tag=安全重定向, enabled=true
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/startup/startup.lnplugin, tag=开屏去广告, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 可莉去广告补充 (Rewrite 层 — 与脚本插件互补)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+https://kelee.one/Tool/Loon/Lpx/Remove_ads_by_keli.lpx, tag=可莉通用去广告, enabled=true
+https://kelee.one/Tool/Loon/Lpx/QiDian_remove_ads.lpx, tag=起点读书去广告, enabled=true
+https://kelee.one/Tool/Loon/Lpx/YouTube_remove_ads.lpx, tag=YouTube去广告, enabled=true
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 工具
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Loon.plugin, tag=Sub-Store, enabled=true
+https://kelee.one/Tool/Loon/Lpx/QuickSearch.lpx, tag=快捷搜索, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 应用增强 (自维护)
+# Apple 服务增强 (iRingo — 按需开启)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://raw.githubusercontent.com/3kaiu/config/main/Plugin/qidian.plugin, tag=起点, enabled=true
-https://raw.githubusercontent.com/3kaiu/config/main/Plugin/youtube.plugin, tag=YouTube, enabled=true
+https://github.com/NSRingo/Maps/releases/latest/download/iRingo.Maps.plugin, tag=iRingo地图, enabled=false
+https://github.com/NSRingo/LocationService/releases/latest/download/iRingo.LocationService.plugin, tag=iRingo定位, enabled=false
+https://github.com/NSRingo/WeatherKit/releases/latest/download/iRingo.WeatherKit.plugin, tag=iRingo天气, enabled=false
+https://github.com/NSRingo/Weather/raw/main/modules/Weather.plugin, tag=iRingo天气增强, enabled=false
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 媒体增强 (按需开启)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+https://github.com/DualSubs/Universal/releases/latest/download/DualSubs.Universal.plugin, tag=双语字幕, enabled=false
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 应用增强 (自维护 — 脚本层)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+https://raw.githubusercontent.com/3kaiu/config/main/Plugin/qidian.plugin, tag=起点全能助手, enabled=true
+https://raw.githubusercontent.com/3kaiu/config/main/Plugin/youtube.plugin, tag=YouTube增强, enabled=true
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/zhihuifangdong.plugin, tag=智慧房东, enabled=true
 
 [MitM]
