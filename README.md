@@ -14,7 +14,7 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/Loon.lcf
 https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 ```
 
-## Loon 配置 (v3.8)
+## Loon 配置 (v3.9)
 
 ### 去广告架构 (双层互补)
 
@@ -25,7 +25,7 @@ Script 层 (自维护): qidian.plugin (GDT视频替换 + finishWatch重放 + cro
                     ↓ http-response / http-request
 ```
 
-### 插件 (20 个)
+### 插件 (18 个)
 
 | 层级 | 插件 | 默认 |
 |------|------|:---:|
@@ -58,7 +58,7 @@ Profile/
   Loon.lcf                 # Loon 主配置
   QX.conf                  # Quantumult X 主配置
 Plugin/
-  qidian.plugin            # 起点全能助手 Pro v3.6
+  qidian.plugin     # 起点全能助手 Pro v3.9
   youtube.plugin           # YouTube 增强
   zhihuifangdong.plugin    # 智慧房东广告屏蔽
 Scripts/
@@ -66,4 +66,6 @@ Scripts/
   Zhihuifangdong.js        # 智慧房东脚本
 Assets/
   1s.mp4                   # 1 秒占位视频
+Templates/
+  Script_Template.js       # 脚本模板
 ```

@@ -1,12 +1,12 @@
 # ═══════════════════════════════════════════════════════════
-#  Loon 配置 (Loon.lcf) — v3.8
-#  核心: .lcf 后缀 · 三路分流 · 双层去广告 (Rewrite + Script)
+#  Loon 配置 (Loon.lcf) — v3.9
+#  核心: .lcf 后缀 · 三路分流 · 双层去广告 · 审计全量修复
 #  引擎支持: iOS Loon 3.3.9+
 # ═══════════════════════════════════════════════════════════
 
 [General]
 ip-mode = dual
-interface-mode = Performance
+interface-mode = Performace
 dns-server = system
 doh-server = https://dns.google/dns-query, https://cloudflare-dns.com/dns-query, https://doh.pub/dns-query
 hijack-dns = *:53, 8.8.8.8, 8.8.4.4, 1.1.1.1, 114.114.114.114, 223.6.6.6, 180.76.76.76
@@ -27,7 +27,7 @@ test-timeout = 5
 internet-test-url = http://cp.cloudflare.com/generate_204
 proxy-test-url = http://cp.cloudflare.com/generate_204
 skip-proxy = 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, localhost, *.local
-bypass-tun = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.0.0.0/24, 192.0.2.0/24, 192.88.99.0/24, 192.168.0.0/16, 198.51.100.0/24, 203.0.113.0/24, 224.0.0.0/4, 255.255.255.255/32
+bypass-tun = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32
 real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.pingan.com.cn, *.cmbchina.com, *.local, *.lan, *.home.arpa
 
 [Host]
@@ -77,13 +77,16 @@ DOMAIN-SUFFIX, wx.qq.com, DIRECT
 # GDT 联享家开屏去广告 (startup.lnplugin 需要 mi.gdt.qq.com 可访问)
 DOMAIN, mi.gdt.qq.com, DIRECT
 
-# 广告 SDK 白名单 (防去广告误杀奖励包 — GDT 素材 CDN 必须放行)
+# 广告 SDK 白名单 (防去广告误杀奖励包 — 仅 GDT 视频 CDN 放行)
 DOMAIN, ii.gdt.qq.com, DIRECT
 DOMAIN, c.gdt.qq.com, DIRECT
-DOMAIN-SUFFIX, gdtimg.com, DIRECT
+DOMAIN, adsmind.gdtimg.com, DIRECT
 DOMAIN-SUFFIX, pangolin-sdk-toutiao.com, DIRECT
 DOMAIN-SUFFIX, pangolin-sdk-toutiao1.com, DIRECT
 DOMAIN-SUFFIX, pangle.io, DIRECT
+
+# 起点追踪域 (本地 REJECT 确保不被 China.list 的 *.qq.com DIRECT 覆盖)
+DOMAIN, path.book.qq.com, REJECT
 
 FINAL, Final
 

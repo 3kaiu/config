@@ -1,5 +1,5 @@
 /**
- * 📚 起点全能助手 v3.5 — KeLi 全清方案 + GDT 双层视频替换
+ * 📚 起点全能助手 v3.9 — KeLi 全清方案 + GDT 双层视频替换
  * 融合 KeLi Loon Rewrite 全规则 + app2smile + 自研视频 1s 替换
  * 作者：3kaiu
  */
