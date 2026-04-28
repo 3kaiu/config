@@ -1,6 +1,6 @@
 /**
- * 📚 起点全能助手 v3.3
- * 基于 2026-04 五批次抓包 + app2smile 方案融合
+ * 📚 起点全能助手 v3.5 — KeLi 全清方案 + GDT 双层视频替换
+ * 融合 KeLi Loon Rewrite 全规则 + app2smile + 自研视频 1s 替换
  * 作者：3kaiu
  */
 const $ = new Env("起点助手");
@@ -11,29 +11,42 @@ const CONFIG = {
     "1218712929269776388": { name: "福利任务", count: 3 }
   },
 
+  // 广告/追踪覆写 (仅广告相关，不动正常功能)
+  ClientConfigOverrides: {
+    "PangleEnable": "0", "DisableQidianBurryReport": "1", "DisableNewabInBI": "1",
+    "SplashScreenInterval": "0", "SplashScreenRoundCount": "0",
+    "BusinessSplashCoolDownTime": "99999", "PushDialogFrequency": "0",
+    "EnableMonitorLog": "0", "EnableBeaconFullBurry": "0",
+    "ReloadExposureEnabled": "false", "QDABRegularReportTimeSpan": "999999",
+    "QDABReportMinThreshold": "999999", "RankBuryPoint": "0",
+    "CheckInPushSwitchReport": "0", "WolfEye": 0
+  },
+
+  // KeLi 风格 — getconf JSON key 精确删除
+  DeleteKeys: ["ActivityPageBackPushNoticeFrequency", "ActivityIcon", "ActivityPopup", "LuckBag"],
+
+  // KeLi 风格 — 直接拒绝对应 API (reject-dict)
+  RejectPaths: [
+    "checkin/simpleinfo", "push/getdialog", "booksearch/hotWords",
+    "maintain/playstrip", "young/getconf",
+    "followsubscribe/showChapterEndModule", "freshman/bookshelfbtn",
+    "message/getpushedmessagelist", "dailyrecommend/recommendBook",
+    "bookshelf/getTopOperation"
+  ],
+
+  // getaccountpage — 删除营销模块 (BenefitButtonList = 福利中心/活动中心/我的阅历)
+  AccountPageDelKeys: ["BenefitButtonList"],
+
   CleanRules: {
     "video/adv/mainPage":       ["Data.DailyBenefitModule.TaskList"],
     "video/adv/mainPageDialog": ["Data"],
     "bookshelf/getHoverAdv":    ["Data.ItemList"],
-    "bookshelf/getTopOperation":["Data"],
     "user/getsimplediscover":   ["Data.Items[ShowName=游戏中心f]","Data.Items[ShowName=游戏中心]","Data.Items[ShowName=新活动中心]","Data.Items[ShowName=红包广场]"],
     "widget/daily/rec":         ["Data"],
     "reddot/getdot":            ["Data"]
   },
 
   DirectKillPaths: ["bookshelf/getad", "client/iosad"],
-
-  ClientConfigOverrides: {
-    "PangleEnable": "0", "DisableQidianBurryReport": "1", "DisableNewabInBI": "1",
-    "SplashScreenInterval": "0", "SplashScreenRoundCount": "0",
-    "BusinessSplashCoolDownTime": "99999", "PushDialogFrequency": "0",
-    "EnableMonitorLog": "0", "EnableBeaconFullBurry": "0",
-    "DailyRecommendGray": "0", "EnableSubscriptionAward": "0",
-    "ReloadExposureEnabled": "false", "QDABRegularReportTimeSpan": "999999",
-    "QDABReportMinThreshold": "999999", "RankBuryPoint": "0",
-    "CheckInPushSwitchReport": "0", "UserGrowthEnable": "0",
-    "IsReceiveFreeReading": "0", "WolfEye": 0
-  },
 
   AdWhitelist: ["ioscheckin", "reward", "video", "flzx", "costume", "buqian", "normaltask", "limitegg", "redpocket"],
 
@@ -68,8 +81,12 @@ const CONFIG = {
     const urlObj = new URL(url);
     const path = urlObj.pathname;
 
+    // KeLi 风格 — 直接拒绝 (reject-dict)
+    if (CONFIG.RejectPaths.some(p => path.includes(p))) {
+      handleReject();
+    }
     // C. 自动重放
-    if (path.endsWith("/video/adv/finishWatch") && method === "POST") {
+    else if (path.endsWith("/video/adv/finishWatch") && method === "POST") {
       await handleReplay($request);
     }
     // D. 客户端配置覆写 (精确匹配 getconf)
@@ -88,15 +105,19 @@ const CONFIG = {
     else if (path.includes("dailyrecommend")) {
       handleDailyRec($response);
     }
-    // H. 批量广告获取 (检查白名单)
+    // H. getaccountpage — 删除营销模块 (福利中心/活动中心/我的阅历)
+    else if (path.includes("getaccountpage")) {
+      handleAccountPage($response);
+    }
+    // I. 批量广告获取 (检查白名单)
     else if (path.includes("adv/getadvlistbatch")) {
       handleAdListBatch(url, $response);
     }
-    // I. 直接置空杀广告 (书架/iosad)
+    // J. 直接置空杀广告 (书架/iosad)
     else if (CONFIG.DirectKillPaths.some(p => path.includes(p))) {
       handleDirectAdKill(url, $response);
     }
-    // I. 页面净化
+    // K. 页面净化
     else if (matchCleanRule(path)) {
       handleClean(path, $response);
     }
@@ -151,28 +172,25 @@ function handleClientConfig(response) {
     const obj = safeJsonParse(response.body);
     if (!obj || !obj.Data) { $.done(); return; }
 
-    // 基础覆盖
+    // 基础广告覆盖
     for (const [k, v] of Object.entries(CONFIG.ClientConfigOverrides)) {
       obj.Data[k] = v;
     }
 
-    // app2smile 方案: 弹窗 / 青少年模式 / 悬浮图标 / 搜索用户
-    if (obj.Data.ActivityPopup) obj.Data.ActivityPopup = null;
+    // KeLi 风格: 精确删除 JSON key
+    CONFIG.DeleteKeys.forEach(k => {
+      if (obj.Data.hasOwnProperty(k)) delete obj.Data[k];
+    });
+
+    // app2smile 补充: 青少年模式 + 悬浮图标 + 搜索用户
     if (obj.Data.CloudSetting && obj.Data.CloudSetting.TeenShowFreq) obj.Data.CloudSetting.TeenShowFreq = "0";
-    if (obj.Data.ActivityIcon) {
-      obj.Data.ActivityIcon.StartTime = 0;
-      obj.Data.ActivityIcon.EndTime = 0;
-      delete obj.Data.ActivityIcon.Actionurl;
-      delete obj.Data.ActivityIcon.Icon;
-    }
     obj.Data.EnableSearchUser = "1";
 
-    // 删除 GDT 配置 + 广告位置配置
+    // 删除 GDT 配置 + 广告位置
     if (obj.Data.GDT) delete obj.Data.GDT;
     if (obj.Data.AdVideoPositionConfig) obj.Data.AdVideoPositionConfig = [];
-    if (obj.Data.AbtestUrls) delete obj.Data.AbtestUrls;
 
-    $.log("✨ 已覆盖客户端超级开关");
+    $.log("✨ 已覆盖客户端配置 (KeLi 风格)");
     $.done({ body: JSON.stringify(obj) });
   } catch (e) {
     $.log(`❌ 配置覆写失败: ${e}`);
@@ -336,6 +354,23 @@ function handleDailyRec(response) {
     }
     $.done({ body: JSON.stringify(obj) });
   } catch (e) { $.done(); }
+}
+
+function handleAccountPage(response) {
+  try {
+    const obj = safeJsonParse(response.body);
+    if (obj && obj.Data && CONFIG.AccountPageDelKeys) {
+      CONFIG.AccountPageDelKeys.forEach(k => {
+        if (obj.Data[k]) delete obj.Data[k];
+      });
+      $.log("✨ 已删除营销模块 (福利中心/活动中心/我的阅历)");
+    }
+    $.done({ body: JSON.stringify(obj) });
+  } catch (e) { $.done(); }
+}
+
+function handleReject() {
+  $.done({ status: 404 });
 }
 
 // 预编码的 1 秒 MP4 (H.264 320x240 黑屏, 655 bytes)

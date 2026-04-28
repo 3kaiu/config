@@ -16,8 +16,8 @@ http-response ^https?:\/\/adsmind\.gdtimg\.com\/.*\.mp4 script-path=https://raw.
 http-request ^https:\/\/h5\.if\.qidian\.com\/argus\/api\/v[12]\/video\/adv\/finishWatch script-path=https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js, requires-body=true, timeout=30, tag=自动重放
 http-request ^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/client\/getconf script-path=https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js, requires-body=false, timeout=10, tag=获取Token
 
-# 全局深度净化 (v3.3 — 融入 app2smile 方案)
-http-response ^https:\/\/(h5|magev6)\.if\.qidian\.com\/argus\/api\/(v[12]\/video\/adv\/mainPage|v[12]\/video\/adv\/mainPageDialog|v[12]\/adv\/getadvlistbatch|v[12]\/deeplink\/geturl|v[12]\/dailyrecommend\/getdailyrecommend|v1\/user\/getsimplediscover|v1\/bookshelf\/getHoverAdv|v1\/bookshelf\/getTopOperation|v1\/bookshelf\/getad|v1\/client\/getconf$|v1\/client\/iosad|v4\/client\/getsplashscreen|v1\/widget\/daily\/rec|v1\/reddot\/getdot) script-path=https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js, requires-body=true, timeout=10, tag=深度净化
+# 全局深度净化 (v3.5 — KeLi 融合方案)
+http-response ^https:\/\/(h5|magev6)\.if\.qidian\.com\/argus\/api\/(v[12]\/video\/adv\/mainPage|v[12]\/video\/adv\/mainPageDialog|v[12]\/adv\/getadvlistbatch|v[12]\/deeplink\/geturl|v[12]\/dailyrecommend|v[12]\/checkin\/simpleinfo|v[12]\/checkin\/lottery|v1\/user\/getsimplediscover|v1\/bookshelf\/getHoverAdv|v1\/bookshelf\/getTopOperation|v1\/bookshelf\/getad|v1\/client\/getconf$|v1\/client\/iosad|v1\/push\/getdialog|v1\/booksearch\/hotWords|v1\/maintain\/playstrip|v1\/young\/getconf|v1\/freshman\/bookshelfbtn|v1\/message\/getpushedmessagelist|v1\/followsubscribe\/showChapterEndModule|v3\/user\/getaccountpage|v4\/client\/getsplashscreen|v1\/widget\/daily\/rec|v1\/reddot\/getdot) script-path=https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js, requires-body=true, timeout=10, tag=深度净化
 
 # 自动签到定时任务
 cron "0 9 * * *" script-path=https://raw.githubusercontent.com/3kaiu/config/main/Scripts/Qidian.js, tag=起点每日静默签到, timeout=30
@@ -54,8 +54,11 @@ DOMAIN, fockrt.yuewen.com, REJECT
 DOMAIN, aegis.cdn-go.cn, REJECT
 DOMAIN, ali-stats.jpush.cn, REJECT
 
+# -- 阅文 AB 实验平台 (KeLi) --
+DOMAIN, ywab.reader.qq.com, REJECT
+
 # -- 其他 --
 DOMAIN-KEYWORD, qreport, REJECT
 
 [MitM]
-hostname = h5.if.qidian.com, magev6.if.qidian.com, druid.if.qidian.com, ii.gdt.qq.com, api-access.pangolin-sdk-toutiao*.com
+hostname = h5.if.qidian.com, magev6.if.qidian.com, druid.if.qidian.com, ii.gdt.qq.com, api-access.pangolin-sdk-toutiao*.com, ywab.reader.qq.com
