@@ -349,9 +349,9 @@ function handleClean(path, response) {
 }
 
 // ==========================================
-// 📦 底层运行环境 (Environment Wrapper)
+// 🔧 跨平台轻量环境包裹器 (Loon & QX 通用)
 // ==========================================
-function Env(n){this.name=n;this.startTime=Date.now();this.log=(...m)=>console.log(`[${this.name}] [${new Date().toLocaleTimeString()}] ${m.join(" ")}`);this.wait=(ms)=>new Promise(r=>setTimeout(r,ms));this.done=(v={})=>$done(v);this.get=(k)=>{let v=$prefs.valueForKey(k);try{return JSON.parse(v)}catch(e){return v}};this.set=(v,k)=>{let val=typeof v==="object"?JSON.stringify(v):v;$prefs.setValueForKey(val,k)};this.fetch=async(o)=>{try{return await $task.fetch(o)}catch(e){return null}};this.clean=(obj,ps)=>{if(!obj||!ps)return obj;ps.forEach(p=>{let ks=p.split("."),c=obj;for(let i=0;i<ks.length-1;i++){let k=ks[i];if(k.includes("[")&&k.includes("]")){let[ak,f]=k.split(/[\[\]]/),[fk,fv]=f.split("=");if(c[ak]){c[ak]=c[ak].filter(item=>item[fk]!==fv);return}}c=c[k];if(!c)break}if(c)delete c[ks[ks.length-1]]});return obj};this.notify=(t,s,b)=>$notify(t,s,b)}
+function Env(n){this.name=n;this.isL=typeof $loon!=="undefined";this.isQ=typeof $task!=="undefined";this.log=(...a)=>console.log(`[${this.name}] `+a.join(" "));this.wait=(m)=>new Promise(r=>setTimeout(r,m));this.done=(o={})=>$done(o);this.get=(k)=>{let v=this.isL?$persistentStore.read(k):$prefs.valueForKey(k);try{return JSON.parse(v)}catch(e){return v}};this.set=(v,k)=>{let s=typeof v==="object"?JSON.stringify(v):v;this.isL?$persistentStore.write(s,k):$prefs.setValueForKey(s,k)};this.fetch=async(o)=>new Promise((r,e)=>{if(this.isQ)$task.fetch(o).then(r,e);else{let m=(o.method||"GET").toLowerCase();$httpClient[m](o,(err,res,b)=>{if(err)e(err);else{res.body=b;res.statusCode=res.status?res.status:200;r(res)}})}});this.clean=(obj,ps)=>{if(!obj||!ps)return obj;ps.forEach(p=>{let ks=p.split("."),c=obj;for(let i=0;i<ks.length-1;i++){let k=ks[i];if(k.includes("[")&&k.includes("]")){let[ak,f]=k.split(/[\[\]]/),[fk,fv]=f.split("=");if(c[ak]){c[ak]=c[ak].filter(item=>item[fk]!==fv);return}}c=c[k];if(!c)break}if(c)delete c[ks[ks.length-1]]});return obj};this.notify=(t,s,b)=>this.isL?$notification.post(t,s,b):$notify(t,s,b)}
 
 function safeJsonParse(body) {
   try {
