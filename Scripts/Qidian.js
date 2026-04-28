@@ -247,11 +247,32 @@ async function handleCron() {
     $.done();
     return;
   }
+
+  // 先查询签到状态，避免重复签到
+  const infoRes = await $.fetch({
+    url: "https://magev6.if.qidian.com/argus/api/v2/checkin/simpleinfo",
+    method: "GET",
+    headers
+  });
+
+  if (infoRes && infoRes.body) {
+    try {
+      const info = JSON.parse(infoRes.body);
+      if (info.Result === 0 && info.Data && info.Data.IsChecked) {
+        $.log("✅ 今日已签到，跳过");
+        $.done();
+        return;
+      }
+    } catch (e) { /* 解析失败继续尝试签到 */ }
+  }
+
+  // 执行签到
   const res = await $.fetch({
     url: "https://magev6.if.qidian.com/argus/api/v2/checkin/checkin",
     method: "GET",
     headers
   });
+
   if (res && res.body) {
     try {
       const obj = JSON.parse(res.body);
@@ -259,7 +280,7 @@ async function handleCron() {
         $.notify("起点助手", "签到成功", obj.Message || "奖励已入账");
         $.log(`✅ 签到成功`);
       } else {
-        $.notify("起点助手", "签到异常", obj.Message || "");
+        $.log(`⚠️ 签到返回: ${obj.Message || obj.Result}`);
       }
     } catch (e) {
       $.log(`❌ 签到解析失败: ${e}`);
