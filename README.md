@@ -14,7 +14,7 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/Loon.lcf
 https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 ```
 
-## Loon 配置 (v3.6)
+## Loon 配置 (v3.7)
 
 ### 三路分流
 
@@ -62,7 +62,7 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 - `interface-mode=Performance` — WiFi + 蜂窝双路聚合
 - `sni-sniffing=true` — 无 MITM TLS 识别
 - `disconnect-on-policy-change=false` — 切换不断连
-- DoH 四路并发 (1.12.12.12 / 223.5.5.5 / doh.pub / dns.google)
+- DoH 三路并发 (Google DNS + Cloudflare + DNSPod)
 
 ## 注意事项
 
