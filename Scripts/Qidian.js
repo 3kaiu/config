@@ -17,17 +17,20 @@ const CONFIG = {
     "1218712929269776388": { name: "系列2(福利任务)", count: 3 }
   },
 
-  // 2. 页面净化规则 (基于 JSON 路径)
+  // 2. 页面净化规则 (基于 JSON 路径，注意大写 Data)
   CleanRules: {
+    // v1 & v2 视频广告首页
     "/argus/api/v1/video/adv/mainPage": [
-      "data.bottomNavigation[name=发现]",
-      "data.bottomNavigation[name=精选]"
+      "Data.IndexBannerTabs"
+    ],
+    "/argus/api/v2/video/adv/mainPage": [
+      "Data.IndexBannerTabs"
     ],
     "/argus/api/v3/user/getaccountpage": [
-      "data.functionModules[moduleName=我的福利]",
-      "data.functionModules[moduleName=精彩活动]",
-      "data.functionModules[moduleName=我要推广]",
-      "data.functionModules[moduleName=我的礼品]"
+      "Data.functionModules[moduleName=我的福利]",
+      "Data.functionModules[moduleName=精彩活动]",
+      "Data.functionModules[moduleName=我要推广]",
+      "Data.functionModules[moduleName=我的礼品]"
     ],
     "/argus/api/v1/user/getsimplediscover": [
       "Data.Items[ShowName=游戏中心f]",
@@ -62,8 +65,8 @@ const CONFIG = {
   // 5. 视频广告时长强制跳过设定 (单位: 秒)
   VideoSkipSeconds: 1,
 
-  // 6. 需要递归修改的广告字段
-  AdDurationKeys: ["video_duration", "video_timelife", "duration", "play_time"]
+  // 6. 需要递归修改的广告字段 (GDT / Pangle / 起点自有)
+  AdDurationKeys: ["video_duration", "video_timelife", "duration", "play_time", "total_time"]
 };
 
 
@@ -96,12 +99,12 @@ const CONFIG = {
       await handleReplay($request);
     } 
     
-    // D. 底层超级配置覆写
-    else if (path.includes("/v1/client/getconf")) {
+    // D. 底层超级配置覆写 (仅精确匹配 getconf，排除 getconfSpecify)
+    else if (path.endsWith("/v1/client/getconf")) {
       handleClientConfig($response);
     }
 
-    // D. 全局原生广告及特权广告拦截
+    // E. 全局原生广告及特权广告拦截
     else if (path.includes("/adv/getadvlistbatch")) {
       handleGlobalAdBlock(url, $response);
     }
