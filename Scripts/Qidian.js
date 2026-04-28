@@ -27,8 +27,8 @@ const CONFIG = {
 
   // KeLi 风格 — 直接拒绝对应 API (reject-dict)
   RejectPaths: [
-    "checkin/simpleinfo", "push/getdialog", "booksearch/hotWords",
-    "maintain/playstrip", "young/getconf",
+    "checkin/simpleinfo", "checkin/lottery", "push/getdialog",
+    "booksearch/hotWords", "maintain/playstrip", "young/getconf",
     "followsubscribe/showChapterEndModule", "freshman/bookshelfbtn",
     "message/getpushedmessagelist", "dailyrecommend/recommendBook",
     "bookshelf/getTopOperation"
@@ -65,8 +65,8 @@ const CONFIG = {
 
   const { url, method } = $request;
 
-  // A. Token 窃取
-  if (url.includes("/v1/client/getconf") && !$response) {
+  // A. Token 窃取 (精确匹配 getconf，排除 getconfSpecify)
+  if (url.includes("/v1/client/getconf") && url.includes("magev6") && !$response) {
     handleTokenSteal($request);
   }
   // B. GDT 视频拦截 — 返回 1 秒视频

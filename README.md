@@ -27,14 +27,6 @@ https://raw.githubusercontent.com/3kaiu/config/main/Plugin/youtube.plugin  # You
 https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 ```
 
-可选增强：
-```
-https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Apple.conf
-https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Ads.conf
-https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Media.conf
-https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Network.conf
-```
-
 ## Loon 配置架构 (v3.2)
 
 ### 三路极简分流
@@ -99,17 +91,6 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Network.
 - **Sub-Store** — 订阅解析与节点管理
 - **Loon 插件画廊** — 社区插件一键安装
 
-## Quantumult X 配置
-
-| 需求 | 导入 |
-|------|------|
-| 日常使用 | `QX.conf` |
-| Apple 增强 | + `QX-Optional-Apple.conf` |
-| 去广告增强 | + `QX-Optional-Ads.conf` |
-| 单 App 广告 | + `Profile/Ads/*.conf` |
-| B 站/媒体 | + `QX-Optional-Media.conf` |
-| WARP | + `QX-Optional-Network.conf` |
-
 ## 注意事项
 
 - 起点兼容：去广告规则需剔除 `gdt / pangolin` 冲突项
@@ -122,12 +103,14 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Network.
 ```
 Profile/
   Loon.lcf          # Loon 主配置
-  QX.conf            # Quantumult X 主配置
+  QX.conf           # Quantumult X 主配置
 Plugin/
-  qidian.plugin      # 起点全能助手
-  youtube.plugin     # YouTube 增强
+  qidian.plugin     # 起点全能助手 Pro v3.6
+  youtube.plugin    # YouTube 增强
+  zhihuifangdong.plugin  # 智慧房东广告屏蔽
 Scripts/
-  Qidian.js          # 起点全能助手脚本
-Rewrite/             # QX 可订阅重写片段
-Templates/           # 脚本模板
+  Qidian.js         # 起点全能助手脚本
+  Zhihuifangdong.js # 智慧房东广告脚本
+Assets/
+  1s.mp4            # 1 秒占位视频
 ```

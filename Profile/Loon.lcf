@@ -1,15 +1,15 @@
 # ═══════════════════════════════════════════════════════════
-#  Loon 配置 (Loon.lcf) — v3.4
-#  核心: .lcf 后缀 · 三路分流 · 双层视频替换 · DoH 四路
+#  Loon 配置 (Loon.lcf) — v3.6
+#  核心: .lcf 后缀 · 三路分流 · GDT 视频替换 · 审计修复
 #  引擎支持: iOS Loon 3.3.9+
 # ═══════════════════════════════════════════════════════════
 
 [General]
 ip-mode = dual
-interface-mode = Performace
+interface-mode = Performance
 dns-server = system
 doh-server = https://1.12.12.12/dns-query, https://223.5.5.5/dns-query, https://doh.pub/dns-query, https://dns.google/dns-query
-hijack-dns = *:53, 8.8.8.8, 8.8.4.4, 1.1.1.1, 114.114.114.114, 223.5.5.5, 223.6.6.6, 119.29.29.29, 180.76.76.76
+hijack-dns = *:53, 8.8.8.8, 8.8.4.4, 1.1.1.1, 114.114.114.114, 223.6.6.6, 180.76.76.76
 sni-sniffing = true
 disable-stun = true
 udp-fallback-mode = REJECT
@@ -22,9 +22,9 @@ ipasn-url = https://geodata.kelee.one/GeoLite2-ASN-P3TERX.mmdb
 resource-parser = https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store-parser.loon.min.js
 allow-wifi-access = true
 wifi-access-http-port = 7222
-wifi-access-socks5-port = 7221
-test-timeout = 2
-internet-test-url = http://wifi.vivo.com.cn/generate_204
+wifi-access-socks5-port = 6221
+test-timeout = 5
+internet-test-url = http://cp.cloudflare.com/generate_204
 proxy-test-url = http://cp.cloudflare.com/generate_204
 skip-proxy = 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, localhost, *.local
 bypass-tun = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.0.0.0/24, 192.0.2.0/24, 192.88.99.0/24, 192.168.0.0/16, 198.51.100.0/24, 203.0.113.0/24, 224.0.0.0/4, 255.255.255.255/32
@@ -41,8 +41,6 @@ real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.pin
 *.jd.com = server:119.29.29.29
 *.baidu.com = server:223.5.5.5
 *.bilibili.com = server:223.5.5.5
-*.apple.com = server:system
-*.icloud.com = server:system
 
 [Proxy]
 # 在此添加自定义节点
@@ -73,7 +71,11 @@ DOMAIN-SUFFIX, apple.com, DIRECT
 DOMAIN-SUFFIX, icloud.com, DIRECT
 DOMAIN-SUFFIX, wechat.com, DIRECT
 DOMAIN-SUFFIX, qpic.cn, DIRECT
-DOMAIN-KEYWORD, wechat, DIRECT
+DOMAIN-SUFFIX, weixin.qq.com, DIRECT
+DOMAIN-SUFFIX, wx.qq.com, DIRECT
+
+# GDT 联享家开屏去广告 (startup.lnplugin 需要 mi.gdt.qq.com 可访问)
+DOMAIN, mi.gdt.qq.com, DIRECT
 
 # 广告 SDK 白名单 (防去广告误杀奖励包 — GDT 素材 CDN 必须放行)
 DOMAIN, ii.gdt.qq.com, DIRECT
@@ -129,4 +131,5 @@ https://raw.githubusercontent.com/3kaiu/config/main/Plugin/zhihuifangdong.plugin
 
 [MitM]
 skip-server-cert-verify = true
-hostname = *.apple.com, *.icloud.com, *.googlevideo.com, *.youtube.com, youtubei.googleapis.com, *.ytimg.com, *.ggpht.com, h5.if.qidian.com, magev6.if.qidian.com, druid.if.qidian.com, ii.gdt.qq.com, api-access.pangolin-sdk-toutiao*.com
+# 核心 MITM (YouTube 域名 + Apple 系统; 起点/智慧房东/其他由插件注入)
+hostname = *.apple.com, *.icloud.com, *.googlevideo.com, *.youtube.com, *.ytimg.com, *.ggpht.com
