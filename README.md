@@ -35,23 +35,39 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Media.co
 https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Network.conf
 ```
 
-## Loon 配置架构 (v2.2)
+## Loon 配置架构 (v2.3)
 
 ### 规则分层
 
 ```
-本地规则 (Apple/微信直连 + 广告 SDK 白名单)
+本地 Rule (Apple/微信直连 + 广告 SDK 白名单)
     ↓
-可莉 REMOTE RULE (REGION_SPLITTER + LAN_SPLITTER — IP 级)
+可莉 REMOTE RULE × 6 (REGION + LAN + Telegram + Netflix + TikTok + AI)
     ↓
-Blackmatrix7 REMOTE RULE (域名级广告/隐私/国内外分流)
+Blackmatrix7 REMOTE RULE × 3 (广告 + 隐私 + 国内外域名)
     ↓
 可莉 PLUGIN × 7 (Block_HTTPDNS → BlockAdvertisers → Prevent_DNS_Leaks → Node_detection → BoxJs → Script-Hub → QuickSearch)
     ↓
-自维护 PLUGIN (起点 + YouTube)
+Blackmatrix7 PLUGIN × 2 (SafeRedirect 安全重定向 + Startup 开屏去广告)
+    ↓
+自维护 PLUGIN × 2 (起点 + YouTube)
     ↓
 FINAL → 兜底策略组
 ```
+
+### 完整覆盖率 (9 层全部就位)
+
+| 层 | 内容 |
+|---|------|
+| **节点** | 8 地区 Remote Filter 自动分组 + url-test tolerance=100 |
+| **规则 (Remote Rule)** | KeLi ×6 (IP级 + Telegram/Netflix/TikTok/AI) + Blackmatrix7 ×3 |
+| **插件 (Plugin)** | KeLi ×7 + Blackmatrix7 ×2 + 自维护 ×2 + Sub-Store + Gallery + 节点看板 = **14 个** |
+| **脚本 (Script)** | JD cron 签到 + Qidian.js (5 bug已修复) + YouTube 脚本拦截 |
+| **复写 (Rewrite)** | SafeRedirect.plugin — 60 条 HTTP→HTTPS 安全重定向 + 追踪参数清除 |
+| **DNS** | DoH×3 + DoH3×2 + hijack-dns 11 IP + Host 映射 12 大厂 |
+| **MITM** | Apple/起点/YouTube/GDT/穿山甲 + 插件 %APPEND% 追加 |
+| **数据持久化** | BoxJs.lpx + Sub-Store.lpx |
+| **其他 (General)** | 22 项参数 (sni-sniffing, disable-stun, disconnect-on-policy-change...) |
 
 ### 可莉生态集成
 
@@ -59,6 +75,10 @@ FINAL → 兜底策略组
 |------|------|------|
 | `REGION_SPLITTER.lsr` | Remote Rule | 国内 IP 自动分流到直连 |
 | `LAN_SPLITTER.lsr` | Remote Rule | 局域网 IP 自动分流 |
+| `Telegram.lsr` | Remote Rule | Telegram 精准分流 |
+| `Netflix.lsr` | Remote Rule | Netflix 精准分流 |
+| `TikTok.lsr` | Remote Rule | TikTok 精准分流 |
+| `AI.lsr` | Remote Rule | ChatGPT/Gemini/Claude AI 分流 |
 | `Block_HTTPDNS.lpx` | Plugin (pin) | 屏蔽 App 私建 HTTPDNS |
 | `BlockAdvertisers.lpx` | Plugin (pin) | 动态广告拦截增强 |
 | `Prevent_DNS_Leaks.lpx` | Plugin | 防止 DNS 泄露 |
@@ -68,6 +88,13 @@ FINAL → 兜底策略组
 | `QuickSearch.lpx` | Plugin | Spotlight/Safari 快捷搜索 |
 | `geodata.kelee.one` | GEOIP/ASN | 可莉 CDN 加速数据库 |
 | `Remote Filter` | 节点分组 | 按地区自动分类节点 |
+
+### 新增 Rewrite 层 (v2.3)
+
+| 资源 | 类型 | 功能 |
+|------|------|------|
+| `SafeRedirect.plugin` | Plugin (Rewrite) | 60 条 HTTP→HTTPS 安全重定向 + 去除追踪参数 |
+| `startup.lnplugin` | Plugin (Script) | 京东/B站/爱奇艺/美团/嘀嗒/多点 等 10+ App 开屏去广告 |
 
 ### DNS 泄露防御 (三层)
 
