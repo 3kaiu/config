@@ -1,8 +1,80 @@
-# Quantumult X 配置库
+# Quantumult X & Loon 配置库
 
-这个仓库只做一件事：给 Quantumult X 提供一套更稳、更轻的主配置，以及少量自维护脚本。
+这个仓库提供 Quantumult X 和 Loon 的主配置，以及少量自维护脚本和插件。
 
-## 选择建议
+## 平台选择
+
+| 平台 | 主配置 | 说明 |
+| --- | --- | --- |
+| Quantumult X | `QX.conf` | 基础分流、去广告、起点增强 |
+| Loon | `Loon.conf` | 极速代理、DNS 加速、深度去广告、应用增强 |
+
+## 快速导入
+
+### Loon
+
+```
+https://raw.githubusercontent.com/3kaiu/config/main/Profile/Loon.conf
+```
+
+插件：
+```
+https://raw.githubusercontent.com/3kaiu/config/main/Plugin/qidian.plugin   # 起点全能助手
+https://raw.githubusercontent.com/3kaiu/config/main/Plugin/youtube.plugin  # YouTube 增强
+```
+
+### Quantumult X
+
+```
+https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
+```
+
+可选增强：
+```
+https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Apple.conf
+https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Ads.conf
+https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Media.conf
+https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Network.conf
+```
+
+## Loon 配置特性
+
+### 代理极速
+- `ip-mode=dual` — 并发 A+AAAA DNS 查询
+- `interface-mode=Performace` — WiFi + 蜂窝双路聚合
+- `hijack-dns=*:53` — 拦截 App 私建 DNS，强制 FakeIP
+- `tolerance=100` — url-test 防抖，避免节点 ping 抖动频繁切换
+- DoH/DoH3 三路并发 DNS
+
+### 去广告
+- `domain-reject-mode=DNS` — DNS 阶段零延迟阻断
+- Blackmatrix7 五大规则库 + YouTube 分流
+- 起点插件 — 深度净化 + 广告 SDK 拦截 + 追踪屏蔽
+
+### 应用增强
+- 起点全能助手 — 自动重放、每日签到、页面净化
+- YouTube — 代理分流 + MITM 解密
+- 京东每日签到
+- Sub-Store 订阅管理器
+- Loon 插件画廊
+
+### MITM 覆盖
+Apple / 起点 / 广告 GDT&穿山甲 SDK / YouTube
+
+## 起点插件技术细节
+
+`Plugin/qidian.plugin` + `Scripts/Qidian.js` 实现：
+
+| 功能 | 实现方式 |
+| --- | --- |
+| GDT/穿山甲广告拦截 | http-response 脚本修改 video_duration → 1 |
+| 视频广告自动重放 | http-request 拦截 finishWatch 并发多包提交 |
+| 页面模块净化 | CleanRules 按 JSON 路径删除广告模块 |
+| 客户端配置覆写 | 篡改 getconf 响应关闭 Pangle/埋点/开屏广告 |
+| 追踪 SDK 屏蔽 | REJECT 规则阻断 QQ/火山/极光/埋点域名 |
+| 每日签到 | cron + 窃取 Token 静默完成 |
+
+## Quantumult X 选择建议
 
 | 需求 | 导入项 |
 | --- | --- |
@@ -13,97 +85,31 @@
 | B 站区域 / 双语字幕 | `QX.conf` + `QX-Optional-Media.conf` |
 | WARP / 链路接管 | `QX.conf` + `QX-Optional-Network.conf` |
 
-## 默认策略
-
-- 主配置优先性能和稳定性，不再默认叠加过多重写模块。
-- 去广告分两层：`filter` 先拦主机级请求，`rewrite` 再处理必须改写的响应。
-- 系统级增强、区域解锁、WARP 这类高介入功能默认按需开启，不放进基础盘。
-- `MITM` 只覆盖基础盘默认启用功能，避免无关域名长期解密。
-
-## 快速使用
-
-主配置：
-
-```text
-https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
-```
-
-可选增强：
-
-```text
-https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Apple.conf
-https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Ads.conf
-https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Media.conf
-https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX-Optional-Network.conf
-```
-
-单 App 广告配置：
-
-```text
-https://raw.githubusercontent.com/3kaiu/config/main/Profile/Ads/Weibo.conf
-https://raw.githubusercontent.com/3kaiu/config/main/Profile/Ads/Applet.conf
-https://raw.githubusercontent.com/3kaiu/config/main/Profile/Ads/Zhihu.conf
-https://raw.githubusercontent.com/3kaiu/config/main/Profile/Ads/Baidu.conf
-https://raw.githubusercontent.com/3kaiu/config/main/Profile/Ads/Ximalaya.conf
-https://raw.githubusercontent.com/3kaiu/config/main/Profile/Ads/Web.conf
-```
-
-起点模块：
-
-```text
-https://raw.githubusercontent.com/3kaiu/config/main/Rewrite/qidian.snippet
-```
-
-启用脚本相关功能前，先在 Quantumult X 中开启并信任 `MITM`。
-
-## 当前保留的重点能力
-
-- 基础分流与测速
-- 常规去广告
-- 起点自动化与页面净化
-- 按需开启的 Apple / Bilibili / WARP 扩展
-
 ## 去广告维护方式
 
-- 基础盘使用自维护的精选去广告组合，不直接把外部大包当默认真相。
-- 专项去广告总入口在 `QX-Optional-Ads.conf`，但它只聚合本仓库内的单 App 配置。
-- 单 App 粒度配置放在 `Profile/Ads/`，用法更接近可莉插件生态。
-- 选材会参考可莉插件生态的覆盖面，以及墨鱼、blackmatrix7 的规则仓库。
-- 参考来源记录在 `Rewrite/Ads/SOURCES.md`。
-- 已失效或只适配少数目标的小众规则，不再混进通用广告包。
+- 基础盘使用自维护的精选去广告组合
+- Loon 端依赖 Blackmatrix7 规则库 + 自维护脚本
+- QX 专项去广告入口在 `QX-Optional-Ads.conf`，聚合本仓库内单 App 配置
+- 选材参考可莉插件生态、墨鱼、blackmatrix7 规则仓库
+- 参考来源记录在 `Rewrite/Ads/SOURCES.md`
 
-## 配置分级
+## 已知注意事项
 
-- `QX.conf`：基础盘，默认长期使用
-- `QX-Optional-Apple.conf`：Apple 系统级增强
-- `QX-Optional-Ads.conf`：专项去广告增强
-- `Profile/Ads/*.conf`：单 App 粒度广告配置
-- `QX-Optional-Media.conf`：媒体区域与字幕增强
-- `QX-Optional-Network.conf`：链路级接管
-
-## 已知冲突
-
-- 基础盘里的 `AllInOne` 已做“起点兼容裁剪”，会通过资源解析器剔除 `gdt / pangolin` 冲突规则。
-- 如果你手动额外导入原版 `AllInOne`，`起点全能助手` 仍可能失效，因为奖励视频脚本拿不到原始响应体。
-
-## 导入建议
-
-- 先导入 `QX.conf`
-- 再根据需要单独添加一个或多个 Optional 文件
-- 不建议一次性把全部 Optional 文件一起叠加
-- 优先按“单一目标”增加模块，不要把 Optional 当成新的基础盘
-
-## 不建议直接引入的内容
-
-- Loon 插件原格式
-- 多套大而全去广告模块同时全开
-- 未区分主功能和可选功能的懒人全家桶
-
-原因很简单：这套仓库以 QX 为主，优先控制匹配成本、MITM 范围和规则冲突。
+- 起点兼容：基础去广告规则需剔除 `gdt / pangolin` 冲突项，否则奖励视频脚本拿不到原始响应体
+- Loon 必须开启并信任 MITM 才能启用脚本和插件
+- Loon 配置中的订阅链接为占位符，需自行填入
 
 ## 目录
 
-- `Profile/`：主配置
-- `Rewrite/`：QX 可订阅重写片段
-- `Scripts/`：脚本
-- `Templates/`：脚本模板
+```
+Profile/
+  Loon.conf          # Loon 主配置
+  QX.conf            # Quantumult X 主配置
+Plugin/
+  qidian.plugin      # 起点全能助手 (Loon)
+  youtube.plugin     # YouTube 增强 (Loon)
+Scripts/
+  Qidian.js          # 起点全能助手脚本
+Rewrite/             # QX 可订阅重写片段
+Templates/           # 脚本模板
+```
