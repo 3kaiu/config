@@ -182,5 +182,7 @@ https://raw.githubusercontent.com/3kaiu/config/main/Plugin/zhihuifangdong.plugin
 # 可在此添加自定义 Rewrite 规则
 [MitM]
 skip-server-cert-verify = true
-# 核心 MITM (YouTube 域名 + Apple 系统; 起点/智慧房东/其他由插件注入)
-hostname = *.apple.com, *.icloud.com, *.googlevideo.com, *.youtube.com, *.ytimg.com, *.ggpht.com
+# 核心 MITM — 只保留 iRingo 需要的特定苹果域名 + YouTube
+# ⚠️ 不能写 *.apple.com / *.icloud.com — 苹果音乐/App Store/iCloud 有证书 pinning 会断连
+# iRingo 插件会通过 %APPEND% 自动注入它需要的域名 (weather-*.apple.com 等)
+hostname = *.googlevideo.com, *.youtube.com, *.ytimg.com, *.ggpht.com
