@@ -7,7 +7,7 @@
 [General]
 ip-mode = dual
 interface-mode = Performance
-dns-server = system
+dns-server = 223.5.5.5, 119.29.29.29
 doh-server = https://doh.pub/dns-query, https://dns.alidns.com/dns-query
 doq-server = quic://dns.alidns.com:853, quic://dns.adguard-dns.com:853
 hijack-dns = *:53, 8.8.8.8, 8.8.4.4, 1.1.1.1, 114.114.114.114, 223.6.6.6, 180.76.76.76
@@ -29,7 +29,7 @@ internet-test-url = http://cp.cloudflare.com/generate_204
 proxy-test-url = http://cp.cloudflare.com/generate_204
 skip-proxy = 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, localhost, *.local
 bypass-tun = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32
-real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.pingan.com.cn, *.cmbchina.com, *.local, *.lan, *.home.arpa
+real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.pingan.com.cn, *.cmbchina.com, *.local, *.lan, *.home.arpa, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, *.msftconnecttest.com, *.msftncsi.com, *.battlenet.com.cn
 
 [Host]
 *.taobao.com = server:223.5.5.5
@@ -136,13 +136,14 @@ FINAL, Final
 
 [Remote Rule]
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 三路分流: 🇨🇳国内直连 | 🌍国外代理 | 🚫去广告
+# 顺序: 🚫去广告 → 🇨🇳国内直连 → 🌍国外代理
+# 广告规则必须在 China.list 之前，否则 *.qq.com DIRECT 会覆盖追踪域
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://kelee.one/Tool/Loon/Lsr/REGION_SPLITTER.lsr, policy=DIRECT, tag=🇨🇳 国内IP, enabled=true
+https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Advertising/Advertising.list, policy=REJECT, tag=🚫 广告域名, enabled=true
 https://kelee.one/Tool/Loon/Lsr/LAN_SPLITTER.lsr, policy=DIRECT, tag=🏠 局域网, enabled=true
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/China/China.list, policy=DIRECT, tag=🇨🇳 国内域名, enabled=true
+https://kelee.one/Tool/Loon/Lsr/REGION_SPLITTER.lsr, policy=DIRECT, tag=🇨🇳 国内IP, enabled=true
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Global/Global.list, policy=Proxy, tag=🌍 国际域名, enabled=true
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Advertising/Advertising.list, policy=REJECT, tag=🚫 广告域名, enabled=true
 
 [Remote Plugin]
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -180,17 +181,17 @@ https://raw.githubusercontent.com/3kaiu/config/main/Plugin/zhihuifangdong.plugin
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/ai.plugin, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Apple 增强 (iRingo)
+# Apple 增强 (iRingo) — kelee.one 分发，GitHub 原始链接已 404
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://raw.githubusercontent.com/VirgilClyne/iRingo/main/plugin/Maps.plugin, enabled=true
-https://raw.githubusercontent.com/VirgilClyne/iRingo/main/plugin/Location.plugin, enabled=true
-https://raw.githubusercontent.com/VirgilClyne/iRingo/main/plugin/WeatherKit.plugin, enabled=true
-https://raw.githubusercontent.com/VirgilClyne/iRingo/main/plugin/Weather.plugin, enabled=true
+https://kelee.one/Tool/Loon/Plugin/iRingo_Maps.plugin, enabled=true
+https://kelee.one/Tool/Loon/Plugin/iRingo_Location.plugin, enabled=true
+https://kelee.one/Tool/Loon/Plugin/iRingo_WeatherKit.plugin, enabled=true
+https://kelee.one/Tool/Loon/Plugin/iRingo_Weather.plugin, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 媒体增强
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://raw.githubusercontent.com/DualSubs/Universal/main/modules/DualSubs.Universal.plugin, enabled=true
+https://kelee.one/Tool/Loon/Plugin/DualSubs_Universal.plugin, enabled=true
 
 [MitM]
 skip-server-cert-verify = true
