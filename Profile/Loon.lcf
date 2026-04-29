@@ -181,17 +181,17 @@ https://raw.githubusercontent.com/3kaiu/config/main/Plugin/zhihuifangdong.plugin
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/ai.plugin, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Apple 增强 (iRingo) — kelee.one 分发，GitHub 原始链接已 404
+# Apple 增强 (iRingo/NSRingo 源头仓库)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://kelee.one/Tool/Loon/Plugin/iRingo_Maps.plugin, enabled=true
-https://kelee.one/Tool/Loon/Plugin/iRingo_Location.plugin, enabled=true
-https://kelee.one/Tool/Loon/Plugin/iRingo_WeatherKit.plugin, enabled=true
-https://kelee.one/Tool/Loon/Plugin/iRingo_Weather.plugin, enabled=true
+https://raw.githubusercontent.com/NSRingo/Maps/main/modules/iRingo.Maps.Workers.plugin, enabled=true
+https://github.com/NSRingo/LocationServices/releases/download/v1.0.1/iRingo.LocationService.plugin, enabled=true
+https://raw.githubusercontent.com/NSRingo/WeatherKit/main/modules/iRingo.WeatherKit.Workers.plugin, enabled=true
+https://raw.githubusercontent.com/NSRingo/Weather/main/modules/Weather.plugin, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 媒体增强
+# 媒体增强 (DualSubs 源头仓库)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://kelee.one/Tool/Loon/Plugin/DualSubs_Universal.plugin, enabled=true
+https://github.com/DualSubs/Universal/releases/download/v1.7.5/DualSubs.Universal.plugin, enabled=true
 
 [MitM]
 skip-server-cert-verify = true
