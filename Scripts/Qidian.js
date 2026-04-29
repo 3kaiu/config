@@ -97,6 +97,16 @@ const CONFIG = {
 };
 
 // ==========================================
+// CleanRules — 必须在主入口 IIFE 之前声明
+// const 没有变量提升，放在后面会触发 TDZ 报错
+// ==========================================
+const CLEAN_RULES = {
+  "video/adv/mainPageDialog":    ["Data"],
+  "reddot/getdot":               ["Data"],
+  "checkin/checkinexchangepage": ["Data.Goods"]
+};
+
+// ==========================================
 // 🚀 主入口
 // ==========================================
 !(async () => {
@@ -474,15 +484,6 @@ function handleDirectAdKill(url, response) {
     $.done({ body: JSON.stringify(obj) });
   } catch (e) { $.done(); }
 }
-
-// ==========================================
-// CleanRules — 剩余端点的精细净化
-// ==========================================
-const CLEAN_RULES = {
-  "video/adv/mainPageDialog": ["Data"],
-  "reddot/getdot":            ["Data"],
-  "checkin/checkinexchangepage": ["Data.Goods"]
-};
 
 function matchCleanRule(path) {
   return Object.keys(CLEAN_RULES).some(k => path.includes(k));
