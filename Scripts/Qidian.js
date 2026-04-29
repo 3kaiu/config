@@ -255,22 +255,19 @@ function handleClientConfig(response) {
 function handleAdSkip(response) {
   try {
     const s = CONFIG.VideoSkipSeconds;
-    const ONE_SEC_VIDEO = "https://raw.githubusercontent.com/3kaiu/config/main/Assets/1s.mp4";
     const obj = safeJsonParse(response.body);
 
     if (obj) {
-      // 替换所有视频 URL 为 1 秒占位视频
-      replaceVideoUrls(obj, ONE_SEC_VIDEO);
-      // 递归修改所有时长字段
+      // 只 patch 时长字段让 SDK 认为广告 1 秒就结束
+      // 不替换视频 URL — adsmind.gdtimg.com 的 .mp4 下载由 handleVideoReplace 直接拦截
       patchDurationFields(obj, CONFIG.AdDurationKeys, s);
       $.done({ body: JSON.stringify(obj) });
       return;
     }
 
-    // 非 JSON 回退：正则替换
+    // 非 JSON 回退：正则压缩时长字段
     let body = String(response.body || "");
     body = body
-      .replace(/"video":\s*"https?:\/\/[^"]+\.mp4[^"]*"/g, `"video":"${ONE_SEC_VIDEO}"`)
       .replace(/"video_duration":\s*\d+/g, `"video_duration":${s}`)
       .replace(/"video_timelife":\s*\d+/g, `"video_timelife":${s}`)
       .replace(/"duration":\s*\d+/g, `"duration":${s}`)
@@ -553,21 +550,6 @@ function patchDurationFields(value, keys, nextValue) {
       }
     }
     patchDurationFields(item, keys, nextValue);
-  }
-}
-
-function replaceVideoUrls(obj, newUrl) {
-  if (!obj || typeof obj !== "object") return;
-  if (Array.isArray(obj)) {
-    obj.forEach(item => replaceVideoUrls(item, newUrl));
-    return;
-  }
-  for (const [key, val] of Object.entries(obj)) {
-    if (key === "video" && typeof val === "string" && val.includes(".mp4")) {
-      obj[key] = newUrl;
-      continue;
-    }
-    replaceVideoUrls(val, newUrl);
   }
 }
 
