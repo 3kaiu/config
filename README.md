@@ -14,15 +14,22 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/Loon.lcf
 https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 ```
 
-## Loon 配置 (v3.9)
+## Loon 配置 (v4.0)
 
 ### 去广告架构 (双层互补)
 
 ```
-Rewite 层 (可莉): Remove_ads_by_keli + QiDian_remove_ads + YouTube_remove_ads
+Rewrite 层 (可莉): Remove_ads_by_keli + QiDian_remove_ads + YouTube_remove_ads
                     ↓ json-replace / json-del / reject-dict
-Script 层 (自维护): qidian.plugin (GDT视频替换 + finishWatch重放 + cron签到)
+Script 层 (自维护): qidian.plugin v4.0 (抓包驱动深度净化)
                     ↓ http-response / http-request
+                    · GDT/穿山甲视频替换 (1s占位MP4)
+                    · finishWatch 自动重放 (9x激励/3x福利)
+                    · getconf 全量广告覆写 + 12 个 DeleteKey
+                    · getsimplediscover KeyName 精确去杂
+                    · popup/batchget · ploy/getactivitylist · pullSocialPush 等新端点
+                    · 29 个追踪域 REJECT (noahqd/upushv6/ataru/ywab/galileo 等)
+                    · cron 9:00 AM 静默签到
 ```
 
 ### 插件 (18 个)
@@ -58,7 +65,7 @@ Profile/
   Loon.lcf                 # Loon 主配置
   QX.conf                  # Quantumult X 主配置
 Plugin/
-  qidian.plugin     # 起点全能助手 Pro v3.9
+  qidian.plugin     # 起点全能助手 Pro v4.0
   youtube.plugin           # YouTube 增强
   zhihuifangdong.plugin    # 智慧房东广告屏蔽
 Scripts/

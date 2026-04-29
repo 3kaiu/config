@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════
-#  Loon 配置 (Loon.lcf) — v3.10
+#  Loon 配置 (Loon.lcf) — v4.0
 #  核心: .lcf 后缀 · 三路分流 · 双层去广告 · 日志静默
 #  引擎支持: iOS Loon 3.3.9+
 # ═══════════════════════════════════════════════════════════
@@ -85,8 +85,34 @@ DOMAIN-SUFFIX, pangolin-sdk-toutiao.com, DIRECT
 DOMAIN-SUFFIX, pangolin-sdk-toutiao1.com, DIRECT
 DOMAIN-SUFFIX, pangle.io, DIRECT
 
-# 起点追踪域 (本地 REJECT 确保不被 China.list 的 *.qq.com DIRECT 覆盖)
+# 起点/阅文追踪域 — 本地 REJECT 确保优先于 China.list 的 *.qq.com/*.yuewen.com DIRECT
+# v4.0 补全抓包发现的全量追踪域名
 DOMAIN, path.book.qq.com, REJECT
+DOMAIN, rmonitor.qq.com, REJECT
+DOMAIN, unitelogreport.reader.qq.com, REJECT
+DOMAIN, sdkreport.e.qq.com, REJECT
+DOMAIN, publiclog.zhiyan.tencent-cloud.net, REJECT
+DOMAIN, zhiyan.monitor.tencent-cloud.net, REJECT
+DOMAIN, galileotelemetry.tencent.com, REJECT
+DOMAIN, tangram.e.qq.com, REJECT
+DOMAIN, gatherer.m.qq.com, REJECT
+DOMAIN, dl.tiku.qq.com, REJECT
+DOMAIN, apmplus.volces.com, REJECT
+DOMAIN, mssdk.volces.com, REJECT
+DOMAIN, tobapplog.ctobsnssdk.com, REJECT
+DOMAIN, hd.ctobsnssdk.com, REJECT
+DOMAIN, ali-stats.jpush.cn, REJECT
+DOMAIN, aegis.cdn-go.cn, REJECT
+DOMAIN, connect.yuewen.com, REJECT
+DOMAIN, fockrt.yuewen.com, REJECT
+DOMAIN, noahqd.yuewen.com, REJECT
+DOMAIN, upushv6.qidian.com, REJECT
+DOMAIN, ywab.reader.qq.com, REJECT
+DOMAIN, ataru.qidian.com, REJECT
+DOMAIN-KEYWORD, pglstatp-toutiao, REJECT
+DOMAIN-KEYWORD, zijieapi, REJECT
+DOMAIN-KEYWORD, bytescm, REJECT
+DOMAIN-KEYWORD, qreport, REJECT
 
 FINAL, Final
 

@@ -1,7 +1,14 @@
 /**
- * 📚 起点全能助手 v3.9 — KeLi 全清方案 + GDT 双层视频替换
- * 融合 KeLi Loon Rewrite 全规则 + app2smile + 自研视频 1s 替换
+ * 📚 起点全能助手 v4.0 — 抓包驱动深度净化
+ * 融合 KeLi Loon Rewrite + app2smile + 自研视频 1s 替换 + 多端点全模块清理
  * 作者：3kaiu
+ *
+ * v4.0 更新 (基于 2026-04 抓包审计):
+ *  - 扩展 RejectPaths: popup/batchget, ploy/getactivitylist, pullSocialPush 等
+ *  - 扩展 DeleteKeys: BookShelfBottomIcons, ClientLocalNotify2, PushDialogScenes, RewardSatisfyDialog 等
+ *  - mainPage 增加 8 个营销模块清理 (BaizeModule, MoreRewardTab, PrivilegedTaskModule 等)
+ *  - 发现页补全 "新书投资" KeyName 删除
+ *  - getsimplediscover 切换为 KeyName 精确匹配 (避免运营改名失效)
  */
 const $ = new Env("起点助手");
 
@@ -19,41 +26,83 @@ const CONFIG = {
     "EnableMonitorLog": "0", "EnableBeaconFullBurry": "0",
     "ReloadExposureEnabled": "false", "QDABRegularReportTimeSpan": "999999",
     "QDABReportMinThreshold": "999999", "RankBuryPoint": "0",
-    "CheckInPushSwitchReport": "0", "WolfEye": 0
+    "CheckInPushSwitchReport": "0", "WolfEye": 0,
+    // v4.0 补强 — 关闭剩余引导/曝光开关
+    "MainTabActivityRunning": 0, "DailyReadRecReasonSwitch": 0,
+    "DailyRecommendGray": 0, "EnableShareChapterPloy": 0,
+    "EnableChapterAdvanceGuide": 0, "AddBookShelfNoticeFrequency": "999999",
+    "BookShelfPushNoticeFrequency": "999999", "UGCPushNoticeFrequency": "999999",
+    "NotificationPageBackPushNoticeFrequency": "999999",
+    "ActivityPageBackPushNoticeFrequency": "999999", "InAppPushLimitMinutes": "999999",
+    "PushNoticeFrequency": "-1", "AegisSignOn": 0, "EnableFockRetryStrategy": 0
   },
 
-  // KeLi 风格 — getconf JSON key 精确删除
-  DeleteKeys: ["ActivityPageBackPushNoticeFrequency", "ActivityIcon", "ActivityPopup", "LuckBag"],
+  // KeLi 风格 — getconf JSON key 精确删除 (移除整段，避免空对象残留)
+  DeleteKeys: [
+    "ActivityIcon", "ActivityPopup", "LuckBag",
+    // v4.0 新增 — 抓包发现的活动/书架底栏推广模块
+    "BookShelfBottomIcons", "ClassicBookInfo", "ClientLocalNotify2",
+    "PushDialogScenes", "RewardSatisfyDialog", "FansClubPropInfo",
+    "AdVideoPositionConfig"
+  ],
 
   // KeLi 风格 — 直接拒绝对应 API (reject-dict)
   RejectPaths: [
     "checkin/simpleinfo", "checkin/lottery", "push/getdialog",
     "booksearch/hotWords", "maintain/playstrip", "young/getconf",
     "followsubscribe/showChapterEndModule", "freshman/bookshelfbtn",
+    "freshman/freshmanGuidePopup",
     "message/getpushedmessagelist", "dailyrecommend/recommendBook",
-    "bookshelf/getTopOperation"
+    "bookshelf/getTopOperation",
+    // v4.0 新增 — 抓包验证的纯广告/营销端点
+    "popup/batchget", "ploy/getactivitylist",
+    "message/pullOperationPush", "message/pullSocialPush",
+    "bookshelf/getHighLevelBookReadInfo", "bookshelf/refreshInfo",
+    "video/adv/reportDialog", "interaction/getclassicbookinfo"
   ],
 
   // getaccountpage — 删除营销模块 (BenefitButtonList = 福利中心/活动中心/我的阅历)
   AccountPageDelKeys: ["BenefitButtonList"],
 
   CleanRules: {
-    "video/adv/mainPage":       ["Data.DailyBenefitModule.TaskList"],
+    // v4.0 — 福利中心顶层模块全清, 仅留奖励视频任务能跑的最小骨架
+    "video/adv/mainPage": [
+      "Data.DailyBenefitModule.TaskList",
+      "Data.DailyBenefitModule.RotateText",
+      "Data.BaizeModule",
+      "Data.IndexBannerTabs",
+      "Data.MemberExclusiveTaskModule",
+      "Data.MoreRewardTab",
+      "Data.PrivilegedTaskModule",
+      "Data.RedeemGifts",
+      "Data.ScoreDrawModule",
+      "Data.SurpriseBenefit",
+      "Data.LastRewardItems",
+      "Data.TaskShowData"
+    ],
     "video/adv/mainPageDialog": ["Data"],
     "bookshelf/getHoverAdv":    ["Data.ItemList"],
+    // v4.0 — KeyName 精确匹配, 不依赖中文显示名 (运营改名/加 emoji 不会失效)
     "user/getsimplediscover":   [
-      "Data.Items[ShowName=游戏中心f]","Data.Items[ShowName=游戏中心]",
-      "Data.Items[ShowName=新活动中心]","Data.Items[ShowName=红包广场]",
-      "Data.Items[ShowName=周边商城]","Data.Items[ShowName=卡牌广场]",
-      "Data.Items[ShowName=热门角色]","Data.Items[ShowName=话题广场]",
-      "Data.Items[ShowName=阅评]"
+      "Data.Items[KeyName=NEW_YOUXIZHONGXIN]",        // 游戏中心
+      "Data.Items[KeyName=NEW_XINHUODONGZHONGXIN]",   // 新活动中心
+      "Data.Items[KeyName=NEW_HONGBAOGUANGCHANG]",    // 红包广场
+      "Data.Items[KeyName=NEW_ZHOUBIANSHANGCHENG]",   // 周边商城
+      "Data.Items[KeyName=NEW_KAPAIGUANGCHANG]",      // 卡牌广场
+      "Data.Items[KeyName=NEW_REMENJIAOSE]",          // 热门角色
+      "Data.Items[KeyName=NEW_HUATIGUANGCHANG]",      // 话题广场
+      "Data.Items[KeyName=NEW_YUEPING]",              // 阅评
+      "Data.Items[KeyName=NEW_XINSHUTOUZI]"           // 新书投资 (v4.0 新增)
     ],
     "widget/daily/rec":         ["Data"],
-    "reddot/getdot":            ["Data"]
+    "reddot/getdot":            ["Data"],
+    // v4.0 — 周历兑换页清空商品避免引导消费
+    "checkin/checkinexchangepage": ["Data.Goods"]
   },
 
   DirectKillPaths: ["bookshelf/getad", "client/iosad"],
 
+  // 广告白名单 — 命中关键字时跳过 ad/getad 类拦截 (确保福利视频任务奖励可正常下发)
   AdWhitelist: ["ioscheckin", "reward", "video", "flzx", "costume", "buqian", "normaltask", "limitegg", "redpocket"],
 
   VideoSkipSeconds: 1,
@@ -192,9 +241,8 @@ function handleClientConfig(response) {
     if (obj.Data.CloudSetting && obj.Data.CloudSetting.TeenShowFreq) obj.Data.CloudSetting.TeenShowFreq = "0";
     obj.Data.EnableSearchUser = "1";
 
-    // 删除 GDT 配置 + 广告位置
+    // 删除 GDT 配置 (AdVideoPositionConfig 已在 DeleteKeys 中处理)
     if (obj.Data.GDT) delete obj.Data.GDT;
-    if (obj.Data.AdVideoPositionConfig) obj.Data.AdVideoPositionConfig = [];
 
     $.log("✨ 已覆盖客户端配置 (KeLi 风格)");
     $.done({ body: JSON.stringify(obj) });
@@ -329,10 +377,6 @@ function handleClean(path, response) {
       obj = $.clean(obj, rules);
     }
     // 后处理空安全
-    if (path.includes("getsplashscreen")) {
-      if (!obj.Data) obj.Data = {};
-      if (!obj.Data.List) obj.Data.List = [];
-    }
     if (path.includes("getHoverAdv")) {
       if (!obj.Data) obj.Data = {};
       if (!obj.Data.ItemList) obj.Data.ItemList = [];
@@ -340,7 +384,7 @@ function handleClean(path, response) {
     if (path.includes("getadvlistbatch")) {
       if (!obj.Data) obj.Data = [];
     }
-    if (path.includes("mainPage") && obj.Data && obj.Data.DailyBenefitModule) {
+    if (path.includes("mainPage") && !path.includes("Dialog") && obj.Data && obj.Data.DailyBenefitModule) {
       obj.Data.DailyBenefitModule.TaskList = [];
     }
     $.log(`✨ 净化完成: ${path.split("/").pop()}`);
