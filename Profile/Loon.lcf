@@ -52,15 +52,12 @@ real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.pin
 
 [Remote Filter]
 全球节点=NameRegex, FilterKey="^(?=.*(.))(?!.*((?i)群|邀请|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|无法|说明|使用|提示|特别|访问|支持|教程|关注|更新|作者|加入|超时|收藏|福利|邀请|好友|失联|(\b(USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author|Traffic)(\d+)?\b|(\d{4}-\d{2}-\d{2}|\dG)))).*$"
-美国节点=NameRegex, FilterKey="(?i)(美|US|United States|America)"
-日本节点=NameRegex, FilterKey="(?i)(日|JP|Japan|Tokyo)"
-港台节点=NameRegex, FilterKey="(?i)(港|台|HK|TW|Hong Kong|Taiwan)"
 
 [Proxy Group]
 Proxy = select, Auto, 全球节点, DIRECT
 Auto = url-test, 全球节点, url = http://cp.cloudflare.com/generate_204, interval = 600, tolerance = 100
-Streaming = select, Auto, 港台节点, 日本节点, 美国节点, 全球节点
-AI = select, 美国节点, 日本节点, Auto, 全球节点
+Streaming = select, Proxy, DIRECT
+AI = select, Proxy, DIRECT
 Apple = select, DIRECT, Proxy
 Final = select, Proxy, DIRECT
 
