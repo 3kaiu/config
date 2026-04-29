@@ -247,8 +247,12 @@ function handleClientConfig(response) {
 }
 
 /**
- * 福利中心主页 — 保留 TaskList，将所有任务标记为已完成可领取
- * 不清空 TaskList，否则 App 显示"无法完成"
+ * 福利中心主页 — 按用户选择保留/删除各模块
+ * 保留: DailyBenefitModule(激励任务), VideoRewardTab(视频奖励),
+ *       RedeemGifts(积分兑换), ScoreDrawModule(幸运抽抽乐)
+ * 删除: MemberExclusiveTaskModule(会员尊享), PrivilegedTaskModule(邀好友),
+ *       MoreRewardTab(更多奖励), SurpriseBenefit(限时福利),
+ *       LastRewardItems(必中夺宝), IndexBannerTabs(顶部Banner)
  */
 function handleMainPage(response) {
   try {
@@ -256,7 +260,7 @@ function handleMainPage(response) {
     if (!obj || !obj.Data) { $.done(); return; }
     const data = obj.Data;
 
-    // DailyBenefitModule — 标记所有任务已完成
+    // ── 保留并修复：激励任务 ──────────────────────────────
     if (data.DailyBenefitModule && Array.isArray(data.DailyBenefitModule.TaskList)) {
       data.DailyBenefitModule.TaskList.forEach(t => {
         t.IsFinished = 1;
@@ -265,24 +269,29 @@ function handleMainPage(response) {
       data.DailyBenefitModule.RotateText = [];
     }
 
-    // VideoRewardTab — 标记已完成
+    // ── 保留并修复：视频奖励 tab ─────────────────────────
     if (data.VideoRewardTab && Array.isArray(data.VideoRewardTab.TaskList)) {
       data.VideoRewardTab.TaskList.forEach(t => { t.IsFinished = 1; });
     }
 
-    // 清除纯营销模块（不影响任务领取）
-    delete data.BaizeModule;
-    delete data.IndexBannerTabs;
-    delete data.MemberExclusiveTaskModule;
-    delete data.MoreRewardTab;
-    delete data.PrivilegedTaskModule;
-    delete data.RedeemGifts;
-    delete data.ScoreDrawModule;
-    delete data.SurpriseBenefit;
-    delete data.LastRewardItems;
-    delete data.TaskShowData;
+    // ── 保留：RedeemGifts(积分兑换), ScoreDrawModule(幸运抽抽乐) ──
 
-    $.log("✨ 福利中心任务已标记完成");
+    // ── 删除：营销/活动/邀请/会员/限时模块 ───────────────
+    const REMOVE_KEYS = [
+      "MemberExclusiveTaskModule", // 会员尊享（90天畅读等）
+      "PrivilegedTaskModule",      // 邀好友活动（邀友一起读/3300点等）
+      "MoreRewardTab",             // 更多奖励（关注微信服务号等）
+      "SurpriseBenefit",           // 限时福利
+      "LastRewardItems",           // 必中夺宝
+      "IndexBannerTabs",           // 顶部 banner
+      "BaizeModule",               // 白泽装扮气泡
+      "TaskShowData",              // 任务展示配置
+      "UserRewardModule",          // 用户奖励统计
+      "PopFrequency",              // 弹窗频率控制
+    ];
+    REMOVE_KEYS.forEach(k => { delete data[k]; });
+
+    $.log("✨ 福利中心已净化");
     $.done({ body: JSON.stringify(obj) });
   } catch (e) { $.done(); }
 }
