@@ -47,8 +47,9 @@ const CONFIG = {
   ],
 
   // KeLi 风格 — 直接拒绝对应 API (reject-dict)
+  // ⚠️ checkin/simpleinfo 不能拒绝 — 返回签到状态/连签天数/福利按钮，App 依赖它渲染 UI
   RejectPaths: [
-    "checkin/simpleinfo", "checkin/lottery", "push/getdialog",
+    "checkin/lottery", "push/getdialog",
     "booksearch/hotWords", "maintain/playstrip", "young/getconf",
     "followsubscribe/showChapterEndModule", "freshman/bookshelfbtn",
     "freshman/freshmanGuidePopup",
@@ -94,10 +95,10 @@ const CONFIG = {
       "Data.Items[KeyName=NEW_YUEPING]",              // 阅评
       "Data.Items[KeyName=NEW_XINSHUTOUZI]"           // 新书投资 (v4.0 新增)
     ],
-    "widget/daily/rec":         ["Data"],
     "reddot/getdot":            ["Data"],
     // v4.0 — 周历兑换页清空商品避免引导消费
     "checkin/checkinexchangepage": ["Data.Goods"]
+    // ⚠️ widget/daily/rec 已移除 — 返回每日导读书籍内容，不是广告，清空后点击无反应
   },
 
   DirectKillPaths: ["bookshelf/getad", "client/iosad"],
