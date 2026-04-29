@@ -41,7 +41,13 @@ const CONFIG = {
     "video/adv/mainPage":       ["Data.DailyBenefitModule.TaskList"],
     "video/adv/mainPageDialog": ["Data"],
     "bookshelf/getHoverAdv":    ["Data.ItemList"],
-    "user/getsimplediscover":   ["Data.Items[ShowName=游戏中心f]","Data.Items[ShowName=游戏中心]","Data.Items[ShowName=新活动中心]","Data.Items[ShowName=红包广场]"],
+    "user/getsimplediscover":   [
+      "Data.Items[ShowName=游戏中心f]","Data.Items[ShowName=游戏中心]",
+      "Data.Items[ShowName=新活动中心]","Data.Items[ShowName=红包广场]",
+      "Data.Items[ShowName=周边商城]","Data.Items[ShowName=卡牌广场]",
+      "Data.Items[ShowName=热门角色]","Data.Items[ShowName=话题广场]",
+      "Data.Items[ShowName=阅评]"
+    ],
     "widget/daily/rec":         ["Data"],
     "reddot/getdot":            ["Data"]
   },
@@ -482,10 +488,25 @@ function patchDurationFields(value, keys, nextValue) {
     value.forEach(item => patchDurationFields(item, keys, nextValue));
     return;
   }
+  
+  // GDT Hippy Template Special Case (Handles rewardTime, appearanceTime etc. deep in attributes)
+  if (value.name && ["rewardTime", "appearanceTime", "minVideoTime", "videoTime"].includes(value.name) && Array.isArray(value.data)) {
+    value.data.forEach(d => {
+      if (d && d.data && d.data.int_val !== undefined) {
+        d.data.int_val = String(nextValue);
+      }
+    });
+  }
+
   for (const [key, item] of Object.entries(value)) {
-    if (keys.includes(key) && typeof item === "number") {
-      value[key] = nextValue;
-      continue;
+    if (keys.includes(key)) {
+      if (typeof item === "number") {
+        value[key] = nextValue;
+        continue;
+      } else if (typeof item === "string" && !isNaN(item)) {
+        value[key] = String(nextValue);
+        continue;
+      }
     }
     patchDurationFields(item, keys, nextValue);
   }
