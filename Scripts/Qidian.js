@@ -48,6 +48,7 @@ const CONFIG = {
 
   // KeLi 风格 — 直接拒绝对应 API (reject-dict)
   // ⚠️ checkin/simpleinfo 不能拒绝 — 返回签到状态/连签天数/福利按钮，App 依赖它渲染 UI
+  // ⚠️ bookshelf/refreshInfo / getHighLevelBookReadInfo 是正常书架数据，不能拒绝
   RejectPaths: [
     "checkin/lottery", "push/getdialog",
     "booksearch/hotWords", "maintain/playstrip", "young/getconf",
@@ -55,10 +56,8 @@ const CONFIG = {
     "freshman/freshmanGuidePopup",
     "message/getpushedmessagelist", "dailyrecommend/recommendBook",
     "bookshelf/getTopOperation",
-    // v4.0 新增 — 抓包验证的纯广告/营销端点
     "popup/batchget", "ploy/getactivitylist",
     "message/pullOperationPush", "message/pullSocialPush",
-    "bookshelf/getHighLevelBookReadInfo", "bookshelf/refreshInfo",
     "video/adv/reportDialog", "interaction/getclassicbookinfo"
   ],
 
@@ -121,9 +120,13 @@ const CONFIG = {
 
   const { url, method } = $request;
 
-  // A. Token 窃取 (精确匹配 getconf，排除 getconfSpecify)
+  // A. Token 窃取 (request 阶段，精确匹配 getconf，排除 getconfSpecify)
   if (url.includes("/v1/client/getconf") && url.includes("magev6") && !$response) {
     handleTokenSteal($request);
+  }
+  // A2. getconf response 覆写 — 删除 BookShelfBottomIcons/AdVideoPositionConfig 等悬浮广告字段
+  else if (url.includes("/v1/client/getconf") && $response) {
+    handleClientConfig($response);
   }
   // B. GDT 视频拦截 — 返回 1 秒视频
   else if (url.includes(".mp4") && url.includes("adsmind.gdtimg.com")) {
