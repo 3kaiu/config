@@ -1,14 +1,15 @@
 # ═══════════════════════════════════════════════════════════
-#  Loon 配置 (Loon.lcf) — v4.0
-#  核心: .lcf 后缀 · 三路分流 · 双层去广告 · 日志静默
+#  Loon 配置 (Loon.lcf) — v5.0
+#  核心: DoQ 加速 · 五路策略分流 · 双层去广告 · AI 专线
 #  引擎支持: iOS Loon 3.3.9+
 # ═══════════════════════════════════════════════════════════
 
 [General]
 ip-mode = dual
-interface-mode = Performace
+interface-mode = Performance
 dns-server = system
-doh-server = https://dns.google/dns-query, https://cloudflare-dns.com/dns-query, https://doh.pub/dns-query
+doh-server = https://doh.pub/dns-query, https://dns.alidns.com/dns-query
+doq-server = quic://dns.alidns.com:853, quic://dns.adguard-dns.com:853
 hijack-dns = *:53, 8.8.8.8, 8.8.4.4, 1.1.1.1, 114.114.114.114, 223.6.6.6, 180.76.76.76
 sni-sniffing = true
 disable-stun = true
@@ -50,34 +51,83 @@ real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.pin
 # Alias = https://your.subscription.link, udp=true, fast-open=true, vmess-aead=true, filter-node = ^(?!(.*(剩余|到期|过期|公告|流量|官网|套餐|联系|地址))).*$
 
 [Remote Filter]
-香港节点=NameRegex, FilterKey="^(?=.*((?i)🇭🇰|香港|(\b(HK|HKG|Hong)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|🎮|(\b(GAME)\b))).*$"
-台湾节点=NameRegex, FilterKey="^(?=.*((?i)🇹🇼|台湾|(\b(TW|TWN|Tai|Taiwan)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|🎮|(\b(GAME)\b))).*$"
-日本节点=NameRegex, FilterKey="^(?=.*((?i)🇯🇵|日本|川日|东京|大阪|泉日|埼玉|(\b(JP|JPN|Japan)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|🎮|(\b(GAME)\b))).*$"
-韩国节点=NameRegex, FilterKey="^(?=.*((?i)🇰🇷|韩国|韓|首尔|(\b(KR|KOR|Korea)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|🎮|(\b(GAME)\b))).*$"
-新国节点=NameRegex, FilterKey="^(?=.*((?i)🇸🇬|新加坡|狮|(\b(SG|SGP|Singapore)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|🎮|(\b(GAME)\b))).*$"
-美国节点=NameRegex, FilterKey="^(?=.*((?i)🇺🇸|美国|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|(\b(US|USA|United States)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|🎮|(\b(GAME)\b))).*$"
-游戏节点=NameRegex, FilterKey="^(?=.*((?i)游戏|🎮|(\b(GAME)(\d+)?\b)))(?!.*((?i)回国|校园)).*$"
 全球节点=NameRegex, FilterKey="^(?=.*(.))(?!.*((?i)群|邀请|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|无法|说明|使用|提示|特别|访问|支持|教程|关注|更新|作者|加入|超时|收藏|福利|邀请|好友|失联|(\b(USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author|Traffic)(\d+)?\b|(\d{4}-\d{2}-\d{2}|\dG)))).*$"
+美国节点=NameRegex, FilterKey="(?i)(美|US|United States|America)"
+日本节点=NameRegex, FilterKey="(?i)(日|JP|Japan|Tokyo)"
+港台节点=NameRegex, FilterKey="(?i)(港|台|HK|TW|Hong Kong|Taiwan)"
 
 [Proxy Group]
 Proxy = select, Auto, 全球节点, DIRECT
 Auto = url-test, 全球节点, url = http://cp.cloudflare.com/generate_204, interval = 600, tolerance = 100
+Streaming = select, Auto, 港台节点, 日本节点, 美国节点, 全球节点
+AI = select, 美国节点, 日本节点, Auto, 全球节点
+Apple = select, DIRECT, Proxy
 Final = select, Proxy, DIRECT
 
 [Rule]
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Apple & 微信 最高优先级直连
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN-SUFFIX, apple.com, Apple
+DOMAIN-SUFFIX, icloud.com, Apple
+DOMAIN-SUFFIX, icloud.com.cn, Apple
 DOMAIN, api.smoot.apple.com, DIRECT
-DOMAIN-SUFFIX, apple.com, DIRECT
-DOMAIN-SUFFIX, icloud.com, DIRECT
 DOMAIN-SUFFIX, wechat.com, DIRECT
 DOMAIN-SUFFIX, qpic.cn, DIRECT
 DOMAIN-SUFFIX, weixin.qq.com, DIRECT
 DOMAIN-SUFFIX, wx.qq.com, DIRECT
 
-# GDT 联享家开屏去广告 (startup.lnplugin 需要 mi.gdt.qq.com 可访问)
-DOMAIN, mi.gdt.qq.com, DIRECT
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# AI 服务 — 走 AI 策略组
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN-SUFFIX, openai.com, AI
+DOMAIN-SUFFIX, ai.com, AI
+DOMAIN-SUFFIX, chatgpt.com, AI
+DOMAIN-SUFFIX, oaiusercontent.com, AI
+DOMAIN-SUFFIX, oaistatic.com, AI
+DOMAIN-SUFFIX, anthropic.com, AI
+DOMAIN-SUFFIX, claude.ai, AI
+DOMAIN-SUFFIX, gemini.google.com, AI
+DOMAIN-SUFFIX, bard.google.com, AI
+DOMAIN-SUFFIX, generativelanguage.googleapis.com, AI
+DOMAIN-SUFFIX, aistudio.google.com, AI
+DOMAIN-SUFFIX, makersuite.google.com, AI
+DOMAIN-SUFFIX, perplexity.ai, AI
+DOMAIN-SUFFIX, mistral.ai, AI
+DOMAIN-SUFFIX, groq.com, AI
+DOMAIN-SUFFIX, cohere.com, AI
+DOMAIN-SUFFIX, huggingface.co, AI
+DOMAIN-SUFFIX, replicate.com, AI
+DOMAIN-SUFFIX, cursor.sh, AI
+DOMAIN-SUFFIX, copilot.microsoft.com, AI
+DOMAIN-SUFFIX, github.copilot.com, AI
 
-# 广告 SDK 白名单 (防去广告误杀奖励包 — 仅 GDT 视频 CDN 放行)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 流媒体 — 走 Streaming 策略组
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN-SUFFIX, youtube.com, Streaming
+DOMAIN-SUFFIX, googlevideo.com, Streaming
+DOMAIN-SUFFIX, ytimg.com, Streaming
+DOMAIN-SUFFIX, netflix.com, Streaming
+DOMAIN-SUFFIX, nflxvideo.net, Streaming
+DOMAIN-SUFFIX, nflximg.net, Streaming
+DOMAIN-SUFFIX, nflxso.net, Streaming
+DOMAIN-SUFFIX, disneyplus.com, Streaming
+DOMAIN-SUFFIX, disney-plus.net, Streaming
+DOMAIN-SUFFIX, bamgrid.com, Streaming
+DOMAIN-SUFFIX, dssott.com, Streaming
+DOMAIN-SUFFIX, hbomax.com, Streaming
+DOMAIN-SUFFIX, hbonow.com, Streaming
+DOMAIN-SUFFIX, spotify.com, Streaming
+DOMAIN-SUFFIX, scdn.co, Streaming
+DOMAIN-SUFFIX, tiktokv.com, Streaming
+DOMAIN-SUFFIX, tiktokcdn.com, Streaming
+DOMAIN-SUFFIX, musical.ly, Streaming
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# GDT 广告 SDK 白名单 (防去广告误杀奖励包)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN, mi.gdt.qq.com, DIRECT
 DOMAIN, ii.gdt.qq.com, DIRECT
 DOMAIN, c.gdt.qq.com, DIRECT
 DOMAIN, adsmind.gdtimg.com, DIRECT
@@ -85,104 +135,67 @@ DOMAIN-SUFFIX, pangolin-sdk-toutiao.com, DIRECT
 DOMAIN-SUFFIX, pangolin-sdk-toutiao1.com, DIRECT
 DOMAIN-SUFFIX, pangle.io, DIRECT
 
-# 起点/阅文追踪域 — 本地 REJECT 确保优先于 China.list 的 *.qq.com/*.yuewen.com DIRECT
-# v4.0 补全抓包发现的全量追踪域名
-DOMAIN, path.book.qq.com, REJECT
-DOMAIN, rmonitor.qq.com, REJECT
-DOMAIN, unitelogreport.reader.qq.com, REJECT
-DOMAIN, sdkreport.e.qq.com, REJECT
-DOMAIN, publiclog.zhiyan.tencent-cloud.net, REJECT
-DOMAIN, zhiyan.monitor.tencent-cloud.net, REJECT
-DOMAIN, galileotelemetry.tencent.com, REJECT
-DOMAIN, tangram.e.qq.com, REJECT
-DOMAIN, gatherer.m.qq.com, REJECT
-DOMAIN, dl.tiku.qq.com, REJECT
-DOMAIN, apmplus.volces.com, REJECT
-DOMAIN, mssdk.volces.com, REJECT
-DOMAIN, tobapplog.ctobsnssdk.com, REJECT
-DOMAIN, hd.ctobsnssdk.com, REJECT
-DOMAIN, ali-stats.jpush.cn, REJECT
-DOMAIN, aegis.cdn-go.cn, REJECT
-DOMAIN, connect.yuewen.com, REJECT
-DOMAIN, fockrt.yuewen.com, REJECT
-DOMAIN, noahqd.yuewen.com, REJECT
-DOMAIN, upushv6.qidian.com, REJECT
-DOMAIN, ywab.reader.qq.com, REJECT
-DOMAIN, ataru.qidian.com, REJECT
-DOMAIN-KEYWORD, pglstatp-toutiao, REJECT
-DOMAIN-KEYWORD, zijieapi, REJECT
-DOMAIN-KEYWORD, bytescm, REJECT
-DOMAIN-KEYWORD, qreport, REJECT
-
 FINAL, Final
 
 [Remote Rule]
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 三路分流: 🇨🇳国内直连 | 🌍国外代理 | 🚫去广告
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 国内 IP 分流 (可莉)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 https://kelee.one/Tool/Loon/Lsr/REGION_SPLITTER.lsr, policy=DIRECT, tag=🇨🇳 国内IP, enabled=true
 https://kelee.one/Tool/Loon/Lsr/LAN_SPLITTER.lsr, policy=DIRECT, tag=🏠 局域网, enabled=true
-
-# 域名级分流 (Blackmatrix7)
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/China/China.list, policy=DIRECT, tag=🇨🇳 国内域名, enabled=true
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Global/Global.list, policy=Proxy, tag=🌍 国际域名, enabled=true
+https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Advertising/Advertising.list, policy=REJECT, tag=🚫 广告域名, enabled=true
 
-# 域名级去广告 (Blackmatrix7)
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Advertising/Advertising.list, policy=REJECT, tag=🚫 广告拦截, enabled=true
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Privacy/Privacy.list, policy=REJECT, tag=🔒 隐私保护, enabled=true
+[Remote Plugin]
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 内核层 — 网络安全基础
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+https://kelee.one/Tool/Loon/Plugin/Block_HTTPDNS.plugin, enabled=true
+https://kelee.one/Tool/Loon/Plugin/BlockAdvertisers.plugin, enabled=true
+https://kelee.one/Tool/Loon/Plugin/Prevent_DNS_Leaks.plugin, policy=Proxy, enabled=true
 
-[Plugin]
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 内核 (可莉 — pin 固定)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://kelee.one/Tool/Loon/Lpx/Block_HTTPDNS.lpx, pin=true, enabled=true
-https://kelee.one/Tool/Loon/Lpx/BlockAdvertisers.lpx, pin=true, enabled=true
-https://kelee.one/Tool/Loon/Lpx/Prevent_DNS_Leaks.lpx, enabled=true
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 基础层 — 通用去广告
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+https://kelee.one/Tool/Loon/Plugin/SafeRedirect.plugin, enabled=true
+https://kelee.one/Tool/Loon/Plugin/Remove_ads_by_keli.plugin, enabled=true
+https://kelee.one/Tool/Loon/Plugin/startup.plugin, enabled=true
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 基础增强 (Blackmatrix7)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/SafeRedirect/SafeRedirect.plugin, tag=安全重定向, enabled=true
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/startup/startup.lnplugin, tag=开屏去广告, enabled=true
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 可莉去广告 — 应用级精准拦截
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+https://kelee.one/Tool/Loon/Plugin/QiDian_remove_ads.plugin, enabled=true
+https://kelee.one/Tool/Loon/Plugin/YouTube_remove_ads.plugin, enabled=true
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 可莉去广告补充 (Rewrite 层 — 与脚本插件互补)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://kelee.one/Tool/Loon/Lpx/Remove_ads_by_keli.lpx, tag=可莉通用去广告, enabled=true
-https://kelee.one/Tool/Loon/Lpx/QiDian_remove_ads.lpx, tag=起点读书去广告, enabled=true
-https://kelee.one/Tool/Loon/Lpx/YouTube_remove_ads.lpx, tag=YouTube去广告, enabled=true
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 工具层
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+https://kelee.one/Tool/Loon/Plugin/Sub-Store.plugin, enabled=true
+https://kelee.one/Tool/Loon/Plugin/QuickSearch.plugin, enabled=true
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 工具
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Loon.plugin, tag=Sub-Store, pin=true, enabled=true
-https://kelee.one/Tool/Loon/Lpx/QuickSearch.lpx, tag=快捷搜索, enabled=true
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 自维护插件
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+https://raw.githubusercontent.com/3kaiu/config/main/Plugin/qidian.plugin, enabled=true
+https://raw.githubusercontent.com/3kaiu/config/main/Plugin/youtube.plugin, enabled=true
+https://raw.githubusercontent.com/3kaiu/config/main/Plugin/zhihuifangdong.plugin, enabled=true
+https://raw.githubusercontent.com/3kaiu/config/main/Plugin/ai.plugin, enabled=true
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Apple 服务增强 (iRingo)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://github.com/NSRingo/Maps/releases/latest/download/iRingo.Maps.plugin, tag=iRingo地图, enabled=true
-https://github.com/NSRingo/LocationService/releases/latest/download/iRingo.LocationService.plugin, tag=iRingo定位, enabled=true
-https://github.com/NSRingo/WeatherKit/releases/latest/download/iRingo.WeatherKit.plugin, tag=iRingo天气, enabled=true
-https://github.com/NSRingo/Weather/raw/main/modules/Weather.plugin, tag=iRingo天气增强, enabled=true
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Apple 增强 (iRingo)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+https://raw.githubusercontent.com/VirgilClyne/iRingo/main/plugin/Maps.plugin, enabled=true
+https://raw.githubusercontent.com/VirgilClyne/iRingo/main/plugin/Location.plugin, enabled=true
+https://raw.githubusercontent.com/VirgilClyne/iRingo/main/plugin/WeatherKit.plugin, enabled=true
+https://raw.githubusercontent.com/VirgilClyne/iRingo/main/plugin/Weather.plugin, enabled=true
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 媒体增强
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://github.com/DualSubs/Universal/releases/latest/download/DualSubs.Universal.plugin, tag=双语字幕, enabled=true
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+https://raw.githubusercontent.com/DualSubs/Universal/main/modules/DualSubs.Universal.plugin, enabled=true
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 应用增强 (自维护 — 脚本层)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://raw.githubusercontent.com/3kaiu/config/main/Plugin/qidian.plugin, tag=起点全能助手, enabled=true
-https://raw.githubusercontent.com/3kaiu/config/main/Plugin/youtube.plugin, tag=YouTube增强, enabled=true
-https://raw.githubusercontent.com/3kaiu/config/main/Plugin/zhihuifangdong.plugin, tag=智慧房东, enabled=true
-
-# 可在此添加自定义 Rewrite 规则
 [MitM]
 skip-server-cert-verify = true
-# 核心 MITM — 只保留 iRingo 需要的特定苹果域名 + YouTube
-# ⚠️ 不能写 *.apple.com / *.icloud.com — 苹果音乐/App Store/iCloud 有证书 pinning 会断连
-# iRingo 插件会通过 %APPEND% 自动注入它需要的域名 (weather-*.apple.com 等)
+# iRingo 插件通过 %APPEND% 自动注入它需要的特定苹果域名
 hostname = *.googlevideo.com, *.youtube.com, *.ytimg.com, *.ggpht.com

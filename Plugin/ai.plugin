@@ -1,0 +1,59 @@
+#!name=AI 服务分流
+#!desc=ChatGPT · Claude · Gemini · Perplexity · Copilot 等 AI 服务走专用策略组
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bot.png
+
+[Rule]
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# OpenAI (ChatGPT / DALL-E / Sora / API)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN-SUFFIX, openai.com, AI
+DOMAIN-SUFFIX, ai.com, AI
+DOMAIN-SUFFIX, chatgpt.com, AI
+DOMAIN-SUFFIX, oaiusercontent.com, AI
+DOMAIN-SUFFIX, oaistatic.com, AI
+DOMAIN-SUFFIX, openaiapi-site.azureedge.net, AI
+DOMAIN-SUFFIX, openaicom-api-bdcpf8c6d2e9b8.azurefd.net, AI
+DOMAIN-SUFFIX, auth0.openai.com, AI
+DOMAIN-KEYWORD, openai, AI
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Anthropic (Claude / API)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN-SUFFIX, anthropic.com, AI
+DOMAIN-SUFFIX, claude.ai, AI
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Google AI (Gemini / AI Studio / PaLM)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN-SUFFIX, gemini.google.com, AI
+DOMAIN-SUFFIX, bard.google.com, AI
+DOMAIN-SUFFIX, aistudio.google.com, AI
+DOMAIN-SUFFIX, makersuite.google.com, AI
+DOMAIN-SUFFIX, generativelanguage.googleapis.com, AI
+DOMAIN-SUFFIX, deepmind.google, AI
+DOMAIN-SUFFIX, deepmind.com, AI
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 其他 AI 服务
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN-SUFFIX, perplexity.ai, AI
+DOMAIN-SUFFIX, mistral.ai, AI
+DOMAIN-SUFFIX, groq.com, AI
+DOMAIN-SUFFIX, cohere.com, AI
+DOMAIN-SUFFIX, huggingface.co, AI
+DOMAIN-SUFFIX, replicate.com, AI
+DOMAIN-SUFFIX, together.ai, AI
+DOMAIN-SUFFIX, fireworks.ai, AI
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# AI 编程工具 (Cursor / Copilot / Windsurf)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN-SUFFIX, cursor.sh, AI
+DOMAIN-SUFFIX, cursor.com, AI
+DOMAIN-SUFFIX, copilot.microsoft.com, AI
+DOMAIN, github.copilot.com, AI
+DOMAIN-SUFFIX, codeium.com, AI
+DOMAIN-SUFFIX, windsurf.ai, AI
+DOMAIN-SUFFIX, supermaven.com, AI
