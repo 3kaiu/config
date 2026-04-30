@@ -1,15 +1,15 @@
 /**
- * 📚 起点全能助手 v4.3
+ * 📚 起点全能助手 v4.4
  * 作者：3kaiu
  *
- * v4.3 更新:
- *  1. 发现页 — 移除全部非阅读模块 (游戏/活动/红包/商城等)，保留书单/专栏/ip专区
- *  2. 每日导读 — 放行 widget/daily/rec，不再清空
- *  3. 福利中心 mainPage — 修复"无法完成"：保留 TaskList，将所有任务标记为已完成
- *     (IsFinished=1, Process=Total)，让 App 显示可领取状态
- *  4. 视频广告 — 直接将 IsFinished 置 1，跳过视频播放；保留 1s MP4 作为后备
- *  5. 每日阅读积分 — readtime/readpage 将 TodayReadTime 改写为满值，TaskList 全部标记完成
- *  6. getconf response — 独立入口确保 BookShelfBottomIcons 等悬浮广告字段被删除
+ * v4.4 更新:
+ *  1. 签到增加重试机制，Token 窃取扩展到 checkin 请求
+ *  2. 福利中心激励任务不再自动标记完成，保留手动触发视频的能力
+ *  3. 发现页 — 移除全部非阅读模块 (游戏/活动/红包/商城等)，保留书单/专栏/ip专区
+ *  4. 每日导读 — 放行 widget/daily/rec，不再清空
+ *  5. 视频广告 — 直接将 IsFinished 置 1，跳过视频播放；保留 1s MP4 作为后备
+ *  6. 每日阅读积分 — readtime/readpage 将 TodayReadTime 改写为满值，TaskList 全部标记完成
+ *  7. getconf response — 独立入口确保 BookShelfBottomIcons 等悬浮广告字段被删除
  */
 const $ = new Env("起点助手");
 
@@ -117,13 +117,13 @@ const CLEAN_RULES = {
 
   const { url, method } = $request;
 
-  // A. Token 窃取 (request 阶段，精确匹配 getconf)
-  if (url.includes("/v1/client/getconf") && url.includes("magev6") && !$response) {
+  // A. Token 窃取 (request 阶段，匹配 getconf/checkin)
+  if ((url.includes("/client/getconf") || url.includes("/checkin/")) && url.includes("magev6") && !$response) {
     handleTokenSteal($request);
     return;
   }
   // A2. getconf response 覆写 — 删除悬浮广告字段
-  if (url.includes("/v1/client/getconf") && $response) {
+  if (url.includes("/client/getconf") && $response) {
     handleClientConfig($response);
     return;
   }
@@ -270,19 +270,12 @@ function handleMainPage(response) {
     if (!obj || !obj.Data) { $.done(); return; }
     const data = obj.Data;
 
-    // ── 保留并修复：激励任务 ──────────────────────────────
-    if (data.DailyBenefitModule && Array.isArray(data.DailyBenefitModule.TaskList)) {
-      data.DailyBenefitModule.TaskList.forEach(t => {
-        t.IsFinished = 1;
-        if (t.Total > 0) t.Process = t.Total;
-      });
+    // ── 激励任务：不修改 IsFinished，保留原始状态让用户手动触发视频 ──
+    if (data.DailyBenefitModule) {
       data.DailyBenefitModule.RotateText = [];
     }
 
-    // ── 保留并修复：视频奖励 tab ─────────────────────────
-    if (data.VideoRewardTab && Array.isArray(data.VideoRewardTab.TaskList)) {
-      data.VideoRewardTab.TaskList.forEach(t => { t.IsFinished = 1; });
-    }
+    // ── 视频奖励 tab：同样保留原始状态 ─────────────────────
 
     // ── 保留：RedeemGifts(积分兑换), ScoreDrawModule(幸运抽抽乐) ──
 
@@ -520,26 +513,40 @@ async function handleCron() {
     return;
   }
 
-  try {
-    const res = await $.fetch({
-      url: "https://magev6.if.qidian.com/argus/api/v2/checkin/checkin",
-      method: "POST",
-      headers: normalizeHeaders(headers),
-      body: ""
-    });
+  const maxRetry = 3;
+  for (let i = 0; i < maxRetry; i++) {
+    try {
+      const res = await $.fetch({
+        url: "https://magev6.if.qidian.com/argus/api/v2/checkin/checkin",
+        method: "POST",
+        headers: normalizeHeaders(headers),
+        body: ""
+      });
 
-    if (res && res.statusCode === 200) {
-      const obj = safeJsonParse(res.body);
-      if (obj && obj.Result === 0) {
-        $.notify("起点助手", "✅ 签到成功", obj.Message || "今日签到完成");
-      } else if (obj && obj.Result === -452000) {
-        $.notify("起点助手", "📅 今日已签到", "");
+      if (res && res.statusCode === 200) {
+        const obj = safeJsonParse(res.body);
+        if (obj && obj.Result === 0) {
+          $.notify("起点助手", "✅ 签到成功", obj.Message || "今日签到完成");
+          $.done();
+          return;
+        } else if (obj && obj.Result === -452000) {
+          $.notify("起点助手", "📅 今日已签到", "");
+          $.done();
+          return;
+        } else {
+          $.notify("起点助手", "⚠️ 签到异常", JSON.stringify(obj));
+          $.done();
+          return;
+        }
+      }
+      if (i < maxRetry - 1) await $.wait(3000);
+    } catch (e) {
+      if (i === maxRetry - 1) {
+        $.notify("起点助手", "❌ 签到失败", `重试${maxRetry}次后仍失败: ${e}`);
       } else {
-        $.notify("起点助手", "⚠️ 签到异常", JSON.stringify(obj));
+        await $.wait(3000);
       }
     }
-  } catch (e) {
-    $.notify("起点助手", "❌ 签到失败", String(e));
   }
   $.done();
 }

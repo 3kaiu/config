@@ -163,7 +163,7 @@ https://kelee.one/Tool/Loon/Plugin/startup.plugin, enabled=true
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 可莉去广告 — 应用级精准拦截
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://kelee.one/Tool/Loon/Plugin/QiDian_remove_ads.plugin, enabled=true
+https://kelee.one/Tool/Loon/Plugin/QiDian_remove_ads.plugin, enabled=false
 https://kelee.one/Tool/Loon/Plugin/YouTube_remove_ads.plugin, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
