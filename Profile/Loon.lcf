@@ -179,6 +179,7 @@ https://raw.githubusercontent.com/3kaiu/config/main/Plugin/qidian.plugin, enable
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/youtube.plugin, enabled=true
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/zhihuifangdong.plugin, enabled=true
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/ai.plugin, enabled=true
+https://raw.githubusercontent.com/3kaiu/config/main/Plugin/bank.plugin, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Apple 增强 (iRingo/NSRingo 源头仓库)
