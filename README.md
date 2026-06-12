@@ -57,6 +57,10 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 *   **脚本路径**：`Plugin/youtube.plugin` (Loon) / `Profile/QX.conf` 重写引用 (QX)
 *   **净化效果**：屏蔽 YouTube App 视频中插广告、首页信息流推广，并提供后台播放 (画中画) 支持。
 
+### 🚫 2.6 全网系统级与 App 深度去广告 (RuCu6 / 墨鱼双引擎)
+*   **规则路径**：Loon 插件 (`Plugin`) / QX 远程重写 (`rewrite_remote`) 默认内置。
+*   **净化范围**：整合全网最有价值的 app 去广告方案，包括 **RuCu6** 与 **ddgksf2013/墨鱼** 的核心净化规则。针对微博、知乎、高德地图、小红书、美团等高频应用，全方位去除开屏广告、弹窗及推广信息，同时**采用多维度多层次设计（如 HTTPDNS 接口置空拦截）**，最大化缩减 CPU 开销以节省电池电量。
+
 ---
 
 ## 3. 网络运维深度优化设计 (NetOps Expert Rules)
