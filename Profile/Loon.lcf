@@ -167,7 +167,7 @@ https://raw.githubusercontent.com/3kaiu/config/main/Kelee/Prevent_DNS_Leaks.plug
 # 基础层 — 通用与多维去广告 (Loon在手机端发起请求，不受 Cloudflare 拦截限制)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 https://raw.githubusercontent.com/3kaiu/config/main/Kelee/Remove_ads_by_keli.plugin, enabled=true
-https://raw.githubusercontent.com/RuCu6/AdBlock/master/Loon/Crack/AdBlock.plugin, enabled=true, tag=RuCu6 App去广告
+https://raw.githubusercontent.com/3kaiu/config/main/Kelee/myblockads.plugin, enabled=true, tag=RuCu6 App去广告
 https://raw.githubusercontent.com/ddgksf2013/Filter/master/Loon/AdBlock.plugin, enabled=true, tag=墨鱼 App去广告
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -106,7 +106,8 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 
 *   **Loon 客户端 100% 稳定连接**：我们已将 `Loon.lcf` 主配置中的 Kelee 插件链接（包括去广告、DNS 防泄露及 YouTube 增强）重定向至本项目本地 GitHub 镜像 Raw 链接（每天通过 Actions 自动同步更新），彻底免除了设备端的 Cloudflare 验证拦截。
 *   **Quantumult X 原生集成 DNS 防泄露**：针对 QX 无法直接解析 Loon `.plugin` 插件的问题，我们已将 Kelee `Prevent_DNS_Leaks.plugin` 中的全部规则静态转换为 QX 语法，并原生集成在 `QX.conf` 的 `[filter_local]` 中，无需使用 Script-Hub 等工具进行繁琐的外部格式转换。
-*   **同步数据源说明**：我们通过 [sync-kelee.yml](file:///Users/edy/.gemini/antigravity/scratch/config/.github/workflows/sync-kelee.yml) 工作流，每天定时从公开且免 CF 拦截的 `ajune0527/vpn_tool` 仓库拉取最新版插件缓存至本地 [Kelee/](file:///Users/edy/.gemini/antigravity/scratch/config/Kelee) 目录，供 QX 用户自行选择使用 Script-Hub 转换引用（如 `Remove_ads_by_keli.plugin`）。
+*   **RuCu6 (广告必须死) 镜像与修复**：由于原作者删库导致双端原配置链接失效（404），我们已将 QX 端链接重定向为长期维护且国内直连的 `Toperlock/Quantumult` 激活镜像；同时将 Loon 端的 `AdBlock.plugin` 替换为存活的 `jqyisbest/RuCu6` 核心去广告插件（`myblockads.plugin`），并已将其纳入 Actions 定时工作流，每日自动拉取至本地 `Kelee/myblockads.plugin` 托管，彻底解决 404 彻底阻断的问题。
+*   **同步数据源说明**：我们通过 [sync-kelee.yml](file:///Users/edy/.gemini/antigravity/scratch/config/.github/workflows/sync-kelee.yml) 工作流，每天定时从公开且免 CF 拦截的 `ajune0527/vpn_tool` 仓库及 `jqyisbest/RuCu6` 仓库拉取最新版插件缓存至本地 [Kelee/](file:///Users/edy/.gemini/antigravity/scratch/config/Kelee) 目录，供 QX 用户自行选择使用 Script-Hub 转换引用（如 `Remove_ads_by_keli.plugin`）。
 
 ---
 
@@ -117,8 +118,9 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 ├── .github/
 │   └── workflows/
 │       └── sync-kelee.yml       # 每天自动从公共镜像源同步可莉插件
-├── Kelee/                      # 本地缓存的可莉 Loon 插件镜像 (QX转换用)
+├── Kelee/                      # 本地缓存的可莉 & RuCu6 插件镜像 (QX转换用)
 │   ├── Prevent_DNS_Leaks.plugin
+│   ├── myblockads.plugin
 │   ├── QiDian_remove_ads.plugin
 │   ├── Remove_ads_by_keli.plugin
 │   └── YouTube_remove_ads.plugin
