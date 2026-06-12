@@ -14,6 +14,9 @@
 const $ = new Env("起点助手");
 
 const CONFIG = {
+  // 是否开启静默运行模式，关闭成功通知，仅对失败/异常进行提醒
+  SilentMode: true,
+
   // finishWatch 重放任务映射
   TaskMapping: {
     "1218712929269776384": { name: "激励视频", count: 9 },
@@ -422,7 +425,11 @@ async function handleReplay(request) {
   });
   const results = await Promise.allSettled(tasks);
   const ok = results.filter(r => r.status === "fulfilled" && r.value).length;
-  $.notify("起点助手", "", `${task.name}: ${ok + 1}/${task.count}`);
+  if (!CONFIG.SilentMode) {
+    $.notify("起点助手", "", `${task.name}: ${ok + 1}/${task.count}`);
+  } else {
+    $.log(`[静默模式] ${task.name}: ${ok + 1}/${task.count}`);
+  }
   $.done();
 }
 
@@ -554,11 +561,19 @@ async function handleSimpleCheckin() {
         const obj = safeJsonParse(res.body);
         if (obj && obj.Result === 0) {
           const drawMsg = await checkinLottery(headers);
-          $.notify("起点助手", "✅ 签到成功", (obj.Message || "今日签到完成") + drawMsg);
+          if (!CONFIG.SilentMode) {
+            $.notify("起点助手", "✅ 签到成功", (obj.Message || "今日签到完成") + drawMsg);
+          } else {
+            $.log(`[静默模式] ✅ 签到成功: ${(obj.Message || "今日签到完成") + drawMsg}`);
+          }
           return;
         } else if (obj && obj.Result === -452000) {
           const drawMsg = await checkinLottery(headers);
-          $.notify("起点助手", "📅 今日已签到", (obj.Message || "今日已签到") + drawMsg);
+          if (!CONFIG.SilentMode) {
+            $.notify("起点助手", "📅 今日已签到", (obj.Message || "今日已签到") + drawMsg);
+          } else {
+            $.log(`[静默模式] 📅 今日已签到: ${(obj.Message || "今日已签到") + drawMsg}`);
+          }
           return;
         } else {
           $.notify("起点助手", "⚠️ 签到异常", JSON.stringify(obj));

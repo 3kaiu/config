@@ -9,10 +9,11 @@ ip-mode = ipv4-only
 interface-mode = Performance
 dns-server = 223.5.5.5, 119.29.29.29, 180.184.11.11, 180.184.22.22
 doh-server = https://doh.pub/dns-query, https://dns.alidns.com/dns-query
+doh3-server = h3://doh.pub/dns-query, h3://dns.alidns.com/dns-query
 doq-server = quic://dns.alidns.com:853
 hijack-dns = *:53, 8.8.8.8, 8.8.4.4, 1.1.1.1, 114.114.114.114, 223.6.6.6, 180.76.76.76
 sni-sniffing = true
-disable-stun = true
+disable-stun = false
 udp-fallback-mode = REJECT
 ipv6-vif = off
 domain-reject-mode = DNS
@@ -60,6 +61,13 @@ Apple = select, DIRECT, Proxy
 Final = select, Proxy, DIRECT
 
 [Rule]
+# WebRTC STUN 阻断 (放行游戏 STUN 直连，阻断追踪 STUN)
+DOMAIN-KEYWORD, stun.playstation, DIRECT
+DOMAIN-KEYWORD, stun.nintendo, DIRECT
+DOMAIN-KEYWORD, xboxlive.com, DIRECT
+DOMAIN-KEYWORD, stun, REJECT
+PORT, 3478, REJECT
+
 # 0. 局域网直连 (LAN Bounded Context)
 IP-CIDR, 192.168.0.0/16, DIRECT
 IP-CIDR, 10.0.0.0/8, DIRECT
