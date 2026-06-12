@@ -123,22 +123,22 @@ https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 内核层 — 网络安全基础
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://kelee.one/Tool/Loon/Plugin/Block_HTTPDNS.plugin, enabled=true
-https://kelee.one/Tool/Loon/Plugin/BlockAdvertisers.plugin, enabled=true
-https://kelee.one/Tool/Loon/Plugin/Prevent_DNS_Leaks.plugin, policy=Proxy, enabled=true
+https://kelee.one/Tool/Loon/Lpx/Block_HTTPDNS.lpx, pin=true, enabled=true
+https://kelee.one/Tool/Loon/Lpx/BlockAdvertisers.lpx, pin=true, enabled=true
+https://kelee.one/Tool/Loon/Lpx/Prevent_DNS_Leaks.lpx, policy=Proxy, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 基础层 — 通用去广告 (Loon在手机端发起请求，不受 Cloudflare 拦截限制)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://kelee.one/Tool/Loon/Plugin/SafeRedirect.plugin, enabled=true
-https://kelee.one/Tool/Loon/Plugin/Remove_ads_by_keli.plugin, enabled=true
-https://kelee.one/Tool/Loon/Plugin/startup.plugin, enabled=true
+https://kelee.one/Tool/Loon/Lpx/SafeRedirect.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/Remove_ads_by_keli.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/startup.lpx, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 工具层
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://kelee.one/Tool/Loon/Plugin/Sub-Store.plugin, enabled=true
-https://kelee.one/Tool/Loon/Plugin/QuickSearch.plugin, enabled=true
+https://kelee.one/Tool/Loon/Lpx/Sub-Store.lpx, enabled=true
+https://kelee.one/Tool/Loon/Lpx/QuickSearch.lpx, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 自维护核心及应用插件 (按需开启)
@@ -149,7 +149,7 @@ https://raw.githubusercontent.com/3kaiu/config/main/Plugin/bank.plugin, enabled=
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/ai.plugin, enabled=true, tag=AI 服务分流
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/zhihuifangdong.plugin, enabled=true, tag=智慧房东去广告
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/youtube.plugin, enabled=true, tag=YouTube 增强
-https://kelee.one/Tool/Loon/Plugin/YouTube_remove_ads.plugin, enabled=false, tag=YouTube去广告
+https://kelee.one/Tool/Loon/Lpx/YouTube_remove_ads.lpx, enabled=false, tag=YouTube去广告
 
 [Rewrite]
 # HTTPDNS API 正则拦截 (防止 API 直接通过 IP 发起解析)
