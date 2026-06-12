@@ -109,6 +109,33 @@ DOMAIN-SUFFIX, pangolin-sdk-toutiao.com, DIRECT
 DOMAIN-SUFFIX, pangolin-sdk-toutiao1.com, DIRECT
 DOMAIN-SUFFIX, pangle.io, DIRECT
 
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 5. 常见 APM & 埋点追踪拦截 (深度优化本地解析)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN, path.book.qq.com, REJECT
+DOMAIN, rmonitor.qq.com, REJECT
+DOMAIN, unitelogreport.reader.qq.com, REJECT
+DOMAIN-KEYWORD, qreport, REJECT
+DOMAIN, apmplus.volces.com, REJECT
+DOMAIN, mssdk.volces.com, REJECT
+DOMAIN, tobapplog.ctobsnssdk.com, REJECT
+DOMAIN, hd.ctobsnssdk.com, REJECT
+DOMAIN, sdkreport.e.qq.com, REJECT
+DOMAIN, publiclog.zhiyan.tencent-cloud.net, REJECT
+DOMAIN, zhiyan.monitor.tencent-cloud.net, REJECT
+DOMAIN, galileotelemetry.tencent.com, REJECT
+DOMAIN, tangram.e.qq.com, REJECT
+DOMAIN, gatherer.m.qq.com, REJECT
+DOMAIN, dl.tiku.qq.com, REJECT
+DOMAIN, ali-stats.jpush.cn, REJECT
+DOMAIN, aegis.cdn-go.cn, REJECT
+DOMAIN, noahqd.yuewen.com, REJECT
+DOMAIN, upushv6.qidian.com, REJECT
+DOMAIN, ataru.qidian.com, REJECT
+DOMAIN, connect.yuewen.com, REJECT
+DOMAIN, fockrt.yuewen.com, REJECT
+DOMAIN, ywab.reader.qq.com, REJECT
+
 FINAL, Final
 
 [Remote Rule]
@@ -130,9 +157,7 @@ https://kelee.one/Tool/Loon/Lpx/Prevent_DNS_Leaks.lpx, policy=Proxy, enabled=tru
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 基础层 — 通用去广告 (Loon在手机端发起请求，不受 Cloudflare 拦截限制)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://kelee.one/Tool/Loon/Lpx/SafeRedirect.lpx, enabled=true
 https://kelee.one/Tool/Loon/Lpx/Remove_ads_by_keli.lpx, enabled=true
-https://kelee.one/Tool/Loon/Lpx/startup.lpx, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 工具层
@@ -141,15 +166,15 @@ https://kelee.one/Tool/Loon/Lpx/Sub-Store.lpx, enabled=true
 https://kelee.one/Tool/Loon/Lpx/QuickSearch.lpx, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 自维护核心及应用插件 (按需开启)
+# 自维护核心及应用插件 (按需开启，默认已全开，可在手机端根据需要关闭)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/qidian.plugin, enabled=true, tag=起点全能助手 Pro
-https://raw.githubusercontent.com/3kaiu/config/main/Plugin/qidian_tasks.plugin, enabled=false, tag=起点自动签到(高阶任务)
+https://raw.githubusercontent.com/3kaiu/config/main/Plugin/qidian_tasks.plugin, enabled=true, tag=起点自动签到(高阶任务)
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/bank.plugin, enabled=true, tag=银行及云闪付去广告
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/ai.plugin, enabled=true, tag=AI 服务分流
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/zhihuifangdong.plugin, enabled=true, tag=智慧房东去广告
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/youtube.plugin, enabled=true, tag=YouTube 增强
-https://kelee.one/Tool/Loon/Lpx/YouTube_remove_ads.lpx, enabled=false, tag=YouTube去广告
+https://kelee.one/Tool/Loon/Lpx/YouTube_remove_ads.lpx, enabled=true, tag=YouTube去广告
 
 [Rewrite]
 # HTTPDNS API 正则拦截 (防止 API 直接通过 IP 发起解析)
