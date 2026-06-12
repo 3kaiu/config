@@ -6,6 +6,8 @@
 
 const $ = new Env("云闪付");
 
+const AD_KEYWORDS = ["广告", "推广", "营销", "活动", "banner", "弹窗", "浮层"];
+
 if (typeof $response !== "undefined") {
   try {
     const url = $request.url;
@@ -16,8 +18,7 @@ if (typeof $response !== "undefined") {
         obj.data = obj.data.filter(item => {
           const type = item.showType || item.type || "";
           const name = item.groupName || item.name || "";
-          const adKeywords = ["广告", "推广", "营销", "活动", "banner", "弹窗", "浮层"];
-          return !adKeywords.some(kw => name.includes(kw) || type.includes(kw));
+          return !AD_KEYWORDS.some(kw => name.includes(kw) || type.includes(kw));
         });
       }
       if (obj.data && obj.data.list) {

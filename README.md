@@ -40,11 +40,15 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 
 ### 💳 2.2 银行及云闪付去广告
 *   **脚本路径**：`Plugin/bank.plugin` (Loon) / `QX/bank.conf` (QX)
-*   **覆盖应用**：云闪付、买单吧 (交通银行)、中国银行 (缤纷生活)、农业银行。
+*   **覆盖应用**：云闪付、买单吧 (交通银行)、中国银行 (缤纷生活)、农业银行等主流金融机构。
 *   **净化效果**：
     *   拦截启动开屏广告、首页弹窗、广告图加载。
     *   **云闪付净化**：通过 [UnionPay.js](file:///Users/edy/.gemini/antigravity/scratch/config/Scripts/UnionPay.js) 重写，剔除理财页推广、首页大图、 koala 权益推广。
     *   **类型安全 Mocking**：使用 `reject-dict` (返回 `{}`) 替代直接断网，防止 App 报错崩溃或因获取不到数据重复高频请求。
+    *   **深度兼容与去广告平衡设计**：
+        1. **DNS 绕过与 Fake-IP 排除**：在 QX `dns_exclusion_list` 与 Loon `real-ip` 中全量加入主流金融域名，强制使用真实 IP 解析，防范安全检测与闪退。
+        2. **最高优先级置顶直连**：在分流规则最上方加入本地网银直连块，保障金融交易流量以最高优先级走 DIRECT。
+        3. **安全与去广告平衡 (免 MitM 劫持安全网关)**：从主配置的 `MitM` 排除列表中移除银行 wildcard (如 `-*.boc.cn` 等)，仅在 `bank.conf` 等远程重写中声明要解密的特定广告域名（如 `mlife.jf365.boc.cn`），确保涉及用户资金交易的核心 API (如 `ebsnew.boc.cn`) 绝不参与解密，完全绕过 MitM 劫持。
 
 ### 🏠 2.3 智慧房东去广告
 *   **脚本路径**：`Plugin/zhihuifangdong.plugin` (Loon) / `QX/zhihuifangdong.conf` (QX)
@@ -82,9 +86,10 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
     *   **国内解析**：通过阿里/腾讯/火山引擎的高速加密 DNS（DoH / DoQ）在本地快速解析，新增火山引擎 DNS (`180.184.11.11`, `180.184.22.22`) 优化字节系/抖音应用解析。
     *   **双端 DoQ 与 DoH3 加速**：Loon 与 Quantumult X 均引入了 DNS over QUIC (`quic://dns.alidns.com`) 和 DoH3 并开启极速首选，极大降低握手延迟，防 DNS 污染与泄露。
     *   **DNS 泄露防护 (no-system)**：开启 QX `no-system`，杜绝并发查询本地方案，防止 DNS 解析泄露给运营商。
-    *   **HTTPDNS IP 级正则与通杀拦截**：
-        *   通过本地重写 `^https?:\/\/119\.29\.29\.29\/d` 直接置空企鹅和阿里等 HTTPDNS 解析接口，强制 App 走系统安全 DNS。
-        *   **通杀拦截**：主配置引入 `DOMAIN-KEYWORD / host-keyword, httpdns, REJECT` 规则进行系统级域名通杀。
+    *   **HTTPDNS 多维拦截机制**：
+        *   **正则重写**：通过本地重写 `^https?:\/\/119\.29\.29\.29\/d` 直接置空腾讯、阿里等 HTTPDNS 解析接口，强制 App 退回系统安全 DNS。
+        *   **规则通杀**：主配置引入 `DOMAIN-KEYWORD / host-keyword, httpdns, REJECT` 进行域名通杀。
+        *   **DNS 级静态映射**：在 QX `[dns]` 与 Loon `[Host]` 中将 `httpdns.c.cdnhwc.com`、`httpdns.gslb.netease.com` 等 HTTPDNS 主机域名静态解析至 `0.0.0.0`，在 DNS 解析阶段实现秒杀拦截。
     *   **精准 WebRTC / STUN 阻断**：在双端部署精准 STUN 拦截规则（拦截 `stun` 关键字和 `3478` 端口），防止网页通过 WebRTC 协议泄露您的 IP 地址；同时**精准放行索尼 PlayStation、任天堂 Switch 和微软 Xbox 的联机 STUN 握手**（设置为直连并旁路 Fake-IP），兼顾隐私与主机联机体验。
 3.  **TLS 减负与本地旁路 (MitM & skip_dst_ip)**：
     *   主配置中的 MitM 实行极严格的黑白名单隔离：排除微信、支付宝、各类网银等绝大部分安全敏感流量，仅对起点、智慧房东与少数联盟广告域名进行解密，**最大程度确保您的设备省电、网络低延迟与隐私安全**。

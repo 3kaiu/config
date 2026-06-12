@@ -96,7 +96,8 @@ const CONFIG = {
   AdWhitelist: ["ioscheckin", "reward", "video", "flzx", "costume", "buqian", "normaltask", "limitegg", "redpocket"],
 
   VideoSkipSeconds: 1,
-  AdDurationKeys: ["video_duration", "video_timelife", "duration", "play_time", "total_time", "show_time", "max_time", "stay", "display_time"]
+  AdDurationKeys: ["video_duration", "video_timelife", "duration", "play_time", "total_time", "show_time", "max_time", "stay", "display_time"],
+  RewardTimeKeys: ["rewardTime", "appearanceTime", "minVideoTime", "videoTime"]
 };
 
 // ==========================================
@@ -614,7 +615,7 @@ function patchDurationFields(value, keys, nextValue) {
     value.forEach(item => patchDurationFields(item, keys, nextValue));
     return;
   }
-  if (value.name && ["rewardTime", "appearanceTime", "minVideoTime", "videoTime"].includes(value.name) && Array.isArray(value.data)) {
+  if (value.name && CONFIG.RewardTimeKeys.includes(value.name) && Array.isArray(value.data)) {
     value.data.forEach(d => {
       if (d && d.data && d.data.int_val !== undefined) d.data.int_val = String(nextValue);
     });

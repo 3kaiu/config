@@ -30,7 +30,7 @@ internet-test-url = http://cp.cloudflare.com/generate_204
 proxy-test-url = http://cp.cloudflare.com/generate_204
 skip-proxy = 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, localhost, *.local
 bypass-tun = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32
-real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.pingan.com.cn, *.cmbchina.com, *.local, *.lan, *.home.arpa, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, *.msftconnecttest.com, *.msftncsi.com, *.battlenet.com.cn
+real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.boc.cn, *.abchina.com, *.ccb.com, *.psbc.com, *.cmbchina.com, *.icbc.com.cn, *.bankofchina.com, *.spdb.com.cn, *.cib.com.cn, *.cebbank.com, *.unionpay.com, *.pingan.com.cn, *.pingan.com, *.bankcomm.com, *.citicbank.com, *.hxb.com.cn, *.cgbchina.com.cn, *.local, *.lan, *.home.arpa, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, *.msftconnecttest.com, *.msftncsi.com, *.battlenet.com.cn
 
 [Host]
 *.taobao.com = server:223.5.5.5
@@ -49,6 +49,8 @@ real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.pin
 *.mi.com = server:223.5.5.5
 *.apple.com = server:223.5.5.5
 *.icloud.com = server:223.5.5.5
+httpdns.c.cdnhwc.com = 0.0.0.0
+httpdns.gslb.netease.com = 0.0.0.0
 
 [Proxy]
 # ⚠️ 提示：请将您的自建东京单节点在此命名为 "🇯🇵 Tokyo_Proxy"
@@ -61,6 +63,27 @@ Apple = select, DIRECT, Proxy
 Final = select, Proxy, DIRECT
 
 [Rule]
+# 银行及金融 App 直连 (防止代理及安全检测失效)
+DOMAIN-SUFFIX, unionpay.com, DIRECT
+DOMAIN-SUFFIX, cmbchina.com, DIRECT
+DOMAIN-SUFFIX, cmbimg.com, DIRECT
+DOMAIN-SUFFIX, icbc.com.cn, DIRECT
+DOMAIN-SUFFIX, ccb.com, DIRECT
+DOMAIN-SUFFIX, boc.cn, DIRECT
+DOMAIN-SUFFIX, bankofchina.com, DIRECT
+DOMAIN-SUFFIX, abchina.com, DIRECT
+DOMAIN-SUFFIX, psbc.com, DIRECT
+DOMAIN-SUFFIX, spdb.com.cn, DIRECT
+DOMAIN-SUFFIX, cib.com.cn, DIRECT
+DOMAIN-SUFFIX, cebbank.com, DIRECT
+DOMAIN-SUFFIX, pingan.com.cn, DIRECT
+DOMAIN-SUFFIX, pingan.com, DIRECT
+DOMAIN-SUFFIX, bankcomm.com, DIRECT
+DOMAIN-SUFFIX, 95559.com.cn, DIRECT
+DOMAIN-SUFFIX, citicbank.com, DIRECT
+DOMAIN-SUFFIX, hxb.com.cn, DIRECT
+DOMAIN-SUFFIX, cgbchina.com.cn, DIRECT
+
 # WebRTC STUN 阻断 (放行游戏 STUN 直连，阻断追踪 STUN)
 DOMAIN-KEYWORD, stun.playstation, DIRECT
 DOMAIN-KEYWORD, stun.nintendo, DIRECT
