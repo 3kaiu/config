@@ -1,5 +1,5 @@
 #!name=AI 服务分流
-#!desc=ChatGPT · Claude · Gemini · Perplexity · Copilot 等 AI 服务走专用策略组
+#!desc=ChatGPT · Claude · Gemini · Perplexity · Copilot 等 AI 服务走 Proxy 代理策略组
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bot.png
@@ -8,52 +8,52 @@
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # OpenAI (ChatGPT / DALL-E / Sora / API)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DOMAIN-SUFFIX, openai.com, AI
-DOMAIN-SUFFIX, ai.com, AI
-DOMAIN-SUFFIX, chatgpt.com, AI
-DOMAIN-SUFFIX, oaiusercontent.com, AI
-DOMAIN-SUFFIX, oaistatic.com, AI
-DOMAIN-SUFFIX, openaiapi-site.azureedge.net, AI
-DOMAIN-SUFFIX, openaicom-api-bdcpf8c6d2e9b8.azurefd.net, AI
-DOMAIN-SUFFIX, auth0.openai.com, AI
-DOMAIN-KEYWORD, openai, AI
+DOMAIN-SUFFIX, openai.com, Proxy
+DOMAIN-SUFFIX, ai.com, Proxy
+DOMAIN-SUFFIX, chatgpt.com, Proxy
+DOMAIN-SUFFIX, oaiusercontent.com, Proxy
+DOMAIN-SUFFIX, oaistatic.com, Proxy
+DOMAIN-SUFFIX, openaiapi-site.azureedge.net, Proxy
+DOMAIN-SUFFIX, openaicom-api-bdcpf8c6d2e9b8.azurefd.net, Proxy
+DOMAIN-SUFFIX, auth0.openai.com, Proxy
+DOMAIN-KEYWORD, openai, Proxy
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Anthropic (Claude / API)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DOMAIN-SUFFIX, anthropic.com, AI
-DOMAIN-SUFFIX, claude.ai, AI
+DOMAIN-SUFFIX, anthropic.com, Proxy
+DOMAIN-SUFFIX, claude.ai, Proxy
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Google AI (Gemini / AI Studio / PaLM)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DOMAIN-SUFFIX, gemini.google.com, AI
-DOMAIN-SUFFIX, bard.google.com, AI
-DOMAIN-SUFFIX, aistudio.google.com, AI
-DOMAIN-SUFFIX, makersuite.google.com, AI
-DOMAIN-SUFFIX, generativelanguage.googleapis.com, AI
-DOMAIN-SUFFIX, deepmind.google, AI
-DOMAIN-SUFFIX, deepmind.com, AI
+DOMAIN-SUFFIX, gemini.google.com, Proxy
+DOMAIN-SUFFIX, bard.google.com, Proxy
+DOMAIN-SUFFIX, aistudio.google.com, Proxy
+DOMAIN-SUFFIX, makersuite.google.com, Proxy
+DOMAIN-SUFFIX, generativelanguage.googleapis.com, Proxy
+DOMAIN-SUFFIX, deepmind.google, Proxy
+DOMAIN-SUFFIX, deepmind.com, Proxy
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 其他 AI 服务
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DOMAIN-SUFFIX, perplexity.ai, AI
-DOMAIN-SUFFIX, mistral.ai, AI
-DOMAIN-SUFFIX, groq.com, AI
-DOMAIN-SUFFIX, cohere.com, AI
-DOMAIN-SUFFIX, huggingface.co, AI
-DOMAIN-SUFFIX, replicate.com, AI
-DOMAIN-SUFFIX, together.ai, AI
-DOMAIN-SUFFIX, fireworks.ai, AI
+DOMAIN-SUFFIX, perplexity.ai, Proxy
+DOMAIN-SUFFIX, mistral.ai, Proxy
+DOMAIN-SUFFIX, groq.com, Proxy
+DOMAIN-SUFFIX, cohere.com, Proxy
+DOMAIN-SUFFIX, huggingface.co, Proxy
+DOMAIN-SUFFIX, replicate.com, Proxy
+DOMAIN-SUFFIX, together.ai, Proxy
+DOMAIN-SUFFIX, fireworks.ai, Proxy
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # AI 编程工具 (Cursor / Copilot / Windsurf)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DOMAIN-SUFFIX, cursor.sh, AI
-DOMAIN-SUFFIX, cursor.com, AI
-DOMAIN-SUFFIX, copilot.microsoft.com, AI
-DOMAIN, github.copilot.com, AI
-DOMAIN-SUFFIX, codeium.com, AI
-DOMAIN-SUFFIX, windsurf.ai, AI
-DOMAIN-SUFFIX, supermaven.com, AI
+DOMAIN-SUFFIX, cursor.sh, Proxy
+DOMAIN-SUFFIX, cursor.com, Proxy
+DOMAIN-SUFFIX, copilot.microsoft.com, Proxy
+DOMAIN, github.copilot.com, Proxy
+DOMAIN-SUFFIX, codeium.com, Proxy
+DOMAIN-SUFFIX, windsurf.ai, Proxy
+DOMAIN-SUFFIX, supermaven.com, Proxy

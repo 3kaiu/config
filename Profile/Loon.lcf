@@ -42,6 +42,12 @@ real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.pin
 *.jd.com = server:119.29.29.29
 *.baidu.com = server:223.5.5.5
 *.bilibili.com = server:223.5.5.5
+*.meituan.com = server:223.5.5.5
+*.douyin.com = server:119.29.29.29
+*.163.com = server:119.29.29.29
+*.mi.com = server:223.5.5.5
+*.apple.com = server:223.5.5.5
+*.icloud.com = server:223.5.5.5
 
 [Proxy]
 # ⚠️ 提示：请将您的自建东京单节点在此命名为 "🇯🇵 Tokyo_Proxy"
@@ -50,8 +56,6 @@ real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.pin
 [Proxy Group]
 # 代理主策略：整合 Fallback 自动容灾，若东京节点超时自动回落直连，防止完全断网，剔除 url-test
 Proxy = select, 🇯🇵 Tokyo_Proxy, DIRECT
-Streaming = select, Proxy, DIRECT
-AI = select, Proxy, DIRECT
 Apple = select, DIRECT, Proxy
 Final = select, Proxy, DIRECT
 
@@ -65,6 +69,7 @@ IP-CIDR, 127.0.0.0/8, DIRECT
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 1. 精确拦截 HTTPDNS (常见 HTTPDNS 域名拦截)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN-KEYWORD, httpdns, REJECT
 DOMAIN, httpdns.c.cdnhwc.com, REJECT
 DOMAIN, httpdns.gslb.netease.com, REJECT
 
@@ -81,29 +86,20 @@ DOMAIN-SUFFIX, weixin.qq.com, DIRECT
 DOMAIN-SUFFIX, wx.qq.com, DIRECT
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 3. AI 服务 — 走 AI 策略组
+# 3. YouTube / 流媒体 (统一走 Proxy)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DOMAIN-SUFFIX, openai.com, AI
-DOMAIN-SUFFIX, ai.com, AI
-DOMAIN-SUFFIX, chatgpt.com, AI
-DOMAIN-SUFFIX, oaiusercontent.com, AI
-DOMAIN-SUFFIX, oaistatic.com, AI
-DOMAIN-SUFFIX, anthropic.com, AI
-DOMAIN-SUFFIX, claude.ai, AI
-DOMAIN-SUFFIX, gemini.google.com, AI
-DOMAIN-SUFFIX, bard.google.com, AI
-DOMAIN-SUFFIX, generativelanguage.googleapis.com, AI
-DOMAIN-SUFFIX, aistudio.google.com, AI
-DOMAIN-SUFFIX, makersuite.google.com, AI
-DOMAIN-SUFFIX, perplexity.ai, AI
-DOMAIN-SUFFIX, mistral.ai, AI
-DOMAIN-SUFFIX, groq.com, AI
-DOMAIN-SUFFIX, cohere.com, AI
-DOMAIN-SUFFIX, huggingface.co, AI
-DOMAIN-SUFFIX, replicate.com, AI
-DOMAIN-SUFFIX, cursor.sh, AI
-DOMAIN-SUFFIX, copilot.microsoft.com, AI
-DOMAIN-SUFFIX, github.copilot.com, AI
+DOMAIN-SUFFIX, youtube.com, Proxy
+DOMAIN-SUFFIX, googlevideo.com, Proxy
+DOMAIN-SUFFIX, ytimg.com, Proxy
+DOMAIN-SUFFIX, ggpht.com, Proxy
+DOMAIN, youtubei.googleapis.com, Proxy
+DOMAIN, yt3.ggpht.com, Proxy
+DOMAIN-SUFFIX, netflix.com, Proxy
+DOMAIN-SUFFIX, nflxvideo.net, Proxy
+DOMAIN-SUFFIX, disneyplus.com, Proxy
+DOMAIN-SUFFIX, hbomax.com, Proxy
+DOMAIN-SUFFIX, spotify.com, Proxy
+DOMAIN-SUFFIX, scdn.co, Proxy
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 4. GDT 广告 SDK 白名单 (防去广告误杀奖励包)
@@ -115,33 +111,6 @@ DOMAIN-SUFFIX, pangolin-sdk-toutiao.com, DIRECT
 DOMAIN-SUFFIX, pangolin-sdk-toutiao1.com, DIRECT
 DOMAIN-SUFFIX, pangle.io, DIRECT
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 5. 常见 APM & 埋点追踪拦截 (深度优化本地解析)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DOMAIN, path.book.qq.com, REJECT
-DOMAIN, rmonitor.qq.com, REJECT
-DOMAIN, unitelogreport.reader.qq.com, REJECT
-DOMAIN-KEYWORD, qreport, REJECT
-DOMAIN, apmplus.volces.com, REJECT
-DOMAIN, mssdk.volces.com, REJECT
-DOMAIN, tobapplog.ctobsnssdk.com, REJECT
-DOMAIN, hd.ctobsnssdk.com, REJECT
-DOMAIN, sdkreport.e.qq.com, REJECT
-DOMAIN, publiclog.zhiyan.tencent-cloud.net, REJECT
-DOMAIN, zhiyan.monitor.tencent-cloud.net, REJECT
-DOMAIN, galileotelemetry.tencent.com, REJECT
-DOMAIN, tangram.e.qq.com, REJECT
-DOMAIN, gatherer.m.qq.com, REJECT
-DOMAIN, dl.tiku.qq.com, REJECT
-DOMAIN, ali-stats.jpush.cn, REJECT
-DOMAIN, aegis.cdn-go.cn, REJECT
-DOMAIN, noahqd.yuewen.com, REJECT
-DOMAIN, upushv6.qidian.com, REJECT
-DOMAIN, ataru.qidian.com, REJECT
-DOMAIN, connect.yuewen.com, REJECT
-DOMAIN, fockrt.yuewen.com, REJECT
-DOMAIN, ywab.reader.qq.com, REJECT
-
 # 7. 本地 GeoIP CN 路由 (Native GeoIP Bounded Context)
 GEOIP, CN, DIRECT
 
@@ -150,6 +119,8 @@ FINAL, Final
 [Remote Rule]
 # 🚫 去广告规则置顶，防 China.list 误杀
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Advertising/Advertising.list, policy=REJECT, tag=🚫 广告域名, enabled=true
+https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Privacy/Privacy.list, policy=REJECT, tag=🔒 隐私保护, enabled=true
+https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Hijacking/Hijacking.list, policy=REJECT, tag=🛡️ 反劫持, enabled=true
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/China/China.list, policy=DIRECT, tag=🇨🇳 国内域名, enabled=true
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Global/Global.list, policy=Proxy, tag=🌍 国际域名, enabled=true
 
@@ -181,7 +152,6 @@ https://raw.githubusercontent.com/3kaiu/config/main/Plugin/qidian.plugin, enable
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/bank.plugin, enabled=true, tag=银行及云闪付去广告
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/ai.plugin, enabled=true, tag=AI 服务分流
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/zhihuifangdong.plugin, enabled=true, tag=智慧房东去广告
-https://raw.githubusercontent.com/3kaiu/config/main/Plugin/youtube.plugin, enabled=true, tag=YouTube 增强
 https://kelee.one/Tool/Loon/Lpx/YouTube_remove_ads.lpx, enabled=true, tag=YouTube去广告
 
 [Rewrite]
@@ -190,6 +160,6 @@ https://kelee.one/Tool/Loon/Lpx/YouTube_remove_ads.lpx, enabled=true, tag=YouTub
 ^https?:\/\/203\.107\.1\.1\/d reject
 
 [MitM]
-skip-server-cert-verify = true
+skip-server-cert-verify = false
 # 仅解密必要域名，防握手耗电和网络延迟
 hostname = h5.if.qidian.com, magev6.if.qidian.com, ii.gdt.qq.com, adsmind.gdtimg.com, api-access.pangolin-sdk-toutiao*.com, api.zhihuifangdong.net
