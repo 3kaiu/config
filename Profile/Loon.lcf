@@ -57,7 +57,10 @@ Final = select, Proxy, DIRECT
 
 [Rule]
 # 0. 局域网直连 (LAN Bounded Context)
-LAN, DIRECT
+IP-CIDR, 192.168.0.0/16, DIRECT
+IP-CIDR, 10.0.0.0/8, DIRECT
+IP-CIDR, 172.16.0.0/12, DIRECT
+IP-CIDR, 127.0.0.0/8, DIRECT
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 1. 精确拦截 HTTPDNS (常见 HTTPDNS 域名拦截)
