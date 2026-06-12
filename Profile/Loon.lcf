@@ -7,7 +7,7 @@
 [General]
 ip-mode = ipv4-only
 interface-mode = Performance
-dns-server = 223.5.5.5, 119.29.29.29
+dns-server = 223.5.5.5, 119.29.29.29, 180.184.11.11, 180.184.22.22
 doh-server = https://doh.pub/dns-query, https://dns.alidns.com/dns-query
 doq-server = quic://dns.alidns.com:853
 hijack-dns = *:53, 8.8.8.8, 8.8.4.4, 1.1.1.1, 114.114.114.114, 223.6.6.6, 180.76.76.76

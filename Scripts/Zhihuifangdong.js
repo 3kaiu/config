@@ -6,33 +6,31 @@
 const arg = typeof $argument !== "undefined" ? $argument : "";
 const $ = new Env("智慧房东");
 
-!(async () => {
-  try {
-    const obj = JSON.parse($response.body);
+try {
+  const obj = JSON.parse($response.body);
 
-    const url = typeof $request !== "undefined" ? $request.url : "";
-    if (arg === "appOpenAds" || url.includes("appOpenAds")) {
-      if (obj && obj.data) {
-        obj.data = [];
-      }
-      $.log("已屏蔽智慧房东开屏广告");
+  const url = typeof $request !== "undefined" ? $request.url : "";
+  if (arg === "appOpenAds" || url.includes("appOpenAds")) {
+    if (obj && obj.data) {
+      obj.data = [];
     }
-    else if (arg === "bannerPicMore" || url.includes("bannerPicMore")) {
-      if (obj && obj.data && obj.data.data) {
-        obj.data.data = [];
-      }
-      if (obj && obj.data) {
-        obj.data = {};
-      }
-      $.log("已屏蔽智慧房东 Banner 广告");
-    }
-
-    $.done({ body: JSON.stringify(obj) });
-  } catch (e) {
-    $.log(`智慧房东去广告异常: ${e}`);
-    $.done();
+    $.log("已屏蔽智慧房东开屏广告");
   }
-})();
+  else if (arg === "bannerPicMore" || url.includes("bannerPicMore")) {
+    if (obj && obj.data && obj.data.data) {
+      obj.data.data = [];
+    }
+    if (obj && obj.data) {
+      obj.data = {};
+    }
+    $.log("已屏蔽智慧房东 Banner 广告");
+  }
+
+  $.done({ body: JSON.stringify(obj) });
+} catch (e) {
+  $.log(`智慧房东去广告异常: ${e}`);
+  $.done();
+}
 
 // ==========================================
 // 🌍 Env 兼容层 (Loon / Quantumult X)

@@ -50,11 +50,11 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 *   **净化效果**：通过 [Zhihuifangdong.js](file:///Users/edy/.gemini/antigravity/scratch/config/Scripts/Zhihuifangdong.js) 拦截开屏与 Banner 横幅广告，Loon 端支持独立开关控制。
 
 ### 🤖 2.4 AI 服务分流
-*   **规则路径**：`Plugin/ai.plugin` (Loon) / `Profile/QX.conf` 本地规则 (QX)
-*   **分流服务**：OpenAI (ChatGPT)、Anthropic (Claude)、Google AI (Gemini)、Perplexity、Groq、编程助手 (Cursor / Copilot / Windsurf / Supermaven) 等。所有 AI 流量自动走向 AI 专用的策略组。
+*   **规则路径**：`Plugin/ai.plugin` (Loon) / `QX/ai.conf` 远程规则引用 (QX)
+*   **分流服务**：OpenAI (ChatGPT)、Anthropic (Claude)、Google AI (Gemini)、Perplexity、Groq、编程助手 (Cursor / Copilot / Windsurf / Supermaven) 等。所有 AI 流量自动走向 Proxy 代理策略组。
 
 ### 📹 2.5 YouTube 增强
-*   **脚本路径**：`Plugin/youtube.plugin` (Loon) / `Profile/QX.conf` 重写引用 (QX)
+*   **脚本路径**：主配置 `[Rule]` 规则路由 (Loon/QX) + 远程去广告插件 (Loon Kelee `YouTube_remove_ads.lpx` / QX `youtube.conf`)
 *   **净化效果**：屏蔽 YouTube App 视频中插广告、首页信息流推广，并提供后台播放 (画中画) 支持。
 
 ### 🚫 2.6 全网系统级与 App 深度去广告 (RuCu6 / 墨鱼双引擎)
@@ -77,14 +77,15 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
     *   主代理策略组采用手动选择设计：`Proxy = select, 🇯🇵 Tokyo_Proxy, DIRECT` (Loon) / `static=Proxy, 🇯🇵 Tokyo_Proxy, direct` (QX)。
     *   **流量防泄露优化**：废除了原先的 `fallback` 组（即当节点宕机时自动降级到 `DIRECT`）。自动降级虽然不会断网，但会导致原本需要代理的敏感流量（如海外搜索、AI、流媒体）在无感知的状态下直接打向真实 IP。这不仅会由于直连打不开导致访问失败，还会让真实 IP 泄漏。现在调整为静态选择，当节点不可用时显式报错，让您及时感知并调整，全面保护隐私。
     *   移除了 `url-test` 测速组，节省定时 ping 的网络握手资源和电量。
-2.  **Split DNS 分流与防泄露**：
-    *   **国内解析**：通过阿里/腾讯的高速加密 DNS（DoH / DoQ）在本地快速解析。
-    *   **国外解析**：代理流量完全交给东京代理服务器进行远端 DNS 解析，防止本地 ISP 监控并防止 DNS 污染。
-    *   **HTTPDNS IP 级正则拦截**：
+2.  **Split DNS 分流与双加密加速 (DoQ / DoH3)**：
+    *   **国内解析**：通过阿里/腾讯/火山引擎的高速加密 DNS（DoH / DoQ）在本地快速解析，新增火山引擎 DNS (`180.184.11.11`, `180.184.22.22`) 优化字节系/抖音应用解析。
+    *   **双端 DoQ 与 DoH3 加速**：Loon 与 Quantumult X 均引入了 DNS over QUIC (`quic://dns.alidns.com`) 和 DoH3 并开启极速首选，极大降低握手延迟，防 DNS 污染与泄露。
+    *   **HTTPDNS IP 级正则与通杀拦截**：
         *   通过本地重写 `^https?:\/\/119\.29\.29\.29\/d` 直接置空企鹅和阿里等 HTTPDNS 解析接口，强制 App 走系统安全 DNS。
-        *   **避免使用 IP-CIDR 全阻断**，防止标准 UDP 53 端口本地 DNS 查询因 IP 阻断被误杀。
-3.  **TLS 减负隔离 (MitM 精简)**：
+        *   **通杀拦截**：主配置引入 `DOMAIN-KEYWORD / host-keyword, httpdns, REJECT` 规则进行系统级域名通杀。
+3.  **TLS 减负与本地旁路 (MitM & skip_dst_ip)**：
     *   主配置中的 MitM 实行极严格的黑白名单隔离：排除微信、支付宝、各类网银等绝大部分安全敏感流量，仅对起点、智慧房东与少数联盟广告域名进行解密，**最大程度确保您的设备省电、网络低延迟与隐私安全**。
+    *   **本地旁路 (QX skip_dst_ip)**：对局域网及本地回环地址（如 `192.168.0.0/16`, `127.0.0.1/32`）强制绕过 MitM 握手流程，优化高频本地请求的响应速度，减少无谓的 CPU 加解密开销。
 
 ---
 
@@ -114,12 +115,12 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 │   ├── qidian.plugin            # 起点全能助手 Pro (全能增强版，含签到与高阶任务)
 │   ├── bank.plugin              # 银行与云闪付去广告
 │   ├── ai.plugin                # AI 服务分流
-│   ├── zhihuifangdong.plugin    # 智慧房东去广告
-│   └── youtube.plugin           # YouTube 增强
-├── QX/                         # 自维护 QX 配置模块 (可用作 Remote Rewrite)
+│   └── zhihuifangdong.plugin    # 智慧房东去广告
+├── QX/                         # 自维护 QX 配置模块 (分流/重写)
 │   ├── qidian.conf              # 起点全能助手 Pro (全能增强版，含签到与高阶任务)
 │   ├── bank.conf                # 银行与云闪付去广告 (QX)
-│   └── zhihuifangdong.conf      # 智慧房东去广告 (QX)
+│   ├── zhihuifangdong.conf      # 智慧房东去广告 (QX)
+│   └── ai.conf                  # AI 服务分流规则 (QX 远程引用)
 ├── Profile/
 │   ├── Loon.lcf                # Loon 客户端主配置文件
 │   └── QX.conf                 # Quantumult X 客户端主配置文件
