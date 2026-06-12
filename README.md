@@ -98,13 +98,15 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 
 ---
 
-## 4. Kelee 插件自动镜像机制
+## 4. Kelee 插件镜像复用与双端直连机制
 
-可莉官方插件（`kelee.one`）部署了 Cloudflare Turnstile 验证，并限制必须具有 `Loon` 的 User-Agent 才能拉取，导致其他工具（如 QX 或 Script-Hub 转换器）访问时直接 403。
+可莉官方插件（`kelee.one`）部署了 Cloudflare Turnstile 验证，限制必须具有 `Loon` 的 User-Agent 且满足验证条件才能拉取，这导致客户端在刷新或下载插件时频繁遭遇 403 错误。
 
-*   **同步数据源**：我们通过 [sync-kelee.yml](file:///Users/edy/.gemini/antigravity/scratch/config/.github/workflows/sync-kelee.yml) 工作流，每天定时从 GitHub 公开且免 CF 拦截的 `ajune0527/vpn_tool` 仓库拉取最新版插件，缓存至本地 [Kelee/](file:///Users/edy/.gemini/antigravity/scratch/config/Kelee) 目录。
-*   **无缝转换**：如果您在 QX 中需要使用可莉的去广告或 DNS 防泄露插件，请使用 Script-Hub 转换您的本地镜像链接：
-    `https://raw.githubusercontent.com/3kaiu/config/main/Kelee/Remove_ads_by_keli.plugin`
+为解决该可用性问题，本项目进行了如下的深度复用与集成：
+
+*   **Loon 客户端 100% 稳定连接**：我们已将 `Loon.lcf` 主配置中的 Kelee 插件链接（包括去广告、DNS 防泄露及 YouTube 增强）重定向至本项目本地 GitHub 镜像 Raw 链接（每天通过 Actions 自动同步更新），彻底免除了设备端的 Cloudflare 验证拦截。
+*   **Quantumult X 原生集成 DNS 防泄露**：针对 QX 无法直接解析 Loon `.plugin` 插件的问题，我们已将 Kelee `Prevent_DNS_Leaks.plugin` 中的全部规则静态转换为 QX 语法，并原生集成在 `QX.conf` 的 `[filter_local]` 中，无需使用 Script-Hub 等工具进行繁琐的外部格式转换。
+*   **同步数据源说明**：我们通过 [sync-kelee.yml](file:///Users/edy/.gemini/antigravity/scratch/config/.github/workflows/sync-kelee.yml) 工作流，每天定时从公开且免 CF 拦截的 `ajune0527/vpn_tool` 仓库拉取最新版插件缓存至本地 [Kelee/](file:///Users/edy/.gemini/antigravity/scratch/config/Kelee) 目录，供 QX 用户自行选择使用 Script-Hub 转换引用（如 `Remove_ads_by_keli.plugin`）。
 
 ---
 

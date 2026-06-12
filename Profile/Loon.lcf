@@ -161,12 +161,12 @@ https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 https://kelee.one/Tool/Loon/Lpx/Block_HTTPDNS.lpx, pin=true, enabled=true
 https://kelee.one/Tool/Loon/Lpx/BlockAdvertisers.lpx, pin=true, enabled=true
-https://kelee.one/Tool/Loon/Lpx/Prevent_DNS_Leaks.lpx, policy=Proxy, enabled=true
+https://raw.githubusercontent.com/3kaiu/config/main/Kelee/Prevent_DNS_Leaks.plugin, policy=Proxy, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 基础层 — 通用与多维去广告 (Loon在手机端发起请求，不受 Cloudflare 拦截限制)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://kelee.one/Tool/Loon/Lpx/Remove_ads_by_keli.lpx, enabled=true
+https://raw.githubusercontent.com/3kaiu/config/main/Kelee/Remove_ads_by_keli.plugin, enabled=true
 https://raw.githubusercontent.com/RuCu6/AdBlock/master/Loon/Crack/AdBlock.plugin, enabled=true, tag=RuCu6 App去广告
 https://raw.githubusercontent.com/ddgksf2013/Filter/master/Loon/AdBlock.plugin, enabled=true, tag=墨鱼 App去广告
 
@@ -183,7 +183,7 @@ https://raw.githubusercontent.com/3kaiu/config/main/Plugin/qidian.plugin, enable
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/bank.plugin, enabled=true, tag=银行及云闪付去广告
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/ai.plugin, enabled=true, tag=AI 服务分流
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/zhihuifangdong.plugin, enabled=true, tag=智慧房东去广告
-https://kelee.one/Tool/Loon/Lpx/YouTube_remove_ads.lpx, enabled=true, tag=YouTube去广告
+https://raw.githubusercontent.com/3kaiu/config/main/Kelee/YouTube_remove_ads.plugin, enabled=true, tag=YouTube去广告
 
 [Rewrite]
 # HTTPDNS API 正则拦截 (防止 API 直接通过 IP 发起解析)
