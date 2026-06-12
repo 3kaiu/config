@@ -503,8 +503,30 @@ function handleClean(path, response) {
 }
 
 // ==========================================
-// ⏰ Cron 签到
+// ⏰ Cron 签到 & 福利抽奖
 // ==========================================
+async function checkinLottery(headers) {
+  try {
+    const res = await $.fetch({
+      url: "https://magev6.if.qidian.com/argus/api/v1/checkin/checkinlottery",
+      method: "POST",
+      headers: normalizeHeaders(headers),
+      body: ""
+    });
+    if (res && res.statusCode === 200) {
+      const obj = safeJsonParse(res.body);
+      if (obj && obj.Result === 0) {
+        return ` | 🎁 抽奖: ${obj.Data?.AwardName || "成功"}`;
+      } else {
+        return ` | 🎁 抽奖: ${obj.Message || "无奖励"}`;
+      }
+    }
+  } catch (e) {
+    return ` | 🎁 抽奖异常: ${e}`;
+  }
+  return "";
+}
+
 async function handleCron() {
   const headers = $.get("Qidian_Headers");
   if (!headers) {
@@ -526,11 +548,13 @@ async function handleCron() {
       if (res && res.statusCode === 200) {
         const obj = safeJsonParse(res.body);
         if (obj && obj.Result === 0) {
-          $.notify("起点助手", "✅ 签到成功", obj.Message || "今日签到完成");
+          const drawMsg = await checkinLottery(headers);
+          $.notify("起点助手", "✅ 签到成功", (obj.Message || "今日签到完成") + drawMsg);
           $.done();
           return;
         } else if (obj && obj.Result === -452000) {
-          $.notify("起点助手", "📅 今日已签到", "");
+          const drawMsg = await checkinLottery(headers);
+          $.notify("起点助手", "📅 今日已签到", (obj.Message || "今日已签到") + drawMsg);
           $.done();
           return;
         } else {

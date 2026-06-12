@@ -1,0 +1,38 @@
+name: Sync Kelee Plugins
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # Everyday at 02:00 UTC
+  workflow_dispatch: # Enable manual run
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create Kelee directory
+        run: mkdir -p Kelee
+
+      - name: Download Kelee Plugins from Mirror (ajune0527/vpn_tool)
+        run: |
+          curl -s -L "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Prevent_DNS_Leaks.plugin" -o Kelee/Prevent_DNS_Leaks.plugin
+          curl -s -L "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/QiDian_remove_ads.plugin" -o Kelee/QiDian_remove_ads.plugin
+          curl -s -L "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Remove_ads_by_keli.plugin" -o Kelee/Remove_ads_by_keli.plugin
+          curl -s -L "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/YouTube_remove_ads.plugin" -o Kelee/YouTube_remove_ads.plugin
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add Kelee/
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Auto-sync Kelee plugins with Loon User-Agent"
+            git push
+          fi

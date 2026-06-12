@@ -52,7 +52,7 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 | 基础 | SafeRedirect / Remove_ads_by_keli / 开屏去广告 | 通用去广告 |
 | 可莉 | QiDian_remove_ads / YouTube_remove_ads | 应用级精准拦截 |
 | 工具 | Sub-Store / QuickSearch | 订阅管理/快捷搜索 |
-| 自维护 | 起点全能助手 v4.4 / YouTube增强 / 智慧房东 / **AI分流** | 深度定制 |
+| 自维护 | 起点全能助手 v4.4 / 起点高阶任务 / YouTube增强 / 智慧房东 / **AI分流** | 深度定制 |
 | Apple | iRingo 地图/定位/天气 ×4 | Apple 服务增强 |
 | 媒体 | DualSubs 双语字幕 | 流媒体增强 |
 
@@ -65,6 +65,20 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 - 每日阅读积分满值显示
 - 29 个追踪域 REJECT
 - cron 9:00 AM 静默签到
+
+## 起点高阶自动化任务 (可选)
+
+本项目集成了 ONZ3V (Yuheng0101) 开发的高阶起点签到与任务脚本。相较于默认的静默签到，高阶任务支持自动做激励碎片、广告币、每周日章节卡自动兑换及大咖荐书任务。
+
+**抓取 Cookie 步骤**：
+1. 双端在配置中将 **起点自动签到(高阶任务)** 模块/重写引用开启。
+2. 确保已开启 MitM 并解密 `h5.if.qidian.com`。
+3. 打开起点 App -> **我的** -> **福利中心**，抓取成功将弹出通知。
+4. 获取成功后，建议关闭/注释重写以减少系统网络开销。
+
+**双端开关说明**：
+- **Loon**：直接在插件管理中打开 `qidian_tasks.plugin`，在参数配置中勾选所需任务（如激励任务、每日抽奖、大咖荐书等）。
+- **Quantumult X**：脚本通过 BoxJs 提供功能开关，您可以在 BoxJs 界面中直接配置 `QDREADER_ADV_JOB_ENABLE` 等参数。
 
 ## DNS 加速
 
@@ -88,9 +102,17 @@ Profile/
   QX.conf                  # Quantumult X 主配置 v15
 Plugin/
   qidian.plugin            # 起点全能助手 Pro v4.4
+  qidian_tasks.plugin      # 起点自动签到高阶任务 (新增)
   youtube.plugin           # YouTube 增强
   zhihuifangdong.plugin    # 智慧房东广告屏蔽
   ai.plugin                # AI 服务分流 (新增)
+QX/
+  qidian.conf              # 起点去广告模块 (QX)
+  qidian_tasks.conf        # 起点高阶任务模块 (QX, 新增)
+  bank.conf                # 银行去广告模块 (QX)
+  zhihuifangdong.conf      # 智慧房东去广告模块 (QX)
+Kelee/
+  *.plugin                 # 本地缓存的可莉插件镜像 (修复)
 Scripts/
   Qidian.js                # 起点脚本 v4.3
   Zhihuifangdong.js        # 智慧房东脚本

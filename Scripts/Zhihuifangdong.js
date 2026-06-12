@@ -10,13 +10,14 @@ const $ = new Env("智慧房东");
   try {
     const obj = JSON.parse($response.body);
 
-    if (arg === "appOpenAds") {
+    const url = typeof $request !== "undefined" ? $request.url : "";
+    if (arg === "appOpenAds" || url.includes("appOpenAds")) {
       if (obj && obj.data) {
         obj.data = [];
       }
       $.log("已屏蔽智慧房东开屏广告");
     }
-    else if (arg === "bannerPicMore") {
+    else if (arg === "bannerPicMore" || url.includes("bannerPicMore")) {
       if (obj && obj.data && obj.data.data) {
         obj.data.data = [];
       }

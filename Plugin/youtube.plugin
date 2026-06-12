@@ -17,4 +17,4 @@ DOMAIN, youtubei.googleapis.com, Proxy
 DOMAIN, yt3.ggpht.com, Proxy
 
 [MitM]
-hostname = %APPEND% youtubei.googleapis.com
+hostname = youtubei.googleapis.com
