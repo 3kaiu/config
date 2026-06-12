@@ -49,7 +49,7 @@ real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.pin
 
 [Proxy Group]
 # 代理主策略：整合 Fallback 自动容灾，若东京节点超时自动回落直连，防止完全断网，剔除 url-test
-Proxy = fallback, 🇯🇵 Tokyo_Proxy, DIRECT, url = http://cp.cloudflare.com/generate_204, interval = 300, timeout = 3
+Proxy = select, 🇯🇵 Tokyo_Proxy, DIRECT
 Streaming = select, Proxy, DIRECT
 AI = select, Proxy, DIRECT
 Apple = select, DIRECT, Proxy
@@ -169,7 +169,6 @@ https://kelee.one/Tool/Loon/Lpx/QuickSearch.lpx, enabled=true
 # 自维护核心及应用插件 (按需开启，默认已全开，可在手机端根据需要关闭)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/qidian.plugin, enabled=true, tag=起点全能助手 Pro
-https://raw.githubusercontent.com/3kaiu/config/main/Plugin/qidian_tasks.plugin, enabled=true, tag=起点自动签到(高阶任务)
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/bank.plugin, enabled=true, tag=银行及云闪付去广告
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/ai.plugin, enabled=true, tag=AI 服务分流
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/zhihuifangdong.plugin, enabled=true, tag=智慧房东去广告
