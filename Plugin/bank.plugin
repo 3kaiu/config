@@ -1,66 +1,72 @@
 #!name=银行应用去广告
-#!desc=交通银行·农业银行·中国银行·云闪付 — 开屏/弹窗/推广净化
+#!desc=交通银行·农业银行·中国银行·云闪付 — 开屏/弹窗/推广净化，支持在插件参数中为各个银行设置独立开关。
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bank.png
 
+[Argument]
+UNIONPAY_ENABLE=switch,"true","false",tag=是否开启云闪付去广告,desc=开启后将拦截云闪付开屏、弹窗与理财页等推广
+BOCOM_ENABLE=switch,"true","false",tag=是否开启交通银行去广告,desc=开启后将拦截买单吧(交通银行)App开屏及广告图片
+ABC_ENABLE=switch,"true","false",tag=是否开启农业银行去广告,desc=开启后将拦截农业银行App开屏、推广及代理检测
+BOC_ENABLE=switch,"true","false",tag=是否开启中国银行去广告,desc=开启后将拦截中国银行App开屏、广告与主题静态资源
+
 [Rule]
 # 云闪付广告域名
-DOMAIN, ads.95516.com, REJECT
-DOMAIN, switch.cup.com.cn, REJECT
-DOMAIN, tysdk.95516.com, REJECT
+DOMAIN, ads.95516.com, REJECT, enable={UNIONPAY_ENABLE}
+DOMAIN, switch.cup.com.cn, REJECT, enable={UNIONPAY_ENABLE}
+DOMAIN, tysdk.95516.com, REJECT, enable={UNIONPAY_ENABLE}
 
 # 交通银行埋点
-DOMAIN-SUFFIX, track.bankcomm.com, REJECT
+DOMAIN-SUFFIX, track.bankcomm.com, REJECT, enable={BOCOM_ENABLE}
 
 # 农业银行埋点
-DOMAIN, firefly.abchina.com.cn, REJECT
+DOMAIN, firefly.abchina.com.cn, REJECT, enable={ABC_ENABLE}
 # 农业银行防代理检测
-DOMAIN, msmp.abchina.com.cn, REJECT
+DOMAIN, msmp.abchina.com.cn, REJECT, enable={ABC_ENABLE}
 
 [Rewrite]
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 交通银行（买单吧/信用卡）
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # ⚠️ 开屏与弹窗接口包含 SSL Pinning，默认注释以防买单吧 App 无法联网
-# ^https?:\/\/creditcardapp\.bankcomm\.(com|cn)\/mappweb_interface\/common\/(qryPopAds|qryLaunchAds)\.do reject-200
-# ^https?:\/\/creditcardapp\.bankcomm\.(com|cn)\/mappweb_interaction\/common\/(getPopAds|queryGuidePageAds)\.do reject-200
-# ^https?:\/\/creditcardapp\.bankcomm\.(com|cn)\/mappweb_interaction\/appInfo\/appNewestVersion reject-200
+# ^https?:\/\/creditcardapp\.bankcomm\.(com|cn)\/mappweb_interface\/common\/(qryPopAds|qryLaunchAds)\.do reject-200, enable={BOCOM_ENABLE}
+# ^https?:\/\/creditcardapp\.bankcomm\.(com|cn)\/mappweb_interaction\/common\/(getPopAds|queryGuidePageAds)\.do reject-200, enable={BOCOM_ENABLE}
+# ^https?:\/\/creditcardapp\.bankcomm\.(com|cn)\/mappweb_interaction\/appInfo\/appNewestVersion reject-200, enable={BOCOM_ENABLE}
 # 广告图片 (无 SSL Pinning，可安全拦截)
-^https?:\/\/creditcard\.bankcomm\.(com|cn)\/tfimg\/public00\/M00\/[a-zA-Z0-9]{2}\/[a-zA-Z0-9]{2}\/[a-zA-Z0-9-]{30}\.(jpg|jpeg) reject
+^https?:\/\/creditcard\.bankcomm\.(com|cn)\/tfimg\/public00\/M00\/[a-zA-Z0-9]{2}\/[a-zA-Z0-9]{2}\/[a-zA-Z0-9-]{30}\.(jpg|jpeg) reject, enable={BOCOM_ENABLE}
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 农业银行
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 开屏广告资源
-^https?:\/\/midc\.cdn-static\.abchina\.com\.cn\/distributecenterimg\/file\/download\/(ed64|74b5|bdfb4|86fb9|7aa68|62b87|7c7d) reject-dict
+^https?:\/\/midc\.cdn-static\.abchina\.com\.cn\/distributecenterimg\/file\/download\/(ed64|74b5|bdfb4|86fb9|7aa68|62b87|7c7d) reject-dict, enable={ABC_ENABLE}
 # 活动推广弹窗
-^https?:\/\/enjoy\.cdn-static\.abchina\.com\/yx-engine-web\/file\/download\/(?!7dc2|fe96|cea3|06a8|1b11|d57b|6918|61db|2d58|aa23|) reject-200
+^https?:\/\/enjoy\.cdn-static\.abchina\.com\/yx-engine-web\/file\/download\/(?!7dc2|fe96|cea3|06a8|1b11|d57b|6918|61db|2d58|aa23|) reject-200, enable={ABC_ENABLE}
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 中国银行（中国银行/缤纷生活）
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 中国银行广告与主题图片 Mock (避免开屏与首页广告，无 SSL Pinning 安全拦截)
-^https?:\/\/cdn1\.mbs\.boc\.cn\/ubas-mgateway-static\/images\/advertType\/ reject-dict
-^https?:\/\/cdn1\.mbs\.boc\.cn\/ubas-mgateway-static\/images\/\/theme\/ reject-dict
+^https?:\/\/cdn1\.mbs\.boc\.cn\/ubas-mgateway-static\/images\/advertType\/ reject-dict, enable={BOC_ENABLE}
+^https?:\/\/cdn1\.mbs\.boc\.cn\/ubas-mgateway-static\/images\/\/theme\/ reject-dict, enable={BOC_ENABLE}
 # ⚠️ 以下接口包含 SSL Pinning，默认注释以防缤纷生活 App 无法联网
 # 开屏广告
-# ^https?:\/\/mlife\.jf365\.boc\.cn\/AppPrj\/FirstPic\.do\?txnId=2PIC000001 reject-200
+# ^https?:\/\/mlife\.jf365\.boc\.cn\/AppPrj\/FirstPic\.do\?txnId=2PIC000001 reject-200, enable={BOC_ENABLE}
 # 首页弹窗/广告列表
-# ^https?:\/\/openapi\.boc\.cn\/unlogin\/app\/cbsp\/query_ad_list reject-200
+# ^https?:\/\/openapi\.boc\.cn\/unlogin\/app\/cbsp\/query_ad_list reject-200, enable={BOC_ENABLE}
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 云闪付
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # ⚠️ 首页大图广告包含 SSL Pinning，默认注释以防云闪付无法联网
-# ^https:\/\/wallet\.95516\.com(:10533)?\/s\/wl\/icon\/large\/1 reject
+# ^https:\/\/wallet\.95516\.com(:10533)?\/s\/wl\/icon\/large\/1 reject, enable={UNIONPAY_ENABLE}
 
 [Script]
 # ⚠️ 云闪付首页/理财/推荐推广脚本，因为接口包含 SSL Pinning，默认注释以防云闪付无法联网。
 # 开启需要设备已越狱并安装 SSL Pinning 绕过插件。
-# http-response ^https:\/\/base\.95516\.com\/app\/inApp\/sys\/appShowGroup\/ script-path=https://raw.githubusercontent.com/3kaiu/config/main/Scripts/UnionPay.js, requires-body=true, timeout=10, tag=云闪付首页净化
-# http-response ^https:\/\/account\.95516\.com\/fortune\/inApp\/common\/ script-path=https://raw.githubusercontent.com/3kaiu/config/main/Scripts/UnionPay.js, requires-body=true, timeout=10, tag=云闪付理财净化
-# http-response ^https:\/\/content\.95516\.com\/koala-pre\/koala\/(recommend\/hotList|right\/queryAllRights) script-path=https://raw.githubusercontent.com/3kaiu/config/main/Scripts/UnionPay.js, requires-body=true, timeout=10, tag=云闪付推荐净化
+# http-response ^https:\/\/base\.95516\.com\/app\/inApp\/sys\/appShowGroup\/ script-path=https://raw.githubusercontent.com/3kaiu/config/main/Scripts/UnionPay.js, requires-body=true, timeout=10, tag=云闪付首页净化, enable={UNIONPAY_ENABLE}
+# http-response ^https:\/\/account\.95516\.com\/fortune\/inApp\/common\/ script-path=https://raw.githubusercontent.com/3kaiu/config/main/Scripts/UnionPay.js, requires-body=true, timeout=10, tag=云闪付理财净化, enable={UNIONPAY_ENABLE}
+# http-response ^https:\/\/content\.95516\.com\/koala-pre\/koala\/(recommend\/hotList|right\/queryAllRights) script-path=https://raw.githubusercontent.com/3kaiu/config/main/Scripts/UnionPay.js, requires-body=true, timeout=10, tag=云闪付推荐净化, enable={UNIONPAY_ENABLE}
 
 [MitM]
 # ⚠️ 移除了包含 SSL Pinning 校验的银行交易与通信核心域名：creditcardapp.bankcomm.com, creditcardapp.bankcomm.cn, mlife.jf365.boc.cn, openapi.boc.cn, wallet.95516.com, base.95516.com, account.95516.com, content.95516.com
