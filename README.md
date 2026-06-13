@@ -31,12 +31,18 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
     *   **发现页净化**：过滤全部游戏/商城/红包模块，仅保留书单/专栏/IP专区/点点圈。
     *   **每日阅读积分满值**：重写阅读时长（7200秒），任务列表显示为已完成。
     *   **自动签到与高阶福利任务自动化**：每日自动运行，支持静默签到、激励视频碎片、广告起点币任务、每周日自动兑换章节卡以及大咖荐书等全套高阶福利。
-    *   **智能静默运行 (Silent Mode)**：默认开启，每日签到成功及重放任务仅在后台记录日志，不再频繁弹窗打扰，仅在 Token 失效或任务发生故障时进行系统级推送通知。
+    *   **消息推送与远程通知 (Push Notifications)**：默认在签到完成后推送系统级本地通知。支持将签到结果同步推送到第三方通道（如 Bark、Telegram Bot、PushPlus），只需在本地持久化存储中配置对应 Token 即可。
 *   **抓取 Cookie 步骤**：
     1. 开启 **起点全能助手 Pro** 模块/重写引用，确保 MitM 包含 `h5.if.qidian.com`。
     2. 打开起点 App -> **我的** -> **福利中心**，弹出 `✨ 抓取起点 Cookie 成功` 通知即表示获取成功。
     3. 获取成功后，建议在列表中关闭/注释此获取 Cookie 的重写以减少网络开销。
-*   **任务配置**：Loon 可直接在插件参数中调整各任务开关（默认全开），QX 用户通过 **BoxJs** 调整参数。
+*   **通知与任务配置**：
+    *   **配置远程通知**：在客户端的本地持久化存储（Loon 的 Persistent Store，或 QX 的 [prefs_local] / 变量编辑）中添加以下对应键值对即可自动启用远程消息推送：
+        *   `Bark_Key`：您的 Bark 秘钥（例如 `https://api.day.app/你的秘钥/` 中的秘钥段）
+        *   `TG_BOT_TOKEN`：Telegram 机器人的 API Token
+        *   `TG_USER_ID`：您的 Telegram 个人账户/频道 ID
+        *   `PUSHPLUS_TOKEN`：PushPlus 一对一推送 Token
+    *   **任务配置**：Loon 可直接在插件参数中调整各任务开关（默认全开），QX 用户通过 **BoxJs** 调整参数。
 
 ### 💳 2.2 银行及云闪付去广告
 *   **脚本路径**：`Plugin/bank.plugin` (Loon) / `QX/bank.conf` (QX)

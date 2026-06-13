@@ -15,7 +15,7 @@ const $ = new Env("起点助手");
 
 const CONFIG = {
   // 是否开启静默运行模式，关闭成功通知，仅对失败/异常进行提醒
-  SilentMode: true,
+  SilentMode: false,
 
   // finishWatch 重放任务映射
   TaskMapping: {
@@ -688,7 +688,47 @@ function Env(n) {
       });
     }
   });
-  this.notify = (t, s, b) => this.isL ? $notification.post(t, s, b) : $notify(t, s, b);
+  this.notify = (t, s, b) => {
+    // 1. 本地通知
+    if (this.isL) $notification.post(t, s, b);
+    else $notify(t, s, b);
+
+    // 2. 远程推送 (Bark, Telegram, PushPlus)
+    const barkKey = this.get("Bark_Key") || this.get("barkKey");
+    const tgToken = this.get("TG_BOT_TOKEN") || this.get("tgToken");
+    const tgChatId = this.get("TG_USER_ID") || this.get("tgChatId");
+    const pushplusToken = this.get("PUSHPLUS_TOKEN") || this.get("pushplusToken");
+
+    if (barkKey) {
+      this.fetch({
+        url: `https://api.day.app/${barkKey}/${encodeURIComponent(t)}/${encodeURIComponent((s ? s + "\n" : "") + b)}`,
+        method: "GET"
+      }).then(() => this.log("Bark 推送成功")).catch(e => this.log("Bark 推送失败: " + e));
+    }
+    if (tgToken && tgChatId) {
+      this.fetch({
+        url: `https://api.telegram.org/bot${tgToken}/sendMessage`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: String(tgChatId),
+          text: `${t}\n${s ? s + "\n" : ""}${b}`
+        })
+      }).then(() => this.log("Telegram 推送成功")).catch(e => this.log("Telegram 推送失败: " + e));
+    }
+    if (pushplusToken) {
+      this.fetch({
+        url: "http://www.pushplus.plus/send",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token: String(pushplusToken),
+          title: t,
+          content: `${s ? s + "\n" : ""}${b}`
+        })
+      }).then(() => this.log("PushPlus 推送成功")).catch(e => this.log("PushPlus 推送失败: " + e));
+    }
+  };
 }
 
 
