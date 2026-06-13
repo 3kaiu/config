@@ -47,8 +47,8 @@ DOMAIN, msmp.abchina.com.cn, REJECT, enable={ABC_ENABLE}
 # 中国银行（中国银行/缤纷生活）
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 中国银行广告与主题图片 Mock (避免开屏与首页广告，无 SSL Pinning 安全拦截)
-^https?:\/\/cdn1\.mbs\.boc\.cn\/ubas-mgateway-static\/images\/advertType\/ reject-dict, enable={BOC_ENABLE}
-^https?:\/\/cdn1\.mbs\.boc\.cn\/ubas-mgateway-static\/images\/\/theme\/ reject-dict, enable={BOC_ENABLE}
+^https?:\/\/cdn1\.mbs\.boc\.cn\/ubas-mgateway-static\/images\/advertType\/ reject-img, enable={BOC_ENABLE}
+^https?:\/\/cdn1\.mbs\.boc\.cn\/ubas-mgateway-static\/images\/\/theme\/ reject-img, enable={BOC_ENABLE}
 # ⚠️ 以下接口包含 SSL Pinning，默认注释以防缤纷生活 App 无法联网
 # 开屏广告
 # ^https?:\/\/mlife\.jf365\.boc\.cn\/AppPrj\/FirstPic\.do\?txnId=2PIC000001 reject-200, enable={BOC_ENABLE}
