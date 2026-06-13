@@ -1,0 +1,68 @@
+#!name=生活出行去广告
+#!desc=菜鸟包裹·万达电影·百度地图·易捷加油·云快充·小桔充电 — 净化推广与开屏广告
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Delivery.png
+
+[Rule]
+# 菜鸟包裹 AMDC 规则 (防拦截后重新获取)
+AND,((USER-AGENT,Cainiao4iPhone*), (DOMAIN,amdc.m.taobao.com)), REJECT
+
+# 百度地图开屏广告
+DOMAIN, ecom.map.baidu.com, REJECT
+
+[Rewrite]
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 1. 菜鸟包裹
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 首页瀑布流与推广
+^https:\/\/nbcps-mtop\.cainiao\.com\/gw\/mtop\.cainiao\.nbcps\.presentation\.fetch\.cn reject
+# 广告/推销中心
+^https:\/\/netflow-mtop\.cainiao\.com\/gw\/mtop\.cainiao\.guoguo\.nbnetflow\.ads\.index reject
+# 搜索栏推广词
+^https:\/\/cn-acs\.m\.cainiao\.com\/gw\/mtop\.cainiao\.adkeyword\.get\.cn reject
+# 寄件页红包/广告
+^https:\/\/cn-acs\.m\.cainiao\.com\/gw\/mtop\.cainiao\.guoguo\.nbnetflow\.ads\.m?show reject
+
+# 首页卡片净化
+http-response ^https:\/\/(cn-acs\.m|e2e-mtop)\.cainiao\.com\/gw\/mtop\.cainiao\.app\.e2e\.engine\.page\.fetch response-body-json-jq "del(.data.data.data.mainSearch.bizData.searchContents, .data.data.data.operationList)"
+# 我的页面推广净化
+http-response ^https:\/\/e2e-mtop\.cainiao\.com\/gw\/mtop\.cainiao\.app\.e2e\.engine\.page\.fetch\.cn response-body-json-jq "del(.data.data.banner, .data.data.activity, .data.data.vip)"
+# 发现页面推广净化
+http-response ^https:\/\/longquan-mtop\.cainiao\.com\/gw\/mtop\.com\.cainiao\.longquan\.place\.getpageresourcecontent\.cn response-body-json-jq "del(.data.result.placeContentMap[\"780001\"].contentList)"
+# 阻塞开屏广告下发
+http-response ^https:\/\/netflow-mtop\.cainiao\.com\/gw\/mtop\.cainiao\.guoguo\.nbnetflow\.ads response-body-json-jq "if .data.result[0].materialId == \"39017\" then . else .data = {} end"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 2. 万达电影
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 移除开屏及首页横幅广告 (利用 JQ 清空广告列表)
+http-response ^https:\/\/misc-api-prd-mx\.wandafilm\.com\/commend\/common_banner_batch\.api response-body-json-jq ".data.objects[\"OpenAPP-&-FlashAD\"] = [] | .data.objects[\"InTheaters-&-BoxAD\"] = []"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 3. 易捷加油
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 易捷加油小程序底部横幅广告
+^https:\/\/ocrifs\.ejoy\.sinopec\.com\/advertitfs\/advert\/findAdvertInfo reject-dict
+# 易捷加油及石化易电小程序红包/广告弹窗
+^https:\/\/ne\.gdsz\.sinopec\.com\/gateway\/api\/omp\/mt\/appAdvertising\/queryAdvertisingByParams reject-dict
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 4. 云快充 (YKC 小程序)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 城市配置/活动包/广告推广净化
+^https:\/\/gw3\.ykccn\.com\/api\/omp\/mt\/enterpriseWeChatConfig\/app\/queryCityConfig reject-dict
+^https:\/\/gw3\.ykccn\.com\/api\/omp\/mt\/appAdvertising\/queryAdvertisingByParams reject-dict
+^https:\/\/gw3\.ykccn\.com\/api\/omp\/mt\/charge\/activity\/package\/newest reject-dict
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 5. 小桔充电 (小桔充电小程序)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 页面详情/活动/个人中心推广净化
+^https:\/\/energy\.xiaojukeji\.com\/mission\/api\/page\/activityInfo reject-dict
+^https:\/\/energy\.xiaojukeji\.com\/mission\/api\/page\/getPageDetail reject-dict
+^https:\/\/energy\.xiaojukeji\.com\/energy\/hummer\/api\/resource\/display reject-dict
+^https:\/\/energy\.xiaojukeji\.com\/am\/marketing\/api\/member\/facade\/charge\/personal\/center reject-dict
+
+[MitM]
+hostname = netflow-mtop.cainiao.com, nbcps-mtop.cainiao.com, cn-acs.m.cainiao.com, e2e-mtop.cainiao.com, longquan-mtop.cainiao.com, misc-api-prd-mx.wandafilm.com, ocrifs.ejoy.sinopec.com, ne.gdsz.sinopec.com, gw3.ykccn.com, energy.xiaojukeji.com

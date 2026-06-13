@@ -138,7 +138,7 @@ const CLEAN_RULES = {
     return;
   }
   // B. GDT 视频拦截 — 返回 1 秒视频
-  if (url.includes(".mp4") && url.includes("adsmind.gdtimg.com")) {
+  if (url.includes(".mp4") && (url.includes("gdtimg.com") || url.includes("gtimg.cn"))) {
     handleVideoReplace();
     return;
   }
@@ -415,7 +415,7 @@ async function handleReplay(request) {
 
   $.log(`🚀 识别任务: ${task.name}, 重放 ${replayCount} 次`);
   const tasks = Array.from({ length: replayCount }, async (_, i) => {
-    await $.wait(i * 15);
+    await $.wait((i + 1) * 2000);
     const res = await $.fetch({
       url: request.url,
       method: "POST",

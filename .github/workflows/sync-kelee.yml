@@ -20,11 +20,11 @@ jobs:
 
       - name: Download Kelee Plugins from Mirror (ajune0527/vpn_tool)
         run: |
-          curl -s -L "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Prevent_DNS_Leaks.plugin" -o Kelee/Prevent_DNS_Leaks.plugin
-          curl -s -L "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/QiDian_remove_ads.plugin" -o Kelee/QiDian_remove_ads.plugin
-          curl -s -L "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Remove_ads_by_keli.plugin" -o Kelee/Remove_ads_by_keli.plugin
-          curl -s -L "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/YouTube_remove_ads.plugin" -o Kelee/YouTube_remove_ads.plugin
-          curl -s -L "https://raw.githubusercontent.com/jqyisbest/RuCu6/main/Plugins/myblockads.plugin" -o Kelee/myblockads.plugin
+          curl -s -L -A "Loon/3.2.1" "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Prevent_DNS_Leaks.plugin" -o Kelee/Prevent_DNS_Leaks.plugin
+          curl -s -L -A "Loon/3.2.1" "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/QiDian_remove_ads.plugin" -o Kelee/QiDian_remove_ads.plugin
+          curl -s -L -A "Loon/3.2.1" "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Remove_ads_by_keli.plugin" -o Kelee/Remove_ads_by_keli.plugin
+          curl -s -L -A "Loon/3.2.1" "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/YouTube_remove_ads.plugin" -o Kelee/YouTube_remove_ads.plugin
+          curl -s -L -A "Loon/3.2.1" "https://raw.githubusercontent.com/jqyisbest/RuCu6/main/Plugins/myblockads.plugin" -o Kelee/myblockads.plugin
 
       - name: Commit and push changes
         run: |

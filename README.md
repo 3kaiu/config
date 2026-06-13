@@ -43,12 +43,12 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 *   **覆盖应用**：云闪付、买单吧 (交通银行)、中国银行 (缤纷生活)、农业银行等主流金融机构。
 *   **净化效果**：
     *   拦截启动开屏广告、首页弹窗、广告图加载。
-    *   **云闪付净化**：通过 [UnionPay.js](file:///Users/edy/.gemini/antigravity/scratch/config/Scripts/UnionPay.js) 重写，剔除理财页推广、首页大图、 koala 权益推广。
-    *   **类型安全 Mocking**：使用 `reject-dict` (返回 `{}`) 替代直接断网，防止 App 报错崩溃或因获取不到数据重复高频请求。
+    *   **云闪付净化**：通过 [UnionPay.js](file:///Users/edy/.gemini/antigravity/scratch/config/Scripts/UnionPay.js) 重写，剔除理财页推广、首页大图、 koala 权益推广（默认注释以防 SSL Pinning 崩溃，越狱/注入用户可手动开启）。
+    *   **类型安全 Mocking**：使用 `reject-dict` (返回 `{}`) 替代直接断网，防止 App 报错崩溃。
     *   **深度兼容与去广告平衡设计**：
-        1. **DNS 绕过与 Fake-IP 排除**：在 QX `dns_exclusion_list` 与 Loon `real-ip` 中全量加入主流金融域名，强制使用真实 IP 解析，防范安全检测与闪退。
+        1. **DNS 绕过与 Fake-IP 排除**：在 QX `dns_exclusion_list` 与 Loon `real-ip` 中全量加入主流金融域名，强制使用真实 IP 解析，防范安全检测。
         2. **最高优先级置顶直连**：在分流规则最上方加入本地网银直连块，保障金融交易流量以最高优先级走 DIRECT。
-        3. **安全与去广告平衡 (免 MitM 劫持安全网关)**：从主配置的 `MitM` 排除列表中移除银行 wildcard (如 `-*.boc.cn` 等)，仅在 `bank.conf` 等远程重写中声明要解密的特定广告域名（如 `mlife.jf365.boc.cn`），确保涉及用户资金交易的核心 API (如 `ebsnew.boc.cn`) 绝不参与解密，完全绕过 MitM 劫持。
+        3. **安全与去广告平衡 (免 MitM 劫持安全网关)**：默认**注释掉**所有内置了严格 SSL Pinning 校验的银行与云闪付核心交易/通信 API 域名（如 `creditcardapp.bankcomm.com`、`openapi.boc.cn`、`wallet.95516.com`）。这样在不破坏普通用户 App 联网稳定性的前提下，利用 DNS 级 `REJECT` 拦截广告服务和不需要解密的静态卡面 CDN。
 
 ### 🏠 2.3 智慧房东去广告
 *   **脚本路径**：`Plugin/zhihuifangdong.plugin` (Loon) / `QX/zhihuifangdong.conf` (QX)
@@ -65,6 +65,21 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 ### 🚫 2.6 全网系统级与 App 深度去广告 (RuCu6 / 墨鱼双引擎)
 *   **规则路径**：Loon 插件 (`Plugin`) / QX 远程重写 (`rewrite_remote`) 默认内置。
 *   **净化范围**：整合全网最有价值的 app 去广告方案，包括 **RuCu6** 与 **ddgksf2013/墨鱼** 的核心净化规则。针对微博、知乎、高德地图、小红书、美团等高频应用，全方位去除开屏广告、弹窗及推广信息，同时**采用多维度多层次设计（如 HTTPDNS 接口置空拦截）**，最大化缩减 CPU 开销以节省电池电量。
+
+### 🎮 2.7 Epic Games & epic-kiosk 领游戏分流支持
+*   **分流规则**：`Profile/Loon.lcf` (Loon) / `Profile/QX.conf` (QX) -> 远程引用 `blackmatrix7` 维护的 `Epic.list`。
+*   **核心功能**：
+    *   将 Epic Games 相关的登录、商城、CDN 流量自动路由至 `Proxy` 代理组，支持自动化领取工具 `epic-kiosk`。
+    *   将其独立分组，方便您在客户端 UI 中单独切换其节点到 **Proxy Chain 代理链（前置中转节点 ➡️ 原生住宅 IP 出口节点）**，完美规避 Epic 严格的 Cloudflare 防刷盾和 hCaptcha 验证码封锁。
+
+### 🛵 2.8 生活出行去广告 (默认开启)
+*   **脚本路径**：`Plugin/life.plugin` (Loon) / `QX/life.conf` (QX)
+*   **核心功能**：
+    *   **菜鸟包裹**：通过类型安全 JSON-JQ 移除首页瀑布流及推广、我的页面横幅及广告、发现页推广，并阻塞开屏广告下发。
+    *   **万达电影**：移除开屏及首页横幅广告。
+    *   **百度地图**：拒绝开屏广告域名加载。
+    *   **易捷加油**：移除小程序底部横幅及首页红包/广告弹窗。
+    *   **云快充与小桔充电**：净化小程序内各类广告包、充电活动及推广横幅，还您干净的充电界面。
 
 ---
 
@@ -127,11 +142,13 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 ├── Plugin/                     # 自维护 Loon 插件
 │   ├── qidian.plugin            # 起点全能助手 Pro (全能增强版，含签到与高阶任务)
 │   ├── bank.plugin              # 银行与云闪付去广告
+│   ├── life.plugin              # 生活出行去广告
 │   ├── ai.plugin                # AI 服务分流
 │   └── zhihuifangdong.plugin    # 智慧房东去广告
 ├── QX/                         # 自维护 QX 配置模块 (分流/重写)
 │   ├── qidian.conf              # 起点全能助手 Pro (全能增强版，含签到与高阶任务)
 │   ├── bank.conf                # 银行与云闪付去广告 (QX)
+│   ├── life.conf                # 生活出行去广告 (QX)
 │   ├── zhihuifangdong.conf      # 智慧房东去广告 (QX)
 │   └── ai.conf                  # AI 服务分流规则 (QX 远程引用)
 ├── Profile/
