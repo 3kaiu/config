@@ -15,25 +15,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create Kelee directory
-        run: mkdir -p Kelee
+      - name: Create directories
+        run: mkdir -p Kelee Plugins
 
-      - name: Download Kelee Plugins from Mirror (ajune0527/vpn_tool)
+      - name: Download core Kelee plugins (ajune0527/vpn_tool mirror)
         run: |
           curl -s -L -A "Loon/3.3.9" "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Prevent_DNS_Leaks.plugin" -o Kelee/Prevent_DNS_Leaks.plugin
-          curl -s -L -A "Loon/3.3.9" "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/QiDian_remove_ads.plugin" -o Kelee/QiDian_remove_ads.plugin
           curl -s -L -A "Loon/3.3.9" "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Remove_ads_by_keli.plugin" -o Kelee/Remove_ads_by_keli.plugin
           curl -s -L -A "Loon/3.3.9" "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/YouTube_remove_ads.plugin" -o Kelee/YouTube_remove_ads.plugin
           curl -s -L -A "Loon/3.3.9" "https://raw.githubusercontent.com/jqyisbest/RuCu6/main/Plugins/myblockads.plugin" -o Kelee/myblockads.plugin
+
+      - name: Backup ajune0527 Loon App plugins (防上游删除/改名导致失效)
+        run: |
+          for p in Weibo_remove_ads Weixin_Official_Accounts_remove_ads Bilibili_remove_ads NeteaseCloudMusic_remove_ads Amap_remove_ads Taobao_remove_ads JD_remove_ads Tieba_remove_ads Himalaya_remove_ads CoolApk_remove_ads IThome_remove_ads BaiduNetDisk_remove_ads Reddit_remove_ads Soul_remove_ads Sub-Store QuickSearch; do
+            curl -s -L -A "Loon/3.3.9" "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/${p}.plugin" -o "Plugins/${p}.plugin"
+          done
 
       - name: Commit and push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add Kelee/
+          git add Kelee/ Plugins/
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Auto-sync Kelee plugins with Loon User-Agent"
+            git commit -m "Auto-sync Kelee + ajune0527 plugins with Loon User-Agent"
             git push
           fi

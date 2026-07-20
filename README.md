@@ -73,8 +73,8 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 *   **净化范围**：整合全网最有价值的 App 去广告方案，采用**多引擎分层覆盖**设计：
     *   **通用去广告层**：`blackmatrix7/AllInOne`（QX）+ `Remove_ads_by_keli.plugin` + `myblockads.plugin`(RuCu6)（Loon）覆盖系统级广告域名、追踪 SDK。
     *   **开屏广告通杀层**：`ddgksf2013/FakeiOSAds`（QX）拦截 iOS 系统/第三方 SDK 开屏广告。
-    *   **按 App 精细化去广告层**（v5.4 新增）：
-        *   **Loon 端**（ajune0527/vpn_tool 插件）：微博、微信公众号、Bilibili、网易云音乐、高德地图、淘宝、京东、百度贴吧、喜马拉雅、酷安、IT之家、百度网盘、Reddit、Soul 等 14+ App 独立去广告插件。
+    *   **按 App 精细化去广告层**（v5.4 新增，v5.5 扩展备份）：
+        *   **Loon 端**（ajune0527/vpn_tool 插件）：微博、微信公众号、Bilibili、网易云音乐、高德地图、淘宝、京东、百度贴吧、喜马拉雅、酷安、IT之家、百度网盘、Reddit、Soul 等 14+ App 独立去广告插件。v5.5 起全部纳入 GitHub Actions 每日同步备份至 `Plugins/` 目录，防上游删除/改名失效。
         *   **QX 端**（ddgksf2013 + app2smile）：微博、微信、网易云音乐、高德地图、百度贴吧、闲鱼、喜马拉雅、什么值得买、Bilibili(主App+漫画)、车来了、中国联通、网易邮箱、墨迹天气、汽水音乐、小宇宙播客、Reddit 等 16+ App 独立去广告配置。
     *   **追踪/埋点拦截层**：主配置 `[Rule]` 段内置 23 条腾讯/字节/阿里系追踪域名 REJECT，与去广告插件互补。
     *   **多维度 HTTPDNS 拦截**：`DOMAIN-KEYWORD httpdns REJECT` + `[Host]` 静态映射 `0.0.0.0` + `[Rewrite]` reject，三层拦截防 DNS 污染。
@@ -131,6 +131,9 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
     *   **本地区域网与游戏 DNS 旁路 (QX dns_exclusion_list)**：防止 Apple 服务（AirPlay/HomeKit）和游戏主机联机遭遇 Fake-IP 映射问题，保障网络稳定性。
 4.  **UDP 443 禁用与 YouTube 去广告兼容 (v5.3 新增)**：
     *   双端禁用 UDP 协议的 443 端口（Loon `disable-udp-ports = 443` / QX `udp_drop_list = 443`），满足 Kelee YouTube 去广告插件"必须禁用 UDP 443"的要求。否则 YouTube QUIC 流量会绕过 MitM 解密，导致视频广告无法拦截。
+5.  **银行 App 网络错误根治 (v5.5 P0 修复)**：
+    *   **根因**：`myblockads.plugin`(RuCu6) 的 MitM hostname 声明了 `wallet.95516.com`(云闪付)、`mobilepaas.abchina.com.cn`(农行)、`image.mybank.icbc.com.cn`(工行) 等银行核心域名，并对部分域名做 rewrite；QX 端 `blackmatrix7/AllInOne.conf` 声明了 `creditcardapp.bankcomm.*`(交行)、`hcz-member.pingan.com.cn`(平安)、`lban.spdb.com.cn`(浦发)、`v.icbc.com.cn`(工行)、`adv.ccb.com`/`yunbusiness.ccb.com`(建行) 等；`Toperlock/AdBlock.conf` 声明了 `midc.cdn-static.abchina.com.cn`(农行)、`image.spdbccc.com.cn`(浦发信用卡)。这些域名被 MitM 解密后，银行 App 的 SSL Pinning 会拒绝伪造证书 → TLS 握手失败 → App 显示"网络错误"。
+    *   **修复**：双端主配置 `[MitM]`/`[mitm]` hostname 列表**前置负向通配符**排除所有银行域名（覆盖 17 家银行 + 银联/云闪付），负向声明优先级高于远程插件的正向声明，确保银行域名**永不被 MitM 解密**。银行去广告完全通过主配置 DNS 级 REJECT 实现，无需解密。
 
 ---
 
@@ -163,13 +166,17 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 3kaiu/config/
 ├── .github/
 │   └── workflows/
-│       └── sync-kelee.yml       # 每天自动从公共镜像源同步可莉插件
+│       └── sync-kelee.yml       # 每天自动从公共镜像源同步可莉插件 + ajune0527 App 插件
 ├── Kelee/                      # 本地缓存的可莉 & RuCu6 插件镜像 (QX转换用)
 │   ├── Prevent_DNS_Leaks.plugin
 │   ├── myblockads.plugin
-│   ├── QiDian_remove_ads.plugin
 │   ├── Remove_ads_by_keli.plugin
 │   └── YouTube_remove_ads.plugin
+├── Plugins/                   # ajune0527 Loon App 去广告插件每日同步备份 (防上游失效)
+│   ├── Weibo_remove_ads.plugin
+│   ├── Bilibili_remove_ads.plugin
+│   ├── NeteaseCloudMusic_remove_ads.plugin
+│   └── ... (16 个 App 独立去广告插件)
 ├── Plugin/                     # 自维护 Loon 插件
 │   ├── qidian.plugin            # 起点全能助手 Pro (全能增强版，含签到与高阶任务)
 │   ├── bank.plugin              # 银行与云闪付去广告
