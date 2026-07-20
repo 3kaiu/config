@@ -77,7 +77,7 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
     *   **Siri**：解锁 Siri 国际版功能与搜索建议。MitM 解密 `guzzoni.smoot.apple.com`、`api2.smoot.apple.com`。
     *   **TestFlight**：区域解锁、多账户切换、跨平台安装。MitM 解密 `testflight.apple.com`。
 *   **MitM 安全**：所有 Apple 增强域名均为具体子域，不影响银行安全。QX 端在 ` -*.apple.com` 负向排除后显式声明这些具体域名来覆盖排除，确保正常解密。
-*   **引用格式**：Loon 使用 `.plugin`（release 下载），QX 使用 `.yaml`（iRingo 官方 QX 原生格式）。
+*   **引用格式**：Loon 使用 `.plugin`（GitHub Releases 下载），QX 使用本地转换的 `.conf`（从 iRingo `.plugin` 手动转换为 QX 原生格式，托管在 `QX/apple/` 目录）。⚠️ iRingo 官方的 `.yaml` 不是 QX 原生格式（QX 无法解析），故 v5.8 改为本地转换。QX 端不支持 argument 传递，参数需通过 BoxJS 配置。
 
 ### 🚫 2.6 全网系统级与 App 深度去广告 (多引擎全覆盖)
 *   **规则路径**：Loon 插件 (`Plugin`) / QX 远程重写 (`rewrite_remote`) 默认内置。
@@ -196,6 +196,12 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 │   ├── ai.plugin                # AI 服务分流
 │   └── zhihuifangdong.plugin    # 智慧房东去广告
 ├── QX/                         # 自维护 QX 配置模块 (分流/重写)
+│   ├── apple/                   # Apple 原生增强 (iRingo .plugin→.conf 转换)
+│   │   ├── WeatherKit.conf      # 天气增强
+│   │   ├── Maps.conf            # 地图增强
+│   │   ├── News.conf            # News 解锁
+│   │   ├── Siri.conf            # Siri + 搜索建议增强
+│   │   └── TestFlight.conf      # TestFlight 区域解锁
 │   ├── qidian.conf              # 起点全能助手 Pro (全能增强版，含签到与高阶任务)
 │   ├── bank.conf                # 银行与云闪付去广告 (QX)
 │   ├── life.conf                # 生活出行去广告 (QX)

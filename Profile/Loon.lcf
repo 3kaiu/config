@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════
-#  Loon 配置 (Loon.lcf) — v5.7 (高级 NetOps 增强版)
+#  Loon 配置 (Loon.lcf) — v5.8 (高级 NetOps 增强版)
 #  核心: 自动健康检测 · 高质量多引擎去广告 · Apple原生增强 · 全球社交/流媒体分流 · 银行 MitM 冲突根治
 #  引擎支持: iOS Loon 3.3.9+
 # ═══════════════════════════════════════════════════════════
@@ -238,6 +238,25 @@ DOMAIN-SUFFIX, steamcdn-a.akamaihd.net, Proxy
 DOMAIN-SUFFIX, wikipedia.org, Proxy
 DOMAIN-SUFFIX, wikimedia.org, Proxy
 DOMAIN-SUFFIX, wikimediafoundation.org, Proxy
+# 其他常用国际服务 (Global.list 未完整覆盖, v5.8 新增)
+# Medium / Notion / Figma / Dropbox
+DOMAIN-SUFFIX, medium.com, Proxy
+DOMAIN-SUFFIX, notion.so, Proxy
+DOMAIN-SUFFIX, notion.com, Proxy
+DOMAIN-SUFFIX, figma.com, Proxy
+DOMAIN-SUFFIX, dropbox.com, Proxy
+DOMAIN-SUFFIX, dropboxusercontent.com, Proxy
+# Pinterest / Tumblr
+DOMAIN-SUFFIX, pinterest.com, Proxy
+DOMAIN-SUFFIX, pinimg.com, Proxy
+DOMAIN-SUFFIX, tumblr.com, Proxy
+# Stack Overflow / 开发者社区
+DOMAIN-SUFFIX, stackoverflow.com, Proxy
+DOMAIN-SUFFIX, stackexchange.com, Proxy
+DOMAIN-SUFFIX, npmjs.com, Proxy
+DOMAIN-SUFFIX, npm.im, Proxy
+DOMAIN-SUFFIX, docker.com, Proxy
+DOMAIN-SUFFIX, jetbrains.com, Proxy
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 全球社交平台 (统一走 Proxy)
