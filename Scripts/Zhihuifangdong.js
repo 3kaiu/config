@@ -56,7 +56,14 @@ function Env(n) {
       let m = (o.method || "GET").toLowerCase();
       $httpClient[m](o, (err, res, b) => {
         if (err) e(err);
-        else { res.body = b; res.statusCode = res.status || 200; r(res); }
+        else {
+          res.body = b;
+          // ⚠️ 修复: Loon 的 response 字段名在不同版本可能是 status 或 statusCode
+          if (res.statusCode === undefined) {
+            res.statusCode = res.status !== undefined ? res.status : (res.response ? res.response.statusCode : 200);
+          }
+          r(res);
+        }
       });
     }
   });

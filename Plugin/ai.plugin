@@ -35,6 +35,7 @@ DOMAIN-SUFFIX, bard.google.com, {AI_Policy}
 DOMAIN-SUFFIX, aistudio.google.com, {AI_Policy}
 DOMAIN-SUFFIX, makersuite.google.com, {AI_Policy}
 DOMAIN-SUFFIX, generativelanguage.googleapis.com, {AI_Policy}
+DOMAIN-SUFFIX, alkalimakersuite-pa.googleapis.com, {AI_Policy}
 DOMAIN-SUFFIX, deepmind.google, {AI_Policy}
 DOMAIN-SUFFIX, deepmind.com, {AI_Policy}
 
@@ -55,8 +56,11 @@ DOMAIN-SUFFIX, fireworks.ai, {AI_Policy}
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 DOMAIN-SUFFIX, cursor.sh, {AI_Policy}
 DOMAIN-SUFFIX, cursor.com, {AI_Policy}
-DOMAIN-SUFFIX, copilot.microsoft.com, {AI_Policy}
+DOMAIN-SUFFIX, cursor-api.com, {AI_Policy}
 DOMAIN, github.copilot.com, {AI_Policy}
+DOMAIN-SUFFIX, copilot.microsoft.com, {AI_Policy}
+DOMAIN-SUFFIX, copilot-proxy.githubusercontent.com, {AI_Policy}
 DOMAIN-SUFFIX, codeium.com, {AI_Policy}
+DOMAIN-SUFFIX, codeiumserver.com, {AI_Policy}
 DOMAIN-SUFFIX, windsurf.ai, {AI_Policy}
 DOMAIN-SUFFIX, supermaven.com, {AI_Policy}

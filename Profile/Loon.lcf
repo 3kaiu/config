@@ -33,7 +33,7 @@ wifi-access-socks5-port = 6225
 test-timeout = 5
 internet-test-url = http://cp.cloudflare.com/generate_204
 proxy-test-url = http://cp.cloudflare.com/generate_204
-skip-proxy = 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, localhost, *.local
+skip-proxy = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32, localhost, *.local, *.lan, *.home.arpa
 bypass-tun = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32
 real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.boc.cn, *.abchina.com, *.ccb.com, *.psbc.com, *.cmbchina.com, *.icbc.com.cn, *.bankofchina.com, *.spdb.com.cn, *.cib.com.cn, *.cebbank.com, *.unionpay.com, *.pingan.com.cn, *.pingan.com, *.bankcomm.com, *.citicbank.com, *.hxb.com.cn, *.cgbchina.com.cn, *.local, *.lan, *.home.arpa, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, *.msftconnecttest.com, *.msftncsi.com, *.battlenet.com.cn
 
@@ -72,6 +72,26 @@ Final = select, Proxy, DIRECT
 [Rule]
 # APNs 推送服务直连 (防止推送延迟)
 PORT, 5223, DIRECT
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 银行广告 CDN 拦截 (必须放在银行 DIRECT 规则之前，Loon 按顺序匹配)
+# 这些域名是银行 App 的广告/埋点 CDN，REJECT 拦截广告又不影响交易
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 交通银行广告图片 CDN
+DOMAIN, creditcard.bankcomm.com, REJECT
+DOMAIN, creditcard.bankcomm.cn, REJECT
+DOMAIN-SUFFIX, track.bankcomm.com, REJECT
+# 农业银行开屏广告/埋点 CDN
+DOMAIN, midc.cdn-static.abchina.com.cn, REJECT
+DOMAIN, enjoy.cdn-static.abchina.com, REJECT
+DOMAIN, firefly.abchina.com.cn, REJECT
+DOMAIN, msmp.abchina.com.cn, REJECT
+# 中国银行广告图片 CDN
+DOMAIN, cdn1.mbs.boc.cn, REJECT
+# 云闪付广告域名
+DOMAIN, ads.95516.com, REJECT
+DOMAIN, switch.cup.com.cn, REJECT
+DOMAIN, tysdk.95516.com, REJECT
 
 # 银行及金融 App 直连 (防止代理及安全检测失效)
 DOMAIN-SUFFIX, unionpay.com, DIRECT
@@ -143,10 +163,44 @@ DOMAIN, youtubei.googleapis.com, Proxy
 DOMAIN, yt3.ggpht.com, Proxy
 DOMAIN-SUFFIX, netflix.com, Proxy
 DOMAIN-SUFFIX, nflxvideo.net, Proxy
+DOMAIN-SUFFIX, netflix.net, Proxy
+DOMAIN-SUFFIX, nflximg.net, Proxy
 DOMAIN-SUFFIX, disneyplus.com, Proxy
+DOMAIN-SUFFIX, disney-plus.net, Proxy
+DOMAIN-SUFFIX, dssott.com, Proxy
 DOMAIN-SUFFIX, hbomax.com, Proxy
+DOMAIN-SUFFIX, hbonow.com, Proxy
 DOMAIN-SUFFIX, spotify.com, Proxy
 DOMAIN-SUFFIX, scdn.co, Proxy
+DOMAIN-SUFFIX, spotifyedge.com, Proxy
+# TikTok / 抖音国际版
+DOMAIN-SUFFIX, tiktok.com, Proxy
+DOMAIN-SUFFIX, tiktokcdn.com, Proxy
+DOMAIN-SUFFIX, tiktokv.com, Proxy
+DOMAIN-SUFFIX, musical.ly, Proxy
+DOMAIN-SUFFIX, byteoversea.com, Proxy
+DOMAIN-SUFFIX, muscdn.com, Proxy
+# Prime Video / Twitch
+DOMAIN-SUFFIX, primevideo.com, Proxy
+DOMAIN-SUFFIX, amazonvideo.com, Proxy
+DOMAIN-SUFFIX, twitch.tv, Proxy
+DOMAIN-SUFFIX, twitchcdn.net, Proxy
+DOMAIN-SUFFIX, ttvnw.net, Proxy
+# AbemaTV / TVB
+DOMAIN-SUFFIX, abema.tv, Proxy
+DOMAIN-SUFFIX, ameba.jp, Proxy
+DOMAIN-SUFFIX, tvb.com, Proxy
+DOMAIN-SUFFIX, mytvb.com, Proxy
+# OpenAI CDN (补充 AI 分流)
+DOMAIN-SUFFIX, oaistatic.com, Proxy
+DOMAIN-SUFFIX, oaiusercontent.com, Proxy
+DOMAIN-SUFFIX, chatgpt.com, Proxy
+# Google 服务
+DOMAIN-SUFFIX, gstatic.com, Proxy
+DOMAIN-SUFFIX, googleapis.com, Proxy
+DOMAIN-SUFFIX, google.com, Proxy
+DOMAIN-SUFFIX, google.co.jp, Proxy
+DOMAIN-SUFFIX, g.co, Proxy
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 4. GDT 广告 SDK 白名单 (防去广告误杀奖励包)
@@ -163,6 +217,33 @@ DOMAIN-SUFFIX, pangle.io, DIRECT
 # 淘宝后台切回跳开屏拦截
 DOMAIN, heic.alicdn.com, REJECT
 DOMAIN-SUFFIX, h-adashx.ut.taobao.com, REJECT
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 追踪/埋点 — 直接 REJECT (与 QX 端对齐)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN, path.book.qq.com, REJECT
+DOMAIN, rmonitor.qq.com, REJECT
+DOMAIN, unitelogreport.reader.qq.com, REJECT
+DOMAIN-KEYWORD, qreport, REJECT
+DOMAIN, apmplus.volces.com, REJECT
+DOMAIN, mssdk.volces.com, REJECT
+DOMAIN, tobapplog.ctobsnssdk.com, REJECT
+DOMAIN, hd.ctobsnssdk.com, REJECT
+DOMAIN, sdkreport.e.qq.com, REJECT
+DOMAIN, publiclog.zhiyan.tencent-cloud.net, REJECT
+DOMAIN, zhiyan.monitor.tencent-cloud.net, REJECT
+DOMAIN, galileotelemetry.tencent.com, REJECT
+DOMAIN, tangram.e.qq.com, REJECT
+DOMAIN, gatherer.m.qq.com, REJECT
+DOMAIN, dl.tiku.qq.com, REJECT
+DOMAIN, ali-stats.jpush.cn, REJECT
+DOMAIN, aegis.cdn-go.cn, REJECT
+DOMAIN, noahqd.yuewen.com, REJECT
+DOMAIN, upushv6.qidian.com, REJECT
+DOMAIN, ataru.qidian.com, REJECT
+DOMAIN, connect.yuewen.com, REJECT
+DOMAIN, fockrt.yuewen.com, REJECT
+DOMAIN, ywab.reader.qq.com, REJECT
 
 # 7. 本地 GeoIP CN 路由 (Native GeoIP Bounded Context)
 GEOIP, CN, DIRECT
@@ -222,5 +303,6 @@ https://raw.githubusercontent.com/3kaiu/config/main/Kelee/YouTube_remove_ads.plu
 
 [MitM]
 skip-server-cert-verify = false
-# 仅解密必要域名，防握手耗电和网络延迟
-hostname = h5.if.qidian.com, magev6.if.qidian.com, ii.gdt.qq.com, adsmind.gdtimg.com, adsmind.ugdtimg.com, pgdt.gtimg.cn, api-access.pangolin-sdk-toutiao*.com, api.zhihuifangdong.net
+# 显式声明所有需要解密的域名（不依赖插件 mitm 合并，更可靠）
+# 仅解密：起点读书 + 广告SDK + 智慧房东 + 菜鸟 + YouTube，排除微信/支付宝/网银等安全敏感流量
+hostname = h5.if.qidian.com, magev6.if.qidian.com, ii.gdt.qq.com, adsmind.gdtimg.com, adsmind.ugdtimg.com, pgdt.gtimg.cn, api-access.pangolin-sdk-toutiao*.com, api.zhihuifangdong.net, netflow-mtop.cainiao.com, nbcps-mtop.cainiao.com, cn-acs.m.cainiao.com, e2e-mtop.cainiao.com, longquan-mtop.cainiao.com, *.googlevideo.com, *.youtube.com, youtubei.googleapis.com
