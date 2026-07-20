@@ -18,46 +18,43 @@ DOMAIN, tysdk.95516.com, REJECT, enable={UNIONPAY_ENABLE}
 
 # 交通银行埋点
 DOMAIN-SUFFIX, track.bankcomm.com, REJECT, enable={BOCOM_ENABLE}
+# 交通银行广告图片 CDN (原 MitM rewrite 改为 DNS 级 REJECT，避免与 DIRECT 规则冲突)
+DOMAIN, creditcard.bankcomm.com, REJECT, enable={BOCOM_ENABLE}
+DOMAIN, creditcard.bankcomm.cn, REJECT, enable={BOCOM_ENABLE}
 
 # 农业银行埋点
 DOMAIN, firefly.abchina.com.cn, REJECT, enable={ABC_ENABLE}
 # 农业银行防代理检测
 DOMAIN, msmp.abchina.com.cn, REJECT, enable={ABC_ENABLE}
+# 农业银行开屏广告资源 CDN (原 MitM rewrite 改为 DNS 级 REJECT)
+DOMAIN, midc.cdn-static.abchina.com.cn, REJECT, enable={ABC_ENABLE}
+DOMAIN, enjoy.cdn-static.abchina.com, REJECT, enable={ABC_ENABLE}
+
+# 中国银行广告与主题图片 CDN (原 MitM rewrite 改为 DNS 级 REJECT，避免与 boc.cn DIRECT 规则冲突)
+DOMAIN, cdn1.mbs.boc.cn, REJECT, enable={BOC_ENABLE}
 
 [Rewrite]
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 交通银行（买单吧/信用卡）
+# ⚠️ 修复: 原先的 MitM rewrite 规则全部移除，改用上方 [Rule] 段的 DNS 级 REJECT。
+# 原因: creditcard.bankcomm.com / cdn1.mbs.boc.cn / enjoy.cdn-static.abchina.com 等域名
+# 会被主配置 DOMAIN-SUFFIX bankcomm.com / boc.cn / abchina.com 的 DIRECT 规则先匹配，
+# MitM 再尝试解密这些直连流量会导致 TLS 握手被劫持 → 银行 App 网络错误。
+# DNS 级 REJECT 在解析阶段就掐断广告 CDN，无需 MitM 解密，安全且无副作用。
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 交通银行（买单吧/信用卡）
 # ⚠️ 开屏与弹窗接口包含 SSL Pinning，默认注释以防买单吧 App 无法联网
 # ^https?:\/\/creditcardapp\.bankcomm\.(com|cn)\/mappweb_interface\/common\/(qryPopAds|qryLaunchAds)\.do reject-200, enable={BOCOM_ENABLE}
 # ^https?:\/\/creditcardapp\.bankcomm\.(com|cn)\/mappweb_interaction\/common\/(getPopAds|queryGuidePageAds)\.do reject-200, enable={BOCOM_ENABLE}
 # ^https?:\/\/creditcardapp\.bankcomm\.(com|cn)\/mappweb_interaction\/appInfo\/appNewestVersion reject-200, enable={BOCOM_ENABLE}
-# 广告图片 (无 SSL Pinning，可安全拦截)
-^https?:\/\/creditcard\.bankcomm\.(com|cn)\/tfimg\/public00\/M00\/[a-zA-Z0-9]{2}\/[a-zA-Z0-9]{2}\/[a-zA-Z0-9-]{30}\.(jpg|jpeg) reject, enable={BOCOM_ENABLE}
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 农业银行
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 开屏广告资源
-^https?:\/\/midc\.cdn-static\.abchina\.com\.cn\/distributecenterimg\/file\/download\/(ed64|74b5|bdfb4|86fb9|7aa68|62b87|7c7d) reject-dict, enable={ABC_ENABLE}
-# 活动推广弹窗
-^https?:\/\/enjoy\.cdn-static\.abchina\.com\/yx-engine-web\/file\/download\/(?!7dc2|fe96|cea3|06a8|1b11|d57b|6918|61db|2d58|aa23|) reject-200, enable={ABC_ENABLE}
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 中国银行（中国银行/缤纷生活）
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 中国银行广告与主题图片 Mock (避免开屏与首页广告，无 SSL Pinning 安全拦截)
-^https?:\/\/cdn1\.mbs\.boc\.cn\/ubas-mgateway-static\/images\/advertType\/ reject-img, enable={BOC_ENABLE}
-^https?:\/\/cdn1\.mbs\.boc\.cn\/ubas-mgateway-static\/images\/\/theme\/ reject-img, enable={BOC_ENABLE}
 # ⚠️ 以下接口包含 SSL Pinning，默认注释以防缤纷生活 App 无法联网
-# 开屏广告
 # ^https?:\/\/mlife\.jf365\.boc\.cn\/AppPrj\/FirstPic\.do\?txnId=2PIC000001 reject-200, enable={BOC_ENABLE}
-# 首页弹窗/广告列表
 # ^https?:\/\/openapi\.boc\.cn\/unlogin\/app\/cbsp\/query_ad_list reject-200, enable={BOC_ENABLE}
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 云闪付
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # ⚠️ 首页大图广告包含 SSL Pinning，默认注释以防云闪付无法联网
 # ^https:\/\/wallet\.95516\.com(:10533)?\/s\/wl\/icon\/large\/1 reject, enable={UNIONPAY_ENABLE}
 
@@ -69,6 +66,8 @@ DOMAIN, msmp.abchina.com.cn, REJECT, enable={ABC_ENABLE}
 # http-response ^https:\/\/content\.95516\.com\/koala-pre\/koala\/(recommend\/hotList|right\/queryAllRights) script-path=https://raw.githubusercontent.com/3kaiu/config/main/Scripts/UnionPay.js, requires-body=true, timeout=10, tag=云闪付推荐净化, enable={UNIONPAY_ENABLE}
 
 [MitM]
-# ⚠️ 移除了包含 SSL Pinning 校验的银行交易与通信核心域名：creditcardapp.bankcomm.com, creditcardapp.bankcomm.cn, mlife.jf365.boc.cn, openapi.boc.cn, wallet.95516.com, base.95516.com, account.95516.com, content.95516.com
-# 仅解密静态广告 CDN 域名
-hostname = creditcard.bankcomm.com, creditcard.bankcomm.cn, midc.cdn-static.abchina.com.cn, enjoy.cdn-static.abchina.com, cdn1.mbs.boc.cn
+# ⚠️ 修复: 不再解密任何与主配置 DIRECT 规则冲突的银行域名。
+# 原先解密 creditcard.bankcomm.com / cdn1.mbs.boc.cn / enjoy.cdn-static.abchina.com 等，
+# 会被 DOMAIN-SUFFIX bankcomm.com / boc.cn / abchina.com 的 DIRECT 规则先匹配，
+# 导致 MitM 劫持直连 TLS 流量 → 银行 App 网络错误。
+# 现改为纯 DNS 级 REJECT 拦截广告 CDN（见上方 [Rule] 段），完全绕开 MitM，既安全又不破坏网络。

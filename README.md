@@ -23,7 +23,7 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 本项目秉持“精简且强力”的原则，仅针对您实际使用的 App 进行净化与增强，不集成未安装的应用：
 
 ### 📚 2.1 起点读书 (全能助手 Pro - 默认开启)
-*   **脚本路径**：`Plugin/qidian.plugin` (Loon) / `QX/qidian.conf` (QX) -> 关联本地 [Qidian.js](file:///Users/edy/.gemini/antigravity/scratch/config/Scripts/Qidian.js)
+*   **脚本路径**：`Plugin/qidian.plugin` (Loon) / `QX/qidian.conf` (QX) -> 关联本地 [Qidian.js](https://github.com/3kaiu/config/blob/main/Scripts/Qidian.js)
 *   **核心功能**：
     *   **开屏与应用内净化**：全量覆写 getconf 广告配置，清空书架悬浮广告，净化我的账户页推广。
     *   **视频广告秒播**：篡改广告 SDK 数据，将腾讯/穿山甲广告时长修改为 1 秒并播放黑屏。
@@ -49,16 +49,16 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 *   **覆盖应用**：云闪付、买单吧 (交通银行)、中国银行 (缤纷生活)、农业银行等主流金融机构。
 *   **净化效果**：
     *   拦截启动开屏广告、首页弹窗、广告图加载。
-    *   **云闪付净化**：通过 [UnionPay.js](file:///Users/edy/.gemini/antigravity/scratch/config/Scripts/UnionPay.js) 重写，剔除理财页推广、首页大图、 koala 权益推广（默认注释以防 SSL Pinning 崩溃，越狱/注入用户可手动开启）。
+    *   **云闪付净化**：通过 [UnionPay.js](https://github.com/3kaiu/config/blob/main/Scripts/UnionPay.js) 重写，剔除理财页推广、首页大图、 koala 权益推广（默认注释以防 SSL Pinning 崩溃，越狱/注入用户可手动开启）。
     *   **类型安全 Mocking**：使用 `reject-dict` (返回 `{}`) 替代直接断网，防止 App 报错崩溃。
     *   **深度兼容与去广告平衡设计**：
         1. **DNS 绕过与 Fake-IP 排除**：在 QX `dns_exclusion_list` 与 Loon `real-ip` 中全量加入主流金融域名，强制使用真实 IP 解析，防范安全检测。
         2. **最高优先级置顶直连**：在分流规则最上方加入本地网银直连块，保障金融交易流量以最高优先级走 DIRECT。
-        3. **安全与去广告平衡 (免 MitM 劫持安全网关)**：默认**注释掉**所有内置了严格 SSL Pinning 校验的银行与云闪付核心交易/通信 API 域名（如 `creditcardapp.bankcomm.com`、`openapi.boc.cn`、`wallet.95516.com`）。这样在不破坏普通用户 App 联网稳定性的前提下，利用 DNS 级 `REJECT` 拦截广告服务和不需要解密的静态卡面 CDN。
+        3. **DNS 级 REJECT 取代 MitM 劫持 (v5.3 修复)**：原先对 `creditcard.bankcomm.com`、`cdn1.mbs.boc.cn`、`enjoy.cdn-static.abchina.com` 等广告 CDN 使用 MitM rewrite 拦截，但这些域名会被 `DOMAIN-SUFFIX bankcomm.com / boc.cn / abchina.com` 的 DIRECT 规则先匹配，导致 MitM 劫持直连 TLS 流量 → 银行 App 网络错误。现改为纯 DNS 级 `REJECT` 在解析阶段直接掐断广告 CDN，完全绕开 MitM，既安全又不破坏网络连通性。所有包含 SSL Pinning 的银行交易/通信 API 域名（如 `creditcardapp.bankcomm.com`、`openapi.boc.cn`、`wallet.95516.com`）默认注释，需越狱设备才能启用。
 
 ### 🏠 2.3 智慧房东去广告
 *   **脚本路径**：`Plugin/zhihuifangdong.plugin` (Loon) / `QX/zhihuifangdong.conf` (QX)
-*   **净化效果**：通过 [Zhihuifangdong.js](file:///Users/edy/.gemini/antigravity/scratch/config/Scripts/Zhihuifangdong.js) 拦截开屏与 Banner 横幅广告，Loon 端支持独立开关控制。
+*   **净化效果**：通过 [Zhihuifangdong.js](https://github.com/3kaiu/config/blob/main/Scripts/Zhihuifangdong.js) 拦截开屏与 Banner 横幅广告，Loon 端支持独立开关控制。
 
 ### 🤖 2.4 AI 服务分流
 *   **规则路径**：`Plugin/ai.plugin` (Loon) / `QX/ai.conf` 远程规则引用 (QX)
@@ -90,15 +90,16 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 针对您的 **单个东京代理节点**（配置文件中命名为 `🇯🇵 Tokyo_Proxy`）环境，我们实施了专家级的路由与网络加速优化：
 
 ```text
-[网络请求] ────► [策略组 (Proxy)] ──► 🇯🇵 Tokyo_Proxy (手动选择)
+[网络请求] ────► [策略组 (Proxy)] ──► 🇯🇵 Tokyo_Proxy (自动健康检测)
                   │
-                  └──► [手动回落] ───► DIRECT / direct
+                  └──► [节点不可用时] ───► 显式报错 (不回落 DIRECT，防泄露)
 ```
 
-1.  **策略组手动掌控 (Proxy Select/Static)**：
-    *   主代理策略组采用手动选择设计：`Proxy = select, 🇯🇵 Tokyo_Proxy, DIRECT` (Loon) / `static=Proxy, 🇯🇵 Tokyo_Proxy, direct` (QX)。
-    *   **流量防泄露优化**：废除了原先的 `fallback` 组（即当节点宕机时自动降级到 `DIRECT`）。自动降级虽然不会断网，但会导致原本需要代理的敏感流量（如海外搜索、AI、流媒体）在无感知的状态下直接打向真实 IP。这不仅会由于直连打不开导致访问失败，还会让真实 IP 泄漏。现在调整为静态选择，当节点不可用时显式报错，让您及时感知并调整，全面保护隐私。
-    *   移除了 `url-test` 测速组，节省定时 ping 的网络握手资源和电量。
+1.  **策略组自动健康检测 (Proxy url-test / url-latency-benchmark)**：
+    *   主代理策略组采用自动延迟检测设计：`Proxy = url-test, 🇯🇵 Tokyo_Proxy, url=..., interval=300, tolerance=50` (Loon) / `url-latency-benchmark=Proxy, 🇯🇵 Tokyo_Proxy, check-interval=600, alive-checking=false, tolerance=50` (QX)。
+    *   **自动选优**：单节点场景下，持续监测节点延迟与可用性，节点可用时自动走节点，无需手动切换。
+    *   **流量防泄露优化**：策略组中**不放 DIRECT / direct 作为回落**。当节点不可用时显式报错，让您及时感知并调整。这避免了原本需要代理的敏感流量（如海外搜索、AI、流媒体）在无感知的状态下直接打向真实 IP 导致泄露。
+    *   **省电设计**：QX 端 `alive-checking=false` 空闲时不测速，Loon 端 `interval=300` 每5分钟一次，平衡实时性与电量。
 2.  **Split DNS 分流与双加密加速 (DoQ / DoH3)**：
     *   **国内解析**：通过阿里/腾讯/火山引擎的高速加密 DNS（DoH / DoQ）在本地快速解析，新增火山引擎 DNS (`180.184.11.11`, `180.184.22.22`) 优化字节系/抖音应用解析。
     *   **双端 DoQ 与 DoH3 加速**：Loon 与 Quantumult X 均引入了 DNS over QUIC (`quic://dns.alidns.com`) 和 DoH3 并开启极速首选，极大降低握手延迟，防 DNS 污染与泄露。
@@ -112,19 +113,25 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
     *   主配置中的 MitM 实行极严格的黑白名单隔离：排除微信、支付宝、各类网银等绝大部分安全敏感流量，仅对起点、智慧房东与少数联盟广告域名进行解密，**最大程度确保您的设备省电、网络低延迟与隐私安全**。
     *   **本地与回环旁路 (QX skip_dst_ip)**：对局域网及本地回环地址（如 `192.168.0.0/16`, `127.0.0.1/32`）强制绕过 MitM 握手流程，优化高频本地请求的响应速度，减少无谓的 CPU 加解密开销。
     *   **本地区域网与游戏 DNS 旁路 (QX dns_exclusion_list)**：防止 Apple 服务（AirPlay/HomeKit）和游戏主机联机遭遇 Fake-IP 映射问题，保障网络稳定性。
+4.  **UDP 443 禁用与 YouTube 去广告兼容 (v5.3 新增)**：
+    *   双端禁用 UDP 协议的 443 端口（Loon `disable-udp-ports = 443` / QX `udp_drop_list = 443`），满足 Kelee YouTube 去广告插件"必须禁用 UDP 443"的要求。否则 YouTube QUIC 流量会绕过 MitM 解密，导致视频广告无法拦截。
 
 ---
 
 ## 4. Kelee 插件镜像复用与双端直连机制
 
-可莉官方插件（`kelee.one`）部署了 Cloudflare Turnstile 验证，限制必须具有 `Loon` 的 User-Agent 且满足验证条件才能拉取，这导致客户端在刷新或下载插件时频繁遭遇 403 错误。
+可莉官方插件（`kelee.one`）部署了 Cloudflare Turnstile 验证，限制必须具有 `Loon` 的 User-Agent 且满足验证条件才能拉取。实测即使携带 `Loon/3.3.9` UA 直接请求 `kelee.one` 仍会返回 403（Turnstile JS challenge 无法被纯 HTTP 客户端通过），Loon App 内部加载也可能间歇性失败。
 
 为解决该可用性问题，本项目进行了如下的深度复用与集成：
 
-*   **Loon 客户端 100% 稳定连接**：我们已将 `Loon.lcf` 主配置中的 Kelee 插件链接（包括去广告、DNS 防泄露及 YouTube 增强）重定向至本项目本地 GitHub 镜像 Raw 链接（每天通过 Actions 自动同步更新），彻底免除了设备端的 Cloudflare 验证拦截。
+*   **Loon 核心 Kelee 插件本地镜像**：已将 `Prevent_DNS_Leaks.plugin`、`Remove_ads_by_keli.plugin`、`myblockads.plugin`、`YouTube_remove_ads.plugin` 重定向至本项目本地 GitHub 镜像 Raw 链接（每天通过 Actions 自动同步更新），彻底免除了设备端的 Cloudflare 验证拦截。
+*   **kelee.one 直连 lpx 引用移除 (v5.3 修复)**：原先 `Loon.lcf` 中直连 `kelee.one` 的 `Block_HTTPDNS.lpx`、`BlockAdvertisers.lpx`、`Sub-Store.lpx`、`QuickSearch.lpx` 四个插件会间歇性 403。现已：
+    *   移除 `Block_HTTPDNS.lpx` 和 `BlockAdvertisers.lpx`——其功能已被主配置完全覆盖（HTTPDNS 拦截：`DOMAIN-KEYWORD httpdns REJECT` + `[Host]` 静态映射 + `[Rewrite] reject`；广告拦截：本地镜像的 `Remove_ads_by_keli.plugin` + `myblockads.plugin`）。
+    *   将 `Sub-Store.lpx` 和 `QuickSearch.lpx` 改用 `ajune0527/vpn_tool` 镜像源（`.plugin` 格式，已验证稳定可达）。
 *   **Quantumult X 原生集成 DNS 防泄露**：针对 QX 无法直接解析 Loon `.plugin` 插件的问题，我们已将 Kelee `Prevent_DNS_Leaks.plugin` 中的全部规则静态转换为 QX 语法，并原生集成在 `QX.conf` 的 `[filter_local]` 中，无需使用 Script-Hub 等工具进行繁琐的外部格式转换。
 *   **RuCu6 (广告必须死) 镜像与修复**：由于原作者删库导致双端原配置链接失效（404），我们已将 QX 端链接重定向为长期维护且国内直连的 `Toperlock/Quantumult` 激活镜像；同时将 Loon 端的 `AdBlock.plugin` 替换为存活的 `jqyisbest/RuCu6` 核心去广告插件（`myblockads.plugin`），并已将其纳入 Actions 定时工作流，每日自动拉取至本地 `Kelee/myblockads.plugin` 托管，彻底解决 404 彻底阻断的问题。
-*   **同步数据源说明**：我们通过 [sync-kelee.yml](file:///Users/edy/.gemini/antigravity/scratch/config/.github/workflows/sync-kelee.yml) 工作流，每天定时从公开且免 CF 拦截的 `ajune0527/vpn_tool` 仓库及 `jqyisbest/RuCu6` 仓库拉取最新版插件缓存至本地 [Kelee/](file:///Users/edy/.gemini/antigravity/scratch/config/Kelee) 目录，供 QX 用户自行选择使用 Script-Hub 转换引用（如 `Remove_ads_by_keli.plugin`）。
+*   **ddgksf2013 (墨鱼) 仓库重构适配 (v5.3 修复)**：ddgksf2013 仓库已全面重构，`Filter/Loon/AdBlock.plugin`、`Filter/QuantumultX/AdBlock.conf`、`Rewrite/AdBlock/StartUp.conf` 全部 404。Loon 端移除了失效的墨鱼引用（由 RuCu6 + 可莉双重覆盖）；QX 端改用 `Rewrite/AdBlock/` 目录下按 App 拆分的新文件（`FakeiOSAds.conf`、`KeepAds.conf`、`YoutubeAds.conf`）。
+*   **同步数据源说明**：我们通过 [sync-kelee.yml](https://github.com/3kaiu/config/blob/main/.github/workflows/sync-kelee.yml) 工作流，每天定时从公开且免 CF 拦截的 `ajune0527/vpn_tool` 仓库及 `jqyisbest/RuCu6` 仓库拉取最新版插件缓存至本地 [Kelee/](https://github.com/3kaiu/config/tree/main/Kelee) 目录，供 QX 用户自行选择使用 Script-Hub 转换引用（如 `Remove_ads_by_keli.plugin`）。
 
 ---
 

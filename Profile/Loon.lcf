@@ -1,6 +1,6 @@
 # ═══════════════════════════════════════════════════════════
-#  Loon 配置 (Loon.lcf) — v5.2 (高级 NetOps 增强版)
-#  核心: Fallback 高可用 · DoQ 国内加速 · 端口级 HTTPDNS 拦截 · 自维护组件精简
+#  Loon 配置 (Loon.lcf) — v5.3 (高级 NetOps 增强版)
+#  核心: 自动健康检测 · DoQ 国内加速 · 端口级 HTTPDNS 拦截 · 银行 MitM 冲突修复
 #  引擎支持: iOS Loon 3.3.9+
 # ═══════════════════════════════════════════════════════════
 
@@ -14,13 +14,18 @@ doq-server = quic://dns.alidns.com:853
 hijack-dns = *:53, 8.8.8.8, 8.8.4.4, 1.1.1.1, 114.114.114.114, 223.6.6.6, 180.76.76.76
 sni-sniffing = true
 disable-stun = false
+# ⚠️ 修复: 禁用 UDP 443 端口，配合 Kelee YouTube_remove_ads 插件要求
+# YouTube 去广告插件明确要求"禁用UDP协议的443端口"，否则 QUIC 流量绕过 MitM 解密导致去广告失效
+disable-udp-ports = 443
 udp-fallback-mode = REJECT
 ipv6-vif = off
 domain-reject-mode = DNS
 dns-reject-mode = LOOPBACKIP
 disconnect-on-policy-change = false
-geoip-url = https://geodata.kelee.one/Country-Masaiki.mmdb
-ipasn-url = https://geodata.kelee.one/GeoLite2-ASN-P3TERX.mmdb
+# ⚠️ 修复: geodata.kelee.one 全站 403 (Cloudflare Turnstile)，改用 GitHub 直连镜像
+# Loyalsoldier/geoip 是社区最权威的中国大陆 GeoIP 数据库，P3TERX 提供 GeoLite2-ASN 镜像
+geoip-url = https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb
+ipasn-url = https://raw.githubusercontent.com/P3TERX/GeoLite.mmdb/download/GeoLite2-ASN.mmdb
 resource-parser = https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store-parser.loon.min.js
 allow-wifi-access = false
 wifi-access-http-port = 7222
@@ -57,8 +62,10 @@ httpdns.gslb.netease.com = 0.0.0.0
 # 示例：🇯🇵 Tokyo_Proxy = shadowrocket, 12.34.56.78, 443, method=chacha20-ietf-poly1305, password=pwd, fast-open=true, udp=true
 
 [Proxy Group]
-# 代理主策略：整合 Fallback 自动容灾，若东京节点超时自动回落直连，防止完全断网，剔除 url-test
-Proxy = select, 🇯🇵 Tokyo_Proxy, DIRECT
+# 代理主策略：url-test 自动健康检测，单节点场景下持续监测节点延迟
+# 节点可用时走节点，不可用时显式报错（不回落 DIRECT，防止敏感流量直连泄露真实 IP）
+# interval=300 每5分钟测速一次，tolerance=50ms 容差防抖
+Proxy = url-test, 🇯🇵 Tokyo_Proxy, url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
 Apple = select, DIRECT, Proxy
 Final = select, Proxy, DIRECT
 
@@ -175,8 +182,11 @@ https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 内核层 — 网络安全基础
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://kelee.one/Tool/Loon/Lpx/Block_HTTPDNS.lpx, pin=true, enabled=true
-https://kelee.one/Tool/Loon/Lpx/BlockAdvertisers.lpx, pin=true, enabled=true
+# ⚠️ 修复: kelee.one 的 Block_HTTPDNS.lpx / BlockAdvertisers.lpx 直连会 403 (Cloudflare Turnstile)
+# 这两个插件的功能已被主配置完全覆盖:
+#   - HTTPDNS 拦截: [Rule] DOMAIN-KEYWORD httpdns REJECT + [Host] 静态映射 0.0.0.0 + [Rewrite] reject
+#   - 广告拦截: 下方 Remove_ads_by_keli.plugin + myblockads.plugin
+# 故移除这两个不稳定的 kelee.one 直连引用，改用本地镜像 Prevent_DNS_Leaks.plugin
 https://raw.githubusercontent.com/3kaiu/config/main/Kelee/Prevent_DNS_Leaks.plugin, policy=Proxy, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -184,13 +194,16 @@ https://raw.githubusercontent.com/3kaiu/config/main/Kelee/Prevent_DNS_Leaks.plug
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 https://raw.githubusercontent.com/3kaiu/config/main/Kelee/Remove_ads_by_keli.plugin, enabled=true
 https://raw.githubusercontent.com/3kaiu/config/main/Kelee/myblockads.plugin, enabled=true, tag=RuCu6 App去广告
-https://raw.githubusercontent.com/ddgksf2013/Filter/master/Loon/AdBlock.plugin, enabled=true, tag=墨鱼 App去广告
+# ⚠️ 修复: ddgksf2013/Filter/master/Loon/AdBlock.plugin 已 404 (仓库重构，Loon 子目录不再存在)
+# 墨鱼去广告已由上方 RuCu6 (myblockads.plugin) 和可莉 (Remove_ads_by_keli.plugin) 双重覆盖，不再需要此失效引用
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 工具层
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://kelee.one/Tool/Loon/Lpx/Sub-Store.lpx, enabled=true
-https://kelee.one/Tool/Loon/Lpx/QuickSearch.lpx, enabled=true
+# ⚠️ 修复: kelee.one 的 Sub-Store.lpx / QuickSearch.lpx 直连会 403 (Cloudflare Turnstile)
+# 改用 ajune0527/vpn_tool 镜像源 (已验证可达)
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Sub-Store.plugin, enabled=true
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/QuickSearch.plugin, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 自维护核心及应用插件 (按需开启，默认已全开，可在手机端根据需要关闭)
