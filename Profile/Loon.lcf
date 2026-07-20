@@ -1,6 +1,6 @@
 # ═══════════════════════════════════════════════════════════
-#  Loon 配置 (Loon.lcf) — v5.3 (高级 NetOps 增强版)
-#  核心: 自动健康检测 · DoQ 国内加速 · 端口级 HTTPDNS 拦截 · 银行 MitM 冲突修复
+#  Loon 配置 (Loon.lcf) — v5.4 (高级 NetOps 增强版)
+#  核心: 自动健康检测 · 高质量多引擎去广告 · 全球社交/流媒体分流 · kelee Turnstile 规避
 #  引擎支持: iOS Loon 3.3.9+
 # ═══════════════════════════════════════════════════════════
 
@@ -203,6 +203,40 @@ DOMAIN-SUFFIX, google.co.jp, Proxy
 DOMAIN-SUFFIX, g.co, Proxy
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 全球社交平台 (统一走 Proxy)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Instagram
+DOMAIN-SUFFIX, instagram.com, Proxy
+DOMAIN-SUFFIX, cdninstagram.com, Proxy
+DOMAIN-SUFFIX, instagramstatic.cdninstagram.com, Proxy
+# Twitter / X
+DOMAIN-SUFFIX, twitter.com, Proxy
+DOMAIN-SUFFIX, x.com, Proxy
+DOMAIN-SUFFIX, twimg.com, Proxy
+DOMAIN-SUFFIX, t.co, Proxy
+DOMAIN-SUFFIX, twittercdn.com, Proxy
+# Facebook / Meta
+DOMAIN-SUFFIX, facebook.com, Proxy
+DOMAIN-SUFFIX, fbcdn.net, Proxy
+DOMAIN-SUFFIX, fb.me, Proxy
+DOMAIN-SUFFIX, fbsbx.com, Proxy
+# Telegram
+DOMAIN-SUFFIX, telegram.org, Proxy
+DOMAIN-SUFFIX, t.me, Proxy
+DOMAIN-SUFFIX, telegramcdn.com, Proxy
+DOMAIN-SUFFIX, tdesktop.com, Proxy
+# Reddit
+DOMAIN-SUFFIX, reddit.com, Proxy
+DOMAIN-SUFFIX, redditstatic.com, Proxy
+DOMAIN-SUFFIX, redd.it, Proxy
+DOMAIN-SUFFIX, redditmedia.com, Proxy
+# Discord
+DOMAIN-SUFFIX, discord.com, Proxy
+DOMAIN-SUFFIX, discordapp.com, Proxy
+DOMAIN-SUFFIX, discordapp.net, Proxy
+DOMAIN-SUFFIX, discord.media, Proxy
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 4. GDT 广告 SDK 白名单 (防去广告误杀奖励包)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 DOMAIN, mi.gdt.qq.com, DIRECT
@@ -281,10 +315,31 @@ https://raw.githubusercontent.com/3kaiu/config/main/Kelee/myblockads.plugin, ena
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 工具层
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# ⚠️ 修复: kelee.one 的 Sub-Store.lpx / QuickSearch.lpx 直连会 403 (Cloudflare Turnstile)
-# 改用 ajune0527/vpn_tool 镜像源 (已验证可达)
+# ⚠️ kelee.one 全站启用 Cloudflare Turnstile，curl/HTTP客户端无法通过（即使带Loon UA也403）
+# 只有 Loon App 内部 WebKit 能通过 JS challenge，但不稳定。故所有 kelee.one 资源改用以下策略：
+#   - HTTPDNS/广告拦截: 主配置规则已完全覆盖，无需kelee插件
+#   - Sub-Store/QuickSearch: 改用 ajune0527/vpn_tool 镜像源
+#   - GeoIP/ASN: 改用 Loyalsoldier/geoip + P3TERX 镜像
 https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Sub-Store.plugin, enabled=true
 https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/QuickSearch.plugin, enabled=true
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 常用 App 精细化去广告 (ajune0527/vpn_tool Loon格式插件, 按需开启/关闭)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Weibo_remove_ads.plugin, enabled=true, tag=微博去广告
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Weixin_Official_Accounts_remove_ads.plugin, enabled=true, tag=微信公众号去广告
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Bilibili_remove_ads.plugin, enabled=true, tag=B站去广告
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/NeteaseCloudMusic_remove_ads.plugin, enabled=true, tag=网易云音乐净化
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Amap_remove_ads.plugin, enabled=true, tag=高德地图去广告
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Taobao_remove_ads.plugin, enabled=true, tag=淘宝去广告
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/JD_remove_ads.plugin, enabled=true, tag=京东去广告
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Tieba_remove_ads.plugin, enabled=true, tag=百度贴吧净化
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Himalaya_remove_ads.plugin, enabled=true, tag=喜马拉雅净化
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/CoolApk_remove_ads.plugin, enabled=true, tag=酷安净化
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/IThome_remove_ads.plugin, enabled=true, tag=IT之家净化
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/BaiduNetDisk_remove_ads.plugin, enabled=true, tag=百度网盘净化
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Reddit_remove_ads.plugin, enabled=true, tag=Reddit去广告
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Soul_remove_ads.plugin, enabled=true, tag=Soul净化
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 自维护核心及应用插件 (按需开启，默认已全开，可在手机端根据需要关闭)

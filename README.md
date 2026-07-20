@@ -68,9 +68,25 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 *   **脚本路径**：主配置 `[Rule]` 规则路由 (Loon/QX) + 远程去广告插件 (Loon Kelee `YouTube_remove_ads.lpx` / QX `youtube.conf`)
 *   **净化效果**：屏蔽 YouTube App 视频中插广告、首页信息流推广，并提供后台播放 (画中画) 支持。
 
-### 🚫 2.6 全网系统级与 App 深度去广告 (RuCu6 / 墨鱼双引擎)
+### 🚫 2.6 全网系统级与 App 深度去广告 (多引擎全覆盖)
 *   **规则路径**：Loon 插件 (`Plugin`) / QX 远程重写 (`rewrite_remote`) 默认内置。
-*   **净化范围**：整合全网最有价值的 app 去广告方案，包括 **RuCu6** 与 **ddgksf2013/墨鱼** 的核心净化规则。针对微博、知乎、高德地图、小红书、美团等高频应用，全方位去除开屏广告、弹窗及推广信息，同时**采用多维度多层次设计（如 HTTPDNS 接口置空拦截）**，最大化缩减 CPU 开销以节省电池电量。
+*   **净化范围**：整合全网最有价值的 App 去广告方案，采用**多引擎分层覆盖**设计：
+    *   **通用去广告层**：`blackmatrix7/AllInOne`（QX）+ `Remove_ads_by_keli.plugin` + `myblockads.plugin`(RuCu6)（Loon）覆盖系统级广告域名、追踪 SDK。
+    *   **开屏广告通杀层**：`ddgksf2013/FakeiOSAds`（QX）拦截 iOS 系统/第三方 SDK 开屏广告。
+    *   **按 App 精细化去广告层**（v5.4 新增）：
+        *   **Loon 端**（ajune0527/vpn_tool 插件）：微博、微信公众号、Bilibili、网易云音乐、高德地图、淘宝、京东、百度贴吧、喜马拉雅、酷安、IT之家、百度网盘、Reddit、Soul 等 14+ App 独立去广告插件。
+        *   **QX 端**（ddgksf2013 + app2smile）：微博、微信、网易云音乐、高德地图、百度贴吧、闲鱼、喜马拉雅、什么值得买、Bilibili(主App+漫画)、车来了、中国联通、网易邮箱、墨迹天气、汽水音乐、小宇宙播客、Reddit 等 16+ App 独立去广告配置。
+    *   **追踪/埋点拦截层**：主配置 `[Rule]` 段内置 23 条腾讯/字节/阿里系追踪域名 REJECT，与去广告插件互补。
+    *   **多维度 HTTPDNS 拦截**：`DOMAIN-KEYWORD httpdns REJECT` + `[Host]` 静态映射 `0.0.0.0` + `[Rewrite]` reject，三层拦截防 DNS 污染。
+
+### 🌍 2.7 全球社交平台与流媒体分流 (v5.4 新增)
+*   **规则路径**：`Profile/Loon.lcf` / `Profile/QX.conf` 的 `[Rule]` / `[filter_local]` 段。
+*   **分流覆盖**：
+    *   **流媒体**：YouTube、Netflix（含 CDN）、Disney+、HBO Max、Spotify、TikTok、Prime Video、Twitch、AbemaTV、TVB。
+    *   **社交平台**：Instagram、Twitter/X、Facebook/Meta、Telegram、Reddit、Discord。
+    *   **AI 服务**：OpenAI、Claude、Gemini（含 CDN）、Perplexity、Cursor、Copilot、Codeium 等。
+    *   **Google 全家桶**：google.com、googleapis.com、gstatic.com、googlevideo.com 等。
+    *   所有海外流量统一走向 `Proxy` 代理组（自动延迟检测选优）。
 
 ### 🎮 2.7 Epic Games & epic-kiosk 领游戏分流支持
 *   **分流规则**：`Profile/Loon.lcf` (Loon) / `Profile/QX.conf` (QX) -> 远程引用 `blackmatrix7` 维护的 `Epic.list`。
@@ -118,16 +134,22 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 
 ---
 
-## 4. Kelee 插件镜像复用与双端直连机制
+## 4. Kelee 插件镜像复用与 Cloudflare Turnstile 规避机制
 
-可莉官方插件（`kelee.one`）部署了 Cloudflare Turnstile 验证，限制必须具有 `Loon` 的 User-Agent 且满足验证条件才能拉取。实测即使携带 `Loon/3.3.9` UA 直接请求 `kelee.one` 仍会返回 403（Turnstile JS challenge 无法被纯 HTTP 客户端通过），Loon App 内部加载也可能间歇性失败。
+可莉官方插件（`kelee.one`）部署了 **Cloudflare Turnstile** 验证机制。Turnstile 是一种 JS challenge，需要浏览器引擎执行 JavaScript 才能通过。实测结论：
 
-为解决该可用性问题，本项目进行了如下的深度复用与集成：
+- **任何 HTTP 客户端（curl/wget/GitHub Actions）即使携带 `Loon/3.3.9` UA 也无法通过**，返回 403。
+- **只有 Loon App 内部的 WebKit 引擎**能执行 Turnstile JS challenge 通过验证，但不稳定（验证有概率失败）。
+- GitHub Actions 中的 `curl` 下载 kelee.one 资源也返回 403，**无法通过 Actions 同步 kelee.one 的 lpx/geoip 文件到本地**。
 
-*   **Loon 核心 Kelee 插件本地镜像**：已将 `Prevent_DNS_Leaks.plugin`、`Remove_ads_by_keli.plugin`、`myblockads.plugin`、`YouTube_remove_ads.plugin` 重定向至本项目本地 GitHub 镜像 Raw 链接（每天通过 Actions 自动同步更新），彻底免除了设备端的 Cloudflare 验证拦截。
-*   **kelee.one 直连 lpx 引用移除 (v5.3 修复)**：原先 `Loon.lcf` 中直连 `kelee.one` 的 `Block_HTTPDNS.lpx`、`BlockAdvertisers.lpx`、`Sub-Store.lpx`、`QuickSearch.lpx` 四个插件会间歇性 403。现已：
-    *   移除 `Block_HTTPDNS.lpx` 和 `BlockAdvertisers.lpx`——其功能已被主配置完全覆盖（HTTPDNS 拦截：`DOMAIN-KEYWORD httpdns REJECT` + `[Host]` 静态映射 + `[Rewrite] reject`；广告拦截：本地镜像的 `Remove_ads_by_keli.plugin` + `myblockads.plugin`）。
-    *   将 `Sub-Store.lpx` 和 `QuickSearch.lpx` 改用 `ajune0527/vpn_tool` 镜像源（`.plugin` 格式，已验证稳定可达）。
+因此，本项目对 kelee.one 资源采取**完全去依赖**策略：
+
+*   **Loon 核心 Kelee 插件本地镜像**（通过 ajune0527/vpn_tool 镜像同步）：`Prevent_DNS_Leaks.plugin`、`Remove_ads_by_keli.plugin`、`myblockads.plugin`、`YouTube_remove_ads.plugin` 重定向至本项目本地 GitHub 镜像 Raw 链接（每天通过 Actions 从 ajune0527 同步）。
+*   **kelee.one 直连 lpx 全部移除 (v5.3 修复)**：
+    *   `Block_HTTPDNS.lpx` / `BlockAdvertisers.lpx` — 功能已被主配置完全覆盖，无需引用。
+    *   `Sub-Store.lpx` / `QuickSearch.lpx` — 改用 `ajune0527/vpn_tool` 镜像源（`.plugin` 格式）。
+*   **GeoIP/ASN 数据库 (v5.3 修复)**：`geodata.kelee.one` 同样 403，改用 `Loyalsoldier/geoip`（Country.mmdb）+ `P3TERX/GeoLite.mmdb`（ASN）。
+*   **同步数据源说明**：通过 [sync-kelee.yml](https://github.com/3kaiu/config/blob/main/.github/workflows/sync-kelee.yml) 工作流，每天从 `ajune0527/vpn_tool`（kelee 官方授权的免 CF 镜像）及 `jqyisbest/RuCu6` 拉取最新插件缓存至本地 [Kelee/](https://github.com/3kaiu/config/tree/main/Kelee) 目录。
 *   **Quantumult X 原生集成 DNS 防泄露**：针对 QX 无法直接解析 Loon `.plugin` 插件的问题，我们已将 Kelee `Prevent_DNS_Leaks.plugin` 中的全部规则静态转换为 QX 语法，并原生集成在 `QX.conf` 的 `[filter_local]` 中，无需使用 Script-Hub 等工具进行繁琐的外部格式转换。
 *   **RuCu6 (广告必须死) 镜像与修复**：由于原作者删库导致双端原配置链接失效（404），我们已将 QX 端链接重定向为长期维护且国内直连的 `Toperlock/Quantumult` 激活镜像；同时将 Loon 端的 `AdBlock.plugin` 替换为存活的 `jqyisbest/RuCu6` 核心去广告插件（`myblockads.plugin`），并已将其纳入 Actions 定时工作流，每日自动拉取至本地 `Kelee/myblockads.plugin` 托管，彻底解决 404 彻底阻断的问题。
 *   **ddgksf2013 (墨鱼) 仓库重构适配 (v5.3 修复)**：ddgksf2013 仓库已全面重构，`Filter/Loon/AdBlock.plugin`、`Filter/QuantumultX/AdBlock.conf`、`Rewrite/AdBlock/StartUp.conf` 全部 404。Loon 端移除了失效的墨鱼引用（由 RuCu6 + 可莉双重覆盖）；QX 端改用 `Rewrite/AdBlock/` 目录下按 App 拆分的新文件（`FakeiOSAds.conf`、`KeepAds.conf`、`YoutubeAds.conf`）。
