@@ -1,6 +1,6 @@
 # ═══════════════════════════════════════════════════════════
-#  Loon 配置 (Loon.lcf) — v5.6 (高级 NetOps 增强版)
-#  核心: 自动健康检测 · 高质量多引擎去广告 · 全球社交/流媒体分流 · 银行 MitM 冲突根治
+#  Loon 配置 (Loon.lcf) — v5.7 (高级 NetOps 增强版)
+#  核心: 自动健康检测 · 高质量多引擎去广告 · Apple原生增强 · 全球社交/流媒体分流 · 银行 MitM 冲突根治
 #  引擎支持: iOS Loon 3.3.9+
 # ═══════════════════════════════════════════════════════════
 
@@ -142,6 +142,15 @@ DOMAIN, httpdns.gslb.netease.com, REJECT
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 2. Apple & 微信 最高优先级直连
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Apple News 在中国大陆被封锁，必须走代理 (v5.7 新增)
+# 放在 DOMAIN-SUFFIX apple.com, Apple 之前确保优先匹配 (Loon 按顺序匹配)
+DOMAIN, news-edge.apple.com, Proxy
+DOMAIN, news-todayconfig-edge.apple.com, Proxy
+DOMAIN, news-events.apple.com, Proxy
+DOMAIN, news-sports-events.apple.com, Proxy
+DOMAIN, news-client.apple.com, Proxy
+DOMAIN, news-client-search.apple.com, Proxy
+# Apple Weather/Maps/Siri 增强域名走 Apple 策略组 (可直连或代理)
 DOMAIN, testflight.apple.com, Proxy
 DOMAIN-SUFFIX, apple.com, Apple
 DOMAIN-SUFFIX, icloud.com, Apple
@@ -382,6 +391,19 @@ https://raw.githubusercontent.com/3kaiu/config/main/Plugin/life.plugin, enabled=
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/ai.plugin, enabled=true, tag=AI 服务分流
 https://raw.githubusercontent.com/3kaiu/config/main/Plugin/zhihuifangdong.plugin, enabled=true, tag=智慧房东去广告
 https://raw.githubusercontent.com/3kaiu/config/main/Kelee/YouTube_remove_ads.plugin, enabled=true, tag=YouTube去广告
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Apple 原生 App 增强 (NSRingo/iRingo, v5.7 新增)
+# 解锁中国大陆 iPhone 被限制的 Apple 原生功能: 天气空气质量/降水地图、地图卫星图/探索、
+# Apple News、Siri 国际版、TestFlight 区域解锁
+# MitM 域名均为具体子域 (weatherkit/news-*/smoot/testflight/ls.apple.com)，不影响银行安全
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+https://github.com/NSRingo/WeatherKit/releases/latest/download/iRingo.WeatherKit.plugin, enabled=true, tag=🍎天气增强
+https://github.com/NSRingo/Maps/releases/latest/download/iRingo.Maps.plugin, enabled=true, tag=🍎地图增强
+https://github.com/NSRingo/News/releases/latest/download/iRingo.News.plugin, enabled=true, tag=🍎News解锁
+https://github.com/NSRingo/Siri/releases/latest/download/iRingo.Siri.plugin, enabled=true, tag=🍎Siri增强
+https://github.com/NSRingo/Siri/releases/latest/download/iRingo.Search.plugin, enabled=true, tag=🍎搜索建议增强
+https://github.com/NSRingo/TestFlight/releases/latest/download/iRingo.TestFlight.plugin, enabled=true, tag=🍎TestFlight增强
 
 [Rewrite]
 # HTTPDNS API 正则拦截 (防止 API 直接通过 IP 发起解析)

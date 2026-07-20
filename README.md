@@ -68,6 +68,17 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 *   **脚本路径**：主配置 `[Rule]` 规则路由 (Loon/QX) + 远程去广告插件 (Loon Kelee `YouTube_remove_ads.lpx` / QX `youtube.conf`)
 *   **净化效果**：屏蔽 YouTube App 视频中插广告、首页信息流推广，并提供后台播放 (画中画) 支持。
 
+### 🍎 2.5b Apple 原生 App 增强 (v5.7 新增)
+*   **方案来源**：[NSRingo/iRingo](https://github.com/NSRingo) 项目（原 VirgilClyne/iRingo 已迁移至 NSRingo 组织）
+*   **增强范围**：
+    *   **天气 (WeatherKit)**：解锁中国大陆被限制的空气质量数据、下一小时降水预报、天气地图。MitM 解密 `weatherkit.apple.com`。
+    *   **地图 (Maps)**：解锁卫星地图、周边探索、国际版导航功能。MitM 解密 `configuration.ls.apple.com`、`gspe35-ssl.ls.apple.com`。
+    *   **Apple News**：在中国大陆解锁 Apple News App（需走代理）。MitM 解密 `news-*.apple.com`，分流规则将 News 域名指向 Proxy。
+    *   **Siri**：解锁 Siri 国际版功能与搜索建议。MitM 解密 `guzzoni.smoot.apple.com`、`api2.smoot.apple.com`。
+    *   **TestFlight**：区域解锁、多账户切换、跨平台安装。MitM 解密 `testflight.apple.com`。
+*   **MitM 安全**：所有 Apple 增强域名均为具体子域，不影响银行安全。QX 端在 ` -*.apple.com` 负向排除后显式声明这些具体域名来覆盖排除，确保正常解密。
+*   **引用格式**：Loon 使用 `.plugin`（release 下载），QX 使用 `.yaml`（iRingo 官方 QX 原生格式）。
+
 ### 🚫 2.6 全网系统级与 App 深度去广告 (多引擎全覆盖)
 *   **规则路径**：Loon 插件 (`Plugin`) / QX 远程重写 (`rewrite_remote`) 默认内置。
 *   **净化范围**：整合全网最有价值的 App 去广告方案，采用**多引擎分层覆盖**设计：
