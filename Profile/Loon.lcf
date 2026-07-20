@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════
-#  Loon 配置 (Loon.lcf) — v5.5 (高级 NetOps 增强版)
+#  Loon 配置 (Loon.lcf) — v5.6 (高级 NetOps 增强版)
 #  核心: 自动健康检测 · 高质量多引擎去广告 · 全球社交/流媒体分流 · 银行 MitM 冲突根治
 #  引擎支持: iOS Loon 3.3.9+
 # ═══════════════════════════════════════════════════════════
@@ -64,8 +64,8 @@ httpdns.gslb.netease.com = 0.0.0.0
 [Proxy Group]
 # 代理主策略：url-test 自动健康检测，单节点场景下持续监测节点延迟
 # 节点可用时走节点，不可用时显式报错（不回落 DIRECT，防止敏感流量直连泄露真实 IP）
-# interval=300 每5分钟测速一次，tolerance=50ms 容差防抖
-Proxy = url-test, 🇯🇵 Tokyo_Proxy, url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
+# interval=600 每10分钟测速一次（与QX端对齐省电），tolerance=50ms 容差防抖
+Proxy = url-test, 🇯🇵 Tokyo_Proxy, url=http://cp.cloudflare.com/generate_204, interval=600, tolerance=50
 Apple = select, DIRECT, Proxy
 Final = select, Proxy, DIRECT
 
@@ -203,6 +203,34 @@ DOMAIN-SUFFIX, google.co.jp, Proxy
 DOMAIN-SUFFIX, g.co, Proxy
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 开发者平台 & 国际服务 (v5.6 新增, 补充 Global.list 未覆盖的域名)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# GitHub (开发者必备, Global.list 未完整覆盖)
+DOMAIN-SUFFIX, github.com, Proxy
+DOMAIN-SUFFIX, githubusercontent.com, Proxy
+DOMAIN-SUFFIX, githubassets.com, Proxy
+DOMAIN-SUFFIX, github.io, Proxy
+DOMAIN-SUFFIX, gist.github.com, Proxy
+# Microsoft / OneDrive / Office 365
+DOMAIN-SUFFIX, microsoft.com, Proxy
+DOMAIN-SUFFIX, microsoftonline.com, Proxy
+DOMAIN-SUFFIX, onedrive.com, Proxy
+DOMAIN-SUFFIX, onedrive.live.com, Proxy
+DOMAIN-SUFFIX, office365.com, Proxy
+DOMAIN-SUFFIX, live.com, Proxy
+# Steam (游戏平台, Global.list 未覆盖)
+DOMAIN-SUFFIX, steam.com, Proxy
+DOMAIN-SUFFIX, steampowered.com, Proxy
+DOMAIN-SUFFIX, steamcommunity.com, Proxy
+DOMAIN-SUFFIX, steamstatic.com, Proxy
+DOMAIN-SUFFIX, steamcontent.com, Proxy
+DOMAIN-SUFFIX, steamcdn-a.akamaihd.net, Proxy
+# Wikipedia / Wikimedia
+DOMAIN-SUFFIX, wikipedia.org, Proxy
+DOMAIN-SUFFIX, wikimedia.org, Proxy
+DOMAIN-SUFFIX, wikimediafoundation.org, Proxy
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 全球社交平台 (统一走 Proxy)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Instagram
@@ -230,11 +258,8 @@ DOMAIN-SUFFIX, reddit.com, Proxy
 DOMAIN-SUFFIX, redditstatic.com, Proxy
 DOMAIN-SUFFIX, redd.it, Proxy
 DOMAIN-SUFFIX, redditmedia.com, Proxy
-# Discord
+# Discord (补充 discord.com 主域，其余 discordapp.* 已在上方 STUN 段优先匹配)
 DOMAIN-SUFFIX, discord.com, Proxy
-DOMAIN-SUFFIX, discordapp.com, Proxy
-DOMAIN-SUFFIX, discordapp.net, Proxy
-DOMAIN-SUFFIX, discord.media, Proxy
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 4. GDT 广告 SDK 白名单 (防去广告误杀奖励包)
@@ -340,6 +365,13 @@ https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/ITh
 https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/BaiduNetDisk_remove_ads.plugin, enabled=true, tag=百度网盘净化
 https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Reddit_remove_ads.plugin, enabled=true, tag=Reddit去广告
 https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Soul_remove_ads.plugin, enabled=true, tag=Soul净化
+# v5.6 新增: 补充常用 App 去广告缺口
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Zhihu_remove_ads.plugin, enabled=true, tag=知乎净化
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/12306_remove_ads.plugin, enabled=true, tag=12306去广告
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/AliYunDrive_remove_ads.plugin, enabled=true, tag=阿里云盘净化
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/QQMusic_remove_ads.plugin, enabled=true, tag=QQ音乐净化
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/smzdm_remove_ads.plugin, enabled=true, tag=什么值得买净化
+https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Cainiao_remove_ads.plugin, enabled=true, tag=菜鸟裹裹净化
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 自维护核心及应用插件 (按需开启，默认已全开，可在手机端根据需要关闭)

@@ -27,7 +27,7 @@ jobs:
 
       - name: Backup ajune0527 Loon App plugins (防上游删除/改名导致失效)
         run: |
-          for p in Weibo_remove_ads Weixin_Official_Accounts_remove_ads Bilibili_remove_ads NeteaseCloudMusic_remove_ads Amap_remove_ads Taobao_remove_ads JD_remove_ads Tieba_remove_ads Himalaya_remove_ads CoolApk_remove_ads IThome_remove_ads BaiduNetDisk_remove_ads Reddit_remove_ads Soul_remove_ads Sub-Store QuickSearch; do
+          for p in Weibo_remove_ads Weixin_Official_Accounts_remove_ads Bilibili_remove_ads NeteaseCloudMusic_remove_ads Amap_remove_ads Taobao_remove_ads JD_remove_ads Tieba_remove_ads Himalaya_remove_ads CoolApk_remove_ads IThome_remove_ads BaiduNetDisk_remove_ads Reddit_remove_ads Soul_remove_ads Zhihu_remove_ads 12306_remove_ads AliYunDrive_remove_ads QQMusic_remove_ads smzdm_remove_ads Cainiao_remove_ads Sub-Store QuickSearch; do
             curl -s -L -A "Loon/3.3.9" "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/${p}.plugin" -o "Plugins/${p}.plugin"
           done
 

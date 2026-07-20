@@ -73,19 +73,20 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 *   **净化范围**：整合全网最有价值的 App 去广告方案，采用**多引擎分层覆盖**设计：
     *   **通用去广告层**：`blackmatrix7/AllInOne`（QX）+ `Remove_ads_by_keli.plugin` + `myblockads.plugin`(RuCu6)（Loon）覆盖系统级广告域名、追踪 SDK。
     *   **开屏广告通杀层**：`ddgksf2013/FakeiOSAds`（QX）拦截 iOS 系统/第三方 SDK 开屏广告。
-    *   **按 App 精细化去广告层**（v5.4 新增，v5.5 扩展备份）：
-        *   **Loon 端**（ajune0527/vpn_tool 插件）：微博、微信公众号、Bilibili、网易云音乐、高德地图、淘宝、京东、百度贴吧、喜马拉雅、酷安、IT之家、百度网盘、Reddit、Soul 等 14+ App 独立去广告插件。v5.5 起全部纳入 GitHub Actions 每日同步备份至 `Plugins/` 目录，防上游删除/改名失效。
-        *   **QX 端**（ddgksf2013 + app2smile）：微博、微信、网易云音乐、高德地图、百度贴吧、闲鱼、喜马拉雅、什么值得买、Bilibili(主App+漫画)、车来了、中国联通、网易邮箱、墨迹天气、汽水音乐、小宇宙播客、Reddit 等 16+ App 独立去广告配置。
+    *   **按 App 精细化去广告层**（v5.4 新增，v5.5 扩展备份，v5.6 补充缺口）：
+        *   **Loon 端**（ajune0527/vpn_tool 插件，20+ App）：微博、微信公众号、Bilibili、网易云音乐、高德地图、淘宝、京东、百度贴吧、喜马拉雅、酷安、IT之家、百度网盘、Reddit、Soul、知乎、12306、阿里云盘、QQ音乐、什么值得买、菜鸟裹裹等独立去广告插件。全部纳入 GitHub Actions 每日同步备份至 `Plugins/` 目录，防上游删除/改名失效。
+        *   **QX 端**（ddgksf2013 + app2smile，20+ App）：微博、微信、网易云音乐、高德地图、百度贴吧、闲鱼、喜马拉雅、什么值得买、Bilibili(主App+漫画)、车来了、中国联通、网易邮箱、墨迹天气、汽水音乐、小宇宙播客、Reddit、菜鸟裹裹、淘票票、彩云天气、微信小程序等独立去广告配置。
     *   **追踪/埋点拦截层**：主配置 `[Rule]` 段内置 23 条腾讯/字节/阿里系追踪域名 REJECT，与去广告插件互补。
     *   **多维度 HTTPDNS 拦截**：`DOMAIN-KEYWORD httpdns REJECT` + `[Host]` 静态映射 `0.0.0.0` + `[Rewrite]` reject，三层拦截防 DNS 污染。
 
-### 🌍 2.7 全球社交平台与流媒体分流 (v5.4 新增)
+### 🌍 2.7 全球社交平台与流媒体分流 (v5.4 新增, v5.6 扩展)
 *   **规则路径**：`Profile/Loon.lcf` / `Profile/QX.conf` 的 `[Rule]` / `[filter_local]` 段。
 *   **分流覆盖**：
     *   **流媒体**：YouTube、Netflix（含 CDN）、Disney+、HBO Max、Spotify、TikTok、Prime Video、Twitch、AbemaTV、TVB。
     *   **社交平台**：Instagram、Twitter/X、Facebook/Meta、Telegram、Reddit、Discord。
     *   **AI 服务**：OpenAI、Claude、Gemini（含 CDN）、Perplexity、Cursor、Copilot、Codeium 等。
     *   **Google 全家桶**：google.com、googleapis.com、gstatic.com、googlevideo.com 等。
+    *   **开发者平台 (v5.6 新增)**：GitHub、Microsoft/OneDrive/Office 365、Steam、Wikipedia/Wikimedia。
     *   所有海外流量统一走向 `Proxy` 代理组（自动延迟检测选优）。
 
 ### 🎮 2.7 Epic Games & epic-kiosk 领游戏分流支持
