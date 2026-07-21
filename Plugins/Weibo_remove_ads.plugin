@@ -1,0 +1,84 @@
+#!name=微博去广告
+#!desc=过滤微博广告及去除各部分推广模块
+#!openUrl=
+#!author=RuCu6 zmqcherish
+#!homepage=https://github.com/ajune0527/vpn_tool/tree/master/Tool/Loon/Plugin
+#!icon=https://gitlab.com/lodepuly/iconlibrary/-/raw/main/App_icon/120px/Weibo.png
+#!date=2024-02-07 17:35:47
+
+[Rule]
+# 请求放行
+DOMAIN, wbapp.uve.weibo.com, DIRECT
+
+# 请求拦截
+# 微博开屏广告
+DOMAIN-SUFFIX, biz.weibo.com, REJECT
+
+[Rewrite]
+# 首页 - 签到、发布按钮、侧边栏、右上角红包、顶部标签页、侧边栏提醒、超话标签页悬浮、顶部直播
+^https:\/\/api\.weibo\.cn\/2\/(ug\/checkin\/list|push\/daily)\? reject-dict
+^https:\/\/api\.weibo\.cn\/2\/!\/live\/media_homelist\? reject-dict
+
+# 详情页 - 超话、评论区、看图界面、个人主页、我的页面、信息流、商品橱窗、视频流、视频号、视频调查、话题卡片
+^https:\/\/api\.weibo\.cn\/2\/comments\/bullet_screens\? reject-dict
+^https:\/\/api\.weibo\.cn\/2\/photo\/info\? reject-dict
+^https:\/\/api\.weibo\.cn\/2\/statuses\/(container_positive|push_info)\? reject-dict
+^https:\/\/api\.weibo\.cn\/2\/vote\/get_vote_detail\? reject-dict
+^https:\/\/api\.weibo\.cn\/2\/!\/chaohua\/discovery\/home_bottom\/switch\? reject-dict
+^https:\/\/api\.weibo\.cn\/2\/!\/huati\/(discovery_home_bottom_getdotinfo|mobile_discovery_searchchange)\? reject-dict
+^https:\/\/api\.weibo\.cn\/2\/!\/wbox\/\w+\/(home_bottom_modal|interest_category)\? reject-dict
+
+# 发现页 - 热门微博信息流、搜索列表、热搜提醒、猜你想搜、视频流红包
+^https:\/\/api\.weibo\.cn\/2\/search\/container_discover\? reject-dict
+^https:\/\/api\.weibo\.cn\/2\/hot\/hours_spotlight\? reject-dict
+^https:\/\/api\.weibo\.cn\/2\/video\/redpacket\? reject-dict
+^https:\/\/api\.weibo\.cn\/!\/sug\/list\/finderchange\? reject-dict
+
+# 开屏广告 //*.uve.weibo.com
+^https:\/\/bootrealtime\.uve\.weibo\.com\/v[23]\/ad\/realtime reject-dict
+^https:\/\/sdkapp\.uve\.weibo\.com\/interface\/sdk\/(get-lbs-cell-info\.php|sdkconfig\.php) reject
+
+# 微博长文章推广
+^https:\/\/card\.weibo\.com\/article\/m\/aj\/(reward|uvead)\? reject-dict
+^https:\/\/weibo\.com\/ttarticle\/x\/m\/aj\/(reward|uvead)\? reject-dict
+
+[Script]
+# 首页 - 签到、发布按钮、侧边栏、右上角红包、顶部标签页、侧边栏提醒、超话标签页悬浮、顶部直播
+http-response ^https:\/\/api\.weibo\.cn\/2\/(checkin\/show|client\/publisher_list|push\/active)\? script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_ads.js, requires-body = true, tag = 移除首页广告
+http-response ^https:\/\/api\.weibo\.cn\/2\/groups\/allgroups\/v2\? script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_ads.js, requires-body = true, tag = 移除首页广告
+
+# 详情页 - 超话、评论区、看图界面、个人主页、我的页面、信息流、商品橱窗、视频流、视频号、视频调查、话题卡片
+http-response ^https:\/\/api\.weibo\.cn\/2\/(cardlist|page)\? script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_ads.js, requires-body = true, tag = 移除详情页广告
+http-response ^https:\/\/api\.weibo\.cn\/2\/comments\/build_comments\? script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_ads.js, requires-body = true, tag = 移除详情页广告
+http-response ^https:\/\/api\.weibo\.cn\/2\/(container\/asyn|flowlist)\? script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_ads.js, requires-body = true, tag = 移除详情页广告
+http-response ^https:\/\/api\.weibo\.cn\/2\/friendships\/(create|destroy)\? script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_ads.js, requires-body = true, tag = 移除详情页广告
+http-response ^https:\/\/api\.weibo\.cn\/2\/profile\/(container_timeline|dealatt|me|statuses\/tab|userinfo)\? script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_ads.js, requires-body = true, tag = 移除详情页广告
+http-response ^https:\/\/api\.weibo\.cn\/2\/statuses\/(container_timeline(_hot|_topic|_topicpage|_unread)?|unread_hot_timeline)\? script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_ads.js, requires-body = true, tag = 移除详情页广告
+http-response ^https:\/\/api\.weibo\.cn\/2\/statuses\/(extend|show)\? script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_ads.js, requires-body = true, tag = 移除详情页广告
+http-response ^https:\/\/api\.weibo\.cn\/2\/video\/tiny_stream_video_list\? script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_ads.js, requires-body = true, tag = 移除详情页广告
+http-response ^https:\/\/api\.weibo\.cn\/2\/!\/huati\/discovery_home_bottom_channels\? script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_ads.js, requires-body = true, tag = 移除详情页广告
+
+# 消息页
+http-response ^https:\/\/api\.weibo\.cn\/2\/direct_messages\/user_list\? script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_ads.js, requires-body = true, tag = 移除消息页广告
+http-response ^https:\/\/api\.weibo\.cn\/2\/messageflow\/notice\? script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_ads.js, requires-body = true, tag = 移除消息页广告
+
+# 发现页 - 热门微博信息流、搜索列表、热搜提醒、猜你想搜、视频流红包
+http-response ^https:\/\/api\.weibo\.cn\/2\/search\/(container_timeline|finder)\? script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_ads.js, requires-body = true, tag = 移除发现页广告
+http-response ^https:\/\/api\.weibo\.cn\/2\/searchall\? script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_ads.js, requires-body = true, tag = 移除发现页广告
+
+# 开屏广告 //*.uve.weibo.com
+http-response ^https:\/\/bootpreload\.uve\.weibo\.com\/v1\/ad\/preload script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_ads.js, requires-body = true, tag = 移除开屏广告
+http-response ^https:\/\/sdkapp\.uve\.weibo\.com\/interface\/sdk\/sdkad\.php script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_ads.js, requires-body = true, tag = 移除开屏广告
+http-response ^https:\/\/wbapp\.uve\.weibo\.com\/(preload\/get_ad|wbapplua\/wbpullad\.lua)\? script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_ads.js, requires-body = true, tag = 移除开屏广告
+
+# 会员图标
+http-response ^https:\/\/new\.vip\.weibo\.cn\/aj\/appicon\/list\? script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_ads.js, requires-body = true, tag = 会员图标
+
+# 跳过重定向页面以直接访问 //weibo.cn, shop.sc.weibo.com, t.cn, sinaurl.cn
+# http-request ^https:\/\/weibo\.cn\/sinaurl\?(.*&)?(u|toasturl|goto)= script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_redirect.js, tag = 跳过重定向
+# http-request ^https:\/\/shop\.sc\.weibo\.com\/h5\/jump\/error\?(.*&)?url= script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_redirect.js, tag = 跳过重定向
+# http-response ^https:\/\/(sinaurl|t)\.cn\/ script-path = https://gitlab.com/lodepuly/vpn_tool/raw/master/Resource/Script/Weibo/Weibo_remove_redirect.js, tag = 跳过重定向
+
+[Mitm]
+# hostname = *.weibo.cn, *.weibo.com, sinaurl.cn, t.cn, weibo.cn
+hostname = *.weibo.cn, *.weibo.com, weibo.com
