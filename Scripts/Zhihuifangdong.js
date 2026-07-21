@@ -20,9 +20,6 @@ try {
     $.log("已屏蔽智慧房东开屏广告");
   }
   else if (arg === "bannerPicMore" || url.includes("bannerPicMore")) {
-    if (obj && obj.data && obj.data.data) {
-      obj.data.data = [];
-    }
     if (obj && obj.data) {
       obj.data = {};
     }

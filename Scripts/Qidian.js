@@ -450,9 +450,9 @@ async function handleReplay(request) {
 function handleSplashScreen(response) {
   try {
     const obj = safeJsonParse(response.body);
-    if (obj && obj.Data) {
+    if (!obj) { $.done(); return; }
+    if (obj.Data) {
       if (Array.isArray(obj.Data.List)) obj.Data.List = [];
-      if (Array.isArray(obj.Data)) obj.Data = [];
     }
     $.done({ body: JSON.stringify(obj) });
   } catch (e) { $.done(); }
@@ -461,7 +461,8 @@ function handleSplashScreen(response) {
 function handleDeeplink(response) {
   try {
     const obj = safeJsonParse(response.body);
-    if (obj && obj.Data) obj.Data = {};
+    if (!obj) { $.done(); return; }
+    if (obj.Data) obj.Data = {};
     $.done({ body: JSON.stringify(obj) });
   } catch (e) { $.done(); }
 }
@@ -469,7 +470,8 @@ function handleDeeplink(response) {
 function handleDailyRec(response) {
   try {
     const obj = safeJsonParse(response.body);
-    if (obj && obj.Data && obj.Data.Items) obj.Data.Items = [];
+    if (!obj) { $.done(); return; }
+    if (obj.Data && obj.Data.Items) obj.Data.Items = [];
     $.done({ body: JSON.stringify(obj) });
   } catch (e) { $.done(); }
 }
@@ -477,7 +479,8 @@ function handleDailyRec(response) {
 function handleAccountPage(response) {
   try {
     const obj = safeJsonParse(response.body);
-    if (obj && obj.Data) {
+    if (!obj) { $.done(); return; }
+    if (obj.Data) {
       CONFIG.AccountPageDelKeys.forEach(k => { delete obj.Data[k]; });
     }
     $.done({ body: JSON.stringify(obj) });

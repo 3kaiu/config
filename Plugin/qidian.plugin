@@ -76,4 +76,4 @@ DOMAIN, ataru.qidian.com, REJECT
 DOMAIN-KEYWORD, qreport, REJECT
 
 [MitM]
-hostname = h5.if.qidian.com, magev6.if.qidian.com, ii.gdt.qq.com, adsmind.gdtimg.com, adsmind.ugdtimg.com, pgdt.gtimg.cn, api-access.pangolin-sdk-toutiao*.com
+hostname = h5.if.qidian.com, magev6.if.qidian.com, ii.gdt.qq.com, adsmind.gdtimg.com, adsmind.ugdtimg.com, pgdt.gtimg.cn, api-access.pangolin-sdk-toutiao.com, api-access.pangolin-sdk-toutiao1.com
