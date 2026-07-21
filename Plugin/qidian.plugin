@@ -2,7 +2,7 @@
 #!desc=抓包驱动深度净化 · 福利中心精简 · 发现页白名单 · 自动静默签到 & 高阶福利任务自动化。配置前需开启抓取重写，并打开起点 App -> 我的 -> 福利中心 抓取 Cookie。
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
-#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Qidian.png
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bookpedia.png
 #!arguments-desc=- 是否开启抓取重写: ["true","false"] \n\n- CRONEXP: 默认每天2点11分执行, 建议自行配置。\n\n- 是否开启调试模式: ["true","false"]\n\n - TIMEOUT: 脚本执行超时时间, 默认60秒。\n\n- 激励任务: ["true","false"]\n\n- 每日任务: ["true","false"]\n\n- 每日抽奖: ["true","false"]\n\n- 每周兑换: ["true","false"]\n\n- 章节卡片: ["true","false"]\n\n- 大咖荐书: ["true","false"]
 
 [Argument]

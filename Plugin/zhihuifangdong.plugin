@@ -2,7 +2,7 @@
 #!desc=屏蔽开屏广告 + Banner 广告，支持独立开关控制
 #!author=Ethan / 3kaiu
 #!homepage=https://github.com/3kaiu/config
-#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/SmartHome.png
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse.png
 
 [Argument]
 appOpenAdsSwitch=switch,true,tag=开屏广告屏蔽,desc=开启后将屏蔽App启动时的开屏广告

@@ -2,7 +2,7 @@
 #!desc=菜鸟包裹 — 净化推广与开屏广告，支持在插件参数中设置独立开关。
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
-#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Delivery.png
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/PostBox.png
 
 [Argument]
 CAINIAO_ENABLE=switch,"true","false",tag=是否开启菜鸟包裹去广告,desc=开启后将对菜鸟包裹App及小程序进行去广告和净化
