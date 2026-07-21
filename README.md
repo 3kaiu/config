@@ -104,7 +104,7 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 *   **分流规则**：`Profile/Loon.lcf` (Loon) / `Profile/QX.conf` (QX) -> 远程引用 `blackmatrix7` 维护的 `Epic.list`。
 *   **核心功能**：
     *   将 Epic Games 相关的登录、商城、CDN 流量自动路由至 `Proxy` 代理组，支持自动化领取工具 `epic-kiosk`。
-    *   将其独立分组，方便您在客户端 UI 中单独切换其节点到 **Proxy Chain 代理链（前置中转节点 ➡️ 原生住宅 IP 出口节点）**，完美规避 Epic 严格的 Cloudflare 防刷盾和 hCaptcha 验证码封锁。
+    *   将其独立分流至 `Proxy` 策略组，您可在客户端 UI 中为 Epic 切换到住宅 IP 节点（或自行配置代理链）以规避 Epic 的 Cloudflare 防刷盾和 hCaptcha 验证码封锁。
 
 ### 🛵 2.8 生活出行去广告 (默认开启)
 *   **脚本路径**：`Plugin/life.plugin` (Loon) / `QX/life.conf` (QX)
@@ -124,10 +124,10 @@ https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
 ```
 
 1.  **策略组自动健康检测 (Proxy url-test / url-latency-benchmark)**：
-    *   主代理策略组采用自动延迟检测设计：`Proxy = url-test, 🇯🇵 Tokyo_Proxy, url=..., interval=300, tolerance=50` (Loon) / `url-latency-benchmark=Proxy, 🇯🇵 Tokyo_Proxy, check-interval=600, alive-checking=false, tolerance=50` (QX)。
+    *   主代理策略组采用自动延迟检测设计：`Proxy = url-test, 🇯🇵 Tokyo_Proxy, url=..., interval=600, tolerance=50` (Loon) / `url-latency-benchmark=Proxy, 🇯🇵 Tokyo_Proxy, check-interval=600, alive-checking=false, tolerance=50` (QX)。
     *   **自动选优**：单节点场景下，持续监测节点延迟与可用性，节点可用时自动走节点，无需手动切换。
     *   **流量防泄露优化**：策略组中**不放 DIRECT / direct 作为回落**。当节点不可用时显式报错，让您及时感知并调整。这避免了原本需要代理的敏感流量（如海外搜索、AI、流媒体）在无感知的状态下直接打向真实 IP 导致泄露。
-    *   **省电设计**：QX 端 `alive-checking=false` 空闲时不测速，Loon 端 `interval=300` 每5分钟一次，平衡实时性与电量。
+    *   **省电设计**：QX 端 `alive-checking=false` 空闲时不测速，Loon 端 `interval=600` 每10分钟一次（与QX端对齐），平衡实时性与电量。
 2.  **Split DNS 分流与双加密加速 (DoQ / DoH3)**：
     *   **国内解析**：通过阿里/腾讯/火山引擎的高速加密 DNS（DoH / DoQ）在本地快速解析，新增火山引擎 DNS (`180.184.11.11`, `180.184.22.22`) 优化字节系/抖音应用解析。
     *   **双端 DoQ 与 DoH3 加速**：Loon 与 Quantumult X 均引入了 DNS over QUIC (`quic://dns.alidns.com`) 和 DoH3 并开启极速首选，极大降低握手延迟，防 DNS 污染与泄露。
