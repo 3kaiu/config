@@ -24,6 +24,10 @@ jobs:
           curl -s -L -A "Loon/3.3.9" "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Remove_ads_by_keli.plugin" -o Kelee/Remove_ads_by_keli.plugin
           curl -s -L -A "Loon/3.3.9" "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/YouTube_remove_ads.plugin" -o Kelee/YouTube_remove_ads.plugin
           curl -s -L -A "Loon/3.3.9" "https://raw.githubusercontent.com/jqyisbest/RuCu6/main/Plugins/myblockads.plugin" -o Kelee/myblockads.plugin
+          # ⚠️ 修复: myblockads.plugin 内部仍引用已删除的 RuCu6/Loon 仓库的 script-path 和 icon
+          # 替换为存活的 jqyisbest/RuCu6 镜像源，防止脚本 404 导致去广告功能失效
+          sed -i 's|raw.githubusercontent.com/RuCu6/Loon/main/Scripts|raw.githubusercontent.com/jqyisbest/RuCu6/main/Scripts|g' Kelee/myblockads.plugin
+          sed -i 's|raw.githubusercontent.com/RuCu6/Loon/main/Icons|raw.githubusercontent.com/jqyisbest/RuCu6/main/Icons|g' Kelee/myblockads.plugin
 
       - name: Backup ajune0527 Loon App plugins (防上游删除/改名导致失效)
         run: |

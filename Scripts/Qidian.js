@@ -438,10 +438,11 @@ async function handleReplay(request) {
   });
   const results = await Promise.allSettled(tasks);
   const ok = results.filter(r => r.status === "fulfilled" && r.value).length;
+  const total = replayCount + 1; // +1 for the original request
   if (!CONFIG.SilentMode) {
-    $.notify("起点助手", "", `${task.name}: ${ok + 1}/${task.count}`);
+    $.notify("起点助手", "", `${task.name}: ${ok + 1}/${total}`);
   } else {
-    $.log(`[静默模式] ${task.name}: ${ok + 1}/${task.count}`);
+    $.log(`[静默模式] ${task.name}: ${ok + 1}/${total}`);
   }
   $.done();
 }
