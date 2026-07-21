@@ -134,7 +134,37 @@ else
 fi
 
 # ============================================
-# 5. 总结
+# 5. Hysteria2 专用 UDP 缓冲区优化
+# ============================================
+echo ""
+echo ">>> Hysteria2 UDP 缓冲区优化..."
+
+# Hysteria2 是 QUIC/UDP 协议, 对 UDP 缓冲区要求极高
+# 默认 UDP 缓冲区通常只有 208KB, 远不够 Hysteria2 的高速传输
+# 已在 BBR 配置中设置 rmem_max/wmem_max = 64MB, 此处额外确认 UDP 层
+cat > /etc/sysctl.d/99-hysteria-udp.conf << 'EOF'
+# Hysteria2 (QUIC/UDP) 专用 UDP 缓冲区优化
+# QUIC 使用 UDP, 默认 UDP 缓冲区远小于 TCP, 是 Hysteria2 限速的常见原因
+net.core.rmem_max = 67108864
+net.core.wmem_max = 67108864
+net.core.rmem_default = 1048576
+net.core.wmem_default = 1048576
+
+# UDP 收发缓冲队列 (防止高吞吐下丢包)
+net.core.netdev_max_backlog = 5000
+
+# conntrack 表 (VLESS+Reality 的 TCP 连接跟踪)
+# 默认 65536 可能不够, 放大防止连接跟踪表满导致丢包
+net.netfilter.nf_conntrack_max = 262144
+net.ipv4.tcp_max_tw_buckets = 32768
+EOF
+
+# 应用 (如果 sysctl --system 报错某些 key 不存在, 忽略)
+sysctl --system 2>/dev/null || sysctl -p /etc/sysctl.d/99-hysteria-udp.conf 2>/dev/null || true
+echo "✅ Hysteria2 UDP 缓冲区已优化 (rmem/wmem = 64MB)"
+
+# ============================================
+# 6. 总结
 # ============================================
 echo ""
 echo "======================================"
@@ -144,11 +174,32 @@ echo "📋 当前网络参数:"
 echo "   拥塞控制: $(sysctl -n net.ipv4.tcp_congestion_control)"
 echo "   队列算法: $(sysctl -n net.core.default_qdisc)"
 echo "   TCP Fast Open: $(sysctl -n net.ipv4.tcp_fastopen)"
-echo "   rmem_max: $(sysctl -n net.core.rmem_max) bytes"
-echo "   wmem_max: $(sysctl -n net.core.wmem_max) bytes"
+echo "   UDP rmem_max: $(sysctl -n net.core.rmem_max) bytes"
+echo "   UDP wmem_max: $(sysctl -n net.core.wmem_max) bytes"
+echo "   MTU 探测: $(sysctl -n net.ipv4.tcp_mtu_probing)"
 echo ""
-echo "💡 后续建议:"
-echo "   1. 重启节点服务使 BBR + TFO 生效 (systemctl restart <你的节点服务>)"
-echo "   2. 如用 sing-box, 确认配置中 transport 已开启 tcp_fast_open: true"
-echo "   3. 如 SS 被运营商限速, 考虑换 Trojan/VLESS+TLS+WS 协议"
-echo "   4. 跨国链路质量波动属正常, BBR 会自适应调节窗口"
+echo "💡 Hysteria2 + VLESS+Reality 服务端建议:"
+echo "   1. 重启节点服务使 BBR + 缓冲区调优生效:"
+echo "      systemctl restart sing-box  (或你的节点服务名)"
+echo ""
+echo "   2. Hysteria2 服务端配置确认 (sing-box):"
+echo "      - up_mbps / down_mbps 不要设得太高 (设为实际带宽的 80%)"
+echo "        过高会导致 QUIC 拥塞控制失效, 反而浪费流量"
+echo "      - 如用 sing-box, hysterias 配置中可设:"
+echo "        recv_idle_timeout: 30s  (空闲超时断开, 省流量)"
+echo "        send_idle_timeout: 30s"
+echo ""
+echo "   3. VLESS+Reality 服务端配置确认:"
+echo "      - flow: xtls-rprx-vision (Vision 流控, 减少 TLS 加密开销)"
+echo "      - transport: 无需额外 WS/gRPC, Vision 直接 TCP 性能最佳"
+echo "      - reality 的 dest 建议用真实大站 (如 www.microsoft.com:443)"
+echo ""
+echo "   4. 流量节省关键点:"
+echo "      - Hysteria2 的 up/down bandwidth 建议设为 VPS 实际带宽"
+echo "        Lightsail $5 套餐 = 1TB/月流量, 带宽约 500Mbps 突发"
+echo "        建设设 down_mbps: 50, up_mbps: 20 (保守值)"
+echo "        过高会导致服务端发包过快, 客户端来不及收 → 重传浪费流量"
+echo "      - VLESS+Reality 的 TCP 流量天然比 Hysteria2 省 (无 QUIC 额外开销)"
+echo "      - 弱网下建议切到 VLESS (TCP BBR 比 QUIC BBR 更成熟)"
+echo ""
+echo "   5. 跨国链路质量波动属正常, BBR 会自适应调节窗口"
