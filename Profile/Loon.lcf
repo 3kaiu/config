@@ -69,22 +69,23 @@ httpdns.c.cdnhwc2.com = 0.0.0.0
 mtalk.google.com = 108.177.125.188
 
 [Proxy]
-# ⚠️ 提示：您使用 Hysteria2 + VLESS+Vision+Reality 双协议到同一台 VPS
-# 直接在下方 [Proxy Group] 的策略组中配置订阅节点即可, 此处留空
-#
-# Loon 节点语法参考 (如需手动定义):
-#   Hysteria2: 🇯🇵 Hysteria2 = hysteria2, <IP>, <端口>, password=<密码>, sni=<域名>, download-bandwidth=0, udp=true
+# ⚠️ 您使用 Hysteria2 (UDP 443) + VLESS+Vision+Reality 双协议到同一台 VPS
+# 节点通过订阅自动导入, 策略组用正则自动匹配所有节点, 无需手动定义
+# 如需手动定义, Loon 节点语法参考:
+#   Hysteria2: 🇯🇵 Hysteria2 = hysteria2, <IP>, 443, password=<密码>, sni=<域名>, udp=true
 #   VLESS:     🇯🇵 VLESS-Reality = vless, <IP>, <端口>, uuid=<UUID>, flow=xtls-rprx-vision, tls-name=<SNI>, reality=true, reality-public-key=<公钥>, reality-short-id=<短ID>, udp=true
 
 [Proxy Group]
-# 双协议节点策略: Hysteria2 (低延迟, UDP) + VLESS+Reality (抗封锁, TCP)
-# url-test 自动选延迟最低的节点, interval=300 每5分钟测速一次
-# Hysteria2 通常延迟更低 (QUIC 0-RTT), 但弱 UDP 网络下 VLESS 更稳
+# 双协议自动选优: Hysteria2 (低延迟, UDP) + VLESS+Reality (抗封锁, TCP)
+# 用正则 # 匹配订阅节点, 无需手动保持节点名一致
+# - #(?=.*hysteria|(?=.*vless) 自动匹配所有 Hysteria2 和 VLESS 节点
+# - url-test 自动选延迟最低的节点
+# Hysteria2 通常延迟更低 (QUIC 0-RTT), 弱 UDP 网络下 VLESS 更稳
 # 如需手动锁定某个协议, 在 Loon App 中将 Proxy 组切换为 select 模式
 #
 # ⚠️ 流量节省: 测速用 cloudflare generate_204 (仅 204 空响应, 不产生真实流量)
 # 每天测速流量约 1.7MB (2节点 × 12次/小时 × 24小时 × 3KB), 可忽略
-Proxy = url-test, 🇯🇵 Hysteria2, 🇯🇵 VLESS-Reality, url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
+Proxy = url-test, "#.*", url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
 Apple = select, DIRECT, Proxy
 Final = select, Proxy, DIRECT
 
