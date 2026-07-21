@@ -30,7 +30,7 @@ resource-parser = https://github.com/sub-store-org/Sub-Store/releases/latest/dow
 allow-wifi-access = false
 wifi-access-http-port = 7222
 wifi-access-socks5-port = 6225
-test-timeout = 5
+test-timeout = 10
 internet-test-url = http://cp.cloudflare.com/generate_204
 proxy-test-url = http://cp.cloudflare.com/generate_204
 skip-proxy = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32, localhost, *.local, *.lan, *.home.arpa
@@ -38,6 +38,9 @@ bypass-tun = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/
 real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.boc.cn, *.abchina.com, *.ccb.com, *.psbc.com, *.cmbchina.com, *.icbc.com.cn, *.bankofchina.com, *.spdb.com.cn, *.cib.com.cn, *.cebbank.com, *.unionpay.com, *.pingan.com.cn, *.pingan.com, *.bankcomm.com, *.citicbank.com, *.hxb.com.cn, *.cgbchina.com.cn, *.local, *.lan, *.home.arpa, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, *.msftconnecttest.com, *.msftncsi.com, *.battlenet.com.cn
 
 [Host]
+# ⚠️ 如果节点用域名连接, 建议在此预解析以省去每次 DNS 查询:
+#   <节点域名> = <节点IP>
+# 例如: your-node.example.com = 13.112.xxx.xxx
 *.taobao.com = server:223.5.5.5
 *.tmall.com = server:223.5.5.5
 *.alipay.com = server:223.5.5.5
@@ -65,13 +68,26 @@ mtalk.google.com = 108.177.125.188
 
 [Proxy]
 # ⚠️ 提示：请将您的自建东京单节点在此命名为 "🇯🇵 Tokyo_Proxy"
-# 示例：🇯🇵 Tokyo_Proxy = shadowrocket, 12.34.56.78, 443, method=chacha20-ietf-poly1305, password=pwd, fast-open=true, udp=true
+#
+# AWS Lightsail Tokyo 推荐配置 (Shadowsocks 协议):
+#   🇯🇵 Tokyo_Proxy = shadowrocket, <IP>, 443, method=chacha20-ietf-poly1305, password=<pwd>, fast-open=true, udp=true, tfo=true
+#
+# 网络质量优化要点:
+#   - 端口 443: 伪装 HTTPS 流量, 部分 ISP 会对非标准端口限速
+#   - chacha20-ietf-poly1305: ARM 芯片(iOS)性能最佳, 比 AES 省电
+#   - fast-open=true + tfo=true: TCP Fast Open 减少一个 RTT 握手开销
+#   - udp=true: 支持 UDP relay (DNS/QUIC 转发)
+#   - 如服务端用 sing-box/233boy, 建议开启 BBR + 缓冲区调优 (见服务端建议)
+#
+# 替代协议 (如 SS 被限速):
+#   🇯🇵 Tokyo_Proxy = trojan, <IP>, 443, password=<pwd>, sni=<域名>, tfo=true
 
 [Proxy Group]
 # 代理主策略：url-test 自动健康检测，单节点场景下持续监测节点延迟
 # 节点可用时走节点，不可用时显式报错（不回落 DIRECT，防止敏感流量直连泄露真实 IP）
-# interval=600 每10分钟测速一次（与QX端对齐省电），tolerance=50ms 容差防抖
-Proxy = url-test, 🇯🇵 Tokyo_Proxy, url=http://cp.cloudflare.com/generate_204, interval=600, tolerance=50
+# interval=180 每3分钟测速一次，单节点场景下兼顾响应速度与省电，tolerance=50ms 容差防抖
+# ⚠️ 测速 URL 用 cloudflare generate_204 (轻量 204 响应, 不产生真实流量, 不被 DNS 污染)
+Proxy = url-test, 🇯🇵 Tokyo_Proxy, url=http://cp.cloudflare.com/generate_204, interval=180, tolerance=50
 Apple = select, DIRECT, Proxy
 Final = select, Proxy, DIRECT
 
