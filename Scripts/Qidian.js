@@ -116,6 +116,8 @@ const CLEAN_RULES = {
 !(async () => {
   if (typeof $request === "undefined") {
     await executeCronTasks();
+    // ⚠️ 修复(v5.9): 确保 cron 任务完成后调用 $.done(), 否则宿主进程挂起
+    $.done();
     return;
   }
 
@@ -126,6 +128,7 @@ const CLEAN_RULES = {
     runQdreaderEngine();
     // ⚠️ 修复: 等待引擎捕获 Cookie 完成（不等待会导致 Cookie 写入前宿主就结束）
     await $.wait(5000);
+    $.done();
     return;
   }
 
@@ -146,11 +149,15 @@ const CLEAN_RULES = {
   }
   // C. 广告 SDK 秒播
   if (url.includes("/gdt_inner_view") || url.includes("/get_ads")) {
+    // ⚠️ 修复(v5.9): 添加 $response 守卫, 防止 request 阶段误入 response 处理
+    if (typeof $response === "undefined") { $.done(); return; }
     handleAdSkip($response);
     return;
   }
 
-  const urlObj = new URL(url);
+  // ⚠️ 修复(v5.9): new URL 保护, 防止畸形 URL 导致整个脚本崩溃
+  let urlObj;
+  try { urlObj = new URL(url); } catch (e) { $.done(); return; }
   const path = urlObj.pathname;
 
   // D. 直接拒绝纯广告端点
@@ -412,10 +419,13 @@ async function handleReplay(request) {
   const match = Object.keys(CONFIG.TaskMapping).find(id => body.includes(id));
   if (!match) { $.done(); return; }
   const task = CONFIG.TaskMapping[match];
-  const replayCount = task.count - 1;
+  // ⚠️ 修复(v5.9): QX rewrite 默认10s超时, 9次重放约需80s必然超时
+  // QX 下减少重放次数为3次(约6s内完成), Loon 下保持原次数(timeout=120s足够)
+  const isQX = typeof $task !== "undefined" && typeof $loon === "undefined";
+  const replayCount = isQX ? Math.min(task.count - 1, 3) : task.count - 1;
   if (replayCount <= 0) { $.done(); return; }
 
-  $.log(`🚀 识别任务: ${task.name}, 重放 ${replayCount} 次`);
+  $.log(`🚀 识别任务: ${task.name}, 重放 ${replayCount} 次${isQX ? " (QX精简模式)" : ""}`);
   const tasks = Array.from({ length: replayCount }, async (_, i) => {
     await $.wait((i + 1) * 2000);
     const res = await $.fetch({

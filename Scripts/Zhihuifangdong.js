@@ -7,6 +7,9 @@ const arg = typeof $argument !== "undefined" ? $argument : "";
 const $ = new Env("智慧房东");
 
 try {
+  // ⚠️ 修复(v5.9): 添加 $response 守卫, 防止 request 阶段误入
+  if (typeof $response === "undefined") { $.done(); }
+  else {
   const obj = JSON.parse($response.body);
 
   const url = typeof $request !== "undefined" ? $request.url : "";
@@ -27,6 +30,7 @@ try {
   }
 
   $.done({ body: JSON.stringify(obj) });
+  }
 } catch (e) {
   $.log(`智慧房东去广告异常: ${e}`);
   $.done();

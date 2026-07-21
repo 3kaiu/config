@@ -8,7 +8,7 @@ const $ = new Env("云闪付");
 
 const AD_KEYWORDS = ["广告", "推广", "营销", "活动", "banner", "弹窗", "浮层"];
 
-if (typeof $response !== "undefined") {
+if (typeof $response !== "undefined" && typeof $request !== "undefined") {
   try {
     const url = $request.url;
     const obj = JSON.parse($response.body);
