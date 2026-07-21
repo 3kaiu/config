@@ -71,7 +71,7 @@ Final = select, Proxy, DIRECT
 
 [Rule]
 # APNs 推送服务直连 (防止推送延迟)
-PORT, 5223, DIRECT
+DEST-PORT, 5223, DIRECT
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 银行广告 CDN 拦截 (必须放在银行 DIRECT 规则之前，Loon 按顺序匹配)
@@ -124,7 +124,7 @@ DOMAIN-KEYWORD, stun.playstation, DIRECT
 DOMAIN-KEYWORD, stun.nintendo, DIRECT
 DOMAIN-KEYWORD, xboxlive.com, DIRECT
 DOMAIN-KEYWORD, stun, REJECT
-PORT, 3478, REJECT
+DEST-PORT, 3478, REJECT
 
 # 0. 局域网直连 (LAN Bounded Context)
 IP-CIDR, 192.168.0.0/16, DIRECT, no-resolve
