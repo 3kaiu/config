@@ -8,12 +8,12 @@
 
 ### 🍏 Loon
 ```text
-https://raw.githubusercontent.com/3kaiu/config/main/Profile/Loon.lcf
+https://ws.wenn.in/main/Profile/Loon.lcf
 ```
 
 ### 🍎 Quantumult X
 ```text
-https://raw.githubusercontent.com/3kaiu/config/main/Profile/QX.conf
+https://ws.wenn.in/main/Profile/QX.conf
 ```
 
 ---
