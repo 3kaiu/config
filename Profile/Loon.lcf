@@ -87,7 +87,7 @@ mtalk.google.com = 108.177.125.188
 # 每天测速流量约 1.7MB (2节点 × 12次/小时 × 24小时 × 3KB), 可忽略
 Proxy = url-test, "#.*", url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
 Apple = select, DIRECT, Proxy
-Final = select, Proxy, DIRECT
+Final = select, DIRECT, Proxy
 
 [Rule]
 # APNs 推送服务直连 (防止推送延迟)
