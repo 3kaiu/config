@@ -23,7 +23,7 @@ https://ws.wenn.in/main/Profile/QX.conf
 本项目秉持“精简且强力”的原则，仅针对您实际使用的 App 进行净化与增强，不集成未安装的应用：
 
 ### 📚 2.1 起点读书 (全能助手 Pro - 默认开启)
-*   **脚本路径**：`Plugin/qidian.plugin` (Loon) / `QX/qidian.conf` (QX) -> 关联本地 [Qidian.js](https://github.com/3kaiu/config/blob/main/Scripts/Qidian.js)
+*   **脚本路径**：`Plugin/qidian.plugin` (Loon) / `QX.conf` `[rewrite_local]` 段 (QX, v7.2 内联) -> 关联本地 [Qidian.js](https://github.com/3kaiu/config/blob/main/Scripts/Qidian.js)
 *   **核心功能**：
     *   **开屏与应用内净化**：全量覆写 getconf 广告配置，清空书架悬浮广告，净化我的账户页推广。
     *   **视频广告秒播**：篡改广告 SDK 数据，将腾讯/穿山甲广告时长修改为 1 秒并播放黑屏。
@@ -45,7 +45,7 @@ https://ws.wenn.in/main/Profile/QX.conf
     *   **任务配置**：Loon 可直接在插件参数中调整各任务开关（默认全开），QX 用户通过 **BoxJs** 调整参数。
 
 ### 💳 2.2 银行及云闪付去广告
-*   **脚本路径**：`Plugin/bank.plugin` (Loon) / `QX/bank.conf` (QX)
+*   **脚本路径**：`Plugin/bank.plugin` (Loon) / `QX.conf` `[filter_local]` 段 (QX, v7.2 内联)
 *   **覆盖应用**：云闪付、买单吧 (交通银行)、中国银行 (缤纷生活)、农业银行等主流金融机构。
 *   **净化效果**：
     *   拦截启动开屏广告、首页弹窗、广告图加载。
@@ -57,7 +57,7 @@ https://ws.wenn.in/main/Profile/QX.conf
         3. **DNS 级 REJECT 取代 MitM 劫持 (v5.3 修复)**：原先对 `creditcard.bankcomm.com`、`cdn1.mbs.boc.cn`、`enjoy.cdn-static.abchina.com` 等广告 CDN 使用 MitM rewrite 拦截，但这些域名会被 `DOMAIN-SUFFIX bankcomm.com / boc.cn / abchina.com` 的 DIRECT 规则先匹配，导致 MitM 劫持直连 TLS 流量 → 银行 App 网络错误。现改为纯 DNS 级 `REJECT` 在解析阶段直接掐断广告 CDN，完全绕开 MitM，既安全又不破坏网络连通性。所有包含 SSL Pinning 的银行交易/通信 API 域名（如 `creditcardapp.bankcomm.com`、`openapi.boc.cn`、`wallet.95516.com`）默认注释，需越狱设备才能启用。
 
 ### 🏠 2.3 智慧房东去广告
-*   **脚本路径**：`Plugin/zhihuifangdong.plugin` (Loon) / `QX/zhihuifangdong.conf` (QX)
+*   **脚本路径**：`Plugin/zhihuifangdong.plugin` (Loon) / `QX.conf` `[rewrite_local]` 段 (QX, v7.2 内联)
 *   **净化效果**：通过 [Zhihuifangdong.js](https://github.com/3kaiu/config/blob/main/Scripts/Zhihuifangdong.js) 拦截开屏与 Banner 横幅广告，Loon 端支持独立开关控制。
 
 ### 🤖 2.4 AI 服务分流
@@ -123,7 +123,7 @@ https://ws.wenn.in/main/Profile/QX.conf
     *   将其独立分流至 `Proxy` 策略组，您可在客户端 UI 中为 Epic 切换到住宅 IP 节点（或自行配置代理链）以规避 Epic 的 Cloudflare 防刷盾和 hCaptcha 验证码封锁。
 
 ### 🛵 2.8 生活出行去广告 (默认开启)
-*   **脚本路径**：`Plugin/life.plugin` (Loon) / `QX/life.conf` (QX)
+*   **脚本路径**：`Plugin/life.plugin` (Loon) / QX 端由 ddgksf2013 `CainiaoAds.conf` 覆盖
 *   **核心功能**：
     *   **菜鸟包裹**：通过类型安全 JSON-JQ 移除首页瀑布流及推广、我的页面横幅及广告、发现页推广，并阻塞开屏广告下发，支持在 Loon UI 中一键启用/禁用该模块。
 
@@ -189,13 +189,11 @@ https://ws.wenn.in/main/Profile/QX.conf
 3kaiu/config/
 ├── .github/
 │   └── workflows/
-│       ├── sync-kelee.yml          # 每天自动从公共镜像源同步可莉插件/RuCu6
-│       └── upstream-health.yml     # 上游依赖每日健康检查 (ddgksf2013/app2smile/Maasea等)
-├── Kelee/                      # 本地缓存的可莉 & RuCu6 插件镜像 (QX转换用)
-│   ├── Prevent_DNS_Leaks.plugin
-│   ├── myblockads.plugin        # jqyisbest/RuCu6 镜像
-│   ├── Remove_ads_by_keli.plugin # 已停用(v7.0), 由 blackmatrix7 AllInOne 取代
-│   └── YouTube_remove_ads.plugin # 自维护, 基于 Maasea 脚本
+│       ├── sync-kelee.yml          # 每日同步 Prevent_DNS_Leaks.plugin
+│       └── upstream-health.yml     # 上游依赖每日健康检查
+├── Kelee/                      # 本地缓存的核心插件
+│   ├── Prevent_DNS_Leaks.plugin  # DNS 泄露防护 (ajune0527 镜像, 每日同步)
+│   └── YouTube_remove_ads.plugin  # YouTube 增强 (自维护, 基于 Maasea)
 ├── Plugin/                     # 自维护 Loon 插件 (19个App覆盖)
 │   ├── qidian.plugin            # 起点全能助手 Pro
 │   ├── bank.plugin              # 银行及云闪付去广告
@@ -216,20 +214,14 @@ https://ws.wenn.in/main/Profile/QX.conf
 │   ├── reddit.plugin            # Reddit去广告 (v7.1 新增)
 │   ├── tieba.plugin             # 贴吧去广告 (v7.1 新增)
 │   └── zhihu.plugin             # 知乎去广告 (v7.1 新增)
-├── archive/                     # 历史废弃文件存档
-│   └── ajune0527-legacy/        # 已淘汰的 ajune0527 插件体系 (22个)
-├── QX/                         # 自维护 QX 配置模块 (分流/重写)
-│   ├── apple/                   # Apple 原生增强 (iRingo .plugin→.conf 转换)
-│   │   ├── WeatherKit.conf      # 天气增强
-│   │   ├── Maps.conf            # 地图增强
-│   │   ├── News.conf            # News 解锁
-│   │   ├── Siri.conf            # Siri + 搜索建议增强
-│   │   └── TestFlight.conf      # TestFlight 区域解锁
-│   ├── qidian.conf              # 起点全能助手 Pro (全能增强版，含签到与高阶任务)
-│   ├── bank.conf                # 银行与云闪付去广告 (QX)
-│   ├── life.conf                # 生活出行去广告 (QX)
-│   ├── zhihuifangdong.conf      # 智慧房东去广告 (QX)
-│   └── ai.conf                  # AI 服务分流规则 (QX 远程引用)
+├── QX/                         # QX 配置模块
+│   ├── ai.conf                  # AI 服务分流规则
+│   └── apple/                   # Apple 原生增强 (iRingo .plugin→.conf 转换)
+│       ├── WeatherKit.conf      # 天气增强
+│       ├── Maps.conf            # 地图增强
+│       ├── News.conf            # News 解锁
+│       ├── Siri.conf            # Siri + 搜索建议增强
+│       └── TestFlight.conf      # TestFlight 区域解锁
 ├── Profile/
 │   ├── Loon.lcf                # Loon 客户端主配置文件
 │   └── QX.conf                 # Quantumult X 客户端主配置文件

@@ -3,7 +3,7 @@ name: Sync Kelee Plugins
 on:
   schedule:
     - cron: '0 2 * * *' # Everyday at 02:00 UTC
-  workflow_dispatch: # Enable manual run
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -15,33 +15,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create directories
-        run: mkdir -p Kelee Plugins
-
-      - name: Download core Kelee plugins (ajune0527/vpn_tool mirror)
+      - name: Sync Prevent_DNS_Leaks.plugin (ajune0527/vpn_tool mirror)
         run: |
           curl -s -L -A "Loon/3.3.9" "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Prevent_DNS_Leaks.plugin" -o Kelee/Prevent_DNS_Leaks.plugin
-          # ⚠️ v7.0: Remove_ads_by_keli.plugin 已淘汰, 替换为 blackmatrix7 AllInOne.plugin (每日更新)
-          # ⚠️ v7.0: myblockads.plugin 已淘汰, 源于已删库的 RuCu6, safebrowsing REJECT 有安全风险
-          # ⚠️ v7.0: 21 个 ajune0527 App 插件已全部淘汰, 替换为自维护插件 (引用 ddgksf2013/app2smile 活跃上游)
-          # ⚠️ v6.3: YouTube 插件改为自维护, 不再从 ajune0527 同步
-
-      - name: Backup ajune0527 Tool plugins (仅保留工具类: Sub-Store/QuickSearch)
-        run: |
-          for p in Sub-Store QuickSearch; do
-            curl -s -L -A "Loon/3.3.9" "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/${p}.plugin" -o "Plugins/${p}.plugin"
-          done
+          # v7.2: 移除 Remove_ads_by_keli / myblockads 同步 (已淘汰)
+          # v7.2: 移除 Plugins/ 目录创建与 Sub-Store/QuickSearch 同步
+          #   Sub-Store/QuickSearch 由 Loon.lcf 直接引用 ajune0527 远程 URL，无需本地缓存
+          # v7.2: YouTube_remove_ads.plugin 仍为自维护，不参与同步
 
       - name: Commit and push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add Kelee/ Plugins/
-          # ⚠️ v6.3: YouTube_remove_ads.plugin 改为自维护, 从 git add 中排除以防被覆盖
+          git add Kelee/Prevent_DNS_Leaks.plugin
+          # YouTube_remove_ads.plugin 为自维护，从 add 中排除
           git reset Kelee/YouTube_remove_ads.plugin 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Auto-sync Kelee + tool plugins with Loon User-Agent"
+            git commit -m "Auto-sync Prevent_DNS_Leaks.plugin"
             git push
           fi
