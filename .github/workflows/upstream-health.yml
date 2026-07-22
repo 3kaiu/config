@@ -1,0 +1,95 @@
+name: Upstream Health Check
+
+on:
+  schedule:
+    - cron: '17 2 * * *' # Everyday at 02:17 UTC (offset from sync-kelee)
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  check-upstreams:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check ddgksf2013/Rewrite
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/KeepAds.conf")
+          if [ "$status" != "200" ]; then
+            echo "::warning::ddgksf2013/Rewrite returned HTTP $status"
+          fi
+          echo "ddgksf2013_status=$status" >> $GITHUB_ENV
+
+      - name: Check Maasea/sgmodule (YouTube)
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js")
+          if [ "$status" != "200" ]; then
+            echo "::warning::Maasea/sgmodule YouTube returned HTTP $status"
+          fi
+          echo "maasea_status=$status" >> $GITHUB_ENV
+
+      - name: Check app2smile/rules (Bilibili)
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js")
+          if [ "$status" != "200" ]; then
+            echo "::warning::app2smile/rules Bilibili returned HTTP $status"
+          fi
+          echo "app2smile_status=$status" >> $GITHUB_ENV
+
+      - name: Check blackmatrix7 AllInOne
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AllInOne/AllInOne.plugin")
+          if [ "$status" != "200" ]; then
+            echo "::warning::blackmatrix7/AllInOne returned HTTP $status"
+          fi
+          echo "blackmatrix7_status=$status" >> $GITHUB_ENV
+
+      - name: Report results
+        run: |
+          echo "### Upstream Health Report" >> $GITHUB_STEP_SUMMARY
+          echo "| Upstream | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| ddgksf2013 | ${{ env.ddgksf2013_status }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Maasea (YouTube) | ${{ env.maasea_status }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| app2smile (Bilibili) | ${{ env.app2smile_status }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| blackmatrix7 (AllInOne) | ${{ env.blackmatrix7_status }} |" >> $GITHUB_STEP_SUMMARY
+
+          ALL_OK=true
+          if [ "${{ env.ddgksf2013_status }}" != "200" ] || [ "${{ env.maasea_status }}" != "200" ] || [ "${{ env.app2smile_status }}" != "200" ] || [ "${{ env.blackmatrix7_status }}" != "200" ]; then
+            ALL_OK=false
+          fi
+          echo "all_ok=$ALL_OK" >> $GITHUB_ENV
+
+      - name: Create issue if upstreams down
+        if: env.all_ok != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            const report = `## ⚠️ Upstream Health Alert
+
+            | Upstream | Status |
+            |----------|--------|
+            | ddgksf2013 | ${process.env.ddgksf2013_status} |
+            | Maasea (YouTube) | ${process.env.maasea_status} |
+            | app2smile (Bilibili) | ${process.env.app2smile_status} |
+            | blackmatrix7 (AllInOne) | ${process.env.blackmatrix7_status} |
+
+            One or more upstreams are down. Please check manually.`;
+            
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['upstream-health']
+            });
+            
+            if (issues.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '⚠️ Upstream Health Alert',
+                body: report,
+                labels: ['upstream-health']
+              });
+            }

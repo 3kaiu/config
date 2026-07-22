@@ -64,18 +64,19 @@ https://ws.wenn.in/main/Profile/QX.conf
 *   **规则路径**：`Plugin/ai.plugin` (Loon) / `QX/ai.conf` 远程规则引用 (QX)
 *   **分流服务**：OpenAI (ChatGPT)、Anthropic (Claude)、Google AI (Gemini)、Perplexity、Groq、编程助手 (Cursor / Copilot / Windsurf / Supermaven) 等。所有 AI 流量自动走向 Proxy 代理策略组。
 
-### 📹 2.5 YouTube 增强 (v6.3 深度优化)
-*   **脚本路径**：Loon 自维护插件 `Kelee/YouTube_remove_ads.plugin` / QX 远程引用 `ddgksf2013/Rewrite/YoutubeAds.conf` + `[rewrite_local]` 补充规则
-*   **脚本来源**：基于 [Maasea/sgmodule](https://github.com/Maasea/sgmodule) 最新脚本 (request build 2026/7/12, response build 2026/7/19)
+### 📹 2.5 YouTube 增强 (v7.1 统一 Maasea 方案)
+*   **脚本路径**：Loon 自维护插件 `Kelee/YouTube_remove_ads.plugin` / QX `[rewrite_local]` 本地规则
+*   **脚本来源**：基于 [Maasea/sgmodule](https://github.com/Maasea/sgmodule) 最新脚本，双端统一
 *   **增强功能**：
-    *   **去广告**：移除视频中插广告、首页信息流推广、搜索页广告、Shorts 短视频广告；拦截 `initplayback` 广告请求、`pagead`/`ptracking` 追踪请求、`qoe?adcontext` 统计请求；ctier 302 重定向绕过广告插入点
-    *   **熄屏播放 / 画中画 (PiP) / 后台播放**：修改 player 响应中的播放器设置，原生启用 background play 和 PiP；隐藏技能：点开视频瞬间退出 APP 即可无 PiP 播放（适合单纯听音频）
-    *   **下一个播放此视频**：清理 `next` 端点 up next 信息流中的广告，确保自动播放推荐链路不被广告打断
-    *   **UMP 加密处理**：`initplayback` request 脚本检测 `encryptedClientKey` 一致性，302 重定向到 Cloudflare Worker 处理 Unified Media Pipeline
-    *   **log_event 头剥离**：剥离 `content-encoding` 头，按缓存状态清理 `x-youtube-hot-hash-data` 头，防止广告缓存注入
-    *   **自动翻译字幕**：可通过插件参数配置字幕翻译语言（遵循 Google Translate Language Codes）
+    *   **去广告**：移除视频前/中/后插广告、首页推广、搜索广告、Shorts 广告；拦截 `initplayback` 广告请求、`pagead`/`ptracking` 追踪、`qoe?adcontext` 统计；ctier 302 重定向绕过广告插入点
+    *   **熄屏播放 / 画中画 (PiP) / 后台播放**：修改 player 响应播放器设置，原生启用 background play 和 PiP；隐藏技能：点开视频瞬间退出 APP 即可无 PiP 播放（适合听音频）
+    *   **下一个播放此视频**：清理 `next` 端点 up next 广告，确保自动播放不被广告打断
+    *   **UMP 加密 + log_event 头剥离**：`initplayback` request 检测 `encryptedClientKey` 一致性，按缓存状态清理 `x-youtube-hot-hash-data` 头
+    *   **自动翻译字幕**：可通过插件参数配置字幕翻译语言
+*   **SponsorBlock 跳段**：代理层无法实现（YouTube 加密 API）。如需自动跳过视频内的赞助商片段、订阅提醒、互动请求等，推荐客户端方案：
+    *   iOS：[Yattee](https://github.com/yattee/yattee) (开源, 原生 SponsorBlock 集成) / [uYouEnhanced](https://github.com/arichornlover/uYouEnhanced) (侧载)
+    *   Android：[NewPipe](https://newpipe.net/) (开源, SponsorBlock 插件) / [ReVanced](https://revanced.app/)
 *   **MitM 保护**：双端 hostname 前置 `-redirector*.googlevideo.com` 负向排除，防止 MitM 解密视频 CDN 重定向服务导致播放故障
-*   **UDP 443 说明**：v6.2 起移除 `disable-udp-ports=443`/`udp_drop_list=443`（Hysteria2 节点需要 UDP 443），改靠 MitM hostname 覆盖 `*.googlevideo.com` 拦截 YouTube QUIC 流量。如遇广告残留，可在 Loon 通用设置 / QX `[general]` 中临时禁用 UDP 443
 
 ### 🍎 2.5b Apple 原生 App 增强 (v5.7 新增)
 *   **方案来源**：[NSRingo/iRingo](https://github.com/NSRingo) 项目（原 VirgilClyne/iRingo 已迁移至 NSRingo 组织）
@@ -88,16 +89,22 @@ https://ws.wenn.in/main/Profile/QX.conf
 *   **MitM 安全**：所有 Apple 增强域名均为具体子域，不影响银行安全。QX 端在 ` -*.apple.com` 负向排除后显式声明这些具体域名来覆盖排除，确保正常解密。
 *   **引用格式**：Loon 使用 `.plugin`（GitHub Releases 下载），QX 使用本地转换的 `.conf`（从 iRingo `.plugin` 手动转换为 QX 原生格式，托管在 `QX/apple/` 目录）。⚠️ iRingo 官方的 `.yaml` 不是 QX 原生格式（QX 无法解析），故 v5.8 改为本地转换。QX 端不支持 argument 传递，参数需通过 BoxJS 配置。
 
-### 🚫 2.6 全网系统级与 App 深度去广告 (多引擎全覆盖)
-*   **规则路径**：Loon 插件 (`Plugin`) / QX 远程重写 (`rewrite_remote`) 默认内置。
-*   **净化范围**：整合全网最有价值的 App 去广告方案，采用**多引擎分层覆盖**设计：
-    *   **通用去广告层**：`blackmatrix7/AllInOne`（QX）+ `Remove_ads_by_keli.plugin` + `myblockads.plugin`(RuCu6)（Loon）覆盖系统级广告域名、追踪 SDK。
+### 🚫 2.6 全网系统级与 App 深度去广告 (多引擎全覆盖, v7.0 重构)
+
+*   **规则路径**：Loon 插件 (`Plugin/`) / QX 远程重写 (`rewrite_remote`) 默认内置。
+*   **v7.0 架构重构**：淘汰停更 2 年的 `ajune0527/vpn_tool` 插件体系，全部改为自维护插件 (引用 ddgksf2013/app2smile 活跃上游脚本)。
+*   **净化范围**：
+    *   **通用去广告层**：`blackmatrix7/AllInOne.plugin`（Loon + QX 双端统一），740+ MitM hostname + 698 reject 规则 + 21 response 脚本，每日更新。已修复 safebrowsing/jiguang/umeng 误杀风险。
+    *   **广告脚本增强层**：`blackmatrix7/AdvertisingScript.plugin`（Loon），含哲也知乎深度净化 + B站/京东/爱奇艺/美团开屏脚本。
     *   **开屏广告通杀层**：`ddgksf2013/FakeiOSAds`（QX）拦截 iOS 系统/第三方 SDK 开屏广告。
-    *   **按 App 精细化去广告层**（v5.4 新增，v5.5 扩展备份，v5.6 补充缺口）：
-        *   **Loon 端**（ajune0527/vpn_tool 插件，20+ App）：微博、微信公众号、Bilibili、网易云音乐、高德地图、淘宝、京东、百度贴吧、喜马拉雅、酷安、IT之家、百度网盘、Reddit、Soul、知乎、12306、阿里云盘、QQ音乐、什么值得买、菜鸟裹裹等独立去广告插件。全部纳入 GitHub Actions 每日同步备份至 `Plugins/` 目录，防上游删除/改名失效。
-        *   **QX 端**（ddgksf2013 + app2smile，20+ App）：微博、微信、网易云音乐、高德地图、百度贴吧、闲鱼、喜马拉雅、什么值得买、Bilibili(主App+漫画)、车来了、中国联通、网易邮箱、墨迹天气、汽水音乐、小宇宙播客、Reddit、菜鸟裹裹、淘票票、彩云天气、微信小程序等独立去广告配置。
-    *   **追踪/埋点拦截层**：主配置 `[Rule]` 段内置 23 条腾讯/字节/阿里系追踪域名 REJECT，与去广告插件互补。
-    *   **多维度 HTTPDNS 拦截**：`DOMAIN-KEYWORD httpdns REJECT` + `[Host]` 静态映射 `0.0.0.0` + `[Rewrite]` reject，三层拦截防 DNS 污染。
+    *   **App 精细化去广告**（19 个自维护插件，Loon + QX 双端覆盖）：
+        *   **Loon 端**：bilibili、bilicomics、weibo、wechat、netease、goofish、qishui、taopiaopiao、amap、jd、qqmusic、reddit、tieba、zhihu（ddgksf2013/app2smile 活跃上游脚本）
+        *   **QX 端**：WeiboAds、WeChat、NeteaseAds、AmapAds、TieBaAds、GoofishAds、SmzdmAds、BiliBiliComicsAds、QiShuiMusicAds、RedditAds、CainiaoAds、TaoPiaoPiaoAds、CaiYunAds、Applet（ddgksf2013 独立 conf，每日更新）
+        *   **京东**：ddgksf2013 无 JDAds.conf，Loon 端自维护 `jd.plugin`，QX 端本地 `[rewrite_local]` 维护
+        *   **知乎**：ddgksf2013 无 ZhihuAds.conf，Loon 端自维护 `zhihu.plugin`，QX 端本地 `[rewrite_local]` 维护
+        *   **QQ音乐**：纯 DNS REJECT，无需 MitM（Loon 端 `qqmusic.plugin`，QX 端 `[filter_local]`）
+    *   **追踪/埋点拦截层**：主配置内置 20+ 条腾讯/字节/阿里系追踪域名 REJECT。
+    *   **HTTPDNS 多维拦截**：`DOMAIN-KEYWORD httpdns REJECT` + `[Host]` 静态映射 + `[Rewrite]` 三层防御。
 
 ### 🌍 2.7 全球社交平台与流媒体分流 (v5.4 新增, v5.6 扩展)
 *   **规则路径**：`Profile/Loon.lcf` / `Profile/QX.conf` 的 `[Rule]` / `[filter_local]` 段。
@@ -160,26 +167,19 @@ https://ws.wenn.in/main/Profile/QX.conf
 
 ---
 
-## 4. Kelee 插件镜像复用与 Cloudflare Turnstile 规避机制
+## 4. Kelee 插件镜像复用与 v7.0 去依赖演进
 
-可莉官方插件（`kelee.one`）部署了 **Cloudflare Turnstile** 验证机制。Turnstile 是一种 JS challenge，需要浏览器引擎执行 JavaScript 才能通过。实测结论：
+### 历史背景
 
-- **任何 HTTP 客户端（curl/wget/GitHub Actions）即使携带 `Loon/3.3.9` UA 也无法通过**，返回 403。
-- **只有 Loon App 内部的 WebKit 引擎**能执行 Turnstile JS challenge 通过验证，但不稳定（验证有概率失败）。
-- GitHub Actions 中的 `curl` 下载 kelee.one 资源也返回 403，**无法通过 Actions 同步 kelee.one 的 lpx/geoip 文件到本地**。
+可莉官方插件（`kelee.one`）部署了 **Cloudflare Turnstile** 验证机制。实测结论：任何 HTTP 客户端（curl/wget/GitHub Actions）即使携带 UA 也无法通过，返回 403。只有 Loon App 内部的 WebKit 引擎能通过（且不稳定）。
 
-因此，本项目对 kelee.one 资源采取**完全去依赖**策略：
+### v7.0 演进
 
-*   **Loon 核心 Kelee 插件本地镜像**（通过 ajune0527/vpn_tool 镜像同步）：`Prevent_DNS_Leaks.plugin`、`Remove_ads_by_keli.plugin`、`myblockads.plugin` 重定向至本项目本地 GitHub 镜像 Raw 链接（每天通过 Actions 从 ajune0527 同步）。`YouTube_remove_ads.plugin` 为自维护版本（v6.3），直接引用 Maasea 最新脚本，不参与自动同步覆盖。
-*   **kelee.one 直连 lpx 全部移除 (v5.3 修复)**：
-    *   `Block_HTTPDNS.lpx` / `BlockAdvertisers.lpx` — 功能已被主配置完全覆盖，无需引用。
-    *   `Sub-Store.lpx` / `QuickSearch.lpx` — 改用 `ajune0527/vpn_tool` 镜像源（`.plugin` 格式）。
-*   **GeoIP/ASN 数据库 (v5.3 修复)**：`geodata.kelee.one` 同样 403，改用 `Loyalsoldier/geoip`（Country.mmdb）+ `P3TERX/GeoLite.mmdb`（ASN）。
-*   **同步数据源说明**：通过 [sync-kelee.yml](https://github.com/3kaiu/config/blob/main/.github/workflows/sync-kelee.yml) 工作流，每天从 `ajune0527/vpn_tool`（kelee 官方授权的免 CF 镜像）及 `jqyisbest/RuCu6` 拉取最新插件缓存至本地 [Kelee/](https://github.com/3kaiu/config/tree/main/Kelee) 目录。
-*   **Quantumult X 原生集成 DNS 防泄露**：针对 QX 无法直接解析 Loon `.plugin` 插件的问题，我们已将 Kelee `Prevent_DNS_Leaks.plugin` 中的全部规则静态转换为 QX 语法，并原生集成在 `QX.conf` 的 `[filter_local]` 中，无需使用 Script-Hub 等工具进行繁琐的外部格式转换。
-*   **RuCu6 (广告必须死) 镜像与修复**：由于原作者删库导致双端原配置链接失效（404），我们已将 QX 端链接重定向为长期维护且国内直连的 `Toperlock/Quantumult` 激活镜像；同时将 Loon 端的 `AdBlock.plugin` 替换为存活的 `jqyisbest/RuCu6` 核心去广告插件（`myblockads.plugin`），并已将其纳入 Actions 定时工作流，每日自动拉取至本地 `Kelee/myblockads.plugin` 托管，彻底解决 404 彻底阻断的问题。
-*   **ddgksf2013 (墨鱼) 仓库重构适配 (v5.3 修复)**：ddgksf2013 仓库已全面重构，`Filter/Loon/AdBlock.plugin`、`Filter/QuantumultX/AdBlock.conf`、`Rewrite/AdBlock/StartUp.conf` 全部 404。Loon 端移除了失效的墨鱼引用（由 RuCu6 + 可莉双重覆盖）；QX 端改用 `Rewrite/AdBlock/` 目录下按 App 拆分的新文件（`FakeiOSAds.conf`、`KeepAds.conf`、`YoutubeAds.conf`）。
-*   **同步数据源说明**：我们通过 [sync-kelee.yml](https://github.com/3kaiu/config/blob/main/.github/workflows/sync-kelee.yml) 工作流，每天定时从公开且免 CF 拦截的 `ajune0527/vpn_tool` 仓库及 `jqyisbest/RuCu6` 仓库拉取最新版插件缓存至本地 [Kelee/](https://github.com/3kaiu/config/tree/main/Kelee) 目录，供 QX 用户自行选择使用 Script-Hub 转换引用（如 `Remove_ads_by_keli.plugin`）。
+*   **Loon 核心 Kelee 插件**：仅保留 `Prevent_DNS_Leaks.plugin`（DNS 泄露防护）和自维护的 `YouTube_remove_ads.plugin`。
+*   **`Remove_ads_by_keli.plugin` / `myblockads.plugin` 已停用**：v7.0 起由 `blackmatrix7/AllInOne.plugin`（740+ hostname 每日更新）全面取代，更全面且无 safebrowsing 误杀风险。
+*   **ajune0527/vpn_tool App 插件体系已淘汰**：停更 2 年（最后一次更新 2024-07），22 个插件文件已移至 `archive/ajune0527-legacy/`。替换为自维护的 19 个 `Plugin/*.plugin`（引用 ddgksf2013/app2smile 活跃上游脚本）。
+*   **GeoIP/ASN 数据库**：改用 `Loyalsoldier/geoip`（Country.mmdb）+ `P3TERX/GeoLite.mmdb`（ASN），不再依赖 kelee.one。
+*   **同步工作流**：`sync-kelee.yml` 仍每日同步 Kelee 核心插件 + RuCu6 镜像，`upstream-health.yml` 每日检查所有上游源可用性。
 
 ---
 
@@ -189,23 +189,35 @@ https://ws.wenn.in/main/Profile/QX.conf
 3kaiu/config/
 ├── .github/
 │   └── workflows/
-│       └── sync-kelee.yml       # 每天自动从公共镜像源同步可莉插件 + ajune0527 App 插件
+│       ├── sync-kelee.yml          # 每天自动从公共镜像源同步可莉插件/RuCu6
+│       └── upstream-health.yml     # 上游依赖每日健康检查 (ddgksf2013/app2smile/Maasea等)
 ├── Kelee/                      # 本地缓存的可莉 & RuCu6 插件镜像 (QX转换用)
 │   ├── Prevent_DNS_Leaks.plugin
-│   ├── myblockads.plugin
-│   ├── Remove_ads_by_keli.plugin
-│   └── YouTube_remove_ads.plugin
-├── Plugins/                   # ajune0527 Loon App 去广告插件每日同步备份 (防上游失效)
-│   ├── Weibo_remove_ads.plugin
-│   ├── Bilibili_remove_ads.plugin
-│   ├── NeteaseCloudMusic_remove_ads.plugin
-│   └── ... (16 个 App 独立去广告插件)
-├── Plugin/                     # 自维护 Loon 插件
-│   ├── qidian.plugin            # 起点全能助手 Pro (全能增强版，含签到与高阶任务)
-│   ├── bank.plugin              # 银行与云闪付去广告
-│   ├── life.plugin              # 生活出行去广告
+│   ├── myblockads.plugin        # jqyisbest/RuCu6 镜像
+│   ├── Remove_ads_by_keli.plugin # 已停用(v7.0), 由 blackmatrix7 AllInOne 取代
+│   └── YouTube_remove_ads.plugin # 自维护, 基于 Maasea 脚本
+├── Plugin/                     # 自维护 Loon 插件 (19个App覆盖)
+│   ├── qidian.plugin            # 起点全能助手 Pro
+│   ├── bank.plugin              # 银行及云闪付去广告
+│   ├── life.plugin              # 生活出行去广告 (菜鸟包裹)
 │   ├── ai.plugin                # AI 服务分流
-│   └── zhihuifangdong.plugin    # 智慧房东去广告
+│   ├── zhihuifangdong.plugin    # 智慧房东去广告
+│   ├── bilibili.plugin          # B站去广告
+│   ├── bilicomics.plugin        # B站漫画去广告
+│   ├── weibo.plugin             # 微博去广告
+│   ├── wechat.plugin            # 微信去广告
+│   ├── netease.plugin           # 网易云音乐净化
+│   ├── goofish.plugin           # 闲鱼去广告
+│   ├── qishui.plugin            # 汽水音乐净化
+│   ├── taopiaopiao.plugin       # 淘票票净化
+│   ├── amap.plugin              # 高德地图去广告 (v7.1 新增)
+│   ├── jd.plugin                # 京东去广告 (v7.1 新增)
+│   ├── qqmusic.plugin           # QQ音乐去广告 (v7.1 新增)
+│   ├── reddit.plugin            # Reddit去广告 (v7.1 新增)
+│   ├── tieba.plugin             # 贴吧去广告 (v7.1 新增)
+│   └── zhihu.plugin             # 知乎去广告 (v7.1 新增)
+├── archive/                     # 历史废弃文件存档
+│   └── ajune0527-legacy/        # 已淘汰的 ajune0527 插件体系 (22个)
 ├── QX/                         # 自维护 QX 配置模块 (分流/重写)
 │   ├── apple/                   # Apple 原生增强 (iRingo .plugin→.conf 转换)
 │   │   ├── WeatherKit.conf      # 天气增强
@@ -222,7 +234,13 @@ https://ws.wenn.in/main/Profile/QX.conf
 │   ├── Loon.lcf                # Loon 客户端主配置文件
 │   └── QX.conf                 # Quantumult X 客户端主配置文件
 └── Scripts/                    # 自维护脚本
-    ├── Qidian.js               # 起点全能增强运行脚本 (含签到+福利抽奖)
+    ├── Qidian.js               # 起点全能增强运行脚本
     ├── Zhihuifangdong.js       # 智慧房东去广告脚本
-    └── UnionPay.js             # 云闪付净化脚本
+    ├── UnionPay.js             # 云闪付净化脚本
+    ├── Cainiao.js              # 菜鸟包裹净化脚本
+    ├── Amap.js                 # 高德地图去广告 (v7.1)
+    ├── JD.js                   # 京东去广告 (v7.1)
+    ├── Reddit.js               # Reddit去广告 (v7.1)
+    ├── Tieba.js                # 贴吧去广告 (v7.1)
+    └── Zhihu.js                # 知乎去广告 (v7.1)
 ```

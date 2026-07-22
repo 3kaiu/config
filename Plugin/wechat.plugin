@@ -1,6 +1,7 @@
 #!name=微信去广告
 #!desc=微信 & 小程序 & 公众号 — 净化推广广告
 #!author=3kaiu (规则来源: ddgksf2013)
+#!fallback=备选: RuCu6 (Plugins/Weixin_Official_Accounts_remove_ads.plugin) — 纯规则无外部脚本依赖
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/WeChat.png
 

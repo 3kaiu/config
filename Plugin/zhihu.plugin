@@ -1,0 +1,69 @@
+#!name=知乎去广告
+#!desc=知乎 — 首页/回答/搜索/会员/外链追踪 深度净化
+#!author=3kaiu (规则来源: RuCu6/blackmatrix7)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Zhihu.png
+
+[Argument]
+ZHIHU_ENABLE=switch,"true","false",tag=是否开启知乎去广告,desc=开启后深度净化知乎首页/回答/搜索/会员/外链追踪
+
+[Rule]
+DOMAIN,appcloud.zhihu.com,REJECT,enable={ZHIHU_ENABLE}
+DOMAIN,appcloud2.in.zhihu.com,REJECT,enable={ZHIHU_ENABLE}
+DOMAIN,crash2.zhihu.com,REJECT,enable={ZHIHU_ENABLE}
+DOMAIN,mqtt.zhihu.com,REJECT,enable={ZHIHU_ENABLE}
+DOMAIN,sugar.zhihu.com,REJECT,enable={ZHIHU_ENABLE}
+DOMAIN,zxid-m.mobileservice.cn,REJECT,enable={ZHIHU_ENABLE}
+IP-CIDR,103.41.167.237/32,REJECT,no-resolve,enable={ZHIHU_ENABLE}
+IP-CIDR,118.89.204.198/32,REJECT,no-resolve,enable={ZHIHU_ENABLE}
+IP-CIDR6,2402:4e00:1200:ed00:0:9089:6dac:96b6/128,REJECT,no-resolve,enable={ZHIHU_ENABLE}
+
+[Rewrite]
+# ── 首页 ──
+^https:\/\/api\.zhihu\.com\/commercial_api\/(answer\/banners|banners|launch) reject-dict, enable={ZHIHU_ENABLE}
+^https:\/\/api\.zhihu\.com\/content-distribution-core reject-dict, enable={ZHIHU_ENABLE}
+^https:\/\/api\.zhihu\.com\/moments\/drama reject-dict, enable={ZHIHU_ENABLE}
+^https:\/\/api\.zhihu\.com\/root\/window reject-dict, enable={ZHIHU_ENABLE}
+
+# ── 会员页 ──
+^https:\/\/api\.zhihu\.com\/bazaar\/float_window reject-dict, enable={ZHIHU_ENABLE}
+^https:\/\/api\.zhihu\.com\/market\/popovers_v2 reject-dict, enable={ZHIHU_ENABLE}
+
+# ── 我的页 ──
+^https:\/\/api\.zhihu\.com\/me\/guides reject-dict, enable={ZHIHU_ENABLE}
+^https:\/\/api\.zhihu\.com\/unlimited\/go\/my_card reject, enable={ZHIHU_ENABLE}
+
+# ── 搜索页 ──
+^https:\/\/api\.zhihu\.com\/search\/preset_words reject-dict, enable={ZHIHU_ENABLE}
+^https:\/\/www\.zhihu\.com\/search\/related_queries reject-dict, enable={ZHIHU_ENABLE}
+
+# ── 回答详情 ──
+^https:\/\/api\.zhihu\.com\/comment_v5\/list-headers reject-dict, enable={ZHIHU_ENABLE}
+^https:\/\/api\.zhihu\.com\/prague\/related_suggestion reject-dict, enable={ZHIHU_ENABLE}
+^https:\/\/api\.zhihu\.com\/v5\.1\/topics\/answer\/relation reject-dict, enable={ZHIHU_ENABLE}
+
+# ── 其他 ──
+^https:\/\/api\.zhihu\.com\/ab\/api reject-dict, enable={ZHIHU_ENABLE}
+^https:\/\/api\.zhihu\.com\/ad-style-service reject-dict, enable={ZHIHU_ENABLE}
+^https:\/\/appcloud2\.zhihu\.com\/v3\/resource reject-dict, enable={ZHIHU_ENABLE}
+
+# ── 外链追踪 → 直达目标URL ──
+^https:\/\/link\.zhihu\.com\/\?target=(https?)?(%3A|:)?(\/\/|%2F%2F)?(.*?)(&source.*)?$ 302 http://$4, enable={ZHIHU_ENABLE}
+
+# ── 网页版 ──
+^https:\/\/api\.zhihu\.com\/distribute\/rhea reject-dict, enable={ZHIHU_ENABLE}
+^https:\/\/api\.zhihu\.com\/hot_recommendation reject-dict, enable={ZHIHU_ENABLE}
+^https:\/\/api\.zhihu\.com\/mcn\/v2\/linkcards reject-dict, enable={ZHIHU_ENABLE}
+^https:\/\/api\.zhihu\.com\/answers\/questions\/related-readings reject-dict, enable={ZHIHU_ENABLE}
+^https:\/\/api\.zhihu\.com\/commercial_api\/mobile_banner reject-dict, enable={ZHIHU_ENABLE}
+^https:\/\/zhuanlan\.zhihu\.com\/api\/articles reject-dict, enable={ZHIHU_ENABLE}
+
+[Script]
+# 首页/回答/搜索/配置
+http-response ^https:\/\/api\.zhihu\.com\/(commercial_api\/answer\/banners|commercial_api\/banners|content-distribution-core|moments\/drama|root\/window|prague\/related_suggestion|v5\.1\/topics\/answer\/relation|hot_recommendation|mcn\/v2\/linkcards|distribute\/rhea|answers\/questions\/related-readings|commercial_api\/mobile_banner|zhuanlan\/api\/articles|ab\/api|ad-style-service) script-path=https://ws.wenn.in/main/Scripts/Zhihu.js, requires-body=true, timeout=10, tag=知乎_首页回答, enable={ZHIHU_ENABLE}
+
+# 搜索页关键词替换
+http-response ^https:\/\/api\.zhihu\.com\/search\/preset_words script-path=https://ws.wenn.in/main/Scripts/Zhihu.js, requires-body=true, timeout=10, tag=知乎_搜索词, argument="recommend_queries":{.+}->"recommend_queries":{}, enable={ZHIHU_ENABLE}
+
+[MitM]
+hostname = %APPEND% api.zhihu.com, www.zhihu.com, appcloud2.zhihu.com, link.zhihu.com, zhuanlan.zhihu.com, m-cloud.zhihu.com

@@ -1,0 +1,25 @@
+#!name=京东去广告
+#!desc=京东 — 首页/我的/搜索/订单 深度净化
+#!author=3kaiu (规则来源: RuCu6)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/JD.png
+
+[Argument]
+JD_ENABLE=switch,"true","false",tag=是否开启京东去广告,desc=开启后深度净化京东首页/搜索/订单等广告
+
+[Rule]
+DOMAIN,dns.jd.com,REJECT,enable={JD_ENABLE}
+IP-CIDR,101.124.19.122/32,REJECT,no-resolve,enable={JD_ENABLE}
+IP-CIDR6,2402:db40:5100:1011::5/128,REJECT,no-resolve,enable={JD_ENABLE}
+URL-REGEX,^http:\/\/\w{32}\.jddebug\.com\/diagnose\?,REJECT,enable={JD_ENABLE}
+
+[Rewrite]
+# 搜索框/推荐/拉活
+^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(searchBoxWord|stationPullService|uniformRecommend[06]) reject-dict, enable={JD_ENABLE}
+
+[Script]
+# 首页/我的/订单/启动页
+http-response ^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome) script-path=https://ws.wenn.in/main/Scripts/JD.js, requires-body=true, timeout=10, tag=京东_首页我的订单, enable={JD_ENABLE}
+
+[MitM]
+hostname = %APPEND% api.m.jd.com

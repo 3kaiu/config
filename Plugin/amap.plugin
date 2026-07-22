@@ -1,0 +1,65 @@
+#!name=高德地图去广告
+#!desc=高德地图 — 导航/首页/我的/附近/打车/开屏 深度净化
+#!author=3kaiu (规则来源: RuCu6/kokoryh)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Amap.png
+
+[Argument]
+AMAP_ENABLE=switch,"true","false",tag=是否开启高德地图去广告,desc=开启后深度净化高德地图导航/首页/打车等广告
+
+[Rule]
+DOMAIN,amap-aos-info-nogw.amap.com,REJECT,enable={AMAP_ENABLE}
+DOMAIN,awaken.amap.com,REJECT,enable={AMAP_ENABLE}
+DOMAIN,free-aos-cdn-image.amap.com,REJECT,enable={AMAP_ENABLE}
+
+[Rewrite]
+# ── 导航详情页 ──
+^https:\/\/m5-zb\.amap\.com\/dsp\/card-service-(car-end|route-plan) reject-dict, enable={AMAP_ENABLE}
+^https:\/\/m5-zb\.amap\.com\/dsp\/new_hotword reject-dict, enable={AMAP_ENABLE}
+^https:\/\/m5-zb\.amap\.com\/dsp\/tips_adv reject-dict, enable={AMAP_ENABLE}
+^https:\/\/m5-zb\.amap\.com\/dsp\/banner\/lists reject-dict, enable={AMAP_ENABLE}
+
+# ── 首页 ──
+^https:\/\/m5\.amap\.com\/dsp\/main-page-(assets|location) reject-dict, enable={AMAP_ENABLE}
+^https:\/\/m5\.amap\.com\/dsp\/hint_text reject-dict, enable={AMAP_ENABLE}
+^https:\/\/m5\.amap\.com\/dsp\/message\/notice\/list reject-dict, enable={AMAP_ENABLE}
+^https:\/\/m5\.amap\.com\/dsp\/scene\/recommend reject-dict, enable={AMAP_ENABLE}
+^https:\/\/m5\.amap\.com\/dsp\/weather\/v2 reject-dict, enable={AMAP_ENABLE}
+^https:\/\/m5\.amap\.com\/dsp\/msgbox\/pull_mp reject-dict, enable={AMAP_ENABLE}
+
+# ── 打车页 ──
+^https:\/\/m5\.amap\.com\/dsp\/king_toolbox_car_bubble reject-dict, enable={AMAP_ENABLE}
+^https:\/\/m5\.amap\.com\/dsp\/onscene_visual_optimization reject-dict, enable={AMAP_ENABLE}
+^https:\/\/m5\.amap\.com\/dsp\/content_info reject-dict, enable={AMAP_ENABLE}
+^https:\/\/m5\.amap\.com\/dsp\/friendly_information reject-dict, enable={AMAP_ENABLE}
+
+# ── AMDC 通用 ──
+^https?:\/\/amdc\.m\.taobao\.com\/amdc\/mobileDispatch reject-dict, enable={AMAP_ENABLE}
+
+[Script]
+# ── 导航详情页 (4条) ──
+http-response ^https:\/\/m5-zb\.amap\.com\/dsp\/card-service-(car-end|route-plan) script-path=https://ws.wenn.in/main/Scripts/Amap.js, requires-body=true, timeout=10, tag=导航_卡片服务, enable={AMAP_ENABLE}
+http-response ^https:\/\/m5-zb\.amap\.com\/dsp\/new_hotword script-path=https://ws.wenn.in/main/Scripts/Amap.js, requires-body=true, timeout=10, tag=导航_热搜词, enable={AMAP_ENABLE}
+http-response ^https:\/\/m5-zb\.amap\.com\/dsp\/tips_adv script-path=https://ws.wenn.in/main/Scripts/Amap.js, requires-body=true, timeout=10, tag=导航_贴士广告, enable={AMAP_ENABLE}
+http-response ^https:\/\/m5-zb\.amap\.com\/dsp\/banner\/lists script-path=https://ws.wenn.in/main/Scripts/Amap.js, requires-body=true, timeout=10, tag=导航_Banner, enable={AMAP_ENABLE}
+
+# ── 首页 (2条) ──
+http-response ^https:\/\/m5\.amap\.com\/dsp\/main-page-(assets|location) script-path=https://ws.wenn.in/main/Scripts/Amap.js, requires-body=true, timeout=10, tag=首页_资源位, enable={AMAP_ENABLE}
+http-response ^https:\/\/m5\.amap\.com\/dsp\/hint_text script-path=https://ws.wenn.in/main/Scripts/Amap.js, requires-body=true, timeout=10, tag=首页_提示文字, enable={AMAP_ENABLE}
+
+# ── 我的页面 (1条) ──
+http-response ^https:\/\/m5\.amap\.com\/dsp\/message\/notice\/list script-path=https://ws.wenn.in/main/Scripts/Amap.js, requires-body=true, timeout=10, tag=我的_消息, enable={AMAP_ENABLE}
+
+# ── 附近页 (1条) ──
+http-response ^https:\/\/m5\.amap\.com\/dsp\/scene\/recommend script-path=https://ws.wenn.in/main/Scripts/Amap.js, requires-body=true, timeout=10, tag=附近_推荐, enable={AMAP_ENABLE}
+
+# ── 开屏广告 (1条) ──
+http-response ^https:\/\/m5\.amap\.com\/dsp\/weather\/v2 script-path=https://ws.wenn.in/main/Scripts/Amap.js, requires-body=true, timeout=10, tag=开屏_天气, enable={AMAP_ENABLE}
+
+# ── 打车页 (3条) ──
+http-response ^https:\/\/m5\.amap\.com\/dsp\/king_toolbox_car_bubble script-path=https://ws.wenn.in/main/Scripts/Amap.js, requires-body=true, timeout=10, tag=打车_工具气泡, enable={AMAP_ENABLE}
+http-response ^https:\/\/m5\.amap\.com\/dsp\/onscene_visual_optimization script-path=https://ws.wenn.in/main/Scripts/Amap.js, requires-body=true, timeout=10, tag=打车_视觉优化, enable={AMAP_ENABLE}
+http-response ^https:\/\/m5\.amap\.com\/dsp\/content_info script-path=https://ws.wenn.in/main/Scripts/Amap.js, requires-body=true, timeout=10, tag=打车_内容, enable={AMAP_ENABLE}
+
+[MitM]
+hostname = %APPEND% m5.amap.com, m5-zb.amap.com, oss.amap.com, sns.amap.com, amdc.m.taobao.com

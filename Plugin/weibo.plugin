@@ -1,6 +1,7 @@
 #!name=微博去广告
 #!desc=微博 & 微博国际版 — 深度净化信息流/评论/发现页/开屏/搜索推广
 #!author=3kaiu (规则来源: ddgksf2013/zmqcherish)
+#!fallback=备选: RuCu6/zmqcherish (Plugins/Weibo_remove_ads.plugin) — 纯规则无外部脚本依赖
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Weibo.png
 

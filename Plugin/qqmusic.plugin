@@ -1,0 +1,33 @@
+#!name=QQ音乐去广告
+#!desc=QQ音乐 — 广告域名/追踪/埋点 DNS 级 REJECT
+#!author=3kaiu (规则来源: 可莉🅥)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/QQMusic.png
+
+[Argument]
+QQMUSIC_ENABLE=switch,"true","false",tag=是否开启QQ音乐去广告,desc=开启后REJECT所有QQ音乐广告和追踪域名
+
+[Rule]
+# 广告 + 追踪域名
+DOMAIN,adstats.tencentmusic.com,REJECT-DROP,enable={QQMUSIC_ENABLE}
+DOMAIN,ad.tencentmusic.com,REJECT-DROP,enable={QQMUSIC_ENABLE}
+DOMAIN,adcdn.tencentmusic.com,REJECT-DROP,enable={QQMUSIC_ENABLE}
+DOMAIN,adcdn6.tencentmusic.com,REJECT-DROP,enable={QQMUSIC_ENABLE}
+DOMAIN,adexpo.tencentmusic.com,REJECT-DROP,enable={QQMUSIC_ENABLE}
+DOMAIN,adclick.tencentmusic.com,REJECT-DROP,enable={QQMUSIC_ENABLE}
+DOMAIN,otheve.beacon.qq.com,REJECT-DROP,enable={QQMUSIC_ENABLE}
+DOMAIN,mazu.m.qq.com,REJECT-DROP,enable={QQMUSIC_ENABLE}
+DOMAIN,monitor.music.qq.com,REJECT-DROP,enable={QQMUSIC_ENABLE}
+DOMAIN,stat.y.qq.com,REJECT-NO-DROP,enable={QQMUSIC_ENABLE}
+DOMAIN,tmead.y.qq.com,REJECT-NO-DROP,enable={QQMUSIC_ENABLE}
+DOMAIN,oth.str.mdt.qq.com,REJECT,enable={QQMUSIC_ENABLE}
+DOMAIN,h.trace.qq.com,REJECT,enable={QQMUSIC_ENABLE}
+DOMAIN,sdk.e.qq.com,REJECT,enable={QQMUSIC_ENABLE}
+DOMAIN,p.l.qq.com,REJECT,enable={QQMUSIC_ENABLE}
+DOMAIN,us.l.qq.com,REJECT,enable={QQMUSIC_ENABLE}
+DOMAIN,tangram.e.qq.com,REJECT,enable={QQMUSIC_ENABLE}
+DOMAIN-SUFFIX,imtmp.net,REJECT,enable={QQMUSIC_ENABLE}
+
+# 纯 DNS 级 REJECT，无需 MitM
+[MitM]
+# 无 MitM 域名 — QQ音乐去广告全部走 DNS REJECT

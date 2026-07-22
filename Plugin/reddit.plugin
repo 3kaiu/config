@@ -1,0 +1,15 @@
+#!name=Reddit去广告
+#!desc=Reddit — 信息流推广帖净化
+#!author=3kaiu (规则来源: xream)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Reddit.png
+
+[Argument]
+REDDIT_ENABLE=switch,"true","false",tag=是否开启Reddit去广告,desc=开启后净化Reddit信息流中的推广帖子
+
+[Script]
+# GraphQL 响应体净化 (移除推广帖)
+http-response ^https?:\/\/gql(-fed)?\.reddit\.com script-path=https://ws.wenn.in/main/Scripts/Reddit.js, requires-body=true, timeout=10, tag=Reddit_推广净化, enable={REDDIT_ENABLE}
+
+[MitM]
+hostname = %APPEND% gql.reddit.com, gql-fed.reddit.com

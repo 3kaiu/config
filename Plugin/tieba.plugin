@@ -1,0 +1,21 @@
+#!name=贴吧去广告
+#!desc=百度贴吧 — 首页/帖子列表/广告 深度净化
+#!author=3kaiu (规则来源: app2smile)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Tieba.png
+
+[Argument]
+TIEBA_ENABLE=switch,"true","false",tag=是否开启贴吧去广告,desc=开启后深度净化贴吧首页/帖子/广告
+
+[Rule]
+DOMAIN,180.76.76.200,REJECT,enable={TIEBA_ENABLE}
+IP-CIDR,180.76.76.200/32,REJECT,no-resolve,enable={TIEBA_ENABLE}
+
+[Script]
+# JSON 处理
+http-response ^https?:\/\/(tiebac|tieba|tiebaapi)\.baidu\.com script-path=https://ws.wenn.in/main/Scripts/Tieba.js, requires-body=true, timeout=10, tag=贴吧_JSON净化, enable={TIEBA_ENABLE}
+# Proto 处理
+http-response ^https?:\/\/(tiebac|tieba|tiebaapi)\.baidu\.com.*\?cmd script-path=https://ws.wenn.in/main/Scripts/Tieba.js, binary-body-mode=true, requires-body=true, timeout=10, tag=贴吧_Proto净化, enable={TIEBA_ENABLE}
+
+[MitM]
+hostname = %APPEND% tiebac.baidu.com, tieba.baidu.com, tiebaapi.baidu.com
