@@ -1,5 +1,6 @@
 #!name=智慧房东广告屏蔽
 #!desc=屏蔽开屏广告 + Banner 广告，支持独立开关控制
+#!version=7.4
 #!author=Ethan / 3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse.png

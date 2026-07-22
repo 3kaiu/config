@@ -1,5 +1,6 @@
 #!name=汽水音乐去广告
 #!desc=汽水音乐 — 视频/信息流/搜索推广/热门搜索/会员推广净化
+#!version=7.4
 #!author=3kaiu (规则来源: ddgksf2013)
 #!fallback=备选: 无独立备选 — ddgksf2013 停更时需自行维护 Rewrite 规则
 #!homepage=https://github.com/3kaiu/config
@@ -26,15 +27,15 @@ QISHUI_ENABLE=switch,"true","false",tag=是否开启汽水音乐去广告,desc=�
 
 [Script]
 # 我的页面推广
-http-response ^https:\/\/[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){1,3}\/luna\/me\? script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/qishui.js, requires-body=true, timeout=10, tag=汽水_我的页面, enable={QISHUI_ENABLE}
+http-response ^https:\/\/[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){1,3}\/luna\/me\? script-path=https://raw.githubusercontent.com/3kaiu/config/main/Mirror/ddgksf2013/qishui.js, requires-body=true, timeout=10, tag=汽水_我的页面, enable={QISHUI_ENABLE}
 # 会员免费听
-http-response ^https:\/\/[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){1,3}\/luna\/card(\?|$) script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/qishui.js, requires-body=true, timeout=10, tag=汽水_会员推广, enable={QISHUI_ENABLE}
+http-response ^https:\/\/[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){1,3}\/luna\/card(\?|$) script-path=https://raw.githubusercontent.com/3kaiu/config/main/Mirror/ddgksf2013/qishui.js, requires-body=true, timeout=10, tag=汽水_会员推广, enable={QISHUI_ENABLE}
 # 搜索block
-http-response ^https:\/\/[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){1,3}\/luna\/search-block(\?|$) script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/qishui.js, requires-body=true, timeout=10, tag=汽水_搜索block, enable={QISHUI_ENABLE}
+http-response ^https:\/\/[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){1,3}\/luna\/search-block(\?|$) script-path=https://raw.githubusercontent.com/3kaiu/config/main/Mirror/ddgksf2013/qishui.js, requires-body=true, timeout=10, tag=汽水_搜索block, enable={QISHUI_ENABLE}
 # 首页活动
-http-response ^https:\/\/[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){1,3}\/luna\/activities(\?|$) script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/qishui.js, requires-body=true, timeout=10, tag=汽水_首页活动, enable={QISHUI_ENABLE}
+http-response ^https:\/\/[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){1,3}\/luna\/activities(\?|$) script-path=https://raw.githubusercontent.com/3kaiu/config/main/Mirror/ddgksf2013/qishui.js, requires-body=true, timeout=10, tag=汽水_首页活动, enable={QISHUI_ENABLE}
 # 音乐流推荐
-http-response ^https:\/\/[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){1,3}\/luna\/feed\/song-tab(\?|$) script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/qishui.js, requires-body=true, timeout=10, tag=汽水_音乐流, enable={QISHUI_ENABLE}
+http-response ^https:\/\/[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){1,3}\/luna\/feed\/song-tab(\?|$) script-path=https://raw.githubusercontent.com/3kaiu/config/main/Mirror/ddgksf2013/qishui.js, requires-body=true, timeout=10, tag=汽水_音乐流, enable={QISHUI_ENABLE}
 
 [MitM]
 hostname = %APPEND% beta-luna.douyin.com, api.qishui.com, tnc-alisg.zijieapi.com, tnc-zijieapi.zijieapi.com

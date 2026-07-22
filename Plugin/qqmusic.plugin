@@ -1,5 +1,6 @@
 #!name=QQ音乐去广告
 #!desc=QQ音乐 — 广告域名/追踪/埋点 DNS 级 REJECT
+#!version=7.4
 #!author=3kaiu (规则来源: 可莉🅥)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/QQMusic.png

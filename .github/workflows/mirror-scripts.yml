@@ -1,0 +1,74 @@
+name: Mirror External Scripts
+
+on:
+  schedule:
+    - cron: '7 2 * * *' # Everyday at 02:07 UTC (after sync-kelee)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Mirror ddgksf2013/Scripts
+        run: |
+          mkdir -p Mirror/ddgksf2013
+          # 微博 JSON 净化脚本 (weibo/weibo_intl 共用)
+          curl -fsSL -m 30 -o Mirror/ddgksf2013/weibo_json.js \
+            "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/weibo_json.js" || true
+          # 微博搜索信息 (weibo_intl 专用)
+          curl -fsSL -m 30 -o Mirror/ddgksf2013/weibo_search_info.json \
+            "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/weibo_search_info.json" || true
+          # 汽水音乐
+          curl -fsSL -m 30 -o Mirror/ddgksf2013/qishui.js \
+            "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/qishui.js" || true
+          # AMDC 通用 (淘票票/闲鱼共用)
+          curl -fsSL -m 30 -o Mirror/ddgksf2013/amdc.js \
+            "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amdc.js" || true
+          # 微信小程序
+          curl -fsSL -m 30 -o Mirror/ddgksf2013/applet.js \
+            "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/applet.js" || true
+
+      - name: Mirror ddgksf2013 Gist (netease)
+        run: |
+          mkdir -p Mirror/ddgksf2013
+          curl -fsSL -m 30 -o Mirror/ddgksf2013/netease.adblock.js \
+            "https://gist.githubusercontent.com/ddgksf2013/4f53b7c6083678df25fecc8ff68b52c4/raw/netease.adblock.js" || true
+
+      - name: Mirror app2smile/rules
+        run: |
+          mkdir -p Mirror/app2smile
+          # B站 JSON
+          curl -fsSL -m 30 -o Mirror/app2smile/bilibili-json.js \
+            "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js" || true
+          # B站 Proto
+          curl -fsSL -m 30 -o Mirror/app2smile/bilibili-proto.js \
+            "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-proto.js" || true
+          # 微信公众号
+          curl -fsSL -m 30 -o Mirror/app2smile/wechat-json.js \
+            "https://raw.githubusercontent.com/app2smile/rules/master/js/wechat-json.js" || true
+
+      - name: Mirror Maasea/sgmodule (YouTube)
+        run: |
+          mkdir -p Mirror/Maasea
+          curl -fsSL -m 30 -o Mirror/Maasea/youtube.request.js \
+            "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.request.js" || true
+          curl -fsSL -m 30 -o Mirror/Maasea/youtube.response.js \
+            "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js" || true
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add Mirror/
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Auto-mirror external scripts"
+            git push
+          fi

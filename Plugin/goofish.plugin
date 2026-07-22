@@ -1,5 +1,6 @@
 #!name=闲鱼去广告
 #!desc=闲鱼 — 开屏/首页/信息流广告净化
+#!version=7.4
 #!author=3kaiu (规则来源: ddgksf2013)
 #!fallback=备选: 无独立备选 — ddgksf2013 停更时需自行维护 Rewrite 规则
 #!homepage=https://github.com/3kaiu/config
@@ -18,7 +19,7 @@ DOMAIN-SUFFIX,iyes.youku.com,REJECT
 [Script]
 # ⚠️ 修复(v7.3): 迁移到 [Script] 段, 添加 requires-body + timeout
 # AMDC 处理
-http-response ^http:\/\/[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){1,4}(:\d+)?\/amdc\/mobileDispatch script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amdc.js, requires-body=true, timeout=10, tag=AMDC净化
+http-response ^http:\/\/[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){1,4}(:\d+)?\/amdc\/mobileDispatch script-path=https://raw.githubusercontent.com/3kaiu/config/main/Mirror/ddgksf2013/amdc.js, requires-body=true, timeout=10, tag=AMDC净化
 
 [MitM]
 hostname = %APPEND% acs.m.goofish.com, g-acs.m.goofish.com, amdc.m.taobao.com
