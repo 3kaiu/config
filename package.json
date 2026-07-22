@@ -1,0 +1,13 @@
+{
+  "name": "3kaiu-config",
+  "version": "7.7.0",
+  "private": true,
+  "description": "3kaiu Loon & Quantumult X config — Surgio project",
+  "scripts": {
+    "generate": "surgio generate",
+    "preview": "surgio preview"
+  },
+  "dependencies": {
+    "surgio": "^3.17.0"
+  }
+}

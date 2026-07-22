@@ -33,8 +33,8 @@ function handleHomePage() {
     if (searchContents) delete obj.data.data.data.mainSearch.bizData.searchContents;
     const opList = obj?.data?.data?.data?.operationList;
     if (opList) delete obj.data.data.data.operationList;
-    $.done({ body: JSON.stringify(obj) });
-  } catch (e) { $.done(); }
+    $done({ body: JSON.stringify(obj) });
+  } catch (e) { $done(); }
 }
 
 function handleMinePage() {
@@ -45,8 +45,8 @@ function handleMinePage() {
       delete obj.data.data.activity;
       delete obj.data.data.vip;
     }
-    $.done({ body: JSON.stringify(obj) });
-  } catch (e) { $.done(); }
+    $done({ body: JSON.stringify(obj) });
+  } catch (e) { $done(); }
 }
 
 function handleDiscover() {
@@ -54,8 +54,8 @@ function handleDiscover() {
     const obj = JSON.parse($response.body);
     const contentList = obj?.data?.result?.placeContentMap?.["780001"]?.contentList;
     if (contentList) delete obj.data.result.placeContentMap["780001"].contentList;
-    $.done({ body: JSON.stringify(obj) });
-  } catch (e) { $.done(); }
+    $done({ body: JSON.stringify(obj) });
+  } catch (e) { $done(); }
 }
 
 function handleSplashAd() {
@@ -64,8 +64,8 @@ function handleSplashAd() {
     if (obj?.data?.result?.[0]?.materialId === "39017") {
       obj.data = {};
     }
-    $.done({ body: JSON.stringify(obj) });
-  } catch (e) { $.done(); }
+    $done({ body: JSON.stringify(obj) });
+  } catch (e) { $done(); }
 }
 
-$.done();
+$done();

@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════
-#  Loon 配置 (Loon.lcf) — v7.6 (高级 NetOps 增强版)
+#  Loon 配置 (Loon.lcf) — v7.7 (Surgio 生成)
 #  核心: 自动健康检测 · 高质量多引擎去广告 · Apple原生增强 · 全球社交/流媒体分流 · 银行 MitM 冲突根治
 #  引擎支持: iOS Loon 3.3.9+
 # ═══════════════════════════════════════════════════════════
@@ -7,25 +7,18 @@
 [General]
 ip-mode = ipv4-only
 interface-mode = Performance
-dns-server = 223.5.5.5, 119.29.29.29, 180.184.11.11, 180.184.22.22
-doh-server = https://doh.pub/dns-query, https://dns.alidns.com/dns-query
-doh3-server = h3://doh.pub/dns-query, h3://dns.alidns.com/dns-query
+dns-server = 180.184.11.11, 180.184.22.22, 119.29.29.29, 223.5.5.5
+doh-server = https://dns.alidns.com/dns-query, https://doh.pub/dns-query
+doh3-server = h3://dns.alidns.com/dns-query, h3://doh.pub/dns-query
 doq-server = quic://dns.alidns.com:853
 hijack-dns = *:53, 8.8.8.8, 8.8.4.4, 1.1.1.1, 114.114.114.114, 223.6.6.6, 180.76.76.76
 sni-sniffing = true
 disable-stun = false
-# ⚠️ v6.2: 移除 disable-udp-ports = 443
-# 该设置会直接杀掉 Hysteria2 (UDP协议) 的所有数据包, 导致节点不可用
-# YouTube 去广告的 QUIC 绕过问题由 MitM hostname 覆盖 *.googlevideo.com 处理
-# 如需严格阻止 YouTube QUIC, 用规则 DEST-PORT,443,REJECT (但会影响所有 UDP 443)
-# udp-fallback-mode 改为 DIRECT 而非 REJECT: UDP 失败时回退 TCP 而非断连
 udp-fallback-mode = DIRECT
 ipv6-vif = off
 domain-reject-mode = DNS
 dns-reject-mode = LOOPBACKIP
 disconnect-on-policy-change = false
-# ⚠️ 修复: geodata.kelee.one 全站 403 (Cloudflare Turnstile)，改用 GitHub 直连镜像
-# Loyalsoldier/geoip 是社区最权威的中国大陆 GeoIP 数据库，P3TERX 提供 GeoLite2-ASN 镜像
 geoip-url = https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb
 ipasn-url = https://raw.githubusercontent.com/P3TERX/GeoLite.mmdb/download/GeoLite2-ASN.mmdb
 resource-parser = https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store-parser.loon.min.js
@@ -40,9 +33,6 @@ bypass-tun = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/
 real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.boc.cn, *.abchina.com, *.ccb.com, *.psbc.com, *.cmbchina.com, *.icbc.com.cn, *.bankofchina.com, *.spdb.com.cn, *.cib.com.cn, *.cebbank.com, *.unionpay.com, *.pingan.com.cn, *.pingan.com, *.bankcomm.com, *.citicbank.com, *.hxb.com.cn, *.cgbchina.com.cn, *.local, *.lan, *.home.arpa, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, *.msftconnecttest.com, *.msftncsi.com, *.battlenet.com.cn
 
 [Host]
-# ⚠️ 如果节点用域名连接, 建议在此预解析以省去每次 DNS 查询:
-#   <节点域名> = <节点IP>
-# 例如: your-node.example.com = 13.112.xxx.xxx
 *.taobao.com = server:223.5.5.5
 *.tmall.com = server:223.5.5.5
 *.alipay.com = server:223.5.5.5
@@ -69,54 +59,37 @@ httpdns.c.cdnhwc2.com = 0.0.0.0
 mtalk.google.com = 108.177.125.188
 
 [Proxy]
-# ⚠️ 您使用 Hysteria2 (UDP 443) + VLESS+Vision+Reality 双协议到同一台 VPS
-# 节点通过订阅自动导入, 策略组用正则自动匹配所有节点, 无需手动定义
-# 如需手动定义, Loon 节点语法参考:
-#   Hysteria2: 🇯🇵 Hysteria2 = hysteria2, <IP>, 443, password=<密码>, sni=<域名>, udp=true
-#   VLESS:     🇯🇵 VLESS-Reality = vless, <IP>, <端口>, uuid=<UUID>, flow=xtls-rprx-vision, tls-name=<SNI>, reality=true, reality-public-key=<公钥>, reality-short-id=<短ID>, udp=true
+# Surgio 自动生成节点: npx surgio generate
+# 通过 SURGIO_SUBSCRIPTION_URL (机场订阅) 或 Secrets (HY2_HOST 等) 传入
 
 [Proxy Group]
-# 双协议自动选优: Hysteria2 (低延迟, UDP) + VLESS+Reality (抗封锁, TCP)
-# 用正则 # 匹配订阅节点, 无需手动保持节点名一致
-# - #(?=.*hysteria|(?=.*vless) 自动匹配所有 Hysteria2 和 VLESS 节点
-# - url-test 自动选延迟最低的节点
-# Hysteria2 通常延迟更低 (QUIC 0-RTT), 弱 UDP 网络下 VLESS 更稳
-# 如需手动锁定某个协议, 在 Loon App 中将 Proxy 组切换为 select 模式
-#
-# ⚠️ 流量节省: 测速用 cloudflare generate_204 (仅 204 空响应, 不产生真实流量)
-# 每天测速流量约 1.7MB (2节点 × 12次/小时 × 24小时 × 3KB), 可忽略
-Proxy = url-test, "#.*", url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
+Proxy = url-test, ".*", url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
 Apple = select, DIRECT, Proxy
 Final = select, DIRECT, Proxy
 
 [Rule]
-# APNs 推送服务直连 (防止推送延迟)
 DEST-PORT, 5223, DIRECT
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 银行广告 CDN 拦截 (必须放在银行 DIRECT 规则之前，Loon 按顺序匹配)
-# 这些域名是银行 App 的广告/埋点 CDN，REJECT 拦截广告又不影响交易
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 交通银行广告图片 CDN
+# ⚠️ 与 QX.conf [filter_local] 同步维护 — 修改时务必双端对齐
+# 交通银行
 DOMAIN, creditcard.bankcomm.com, REJECT
 DOMAIN, creditcard.bankcomm.cn, REJECT
 DOMAIN-SUFFIX, track.bankcomm.com, REJECT
-# 农业银行开屏广告/埋点 CDN
+# 农业银行
 DOMAIN, midc.cdn-static.abchina.com.cn, REJECT
 DOMAIN, enjoy.cdn-static.abchina.com, REJECT
 DOMAIN, firefly.abchina.com.cn, REJECT
 DOMAIN, msmp.abchina.com.cn, REJECT
-# 中国银行广告图片 CDN
+# 中国银行
 DOMAIN, cdn1.mbs.boc.cn, REJECT
-# 云闪付广告域名
+# 云闪付
 DOMAIN, ads.95516.com, REJECT
 DOMAIN, switch.cup.com.cn, REJECT
 DOMAIN, tysdk.95516.com, REJECT
 
-# 银行及金融 App 直连 (防止代理及安全检测失效)
+
 DOMAIN-SUFFIX, unionpay.com, DIRECT
 DOMAIN-SUFFIX, cmbchina.com, DIRECT
-DOMAIN-SUFFIX, cmbimg.com, DIRECT
 DOMAIN-SUFFIX, icbc.com.cn, DIRECT
 DOMAIN-SUFFIX, ccb.com, DIRECT
 DOMAIN-SUFFIX, boc.cn, DIRECT
@@ -134,210 +107,154 @@ DOMAIN-SUFFIX, citicbank.com, DIRECT
 DOMAIN-SUFFIX, hxb.com.cn, DIRECT
 DOMAIN-SUFFIX, cgbchina.com.cn, DIRECT
 
-# Discord 语音 STUN 通道代理 (防止全局 3478 端口阻断导致语音连接失败)
+# Discord STUN
 DOMAIN-SUFFIX, discord.media, Proxy
 DOMAIN-SUFFIX, discordapp.com, Proxy
 DOMAIN-SUFFIX, discordapp.net, Proxy
 
-# WebRTC STUN 阻断 (放行游戏 STUN 直连，阻断追踪 STUN)
+# STUN 阻断
 DOMAIN-KEYWORD, stun.playstation, DIRECT
 DOMAIN-KEYWORD, stun.nintendo, DIRECT
 DOMAIN-KEYWORD, xboxlive.com, DIRECT
 DOMAIN-KEYWORD, stun, REJECT
 DEST-PORT, 3478, REJECT
 
-# 0. 局域网直连 (LAN Bounded Context)
+# 局域网
 IP-CIDR, 192.168.0.0/16, DIRECT, no-resolve
 IP-CIDR, 10.0.0.0/8, DIRECT, no-resolve
 IP-CIDR, 172.16.0.0/12, DIRECT, no-resolve
 IP-CIDR, 127.0.0.0/8, DIRECT, no-resolve
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 1. 精确拦截 HTTPDNS (常见 HTTPDNS 域名拦截)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# HTTPDNS 拦截
 DOMAIN-KEYWORD, httpdns, REJECT
-DOMAIN, httpdns.c.cdnhwc.com, REJECT
-DOMAIN, httpdns.gslb.netease.com, REJECT
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 2. Apple & 微信 最高优先级直连
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Apple News 在中国大陆被封锁，必须走代理 (v5.7 新增)
-# 放在 DOMAIN-SUFFIX apple.com, Apple 之前确保优先匹配 (Loon 按顺序匹配)
+# Apple
 DOMAIN, news-edge.apple.com, Proxy
-DOMAIN, news-todayconfig-edge.apple.com, Proxy
-DOMAIN, news-events.apple.com, Proxy
-DOMAIN, news-sports-events.apple.com, Proxy
-DOMAIN, news-client.apple.com, Proxy
-DOMAIN, news-client-search.apple.com, Proxy
-# ⚠️ 修复(v5.9): gateway.icloud.com 走 Proxy (Apple News 需要, 必须在 icloud.com→Apple 之前)
-DOMAIN, gateway.icloud.com, Proxy
-# Apple Weather/Maps/Siri 增强域名走 Apple 策略组 (可直连或代理)
-DOMAIN, testflight.apple.com, Proxy
 DOMAIN-SUFFIX, apple.com, Apple
 DOMAIN-SUFFIX, icloud.com, Apple
 DOMAIN-SUFFIX, icloud.com.cn, Apple
+
+# 微信
 DOMAIN-SUFFIX, wechat.com, DIRECT
 DOMAIN-SUFFIX, qpic.cn, DIRECT
 DOMAIN-SUFFIX, weixin.qq.com, DIRECT
 DOMAIN-SUFFIX, wx.qq.com, DIRECT
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 3. YouTube / 流媒体 (统一走 Proxy)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# AI 服务分流
+# OpenAI / Anthropic / Google AI / AI 编程工具 / 新兴 AI (v7.7)
+
+DOMAIN-SUFFIX, openai.com, Proxy
+DOMAIN-SUFFIX, ai.com, Proxy
+DOMAIN-SUFFIX, chatgpt.com, Proxy
+DOMAIN-SUFFIX, oaiusercontent.com, Proxy
+DOMAIN-SUFFIX, oaistatic.com, Proxy
+DOMAIN-KEYWORD, openai, Proxy
+DOMAIN-SUFFIX, anthropic.com, Proxy
+DOMAIN-SUFFIX, claude.ai, Proxy
+DOMAIN-SUFFIX, gemini.google.com, Proxy
+DOMAIN-SUFFIX, aistudio.google.com, Proxy
+DOMAIN-SUFFIX, deepmind.google, Proxy
+DOMAIN-SUFFIX, deepseek.com, Proxy
+DOMAIN-SUFFIX, x.ai, Proxy
+DOMAIN-SUFFIX, midjourney.com, Proxy
+DOMAIN-SUFFIX, suno.ai, Proxy
+DOMAIN-SUFFIX, elevenlabs.io, Proxy
+DOMAIN-SUFFIX, runwayml.com, Proxy
+DOMAIN-SUFFIX, lumalabs.ai, Proxy
+DOMAIN-SUFFIX, perplexity.ai, Proxy
+DOMAIN-SUFFIX, groq.com, Proxy
+DOMAIN-SUFFIX, huggingface.co, Proxy
+DOMAIN-SUFFIX, cursor.sh, Proxy
+DOMAIN-SUFFIX, codeium.com, Proxy
+DOMAIN-SUFFIX, copilot.microsoft.com, Proxy
+
+# 流媒体路由 (Loon 格式, QX 通过 quantumultx filter 转换)
 DOMAIN-SUFFIX, youtube.com, Proxy
 DOMAIN-SUFFIX, googlevideo.com, Proxy
 DOMAIN-SUFFIX, ytimg.com, Proxy
-DOMAIN-SUFFIX, ggpht.com, Proxy
 DOMAIN-SUFFIX, netflix.com, Proxy
 DOMAIN-SUFFIX, nflxvideo.net, Proxy
 DOMAIN-SUFFIX, netflix.net, Proxy
-DOMAIN-SUFFIX, nflximg.net, Proxy
 DOMAIN-SUFFIX, disneyplus.com, Proxy
 DOMAIN-SUFFIX, disney-plus.net, Proxy
 DOMAIN-SUFFIX, dssott.com, Proxy
 DOMAIN-SUFFIX, hbomax.com, Proxy
-DOMAIN-SUFFIX, hbonow.com, Proxy
 DOMAIN-SUFFIX, spotify.com, Proxy
 DOMAIN-SUFFIX, scdn.co, Proxy
-DOMAIN-SUFFIX, spotifyedge.com, Proxy
-# TikTok / 抖音国际版
 DOMAIN-SUFFIX, tiktok.com, Proxy
-DOMAIN-SUFFIX, tiktokcdn.com, Proxy
-DOMAIN-SUFFIX, tiktokv.com, Proxy
-DOMAIN-SUFFIX, musical.ly, Proxy
 DOMAIN-SUFFIX, byteoversea.com, Proxy
-DOMAIN-SUFFIX, muscdn.com, Proxy
-# Prime Video / Twitch
 DOMAIN-SUFFIX, primevideo.com, Proxy
-DOMAIN-SUFFIX, amazonvideo.com, Proxy
 DOMAIN-SUFFIX, twitch.tv, Proxy
-DOMAIN-SUFFIX, twitchcdn.net, Proxy
-DOMAIN-SUFFIX, ttvnw.net, Proxy
-# AbemaTV / TVB
 DOMAIN-SUFFIX, abema.tv, Proxy
-DOMAIN-SUFFIX, ameba.jp, Proxy
 DOMAIN-SUFFIX, tvb.com, Proxy
-DOMAIN-SUFFIX, mytvb.com, Proxy
-# OpenAI CDN (补充 AI 分流)
-DOMAIN-SUFFIX, oaistatic.com, Proxy
-DOMAIN-SUFFIX, oaiusercontent.com, Proxy
-DOMAIN-SUFFIX, chatgpt.com, Proxy
-# Google 服务
 DOMAIN-SUFFIX, gstatic.com, Proxy
 DOMAIN-SUFFIX, googleapis.com, Proxy
 DOMAIN-SUFFIX, google.com, Proxy
 DOMAIN-SUFFIX, google.co.jp, Proxy
-DOMAIN-SUFFIX, g.co, Proxy
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 开发者平台 & 国际服务 (v5.6 新增, 补充 Global.list 未覆盖的域名)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# GitHub (开发者必备, Global.list 未完整覆盖)
+# 社交平台路由 (Loon 格式)
+DOMAIN-SUFFIX, instagram.com, Proxy
+DOMAIN-SUFFIX, cdninstagram.com, Proxy
+DOMAIN-SUFFIX, twitter.com, Proxy
+DOMAIN-SUFFIX, x.com, Proxy
+DOMAIN-SUFFIX, twimg.com, Proxy
+DOMAIN-SUFFIX, t.co, Proxy
+DOMAIN-SUFFIX, twittercdn.com, Proxy
+DOMAIN-SUFFIX, facebook.com, Proxy
+DOMAIN-SUFFIX, fbcdn.net, Proxy
+DOMAIN-SUFFIX, telegram.org, Proxy
+DOMAIN-SUFFIX, t.me, Proxy
+DOMAIN-SUFFIX, telegramcdn.com, Proxy
+DOMAIN-SUFFIX, tdesktop.com, Proxy
+DOMAIN-SUFFIX, reddit.com, Proxy
+DOMAIN-SUFFIX, redditstatic.com, Proxy
+DOMAIN-SUFFIX, discord.com, Proxy
+
+# 开发者平台路由 (Loon 格式)
 DOMAIN-SUFFIX, github.com, Proxy
 DOMAIN-SUFFIX, githubusercontent.com, Proxy
 DOMAIN-SUFFIX, githubassets.com, Proxy
-DOMAIN-SUFFIX, github.io, Proxy
-# Microsoft / OneDrive / Office 365
 DOMAIN-SUFFIX, microsoft.com, Proxy
 DOMAIN-SUFFIX, microsoftonline.com, Proxy
 DOMAIN-SUFFIX, onedrive.com, Proxy
 DOMAIN-SUFFIX, onedrive.live.com, Proxy
 DOMAIN-SUFFIX, office365.com, Proxy
 DOMAIN-SUFFIX, live.com, Proxy
-# Steam (游戏平台, Global.list 未覆盖)
 DOMAIN-SUFFIX, steam.com, Proxy
 DOMAIN-SUFFIX, steampowered.com, Proxy
 DOMAIN-SUFFIX, steamcommunity.com, Proxy
 DOMAIN-SUFFIX, steamstatic.com, Proxy
-DOMAIN-SUFFIX, steamcontent.com, Proxy
 DOMAIN-SUFFIX, steamcdn-a.akamaihd.net, Proxy
-# Wikipedia / Wikimedia
 DOMAIN-SUFFIX, wikipedia.org, Proxy
 DOMAIN-SUFFIX, wikimedia.org, Proxy
 DOMAIN-SUFFIX, wikimediafoundation.org, Proxy
-# 其他常用国际服务 (Global.list 未完整覆盖, v5.8 新增)
-# Medium / Notion / Figma / Dropbox
 DOMAIN-SUFFIX, medium.com, Proxy
 DOMAIN-SUFFIX, notion.so, Proxy
-DOMAIN-SUFFIX, notion.com, Proxy
 DOMAIN-SUFFIX, figma.com, Proxy
-DOMAIN-SUFFIX, dropbox.com, Proxy
-DOMAIN-SUFFIX, dropboxusercontent.com, Proxy
-# Pinterest / Tumblr
-DOMAIN-SUFFIX, pinterest.com, Proxy
-DOMAIN-SUFFIX, pinimg.com, Proxy
-DOMAIN-SUFFIX, tumblr.com, Proxy
-# Stack Overflow / 开发者社区
 DOMAIN-SUFFIX, stackoverflow.com, Proxy
-DOMAIN-SUFFIX, stackexchange.com, Proxy
-DOMAIN-SUFFIX, npmjs.com, Proxy
-DOMAIN-SUFFIX, npm.im, Proxy
 DOMAIN-SUFFIX, docker.com, Proxy
 DOMAIN-SUFFIX, jetbrains.com, Proxy
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 全球社交平台 (统一走 Proxy)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Instagram
-DOMAIN-SUFFIX, instagram.com, Proxy
-DOMAIN-SUFFIX, cdninstagram.com, Proxy
-# Twitter / X
-DOMAIN-SUFFIX, twitter.com, Proxy
-DOMAIN-SUFFIX, x.com, Proxy
-DOMAIN-SUFFIX, twimg.com, Proxy
-DOMAIN-SUFFIX, t.co, Proxy
-DOMAIN-SUFFIX, twittercdn.com, Proxy
-# Facebook / Meta
-DOMAIN-SUFFIX, facebook.com, Proxy
-DOMAIN-SUFFIX, fbcdn.net, Proxy
-DOMAIN-SUFFIX, fb.me, Proxy
-DOMAIN-SUFFIX, fbsbx.com, Proxy
-# Telegram
-DOMAIN-SUFFIX, telegram.org, Proxy
-DOMAIN-SUFFIX, t.me, Proxy
-DOMAIN-SUFFIX, telegramcdn.com, Proxy
-DOMAIN-SUFFIX, tdesktop.com, Proxy
-# Reddit
-DOMAIN-SUFFIX, reddit.com, Proxy
-DOMAIN-SUFFIX, redditstatic.com, Proxy
-DOMAIN-SUFFIX, redd.it, Proxy
-DOMAIN-SUFFIX, redditmedia.com, Proxy
-# Discord (补充 discord.com 主域，其余 discordapp.* 已在上方 STUN 段优先匹配)
-DOMAIN-SUFFIX, discord.com, Proxy
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 4. GDT 广告 SDK 白名单 (防去广告误杀奖励包)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# GDT 广告 SDK 白名单
 DOMAIN, mi.gdt.qq.com, DIRECT
 DOMAIN, ii.gdt.qq.com, DIRECT
 DOMAIN, c.gdt.qq.com, DIRECT
-DOMAIN, adsmind.gdtimg.com, DIRECT
-DOMAIN, adsmind.ugdtimg.com, DIRECT
-DOMAIN, pgdt.gtimg.cn, DIRECT
 DOMAIN-SUFFIX, pangolin-sdk-toutiao.com, DIRECT
-DOMAIN-SUFFIX, pangolin-sdk-toutiao1.com, DIRECT
 DOMAIN-SUFFIX, pangle.io, DIRECT
 
-# 淘宝后台切回跳开屏拦截
+# 淘宝
 DOMAIN, heic.alicdn.com, REJECT
 DOMAIN-SUFFIX, h-adashx.ut.taobao.com, REJECT
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 追踪/埋点 — 直接 REJECT (与 QX 端对齐)
-# ⚠️ v7.1: 以下规则已移至 qidian.plugin [Rule] 段, 避免重复维护
-#   保留 qreport keyword 通杀 + 两处独立域名 (不在 qidian.plugin 中)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 追踪
 DOMAIN-KEYWORD, qreport, REJECT
 DOMAIN, aegis.cdn-go.cn, REJECT
 
-# 7. 本地 GeoIP CN 路由 (Native GeoIP Bounded Context)
 GEOIP, CN, DIRECT
-
 FINAL, Final
 
 [Remote Rule]
-# 🚫 去广告规则置顶，防 China.list 误杀
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Advertising/Advertising.list, policy=REJECT, tag=🚫 广告域名, enabled=true
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Privacy/Privacy.list, policy=REJECT, tag=🔒 隐私保护, enabled=true
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Hijacking/Hijacking.list, policy=REJECT, tag=🛡️ 反劫持, enabled=true
@@ -346,37 +263,11 @@ https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Global/Global.list, policy=Proxy, tag=🌍 国际域名, enabled=true
 
 [Plugin]
-# ═══════════════════════════════════════════════════════════
-# v7.0 架构重构: 淘汰停更2年的 ajune0527 插件体系 + Remove_ads_by_keli + myblockads
-# 替换为每日更新的 blackmatrix7 AllInOne.plugin (通用广告域名层)
-# App 级精细化去广告改用自维护插件 (引用 ddgksf2013/app2smile 活跃上游脚本)
-# ═══════════════════════════════════════════════════════════
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 内核层 — 网络安全基础
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 https://ws.wenn.in/main/Kelee/Prevent_DNS_Leaks.plugin, policy=Proxy, enabled=true
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 通用广告域名层 — blackmatrix7 AllInOne (每日更新, 替代 Remove_ads_by_keli + myblockads)
-# AllInOne: 740 MitM hostname + 698 reject 规则 + 21 response 脚本
-# 已修复 safebrowsing/jiguang/umeng 误杀风险 (旧版 keli+myblockads 的激进规则已移除)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AllInOne/AllInOne.plugin, enabled=true, tag=通用广告域名层
-# 哲也脚本 (知乎深度净化) + B站/京东/爱奇艺/美团等开屏脚本
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AdvertisingScript/AdvertisingScript.plugin, enabled=true, tag=广告脚本增强
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 工具层
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Sub-Store.plugin, enabled=true
 https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/QuickSearch.plugin, enabled=true
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# App 精细化去广告 (自维护, 引用 ddgksf2013/app2smile 活跃上游脚本)
-# 按需开启/关闭, 默认已全开
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# v7.6: weibo.plugin 已移除 — 微博去广告交给 ddgksf2013/WeiboAds.conf (QX) 或 skip
 https://ws.wenn.in/main/Plugin/wechat.plugin, enabled=true, tag=微信&小程序&公众号去广告
 https://ws.wenn.in/main/Plugin/bilibili.plugin, enabled=true, tag=B站去广告
 https://ws.wenn.in/main/Plugin/bilicomics.plugin, enabled=true, tag=B站漫画去广告
@@ -384,33 +275,18 @@ https://ws.wenn.in/main/Plugin/netease.plugin, enabled=true, tag=网易云音乐
 https://ws.wenn.in/main/Plugin/goofish.plugin, enabled=true, tag=闲鱼去广告
 https://ws.wenn.in/main/Plugin/qishui.plugin, enabled=true, tag=汽水音乐净化
 https://ws.wenn.in/main/Plugin/taopiaopiao.plugin, enabled=true, tag=淘票票净化
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Phase 2 新增: 补全 App 覆盖 (amap/jd/qqmusic/reddit/tieba/zhihu)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 https://ws.wenn.in/main/Plugin/amap.plugin, enabled=true, tag=高德地图去广告
 https://ws.wenn.in/main/Plugin/jd.plugin, enabled=true, tag=京东去广告
 https://ws.wenn.in/main/Plugin/qqmusic.plugin, enabled=true, tag=QQ音乐去广告
 https://ws.wenn.in/main/Plugin/reddit.plugin, enabled=true, tag=Reddit去广告
 https://ws.wenn.in/main/Plugin/tieba.plugin, enabled=true, tag=贴吧去广告
 https://ws.wenn.in/main/Plugin/zhihu.plugin, enabled=true, tag=知乎去广告
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 自维护核心及应用插件
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 https://ws.wenn.in/main/Plugin/qidian.plugin, enabled=true, tag=起点全能助手 Pro
 https://ws.wenn.in/main/Plugin/bank.plugin, enabled=true, tag=银行及云闪付去广告
 https://ws.wenn.in/main/Plugin/life.plugin, enabled=true, tag=生活出行去广告
 https://ws.wenn.in/main/Plugin/ai.plugin, enabled=true, tag=AI 服务分流
 https://ws.wenn.in/main/Plugin/zhihuifangdong.plugin, enabled=true, tag=智慧房东去广告
 https://ws.wenn.in/main/Kelee/YouTube_remove_ads.plugin, enabled=true, tag=YouTube去广告
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Apple 原生 App 增强 (NSRingo/iRingo, v5.7 新增)
-# 解锁中国大陆 iPhone 被限制的 Apple 原生功能: 天气空气质量/降水地图、地图卫星图/探索、
-# Apple News、Siri 国际版、TestFlight 区域解锁
-# MitM 域名均为具体子域 (weatherkit/news-*/smoot/testflight/ls.apple.com)，不影响银行安全
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 https://github.com/NSRingo/WeatherKit/releases/latest/download/iRingo.WeatherKit.plugin, enabled=true, tag=🍎天气增强
 https://github.com/NSRingo/Maps/releases/latest/download/iRingo.Maps.plugin, enabled=true, tag=🍎地图增强
 https://github.com/NSRingo/News/releases/latest/download/iRingo.News.plugin, enabled=true, tag=🍎News解锁
@@ -419,8 +295,6 @@ https://github.com/NSRingo/Siri/releases/latest/download/iRingo.Search.plugin, e
 https://github.com/NSRingo/TestFlight/releases/latest/download/iRingo.TestFlight.plugin, enabled=true, tag=🍎TestFlight增强
 
 [Rewrite]
-# HTTPDNS API 正则拦截 (防止 API 直接通过 IP 发起解析)
-# ⚠️ 修复(v5.9): reject→reject-200, 与QX端行为一致 (返回HTTP 200空响应, 避免App报错重试)
 ^https?:\/\/119\.29\.29\.29\/d reject-200
 ^https?:\/\/203\.107\.1\.1\/d reject-200
 ^https?:\/\/223\.5\.5\.5\/d reject-200
@@ -429,11 +303,4 @@ https://github.com/NSRingo/TestFlight/releases/latest/download/iRingo.TestFlight
 
 [MitM]
 skip-server-cert-verify = false
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# v7.0: blackmatrix7 AllInOne.plugin 通过 %APPEND% 自动声明其 740 个 MitM hostname
-# 主配置只需保留:
-#   1. 银行域名负向排除 (P0, 防 SSL Pinning 失败)
-#   2. Apple iRingo 增强域名
-#   3. 自维护插件核心域名 (GDT白名单/起点/菜鸟/智慧房东/YouTube)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 hostname = -*.apple.com, -*.icloud.com, -*.icloud.com.cn, -*.95516.com, -*.cup.com.cn, -*.95516.com.cn, -*.unionpay.com, -*.icbc.com.cn, -*.mybank.icbc.com.cn, -*.icbc.com, -*.ccb.com, -*.ccb.cn, -*.boc.cn, -*.bankofchina.com, -*.jf365.boc.cn, -*.abchina.com, -*.abchina.com.cn, -*.cdn-static.abchina.com.cn, -*.cdn-static.abchina.com, -*.bankcomm.com, -*.bankcomm.cn, -*.creditcard.bankcomm.com, -*.creditcard.bankcomm.cn, -*.cmbchina.com, -*.cmbimg.com, -*.psbc.com, -*.spdb.com.cn, -*.spdbccc.com.cn, -*.citicbank.com, -*.citibank.com, -*.ecitic.com, -*.pingan.com.cn, -*.pingan.com, -*.hcz-member.pingan.com.cn, -*.iobs.pingan.com.cn, -*.stock.pingan.com, -*.cmbc.com.cn, -*.cib.com.cn, -*.cebbank.com, -*.ebchinabank.com, -*.hxb.com.cn, -*.cgbchina.com.cn, -*.95508.com, -*.static.95508.com, -*.bankofbeijing.com.cn, -*.bosc.cn, -*.js96008.com, -*.tenpay.com, -*.qianbao.qq.com, weatherkit.apple.com, configuration.ls.apple.com, gspe35-ssl.ls.apple.com, gspe35-ssl.ls.apple.cn, news-edge.apple.com, news-todayconfig-edge.apple.com, news-events.apple.com, news-sports-events.apple.com, news-client.apple.com, news-client-search.apple.com, guzzoni.smoot.apple.com, api2.smoot.apple.com, *.smoot.apple.com, *.smoot.apple.cn, testflight.apple.com, boxjs.com, h5.if.qidian.com, magev6.if.qidian.com, ii.gdt.qq.com, adsmind.gdtimg.com, adsmind.ugdtimg.com, pgdt.gtimg.cn, api-access.pangolin-sdk-toutiao.com, api-access.pangolin-sdk-toutiao1.com, api.zhihuifangdong.net, netflow-mtop.cainiao.com, nbcps-mtop.cainiao.com, cn-acs.m.cainiao.com, e2e-mtop.cainiao.com, longquan-mtop.cainiao.com, -redirector*.googlevideo.com, *.googlevideo.com, *.youtube.com, youtubei.googleapis.com, m5.amap.com, m5-zb.amap.com, amdc.m.taobao.com, api.m.jd.com, api.zhihu.com, www.zhihu.com, appcloud2.zhihu.com, link.zhihu.com, zhuanlan.zhihu.com, m-cloud.zhihu.com, tiebac.baidu.com, tieba.baidu.com, tiebaapi.baidu.com, gql.reddit.com, gql-fed.reddit.com

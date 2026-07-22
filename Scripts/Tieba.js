@@ -40,8 +40,8 @@ try {
   }
 
   clean(obj);
-  $.done({ body: JSON.stringify(obj) });
+  $done({ body: JSON.stringify(obj) });
 } catch (e) {
   // 非 JSON body (Proto), pass through
-  $.done();
+  $done();
 }

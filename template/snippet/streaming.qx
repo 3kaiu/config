@@ -1,0 +1,23 @@
+# 流媒体路由 (Loon 格式, QX 通过 quantumultx filter 转换)
+host-suffix, youtube.com, Proxy
+host-suffix, googlevideo.com, Proxy
+host-suffix, ytimg.com, Proxy
+host-suffix, netflix.com, Proxy
+host-suffix, nflxvideo.net, Proxy
+host-suffix, netflix.net, Proxy
+host-suffix, disneyplus.com, Proxy
+host-suffix, disney-plus.net, Proxy
+host-suffix, dssott.com, Proxy
+host-suffix, hbomax.com, Proxy
+host-suffix, spotify.com, Proxy
+host-suffix, scdn.co, Proxy
+host-suffix, tiktok.com, Proxy
+host-suffix, byteoversea.com, Proxy
+host-suffix, primevideo.com, Proxy
+host-suffix, twitch.tv, Proxy
+host-suffix, abema.tv, Proxy
+host-suffix, tvb.com, Proxy
+host-suffix, gstatic.com, Proxy
+host-suffix, googleapis.com, Proxy
+host-suffix, google.com, Proxy
+host-suffix, google.co.jp, Proxy

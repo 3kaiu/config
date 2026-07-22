@@ -1,0 +1,24 @@
+# 开发者平台路由 (Loon 格式)
+host-suffix, github.com, Proxy
+host-suffix, githubusercontent.com, Proxy
+host-suffix, githubassets.com, Proxy
+host-suffix, microsoft.com, Proxy
+host-suffix, microsoftonline.com, Proxy
+host-suffix, onedrive.com, Proxy
+host-suffix, onedrive.live.com, Proxy
+host-suffix, office365.com, Proxy
+host-suffix, live.com, Proxy
+host-suffix, steam.com, Proxy
+host-suffix, steampowered.com, Proxy
+host-suffix, steamcommunity.com, Proxy
+host-suffix, steamstatic.com, Proxy
+host-suffix, steamcdn-a.akamaihd.net, Proxy
+host-suffix, wikipedia.org, Proxy
+host-suffix, wikimedia.org, Proxy
+host-suffix, wikimediafoundation.org, Proxy
+host-suffix, medium.com, Proxy
+host-suffix, notion.so, Proxy
+host-suffix, figma.com, Proxy
+host-suffix, stackoverflow.com, Proxy
+host-suffix, docker.com, Proxy
+host-suffix, jetbrains.com, Proxy

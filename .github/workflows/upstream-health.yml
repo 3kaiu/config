@@ -12,52 +12,92 @@ jobs:
   check-upstreams:
     runs-on: ubuntu-latest
     steps:
+      # ── 核心依赖 (原有 4 项) ──
       - name: Check ddgksf2013/Rewrite
         run: |
           status=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/KeepAds.conf" || echo "000")
-          if [ "$status" != "200" ]; then
-            echo "::warning::ddgksf2013/Rewrite returned HTTP $status"
-          fi
           echo "ddgksf2013_status=$status" >> $GITHUB_ENV
 
       - name: Check Maasea/sgmodule (YouTube)
         run: |
           status=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js" || echo "000")
-          if [ "$status" != "200" ]; then
-            echo "::warning::Maasea/sgmodule YouTube returned HTTP $status"
-          fi
           echo "maasea_status=$status" >> $GITHUB_ENV
 
       - name: Check app2smile/rules (Bilibili)
         run: |
           status=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js" || echo "000")
-          if [ "$status" != "200" ]; then
-            echo "::warning::app2smile/rules Bilibili returned HTTP $status"
-          fi
           echo "app2smile_status=$status" >> $GITHUB_ENV
 
       - name: Check blackmatrix7 AllInOne
         run: |
           status=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AllInOne/AllInOne.plugin" || echo "000")
-          if [ "$status" != "200" ]; then
-            echo "::warning::blackmatrix7/AllInOne returned HTTP $status"
-          fi
           echo "blackmatrix7_status=$status" >> $GITHUB_ENV
+
+      # ── 新增: 自建 CDN 可达性 (ws.wenn.in) ──
+      - name: Check ws.wenn.in CDN (Mirror)
+        run: |
+          status=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://ws.wenn.in/main/Mirror/netease.adblock.js" || echo "000")
+          echo "wennin_status=$status" >> $GITHUB_ENV
+
+      # ── 新增: 脚本级上游 (已 Mirror, 但仍需监控原站) ──
+      - name: Check ddgksf2013 gist (netease.adblock.js)
+        run: |
+          status=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://gist.githubusercontent.com/ddgksf2013/4f53b7c6083678df25fecc8ff68b52c4/raw/netease.adblock.js" || echo "000")
+          echo "gist_status=$status" >> $GITHUB_ENV
+
+      - name: Check ddgksf2013/Scripts (amdc.js, applet.js)
+        run: |
+          amdc=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amdc.js" || echo "000")
+          applet=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/applet.js" || echo "000")
+          echo "ddgkscripts_amdc=$amdc" >> $GITHUB_ENV
+          echo "ddgkscripts_applet=$applet" >> $GITHUB_ENV
+
+      # ── 新增: NSRingo Apple 增强 (5 仓库) ──
+      - name: Check NSRingo release artifacts
+        run: |
+          weatherkit=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://github.com/NSRingo/WeatherKit/releases/latest/download/iRingo.WeatherKit.plugin" || echo "000")
+          maps=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://github.com/NSRingo/Maps/releases/latest/download/iRingo.Maps.plugin" || echo "000")
+          news=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://github.com/NSRingo/News/releases/latest/download/iRingo.News.plugin" || echo "000")
+          siri=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://github.com/NSRingo/Siri/releases/latest/download/iRingo.Siri.plugin" || echo "000")
+          testflight=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://github.com/NSRingo/TestFlight/releases/latest/download/iRingo.TestFlight.plugin" || echo "000")
+          echo "nsringo_weatherkit=$weatherkit" >> $GITHUB_ENV
+          echo "nsringo_maps=$maps" >> $GITHUB_ENV
+          echo "nsringo_news=$news" >> $GITHUB_ENV
+          echo "nsringo_siri=$siri" >> $GITHUB_ENV
+          echo "nsringo_testflight=$testflight" >> $GITHUB_ENV
+
+      # ── 新增: Sub-Store (ajune0527) ──
+      - name: Check ajune0527/vpn_tool (Sub-Store, QuickSearch)
+        run: |
+          substore=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Sub-Store.plugin" || echo "000")
+          echo "ajune0527_substore=$substore" >> $GITHUB_ENV
 
       - name: Report results
         run: |
           echo "### Upstream Health Report" >> $GITHUB_STEP_SUMMARY
           echo "| Upstream | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| ddgksf2013 | ${{ env.ddgksf2013_status }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ddgksf2013/Rewrite | ${{ env.ddgksf2013_status }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Maasea (YouTube) | ${{ env.maasea_status }} |" >> $GITHUB_STEP_SUMMARY
           echo "| app2smile (Bilibili) | ${{ env.app2smile_status }} |" >> $GITHUB_STEP_SUMMARY
           echo "| blackmatrix7 (AllInOne) | ${{ env.blackmatrix7_status }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **ws.wenn.in CDN** | **${{ env.wennin_status }}** |" >> $GITHUB_STEP_SUMMARY
+          echo "| ddgksf2013 gist (netease) | ${{ env.gist_status }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ddgksf2013/Scripts amdc.js | ${{ env.ddgkscripts_amdc }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ddgksf2013/Scripts applet.js | ${{ env.ddgkscripts_applet }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| NSRingo WeatherKit | ${{ env.nsringo_weatherkit }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| NSRingo Maps | ${{ env.nsringo_maps }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| NSRingo News | ${{ env.nsringo_news }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| NSRingo Siri | ${{ env.nsringo_siri }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| NSRingo TestFlight | ${{ env.nsringo_testflight }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ajune0527 Sub-Store | ${{ env.ajune0527_substore }} |" >> $GITHUB_STEP_SUMMARY
 
           ALL_OK=true
-          if [ "${{ env.ddgksf2013_status }}" != "200" ] || [ "${{ env.maasea_status }}" != "200" ] || [ "${{ env.app2smile_status }}" != "200" ] || [ "${{ env.blackmatrix7_status }}" != "200" ]; then
-            ALL_OK=false
-          fi
+          for s in "${{ env.ddgksf2013_status }}" "${{ env.maasea_status }}" "${{ env.app2smile_status }}" "${{ env.blackmatrix7_status }}" "${{ env.wennin_status }}" "${{ env.gist_status }}" "${{ env.ddgkscripts_amdc }}" "${{ env.ddgkscripts_applet }}" "${{ env.nsringo_weatherkit }}" "${{ env.nsringo_maps }}" "${{ env.nsringo_news }}" "${{ env.nsringo_siri }}" "${{ env.nsringo_testflight }}" "${{ env.ajune0527_substore }}"; do
+            if [ "$s" != "200" ] && [ "$s" != "302" ] && [ "$s" != "301" ]; then
+              ALL_OK=false
+            fi
+          done
           echo "all_ok=$ALL_OK" >> $GITHUB_ENV
 
       - name: Create issue if upstreams down
@@ -65,25 +105,34 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const { execSync } = require('child_process');
             const report = `## ⚠️ Upstream Health Alert
 
             | Upstream | Status |
             |----------|--------|
-            | ddgksf2013 | ${process.env.ddgksf2013_status} |
+            | ddgksf2013/Rewrite | ${process.env.ddgksf2013_status} |
             | Maasea (YouTube) | ${process.env.maasea_status} |
             | app2smile (Bilibili) | ${process.env.app2smile_status} |
             | blackmatrix7 (AllInOne) | ${process.env.blackmatrix7_status} |
+            | **ws.wenn.in CDN** | **${process.env.wennin_status}** |
+            | ddgksf2013 gist (netease) | ${process.env.gist_status} |
+            | ddgksf2013/Scripts (amdc) | ${process.env.ddgkscripts_amdc} |
+            | ddgksf2013/Scripts (applet) | ${process.env.ddgkscripts_applet} |
+            | NSRingo WeatherKit | ${process.env.nsringo_weatherkit} |
+            | NSRingo Maps | ${process.env.nsringo_maps} |
+            | NSRingo News | ${process.env.nsringo_news} |
+            | NSRingo Siri | ${process.env.nsringo_siri} |
+            | NSRingo TestFlight | ${process.env.nsringo_testflight} |
+            | ajune0527 Sub-Store | ${process.env.ajune0527_substore} |
 
-            One or more upstreams are down. Please check manually.`;
-            
+            One or more upstreams are down. Check the workflow log for details.`;
+
             const { data: issues } = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
               labels: ['upstream-health']
             });
-            
+
             if (issues.length === 0) {
               await github.rest.issues.create({
                 owner: context.repo.owner,

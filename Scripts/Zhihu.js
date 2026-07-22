@@ -20,8 +20,8 @@ if (url.includes("search/preset_words")) {
     if (obj && obj.recommend_queries) {
       obj.recommend_queries = {};
     }
-    $.done({ body: JSON.stringify(obj) });
-  } catch (e) { $.done(); }
+    $done({ body: JSON.stringify(obj) });
+  } catch (e) { $done(); }
   return; // 提前返回, 不进入下面的通用处理
 }
 
@@ -31,7 +31,7 @@ try {
   if (obj && obj.data) {
     obj.data = {};
   }
-  $.done({ body: JSON.stringify(obj) });
+  $done({ body: JSON.stringify(obj) });
 } catch (e) {
-  $.done();
+  $done();
 }

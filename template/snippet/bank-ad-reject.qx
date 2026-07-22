@@ -1,0 +1,16 @@
+# ⚠️ 与 QX.conf [filter_local] 同步维护 — 修改时务必双端对齐
+# 交通银行
+host, creditcard.bankcomm.com, reject
+host, creditcard.bankcomm.cn, reject
+host-suffix, track.bankcomm.com, reject
+# 农业银行
+host, midc.cdn-static.abchina.com.cn, reject
+host, enjoy.cdn-static.abchina.com, reject
+host, firefly.abchina.com.cn, reject
+host, msmp.abchina.com.cn, reject
+# 中国银行
+host, cdn1.mbs.boc.cn, reject
+# 云闪付
+host, ads.95516.com, reject
+host, switch.cup.com.cn, reject
+host, tysdk.95516.com, reject

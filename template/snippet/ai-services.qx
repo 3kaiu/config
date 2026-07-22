@@ -1,0 +1,27 @@
+# AI 服务分流
+# OpenAI / Anthropic / Google AI / AI 编程工具 / 新兴 AI (v7.7)
+
+host-suffix, openai.com, Proxy
+host-suffix, ai.com, Proxy
+host-suffix, chatgpt.com, Proxy
+host-suffix, oaiusercontent.com, Proxy
+host-suffix, oaistatic.com, Proxy
+host-keyword, openai, Proxy
+host-suffix, anthropic.com, Proxy
+host-suffix, claude.ai, Proxy
+host-suffix, gemini.google.com, Proxy
+host-suffix, aistudio.google.com, Proxy
+host-suffix, deepmind.google, Proxy
+host-suffix, deepseek.com, Proxy
+host-suffix, x.ai, Proxy
+host-suffix, midjourney.com, Proxy
+host-suffix, suno.ai, Proxy
+host-suffix, elevenlabs.io, Proxy
+host-suffix, runwayml.com, Proxy
+host-suffix, lumalabs.ai, Proxy
+host-suffix, perplexity.ai, Proxy
+host-suffix, groq.com, Proxy
+host-suffix, huggingface.co, Proxy
+host-suffix, cursor.sh, Proxy
+host-suffix, codeium.com, Proxy
+host-suffix, copilot.microsoft.com, Proxy

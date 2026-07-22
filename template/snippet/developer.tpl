@@ -1,0 +1,24 @@
+# 开发者平台路由 (Loon 格式)
+DOMAIN-SUFFIX, github.com, Proxy
+DOMAIN-SUFFIX, githubusercontent.com, Proxy
+DOMAIN-SUFFIX, githubassets.com, Proxy
+DOMAIN-SUFFIX, microsoft.com, Proxy
+DOMAIN-SUFFIX, microsoftonline.com, Proxy
+DOMAIN-SUFFIX, onedrive.com, Proxy
+DOMAIN-SUFFIX, onedrive.live.com, Proxy
+DOMAIN-SUFFIX, office365.com, Proxy
+DOMAIN-SUFFIX, live.com, Proxy
+DOMAIN-SUFFIX, steam.com, Proxy
+DOMAIN-SUFFIX, steampowered.com, Proxy
+DOMAIN-SUFFIX, steamcommunity.com, Proxy
+DOMAIN-SUFFIX, steamstatic.com, Proxy
+DOMAIN-SUFFIX, steamcdn-a.akamaihd.net, Proxy
+DOMAIN-SUFFIX, wikipedia.org, Proxy
+DOMAIN-SUFFIX, wikimedia.org, Proxy
+DOMAIN-SUFFIX, wikimediafoundation.org, Proxy
+DOMAIN-SUFFIX, medium.com, Proxy
+DOMAIN-SUFFIX, notion.so, Proxy
+DOMAIN-SUFFIX, figma.com, Proxy
+DOMAIN-SUFFIX, stackoverflow.com, Proxy
+DOMAIN-SUFFIX, docker.com, Proxy
+DOMAIN-SUFFIX, jetbrains.com, Proxy

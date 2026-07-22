@@ -32,7 +32,7 @@ try {
   }
 
   walk(obj);
-  $.done({ body: JSON.stringify(obj) });
+  $done({ body: JSON.stringify(obj) });
 } catch (e) {
-  $.done();
+  $done();
 }

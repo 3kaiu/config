@@ -1,0 +1,90 @@
+name: Mirror External Scripts
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # Everyday at 03:00 UTC (after sync-kelee @02:00 + health @02:17)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Mirror scripts from upstream sources
+        run: |
+          SUCCESS=0
+          FAIL=0
+
+          mirror() {
+            local url="$1"
+            local dest="$2"
+            local name="$3"
+            mkdir -p "$(dirname "Mirror/$dest")"
+            if curl -fsSL -m 60 -A "Loon/3.3.9" "$url" -o "Mirror/$dest"; then
+              echo "✅ $name → Mirror/$dest"
+              SUCCESS=$((SUCCESS + 1))
+            else
+              echo "❌ $name (FAILED)"
+              FAIL=$((FAIL + 1))
+            fi
+          }
+
+          # ── ddgksf2013 (gist: netease.adblock.js) ──
+          mirror "https://gist.githubusercontent.com/ddgksf2013/4f53b7c6083678df25fecc8ff68b52c4/raw/netease.adblock.js" \
+            "netease.adblock.js" "ddgksf2013 gist / netease.adblock.js"
+
+          # ── ddgksf2013/Scripts ──
+          mirror "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amdc.js" \
+            "amdc.js" "ddgksf2013/Scripts / amdc.js"
+
+          mirror "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/applet.js" \
+            "applet.js" "ddgksf2013/Scripts / applet.js"
+
+          # ── app2smile/rules (Bilibili) ──
+          mirror "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js" \
+            "bilibili-json.js" "app2smile / bilibili-json.js"
+
+          mirror "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-proto.js" \
+            "bilibili-proto.js" "app2smile / bilibili-proto.js"
+
+          # ── Maasea/sgmodule (YouTube) ──
+          mirror "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.request.js" \
+            "youtube.request.js" "Maasea / youtube.request.js"
+
+          mirror "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js" \
+            "youtube.response.js" "Maasea / youtube.response.js"
+
+          echo ""
+          echo "== Mirror Summary: $SUCCESS succeeded, $FAIL failed =="
+          echo "success=$SUCCESS" >> $GITHUB_ENV
+          echo "fail=$FAIL" >> $GITHUB_ENV
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add Mirror/
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Auto-mirror external scripts ($(date +%Y-%m-%d))"
+            git push
+          fi
+
+      - name: Report summary
+        if: always()
+        run: |
+          echo "### Mirror Scripts Report" >> $GITHUB_STEP_SUMMARY
+          echo "| Date | Succeeded | Failed |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| $(date +%Y-%m-%d) | ${{ env.success }} | ${{ env.fail }} |" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ env.fail }}" -gt 0 ]; then
+            echo "### ⚠️ Some mirrors failed" >> $GITHUB_STEP_SUMMARY
+            echo "Check run logs for details." >> $GITHUB_STEP_SUMMARY
+          fi

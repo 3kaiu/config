@@ -1,0 +1,120 @@
+name: Config Validation
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 1. Plugin 元信息检查 ──
+      - name: Check plugin metadata
+        run: |
+          echo "## Plugin Metadata Check" >> $GITHUB_STEP_SUMMARY
+          MISSING=0
+          for f in Plugin/*.plugin Kelee/*.plugin; do
+            name=$(grep -m1 '#!name=' "$f" | sed 's/#!name=//')
+            ver=$(grep -m1 '#!version=' "$f" | sed 's/#!version=//')
+            desc=$(grep -m1 '#!desc=' "$f" | sed 's/#!desc=//')
+            if [ -z "$name" ]; then echo "❌ $f: missing #!name"; MISSING=$((MISSING+1)); fi
+            if [ -z "$ver" ]; then echo "⚠️ $f: missing #!version"; MISSING=$((MISSING+1)); fi
+            if [ -z "$desc" ]; then echo "⚠️ $f: missing #!desc"; fi
+            echo "| $(basename $f) | ${name:-UNKNOWN} | v${ver:-?} | OK |" >> $GITHUB_STEP_SUMMARY
+          done
+          echo "" >> $GITHUB_STEP_SUMMARY
+          exit $MISSING
+
+      # ── 2. Script-path URL 可达性检查 ──
+      - name: Check script-path URLs (lightweight)
+        run: |
+          echo "## Script-Path URL Check" >> $GITHUB_STEP_SUMMARY
+          grep -rh 'script-path=' Plugin/*.plugin Kelee/*.plugin Profile/QX.conf 2>/dev/null | \
+            grep -oP 'https?://[^"'\'',]+' | sort -u > /tmp/urls.txt
+          FAIL=0
+          while IFS= read -r url; do
+            [ -z "$url" ] && continue
+            code=$(curl -fsSL -m 15 -o /dev/null -w "%{http_code}" "$url" || echo "FAIL")
+            if [ "$code" = "FAIL" ] || [ "$code" = "000" ]; then
+              echo "❌ $url → $code"
+              FAIL=$((FAIL+1))
+            else
+              echo "✅ $url → $code"
+            fi
+          done < /tmp/urls.txt
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Failures: $FAIL" >> $GITHUB_STEP_SUMMARY
+          exit $FAIL
+
+      # ── 3. 双端配置交叉核对 ──
+      - name: Cross-check Loon vs QX rule coverage
+        run: |
+          echo "## Loon vs QX Cross-Check" >> $GITHUB_STEP_SUMMARY
+          MISSING=0
+          # 检查微信域名是否在 QX 中直连
+          for domain in wechat.com weixin.qq.com wx.qq.com qpic.cn; do
+            in_qx=$(grep -c "host-suffix, $domain, direct" Profile/QX.conf)
+            if [ "$in_qx" -eq 0 ]; then
+              echo "⚠️ QX 缺少 $domain DIRECT 规则" >> $GITHUB_STEP_SUMMARY
+              MISSING=$((MISSING+1))
+            fi
+          done
+          # 检查 Proxy 路由是否双端一致 (Global.list 未完整覆盖的域名)
+          for domain in twittercdn.com tdesktop.com steamcdn-a.akamaihd.net onedrive.live.com wikimediafoundation.org; do
+            in_qx=$(grep -c "host-suffix, $domain, Proxy" Profile/QX.conf)
+            in_loon=$(grep -c "DOMAIN-SUFFIX, $domain, Proxy\|DOMAIN-SUFFIX, $domain, DIRECT" Profile/Loon.lcf)
+            if [ "$in_qx" -eq 0 ]; then echo "⚠️ QX 缺少 $domain Proxy 规则"; MISSING=$((MISSING+1)); fi
+            if [ "$in_loon" -eq 0 ]; then echo "⚠️ Loon 缺少 $domain Proxy 规则"; MISSING=$((MISSING+1)); fi
+          done
+          # 检查 Proxy 组正则一致性
+          loon_regex=$(grep "Proxy = url-test" Profile/Loon.lcf | grep -o '".*"')
+          echo "| Check | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Loon Proxy regex | $loon_regex |" >> $GITHUB_STEP_SUMMARY
+          if [ "$loon_regex" != '".*"' ]; then
+            echo "⚠️ Loon Proxy regex 非预期: $loon_regex" >> $GITHUB_STEP_SUMMARY
+            MISSING=$((MISSING+1))
+          fi
+          echo "| Missing rules | $MISSING |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          exit $MISSING
+
+      # ── 4. 银行域名 MitM 冲突检测 ──
+      - name: Bank MitM conflict detection
+        run: |
+          echo "## Bank MitM Conflict Check" >> $GITHUB_STEP_SUMMARY
+          # 提取银行负向排除域名列表
+          loon_banks=$(grep -oP '(?<=, )-\*\.\w+\.(com|cn)' Profile/Loon.lcf | grep -v 'apple\|icloud' | sed 's/-\*\.//' | sort)
+          qx_banks=$(grep -oP '(?<=, )-\*\.\w+\.(com|cn)' Profile/QX.conf | grep -v 'apple\|icloud' | sed 's/-\*\.//' | sort)
+          # 对比配置数量
+          loon_count=$(echo "$loon_banks" | wc -l)
+          qx_count=$(echo "$qx_banks" | wc -l)
+          echo "| Config | Bank excludes |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|---------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Loon | $loon_count |" >> $GITHUB_STEP_SUMMARY
+          echo "| QX | $qx_count |" >> $GITHUB_STEP_SUMMARY
+          # 找差异
+          diff <(echo "$loon_banks") <(echo "$qx_banks") && echo "✅ 银行域名排除双端一致" >> $GITHUB_STEP_SUMMARY || echo "⚠️ 银行域名排除存在差异" >> $GITHUB_STEP_SUMMARY
+
+      # ── 5. 主配置版本号一致性 ──
+      - name: Check version consistency
+        run: |
+          echo "## Version Consistency" >> $GITHUB_STEP_SUMMARY
+          loon_ver=$(grep -oP 'v\d+\.\d+' Profile/Loon.lcf | head -1)
+          qx_ver=$(grep -oP 'v\d+\.\d+' Profile/QX.conf | head -1)
+          plugin_vers=$(grep -rh '#!version=' Plugin/*.plugin Kelee/*.plugin | sed 's/#!version=//' | sort -u | tr '\n' ' ')
+          echo "| Config | Version |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Loon.lcf | $loon_ver |" >> $GITHUB_STEP_SUMMARY
+          echo "| QX.conf | $qx_ver |" >> $GITHUB_STEP_SUMMARY
+          if [ "$loon_ver" != "$qx_ver" ]; then
+            echo "❌ 版本不一致: Loon=$loon_ver, QX=$qx_ver" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+          echo "✅ 版本一致: $loon_ver" >> $GITHUB_STEP_SUMMARY

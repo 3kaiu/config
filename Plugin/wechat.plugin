@@ -1,6 +1,6 @@
 #!name=微信去广告
-#!desc=微信 & 小程序 & 公众号 — 净化推广广告
-#!version=7.6
+#!desc=微信 & 小程序 & 公众号 — 纯 Reject 净化 (v7.7: weixin.js/wechat-json.js 已不可用, 改用剔除式规则, applet.js 仍正常)
+#!version=7.7
 #!author=3kaiu (规则来源: ddgksf2013)
 #!fallback=备选: 无脚本纯规则 — ddgksf2013/WeChat.conf 每日更新
 #!homepage=https://github.com/3kaiu/config
@@ -20,7 +20,7 @@ WECHAT_MINI=switch,"true","false",tag=是否开启小程序去广告,desc=开启
 
 [Script]
 # 小程序通用 (ddgksf2013 applet.js 仍可用)
-http-response ^(https?://)?([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+[a-zA-Z]{2,}(:\d+)?/wp-json/[a-zA-Z0-9_-]+/(mp\/)?v\d/posts script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/applet.js, requires-body=true, timeout=10, tag=小程序净化, enable={WECHAT_MINI}
+http-response ^(https?://)?([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+[a-zA-Z]{2,}(:\d+)?/wp-json/[a-zA-Z0-9_-]+/(mp\/)?v\d/posts script-path=https://ws.wenn.in/main/Mirror/applet.js, requires-body=true, timeout=10, tag=小程序净化, enable={WECHAT_MINI}
 
 [MitM]
 hostname = %APPEND% mp.weixin.qq.com, api.blibee.com, ucmp.sf-express.com

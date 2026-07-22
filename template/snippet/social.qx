@@ -1,0 +1,17 @@
+# 社交平台路由 (Loon 格式)
+host-suffix, instagram.com, Proxy
+host-suffix, cdninstagram.com, Proxy
+host-suffix, twitter.com, Proxy
+host-suffix, x.com, Proxy
+host-suffix, twimg.com, Proxy
+host-suffix, t.co, Proxy
+host-suffix, twittercdn.com, Proxy
+host-suffix, facebook.com, Proxy
+host-suffix, fbcdn.net, Proxy
+host-suffix, telegram.org, Proxy
+host-suffix, t.me, Proxy
+host-suffix, telegramcdn.com, Proxy
+host-suffix, tdesktop.com, Proxy
+host-suffix, reddit.com, Proxy
+host-suffix, redditstatic.com, Proxy
+host-suffix, discord.com, Proxy

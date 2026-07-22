@@ -7,6 +7,7 @@
  *        personinfoBusiness / start / welcomeHome
  *
  * ⚠️ 修复(v1.1): 添加 $response 守卫, 防止 AllInOne 全局 MitM 误触 request 阶段
+ * ⚠️ 修复(v7.7): 用 $done() 替换 $.done(), 消除 ReferenceError
  */
 
 // $response 守卫
@@ -17,7 +18,7 @@ try {
   if (obj && obj.data) {
     obj.data = {};
   }
-  $.done({ body: JSON.stringify(obj) });
+  $done({ body: JSON.stringify(obj) });
 } catch (e) {
-  $.done();
+  $done();
 }

@@ -1,0 +1,47 @@
+name: Surgio Config Generation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'surgio.conf.js'
+      - 'template/**'
+      - 'provider/**'
+      - 'package.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install --production
+
+      - name: Generate configs with Surgio
+        run: npx surgio generate --skip-lint
+        env:
+          SURGIO_SUBSCRIPTION_URL: ${{ secrets.SURGIO_SUBSCRIPTION_URL || '' }}
+
+      - name: Check for changes
+        run: |
+          if git diff --quiet Profile/Loon.lcf Profile/QX.conf; then
+            echo "No changes to generated configs"
+          else
+            echo "Configs were updated by Surgio generation"
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            git add Profile/Loon.lcf Profile/QX.conf
+            git commit -m "chore: auto-update Surgio generated configs"
+            git push
+          fi

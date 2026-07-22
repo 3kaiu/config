@@ -1,0 +1,23 @@
+# 流媒体路由 (Loon 格式, QX 通过 quantumultx filter 转换)
+DOMAIN-SUFFIX, youtube.com, Proxy
+DOMAIN-SUFFIX, googlevideo.com, Proxy
+DOMAIN-SUFFIX, ytimg.com, Proxy
+DOMAIN-SUFFIX, netflix.com, Proxy
+DOMAIN-SUFFIX, nflxvideo.net, Proxy
+DOMAIN-SUFFIX, netflix.net, Proxy
+DOMAIN-SUFFIX, disneyplus.com, Proxy
+DOMAIN-SUFFIX, disney-plus.net, Proxy
+DOMAIN-SUFFIX, dssott.com, Proxy
+DOMAIN-SUFFIX, hbomax.com, Proxy
+DOMAIN-SUFFIX, spotify.com, Proxy
+DOMAIN-SUFFIX, scdn.co, Proxy
+DOMAIN-SUFFIX, tiktok.com, Proxy
+DOMAIN-SUFFIX, byteoversea.com, Proxy
+DOMAIN-SUFFIX, primevideo.com, Proxy
+DOMAIN-SUFFIX, twitch.tv, Proxy
+DOMAIN-SUFFIX, abema.tv, Proxy
+DOMAIN-SUFFIX, tvb.com, Proxy
+DOMAIN-SUFFIX, gstatic.com, Proxy
+DOMAIN-SUFFIX, googleapis.com, Proxy
+DOMAIN-SUFFIX, google.com, Proxy
+DOMAIN-SUFFIX, google.co.jp, Proxy

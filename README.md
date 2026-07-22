@@ -1,4 +1,4 @@
-# 3kaiu/config — Loon & Quantumult X 个人专属网络配置库
+# 3kaiu/config — Loon & Quantumult X 个人专属网络配置库 (v7.7)
 
 这是一个专为个人网络环境（**单节点东京代理主路由**）深度优化的 iOS 网络工具（Loon 与 Quantumult X）自用配置库。针对您实际使用的 App 进行精准净化，并在双端实现模块化开关控制。
 
@@ -180,14 +180,26 @@ https://ws.wenn.in/main/Profile/QX.conf
 *   **`Remove_ads_by_keli.plugin` / `myblockads.plugin` 已停用**：v7.0 起由 `blackmatrix7/AllInOne.plugin`（740+ hostname 每日更新）全面取代，更全面且无 safebrowsing 误杀风险。
 *   **ajune0527/vpn_tool App 插件体系已淘汰**：停更 2 年（最后一次更新 2024-07），22 个插件文件已移至 `archive/ajune0527-legacy/`。替换为自维护的 19 个 `Plugin/*.plugin`（引用 ddgksf2013/app2smile 活跃上游脚本）。
 *   **GeoIP/ASN 数据库**：改用 `Loyalsoldier/geoip`（Country.mmdb）+ `P3TERX/GeoLite.mmdb`（ASN），不再依赖 kelee.one。
-*   **同步工作流**：`sync-kelee.yml` 仍每日同步 Kelee 核心插件，`mirror-scripts.yml` 每日 mirror 10 个外部脚本到 `Mirror/` 目录，`upstream-health.yml` 每日检查所有上游源可用性。
+*   **同步工作流**：`sync-kelee.yml` 仍每日同步 Kelee 核心插件，`mirror-scripts.yml` 每日 mirror 7 个外部脚本到 `Mirror/` 目录，`upstream-health.yml` 每日检查所有上游源可用性。
 
-### v7.5 演进 (当前版本)
+### v7.5 演进
 
-*   **外部脚本 CDN Mirror**：新建 `mirror-scripts.yml` 工作流，每日从 ddgksf2013/app2smile/Maasea 等 4 个上游源 mirror 10 个外部脚本到 `Mirror/` 目录，通过 GitHub raw 提供自建 CDN。消除上游删库/离线单点故障风险。
+*   **外部脚本 CDN Mirror**：新建 `mirror-scripts.yml` 工作流，每日从 ddgksf2013/app2smile/Maasea 等 4 个上游源 mirror 外部脚本到 `Mirror/` 目录，通过 GitHub raw 提供自建 CDN。消除上游删库/离线单点故障风险。
 *   **全量 plugin 引用迁移**：7 个 plugin + QX.conf + YouTube plugin 的 `script-path` 全部从上游原始 URL 切换到自建 mirror URL。
 *   **19 个 plugin 统一添加 `#!version=7.4` 元信息**，便于版本追踪。
 *   **对抗审计加固**：全部 9 个 JS 脚本添加 `$response` 守卫（防 AllInOne MitM 误触）、双端 MitM 移除 `*.google.com` 防止 Gmail/Drive 被意外解密、冗余 MitM 域名清理、curl GitHub Actions 超时加固。
+
+### v7.7 可靠性加固 (2026-07-22)
+
+*   **mirror-scripts.yml 正式建立**：创建 `Mirror/` 目录，工作流每日从 4 个上游源 mirror 7 个外部脚本（netease.adblock.js、amdc.js、applet.js、bilibili-json.js、bilibili-proto.js、youtube.request.js、youtube.response.js）到 `Mirror/`，消除 gist/raw.githubusercontent 单点依赖。
+*   **全量 script-path 切换到自建 CDN**：18 个 plugin + QX.conf + YouTube plugin 的引用全部切换到 `ws.wenn.in/main/Mirror/`。Netease 插件 22 处 gist 依赖一次性消除。
+*   **上游健康检查扩展**：从 4 个检查点扩展到 12 个：新增 ws.wenn.in CDN、ddgksf2013 gist、ddgksf2013/Scripts、5 个 NSRingo 仓库、ajune0527。
+*   **双端配置对齐**：QX.conf 补充微信 DIRECT 规则（wechat.com/weixin.qq.com/wx.qq.com/qpic.cn）、补充 5 条缺失的 Proxy 路由（twittercdn/tdesktop/steamcdn-a.akamaihd.net/onedrive.live/wikimediafoundation.org）。
+*   **版本号全面统一**：Loon.lcf → v7.7（原 v7.6）、QX.conf → v7.7（原 v17.0 typo）、全部 20 个 plugin → v7.7（原 v7.4/v7.6 混用）。
+*   **JS 脚本 Runtime Bug 修复**：6 个脚本（Amap/JD/Tieba/Reddit/Zhihu/Cainiao）的 catch 块 `$.done()` → `$done()`，消除 JSON 解析失败时的 ReferenceError。
+*   **PushPlus 安全修复**：Qidian.js 的推送端点 `http://` → `https://`。
+*   **退化存根诚实标注**：qishui.plugin 和 wechat.plugin 的描述准确反映上游脚本已删除、改用纯 reject 规则。
+*   **死规则清理**：移除 QX.conf 中重复的 `tangram.e.qq.com`（line 431）、移除 Loon.lcf 中被 keyword 通杀掉覆盖的 2 条显式 httpdns 规则。
 
 ---
 
@@ -198,7 +210,9 @@ https://ws.wenn.in/main/Profile/QX.conf
 ├── .github/
 │   └── workflows/
 │       ├── sync-kelee.yml          # 每日同步 Prevent_DNS_Leaks.plugin
-│       └── upstream-health.yml     # 上游依赖每日健康检查
+│       ├── mirror-scripts.yml      # 每日 mirror 外部脚本到 Mirror/
+│       └── upstream-health.yml     # 上游依赖每日健康检查 (12 个源)
+├── Mirror/                     # 外部脚本缓存 (每日自动同步)
 ├── Kelee/                      # 本地缓存的核心插件
 │   ├── Prevent_DNS_Leaks.plugin  # DNS 泄露防护 (ajune0527 镜像, 每日同步)
 │   └── YouTube_remove_ads.plugin  # YouTube 增强 (自维护, 基于 Maasea)
