@@ -69,8 +69,4 @@ DOMAIN-SUFFIX, twitch.tv, Streaming
 DOMAIN-SUFFIX, abema.tv, Streaming
 # TVB
 DOMAIN-SUFFIX, tvb.com, Streaming
-# Google 全家桶 (流媒体依赖)
-DOMAIN-SUFFIX, gstatic.com, Streaming
-DOMAIN-SUFFIX, googleapis.com, Streaming
-DOMAIN-SUFFIX, google.com, Streaming
-DOMAIN-SUFFIX, google.co.jp, Streaming
+# Google 通配域名已移至 developer snippet 之后 (P1-1: 避免 googleapis.com 截胡 firebase.googleapis.com)

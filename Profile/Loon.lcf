@@ -275,11 +275,7 @@ DOMAIN-SUFFIX, twitch.tv, Streaming
 DOMAIN-SUFFIX, abema.tv, Streaming
 # TVB
 DOMAIN-SUFFIX, tvb.com, Streaming
-# Google 全家桶 (流媒体依赖)
-DOMAIN-SUFFIX, gstatic.com, Streaming
-DOMAIN-SUFFIX, googleapis.com, Streaming
-DOMAIN-SUFFIX, google.com, Streaming
-DOMAIN-SUFFIX, google.co.jp, Streaming
+# Google 通配域名已移至 developer 规则之后 (P1-1: 避免 googleapis.com 截胡 firebase.googleapis.com)
 
 # 社交平台路由 (Loon 格式)
 # Instagram
@@ -417,6 +413,11 @@ DOMAIN-SUFFIX, archlinux.org, Developer
 DOMAIN-SUFFIX, debian.org, Developer
 DOMAIN-SUFFIX, ubuntu.com, Developer
 
+# Google 通配域名 (流媒体依赖) — 必须在 developer 规则之后, 避免 googleapis.com 截胡 firebase.googleapis.com
+DOMAIN-SUFFIX, gstatic.com, Streaming
+DOMAIN-SUFFIX, googleapis.com, Streaming
+DOMAIN-SUFFIX, google.com, Streaming
+DOMAIN-SUFFIX, google.co.jp, Streaming
 
 # Google 全家桶
 DOMAIN-SUFFIX, googleusercontent.com, Proxy

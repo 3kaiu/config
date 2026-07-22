@@ -10,7 +10,7 @@
  */
 
 // $response 守卫
-if (typeof $response === "undefined") { $done(); }
+if (typeof $response === "undefined") { $done(); return; }
 
 try {
   const obj = JSON.parse($response.body);

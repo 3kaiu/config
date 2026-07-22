@@ -10,7 +10,7 @@
  */
 
 // $response 守卫
-if (typeof $response === "undefined") { $done(); }
+if (typeof $response === "undefined") { $done(); return; }
 
 // 需要删除的字段列表 (JSON 模式)
 const AD_KEYS = [

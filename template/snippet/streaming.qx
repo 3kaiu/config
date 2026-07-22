@@ -69,8 +69,4 @@ host-suffix, twitch.tv, Streaming
 host-suffix, abema.tv, Streaming
 # TVB
 host-suffix, tvb.com, Streaming
-# Google 全家桶 (流媒体依赖)
-host-suffix, gstatic.com, Streaming
-host-suffix, googleapis.com, Streaming
-host-suffix, google.com, Streaming
-host-suffix, google.co.jp, Streaming
+# Google 通配域名已移至 developer snippet 之后 (P1-1: 避免 googleapis.com 截胡 firebase.googleapis.com)

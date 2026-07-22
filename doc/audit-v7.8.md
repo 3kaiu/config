@@ -186,6 +186,70 @@ v7.8 围绕路由规则补全展开，覆盖以下 4 个维度：
 
 ---
 
+## F 组 — 深度对抗审计 P0/P1 修复 (v7.8 补充)
+
+### F 组-1: 插件 MitM hostname %APPEND% 改造
+
+| # | 修复 | 文件 | 状态 |
+|---|------|------|------|
+| F1 | 5 个插件 MitM hostname 改用 `%APPEND%` 而非覆盖式 `=` | life.plugin / qidian.plugin / quicksearch.plugin / sub-store.plugin / zhihuifangdong.plugin | ✅ |
+
+**问题**: 使用 `hostname = xxx` 会覆盖主配置的全局 hostname 列表，导致银行域名负向排除和其他插件的 hostname 声明全部失效。改用 `hostname = %APPEND% xxx` 仅追加，不覆盖。
+
+### F 组-2: JS 脚本 $response 守卫
+
+| # | 修复 | 文件 | 状态 |
+|---|------|------|------|
+| F2 | 7 个 JS 脚本添加 `if (typeof $response === "undefined") { $done(); return; }` 守卫 | Zhihuifangdong.js / Amap.js / JD.js / Cainiao.js / Zhihu.js / Reddit.js / Tieba.js | ✅ |
+
+**问题**: 当 `AllInOne` 重写规则以非 response 模式触发脚本时，`$response` 未定义会导致 `TypeError`，脚本崩溃后 `$done()` 不执行，请求挂起。
+
+### F 组-3: QX 端 QQ 音乐 REJECT + GDT DIRECT
+
+| # | 修复 | 文件 | 状态 |
+|---|------|------|------|
+| F3 | QX 端补充 QQ 音乐 14 条 DNS REJECT 规则 | QX.conf + quantumultx.tpl | ✅ |
+| F4 | QX 端补充 GDT 广告 SDK 6 条 DIRECT 规则 | QX.conf + quantumultx.tpl | ✅ |
+| F5 | QX 端补充 11 条 DNS 静态映射（Developer/AI/Streaming 精确域名） | QX.conf + quantumultx.tpl | ✅ |
+
+### F 组-4: QX task_local 同步
+
+| # | 修复 | 文件 | 状态 |
+|---|------|------|------|
+| F6 | QX task_local 同步 Loon cron 任务（起点签到 / health-notify / traffic-notify） | QX.conf + quantumultx.tpl | ✅ |
+
+---
+
+## G 组 — 路由冲突与文档修复 (v7.8 补充)
+
+### G-1: googleapis.com 路由冲突修复 (P1-1)
+
+| # | 修复 | 文件 | 状态 |
+|---|------|------|------|
+| G1 | streaming snippet 中的 Google 通配域名（gstatic.com / googleapis.com / google.com / google.co.jp）移至 developer snippet include 之后 | streaming.qx + streaming.tpl + quantumultx.tpl + QX.conf + loon.tpl + Loon.lcf | ✅ |
+
+**问题**: `host-suffix, googleapis.com, Streaming` 在 `host, firebase.googleapis.com, Developer` 之前匹配（QX 按顺序从上到下匹配），导致 `firebase.googleapis.com` 被错误路由到 Streaming 策略组而非 Developer。将 Google 通配域名移到 developer 规则之后，确保精确 host 匹配先生效。
+
+### G-2: README 目录树修复 (P2)
+
+| # | 修复 | 状态 |
+|---|------|------|
+| G2 | 移除虚假的 `weibo.plugin`（实际不存在，只有微博去广告 QX rewrite 远程引用） | ✅ |
+| G3 | 插件数从 "22个" 修正为 "21个" | ✅ |
+| G4 | 移除重复列出的 `zhihu.plugin` 行 | ✅ |
+| G5 | Loon 端插件描述移除 `weibo` | ✅ |
+| G6 | 目录树补充 `doc/`（含 4 个审计/评估文档）、`CHANGELOG.md`、`package.json`、`package-lock.json`、`surgio.conf.js`、`README.md` | ✅ |
+
+### G-3: QX apple conf 引用迁移 (P3-9)
+
+| # | 修复 | 文件 | 状态 |
+|---|------|------|------|
+| G7 | 5 个 QX apple conf 文件的 `script-path` 从 `github.com/NSRingo/.../releases/download/vX.Y.Z/*.bundle.js` 迁移到 `ws.wenn.in/main/Mirror/nsringo/*.bundle.js` | Maps.conf / News.conf / Siri.conf / TestFlight.conf / WeatherKit.conf | ✅ |
+
+**影响**: 24 个 script-path 引用全部切换到自建 CDN mirror，消除 GitHub Releases 单点故障风险。注释行保留原始来源 URL 作为标注。
+
+---
+
 ## 遗留问题和后续计划
 
 | 项 | 优先级 | 说明 |

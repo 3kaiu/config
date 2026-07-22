@@ -133,6 +133,12 @@ DOMAIN-SUFFIX, wx.qq.com, DIRECT
 {% include "./snippet/social.tpl" %}
 {% include "./snippet/developer.tpl" %}
 
+# Google 通配域名 (流媒体依赖) — 必须在 developer snippet 之后, 避免 googleapis.com 截胡 firebase.googleapis.com
+DOMAIN-SUFFIX, gstatic.com, Streaming
+DOMAIN-SUFFIX, googleapis.com, Streaming
+DOMAIN-SUFFIX, google.com, Streaming
+DOMAIN-SUFFIX, google.co.jp, Streaming
+
 # Google 全家桶
 DOMAIN-SUFFIX, googleusercontent.com, Proxy
 DOMAIN-SUFFIX, ggpht.com, Proxy

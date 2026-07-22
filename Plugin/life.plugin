@@ -36,4 +36,4 @@ http-response ^https:\/\/longquan-mtop\.cainiao\.com\/gw\/mtop\.com\.cainiao\.lo
 http-response ^https:\/\/netflow-mtop\.cainiao\.com\/gw\/mtop\.cainiao\.guoguo\.nbnetflow\.ads script-path=https://ws.wenn.in/main/Scripts/Cainiao.js, requires-body=true, timeout=10, tag=开屏净化, enable={CAINIAO_ENABLE}
 
 [MitM]
-hostname = netflow-mtop.cainiao.com, nbcps-mtop.cainiao.com, cn-acs.m.cainiao.com, e2e-mtop.cainiao.com, longquan-mtop.cainiao.com
+hostname = %APPEND% netflow-mtop.cainiao.com, nbcps-mtop.cainiao.com, cn-acs.m.cainiao.com, e2e-mtop.cainiao.com, longquan-mtop.cainiao.com

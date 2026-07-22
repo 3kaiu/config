@@ -7,7 +7,7 @@
  */
 
 // $response 守卫
-if (typeof $response === "undefined") { $done(); }
+if (typeof $response === "undefined") { $done(); return; }
 
 const arg = typeof $argument !== "undefined" ? $argument : "";
 const $ = new Env("智慧房东");

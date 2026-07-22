@@ -29,7 +29,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 
 - **README 脚本引用修复**：移除正文中不存在的 `Scripts/UnionPay.js` 引用，改为"云闪付净化通过 DNS 级 REJECT 实现，无独立脚本"。
-- **README 目录树补全**：补充 `provider/`（含 tokyo.js）、`template/`（含 loon.tpl / quantumultx.tpl）、`template/snippet/`（5 对 .tpl/.qx）、`Mirror/`（7 个 mirror 脚本）目录，移除虚假的 `Scripts/UnionPay.js` 行。
+- **README 目录树修复**：移除虚假的 `weibo.plugin`（实际不存在）；插件数从 "22个" 修正为 "21个"；移除重复列出的 `zhihu.plugin`；Loon 端描述移除 `weibo`；补充 `doc/`、`CHANGELOG.md`、`package.json`、`surgio.conf.js` 等缺失目录。
+- **googleapis.com 路由冲突修复 (P1-1)**：streaming snippet 中的 Google 通配域名（gstatic.com / googleapis.com / google.com / google.co.jp）在 QX 顺序匹配中截胡了 developer snippet 的 `host, firebase.googleapis.com, Developer`。将 Google 通配域名移至 developer snippet include 之后，六端同步（streaming.qx/.tpl + quantumultx.tpl + QX.conf + loon.tpl + Loon.lcf）。
+- **插件 MitM hostname %APPEND% 改造**：5 个插件（life / qidian / quicksearch / sub-store / zhihuifangdong）的 `hostname =` 改为 `hostname = %APPEND%`，避免覆盖主配置全局 hostname 列表导致银行域名负向排除失效。
+- **JS 脚本 $response 守卫**：7 个 JS 脚本（Zhihuifangdong / Amap / JD / Cainiao / Zhihu / Reddit / Tieba）添加 `if (typeof $response === "undefined") { $done(); return; }` 守卫，防止 AllInOne 重写规则以非 response 模式触发时脚本崩溃。
+- **QX 端 QQ 音乐 REJECT 补全**：补充 14 条 QQ 音乐 DNS REJECT 规则（adstats/ad/adcdn/adcdn6/adexpo/adclick.tencentmusic.com + otheve.beacon/mazu.m.qq/monitor.music.qq/stat.y/tmead.y.qq + oth.str.mdt/h.trace/sdk.e/p.l/us.l.qq + imtmp.net + qreport）。
+- **QX 端 GDT DIRECT 补全**：补充 6 条 GDT 广告 SDK DIRECT 规则（mi.gdt/ii.gdt/c.gdt/adsmind.gdtimg/adsmind.ugdtimg/pgdt.gtimg）。
+- **QX task_local 同步**：同步 Loon 端 3 个 cron 任务到 QX task_local（起点签到 / health-notify / traffic-notify）。
+- **QX apple conf script-path 迁移**：5 个 QX apple conf 文件（Maps / News / Siri / TestFlight / WeatherKit）的 24 个 `script-path` 从 `github.com/NSRingo/.../releases/download/vX.Y.Z/*.bundle.js` 迁移到 `ws.wenn.in/main/Mirror/nsringo/*.bundle.js` 自建 CDN。
 
 ### Changed
 

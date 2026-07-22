@@ -38,6 +38,17 @@ server=/*.qq.com/119.29.29.29
 server=/*.weixin.qq.com/119.29.29.29
 server=/*.apple.com/223.5.5.5
 server=/*.icloud.com/223.5.5.5
+server=/*.tmall.com/223.5.5.5
+server=/*.alipay.com/223.5.5.5
+server=/*.alicdn.com/223.5.5.5
+server=/*.tencent.com/119.29.29.29
+server=/*.baidu.com/223.5.5.5
+server=/*.bilibili.com/223.5.5.5
+server=/*.meituan.com/223.5.5.5
+server=/*.douyin.com/119.29.29.29
+server=/*.163.com/119.29.29.29
+server=/*.mi.com/223.5.5.5
+server=/*.icloud.com.cn/223.5.5.5
 address=/mtalk.google.com/108.177.125.188
 
 [policy]
@@ -127,6 +138,12 @@ host, ip-scan.adspower.net, Proxy
 
 {% include "./snippet/developer.qx" %}
 
+# Google 通配域名 (流媒体依赖) — 必须在 developer.qx 之后, 避免 googleapis.com 截胡 firebase.googleapis.com
+host-suffix, gstatic.com, Streaming
+host-suffix, googleapis.com, Streaming
+host-suffix, google.com, Streaming
+host-suffix, google.co.jp, Streaming
+
 # Google 全家桶
 host-suffix, googleusercontent.com, Proxy
 host-suffix, ggpht.com, Proxy
@@ -147,6 +164,8 @@ host, mi.gdt.qq.com, direct
 host, ii.gdt.qq.com, direct
 host, c.gdt.qq.com, direct
 host, adsmind.gdtimg.com, direct
+host, adsmind.ugdtimg.com, direct
+host, pgdt.gtimg.cn, direct
 host-suffix, pangolin-sdk-toutiao.com, direct
 host-suffix, pangle.io, direct
 
@@ -157,6 +176,19 @@ host-suffix, h-adashx.ut.taobao.com, reject
 host, adstats.tencentmusic.com, reject
 host, ad.tencentmusic.com, reject
 host, adcdn.tencentmusic.com, reject
+host, adcdn6.tencentmusic.com, reject-drop
+host, adexpo.tencentmusic.com, reject-drop
+host, adclick.tencentmusic.com, reject-drop
+host, otheve.beacon.qq.com, reject-drop
+host, mazu.m.qq.com, reject-drop
+host, monitor.music.qq.com, reject-drop
+host, stat.y.qq.com, reject-no-drop
+host, tmead.y.qq.com, reject-no-drop
+host, oth.str.mdt.qq.com, reject
+host, h.trace.qq.com, reject
+host, sdk.e.qq.com, reject
+host, p.l.qq.com, reject
+host, us.l.qq.com, reject
 host-suffix, imtmp.net, reject
 
 {% include "./snippet/ai-services.qx" %}
@@ -264,6 +296,8 @@ http-response ^https:\/\/api\.zhihu\.com\/search\/preset_words url script-respon
 
 [task_local]
 0 9 * * * https://ws.wenn.in/main/Scripts/Qidian.js, tag=起点全自动签到, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Daily.png, enabled=true, argument=debug=false&QDREADER_ADV_JOB_ENABLE=true&QDREADER_EXTRA_ADV_JOB_ENABLE=true&QDREADER_LOTTERY_ENABLE=true&QDREADER_WEEKLY_EXCHANGE_ENABLE=true&QDREADER_CHAPTER_CARD_ENABLE=true&QDREADER_MESSAGE_BOX_ENABLE=true
+0 */6 * * * https://ws.wenn.in/main/Scripts/health-notify.js, tag=节点健康检测, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Speedtest.png, enabled=true
+0 22 * * * https://ws.wenn.in/main/Scripts/traffic-notify.js, tag=流量统计通知, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Day.png, enabled=true
 event-interaction https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/geo_location.js, tag=查看IP信息, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Area.png, enabled=true
 event-interaction https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/traffic-check.js, tag=策略流量查询, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Speedtest.png, enabled=true
 event-interaction https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/streaming-ui-check.js, tag=流媒体解锁检测, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png, enabled=true

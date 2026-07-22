@@ -99,7 +99,7 @@ https://ws.wenn.in/main/Profile/QX.conf
     *   **广告脚本增强层**：`blackmatrix7/AdvertisingScript.plugin`（Loon），含哲也知乎深度净化 + B站/京东/爱奇艺/美团开屏脚本。
     *   **开屏广告通杀层**：`ddgksf2013/FakeiOSAds`（QX）拦截 iOS 系统/第三方 SDK 开屏广告。
     *   **App 精细化去广告**（19 个自维护插件，Loon + QX 双端覆盖）：
-        *   **Loon 端**：bilibili、bilicomics、weibo、wechat、netease、goofish、qishui、taopiaopiao、amap、jd、qqmusic、reddit、tieba、zhihu（ddgksf2013/app2smile 活跃上游脚本）
+        *   **Loon 端**：bilibili、bilicomics、wechat、netease、goofish、qishui、taopiaopiao、amap、jd、qqmusic、reddit、tieba、zhihu（ddgksf2013/app2smile 活跃上游脚本）
         *   **QX 端**：WeiboAds、WeChat、NeteaseAds、AmapAds、TieBaAds、GoofishAds、SmzdmAds、BiliBiliComicsAds、QiShuiMusicAds、RedditAds、CainiaoAds、TaoPiaoPiaoAds、CaiYunAds、Applet（ddgksf2013 独立 conf，每日更新）
         *   **京东**：ddgksf2013 无 JDAds.conf，Loon 端自维护 `jd.plugin`，QX 端本地 `[rewrite_local]` 维护
         *   **知乎**：ddgksf2013 无 ZhihuAds.conf，Loon 端自维护 `zhihu.plugin`，QX 端本地 `[rewrite_local]` 维护
@@ -223,7 +223,7 @@ v7.8 完成流媒体/社交平台/AI 服务/开发者平台四维路由补全，
 ├── Kelee/                      # 本地缓存的核心插件
 │   ├── Prevent_DNS_Leaks.plugin  # DNS 泄露防护 (ajune0527 镜像, 每日同步)
 │   └── YouTube_remove_ads.plugin  # YouTube 增强 (自维护, 基于 Maasea)
-├── Plugin/                     # 自维护 Loon 插件 (22个)
+├── Plugin/                     # 自维护 Loon 插件 (21个)
 │   ├── qidian.plugin            # 起点全能助手 Pro
 │   ├── bank.plugin              # 银行及云闪付去广告
 │   ├── life.plugin              # 生活出行去广告 (菜鸟包裹)
@@ -231,7 +231,6 @@ v7.8 完成流媒体/社交平台/AI 服务/开发者平台四维路由补全，
 │   ├── zhihuifangdong.plugin    # 智慧房东去广告
 │   ├── bilibili.plugin          # B站去广告
 │   ├── bilicomics.plugin        # B站漫画去广告
-│   ├── weibo.plugin             # 微博去广告
 │   ├── wechat.plugin            # 微信去广告
 │   ├── netease.plugin           # 网易云音乐净化
 │   ├── goofish.plugin           # 闲鱼去广告
@@ -246,7 +245,6 @@ v7.8 完成流媒体/社交平台/AI 服务/开发者平台四维路由补全，
 │   ├── sub-store.plugin         # Sub-Store 订阅管理 (v7.8 从 ajune0527 迁移)
 │   ├── quicksearch.plugin       # 快捷搜索 (v7.8 从 ajune0527 迁移)
 │   └── notify.plugin            # 定时通知: 节点健康+流量统计 (v7.8 新增)
-│   └── zhihu.plugin             # 知乎去广告 (v7.1 新增)
 ├── provider/                   # Surgio provider 定义
 │   └── tokyo.js                   # 东京单节点 provider
 ├── template/                   # Surgio 模板
@@ -273,15 +271,25 @@ v7.8 完成流媒体/社交平台/AI 服务/开发者平台四维路由补全，
 ├── Profile/
 │   ├── Loon.lcf                # Loon 客户端主配置文件
 │   └── QX.conf                 # Quantumult X 客户端主配置文件
-└── Scripts/                    # 自维护脚本
-    ├── Qidian.js               # 起点全能增强运行脚本
-    ├── Zhihuifangdong.js       # 智慧房东去广告脚本
-    ├── Cainiao.js              # 菜鸟包裹净化脚本
-    ├── Amap.js                 # 高德地图去广告 (v7.1)
-    ├── JD.js                   # 京东去广告 (v7.1)
-    ├── Reddit.js               # Reddit去广告 (v7.1)
-    ├── Tieba.js                # 贴吧去广告 (v7.1)
-    ├── Zhihu.js                # 知乎去广告 (v7.1)
-    ├── health-notify.js        # 节点健康检测通知 (v7.8 新增)
-    └── traffic-notify.js       # 流量统计通知 (v7.8 新增)
+├── Scripts/                    # 自维护脚本
+│   ├── Qidian.js               # 起点全能增强运行脚本
+│   ├── Zhihuifangdong.js       # 智慧房东去广告脚本
+│   ├── Cainiao.js              # 菜鸟包裹净化脚本
+│   ├── Amap.js                 # 高德地图去广告 (v7.1)
+│   ├── JD.js                   # 京东去广告 (v7.1)
+│   ├── Reddit.js               # Reddit去广告 (v7.1)
+│   ├── Tieba.js                # 贴吧去广告 (v7.1)
+│   ├── Zhihu.js                # 知乎去广告 (v7.1)
+│   ├── health-notify.js        # 节点健康检测通知 (v7.8 新增)
+│   └── traffic-notify.js       # 流量统计通知 (v7.8 新增)
+├── doc/                        # 审计与评估文档
+│   ├── audit-v7.7.md           # v7.7 对抗审计报告
+│   ├── audit-v7.8.md           # v7.8 对抗审计报告
+│   ├── ecosystem-evaluation.md # Loon/QX 生态评估
+│   └── surgio-migration.md     # Surgio 迁移记录
+├── CHANGELOG.md                # 版本变更记录
+├── package.json                # Surgio 依赖定义
+├── package-lock.json           # 依赖锁定
+├── surgio.conf.js              # Surgio 构建配置
+└── README.md                   # 本文件
 ```

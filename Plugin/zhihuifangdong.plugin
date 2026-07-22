@@ -17,4 +17,4 @@ http-response ^https?:\/\/api\.zhihuifangdong\.net\/core\/app\/activity\/appOpen
 http-response ^https?:\/\/api\.zhihuifangdong\.net\/core\/app\/activity\/bannerPicMore script-path=https://ws.wenn.in/main/Scripts/Zhihuifangdong.js, requires-body=true, timeout=10, tag=Banner广告屏蔽, argument=bannerPicMore, enable={bannerAdsSwitch}
 
 [MitM]
-hostname = api.zhihuifangdong.net
+hostname = %APPEND% api.zhihuifangdong.net
