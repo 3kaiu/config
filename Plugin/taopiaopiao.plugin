@@ -1,0 +1,28 @@
+#!name=淘票票去广告
+#!desc=淘票票 — 开屏/首页/搜索/我的/弹窗广告净化
+#!author=3kaiu (规则来源: ddgksf2013)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/TaoPiao.png
+
+[Rewrite]
+# AMDC
+^http:\/\/amdc\.m\.taobao\.com url script-response-body https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amdc.js
+# 开屏广告
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopadvertiseapi\.queryloadingbanner url reject-200
+# 广告预加载
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.independentadvertiseapi\.querypreloadadvertise url reject-200
+# 搜索框下方
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopsearchapi\.getranklistbytypeforsearch url reject-200
+# 搜索填词
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopintegrationapi\.homeconfig url reject-200
+# 我的页面推广Banner
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopindependentadvertiseapi\.queryadvertise url reject-200
+# 首页信息流顶部和最底部
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.life\.aristotle\.get url reject-200
+# 启动弹窗
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.life\.popup\.get url reject-200
+# 影院Tab栏顶部广告
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopitemadvertiseapi\.queryadvertise url reject-200
+
+[MitM]
+hostname = %APPEND% acs.m.taobao.com

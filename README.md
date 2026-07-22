@@ -64,9 +64,18 @@ https://ws.wenn.in/main/Profile/QX.conf
 *   **规则路径**：`Plugin/ai.plugin` (Loon) / `QX/ai.conf` 远程规则引用 (QX)
 *   **分流服务**：OpenAI (ChatGPT)、Anthropic (Claude)、Google AI (Gemini)、Perplexity、Groq、编程助手 (Cursor / Copilot / Windsurf / Supermaven) 等。所有 AI 流量自动走向 Proxy 代理策略组。
 
-### 📹 2.5 YouTube 增强
-*   **脚本路径**：主配置 `[Rule]` 规则路由 (Loon/QX) + 远程去广告插件 (Loon Kelee `YouTube_remove_ads.lpx` / QX `youtube.conf`)
-*   **净化效果**：屏蔽 YouTube App 视频中插广告、首页信息流推广，并提供后台播放 (画中画) 支持。
+### 📹 2.5 YouTube 增强 (v6.3 深度优化)
+*   **脚本路径**：Loon 自维护插件 `Kelee/YouTube_remove_ads.plugin` / QX 远程引用 `ddgksf2013/Rewrite/YoutubeAds.conf` + `[rewrite_local]` 补充规则
+*   **脚本来源**：基于 [Maasea/sgmodule](https://github.com/Maasea/sgmodule) 最新脚本 (request build 2026/7/12, response build 2026/7/19)
+*   **增强功能**：
+    *   **去广告**：移除视频中插广告、首页信息流推广、搜索页广告、Shorts 短视频广告；拦截 `initplayback` 广告请求、`pagead`/`ptracking` 追踪请求、`qoe?adcontext` 统计请求；ctier 302 重定向绕过广告插入点
+    *   **熄屏播放 / 画中画 (PiP) / 后台播放**：修改 player 响应中的播放器设置，原生启用 background play 和 PiP；隐藏技能：点开视频瞬间退出 APP 即可无 PiP 播放（适合单纯听音频）
+    *   **下一个播放此视频**：清理 `next` 端点 up next 信息流中的广告，确保自动播放推荐链路不被广告打断
+    *   **UMP 加密处理**：`initplayback` request 脚本检测 `encryptedClientKey` 一致性，302 重定向到 Cloudflare Worker 处理 Unified Media Pipeline
+    *   **log_event 头剥离**：剥离 `content-encoding` 头，按缓存状态清理 `x-youtube-hot-hash-data` 头，防止广告缓存注入
+    *   **自动翻译字幕**：可通过插件参数配置字幕翻译语言（遵循 Google Translate Language Codes）
+*   **MitM 保护**：双端 hostname 前置 `-redirector*.googlevideo.com` 负向排除，防止 MitM 解密视频 CDN 重定向服务导致播放故障
+*   **UDP 443 说明**：v6.2 起移除 `disable-udp-ports=443`/`udp_drop_list=443`（Hysteria2 节点需要 UDP 443），改靠 MitM hostname 覆盖 `*.googlevideo.com` 拦截 YouTube QUIC 流量。如遇广告残留，可在 Loon 通用设置 / QX `[general]` 中临时禁用 UDP 443
 
 ### 🍎 2.5b Apple 原生 App 增强 (v5.7 新增)
 *   **方案来源**：[NSRingo/iRingo](https://github.com/NSRingo) 项目（原 VirgilClyne/iRingo 已迁移至 NSRingo 组织）
@@ -141,8 +150,10 @@ https://ws.wenn.in/main/Profile/QX.conf
     *   主配置中的 MitM 实行极严格的黑白名单隔离：排除微信、支付宝、各类网银等绝大部分安全敏感流量，仅对起点、智慧房东与少数联盟广告域名进行解密，**最大程度确保您的设备省电、网络低延迟与隐私安全**。
     *   **本地与回环旁路 (QX skip_dst_ip)**：对局域网及本地回环地址（如 `192.168.0.0/16`, `127.0.0.1/32`）强制绕过 MitM 握手流程，优化高频本地请求的响应速度，减少无谓的 CPU 加解密开销。
     *   **本地区域网与游戏 DNS 旁路 (QX dns_exclusion_list)**：防止 Apple 服务（AirPlay/HomeKit）和游戏主机联机遭遇 Fake-IP 映射问题，保障网络稳定性。
-4.  **UDP 443 禁用与 YouTube 去广告兼容 (v5.3 新增)**：
-    *   双端禁用 UDP 协议的 443 端口（Loon `disable-udp-ports = 443` / QX `udp_drop_list = 443`），满足 Kelee YouTube 去广告插件"必须禁用 UDP 443"的要求。否则 YouTube QUIC 流量会绕过 MitM 解密，导致视频广告无法拦截。
+4.  **YouTube 去广告与 UDP 443 兼容 (v5.3 新增, v6.2 更新)**：
+    *   ~~v5.3：双端禁用 UDP 443（Loon `disable-udp-ports = 443` / QX `udp_drop_list = 443`）~~
+    *   **v6.2 更新**：移除 `disable-udp-ports = 443` / `udp_drop_list = 443`，因为该设置会直接杀掉 Hysteria2 (UDP 协议) 节点的所有数据包导致不可用。改靠 MitM hostname 覆盖 `*.googlevideo.com` + `-redirector*.googlevideo.com` 负向排除来拦截 YouTube QUIC 流量。如遇广告残留，可临时禁用 UDP 443 作为回退方案。
+    *   **v6.3 更新**：YouTube 插件全面升级为 Maasea 最新脚本，新增 `initplayback` UMP 处理 + `log_event` 头剥离 + ctier 302 重定向 + `get_watch`/`config` 响应端点覆盖，广告拦截能力大幅提升。
 5.  **银行 App 网络错误根治 (v5.5 P0 修复)**：
     *   **根因**：`myblockads.plugin`(RuCu6) 的 MitM hostname 声明了 `wallet.95516.com`(云闪付)、`mobilepaas.abchina.com.cn`(农行)、`image.mybank.icbc.com.cn`(工行) 等银行核心域名，并对部分域名做 rewrite；QX 端 `blackmatrix7/AllInOne.conf` 声明了 `creditcardapp.bankcomm.*`(交行)、`hcz-member.pingan.com.cn`(平安)、`lban.spdb.com.cn`(浦发)、`v.icbc.com.cn`(工行)、`adv.ccb.com`/`yunbusiness.ccb.com`(建行) 等；`Toperlock/AdBlock.conf` 声明了 `midc.cdn-static.abchina.com.cn`(农行)、`image.spdbccc.com.cn`(浦发信用卡)。这些域名被 MitM 解密后，银行 App 的 SSL Pinning 会拒绝伪造证书 → TLS 握手失败 → App 显示"网络错误"。
     *   **修复**：双端主配置 `[MitM]`/`[mitm]` hostname 列表**前置负向通配符**排除所有银行域名（覆盖 17 家银行 + 银联/云闪付），负向声明优先级高于远程插件的正向声明，确保银行域名**永不被 MitM 解密**。银行去广告完全通过主配置 DNS 级 REJECT 实现，无需解密。
@@ -159,7 +170,7 @@ https://ws.wenn.in/main/Profile/QX.conf
 
 因此，本项目对 kelee.one 资源采取**完全去依赖**策略：
 
-*   **Loon 核心 Kelee 插件本地镜像**（通过 ajune0527/vpn_tool 镜像同步）：`Prevent_DNS_Leaks.plugin`、`Remove_ads_by_keli.plugin`、`myblockads.plugin`、`YouTube_remove_ads.plugin` 重定向至本项目本地 GitHub 镜像 Raw 链接（每天通过 Actions 从 ajune0527 同步）。
+*   **Loon 核心 Kelee 插件本地镜像**（通过 ajune0527/vpn_tool 镜像同步）：`Prevent_DNS_Leaks.plugin`、`Remove_ads_by_keli.plugin`、`myblockads.plugin` 重定向至本项目本地 GitHub 镜像 Raw 链接（每天通过 Actions 从 ajune0527 同步）。`YouTube_remove_ads.plugin` 为自维护版本（v6.3），直接引用 Maasea 最新脚本，不参与自动同步覆盖。
 *   **kelee.one 直连 lpx 全部移除 (v5.3 修复)**：
     *   `Block_HTTPDNS.lpx` / `BlockAdvertisers.lpx` — 功能已被主配置完全覆盖，无需引用。
     *   `Sub-Store.lpx` / `QuickSearch.lpx` — 改用 `ajune0527/vpn_tool` 镜像源（`.plugin` 格式）。

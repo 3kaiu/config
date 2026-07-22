@@ -1,0 +1,22 @@
+#!name=B站去广告
+#!desc=哔哩哔哩 — 开屏/推荐页/动态/视频播放页去广告 & 港澳台地区解锁
+#!author=3kaiu (规则来源: app2smile)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bilibili.png
+
+[Argument]
+BILI_ENABLE=switch,"true","false",tag=是否开启B站去广告,desc=开启后深度净化开屏/推荐/动态/视频页广告
+
+[Script]
+# B站 JSON 去广告 (开屏、推荐、资源tab)
+http-response ^https:\/\/app\.bilibili\.com\/x\/(v2\/(splash\/(list|show)|feed\/index\?)|resource\/show\/tab\/v2) script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js, requires-body=true, timeout=10, tag=B站JSON去广告, enable={BILI_ENABLE}
+# B站 protobuf 去广告 (视频播放页、动态)
+http-response ^https:\/\/(grpc\.biliapi\.net|app\.bilibili\.com)\/bilibili\.app\.(viewunite\.v1\.View\/View|dynamic\.v2\.Dynamic\/DynAll)$ script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-proto.js, binary-body-mode=true, requires-body=true, timeout=10, tag=B站Proto去广告, enable={BILI_ENABLE}
+
+[Rewrite]
+# 港澳台地区解锁 (Region Unlock)
+^https?:\/\/app\.bilibili\.com\/(x\/)?(intl|dm|reply|history|v\d\/(fav|msgfeed)).+?(&s_locale=zh-Hans_[A-Z]{2})(.+?)(&sim_code=\d+)(.+) $1&s_locale=zh-Hans_PH$6&sim_code=51503$8 302, enable={BILI_ENABLE}
+^https?:\/\/passport\.bilibili\.com\/x\/intl\/passport-login\/.+(&s_locale=zh-Hans_[A-Z]{2})(.+)(&sim_code=\d+)(.+) $1&s_locale=zh-Hans_PH$35&sim_code=51503$5 302, enable={BILI_ENABLE}
+
+[MitM]
+hostname = %APPEND% app.bilibili.com, grpc.biliapi.net

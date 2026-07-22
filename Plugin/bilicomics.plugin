@@ -1,0 +1,50 @@
+#!name=B站漫画去广告
+#!desc=哔哩哔哩漫画 — 开屏/首页/搜索/我的页深度净化
+#!author=3kaiu (规则来源: ddgksf2013)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bilibili.png
+
+[Rewrite]
+# 开屏 / 活动弹窗
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/ListFlash url reject-200
+# 首页轮播 Banner
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/Banner url reject-200
+# App 初始化 (开屏、运营位、商城入口、活动入口)
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/AppInit url reject-200
+# 首页推荐：去运营卡片
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Home\/HomeFeed url reject-200
+# 首页 Tab 精简
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetClassPageAllTabs url reject-200
+# 活动 Tab
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetActivityTab url reject-200
+# 气泡
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetBubbles url reject-200
+# 福利横幅
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetWelfareBanner url reject-200
+# 运营横幅
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetOperaterBanner url reject-200
+# 通用横幅/畅读卡
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetCommonBanner url reject-200
+# Hook Banner
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetHookBanner url reject-200
+# 我的页营销（只保留"我的已购"）
+^https:\/\/manga\.bilibili\.com\/twirp\/user\.v\d\.User\/UCenterConf url reject-200
+# 营销中心入口
+^https:\/\/manga\.bilibili\.com\/twirp\/user\.v\d\.User\/GetMarketingCenterInfo url reject-200
+# 搜索框填词
+^https:\/\/manga\.bilibili\.com\/twirp\/search\.v\d\.Search\/GetSearchBoxKeyword url reject-200
+# 搜索页展示
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/SearchDisplay url reject-200
+# 搜索页 Banner
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/SearchBanner url reject-200
+# 搜索页猜你喜欢
+^https:\/\/manga\.bilibili\.com\/twirp\/search\.v\d\.Search\/GetGuessLabel url reject-200
+# 热搜
+^https:\/\/manga\.bilibili\.com\/twirp\/search\.v\d\.Search\/GetHotSearch url reject-200
+# 红点
+^https:\/\/manga\.bilibili\.com\/twirp\/line\.v\d\.Line\/TabRedDot url reject-200
+# 推荐
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/Recommend url reject-200
+
+[MitM]
+hostname = %APPEND% manga.bilibili.com

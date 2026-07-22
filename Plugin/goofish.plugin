@@ -1,0 +1,20 @@
+#!name=闲鱼去广告
+#!desc=闲鱼 — 开屏/首页/信息流广告净化
+#!author=3kaiu (规则来源: ddgksf2013)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Goofish.png
+
+[Rule]
+# 优酷推广域名
+DOMAIN-SUFFIX,iyes.youku.com,REJECT
+
+[Rewrite]
+# 开屏广告
+^https?:\/\/(g-)?acs\.m\.goofish\.com\/gw\/mtop.*splash\.ads url reject-200
+# 广告曝光
+^https?:\/\/(g-)?acs\.m\.goofish\.com\/gw\/mtop\.idle\.ad\.expose url reject-200
+# AMDC 处理
+^http:\/\/[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){1,4}(:\d+)?\/amdc\/mobileDispatch url script-response-body https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amdc.js
+
+[MitM]
+hostname = %APPEND% acs.m.goofish.com, g-acs.m.goofish.com

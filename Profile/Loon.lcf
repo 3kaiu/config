@@ -365,62 +365,47 @@ https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Global/Global.list, policy=Proxy, tag=🌍 国际域名, enabled=true
 
 [Plugin]
+# ═══════════════════════════════════════════════════════════
+# v7.0 架构重构: 淘汰停更2年的 ajune0527 插件体系 + Remove_ads_by_keli + myblockads
+# 替换为每日更新的 blackmatrix7 AllInOne.plugin (通用广告域名层)
+# App 级精细化去广告改用自维护插件 (引用 ddgksf2013/app2smile 活跃上游脚本)
+# ═══════════════════════════════════════════════════════════
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 内核层 — 网络安全基础
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# ⚠️ 修复: kelee.one 的 Block_HTTPDNS.lpx / BlockAdvertisers.lpx 直连会 403 (Cloudflare Turnstile)
-# 这两个插件的功能已被主配置完全覆盖:
-#   - HTTPDNS 拦截: [Rule] DOMAIN-KEYWORD httpdns REJECT + [Host] 静态映射 0.0.0.0 + [Rewrite] reject
-#   - 广告拦截: 下方 Remove_ads_by_keli.plugin + myblockads.plugin
-# 故移除这两个不稳定的 kelee.one 直连引用，改用本地镜像 Prevent_DNS_Leaks.plugin
 https://ws.wenn.in/main/Kelee/Prevent_DNS_Leaks.plugin, policy=Proxy, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 基础层 — 通用与多维去广告 (Loon在手机端发起请求，不受 Cloudflare 拦截限制)
+# 通用广告域名层 — blackmatrix7 AllInOne (每日更新, 替代 Remove_ads_by_keli + myblockads)
+# AllInOne: 740 MitM hostname + 698 reject 规则 + 21 response 脚本
+# 已修复 safebrowsing/jiguang/umeng 误杀风险 (旧版 keli+myblockads 的激进规则已移除)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://ws.wenn.in/main/Kelee/Remove_ads_by_keli.plugin, enabled=true
-https://ws.wenn.in/main/Kelee/myblockads.plugin, enabled=true, tag=RuCu6 App去广告
-# ⚠️ 修复: ddgksf2013/Filter/master/Loon/AdBlock.plugin 已 404 (仓库重构，Loon 子目录不再存在)
-# 墨鱼去广告已由上方 RuCu6 (myblockads.plugin) 和可莉 (Remove_ads_by_keli.plugin) 双重覆盖，不再需要此失效引用
+https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AllInOne/AllInOne.plugin, enabled=true, tag=通用广告域名层
+# 哲也脚本 (知乎深度净化) + B站/京东/爱奇艺/美团等开屏脚本
+https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AdvertisingScript/AdvertisingScript.plugin, enabled=true, tag=广告脚本增强
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 工具层
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# ⚠️ kelee.one 全站启用 Cloudflare Turnstile，curl/HTTP客户端无法通过（即使带Loon UA也403）
-# 只有 Loon App 内部 WebKit 能通过 JS challenge，但不稳定。故所有 kelee.one 资源改用以下策略：
-#   - HTTPDNS/广告拦截: 主配置规则已完全覆盖，无需kelee插件
-#   - Sub-Store/QuickSearch: 改用 ajune0527/vpn_tool 镜像源
-#   - GeoIP/ASN: 改用 Loyalsoldier/geoip + P3TERX 镜像
 https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Sub-Store.plugin, enabled=true
 https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/QuickSearch.plugin, enabled=true
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 常用 App 精细化去广告 (ajune0527/vpn_tool Loon格式插件, 按需开启/关闭)
+# App 精细化去广告 (自维护, 引用 ddgksf2013/app2smile 活跃上游脚本)
+# 按需开启/关闭, 默认已全开
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Weibo_remove_ads.plugin, enabled=true, tag=微博去广告
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Weixin_Official_Accounts_remove_ads.plugin, enabled=true, tag=微信公众号去广告
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Bilibili_remove_ads.plugin, enabled=true, tag=B站去广告
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/NeteaseCloudMusic_remove_ads.plugin, enabled=true, tag=网易云音乐净化
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Amap_remove_ads.plugin, enabled=true, tag=高德地图去广告
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Taobao_remove_ads.plugin, enabled=true, tag=淘宝去广告
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/JD_remove_ads.plugin, enabled=true, tag=京东去广告
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Tieba_remove_ads.plugin, enabled=true, tag=百度贴吧净化
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Himalaya_remove_ads.plugin, enabled=true, tag=喜马拉雅净化
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/CoolApk_remove_ads.plugin, enabled=true, tag=酷安净化
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/IThome_remove_ads.plugin, enabled=true, tag=IT之家净化
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/BaiduNetDisk_remove_ads.plugin, enabled=true, tag=百度网盘净化
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Reddit_remove_ads.plugin, enabled=true, tag=Reddit去广告
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Soul_remove_ads.plugin, enabled=true, tag=Soul净化
-# v5.6 新增: 补充常用 App 去广告缺口
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Zhihu_remove_ads.plugin, enabled=true, tag=知乎净化
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/12306_remove_ads.plugin, enabled=true, tag=12306去广告
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/AliYunDrive_remove_ads.plugin, enabled=true, tag=阿里云盘净化
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/QQMusic_remove_ads.plugin, enabled=true, tag=QQ音乐净化
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/smzdm_remove_ads.plugin, enabled=true, tag=什么值得买净化
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Cainiao_remove_ads.plugin, enabled=true, tag=菜鸟裹裹净化
+https://ws.wenn.in/main/Plugin/weibo.plugin, enabled=true, tag=微博去广告
+https://ws.wenn.in/main/Plugin/wechat.plugin, enabled=true, tag=微信&小程序&公众号去广告
+https://ws.wenn.in/main/Plugin/bilibili.plugin, enabled=true, tag=B站去广告
+https://ws.wenn.in/main/Plugin/bilicomics.plugin, enabled=true, tag=B站漫画去广告
+https://ws.wenn.in/main/Plugin/netease.plugin, enabled=true, tag=网易云音乐净化
+https://ws.wenn.in/main/Plugin/goofish.plugin, enabled=true, tag=闲鱼去广告
+https://ws.wenn.in/main/Plugin/qishui.plugin, enabled=true, tag=汽水音乐净化
+https://ws.wenn.in/main/Plugin/taopiaopiao.plugin, enabled=true, tag=淘票票净化
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 自维护核心及应用插件 (按需开启，默认已全开，可在手机端根据需要关闭)
+# 自维护核心及应用插件
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 https://ws.wenn.in/main/Plugin/qidian.plugin, enabled=true, tag=起点全能助手 Pro
 https://ws.wenn.in/main/Plugin/bank.plugin, enabled=true, tag=银行及云闪付去广告
@@ -454,9 +439,10 @@ https://github.com/NSRingo/TestFlight/releases/latest/download/iRingo.TestFlight
 [MitM]
 skip-server-cert-verify = false
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 银行域名负向排除 (P0 修复: 防止远程插件声明银行域名触发 MitM 解密 → SSL Pinning 失败 → 网络错误)
-# 即使 myblockads/AllInOne 等远程去广告插件声明了银行 hostname，这里的负向通配符优先级更高，
-# 阻止这些域名被解密。银行去广告完全通过主配置 DNS 级 REJECT 实现，无需 MitM。
-# 覆盖: 云闪付/工行/建行/中行/农行/交行/招行/邮储/浦发/中信/平安/民生/兴业/光大/华夏/广发等
+# v7.0: blackmatrix7 AllInOne.plugin 通过 %APPEND% 自动声明其 740 个 MitM hostname
+# 主配置只需保留:
+#   1. 银行域名负向排除 (P0, 防 SSL Pinning 失败)
+#   2. Apple iRingo 增强域名
+#   3. 自维护插件核心域名 (GDT白名单/起点/菜鸟/智慧房东/YouTube)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-hostname = -*.apple.com, -*.icloud.com, -*.icloud.com.cn, -*.95516.com, -*.cup.com.cn, -*.95516.com.cn, -*.unionpay.com, -*.icbc.com.cn, -*.mybank.icbc.com.cn, -*.icbc.com, -*.ccb.com, -*.ccb.cn, -*.boc.cn, -*.bankofchina.com, -*.jf365.boc.cn, -*.abchina.com, -*.abchina.com.cn, -*.cdn-static.abchina.com.cn, -*.cdn-static.abchina.com, -*.bankcomm.com, -*.bankcomm.cn, -*.creditcard.bankcomm.com, -*.creditcard.bankcomm.cn, -*.cmbchina.com, -*.cmbimg.com, -*.psbc.com, -*.spdb.com.cn, -*.spdbccc.com.cn, -*.citicbank.com, -*.citibank.com, -*.ecitic.com, -*.pingan.com.cn, -*.pingan.com, -*.hcz-member.pingan.com.cn, -*.iobs.pingan.com.cn, -*.stock.pingan.com, -*.cmbc.com.cn, -*.cib.com.cn, -*.cebbank.com, -*.ebchinabank.com, -*.hxb.com.cn, -*.cgbchina.com.cn, -*.95508.com, -*.static.95508.com, -*.bankofbeijing.com.cn, -*.bosc.cn, -*.js96008.com, -*.tenpay.com, -*.qianbao.qq.com, weatherkit.apple.com, configuration.ls.apple.com, gspe35-ssl.ls.apple.com, gspe35-ssl.ls.apple.cn, news-edge.apple.com, news-todayconfig-edge.apple.com, news-events.apple.com, news-sports-events.apple.com, news-client.apple.com, news-client-search.apple.com, guzzoni.smoot.apple.com, api2.smoot.apple.com, *.smoot.apple.com, *.smoot.apple.cn, testflight.apple.com, boxjs.com, h5.if.qidian.com, magev6.if.qidian.com, ii.gdt.qq.com, adsmind.gdtimg.com, adsmind.ugdtimg.com, pgdt.gtimg.cn, api-access.pangolin-sdk-toutiao.com, api-access.pangolin-sdk-toutiao1.com, api.zhihuifangdong.net, netflow-mtop.cainiao.com, nbcps-mtop.cainiao.com, cn-acs.m.cainiao.com, e2e-mtop.cainiao.com, longquan-mtop.cainiao.com, *.googlevideo.com, *.youtube.com, youtubei.googleapis.com, *.google.com
+hostname = -*.apple.com, -*.icloud.com, -*.icloud.com.cn, -*.95516.com, -*.cup.com.cn, -*.95516.com.cn, -*.unionpay.com, -*.icbc.com.cn, -*.mybank.icbc.com.cn, -*.icbc.com, -*.ccb.com, -*.ccb.cn, -*.boc.cn, -*.bankofchina.com, -*.jf365.boc.cn, -*.abchina.com, -*.abchina.com.cn, -*.cdn-static.abchina.com.cn, -*.cdn-static.abchina.com, -*.bankcomm.com, -*.bankcomm.cn, -*.creditcard.bankcomm.com, -*.creditcard.bankcomm.cn, -*.cmbchina.com, -*.cmbimg.com, -*.psbc.com, -*.spdb.com.cn, -*.spdbccc.com.cn, -*.citicbank.com, -*.citibank.com, -*.ecitic.com, -*.pingan.com.cn, -*.pingan.com, -*.hcz-member.pingan.com.cn, -*.iobs.pingan.com.cn, -*.stock.pingan.com, -*.cmbc.com.cn, -*.cib.com.cn, -*.cebbank.com, -*.ebchinabank.com, -*.hxb.com.cn, -*.cgbchina.com.cn, -*.95508.com, -*.static.95508.com, -*.bankofbeijing.com.cn, -*.bosc.cn, -*.js96008.com, -*.tenpay.com, -*.qianbao.qq.com, weatherkit.apple.com, configuration.ls.apple.com, gspe35-ssl.ls.apple.com, gspe35-ssl.ls.apple.cn, news-edge.apple.com, news-todayconfig-edge.apple.com, news-events.apple.com, news-sports-events.apple.com, news-client.apple.com, news-client-search.apple.com, guzzoni.smoot.apple.com, api2.smoot.apple.com, *.smoot.apple.com, *.smoot.apple.cn, testflight.apple.com, boxjs.com, h5.if.qidian.com, magev6.if.qidian.com, ii.gdt.qq.com, adsmind.gdtimg.com, adsmind.ugdtimg.com, pgdt.gtimg.cn, api-access.pangolin-sdk-toutiao.com, api-access.pangolin-sdk-toutiao1.com, api.zhihuifangdong.net, netflow-mtop.cainiao.com, nbcps-mtop.cainiao.com, cn-acs.m.cainiao.com, e2e-mtop.cainiao.com, longquan-mtop.cainiao.com, -redirector*.googlevideo.com, *.googlevideo.com, *.youtube.com, youtubei.googleapis.com, *.google.com

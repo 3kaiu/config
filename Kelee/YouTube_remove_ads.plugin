@@ -1,20 +1,35 @@
-#!name=YouTube去广告
-#!desc=移除YouTube视频、瀑布流、搜索和Shorts中的广告，移除底部的上传按钮，增加画中画及解锁更多的字幕地区功能。移除YouTube Music底部的上传、选段和升级按钮，支持二者的后台播放。此插件不能与其他具有YouTube广告过滤能力的插件一起使用，并且需要禁用UDP协议的443端口。此插件仅建议iOS 15以上设备使用，支持Premium订阅用户使用，不支持tvOS设备。
+#!name=YouTube去广告增强
+#!desc=移除YouTube视频/瀑布流/搜索/Shorts中的广告，启用画中画(PiP)、后台播放(熄屏播放)、自动翻译字幕。支持YouTube Music。基于Maasea最新脚本(request build 2026/7/12, response build 2026/7/19)。不与其他YouTube去广告插件共用，仅建议iOS 15+设备，支持Premium订阅用户，不支持tvOS。如视频广告残留可尝试在Loon通用设置中禁用UDP 443。
 #!openUrl=
-#!author=Maasea VirgilClyne Choler DivineEngine app2smile
-#!homepage=https://github.com/ajune0527/vpn_tool/tree/master/Tool/Loon/Plugin
+#!author=Maasea VirgilClyne DivineEngine app2smile ddgksf2013
+#!homepage=https://github.com/Maasea/sgmodule
 #!icon=https://gitlab.com/lodepuly/iconlibrary/-/raw/main/App_icon/120px/YouTube.png
-#!date=2023-12-21 18:49:17
+#!date=2026-07-21
+#!arguments=屏蔽上传按钮:true,屏蔽选段按钮:true,屏蔽Shorts按钮:false,字幕翻译语言:off,启用调试模式:false
+#!arguments-desc=- 屏蔽参数: [true, false] \n- 翻译参数: [语言代码, off] \n\n1. 语言代码遵循 Google Translate Languages Codes, 当填入 off 时关闭翻译\n2. 开启调试模式用于输出更多日志
 
 [Rewrite]
-# 使用reject-200方法以减少开销
+# ======= 视频广告请求拦截 =======
+# ctier 302 重定向: 移除低质量层级参数, 绕过广告插入点
+(^https?:\/\/[\w-]+\.googlevideo\.com\/(?!dclk_video_ads).+?)&ctier=L(&.+?),ctier,(.+) 302 $1$2$3
+# initplayback 广告请求拦截
 ^https?:\/\/[\w-]+\.googlevideo\.com\/initplayback.+&oad reject-200
+# 视频广告请求 (排除正常视频回放和广告点击追踪)
+^https?:\/\/[\w-]+\.googlevideo\.com\/(?!(dclk_video_ads|videoplayback\?)).+&oad reject-200
+
+# ======= 通用广告请求拦截 =======
+^https?:\/\/(www|s)\.youtube\.com\/api\/stats\/ads reject-200
+^https?:\/\/(www|s)\.youtube\.com\/(pagead|ptracking) reject-200
+^https?:\/\/s\.youtube\.com\/api\/stats\/qoe\?adcontext reject-200
 
 [Script]
-# YouTube去广告 - 来自Maasea的作品
-http-request ^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(browse|next|player|reel\/reel_watch_sequence) script-path = https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Resource/Script/YouTube/YouTube_remove_ads_request.js, requires-body = true, binary-body-mode = true, tag = YouTube请求
+# ======= YouTube 请求处理 (initplayback UMP 重定向 + log_event 头剥离) =======
+http-request ^https?:\/\/[\w-]+\.googlevideo\.com\/initplayback.+&ack script-path = https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.request.js, requires-body = true, binary-body-mode = true, max-size = -1, argument = {"captionLang":"{{{字幕翻译语言}}}","blockUpload":{{{屏蔽上传按钮}}},"blockImmersive":{{{屏蔽选段按钮}}},"blockShorts":{{{屏蔽Shorts按钮}}},"debug":{{{启用调试模式}}}}, tag = YouTube请求-initplayback
 
-http-response ^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting) script-path = https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Resource/Script/YouTube/YouTube_remove_ads_response.js, requires-body = true, binary-body-mode = true, tag = YouTube响应
+http-request ^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/log_event script-path = https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.request.js, requires-body = true, binary-body-mode = true, max-size = -1, tag = YouTube请求-log_event
+
+# ======= YouTube 响应处理 (去广告 + PiP画中画 + 后台熄屏播放 + 自动翻译字幕) =======
+http-response ^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch|log_event|config) script-path = https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js, requires-body = true, binary-body-mode = true, max-size = -1, argument = {"captionLang":"{{{字幕翻译语言}}}","blockUpload":{{{屏蔽上传按钮}}},"blockImmersive":{{{屏蔽选段按钮}}},"blockShorts":{{{屏蔽Shorts按钮}}},"debug":{{{启用调试模式}}}}, tag = YouTube响应
 
 [Mitm]
-hostname = *.googlevideo.com, youtubei.googleapis.com
+hostname = -redirector*.googlevideo.com, *.googlevideo.com, www.youtube.com, s.youtube.com, youtubei.googleapis.com
