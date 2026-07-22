@@ -35,7 +35,7 @@ DOMAIN,free-aos-cdn-image.amap.com,REJECT,enable={AMAP_ENABLE}
 ^https:\/\/m5\.amap\.com\/dsp\/friendly_information reject-dict, enable={AMAP_ENABLE}
 
 # ── AMDC 通用 ──
-^https?:\/\/amdc\.m\.taobao\.com\/amdc\/mobileDispatch reject-dict, enable={AMAP_ENABLE}
+^https:\/\/amdc\.m\.taobao\.com\/amdc\/mobileDispatch reject-dict, enable={AMAP_ENABLE}
 
 [Script]
 # ⚠️ 设计说明(v7.3): Rewrite reject-dict 优先生效, Script http-response 作为 fallback
