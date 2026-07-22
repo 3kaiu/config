@@ -23,7 +23,8 @@ https://ws.wenn.in/main/Profile/QX.conf
 本项目秉持“精简且强力”的原则，仅针对您实际使用的 App 进行净化与增强，不集成未安装的应用：
 
 ### 📚 2.1 起点读书 (全能助手 Pro - 默认开启)
-*   **脚本路径**：`Plugin/qidian.plugin` (Loon) / `QX.conf` `[rewrite_local]` 段 (QX, v7.2 内联) -> 关联本地 [Qidian.js](https://github.com/3kaiu/config/blob/main/Scripts/Qidian.js)
+*   **脚本路径**：`Plugin/qidian.plugin` (Loon) / `QX.conf` `[rewrite_local]` 段 (QX, v7.2 内联) -> 关联本地 [Qidian.js](https://github.com/3kaiu/config/blob/main/Scripts/Qidian.js) (v6.2)
+*   **版本**: v6.2 — 修复 finishWatch 重放回归 bug + `$response` ReferenceError + QX cron argument
 *   **核心功能**：
     *   **开屏与应用内净化**：全量覆写 getconf 广告配置，清空书架悬浮广告，净化我的账户页推广。
     *   **视频广告秒播**：篡改广告 SDK 数据，将腾讯/穿山甲广告时长修改为 1 秒并播放黑屏。
@@ -179,7 +180,14 @@ https://ws.wenn.in/main/Profile/QX.conf
 *   **`Remove_ads_by_keli.plugin` / `myblockads.plugin` 已停用**：v7.0 起由 `blackmatrix7/AllInOne.plugin`（740+ hostname 每日更新）全面取代，更全面且无 safebrowsing 误杀风险。
 *   **ajune0527/vpn_tool App 插件体系已淘汰**：停更 2 年（最后一次更新 2024-07），22 个插件文件已移至 `archive/ajune0527-legacy/`。替换为自维护的 19 个 `Plugin/*.plugin`（引用 ddgksf2013/app2smile 活跃上游脚本）。
 *   **GeoIP/ASN 数据库**：改用 `Loyalsoldier/geoip`（Country.mmdb）+ `P3TERX/GeoLite.mmdb`（ASN），不再依赖 kelee.one。
-*   **同步工作流**：`sync-kelee.yml` 仍每日同步 Kelee 核心插件 + RuCu6 镜像，`upstream-health.yml` 每日检查所有上游源可用性。
+*   **同步工作流**：`sync-kelee.yml` 仍每日同步 Kelee 核心插件，`mirror-scripts.yml` 每日 mirror 10 个外部脚本到 `Mirror/` 目录，`upstream-health.yml` 每日检查所有上游源可用性。
+
+### v7.5 演进 (当前版本)
+
+*   **外部脚本 CDN Mirror**：新建 `mirror-scripts.yml` 工作流，每日从 ddgksf2013/app2smile/Maasea 等 4 个上游源 mirror 10 个外部脚本到 `Mirror/` 目录，通过 GitHub raw 提供自建 CDN。消除上游删库/离线单点故障风险。
+*   **全量 plugin 引用迁移**：7 个 plugin + QX.conf + YouTube plugin 的 `script-path` 全部从上游原始 URL 切换到自建 mirror URL。
+*   **19 个 plugin 统一添加 `#!version=7.4` 元信息**，便于版本追踪。
+*   **对抗审计加固**：全部 9 个 JS 脚本添加 `$response` 守卫（防 AllInOne MitM 误触）、双端 MitM 移除 `*.google.com` 防止 Gmail/Drive 被意外解密、冗余 MitM 域名清理、curl GitHub Actions 超时加固。
 
 ---
 
