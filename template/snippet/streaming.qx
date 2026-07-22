@@ -1,76 +1,76 @@
 # 流媒体路由 (Loon 格式, QX 通过 quantumultx filter 转换)
-host-suffix, youtube.com, Proxy
-host-suffix, googlevideo.com, Proxy
-host-suffix, ytimg.com, Proxy
-host-suffix, netflix.com, Proxy
-host-suffix, nflxvideo.net, Proxy
-host-suffix, netflix.net, Proxy
+host-suffix, youtube.com, Streaming
+host-suffix, googlevideo.com, Streaming
+host-suffix, ytimg.com, Streaming
+host-suffix, netflix.com, Streaming
+host-suffix, nflxvideo.net, Streaming
+host-suffix, netflix.net, Streaming
 # Netflix CDN
-host-suffix, nflximg.net, Proxy
-host-suffix, nflximg.com, Proxy
-host-suffix, nflxext.com, Proxy
-host-suffix, netflixcdn.net, Proxy
-host, nrdns.netflix.com, Proxy
+host-suffix, nflximg.net, Streaming
+host-suffix, nflximg.com, Streaming
+host-suffix, nflxext.com, Streaming
+host-suffix, netflixcdn.net, Streaming
+host, nrdns.netflix.com, Streaming
 # Disney+
-host-suffix, disneyplus.com, Proxy
-host-suffix, disney-plus.net, Proxy
-host-suffix, dssott.com, Proxy
-host, disney.api.edge.bamgrid.com, Proxy
+host-suffix, disneyplus.com, Streaming
+host-suffix, disney-plus.net, Streaming
+host-suffix, dssott.com, Streaming
+host, disney.api.edge.bamgrid.com, Streaming
 # HBO Max
-host-suffix, hbomax.com, Proxy
-host-suffix, hbo.com, Proxy
-host-suffix, hbomaxcdn.com, Proxy
+host-suffix, hbomax.com, Streaming
+host-suffix, hbo.com, Streaming
+host-suffix, hbomaxcdn.com, Streaming
 # Spotify
-host-suffix, spotify.com, Proxy
-host-suffix, scdn.co, Proxy
-host-suffix, spotify.map.fastly.net, Proxy
-host-suffix, scdn.co.global.ssl.fastly.net, Proxy
+host-suffix, spotify.com, Streaming
+host-suffix, scdn.co, Streaming
+host-suffix, spotify.map.fastly.net, Streaming
+host-suffix, scdn.co.global.ssl.fastly.net, Streaming
 # TikTok CDN
-host-suffix, tiktok.com, Proxy
-host-suffix, byteoversea.com, Proxy
-host-suffix, tiktokcdn.com, Proxy
-host-suffix, tiktokv.com, Proxy
-host-suffix, muscdn.com, Proxy
+host-suffix, tiktok.com, Streaming
+host-suffix, byteoversea.com, Streaming
+host-suffix, tiktokcdn.com, Streaming
+host-suffix, tiktokv.com, Streaming
+host-suffix, muscdn.com, Streaming
 # Crunchyroll
-host-suffix, crunchyroll.com, Proxy
-host-suffix, v.vrv.co, Proxy
+host-suffix, crunchyroll.com, Streaming
+host-suffix, v.vrv.co, Streaming
 # Hulu
-host-suffix, hulu.com, Proxy
-host-suffix, huluim.com, Proxy
+host-suffix, hulu.com, Streaming
+host-suffix, huluim.com, Streaming
 # Paramount+
-host-suffix, paramountplus.com, Proxy
-host-suffix, cbsi.com, Proxy
-host-suffix, cbsivideo.com, Proxy
+host-suffix, paramountplus.com, Streaming
+host-suffix, cbsi.com, Streaming
+host-suffix, cbsivideo.com, Streaming
 # Peacock
-host-suffix, peacocktv.com, Proxy
-host-suffix, peacock.com, Proxy
+host-suffix, peacocktv.com, Streaming
+host-suffix, peacock.com, Streaming
 # NOW TV
-host-suffix, nowtv.com, Proxy
+host-suffix, nowtv.com, Streaming
 # Bilibili 国际版
-host-suffix, bilibili.tv, Proxy
+host-suffix, bilibili.tv, Streaming
 # Apple TV+
-host, tv.apple.com, Proxy
+host, tv.apple.com, Streaming
 # Pandora
-host-suffix, pandora.com, Proxy
+host-suffix, pandora.com, Streaming
 # SoundCloud
-host-suffix, soundcloud.com, Proxy
-host-suffix, sndcdn.com, Proxy
+host-suffix, soundcloud.com, Streaming
+host-suffix, sndcdn.com, Streaming
 # Tidal
-host-suffix, tidal.com, Proxy
-host-suffix, tidalhifi.com, Proxy
+host-suffix, tidal.com, Streaming
+host-suffix, tidalhifi.com, Streaming
 # Deezer
-host-suffix, deezer.com, Proxy
-host-suffix, dzcdn.net, Proxy
+host-suffix, deezer.com, Streaming
+host-suffix, dzcdn.net, Streaming
 # Amazon Prime Video
-host-suffix, primevideo.com, Proxy
+host-suffix, primevideo.com, Streaming
 # Twitch
-host-suffix, twitch.tv, Proxy
+host-suffix, twitch.tv, Streaming
 # AbemaTV
-host-suffix, abema.tv, Proxy
+host-suffix, abema.tv, Streaming
 # TVB
-host-suffix, tvb.com, Proxy
+host-suffix, tvb.com, Streaming
 # Google 全家桶 (流媒体依赖)
-host-suffix, gstatic.com, Proxy
-host-suffix, googleapis.com, Proxy
-host-suffix, google.com, Proxy
-host-suffix, google.co.jp, Proxy
+host-suffix, gstatic.com, Streaming
+host-suffix, googleapis.com, Streaming
+host-suffix, google.com, Streaming
+host-suffix, google.co.jp, Streaming

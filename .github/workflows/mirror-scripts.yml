@@ -59,6 +59,35 @@ jobs:
           mirror "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js" \
             "youtube.response.js" "Maasea / youtube.response.js"
 
+          # ── NSRingo bundle.js (version-pinned release artifacts) ──
+          # These .bundle.js files are referenced by NSRingo .plugin files
+          # with version-pinned URLs (e.g. releases/download/v3.1.0/).
+          # If NSRingo cleans up old releases, those URLs would 404.
+          # Mirroring eliminates this single-point-of-failure.
+          mirror "https://github.com/NSRingo/WeatherKit/releases/download/v3.1.0/response.bundle.js" \
+            "nsringo/WeatherKit-v3.1.0-response.bundle.js" "NSRingo WeatherKit / response.bundle.js v3.1.0"
+
+          mirror "https://github.com/NSRingo/GeoServices/releases/download/v4.6.1/request.bundle.js" \
+            "nsringo/GeoServices-v4.6.1-request.bundle.js" "NSRingo GeoServices / request.bundle.js v4.6.1"
+
+          mirror "https://github.com/NSRingo/GeoServices/releases/download/v4.6.1/response.bundle.js" \
+            "nsringo/GeoServices-v4.6.1-response.bundle.js" "NSRingo GeoServices / response.bundle.js v4.6.1"
+
+          mirror "https://github.com/NSRingo/News/releases/download/v3.2.1/request.bundle.js" \
+            "nsringo/News-v3.2.1-request.bundle.js" "NSRingo News / request.bundle.js v3.2.1"
+
+          mirror "https://github.com/NSRingo/Siri/releases/download/v4.2.7/request.bundle.js" \
+            "nsringo/Siri-v4.2.7-request.bundle.js" "NSRingo Siri / request.bundle.js v4.2.7"
+
+          mirror "https://github.com/NSRingo/Siri/releases/download/v4.2.7/response.bundle.js" \
+            "nsringo/Siri-v4.2.7-response.bundle.js" "NSRingo Siri / response.bundle.js v4.2.7"
+
+          mirror "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/request.bundle.js" \
+            "nsringo/TestFlight-v3.4.0-request.bundle.js" "NSRingo TestFlight / request.bundle.js v3.4.0"
+
+          mirror "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/response.bundle.js" \
+            "nsringo/TestFlight-v3.4.0-response.bundle.js" "NSRingo TestFlight / response.bundle.js v3.4.0"
+
           echo ""
           echo "== Mirror Summary: $SUCCESS succeeded, $FAIL failed =="
           echo "success=$SUCCESS" >> $GITHUB_ENV

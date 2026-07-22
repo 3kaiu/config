@@ -63,7 +63,7 @@ https://ws.wenn.in/main/Profile/QX.conf
 
 ### 🤖 2.4 AI 服务分流
 *   **规则路径**：`Plugin/ai.plugin` (Loon) / `QX.conf` `[filter_local]` 段 (QX, v7.3 内联)
-*   **分流服务**：OpenAI (ChatGPT)、Anthropic (Claude)、Google AI (Gemini)、Perplexity、Groq、编程助手 (Cursor / Copilot / Windsurf / Supermaven) 等。所有 AI 流量自动走向 Proxy 代理策略组。
+*   **分流服务**：OpenAI (ChatGPT)、Anthropic (Claude)、Google AI (Gemini)、Perplexity、Groq、编程助手 (Cursor / Copilot / Windsurf / Supermaven) 等。所有 AI 流量走向独立的 `AI` 策略组（默认指向 Proxy，可手动切换 DIRECT）。
 
 ### 📹 2.5 YouTube 增强 (v7.1 统一 Maasea 方案)
 *   **脚本路径**：Loon 自维护插件 `Kelee/YouTube_remove_ads.plugin` / QX `[rewrite_local]` 本地规则
@@ -93,7 +93,7 @@ https://ws.wenn.in/main/Profile/QX.conf
 ### 🚫 2.6 全网系统级与 App 深度去广告 (多引擎全覆盖, v7.0 重构)
 
 *   **规则路径**：Loon 插件 (`Plugin/`) / QX 远程重写 (`rewrite_remote`) 默认内置。
-*   **v7.0 架构重构**：淘汰停更 2 年的 `ajune0527/vpn_tool` 插件体系，全部改为自维护插件 (引用 ddgksf2013/app2smile 活跃上游脚本)。
+*   **v7.0 架构重构**：淘汰停更 2 年的 `ajune0527/vpn_tool` 插件体系，全部改为自维护插件 (引用 ddgksf2013/app2smile 活跃上游脚本)。v7.8 起 Sub-Store.plugin 和 QuickSearch.plugin 也已本地化到 `Plugin/` 目录，完全消除对 ajune0527 仓库的依赖。
 *   **净化范围**：
     *   **通用去广告层**：`blackmatrix7/AllInOne.plugin`（Loon + QX 双端统一），740+ MitM hostname + 698 reject 规则 + 21 response 脚本，每日更新。已修复 safebrowsing/jiguang/umeng 误杀风险。
     *   **广告脚本增强层**：`blackmatrix7/AdvertisingScript.plugin`（Loon），含哲也知乎深度净化 + B站/京东/爱奇艺/美团开屏脚本。
@@ -116,7 +116,7 @@ https://ws.wenn.in/main/Profile/QX.conf
     *   **Google 全家桶**：google.com、googleapis.com、gstatic.com、googlevideo.com、googleusercontent.com、ggpht.com、withgoogle.com、g.co 等。
     *   **开发者平台 (v5.6 新增, v7.8 扩展)**：GitHub、Microsoft/OneDrive/Office 365、Steam、Wikipedia/Wikimedia、GitLab、BitBucket、Atlassian/Jira、npm/PyPI/crates.io、Vercel/Netlify/Cloudflare 等。
     *   **追踪拦截 (v7.8 新增)**：Google 广告与分析 SDK（doubleclick/google-analytics/googletagmanager）、Firebase、Segment/Amplitude/Mixpanel/Branch/Adjust/AppsFlyer/Kochava/Sentry 等 20 条 REJECT。
-    *   所有海外流量统一走向 `Proxy` 代理组（自动延迟检测选优）。
+    *   海外流量按类别分流至独立策略组：流媒体→`Streaming`、AI服务→`AI`、开发者平台→`Developer`、社交平台→`Social`，各策略组默认指向 `Proxy`（自动延迟检测选优），可手动切换 DIRECT。
 
 ### 🎮 2.7 Epic Games & epic-kiosk 领游戏分流支持
 *   **分流规则**：`Profile/Loon.lcf` (Loon) / `Profile/QX.conf` (QX) -> 远程引用 `blackmatrix7` 维护的 `Epic.list`。
@@ -136,9 +136,16 @@ https://ws.wenn.in/main/Profile/QX.conf
 针对您的 **单个东京代理节点**（配置文件中命名为 `🇯🇵 Tokyo_Proxy`）环境，我们实施了专家级的路由与网络加速优化：
 
 ```text
-[网络请求] ────► [策略组 (Proxy)] ──► 🇯🇵 Tokyo_Proxy (自动健康检测)
+[网络请求] ────► [策略组] ──► 🇯🇵 Tokyo_Proxy (自动健康检测)
                   │
-                  └──► [节点不可用时] ───► 显式报错 (不回落 DIRECT，防泄露)
+                  ├──► Streaming (流媒体) ──┐
+                  ├──► AI (AI服务) ─────────┤
+                  ├──► Developer (开发者) ──┤──► Proxy (url-test 自动选优) ──► 🇯🇵 Tokyo_Proxy
+                  ├──► Social (社交平台) ──┘
+                  ├──► Apple (Apple服务) ──┘
+                  └──► Final (兜底) ────────┘
+                  
+[节点不可用时] ───► 显式报错 (不回落 DIRECT，防泄露)
 ```
 
 1.  **策略组自动健康检测 (Proxy url-test / url-latency-benchmark)**：
@@ -177,39 +184,19 @@ https://ws.wenn.in/main/Profile/QX.conf
 
 ### v7.0 演进
 
-*   **Loon 核心 Kelee 插件**：仅保留 `Prevent_DNS_Leaks.plugin`（DNS 泄露防护）和自维护的 `YouTube_remove_ads.plugin`。
-*   **`Remove_ads_by_keli.plugin` / `myblockads.plugin` 已停用**：v7.0 起由 `blackmatrix7/AllInOne.plugin`（740+ hostname 每日更新）全面取代，更全面且无 safebrowsing 误杀风险。
-*   **ajune0527/vpn_tool App 插件体系已淘汰**：停更 2 年（最后一次更新 2024-07），22 个插件文件已移至 `archive/ajune0527-legacy/`。替换为自维护的 19 个 `Plugin/*.plugin`（引用 ddgksf2013/app2smile 活跃上游脚本）。
-*   **GeoIP/ASN 数据库**：改用 `Loyalsoldier/geoip`（Country.mmdb）+ `P3TERX/GeoLite.mmdb`（ASN），不再依赖 kelee.one。
-*   **同步工作流**：`sync-kelee.yml` 仍每日同步 Kelee 核心插件，`mirror-scripts.yml` 每日 mirror 7 个外部脚本到 `Mirror/` 目录，`upstream-health.yml` 每日检查所有上游源可用性。
+v7.0 淘汰停更 2 年的 `ajune0527/vpn_tool` 插件体系，替换为自维护的 19 个 `Plugin/*.plugin`；GeoIP/ASN 数据库改用 `Loyalsoldier/geoip` + `P3TERX/GeoLite.mmdb`；Kelee 插件仅保留 `Prevent_DNS_Leaks.plugin` 和自维护的 `YouTube_remove_ads.plugin`。See [CHANGELOG.md](./CHANGELOG.md) for full details.
 
 ### v7.5 演进
 
-*   **外部脚本 CDN Mirror**：新建 `mirror-scripts.yml` 工作流，每日从 ddgksf2013/app2smile/Maasea 等 4 个上游源 mirror 外部脚本到 `Mirror/` 目录，通过 GitHub raw 提供自建 CDN。消除上游删库/离线单点故障风险。
-*   **全量 plugin 引用迁移**：7 个 plugin + QX.conf + YouTube plugin 的 `script-path` 全部从上游原始 URL 切换到自建 mirror URL。
-*   **19 个 plugin 统一添加 `#!version=7.4` 元信息**，便于版本追踪。
-*   **对抗审计加固**：全部 9 个 JS 脚本添加 `$response` 守卫（防 AllInOne MitM 误触）、双端 MitM 移除 `*.google.com` 防止 Gmail/Drive 被意外解密、冗余 MitM 域名清理、curl GitHub Actions 超时加固。
+v7.5 新建 `mirror-scripts.yml` 工作流创建外部脚本 CDN Mirror，将全量 plugin `script-path` 迁移到自建 mirror URL，19 个 plugin 统一添加版本元信息，并完成对抗审计加固（`$response` 守卫、MitM 收窄、超时加固）。See [CHANGELOG.md](./CHANGELOG.md) for full details.
 
 ### v7.7 可靠性加固 (2026-07-22)
 
-*   **mirror-scripts.yml 正式建立**：创建 `Mirror/` 目录，工作流每日从 4 个上游源 mirror 7 个外部脚本（netease.adblock.js、amdc.js、applet.js、bilibili-json.js、bilibili-proto.js、youtube.request.js、youtube.response.js）到 `Mirror/`，消除 gist/raw.githubusercontent 单点依赖。
-*   **全量 script-path 切换到自建 CDN**：18 个 plugin + QX.conf + YouTube plugin 的引用全部切换到 `ws.wenn.in/main/Mirror/`。Netease 插件 22 处 gist 依赖一次性消除。
-*   **上游健康检查扩展**：从 4 个检查点扩展到 12 个：新增 ws.wenn.in CDN、ddgksf2013 gist、ddgksf2013/Scripts、5 个 NSRingo 仓库、ajune0527。
-*   **双端配置对齐**：QX.conf 补充微信 DIRECT 规则（wechat.com/weixin.qq.com/wx.qq.com/qpic.cn）、补充 5 条缺失的 Proxy 路由（twittercdn/tdesktop/steamcdn-a.akamaihd.net/onedrive.live/wikimediafoundation.org）。
-*   **版本号全面统一**：Loon.lcf → v7.7（原 v7.6）、QX.conf → v7.7（原 v17.0 typo）、全部 20 个 plugin → v7.7（原 v7.4/v7.6 混用）。
-*   **JS 脚本 Runtime Bug 修复**：6 个脚本（Amap/JD/Tieba/Reddit/Zhihu/Cainiao）的 catch 块 `$.done()` → `$done()`，消除 JSON 解析失败时的 ReferenceError。
-*   **PushPlus 安全修复**：Qidian.js 的推送端点 `http://` → `https://`。
-*   **退化存根诚实标注**：qishui.plugin 和 wechat.plugin 的描述准确反映上游脚本已删除、改用纯 reject 规则。
-*   **死规则清理**：移除 QX.conf 中重复的 `tangram.e.qq.com`（line 431）、移除 Loon.lcf 中被 keyword 通杀掉覆盖的 2 条显式 httpdns 规则。
+v7.7 正式建立 `mirror-scripts.yml` 与 `Mirror/` 目录，将全量 script-path 切换到自建 CDN；上游健康检查扩展至 12 个检查点；修复 6 个 JS 脚本 Runtime Bug 与 PushPlus 安全漏洞；统一全部版本号为 v7.7；清理死规则。See [CHANGELOG.md](./CHANGELOG.md) for full details.
 
 ### v7.8 路由规则全面补全 (2026-07-22)
 
-*   **流媒体路由补全**：新增 Netflix CDN（nflximg.net/nflximg.com/nflxext.com/netflixcdn.net/nrdns.netflix.com）、Spotify CDN（spotify.map.fastly.net）、TikTok CDN（tiktokcdn.com/tiktokv.com/muscdn.com）、HBO Max CDN（hbo.com/hbomaxcdn.com）、Disney+ CDN（disney.api.edge.bamgrid.com，DOMAIN 精确匹配）、Crunchyroll（crunchyroll.com/v.vrv.co）、Hulu、Paramount+、Peacock、NOW TV、Bilibili 国际版（bilibili.tv）、Apple TV+（tv.apple.com，DOMAIN 精确匹配）、Pandora、SoundCloud、Tidal、Deezer。
-*   **社交平台路由补全**：新增 WhatsApp、Signal、Line、Threads、Mastodon、VK、Tumblr、Bluesky；补充 Reddit CDN（redditmedia.com/redd.it/reddesignimg.com）；Discord CDN 域名在主配置 Rule 中已有声明，snippet 中添加注释说明。
-*   **AI 服务路由补全**：将 ai.plugin 中的全部域名同步到 snippet。新增 OpenAI CDN（openaiapi-site.azureedge.net/openaicom-api…azurefd.net，auth0.openai.com 用 DOMAIN 精确匹配）、Google AI 补全（bard.google.com/makersuite.google.com/generativelanguage.googleapis.com/alkalimakersuite-pa.googleapis.com/deepmind.com）、AI 音视频（elevenlabs.com）、新兴 AI（mistral.ai/cohere.com/replicate.com/together.ai/fireworks.ai）、AI 编程工具补全（cursor.com/cursor-api.com/github.copilot.com 用 DOMAIN/copilot-proxy.githubusercontent.com/codeiumserver.com/windsurf.ai/supermaven.com）。
-*   **开发者平台路由补全**：新增 Google 开发者（developers.google.com/cloud.google.com/firebase.google.com 用 DOMAIN、firebaseio.com/firebase.googleapis.com）、Microsoft 开发者补全（visualstudio.com/azure.com/azure-devices.com/nuget.org/msdn.com）、包管理器（npmjs.com/npmjs.org/pypi.org/pythonhosted.org/crates.io/rubygems.org/packagist.org）、代码托管/CI（gitlab.com/bitbucket.org/circleci.com/travis-ci.org）、开发工具（atlassian.com/confluence.com/jira.com/hashicorp.com）、文档/知识库（dev.to/hashnode.com/digitalocean.com/herokuapp.com/vercel.com/netlify.com/netlify.app/cloudflare.com/workers.dev）、Stack Exchange 补充（stackexchange.com/serverfault.com/superuser.com）、Linux/开源（kernel.org/gnu.org/opensuse.org/fedoraproject.org/archlinux.org/debian.org/ubuntu.com）。
-*   **Google 全家桶与广告追踪拦截增强**：在主配置 [Rule]/[filter_local] 新增 Google 代理域名（googleusercontent.com/ggpht.com/withgoogle.com 走 Proxy，g.co 用 DOMAIN 精确匹配走 Proxy）；新增 20 条 Google 广告与分析 SDK REJECT 规则（googleadservices.com/doubleclick.net/googlesyndication.com/google-analytics.com/googletagmanager.com/googletagservices.com/adservice.google.com/firebaseinstallations.googleapis.com/app-measurement.com/analytics.google.com/crashlytics.googleapis.com/segment.io/amplitude.com/mixpanel.com/branch.io/adjust.com/appsflyer.com/kochava.com/sentry.io），双端同步。
-*   **版本号全面升级**：Loon.lcf/QX.conf → v7.8、全部 20 个 plugin #!version= → 7.8、package.json → 7.8.0、ai-services snippet 注释 → v7.8。
+v7.8 完成流媒体/社交平台/AI 服务/开发者平台四维路由补全，新增 Google 广告与追踪 SDK REJECT 规则（20 条双端同步），修复 QX MitM hostname 与 HTTPDNS Rewrite 双端对齐问题，扩展 DNS 泄露检测覆盖至 21 条，修复 README 文档错误，CI 防护从 5 项扩展到 8 项。**策略组拆分**：新增 Streaming/AI/Developer/Social 四个独立策略组，snippet 域名从硬编码 `Proxy` 改为各自策略组名。**定时通知**：新增 `health-notify.js`（每6小时节点健康检测）+ `traffic-notify.js`（每晚22点流量统计/心跳）+ `notify.plugin`。**Sub-Store/QuickSearch 迁移**：从停更的 `ajune0527/vpn_tool` 迁移到自维护 `Plugin/sub-store.plugin` 和 `Plugin/quicksearch.plugin`。**NSRingo bundle.js 镜像**：发现 6 个 NSRingo 插件依赖 8 个版本固定的 `.bundle.js`，已在 `mirror-scripts.yml` 中添加每日 mirror 逻辑到 `Mirror/nsringo/`，并在 `upstream-health.yml` 中添加健康检查。See [CHANGELOG.md](./CHANGELOG.md) for full details.
 
 ---
 
@@ -225,6 +212,7 @@ https://ws.wenn.in/main/Profile/QX.conf
 │       ├── surgio-build.yml        # Surgio 构建工作流
 │       └── config-validate.yml     # 配置验证 CI (元信息/URL/双端对齐/MitM)
 ├── Mirror/                     # 外部脚本缓存 (每日自动同步)
+│   ├── nsringo/                   # NSRingo bundle.js 镜像 (8个, 版本固定)
 │   ├── youtube.response.js         # YouTube 响应增强
 │   ├── youtube.request.js          # YouTube 请求拦截
 │   ├── netease.adblock.js          # 网易云音乐去广告
@@ -235,7 +223,7 @@ https://ws.wenn.in/main/Profile/QX.conf
 ├── Kelee/                      # 本地缓存的核心插件
 │   ├── Prevent_DNS_Leaks.plugin  # DNS 泄露防护 (ajune0527 镜像, 每日同步)
 │   └── YouTube_remove_ads.plugin  # YouTube 增强 (自维护, 基于 Maasea)
-├── Plugin/                     # 自维护 Loon 插件 (19个App覆盖)
+├── Plugin/                     # 自维护 Loon 插件 (22个)
 │   ├── qidian.plugin            # 起点全能助手 Pro
 │   ├── bank.plugin              # 银行及云闪付去广告
 │   ├── life.plugin              # 生活出行去广告 (菜鸟包裹)
@@ -254,6 +242,10 @@ https://ws.wenn.in/main/Profile/QX.conf
 │   ├── qqmusic.plugin           # QQ音乐去广告 (v7.1 新增)
 │   ├── reddit.plugin            # Reddit去广告 (v7.1 新增)
 │   ├── tieba.plugin             # 贴吧去广告 (v7.1 新增)
+│   ├── zhihu.plugin             # 知乎去广告 (v7.1 新增)
+│   ├── sub-store.plugin         # Sub-Store 订阅管理 (v7.8 从 ajune0527 迁移)
+│   ├── quicksearch.plugin       # 快捷搜索 (v7.8 从 ajune0527 迁移)
+│   └── notify.plugin            # 定时通知: 节点健康+流量统计 (v7.8 新增)
 │   └── zhihu.plugin             # 知乎去广告 (v7.1 新增)
 ├── provider/                   # Surgio provider 定义
 │   └── tokyo.js                   # 东京单节点 provider
@@ -289,5 +281,7 @@ https://ws.wenn.in/main/Profile/QX.conf
     ├── JD.js                   # 京东去广告 (v7.1)
     ├── Reddit.js               # Reddit去广告 (v7.1)
     ├── Tieba.js                # 贴吧去广告 (v7.1)
-    └── Zhihu.js                # 知乎去广告 (v7.1)
+    ├── Zhihu.js                # 知乎去广告 (v7.1)
+    ├── health-notify.js        # 节点健康检测通知 (v7.8 新增)
+    └── traffic-notify.js       # 流量统计通知 (v7.8 新增)
 ```

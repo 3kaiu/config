@@ -30,7 +30,7 @@ internet-test-url = http://cp.cloudflare.com/generate_204
 proxy-test-url = http://cp.cloudflare.com/generate_204
 skip-proxy = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32, localhost, *.local, *.lan, *.home.arpa
 bypass-tun = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32
-real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.boc.cn, *.abchina.com, *.ccb.com, *.psbc.com, *.cmbchina.com, *.icbc.com.cn, *.bankofchina.com, *.spdb.com.cn, *.cib.com.cn, *.cebbank.com, *.unionpay.com, *.pingan.com.cn, *.pingan.com, *.bankcomm.com, *.citicbank.com, *.hxb.com.cn, *.cgbchina.com.cn, *.local, *.lan, *.home.arpa, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, *.msftconnecttest.com, *.msftncsi.com, *.battlenet.com.cn
+real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.boc.cn, *.abchina.com, *.ccb.com, *.psbc.com, *.cmbchina.com, *.icbc.com.cn, *.bankofchina.com, *.spdb.com.cn, *.cib.com.cn, *.cebbank.com, *.unionpay.com, *.pingan.com.cn, *.pingan.com, *.bankcomm.com, *.citicbank.com, *.hxb.com.cn, *.cgbchina.com.cn, *.push.apple.com, *.apns.apple.com, captive.apple.com, *.local, *.lan, *.home.arpa, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, *.msftconnecttest.com, *.msftncsi.com, *.battlenet.com.cn
 
 [Host]
 *.taobao.com = server:223.5.5.5
@@ -66,6 +66,10 @@ mtalk.google.com = 108.177.125.188
 Proxy = url-test, ".*", url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
 Apple = select, DIRECT, Proxy
 Final = select, DIRECT, Proxy
+Streaming = select, Proxy, DIRECT, tag=流媒体
+AI = select, Proxy, DIRECT, tag=AI服务
+Developer = select, Proxy, DIRECT, tag=开发者
+Social = select, Proxy, DIRECT, tag=社交平台
 
 [Rule]
 DEST-PORT, 5223, DIRECT
@@ -188,8 +192,9 @@ https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/
 https://ws.wenn.in/main/Kelee/Prevent_DNS_Leaks.plugin, policy=Proxy, enabled=true
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AllInOne/AllInOne.plugin, enabled=true, tag=通用广告域名层
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AdvertisingScript/AdvertisingScript.plugin, enabled=true, tag=广告脚本增强
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Sub-Store.plugin, enabled=true
-https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/QuickSearch.plugin, enabled=true
+https://ws.wenn.in/main/Plugin/sub-store.plugin, enabled=true, tag=Sub-Store 订阅管理
+https://ws.wenn.in/main/Plugin/quicksearch.plugin, enabled=true, tag=快捷搜索
+https://ws.wenn.in/main/Plugin/notify.plugin, enabled=true, tag=🔔 定时通知
 https://ws.wenn.in/main/Plugin/wechat.plugin, enabled=true, tag=微信&小程序&公众号去广告
 https://ws.wenn.in/main/Plugin/bilibili.plugin, enabled=true, tag=B站去广告
 https://ws.wenn.in/main/Plugin/bilicomics.plugin, enabled=true, tag=B站漫画去广告

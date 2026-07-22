@@ -66,11 +66,25 @@ jobs:
           echo "nsringo_siri=$siri" >> $GITHUB_ENV
           echo "nsringo_testflight=$testflight" >> $GITHUB_ENV
 
-      # ── 新增: Sub-Store (ajune0527) ──
-      - name: Check ajune0527/vpn_tool (Sub-Store, QuickSearch)
+      # ── 新增: NSRingo bundle.js (version-pinned release artifacts) ──
+      - name: Check NSRingo bundle.js artifacts
         run: |
-          substore=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Sub-Store.plugin" || echo "000")
-          echo "ajune0527_substore=$substore" >> $GITHUB_ENV
+          wk=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://github.com/NSRingo/WeatherKit/releases/download/v3.1.0/response.bundle.js" || echo "000")
+          geo_req=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://github.com/NSRingo/GeoServices/releases/download/v4.6.1/request.bundle.js" || echo "000")
+          geo_res=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://github.com/NSRingo/GeoServices/releases/download/v4.6.1/response.bundle.js" || echo "000")
+          news=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://github.com/NSRingo/News/releases/download/v3.2.1/request.bundle.js" || echo "000")
+          siri_req=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://github.com/NSRingo/Siri/releases/download/v4.2.7/request.bundle.js" || echo "000")
+          siri_res=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://github.com/NSRingo/Siri/releases/download/v4.2.7/response.bundle.js" || echo "000")
+          tf_req=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/request.bundle.js" || echo "000")
+          tf_res=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/response.bundle.js" || echo "000")
+          echo "nsringo_bundle_wk=$wk" >> $GITHUB_ENV
+          echo "nsringo_bundle_geo_req=$geo_req" >> $GITHUB_ENV
+          echo "nsringo_bundle_geo_res=$geo_res" >> $GITHUB_ENV
+          echo "nsringo_bundle_news=$news" >> $GITHUB_ENV
+          echo "nsringo_bundle_siri_req=$siri_req" >> $GITHUB_ENV
+          echo "nsringo_bundle_siri_res=$siri_res" >> $GITHUB_ENV
+          echo "nsringo_bundle_tf_req=$tf_req" >> $GITHUB_ENV
+          echo "nsringo_bundle_tf_res=$tf_res" >> $GITHUB_ENV
 
       - name: Report results
         run: |
@@ -90,10 +104,17 @@ jobs:
           echo "| NSRingo News | ${{ env.nsringo_news }} |" >> $GITHUB_STEP_SUMMARY
           echo "| NSRingo Siri | ${{ env.nsringo_siri }} |" >> $GITHUB_STEP_SUMMARY
           echo "| NSRingo TestFlight | ${{ env.nsringo_testflight }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| ajune0527 Sub-Store | ${{ env.ajune0527_substore }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| NSRingo bundle WeatherKit | ${{ env.nsringo_bundle_wk }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| NSRingo bundle GeoServices req | ${{ env.nsringo_bundle_geo_req }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| NSRingo bundle GeoServices res | ${{ env.nsringo_bundle_geo_res }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| NSRingo bundle News | ${{ env.nsringo_bundle_news }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| NSRingo bundle Siri req | ${{ env.nsringo_bundle_siri_req }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| NSRingo bundle Siri res | ${{ env.nsringo_bundle_siri_res }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| NSRingo bundle TestFlight req | ${{ env.nsringo_bundle_tf_req }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| NSRingo bundle TestFlight res | ${{ env.nsringo_bundle_tf_res }} |" >> $GITHUB_STEP_SUMMARY
 
           ALL_OK=true
-          for s in "${{ env.ddgksf2013_status }}" "${{ env.maasea_status }}" "${{ env.app2smile_status }}" "${{ env.blackmatrix7_status }}" "${{ env.wennin_status }}" "${{ env.gist_status }}" "${{ env.ddgkscripts_amdc }}" "${{ env.ddgkscripts_applet }}" "${{ env.nsringo_weatherkit }}" "${{ env.nsringo_maps }}" "${{ env.nsringo_news }}" "${{ env.nsringo_siri }}" "${{ env.nsringo_testflight }}" "${{ env.ajune0527_substore }}"; do
+          for s in "${{ env.ddgksf2013_status }}" "${{ env.maasea_status }}" "${{ env.app2smile_status }}" "${{ env.blackmatrix7_status }}" "${{ env.wennin_status }}" "${{ env.gist_status }}" "${{ env.ddgkscripts_amdc }}" "${{ env.ddgkscripts_applet }}" "${{ env.nsringo_weatherkit }}" "${{ env.nsringo_maps }}" "${{ env.nsringo_news }}" "${{ env.nsringo_siri }}" "${{ env.nsringo_testflight }}" "${{ env.nsringo_bundle_wk }}" "${{ env.nsringo_bundle_geo_req }}" "${{ env.nsringo_bundle_geo_res }}" "${{ env.nsringo_bundle_news }}" "${{ env.nsringo_bundle_siri_req }}" "${{ env.nsringo_bundle_siri_res }}" "${{ env.nsringo_bundle_tf_req }}" "${{ env.nsringo_bundle_tf_res }}"; do
             if [ "$s" != "200" ] && [ "$s" != "302" ] && [ "$s" != "301" ]; then
               ALL_OK=false
             fi
@@ -122,7 +143,14 @@ jobs:
             | NSRingo News | ${process.env.nsringo_news} |
             | NSRingo Siri | ${process.env.nsringo_siri} |
             | NSRingo TestFlight | ${process.env.nsringo_testflight} |
-            | ajune0527 Sub-Store | ${process.env.ajune0527_substore} |
+            | NSRingo bundle WeatherKit | ${process.env.nsringo_bundle_wk} |
+            | NSRingo bundle GeoServices req | ${process.env.nsringo_bundle_geo_req} |
+            | NSRingo bundle GeoServices res | ${process.env.nsringo_bundle_geo_res} |
+            | NSRingo bundle News | ${process.env.nsringo_bundle_news} |
+            | NSRingo bundle Siri req | ${process.env.nsringo_bundle_siri_req} |
+            | NSRingo bundle Siri res | ${process.env.nsringo_bundle_siri_res} |
+            | NSRingo bundle TestFlight req | ${process.env.nsringo_bundle_tf_req} |
+            | NSRingo bundle TestFlight res | ${process.env.nsringo_bundle_tf_res} |
 
             One or more upstreams are down. Check the workflow log for details.`;
 

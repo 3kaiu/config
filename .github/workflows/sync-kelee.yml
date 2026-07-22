@@ -19,8 +19,7 @@ jobs:
         run: |
           curl -fsSL -m 60 -A "Loon/3.3.9" "https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Prevent_DNS_Leaks.plugin" -o Kelee/Prevent_DNS_Leaks.plugin
           # v7.2: 移除 Remove_ads_by_keli / myblockads 同步 (已淘汰)
-          # v7.2: 移除 Plugins/ 目录创建与 Sub-Store/QuickSearch 同步
-          #   Sub-Store/QuickSearch 由 Loon.lcf 直接引用 ajune0527 远程 URL，无需本地缓存
+          # v7.8: Sub-Store/QuickSearch 已迁移到自维护 Plugin/ 目录，不再引用 ajune0527 远程 URL
           # v7.2: YouTube_remove_ads.plugin 仍为自维护，不参与同步
 
       - name: Commit and push changes

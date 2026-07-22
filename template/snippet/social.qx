@@ -1,50 +1,50 @@
 # 社交平台路由 (Loon 格式)
 # Instagram
-host-suffix, instagram.com, Proxy
-host-suffix, cdninstagram.com, Proxy
+host-suffix, instagram.com, Social
+host-suffix, cdninstagram.com, Social
 # Twitter / X
-host-suffix, twitter.com, Proxy
-host-suffix, x.com, Proxy
-host-suffix, twimg.com, Proxy
-host-suffix, t.co, Proxy
-host-suffix, twittercdn.com, Proxy
+host-suffix, twitter.com, Social
+host-suffix, x.com, Social
+host-suffix, twimg.com, Social
+host-suffix, t.co, Social
+host-suffix, twittercdn.com, Social
 # Facebook / Meta
-host-suffix, facebook.com, Proxy
-host-suffix, fbcdn.net, Proxy
+host-suffix, facebook.com, Social
+host-suffix, fbcdn.net, Social
 # Telegram
-host-suffix, telegram.org, Proxy
-host-suffix, t.me, Proxy
-host-suffix, telegramcdn.com, Proxy
-host-suffix, tdesktop.com, Proxy
+host-suffix, telegram.org, Social
+host-suffix, t.me, Social
+host-suffix, telegramcdn.com, Social
+host-suffix, tdesktop.com, Social
 # Reddit
-host-suffix, reddit.com, Proxy
-host-suffix, redditstatic.com, Proxy
-host-suffix, redditmedia.com, Proxy
-host-suffix, redd.it, Proxy
-host-suffix, reddesignimg.com, Proxy
+host-suffix, reddit.com, Social
+host-suffix, redditstatic.com, Social
+host-suffix, redditmedia.com, Social
+host-suffix, redd.it, Social
+host-suffix, reddesignimg.com, Social
 # Discord (discord.com/discord.media/discordapp.com/discordapp.net/discord.gg 已在主配置 Rule 中处理)
-host-suffix, discord.com, Proxy
+host-suffix, discord.com, Social
 # WhatsApp
-host-suffix, whatsapp.com, Proxy
-host-suffix, whatsapp.net, Proxy
+host-suffix, whatsapp.com, Social
+host-suffix, whatsapp.net, Social
 # Signal
-host-suffix, signal.org, Proxy
-host-suffix, calls.signal.org, Proxy
+host-suffix, signal.org, Social
+host-suffix, calls.signal.org, Social
 # Line
-host-suffix, line.me, Proxy
-host-suffix, line-apps.com, Proxy
-host-suffix, line-scdn.net, Proxy
+host-suffix, line.me, Social
+host-suffix, line-apps.com, Social
+host-suffix, line-scdn.net, Social
 # Threads
-host-suffix, threads.net, Proxy
+host-suffix, threads.net, Social
 # Mastodon
-host-suffix, mastodon.social, Proxy
+host-suffix, mastodon.social, Social
 # VK
-host-suffix, vk.com, Proxy
-host-suffix, userapi.com, Proxy
-host-suffix, vk-cdn.net, Proxy
+host-suffix, vk.com, Social
+host-suffix, userapi.com, Social
+host-suffix, vk-cdn.net, Social
 # Tumblr
-host-suffix, tumblr.com, Proxy
-host-suffix, tumblr.co, Proxy
+host-suffix, tumblr.com, Social
+host-suffix, tumblr.co, Social
 # Bluesky
-host-suffix, bsky.app, Proxy
-host-suffix, bsky.social, Proxy
+host-suffix, bsky.app, Social
+host-suffix, bsky.social, Social

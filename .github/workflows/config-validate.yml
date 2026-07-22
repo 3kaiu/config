@@ -65,12 +65,13 @@ jobs:
               MISSING=$((MISSING+1))
             fi
           done
-          # 检查 Proxy 路由是否双端一致 (Global.list 未完整覆盖的域名)
+          # 检查策略组路由是否双端一致 (Global.list 未完整覆盖的域名)
+          # v7.8: 策略组拆分后, twittercdn/tdesktop 走 Social, steamcdn/onedrive/wikimedia 走 Developer
           for domain in twittercdn.com tdesktop.com steamcdn-a.akamaihd.net onedrive.live.com wikimediafoundation.org; do
-            in_qx=$(grep -c "host-suffix, $domain, Proxy" Profile/QX.conf)
-            in_loon=$(grep -c "DOMAIN-SUFFIX, $domain, Proxy\|DOMAIN-SUFFIX, $domain, DIRECT" Profile/Loon.lcf)
-            if [ "$in_qx" -eq 0 ]; then echo "⚠️ QX 缺少 $domain Proxy 规则"; MISSING=$((MISSING+1)); fi
-            if [ "$in_loon" -eq 0 ]; then echo "⚠️ Loon 缺少 $domain Proxy 规则"; MISSING=$((MISSING+1)); fi
+            in_qx=$(grep -cE "host-suffix, $domain, (Proxy|Streaming|Social|Developer|AI)" Profile/QX.conf)
+            in_loon=$(grep -cE "DOMAIN-SUFFIX, $domain, (Proxy|Streaming|Social|Developer|AI)" Profile/Loon.lcf)
+            if [ "$in_qx" -eq 0 ]; then echo "⚠️ QX 缺少 $domain 代理规则"; MISSING=$((MISSING+1)); fi
+            if [ "$in_loon" -eq 0 ]; then echo "⚠️ Loon 缺少 $domain 代理规则"; MISSING=$((MISSING+1)); fi
           done
           # 检查 Proxy 组正则一致性
           loon_regex=$(grep "Proxy = url-test" Profile/Loon.lcf | grep -o '".*"')
@@ -160,10 +161,10 @@ jobs:
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
 
-      # ── 7. Snippet 双端对齐检查 ──
-      - name: Snippet alignment check
+      # ── 7. Snippet 双端域名内容级 diff 检查 ──
+      - name: Snippet alignment check (content-level diff)
         run: |
-          echo "## Snippet Alignment Check" >> $GITHUB_STEP_SUMMARY
+          echo "## Snippet Alignment Check (Content-Level Diff)" >> $GITHUB_STEP_SUMMARY
           FAIL=0
           for pair in streaming social ai-services developer bank-ad-reject; do
             tpl_file="template/snippet/${pair}.tpl"
@@ -173,20 +174,55 @@ jobs:
               FAIL=$((FAIL+1))
               continue
             fi
-            # 统计 Loon 格式的域名规则行数（DOMAIN / DOMAIN-SUFFIX / DOMAIN-KEYWORD 开头）
-            tpl_count=$(grep -cE '^(DOMAIN|DOMAIN-SUFFIX|DOMAIN-KEYWORD|DEST-PORT)' "$tpl_file" || echo 0)
-            # 统计 QX 格式的域名规则行数（host / host-suffix / host-keyword / dest-port 开头）
-            qx_count=$(grep -cE '^(host|host-suffix|host-keyword|dest-port)' "$qx_file" || echo 0)
-            echo "| ${pair} | Loon: ${tpl_count} | QX: ${qx_count} |" >> $GITHUB_STEP_SUMMARY
-            if [ "$tpl_count" -ne "$qx_count" ]; then
-              echo "❌ ${pair} 域名数量不一致: Loon=${tpl_count}, QX=${qx_count}" >> $GITHUB_STEP_SUMMARY
+            # 提取 Loon 格式的域名 (DOMAIN/DOMAIN-SUFFIX/DOMAIN-KEYWORD 后的域名，去除策略名)
+            # 格式: DOMAIN-SUFFIX, youtube.com, Streaming → 提取 youtube.com
+            grep -oE '^(DOMAIN-SUFFIX|DOMAIN-KEYWORD|DOMAIN), [^,]+,' "$tpl_file" \
+              | sed -E 's/^(DOMAIN-SUFFIX|DOMAIN-KEYWORD|DOMAIN), ([^,]+),/\2/' | sort -u > /tmp/tpl_${pair}_domains.txt
+            # 对于 DEST-PORT 也提取
+            grep -oE '^DEST-PORT, [0-9]+,' "$tpl_file" \
+              | sed -E 's/^DEST-PORT, ([0-9]+),/\1/' | sort -u >> /tmp/tpl_${pair}_domains.txt
+            sort -u -o /tmp/tpl_${pair}_domains.txt /tmp/tpl_${pair}_domains.txt
+
+            # 提取 QX 格式的域名 (host/host-suffix/host-keyword 后的域名，去除策略名)
+            # 格式: host-suffix, youtube.com, Streaming → 提取 youtube.com
+            grep -oE '^(host-suffix|host-keyword|host), [^,]+,' "$qx_file" \
+              | sed -E 's/^(host-suffix|host-keyword|host), ([^,]+),/\2/' | sort -u > /tmp/qx_${pair}_domains.txt
+            # 对于 dest-port 也提取
+            grep -oE '^dest-port, [0-9]+,' "$qx_file" \
+              | sed -E 's/^dest-port, ([0-9]+),/\1/' | sort -u >> /tmp/qx_${pair}_domains.txt
+            sort -u -o /tmp/qx_${pair}_domains.txt /tmp/qx_${pair}_domains.txt
+
+            tpl_count=$(wc -l < /tmp/tpl_${pair}_domains.txt)
+            qx_count=$(wc -l < /tmp/qx_${pair}_domains.txt)
+
+            # 逐域名 diff
+            only_tpl=$(comm -23 /tmp/tpl_${pair}_domains.txt /tmp/qx_${pair}_domains.txt)
+            only_qx=$(comm -13 /tmp/tpl_${pair}_domains.txt /tmp/qx_${pair}_domains.txt)
+
+            if [ -z "$only_tpl" ] && [ -z "$only_qx" ]; then
+              echo "| ${pair} | ${tpl_count} domains | ✅ 一致 |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| ${pair} | Loon: ${tpl_count} / QX: ${qx_count} | ❌ 有差异 |" >> $GITHUB_STEP_SUMMARY
+              echo "❌ **${pair} 域名内容不一致**:" >> $GITHUB_STEP_SUMMARY
+              if [ -n "$only_tpl" ]; then
+                echo "- 仅 Loon 有:" >> $GITHUB_STEP_SUMMARY
+                echo '```' >> $GITHUB_STEP_SUMMARY
+                echo "$only_tpl" >> $GITHUB_STEP_SUMMARY
+                echo '```' >> $GITHUB_STEP_SUMMARY
+              fi
+              if [ -n "$only_qx" ]; then
+                echo "- 仅 QX 有:" >> $GITHUB_STEP_SUMMARY
+                echo '```' >> $GITHUB_STEP_SUMMARY
+                echo "$only_qx" >> $GITHUB_STEP_SUMMARY
+                echo '```' >> $GITHUB_STEP_SUMMARY
+              fi
               FAIL=$((FAIL+1))
             fi
           done
           if [ "$FAIL" -eq 0 ]; then
-            echo "✅ 所有 snippet 双端域名数量一致" >> $GITHUB_STEP_SUMMARY
+            echo "✅ 所有 snippet 双端域名内容完全一致" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ $FAIL 个 snippet 双端不一致" >> $GITHUB_STEP_SUMMARY
+            echo "❌ $FAIL 个 snippet 双端域名内容不一致" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           exit $FAIL

@@ -1,76 +1,76 @@
 # 流媒体路由 (Loon 格式, QX 通过 quantumultx filter 转换)
-DOMAIN-SUFFIX, youtube.com, Proxy
-DOMAIN-SUFFIX, googlevideo.com, Proxy
-DOMAIN-SUFFIX, ytimg.com, Proxy
-DOMAIN-SUFFIX, netflix.com, Proxy
-DOMAIN-SUFFIX, nflxvideo.net, Proxy
-DOMAIN-SUFFIX, netflix.net, Proxy
+DOMAIN-SUFFIX, youtube.com, Streaming
+DOMAIN-SUFFIX, googlevideo.com, Streaming
+DOMAIN-SUFFIX, ytimg.com, Streaming
+DOMAIN-SUFFIX, netflix.com, Streaming
+DOMAIN-SUFFIX, nflxvideo.net, Streaming
+DOMAIN-SUFFIX, netflix.net, Streaming
 # Netflix CDN
-DOMAIN-SUFFIX, nflximg.net, Proxy
-DOMAIN-SUFFIX, nflximg.com, Proxy
-DOMAIN-SUFFIX, nflxext.com, Proxy
-DOMAIN-SUFFIX, netflixcdn.net, Proxy
-DOMAIN, nrdns.netflix.com, Proxy
+DOMAIN-SUFFIX, nflximg.net, Streaming
+DOMAIN-SUFFIX, nflximg.com, Streaming
+DOMAIN-SUFFIX, nflxext.com, Streaming
+DOMAIN-SUFFIX, netflixcdn.net, Streaming
+DOMAIN, nrdns.netflix.com, Streaming
 # Disney+
-DOMAIN-SUFFIX, disneyplus.com, Proxy
-DOMAIN-SUFFIX, disney-plus.net, Proxy
-DOMAIN-SUFFIX, dssott.com, Proxy
-DOMAIN, disney.api.edge.bamgrid.com, Proxy
+DOMAIN-SUFFIX, disneyplus.com, Streaming
+DOMAIN-SUFFIX, disney-plus.net, Streaming
+DOMAIN-SUFFIX, dssott.com, Streaming
+DOMAIN, disney.api.edge.bamgrid.com, Streaming
 # HBO Max
-DOMAIN-SUFFIX, hbomax.com, Proxy
-DOMAIN-SUFFIX, hbo.com, Proxy
-DOMAIN-SUFFIX, hbomaxcdn.com, Proxy
+DOMAIN-SUFFIX, hbomax.com, Streaming
+DOMAIN-SUFFIX, hbo.com, Streaming
+DOMAIN-SUFFIX, hbomaxcdn.com, Streaming
 # Spotify
-DOMAIN-SUFFIX, spotify.com, Proxy
-DOMAIN-SUFFIX, scdn.co, Proxy
-DOMAIN-SUFFIX, spotify.map.fastly.net, Proxy
-DOMAIN-SUFFIX, scdn.co.global.ssl.fastly.net, Proxy
+DOMAIN-SUFFIX, spotify.com, Streaming
+DOMAIN-SUFFIX, scdn.co, Streaming
+DOMAIN-SUFFIX, spotify.map.fastly.net, Streaming
+DOMAIN-SUFFIX, scdn.co.global.ssl.fastly.net, Streaming
 # TikTok CDN
-DOMAIN-SUFFIX, tiktok.com, Proxy
-DOMAIN-SUFFIX, byteoversea.com, Proxy
-DOMAIN-SUFFIX, tiktokcdn.com, Proxy
-DOMAIN-SUFFIX, tiktokv.com, Proxy
-DOMAIN-SUFFIX, muscdn.com, Proxy
+DOMAIN-SUFFIX, tiktok.com, Streaming
+DOMAIN-SUFFIX, byteoversea.com, Streaming
+DOMAIN-SUFFIX, tiktokcdn.com, Streaming
+DOMAIN-SUFFIX, tiktokv.com, Streaming
+DOMAIN-SUFFIX, muscdn.com, Streaming
 # Crunchyroll
-DOMAIN-SUFFIX, crunchyroll.com, Proxy
-DOMAIN-SUFFIX, v.vrv.co, Proxy
+DOMAIN-SUFFIX, crunchyroll.com, Streaming
+DOMAIN-SUFFIX, v.vrv.co, Streaming
 # Hulu
-DOMAIN-SUFFIX, hulu.com, Proxy
-DOMAIN-SUFFIX, huluim.com, Proxy
+DOMAIN-SUFFIX, hulu.com, Streaming
+DOMAIN-SUFFIX, huluim.com, Streaming
 # Paramount+
-DOMAIN-SUFFIX, paramountplus.com, Proxy
-DOMAIN-SUFFIX, cbsi.com, Proxy
-DOMAIN-SUFFIX, cbsivideo.com, Proxy
+DOMAIN-SUFFIX, paramountplus.com, Streaming
+DOMAIN-SUFFIX, cbsi.com, Streaming
+DOMAIN-SUFFIX, cbsivideo.com, Streaming
 # Peacock
-DOMAIN-SUFFIX, peacocktv.com, Proxy
-DOMAIN-SUFFIX, peacock.com, Proxy
+DOMAIN-SUFFIX, peacocktv.com, Streaming
+DOMAIN-SUFFIX, peacock.com, Streaming
 # NOW TV
-DOMAIN-SUFFIX, nowtv.com, Proxy
+DOMAIN-SUFFIX, nowtv.com, Streaming
 # Bilibili 国际版
-DOMAIN-SUFFIX, bilibili.tv, Proxy
+DOMAIN-SUFFIX, bilibili.tv, Streaming
 # Apple TV+
-DOMAIN, tv.apple.com, Proxy
+DOMAIN, tv.apple.com, Streaming
 # Pandora
-DOMAIN-SUFFIX, pandora.com, Proxy
+DOMAIN-SUFFIX, pandora.com, Streaming
 # SoundCloud
-DOMAIN-SUFFIX, soundcloud.com, Proxy
-DOMAIN-SUFFIX, sndcdn.com, Proxy
+DOMAIN-SUFFIX, soundcloud.com, Streaming
+DOMAIN-SUFFIX, sndcdn.com, Streaming
 # Tidal
-DOMAIN-SUFFIX, tidal.com, Proxy
-DOMAIN-SUFFIX, tidalhifi.com, Proxy
+DOMAIN-SUFFIX, tidal.com, Streaming
+DOMAIN-SUFFIX, tidalhifi.com, Streaming
 # Deezer
-DOMAIN-SUFFIX, deezer.com, Proxy
-DOMAIN-SUFFIX, dzcdn.net, Proxy
+DOMAIN-SUFFIX, deezer.com, Streaming
+DOMAIN-SUFFIX, dzcdn.net, Streaming
 # Amazon Prime Video
-DOMAIN-SUFFIX, primevideo.com, Proxy
+DOMAIN-SUFFIX, primevideo.com, Streaming
 # Twitch
-DOMAIN-SUFFIX, twitch.tv, Proxy
+DOMAIN-SUFFIX, twitch.tv, Streaming
 # AbemaTV
-DOMAIN-SUFFIX, abema.tv, Proxy
+DOMAIN-SUFFIX, abema.tv, Streaming
 # TVB
-DOMAIN-SUFFIX, tvb.com, Proxy
+DOMAIN-SUFFIX, tvb.com, Streaming
 # Google 全家桶 (流媒体依赖)
-DOMAIN-SUFFIX, gstatic.com, Proxy
-DOMAIN-SUFFIX, googleapis.com, Proxy
-DOMAIN-SUFFIX, google.com, Proxy
-DOMAIN-SUFFIX, google.co.jp, Proxy
+DOMAIN-SUFFIX, gstatic.com, Streaming
+DOMAIN-SUFFIX, googleapis.com, Streaming
+DOMAIN-SUFFIX, google.com, Streaming
+DOMAIN-SUFFIX, google.co.jp, Streaming

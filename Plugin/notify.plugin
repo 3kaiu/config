@@ -1,0 +1,10 @@
+#!name=🔔 定时通知
+#!desc=节点健康检测 (每6小时) + 流量统计通知 (每晚22点), 支持 Bark/Telegram 推送
+#!version=7.8
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Notification.png
+
+[Script]
+cron 0 */6 * * * script-path=https://ws.wenn.in/main/Scripts/health-notify.js, timeout=60, tag=🔔 节点健康检测
+cron 0 22 * * * script-path=https://ws.wenn.in/main/Scripts/traffic-notify.js, timeout=60, tag=📊 流量统计通知

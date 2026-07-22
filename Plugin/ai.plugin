@@ -6,7 +6,7 @@
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bot.png
 
 [Argument]
-AI_Policy=select,"Proxy","DIRECT",tag=AI分流策略组,desc=请选择或输入你的AI服务分流策略组名称
+AI_Policy=select,"AI","Proxy","DIRECT",tag=AI分流策略组,desc=请选择或输入你的AI服务分流策略组名称
 
 [Rule]
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

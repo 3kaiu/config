@@ -139,14 +139,63 @@ v7.8 围绕路由规则补全展开，覆盖以下 4 个维度：
 
 ---
 
+## D 组 — NSRingo bundle.js 版本固定风险消除 (v7.8 补充)
+
+### 发现
+
+6 个 NSRingo Apple 增强插件（WeatherKit/Maps/News/Siri/Search/TestFlight）内部通过 `script-path` 引用了 **版本固定的 `.bundle.js`** 下载链接，而非 `releases/latest` 动态链接：
+
+| 插件 | 仓库 | bundle.js | 版本 |
+|------|------|-----------|------|
+| WeatherKit | NSRingo/WeatherKit | response.bundle.js | v3.1.0 |
+| Maps | NSRingo/GeoServices | request.bundle.js + response.bundle.js | v4.6.1 |
+| News | NSRingo/News | request.bundle.js | v3.2.1 |
+| Siri | NSRingo/Siri | request.bundle.js + response.bundle.js | v4.2.7 |
+| Search | NSRingo/Siri | (同 Siri) | v4.2.7 |
+| TestFlight | NSRingo/TestFlight | request.bundle.js + response.bundle.js | v3.4.0 |
+
+**风险**：如果 NSRingo 清理旧版 Release，这些 `releases/download/vX.Y.Z/` 链接会 404，导致插件脚本加载失败。
+
+### 修复措施
+
+| # | 修复 | 文件 | 状态 |
+|---|------|------|------|
+| D9 | 在 `mirror-scripts.yml` 中添加 8 个 NSRingo bundle.js 的每日 mirror 逻辑，同步到 `Mirror/nsringo/` 目录 | mirror-scripts.yml | ✅ |
+| D10 | 创建 `Mirror/nsringo/` 目录 | Mirror/nsringo/.gitkeep | ✅ |
+| D11 | 在 `upstream-health.yml` 中添加 8 个 NSRingo bundle.js 版本固定产物的健康检查 | upstream-health.yml | ✅ |
+
+**注意**：当前 NSRingo `.plugin` 文件仍通过 `releases/latest/download/` 动态链接获取（非版本固定），仅其内部 `script-path` 引用的 `.bundle.js` 是版本固定的。mirror 的 `.bundle.js` 作为灾备缓存，未来若需要可修改 `.plugin` 中的 `script-path` 指向自建 CDN。
+
+---
+
+## E 组 — 策略组拆分与定时通知 (v7.8 补充)
+
+| # | 修复 | 文件 | 状态 |
+|---|------|------|------|
+| E1 | 新增 Streaming/AI/Developer/Social 四个独立 select 策略组 | loon.tpl + quantumultx.tpl + Loon.lcf + QX.conf | ✅ |
+| E2 | snippet 文件中 `Proxy` 替换为各自策略组名（streaming→Streaming, social→Social, ai-services→AI, developer→Developer） | 8 个 snippet 文件 (.tpl + .qx) | ✅ |
+| E3 | ai.plugin 的 `AI_Policy` 默认值从 `Proxy` 改为 `AI` | Plugin/ai.plugin | ✅ |
+| E4 | 新增 `Scripts/health-notify.js` — 节点健康检测通知（每6小时，支持 Bark/Telegram） | Scripts/health-notify.js | ✅ |
+| E5 | 新增 `Scripts/traffic-notify.js` — 流量统计/心跳通知（每晚22点） | Scripts/traffic-notify.js | ✅ |
+| E6 | 新增 `Plugin/notify.plugin` — 定时通知插件（cron 0 */6 + cron 0 22） | Plugin/notify.plugin | ✅ |
+| E7 | Loon [Plugin] 段添加 notify.plugin 引用 | loon.tpl + Loon.lcf | ✅ |
+| E8 | Sub-Store/QuickSearch 从 ajune0527 远程 URL 迁移到自维护 `Plugin/sub-store.plugin` + `Plugin/quicksearch.plugin` | loon.tpl + Loon.lcf + Plugin/ | ✅ |
+| E9 | upstream-health.yml 移除 ajune0527 检查（已自维护） | upstream-health.yml | ✅ |
+| E10 | real-ip 补充 Apple 推送域名（*.push.apple.com / *.apns.apple.com / captive.apple.com） | loon.tpl + Loon.lcf + quantumultx.tpl + QX.conf | ✅ |
+| E11 | config-validate.yml Step 7 Snippet 对齐检查升级为逐域名内容 diff | config-validate.yml | ✅ |
+
+---
+
 ## 遗留问题和后续计划
 
 | 项 | 优先级 | 说明 |
 |----|--------|------|
-| 策略组拆分 | 低 | 当前仅 Proxy/Apple/Final 三个策略组，未来可考虑按地区/用途拆分（如 Streaming/AI/Developer 子策略组），但单节点场景下收益有限 |
-| Cron 任务扩展 | 低 | 当前仅起点签到 1 个 cron 任务，可考虑增加定时清理缓存、定时重置插件状态等运维任务 |
+| ~~策略组拆分~~ | ~~低~~ | ✅ v7.8 已实现 Streaming/AI/Developer/Social 四个独立策略组 |
+| ~~Cron 任务扩展~~ | ~~低~~ | ✅ v7.8 已实现节点健康检测（每6小时）+ 流量统计通知（每晚22点） |
+| ~~NSRingo bundle.js 版本固定风险~~ | ~~中~~ | ✅ v7.8 已在 mirror-scripts.yml 中添加每日 mirror 逻辑 |
+| ~~Sub-Store/QuickSearch ajune0527 依赖~~ | ~~中~~ | ✅ v7.8 已迁移到自维护 Plugin/ 目录 |
 | BoxJS 集成 | 低 | QX 端参数配置仍需手动编辑 [prefs_local]，未来可考虑统一 BoxJS 入口简化配置流程 |
-| Snippet 域名内容级 diff | 中 | 当前 CI 仅检查 snippet 域名数量是否一致，未来可升级为逐域名内容 diff 以发现遗漏 |
+| ~~Snippet 域名内容级 diff~~ | ~~中~~ | ✅ v7.8 已升级为逐域名内容 diff |
 | MitM hostname 差异自动修复 | 中 | 当前 Step 5 仅输出 warning，未来可考虑自动生成补丁 PR |
 | README 目录树自动生成 | 低 | 手动维护目录树易过时，未来可考虑 CI 自动生成 |
 
@@ -162,3 +211,28 @@ v7.8 围绕路由规则补全展开，覆盖以下 4 个维度：
 | CI 检查项数量 | 5 项 | 8 项 (+3) |
 | README 目录树完整性 | ❌ 缺 4 个目录 | ✅ 完整 |
 | README 脚本引用准确性 | ❌ UnionPay.js 虚假引用 | ✅ 已修正 |
+
+---
+
+## NSRingo bundle.js Investigation (v7.8)
+
+**Date**: 2026-07-22
+**Finding**: All 6 NSRingo plugins (WeatherKit, Maps, News, Siri, Search, TestFlight) reference external `.bundle.js` files via `script-path` directives. The plugins are NOT self-contained — they depend on 8 distinct version-pinned `bundle.js` artifacts hosted on GitHub Releases across 4 NSRingo repositories (WeatherKit, GeoServices, News, Siri, TestFlight).
+
+**bundle.js dependency map**:
+
+| Plugin | Version | bundle.js files | Source repo |
+|--------|---------|-----------------|------------|
+| WeatherKit | v3.1.0 | `response.bundle.js` | NSRingo/WeatherKit |
+| Maps | v4.6.1 | `request.bundle.js`, `response.bundle.js` | NSRingo/GeoServices |
+| News | v3.2.1 | `request.bundle.js` | NSRingo/News |
+| Siri | v4.2.7 | `request.bundle.js` | NSRingo/Siri |
+| Search | v4.2.7 | `request.bundle.js`, `response.bundle.js` | NSRingo/Siri |
+| TestFlight | v3.4.0 | `request.bundle.js`, `response.bundle.js` | NSRingo/TestFlight |
+
+**Risk**: Each `bundle.js` URL is version-pinned (e.g. `releases/download/v3.1.0/response.bundle.js`). If NSRingo deletes old releases or the repos go private/deleted, these URLs will 404 and the plugins will break silently.
+
+**Mitigation implemented**:
+1. **Mirror directory**: `/tmp/loon-config/Mirror/nsringo/` — 8 `bundle.js` files downloaded and committed (total ~830 KB).
+2. **`mirror-scripts.yml`**: Added 8 `mirror()` calls (lines 67–89) to daily-download all NSRingo `bundle.js` files at 03:00 UTC.
+3. **`upstream-health.yml`**: Added "Check NSRingo bundle.js artifacts" step (lines 70–87) with HTTP status checks for all 8 URLs, results surfaced in the health report and issue alert.

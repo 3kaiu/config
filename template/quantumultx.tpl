@@ -12,7 +12,7 @@ geo_location_checker=http://ip-api.com/json/?lang=zh-CN, https://raw.githubuserc
 fallback_udp_policy=direct
 icmp_auto_reply = true
 excluded_routes = 192.168.0.0/16, 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 224.0.0.0/4, 255.255.255.255/32
-dns_exclusion_list = *.local, *.lan, *.home.arpa, *.srv.nintendo.net, *.stun.playstation.net, *.xboxlive.com, *.msftconnecttest.com, *.msftncsi.com, *.battlenet.com.cn, *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.boc.cn, *.abchina.com, *.ccb.com, *.psbc.com, *.cmbchina.com, *.icbc.com.cn, *.bankofchina.com, *.spdb.com.cn, *.cib.com.cn, *.cebbank.com, *.unionpay.com, *.pingan.com.cn, *.pingan.com, *.bankcomm.com, *.citicbank.com, *.hxb.com.cn, *.cgbchina.com.cn
+dns_exclusion_list = *.local, *.lan, *.home.arpa, *.srv.nintendo.net, *.stun.playstation.net, *.xboxlive.com, *.msftconnecttest.com, *.msftncsi.com, *.battlenet.com.cn, *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.boc.cn, *.abchina.com, *.ccb.com, *.psbc.com, *.cmbchina.com, *.icbc.com.cn, *.bankofchina.com, *.spdb.com.cn, *.cib.com.cn, *.cebbank.com, *.unionpay.com, *.pingan.com.cn, *.pingan.com, *.bankcomm.com, *.citicbank.com, *.hxb.com.cn, *.cgbchina.com.cn, *.push.apple.com, *.apns.apple.com, captive.apple.com
 
 [dns]
 no-system
@@ -44,6 +44,10 @@ address=/mtalk.google.com/108.177.125.188
 url-latency-benchmark=Proxy, server_regex=., check-interval=300, alive-checking=false, tolerance=50, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Proxy.png
 static=Apple, direct, Proxy, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple.png
 static=Final, direct, Proxy, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Final.png
+static=Streaming, Proxy, direct, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png
+static=AI, Proxy, direct, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Robot.png
+static=Developer, Proxy, direct, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Developer.png
+static=Social, Proxy, direct, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Social.png
 
 [server_remote]
 # Surgio 管理节点加载 — 通过 SURGIO_SUBSCRIPTION_URL 或 Secrets
