@@ -25,6 +25,7 @@ AND,((USER-AGENT,Cainiao4iPhone*), (DOMAIN,amdc.m.taobao.com)), REJECT, enable={
 # 寄件页红包/广告
 ^https:\/\/cn-acs\.m\.cainiao\.com\/gw\/mtop\.cainiao\.guoguo\.nbnetflow\.ads\.m?show reject, enable={CAINIAO_ENABLE}
 
+[Script]
 # 首页卡片净化 — 首页/我的/发现/开屏广告 → Cainiao.js
 http-response ^https:\/\/(cn-acs\.m|e2e-mtop)\.cainiao\.com\/gw\/mtop\.cainiao\.app\.e2e\.engine\.page\.fetch script-path=https://ws.wenn.in/main/Scripts/Cainiao.js, requires-body=true, timeout=10, tag=首页净化, enable={CAINIAO_ENABLE}
 # 我的页面推广净化

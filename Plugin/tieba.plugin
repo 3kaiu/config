@@ -9,7 +9,6 @@
 TIEBA_ENABLE=switch,"true","false",tag=是否开启贴吧去广告,desc=开启后深度净化贴吧首页/帖子/广告
 
 [Rule]
-DOMAIN,180.76.76.200,REJECT,enable={TIEBA_ENABLE}
 IP-CIDR,180.76.76.200/32,REJECT,no-resolve,enable={TIEBA_ENABLE}
 
 [Script]

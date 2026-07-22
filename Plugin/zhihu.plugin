@@ -67,4 +67,4 @@ http-response ^https:\/\/api\.zhihu\.com\/(commercial_api\/answer\/banners|comme
 http-response ^https:\/\/api\.zhihu\.com\/search\/preset_words script-path=https://ws.wenn.in/main/Scripts/Zhihu.js, requires-body=true, timeout=10, tag=知乎_搜索词, argument="recommend_queries":{.+}->"recommend_queries":{}, enable={ZHIHU_ENABLE}
 
 [MitM]
-hostname = %APPEND% api.zhihu.com, www.zhihu.com, appcloud2.zhihu.com, link.zhihu.com, zhuanlan.zhihu.com, m-cloud.zhihu.com
+hostname = %APPEND% api.zhihu.com, www.zhihu.com, appcloud2.zhihu.com, link.zhihu.com, zhuanlan.zhihu.com
