@@ -1,27 +1,59 @@
 # AI 服务分流
-# OpenAI / Anthropic / Google AI / AI 编程工具 / 新兴 AI (v7.7)
+# OpenAI / Anthropic / Google AI / AI 编程工具 / 新兴 AI (v7.8)
 
+# OpenAI
 host-suffix, openai.com, Proxy
 host-suffix, ai.com, Proxy
 host-suffix, chatgpt.com, Proxy
 host-suffix, oaiusercontent.com, Proxy
 host-suffix, oaistatic.com, Proxy
 host-keyword, openai, Proxy
+host-suffix, openaiapi-site.azureedge.net, Proxy
+host-suffix, openaicom-api-bdcpf8c6d2e9b8.azurefd.net, Proxy
+host, auth0.openai.com, Proxy
+# Anthropic
 host-suffix, anthropic.com, Proxy
 host-suffix, claude.ai, Proxy
+# Google AI
 host-suffix, gemini.google.com, Proxy
 host-suffix, aistudio.google.com, Proxy
 host-suffix, deepmind.google, Proxy
+host-suffix, bard.google.com, Proxy
+host-suffix, makersuite.google.com, Proxy
+host-suffix, generativelanguage.googleapis.com, Proxy
+host-suffix, alkalimakersuite-pa.googleapis.com, Proxy
+host-suffix, deepmind.com, Proxy
+# DeepSeek
 host-suffix, deepseek.com, Proxy
+# Grok (xAI)
 host-suffix, x.ai, Proxy
+# AI 图像/视频
 host-suffix, midjourney.com, Proxy
-host-suffix, suno.ai, Proxy
-host-suffix, elevenlabs.io, Proxy
 host-suffix, runwayml.com, Proxy
 host-suffix, lumalabs.ai, Proxy
+# AI 音视频
+host-suffix, suno.ai, Proxy
+host-suffix, elevenlabs.io, Proxy
+host-suffix, elevenlabs.com, Proxy
+# AI 搜索/问答
 host-suffix, perplexity.ai, Proxy
+# AI 基础设施
 host-suffix, groq.com, Proxy
 host-suffix, huggingface.co, Proxy
+# 新增 AI 服务
+host-suffix, mistral.ai, Proxy
+host-suffix, cohere.com, Proxy
+host-suffix, replicate.com, Proxy
+host-suffix, together.ai, Proxy
+host-suffix, fireworks.ai, Proxy
+# AI 编程工具
 host-suffix, cursor.sh, Proxy
+host-suffix, cursor.com, Proxy
+host-suffix, cursor-api.com, Proxy
+host, github.copilot.com, Proxy
+host-suffix, copilot-proxy.githubusercontent.com, Proxy
 host-suffix, codeium.com, Proxy
+host-suffix, codeiumserver.com, Proxy
+host-suffix, windsurf.ai, Proxy
+host-suffix, supermaven.com, Proxy
 host-suffix, copilot.microsoft.com, Proxy

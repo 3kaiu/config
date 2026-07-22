@@ -1,6 +1,6 @@
 #!name=微信去广告
 #!desc=微信 & 小程序 & 公众号 — 纯 Reject 净化 (v7.7: weixin.js/wechat-json.js 已不可用, 改用剔除式规则, applet.js 仍正常)
-#!version=7.7
+#!version=7.8
 #!author=3kaiu (规则来源: ddgksf2013)
 #!fallback=备选: 无脚本纯规则 — ddgksf2013/WeChat.conf 每日更新
 #!homepage=https://github.com/3kaiu/config

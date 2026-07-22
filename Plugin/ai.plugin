@@ -1,6 +1,6 @@
 #!name=AI 服务分流
 #!desc=ChatGPT · Claude · Gemini · Perplexity · Copilot 等 AI 服务分流到指定策略组，支持在插件参数中自定义策略组名称。
-#!version=7.7
+#!version=7.8
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bot.png

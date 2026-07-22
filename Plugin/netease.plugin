@@ -1,6 +1,6 @@
 #!name=网易云音乐去广告
 #!desc=网易云音乐 — 深度净化推荐/搜索/个人页/启动广告
-#!version=7.7
+#!version=7.8
 #!author=3kaiu (规则来源: ddgksf2013)
 #!fallback=备选: Keywos/RuCu6 (Plugins/NeteaseCloudMusic_remove_ads.plugin) — 纯规则无外部脚本依赖
 #!homepage=https://github.com/3kaiu/config

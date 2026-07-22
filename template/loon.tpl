@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════
-#  Loon 配置 (Loon.lcf) — v7.7 (Surgio 生成)
+#  Loon 配置 (Loon.lcf) — v7.8 (Surgio 生成)
 #  核心: 自动健康检测 · 高质量多引擎去广告 · Apple原生增强 · 全球社交/流媒体分流 · 银行 MitM 冲突根治
 #  引擎支持: iOS Loon 3.3.9+
 # ═══════════════════════════════════════════════════════════
@@ -129,6 +129,12 @@ DOMAIN-SUFFIX, wx.qq.com, DIRECT
 {% include "./snippet/social.tpl" %}
 {% include "./snippet/developer.tpl" %}
 
+# Google 全家桶
+DOMAIN-SUFFIX, googleusercontent.com, Proxy
+DOMAIN-SUFFIX, ggpht.com, Proxy
+DOMAIN-SUFFIX, withgoogle.com, Proxy
+DOMAIN, g.co, Proxy
+
 # GDT 广告 SDK 白名单
 DOMAIN, mi.gdt.qq.com, DIRECT
 DOMAIN, ii.gdt.qq.com, DIRECT
@@ -143,6 +149,29 @@ DOMAIN-SUFFIX, h-adashx.ut.taobao.com, REJECT
 # 追踪
 DOMAIN-KEYWORD, qreport, REJECT
 DOMAIN, aegis.cdn-go.cn, REJECT
+
+# Google 分析与广告
+DOMAIN-SUFFIX, googleadservices.com, REJECT
+DOMAIN-SUFFIX, doubleclick.net, REJECT
+DOMAIN-SUFFIX, googlesyndication.com, REJECT
+DOMAIN-SUFFIX, google-analytics.com, REJECT
+DOMAIN-SUFFIX, googletagmanager.com, REJECT
+DOMAIN-SUFFIX, googletagservices.com, REJECT
+DOMAIN-SUFFIX, adservice.google.com, REJECT
+# Firebase
+DOMAIN-SUFFIX, firebaseinstallations.googleapis.com, REJECT
+# 常见分析 SDK
+DOMAIN-SUFFIX, app-measurement.com, REJECT
+DOMAIN-SUFFIX, analytics.google.com, REJECT
+DOMAIN-SUFFIX, crashlytics.googleapis.com, REJECT
+DOMAIN-SUFFIX, segment.io, REJECT
+DOMAIN-SUFFIX, amplitude.com, REJECT
+DOMAIN-SUFFIX, mixpanel.com, REJECT
+DOMAIN-SUFFIX, branch.io, REJECT
+DOMAIN-SUFFIX, adjust.com, REJECT
+DOMAIN-SUFFIX, appsflyer.com, REJECT
+DOMAIN-SUFFIX, kochava.com, REJECT
+DOMAIN-SUFFIX, sentry.io, REJECT
 
 GEOIP, CN, DIRECT
 FINAL, Final

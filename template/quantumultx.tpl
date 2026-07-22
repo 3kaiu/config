@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════
-#  Quantumult X 配置 (QX.conf) — v7.7 (Surgio 生成)
+#  Quantumult X 配置 (QX.conf) — v7.8 (Surgio 生成)
 #  核心: 自动延迟检测 · 高质量多引擎去广告 · Apple原生增强 · 全球社交/流媒体分流 · 银行 MitM 冲突根治
 # ═══════════════════════════════════════════════════════════
 
@@ -107,6 +107,12 @@ host-suffix, browserleaks.com, Proxy
 
 {% include "./snippet/developer.qx" %}
 
+# Google 全家桶
+host-suffix, googleusercontent.com, Proxy
+host-suffix, ggpht.com, Proxy
+host-suffix, withgoogle.com, Proxy
+host, g.co, Proxy
+
 host, news-edge.apple.com, Proxy
 host-suffix, apple.com, Apple
 host-suffix, icloud.com, Apple
@@ -137,6 +143,29 @@ host-suffix, imtmp.net, reject
 
 host-keyword, qreport, reject
 host, aegis.cdn-go.cn, reject
+
+# Google 分析与广告
+host-suffix, googleadservices.com, reject
+host-suffix, doubleclick.net, reject
+host-suffix, googlesyndication.com, reject
+host-suffix, google-analytics.com, reject
+host-suffix, googletagmanager.com, reject
+host-suffix, googletagservices.com, reject
+host-suffix, adservice.google.com, reject
+# Firebase
+host-suffix, firebaseinstallations.googleapis.com, reject
+# 常见分析 SDK
+host-suffix, app-measurement.com, reject
+host-suffix, analytics.google.com, reject
+host-suffix, crashlytics.googleapis.com, reject
+host-suffix, segment.io, reject
+host-suffix, amplitude.com, reject
+host-suffix, mixpanel.com, reject
+host-suffix, branch.io, reject
+host-suffix, adjust.com, reject
+host-suffix, appsflyer.com, reject
+host-suffix, kochava.com, reject
+host-suffix, sentry.io, reject
 
 geoip, cn, direct
 final, Final

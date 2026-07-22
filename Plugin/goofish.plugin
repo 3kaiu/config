@@ -1,6 +1,6 @@
 #!name=闲鱼去广告
 #!desc=闲鱼 — 开屏/首页/信息流广告净化
-#!version=7.7
+#!version=7.8
 #!author=3kaiu (规则来源: ddgksf2013)
 #!fallback=备选: 无独立备选 — ddgksf2013 停更时需自行维护 Rewrite 规则
 #!homepage=https://github.com/3kaiu/config

@@ -1,5 +1,5 @@
 #!name=YouTube去广告增强
-#!version=7.7
+#!version=7.8
 #!desc=移除YouTube视频/瀑布流/搜索/Shorts中的广告，启用画中画(PiP)、后台播放(熄屏播放)、自动翻译字幕。支持YouTube Music。基于Maasea最新脚本(request build 2026/7/12, response build 2026/7/19)。不与其他YouTube去广告插件共用，仅建议iOS 15+设备，支持Premium订阅用户，不支持tvOS。如视频广告残留可尝试在Loon通用设置中禁用UDP 443。
 #!openUrl=
 #!author=Maasea VirgilClyne DivineEngine app2smile ddgksf2013

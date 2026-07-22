@@ -1,24 +1,84 @@
 # 开发者平台路由 (Loon 格式)
+# GitHub / Microsoft / Steam / Wikipedia / 文档与开发工具 (v7.8)
+
+# GitHub
 host-suffix, github.com, Proxy
 host-suffix, githubusercontent.com, Proxy
 host-suffix, githubassets.com, Proxy
+# Microsoft
 host-suffix, microsoft.com, Proxy
 host-suffix, microsoftonline.com, Proxy
 host-suffix, onedrive.com, Proxy
 host-suffix, onedrive.live.com, Proxy
 host-suffix, office365.com, Proxy
 host-suffix, live.com, Proxy
+# Microsoft 开发者
+host-suffix, visualstudio.com, Proxy
+host-suffix, azure.com, Proxy
+host-suffix, azure-devices.com, Proxy
+host-suffix, nuget.org, Proxy
+host-suffix, msdn.com, Proxy
+# Google 开发者
+host, developers.google.com, Proxy
+host, cloud.google.com, Proxy
+host, firebase.google.com, Proxy
+host-suffix, firebaseio.com, Proxy
+host, firebase.googleapis.com, Proxy
+# Steam
 host-suffix, steam.com, Proxy
 host-suffix, steampowered.com, Proxy
 host-suffix, steamcommunity.com, Proxy
 host-suffix, steamstatic.com, Proxy
 host-suffix, steamcdn-a.akamaihd.net, Proxy
+# Wikipedia
 host-suffix, wikipedia.org, Proxy
 host-suffix, wikimedia.org, Proxy
 host-suffix, wikimediafoundation.org, Proxy
+# 文档/知识库
 host-suffix, medium.com, Proxy
 host-suffix, notion.so, Proxy
+host-suffix, dev.to, Proxy
+host-suffix, hashnode.com, Proxy
+host-suffix, digitalocean.com, Proxy
+host-suffix, herokuapp.com, Proxy
+# 部署/托管平台
+host-suffix, vercel.com, Proxy
+host-suffix, netlify.com, Proxy
+host-suffix, netlify.app, Proxy
+host-suffix, cloudflare.com, Proxy
+host-suffix, workers.dev, Proxy
+# 设计工具
 host-suffix, figma.com, Proxy
+# Stack Exchange
 host-suffix, stackoverflow.com, Proxy
+host-suffix, stackexchange.com, Proxy
+host-suffix, serverfault.com, Proxy
+host-suffix, superuser.com, Proxy
+# 容器/包管理器
 host-suffix, docker.com, Proxy
+host-suffix, npmjs.com, Proxy
+host-suffix, npmjs.org, Proxy
+host-suffix, pypi.org, Proxy
+host-suffix, pythonhosted.org, Proxy
+host-suffix, crates.io, Proxy
+host-suffix, rubygems.org, Proxy
+host-suffix, packagist.org, Proxy
+# 代码托管/CI
+host-suffix, gitlab.com, Proxy
+host-suffix, bitbucket.org, Proxy
+host-suffix, circleci.com, Proxy
+host-suffix, travis-ci.org, Proxy
+# 开发工具
 host-suffix, jetbrains.com, Proxy
+host-suffix, atlassian.com, Proxy
+host-suffix, confluence.com, Proxy
+host-suffix, jira.com, Proxy
+host-suffix, hashicorp.com, Proxy
+# Linux/开源
+host-suffix, kernel.org, Proxy
+host-suffix, gnu.org, Proxy
+host-suffix, opensuse.org, Proxy
+host-suffix, fedoraproject.org, Proxy
+host-suffix, archlinux.org, Proxy
+host-suffix, debian.org, Proxy
+host-suffix, ubuntu.com, Proxy

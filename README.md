@@ -1,4 +1,4 @@
-# 3kaiu/config — Loon & Quantumult X 个人专属网络配置库 (v7.7)
+# 3kaiu/config — Loon & Quantumult X 个人专属网络配置库 (v7.8)
 
 这是一个专为个人网络环境（**单节点东京代理主路由**）深度优化的 iOS 网络工具（Loon 与 Quantumult X）自用配置库。针对您实际使用的 App 进行精准净化，并在双端实现模块化开关控制。
 
@@ -110,11 +110,12 @@ https://ws.wenn.in/main/Profile/QX.conf
 ### 🌍 2.7 全球社交平台与流媒体分流 (v5.4 新增, v5.6 扩展)
 *   **规则路径**：`Profile/Loon.lcf` / `Profile/QX.conf` 的 `[Rule]` / `[filter_local]` 段。
 *   **分流覆盖**：
-    *   **流媒体**：YouTube、Netflix（含 CDN）、Disney+、HBO Max、Spotify、TikTok、Prime Video、Twitch、AbemaTV、TVB。
-    *   **社交平台**：Instagram、Twitter/X、Facebook/Meta、Telegram、Reddit、Discord。
-    *   **AI 服务**：OpenAI、Claude、Gemini（含 CDN）、Perplexity、Cursor、Copilot、Codeium 等。
-    *   **Google 全家桶**：google.com、googleapis.com、gstatic.com、googlevideo.com 等。
-    *   **开发者平台 (v5.6 新增)**：GitHub、Microsoft/OneDrive/Office 365、Steam、Wikipedia/Wikimedia。
+    *   **流媒体**：YouTube、Netflix（含 CDN）、Disney+、HBO Max、Spotify、TikTok、Prime Video、Twitch、AbemaTV、TVB、Crunchyroll、Hulu、Paramount+、Peacock、NOW TV、Bilibili 国际版、Apple TV+、Pandora、SoundCloud、Tidal、Deezer。
+    *   **社交平台**：Instagram、Twitter/X、Facebook/Meta、Telegram、Reddit、Discord、WhatsApp、Signal、Line、Threads、Mastodon、VK、Tumblr、Bluesky。
+    *   **AI 服务**：OpenAI、Claude、Gemini（含 CDN）、Perplexity、Cursor、Copilot、Codeium、Mistral、Cohere、Replicate、Together.ai、Fireworks.ai 等。
+    *   **Google 全家桶**：google.com、googleapis.com、gstatic.com、googlevideo.com、googleusercontent.com、ggpht.com、withgoogle.com、g.co 等。
+    *   **开发者平台 (v5.6 新增, v7.8 扩展)**：GitHub、Microsoft/OneDrive/Office 365、Steam、Wikipedia/Wikimedia、GitLab、BitBucket、Atlassian/Jira、npm/PyPI/crates.io、Vercel/Netlify/Cloudflare 等。
+    *   **追踪拦截 (v7.8 新增)**：Google 广告与分析 SDK（doubleclick/google-analytics/googletagmanager）、Firebase、Segment/Amplitude/Mixpanel/Branch/Adjust/AppsFlyer/Kochava/Sentry 等 20 条 REJECT。
     *   所有海外流量统一走向 `Proxy` 代理组（自动延迟检测选优）。
 
 ### 🎮 2.7 Epic Games & epic-kiosk 领游戏分流支持
@@ -200,6 +201,15 @@ https://ws.wenn.in/main/Profile/QX.conf
 *   **PushPlus 安全修复**：Qidian.js 的推送端点 `http://` → `https://`。
 *   **退化存根诚实标注**：qishui.plugin 和 wechat.plugin 的描述准确反映上游脚本已删除、改用纯 reject 规则。
 *   **死规则清理**：移除 QX.conf 中重复的 `tangram.e.qq.com`（line 431）、移除 Loon.lcf 中被 keyword 通杀掉覆盖的 2 条显式 httpdns 规则。
+
+### v7.8 路由规则全面补全 (2026-07-22)
+
+*   **流媒体路由补全**：新增 Netflix CDN（nflximg.net/nflximg.com/nflxext.com/netflixcdn.net/nrdns.netflix.com）、Spotify CDN（spotify.map.fastly.net）、TikTok CDN（tiktokcdn.com/tiktokv.com/muscdn.com）、HBO Max CDN（hbo.com/hbomaxcdn.com）、Disney+ CDN（disney.api.edge.bamgrid.com，DOMAIN 精确匹配）、Crunchyroll（crunchyroll.com/v.vrv.co）、Hulu、Paramount+、Peacock、NOW TV、Bilibili 国际版（bilibili.tv）、Apple TV+（tv.apple.com，DOMAIN 精确匹配）、Pandora、SoundCloud、Tidal、Deezer。
+*   **社交平台路由补全**：新增 WhatsApp、Signal、Line、Threads、Mastodon、VK、Tumblr、Bluesky；补充 Reddit CDN（redditmedia.com/redd.it/reddesignimg.com）；Discord CDN 域名在主配置 Rule 中已有声明，snippet 中添加注释说明。
+*   **AI 服务路由补全**：将 ai.plugin 中的全部域名同步到 snippet。新增 OpenAI CDN（openaiapi-site.azureedge.net/openaicom-api…azurefd.net，auth0.openai.com 用 DOMAIN 精确匹配）、Google AI 补全（bard.google.com/makersuite.google.com/generativelanguage.googleapis.com/alkalimakersuite-pa.googleapis.com/deepmind.com）、AI 音视频（elevenlabs.com）、新兴 AI（mistral.ai/cohere.com/replicate.com/together.ai/fireworks.ai）、AI 编程工具补全（cursor.com/cursor-api.com/github.copilot.com 用 DOMAIN/copilot-proxy.githubusercontent.com/codeiumserver.com/windsurf.ai/supermaven.com）。
+*   **开发者平台路由补全**：新增 Google 开发者（developers.google.com/cloud.google.com/firebase.google.com 用 DOMAIN、firebaseio.com/firebase.googleapis.com）、Microsoft 开发者补全（visualstudio.com/azure.com/azure-devices.com/nuget.org/msdn.com）、包管理器（npmjs.com/npmjs.org/pypi.org/pythonhosted.org/crates.io/rubygems.org/packagist.org）、代码托管/CI（gitlab.com/bitbucket.org/circleci.com/travis-ci.org）、开发工具（atlassian.com/confluence.com/jira.com/hashicorp.com）、文档/知识库（dev.to/hashnode.com/digitalocean.com/herokuapp.com/vercel.com/netlify.com/netlify.app/cloudflare.com/workers.dev）、Stack Exchange 补充（stackexchange.com/serverfault.com/superuser.com）、Linux/开源（kernel.org/gnu.org/opensuse.org/fedoraproject.org/archlinux.org/debian.org/ubuntu.com）。
+*   **Google 全家桶与广告追踪拦截增强**：在主配置 [Rule]/[filter_local] 新增 Google 代理域名（googleusercontent.com/ggpht.com/withgoogle.com 走 Proxy，g.co 用 DOMAIN 精确匹配走 Proxy）；新增 20 条 Google 广告与分析 SDK REJECT 规则（googleadservices.com/doubleclick.net/googlesyndication.com/google-analytics.com/googletagmanager.com/googletagservices.com/adservice.google.com/firebaseinstallations.googleapis.com/app-measurement.com/analytics.google.com/crashlytics.googleapis.com/segment.io/amplitude.com/mixpanel.com/branch.io/adjust.com/appsflyer.com/kochava.com/sentry.io），双端同步。
+*   **版本号全面升级**：Loon.lcf/QX.conf → v7.8、全部 20 个 plugin #!version= → 7.8、package.json → 7.8.0、ai-services snippet 注释 → v7.8。
 
 ---
 

@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════
-#  Loon 配置 (Loon.lcf) — v7.7 (Surgio 生成)
+#  Loon 配置 (Loon.lcf) — v7.8 (Surgio 生成)
 #  核心: 自动健康检测 · 高质量多引擎去广告 · Apple原生增强 · 全球社交/流媒体分流 · 银行 MitM 冲突根治
 #  引擎支持: iOS Loon 3.3.9+
 # ═══════════════════════════════════════════════════════════
@@ -141,99 +141,286 @@ DOMAIN-SUFFIX, weixin.qq.com, DIRECT
 DOMAIN-SUFFIX, wx.qq.com, DIRECT
 
 # AI 服务分流
-# OpenAI / Anthropic / Google AI / AI 编程工具 / 新兴 AI (v7.7)
+# OpenAI / Anthropic / Google AI / AI 编程工具 / 新兴 AI (v7.8)
 
+# OpenAI (ChatGPT / DALL-E / Sora / API)
 DOMAIN-SUFFIX, openai.com, Proxy
 DOMAIN-SUFFIX, ai.com, Proxy
 DOMAIN-SUFFIX, chatgpt.com, Proxy
 DOMAIN-SUFFIX, oaiusercontent.com, Proxy
 DOMAIN-SUFFIX, oaistatic.com, Proxy
+DOMAIN-SUFFIX, openaiapi-site.azureedge.net, Proxy
+DOMAIN-SUFFIX, openaicom-api-bdcpf8c6d2e9b8.azurefd.net, Proxy
+DOMAIN, auth0.openai.com, Proxy
 DOMAIN-KEYWORD, openai, Proxy
+
+# Anthropic (Claude / API)
 DOMAIN-SUFFIX, anthropic.com, Proxy
 DOMAIN-SUFFIX, claude.ai, Proxy
+
+# Google AI (Gemini / AI Studio / PaLM)
 DOMAIN-SUFFIX, gemini.google.com, Proxy
+DOMAIN-SUFFIX, bard.google.com, Proxy
 DOMAIN-SUFFIX, aistudio.google.com, Proxy
+DOMAIN-SUFFIX, makersuite.google.com, Proxy
+DOMAIN-SUFFIX, generativelanguage.googleapis.com, Proxy
+DOMAIN-SUFFIX, alkalimakersuite-pa.googleapis.com, Proxy
 DOMAIN-SUFFIX, deepmind.google, Proxy
+DOMAIN-SUFFIX, deepmind.com, Proxy
+
+# DeepSeek
 DOMAIN-SUFFIX, deepseek.com, Proxy
+
+# xAI (Grok)
 DOMAIN-SUFFIX, x.ai, Proxy
+
+# Midjourney
 DOMAIN-SUFFIX, midjourney.com, Proxy
+
+# AI 音视频生成
 DOMAIN-SUFFIX, suno.ai, Proxy
 DOMAIN-SUFFIX, elevenlabs.io, Proxy
+DOMAIN-SUFFIX, elevenlabs.com, Proxy
 DOMAIN-SUFFIX, runwayml.com, Proxy
 DOMAIN-SUFFIX, lumalabs.ai, Proxy
+
+# 其他 AI 服务
 DOMAIN-SUFFIX, perplexity.ai, Proxy
+DOMAIN-SUFFIX, mistral.ai, Proxy
 DOMAIN-SUFFIX, groq.com, Proxy
+DOMAIN-SUFFIX, cohere.com, Proxy
 DOMAIN-SUFFIX, huggingface.co, Proxy
+DOMAIN-SUFFIX, replicate.com, Proxy
+DOMAIN-SUFFIX, together.ai, Proxy
+DOMAIN-SUFFIX, fireworks.ai, Proxy
+
+# AI 编程工具 (Cursor / Copilot / Windsurf / Supermaven)
 DOMAIN-SUFFIX, cursor.sh, Proxy
-DOMAIN-SUFFIX, codeium.com, Proxy
+DOMAIN-SUFFIX, cursor.com, Proxy
+DOMAIN-SUFFIX, cursor-api.com, Proxy
+DOMAIN, github.copilot.com, Proxy
 DOMAIN-SUFFIX, copilot.microsoft.com, Proxy
+DOMAIN-SUFFIX, copilot-proxy.githubusercontent.com, Proxy
+DOMAIN-SUFFIX, codeium.com, Proxy
+DOMAIN-SUFFIX, codeiumserver.com, Proxy
+DOMAIN-SUFFIX, windsurf.ai, Proxy
+DOMAIN-SUFFIX, supermaven.com, Proxy
 
 # 流媒体路由 (Loon 格式, QX 通过 quantumultx filter 转换)
+# YouTube
 DOMAIN-SUFFIX, youtube.com, Proxy
 DOMAIN-SUFFIX, googlevideo.com, Proxy
 DOMAIN-SUFFIX, ytimg.com, Proxy
+# Netflix
 DOMAIN-SUFFIX, netflix.com, Proxy
 DOMAIN-SUFFIX, nflxvideo.net, Proxy
 DOMAIN-SUFFIX, netflix.net, Proxy
+DOMAIN-SUFFIX, nflximg.net, Proxy
+DOMAIN-SUFFIX, nflximg.com, Proxy
+DOMAIN-SUFFIX, nflxext.com, Proxy
+DOMAIN-SUFFIX, netflixcdn.net, Proxy
+DOMAIN, nrdns.netflix.com, Proxy
+# Disney+
 DOMAIN-SUFFIX, disneyplus.com, Proxy
 DOMAIN-SUFFIX, disney-plus.net, Proxy
+DOMAIN, disney.api.edge.bamgrid.com, Proxy
 DOMAIN-SUFFIX, dssott.com, Proxy
+# HBO Max
 DOMAIN-SUFFIX, hbomax.com, Proxy
+DOMAIN-SUFFIX, hbo.com, Proxy
+DOMAIN-SUFFIX, hbomaxcdn.com, Proxy
+# Spotify
 DOMAIN-SUFFIX, spotify.com, Proxy
 DOMAIN-SUFFIX, scdn.co, Proxy
+DOMAIN-SUFFIX, spotify.map.fastly.net, Proxy
+DOMAIN-SUFFIX, scdn.co.global.ssl.fastly.net, Proxy
+# TikTok
 DOMAIN-SUFFIX, tiktok.com, Proxy
 DOMAIN-SUFFIX, byteoversea.com, Proxy
+DOMAIN-SUFFIX, tiktokcdn.com, Proxy
+DOMAIN-SUFFIX, tiktokv.com, Proxy
+DOMAIN-SUFFIX, muscdn.com, Proxy
+# Prime Video
 DOMAIN-SUFFIX, primevideo.com, Proxy
+# Twitch
 DOMAIN-SUFFIX, twitch.tv, Proxy
+# AbemaTV
 DOMAIN-SUFFIX, abema.tv, Proxy
+# TVB
 DOMAIN-SUFFIX, tvb.com, Proxy
+# Crunchyroll
+DOMAIN-SUFFIX, crunchyroll.com, Proxy
+DOMAIN-SUFFIX, v.vrv.co, Proxy
+# Hulu
+DOMAIN-SUFFIX, hulu.com, Proxy
+DOMAIN-SUFFIX, huluim.com, Proxy
+# Paramount+
+DOMAIN-SUFFIX, paramountplus.com, Proxy
+DOMAIN-SUFFIX, cbsi.com, Proxy
+DOMAIN-SUFFIX, cbsivideo.com, Proxy
+# Peacock
+DOMAIN-SUFFIX, peacocktv.com, Proxy
+DOMAIN-SUFFIX, peacock.com, Proxy
+# NOW TV
+DOMAIN-SUFFIX, nowtv.com, Proxy
+# Bilibili 国际版
+DOMAIN-SUFFIX, bilibili.tv, Proxy
+# Apple TV+
+DOMAIN, tv.apple.com, Proxy
+# Pandora
+DOMAIN-SUFFIX, pandora.com, Proxy
+# SoundCloud
+DOMAIN-SUFFIX, soundcloud.com, Proxy
+DOMAIN-SUFFIX, sndcdn.com, Proxy
+# Tidal
+DOMAIN-SUFFIX, tidal.com, Proxy
+DOMAIN-SUFFIX, tidalhifi.com, Proxy
+# Deezer
+DOMAIN-SUFFIX, deezer.com, Proxy
+DOMAIN-SUFFIX, dzcdn.net, Proxy
+# Google 基础设施
 DOMAIN-SUFFIX, gstatic.com, Proxy
 DOMAIN-SUFFIX, googleapis.com, Proxy
 DOMAIN-SUFFIX, google.com, Proxy
 DOMAIN-SUFFIX, google.co.jp, Proxy
 
 # 社交平台路由 (Loon 格式)
+# Instagram
 DOMAIN-SUFFIX, instagram.com, Proxy
 DOMAIN-SUFFIX, cdninstagram.com, Proxy
+# Twitter / X
 DOMAIN-SUFFIX, twitter.com, Proxy
 DOMAIN-SUFFIX, x.com, Proxy
 DOMAIN-SUFFIX, twimg.com, Proxy
 DOMAIN-SUFFIX, t.co, Proxy
 DOMAIN-SUFFIX, twittercdn.com, Proxy
+# Facebook
 DOMAIN-SUFFIX, facebook.com, Proxy
 DOMAIN-SUFFIX, fbcdn.net, Proxy
+# Telegram
 DOMAIN-SUFFIX, telegram.org, Proxy
 DOMAIN-SUFFIX, t.me, Proxy
 DOMAIN-SUFFIX, telegramcdn.com, Proxy
 DOMAIN-SUFFIX, tdesktop.com, Proxy
+# Reddit
 DOMAIN-SUFFIX, reddit.com, Proxy
 DOMAIN-SUFFIX, redditstatic.com, Proxy
+DOMAIN-SUFFIX, redditmedia.com, Proxy
+DOMAIN-SUFFIX, redd.it, Proxy
+DOMAIN-SUFFIX, reddesignimg.com, Proxy
+# Discord (主配置 Rule 中已有 discordapp.com/discord.media/discordapp.net)
 DOMAIN-SUFFIX, discord.com, Proxy
+# WhatsApp
+DOMAIN-SUFFIX, whatsapp.com, Proxy
+DOMAIN-SUFFIX, whatsapp.net, Proxy
+# Signal
+DOMAIN-SUFFIX, signal.org, Proxy
+DOMAIN-SUFFIX, calls.signal.org, Proxy
+# Line
+DOMAIN-SUFFIX, line.me, Proxy
+DOMAIN-SUFFIX, line-apps.com, Proxy
+DOMAIN-SUFFIX, line-scdn.net, Proxy
+# Threads
+DOMAIN-SUFFIX, threads.net, Proxy
+# Mastodon
+DOMAIN-SUFFIX, mastodon.social, Proxy
+# VK
+DOMAIN-SUFFIX, vk.com, Proxy
+DOMAIN-SUFFIX, userapi.com, Proxy
+DOMAIN-SUFFIX, vk-cdn.net, Proxy
+# Tumblr
+DOMAIN-SUFFIX, tumblr.com, Proxy
+DOMAIN-SUFFIX, tumblr.co, Proxy
+# Bluesky
+DOMAIN-SUFFIX, bsky.app, Proxy
+DOMAIN-SUFFIX, bsky.social, Proxy
 
 # 开发者平台路由 (Loon 格式)
+# GitHub
 DOMAIN-SUFFIX, github.com, Proxy
 DOMAIN-SUFFIX, githubusercontent.com, Proxy
 DOMAIN-SUFFIX, githubassets.com, Proxy
+# Microsoft
 DOMAIN-SUFFIX, microsoft.com, Proxy
 DOMAIN-SUFFIX, microsoftonline.com, Proxy
+DOMAIN-SUFFIX, visualstudio.com, Proxy
+DOMAIN-SUFFIX, azure.com, Proxy
+DOMAIN-SUFFIX, azure-devices.com, Proxy
+DOMAIN-SUFFIX, nuget.org, Proxy
+DOMAIN-SUFFIX, msdn.com, Proxy
+# OneDrive / Office 365
 DOMAIN-SUFFIX, onedrive.com, Proxy
 DOMAIN-SUFFIX, onedrive.live.com, Proxy
 DOMAIN-SUFFIX, office365.com, Proxy
 DOMAIN-SUFFIX, live.com, Proxy
+# Google 开发者
+DOMAIN, developers.google.com, Proxy
+DOMAIN, cloud.google.com, Proxy
+DOMAIN, firebase.google.com, Proxy
+DOMAIN-SUFFIX, firebaseio.com, Proxy
+DOMAIN, firebase.googleapis.com, Proxy
+# Steam
 DOMAIN-SUFFIX, steam.com, Proxy
 DOMAIN-SUFFIX, steampowered.com, Proxy
 DOMAIN-SUFFIX, steamcommunity.com, Proxy
 DOMAIN-SUFFIX, steamstatic.com, Proxy
 DOMAIN-SUFFIX, steamcdn-a.akamaihd.net, Proxy
+# Wikipedia
 DOMAIN-SUFFIX, wikipedia.org, Proxy
 DOMAIN-SUFFIX, wikimedia.org, Proxy
 DOMAIN-SUFFIX, wikimediafoundation.org, Proxy
+# 文档/知识库
 DOMAIN-SUFFIX, medium.com, Proxy
 DOMAIN-SUFFIX, notion.so, Proxy
 DOMAIN-SUFFIX, figma.com, Proxy
+DOMAIN-SUFFIX, dev.to, Proxy
+DOMAIN-SUFFIX, hashnode.com, Proxy
+DOMAIN-SUFFIX, digitalocean.com, Proxy
+DOMAIN-SUFFIX, herokuapp.com, Proxy
+DOMAIN-SUFFIX, vercel.com, Proxy
+DOMAIN-SUFFIX, netlify.com, Proxy
+DOMAIN-SUFFIX, netlify.app, Proxy
+DOMAIN-SUFFIX, cloudflare.com, Proxy
+DOMAIN-SUFFIX, workers.dev, Proxy
+# Stack Exchange
 DOMAIN-SUFFIX, stackoverflow.com, Proxy
+DOMAIN-SUFFIX, stackexchange.com, Proxy
+DOMAIN-SUFFIX, serverfault.com, Proxy
+DOMAIN-SUFFIX, superuser.com, Proxy
+# 包管理器
 DOMAIN-SUFFIX, docker.com, Proxy
+DOMAIN-SUFFIX, npmjs.com, Proxy
+DOMAIN-SUFFIX, npmjs.org, Proxy
+DOMAIN-SUFFIX, pypi.org, Proxy
+DOMAIN-SUFFIX, pythonhosted.org, Proxy
+DOMAIN-SUFFIX, crates.io, Proxy
+DOMAIN-SUFFIX, rubygems.org, Proxy
+DOMAIN-SUFFIX, packagist.org, Proxy
+# 代码托管/CI
+DOMAIN-SUFFIX, gitlab.com, Proxy
+DOMAIN-SUFFIX, bitbucket.org, Proxy
+DOMAIN-SUFFIX, circleci.com, Proxy
+DOMAIN-SUFFIX, travis-ci.org, Proxy
+# 开发工具
 DOMAIN-SUFFIX, jetbrains.com, Proxy
+DOMAIN-SUFFIX, atlassian.com, Proxy
+DOMAIN-SUFFIX, confluence.com, Proxy
+DOMAIN-SUFFIX, jira.com, Proxy
+DOMAIN-SUFFIX, hashicorp.com, Proxy
+# Linux/开源
+DOMAIN-SUFFIX, kernel.org, Proxy
+DOMAIN-SUFFIX, gnu.org, Proxy
+DOMAIN-SUFFIX, opensuse.org, Proxy
+DOMAIN-SUFFIX, fedoraproject.org, Proxy
+DOMAIN-SUFFIX, archlinux.org, Proxy
+DOMAIN-SUFFIX, debian.org, Proxy
+DOMAIN-SUFFIX, ubuntu.com, Proxy
+
+# Google 全家桶
+DOMAIN-SUFFIX, googleusercontent.com, Proxy
+DOMAIN-SUFFIX, ggpht.com, Proxy
+DOMAIN-SUFFIX, withgoogle.com, Proxy
+DOMAIN, g.co, Proxy
 
 
 # GDT 广告 SDK 白名单
@@ -250,6 +437,29 @@ DOMAIN-SUFFIX, h-adashx.ut.taobao.com, REJECT
 # 追踪
 DOMAIN-KEYWORD, qreport, REJECT
 DOMAIN, aegis.cdn-go.cn, REJECT
+
+# Google 分析与广告
+DOMAIN-SUFFIX, googleadservices.com, REJECT
+DOMAIN-SUFFIX, doubleclick.net, REJECT
+DOMAIN-SUFFIX, googlesyndication.com, REJECT
+DOMAIN-SUFFIX, google-analytics.com, REJECT
+DOMAIN-SUFFIX, googletagmanager.com, REJECT
+DOMAIN-SUFFIX, googletagservices.com, REJECT
+DOMAIN-SUFFIX, adservice.google.com, REJECT
+# Firebase
+DOMAIN-SUFFIX, firebaseinstallations.googleapis.com, REJECT
+# 常见分析 SDK
+DOMAIN-SUFFIX, app-measurement.com, REJECT
+DOMAIN-SUFFIX, analytics.google.com, REJECT
+DOMAIN-SUFFIX, crashlytics.googleapis.com, REJECT
+DOMAIN-SUFFIX, segment.io, REJECT
+DOMAIN-SUFFIX, amplitude.com, REJECT
+DOMAIN-SUFFIX, mixpanel.com, REJECT
+DOMAIN-SUFFIX, branch.io, REJECT
+DOMAIN-SUFFIX, adjust.com, REJECT
+DOMAIN-SUFFIX, appsflyer.com, REJECT
+DOMAIN-SUFFIX, kochava.com, REJECT
+DOMAIN-SUFFIX, sentry.io, REJECT
 
 GEOIP, CN, DIRECT
 FINAL, Final

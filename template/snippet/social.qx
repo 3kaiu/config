@@ -1,17 +1,50 @@
 # 社交平台路由 (Loon 格式)
+# Instagram
 host-suffix, instagram.com, Proxy
 host-suffix, cdninstagram.com, Proxy
+# Twitter / X
 host-suffix, twitter.com, Proxy
 host-suffix, x.com, Proxy
 host-suffix, twimg.com, Proxy
 host-suffix, t.co, Proxy
 host-suffix, twittercdn.com, Proxy
+# Facebook / Meta
 host-suffix, facebook.com, Proxy
 host-suffix, fbcdn.net, Proxy
+# Telegram
 host-suffix, telegram.org, Proxy
 host-suffix, t.me, Proxy
 host-suffix, telegramcdn.com, Proxy
 host-suffix, tdesktop.com, Proxy
+# Reddit
 host-suffix, reddit.com, Proxy
 host-suffix, redditstatic.com, Proxy
+host-suffix, redditmedia.com, Proxy
+host-suffix, redd.it, Proxy
+host-suffix, reddesignimg.com, Proxy
+# Discord (discord.com/discord.media/discordapp.com/discordapp.net/discord.gg 已在主配置 Rule 中处理)
 host-suffix, discord.com, Proxy
+# WhatsApp
+host-suffix, whatsapp.com, Proxy
+host-suffix, whatsapp.net, Proxy
+# Signal
+host-suffix, signal.org, Proxy
+host-suffix, calls.signal.org, Proxy
+# Line
+host-suffix, line.me, Proxy
+host-suffix, line-apps.com, Proxy
+host-suffix, line-scdn.net, Proxy
+# Threads
+host-suffix, threads.net, Proxy
+# Mastodon
+host-suffix, mastodon.social, Proxy
+# VK
+host-suffix, vk.com, Proxy
+host-suffix, userapi.com, Proxy
+host-suffix, vk-cdn.net, Proxy
+# Tumblr
+host-suffix, tumblr.com, Proxy
+host-suffix, tumblr.co, Proxy
+# Bluesky
+host-suffix, bsky.app, Proxy
+host-suffix, bsky.social, Proxy
