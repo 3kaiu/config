@@ -1,5 +1,5 @@
 /**
- * 菜鸟包裹去广告 v1.0
+ * 菜鸟包裹去广告 v1.1
  * 作者：3kaiu
  *
  * 处理 jq 过滤：
@@ -7,7 +7,12 @@
  * - 我的页面净化：删除 banner/activity/vip
  * - 发现页面净化：删除 placeContentMap["780001"]
  * - 开屏广告阻塞：materialId==39017 时清空 data
+ *
+ * ⚠️ 修复(v1.1): 添加 $response 守卫, 防止 AllInOne 全局 MitM 误触 request 阶段
  */
+
+// $response 守卫
+if (typeof $response === "undefined") { $done(); }
 
 const url = $request.url;
 

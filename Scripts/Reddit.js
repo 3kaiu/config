@@ -1,9 +1,14 @@
 /**
- * Reddit 去广告 v1.0
+ * Reddit 去广告 v1.1
  * 作者：3kaiu (规则来源: xream)
  *
  * 从 GraphQL 响应中移除推广帖 (promoted posts) 节点。
+ *
+ * ⚠️ 修复(v1.1): 添加 $response 守卫, 防止 AllInOne 全局 MitM 误触 request 阶段
  */
+
+// $response 守卫
+if (typeof $response === "undefined") { $done(); }
 
 try {
   const obj = JSON.parse($response.body);

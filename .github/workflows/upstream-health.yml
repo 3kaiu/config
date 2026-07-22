@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Check ddgksf2013/Rewrite
         run: |
-          status=$(curl -s -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/KeepAds.conf")
+          status=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/KeepAds.conf" || echo "000")
           if [ "$status" != "200" ]; then
             echo "::warning::ddgksf2013/Rewrite returned HTTP $status"
           fi
@@ -22,7 +22,7 @@ jobs:
 
       - name: Check Maasea/sgmodule (YouTube)
         run: |
-          status=$(curl -s -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js")
+          status=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js" || echo "000")
           if [ "$status" != "200" ]; then
             echo "::warning::Maasea/sgmodule YouTube returned HTTP $status"
           fi
@@ -30,7 +30,7 @@ jobs:
 
       - name: Check app2smile/rules (Bilibili)
         run: |
-          status=$(curl -s -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js")
+          status=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js" || echo "000")
           if [ "$status" != "200" ]; then
             echo "::warning::app2smile/rules Bilibili returned HTTP $status"
           fi
@@ -38,7 +38,7 @@ jobs:
 
       - name: Check blackmatrix7 AllInOne
         run: |
-          status=$(curl -s -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AllInOne/AllInOne.plugin")
+          status=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AllInOne/AllInOne.plugin" || echo "000")
           if [ "$status" != "200" ]; then
             echo "::warning::blackmatrix7/AllInOne returned HTTP $status"
           fi

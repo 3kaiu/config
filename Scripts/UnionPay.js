@@ -1,14 +1,19 @@
 /**
- * 云闪付去广告脚本
+ * 云闪付去广告脚本 v1.1
  * 作者：3kaiu
  * 移除首页推广模块、理财页广告、推荐/权益营销内容
+ *
+ * ⚠️ 修复(v1.1): 添加 $response 守卫, 防止 AllInOne 全局 MitM 误触 request 阶段
  */
 
 const $ = new Env("云闪付");
 
+// $response 守卫
+if (typeof $response === "undefined") { $.done(); }
+
 const AD_KEYWORDS = ["广告", "推广", "营销", "活动", "banner", "弹窗", "浮层"];
 
-if (typeof $response !== "undefined" && typeof $request !== "undefined") {
+if (typeof $request !== "undefined") {
   try {
     const url = $request.url;
     const obj = JSON.parse($response.body);
@@ -81,7 +86,6 @@ function Env(n) {
         if (err) e(err);
         else {
           res.body = b;
-          // ⚠️ 修复: Loon 的 response 字段名在不同版本可能是 status 或 statusCode
           if (res.statusCode === undefined) {
             res.statusCode = res.status !== undefined ? res.status : (res.response ? res.response.statusCode : 200);
           }

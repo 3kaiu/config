@@ -1,11 +1,16 @@
 /**
- * 贴吧去广告 v1.0
+ * 贴吧去广告 v1.1
  * 作者：3kaiu (规则来源: app2smile)
  *
  * 对贴吧 JSON/Proto 响应体进行广告净化：
  * - 删除 ad 相关字段
  * - 处理 JSON 响应中的推广帖
+ *
+ * ⚠️ 修复(v1.1): 添加 $response 守卫, 防止 AllInOne 全局 MitM 误触 request 阶段
  */
+
+// $response 守卫
+if (typeof $response === "undefined") { $done(); }
 
 // 需要删除的字段列表 (JSON 模式)
 const AD_KEYS = [

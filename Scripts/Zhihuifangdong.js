@@ -1,15 +1,18 @@
 /**
- * 智慧房东广告屏蔽脚本
+ * 智慧房东广告屏蔽脚本 v1.1
  * 基于 Loon http-response 拦截
  * 参数: appOpenAds — 开屏广告; bannerPicMore — Banner 广告
+ *
+ * ⚠️ 修复(v1.1): $response 守卫提前 return, 避免穿透
  */
+
+// $response 守卫
+if (typeof $response === "undefined") { $done(); }
+
 const arg = typeof $argument !== "undefined" ? $argument : "";
 const $ = new Env("智慧房东");
 
 try {
-  // ⚠️ 修复(v5.9): 添加 $response 守卫, 防止 request 阶段误入
-  if (typeof $response === "undefined") { $.done(); }
-  else {
   const obj = JSON.parse($response.body);
 
   const url = typeof $request !== "undefined" ? $request.url : "";
@@ -27,7 +30,6 @@ try {
   }
 
   $.done({ body: JSON.stringify(obj) });
-  }
 } catch (e) {
   $.log(`智慧房东去广告异常: ${e}`);
   $.done();
@@ -59,7 +61,6 @@ function Env(n) {
         if (err) e(err);
         else {
           res.body = b;
-          // ⚠️ 修复: Loon 的 response 字段名在不同版本可能是 status 或 statusCode
           if (res.statusCode === undefined) {
             res.statusCode = res.status !== undefined ? res.status : (res.response ? res.response.statusCode : 200);
           }
