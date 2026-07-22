@@ -576,6 +576,7 @@ async function handleSimpleCheckin() {
   }
 
   const maxRetry = 3;
+  let lastError = "";
   for (let i = 0; i < maxRetry; i++) {
     try {
       const res = await $.fetch({
@@ -604,18 +605,42 @@ async function handleSimpleCheckin() {
           }
           return;
         } else {
-          $.notify("起点助手", "⚠️ 签到异常", JSON.stringify(obj));
+          const msg = obj ? JSON.stringify(obj) : "未知错误";
+          if (!CONFIG.SilentMode) {
+            $.notify("起点助手", "⚠️ 签到异常", msg);
+          } else {
+            $.log(`[静默模式] ⚠️ 签到异常: ${msg}`);
+          }
           return;
         }
       }
-      if (i < maxRetry - 1) await $.wait(3000);
+      // res 存在但 statusCode !== 200 (如 429/502/503)
+      lastError = `HTTP ${res ? res.statusCode : "未知"}`;
+      if (i < maxRetry - 1) {
+        $.log(`[签到] ${lastError}, 重试 ${i + 1}/${maxRetry}...`);
+        await $.wait(3000);
+      }
     } catch (e) {
+      lastError = String(e);
       if (i === maxRetry - 1) {
-        $.notify("起点助手", "❌ 签到失败", '重试' + maxRetry + '次后仍失败: ' + e);
+        const errMsg = '重试' + maxRetry + '次后仍失败: ' + lastError;
+        if (!CONFIG.SilentMode) {
+          $.notify("起点助手", "❌ 签到失败", errMsg);
+        } else {
+          $.log(`[静默模式] ❌ 签到失败: ${errMsg}`);
+        }
       } else {
+        $.log(`[签到] 网络异常, 重试 ${i + 1}/${maxRetry}...`);
         await $.wait(3000);
       }
     }
+  }
+  // 3 次重试全部非 200 且未进入 catch — 兜底通知
+  const errMsg = '重试' + maxRetry + '次后仍失败 (HTTP ' + lastError + ')';
+  if (!CONFIG.SilentMode) {
+    $.notify("起点助手", "❌ 签到失败", errMsg);
+  } else {
+    $.log(`[静默模式] ❌ 签到失败: ${errMsg}`);
   }
 }
 

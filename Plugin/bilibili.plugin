@@ -15,8 +15,8 @@ http-response ^https:\/\/(grpc\.biliapi\.net|app\.bilibili\.com)\/bilibili\.app\
 
 [Rewrite]
 # 港澳台地区解锁 (Region Unlock)
-^https?:\/\/app\.bilibili\.com\/(x\/)?(intl|dm|reply|history|v\d\/(fav|msgfeed)).+?(&s_locale=zh-Hans_[A-Z]{2})(.+?)(&sim_code=\d+)(.+) $1&s_locale=zh-Hans_PH$6&sim_code=51503$8 302, enable={BILI_ENABLE}
-^https?:\/\/passport\.bilibili\.com\/x\/intl\/passport-login\/.+(&s_locale=zh-Hans_[A-Z]{2})(.+)(&sim_code=\d+)(.+) $1&s_locale=zh-Hans_PH$35&sim_code=51503$5 302, enable={BILI_ENABLE}
+^https?:\/\/app\.bilibili\.com\/(x\/)?(intl|dm|reply|history|v\d\/(fav|msgfeed)).+?(&s_locale=zh-Hans_[A-Z]{2})(.+?)(&sim_code=\d+)(.+) $1$2$3$4$5&s_locale=zh-Hans_PH&sim_code=51503$7 302, enable={BILI_ENABLE}
+^https?:\/\/passport\.bilibili\.com\/x\/intl\/passport-login\/.+(&s_locale=zh-Hans_[A-Z]{2})(.+)(&sim_code=\d+)(.+) $1$2$3&s_locale=zh-Hans_PH&sim_code=51503$4 302, enable={BILI_ENABLE}
 
 [MitM]
 hostname = %APPEND% app.bilibili.com, grpc.biliapi.net
