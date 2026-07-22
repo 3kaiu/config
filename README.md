@@ -50,7 +50,7 @@ https://ws.wenn.in/main/Profile/QX.conf
 *   **覆盖应用**：云闪付、买单吧 (交通银行)、中国银行 (缤纷生活)、农业银行等主流金融机构。
 *   **净化效果**：
     *   拦截启动开屏广告、首页弹窗、广告图加载。
-    *   **云闪付净化**：通过 [UnionPay.js](https://github.com/3kaiu/config/blob/main/Scripts/UnionPay.js) 重写，剔除理财页推广、首页大图、 koala 权益推广（默认注释以防 SSL Pinning 崩溃，越狱/注入用户可手动开启）。
+    *   **云闪付净化**：通过 DNS 级 REJECT 实现，无独立脚本。
     *   **类型安全 Mocking**：使用 `reject-dict` (返回 `{}`) 替代直接断网，防止 App 报错崩溃。
     *   **深度兼容与去广告平衡设计**：
         1. **DNS 绕过与 Fake-IP 排除**：在 QX `dns_exclusion_list` 与 Loon `real-ip` 中全量加入主流金融域名，强制使用真实 IP 解析，防范安全检测。
@@ -221,8 +221,17 @@ https://ws.wenn.in/main/Profile/QX.conf
 │   └── workflows/
 │       ├── sync-kelee.yml          # 每日同步 Prevent_DNS_Leaks.plugin
 │       ├── mirror-scripts.yml      # 每日 mirror 外部脚本到 Mirror/
-│       └── upstream-health.yml     # 上游依赖每日健康检查 (12 个源)
+│       ├── upstream-health.yml     # 上游依赖每日健康检查 (12 个源)
+│       ├── surgio-build.yml        # Surgio 构建工作流
+│       └── config-validate.yml     # 配置验证 CI (元信息/URL/双端对齐/MitM)
 ├── Mirror/                     # 外部脚本缓存 (每日自动同步)
+│   ├── youtube.response.js         # YouTube 响应增强
+│   ├── youtube.request.js          # YouTube 请求拦截
+│   ├── netease.adblock.js          # 网易云音乐去广告
+│   ├── bilibili-proto.js           # B站 Proto 去广告
+│   ├── bilibili-json.js            # B站 JSON 去广告
+│   ├── applet.js                   # 微信小程序去广告
+│   └── amdc.js                     # 淘宝/高德 AMDC
 ├── Kelee/                      # 本地缓存的核心插件
 │   ├── Prevent_DNS_Leaks.plugin  # DNS 泄露防护 (ajune0527 镜像, 每日同步)
 │   └── YouTube_remove_ads.plugin  # YouTube 增强 (自维护, 基于 Maasea)
@@ -246,6 +255,22 @@ https://ws.wenn.in/main/Profile/QX.conf
 │   ├── reddit.plugin            # Reddit去广告 (v7.1 新增)
 │   ├── tieba.plugin             # 贴吧去广告 (v7.1 新增)
 │   └── zhihu.plugin             # 知乎去广告 (v7.1 新增)
+├── provider/                   # Surgio provider 定义
+│   └── tokyo.js                   # 东京单节点 provider
+├── template/                   # Surgio 模板
+│   ├── loon.tpl                  # Loon 主配置模板
+│   ├── quantumultx.tpl          # QX 主配置模板
+│   └── snippet/                  # 双端共享路由片段
+│       ├── streaming.tpl         # 流媒体路由 (Loon)
+│       ├── streaming.qx          # 流媒体路由 (QX)
+│       ├── social.tpl            # 社交平台路由 (Loon)
+│       ├── social.qx             # 社交平台路由 (QX)
+│       ├── ai-services.tpl       # AI 服务路由 (Loon)
+│       ├── ai-services.qx        # AI 服务路由 (QX)
+│       ├── developer.tpl        # 开发者平台路由 (Loon)
+│       ├── developer.qx         # 开发者平台路由 (QX)
+│       ├── bank-ad-reject.tpl   # 银行广告 REJECT 规则 (Loon)
+│       └── bank-ad-reject.qx    # 银行广告 REJECT 规则 (QX)
 ├── QX/                         # QX 配置模块
 │   └── apple/                   # Apple 原生增强 (iRingo .plugin→.conf 转换)
 │       ├── WeatherKit.conf      # 天气增强
@@ -259,7 +284,6 @@ https://ws.wenn.in/main/Profile/QX.conf
 └── Scripts/                    # 自维护脚本
     ├── Qidian.js               # 起点全能增强运行脚本
     ├── Zhihuifangdong.js       # 智慧房东去广告脚本
-    ├── UnionPay.js             # 云闪付净化脚本
     ├── Cainiao.js              # 菜鸟包裹净化脚本
     ├── Amap.js                 # 高德地图去广告 (v7.1)
     ├── JD.js                   # 京东去广告 (v7.1)

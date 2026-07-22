@@ -102,7 +102,96 @@ jobs:
           # 找差异
           diff <(echo "$loon_banks") <(echo "$qx_banks") && echo "✅ 银行域名排除双端一致" >> $GITHUB_STEP_SUMMARY || echo "⚠️ 银行域名排除存在差异" >> $GITHUB_STEP_SUMMARY
 
-      # ── 5. 主配置版本号一致性 ──
+      # ── 5. MitM hostname 双端 diff 检查 ──
+      - name: MitM hostname cross-check
+        run: |
+          echo "## MitM Hostname Cross-Check" >> $GITHUB_STEP_SUMMARY
+          # 提取 Loon.lcf 的 hostname 行中所有正向域名（非 - 开头）
+          loon_hostname_line=$(grep '^hostname = ' Profile/Loon.lcf)
+          qx_hostname_line=$(grep '^hostname = ' Profile/QX.conf)
+          # 提取正向域名（逗号分隔，去除前导空格，过滤 - 开头的负向排除）
+          echo "$loon_hostname_line" | sed 's/^hostname = //' | tr ',' '\n' | sed 's/^ //' | grep -v '^-' | sort -u > /tmp/loon_hostnames.txt
+          echo "$qx_hostname_line" | sed 's/^hostname = //' | tr ',' '\n' | sed 's/^ //' | grep -v '^-' | sort -u > /tmp/qx_hostnames.txt
+          loon_count=$(wc -l < /tmp/loon_hostnames.txt)
+          qx_count=$(wc -l < /tmp/qx_hostnames.txt)
+          echo "| Config | Positive hostnames |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Loon | $loon_count |" >> $GITHUB_STEP_SUMMARY
+          echo "| QX | $qx_count |" >> $GITHUB_STEP_SUMMARY
+          # Loon 有但 QX 没有的域名
+          only_loon=$(comm -23 /tmp/loon_hostnames.txt /tmp/qx_hostnames.txt)
+          # QX 有但 Loon 没有的域名
+          only_qx=$(comm -13 /tmp/loon_hostnames.txt /tmp/qx_hostnames.txt)
+          if [ -n "$only_loon" ]; then
+            echo "⚠️ **Loon 有但 QX 没有的 MitM hostname**:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "$only_loon" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -n "$only_qx" ]; then
+            echo "⚠️ **QX 有但 Loon 没有的 MitM hostname**:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "$only_qx" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -z "$only_loon" ] && [ -z "$only_qx" ]; then
+            echo "✅ MitM hostname 双端完全一致" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ MitM hostname 双端存在差异（warning，不阻断）" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+      # ── 6. HTTPDNS Rewrite 对齐检查 ──
+      - name: HTTPDNS rewrite alignment check
+        run: |
+          echo "## HTTPDNS Rewrite Alignment" >> $GITHUB_STEP_SUMMARY
+          # 统计 Loon [Rewrite] 段中以 /d 结尾的 HTTPDNS reject-200 规则数
+          loon_httpdns=$(grep -c 'reject-200$' Profile/Loon.lcf || echo 0)
+          # 统计 QX [rewrite_local] 段中 url reject-200 且含 /d 的 HTTPDNS 规则数
+          qx_httpdns=$(grep '/d url reject-200' Profile/QX.conf | wc -l || echo 0)
+          echo "| Config | HTTPDNS rewrite count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|----------------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Loon | $loon_httpdns |" >> $GITHUB_STEP_SUMMARY
+          echo "| QX | $qx_httpdns |" >> $GITHUB_STEP_SUMMARY
+          if [ "$loon_httpdns" -ne "$qx_httpdns" ]; then
+            echo "⚠️ HTTPDNS rewrite 数量不一致: Loon=$loon_httpdns, QX=$qx_httpdns（warning，不阻断）" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ HTTPDNS rewrite 数量一致: $loon_httpdns 条" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+      # ── 7. Snippet 双端对齐检查 ──
+      - name: Snippet alignment check
+        run: |
+          echo "## Snippet Alignment Check" >> $GITHUB_STEP_SUMMARY
+          FAIL=0
+          for pair in streaming social ai-services developer bank-ad-reject; do
+            tpl_file="template/snippet/${pair}.tpl"
+            qx_file="template/snippet/${pair}.qx"
+            if [ ! -f "$tpl_file" ] || [ ! -f "$qx_file" ]; then
+              echo "⚠️ ${pair}: 缺少 .tpl 或 .qx 文件" >> $GITHUB_STEP_SUMMARY
+              FAIL=$((FAIL+1))
+              continue
+            fi
+            # 统计 Loon 格式的域名规则行数（DOMAIN / DOMAIN-SUFFIX / DOMAIN-KEYWORD 开头）
+            tpl_count=$(grep -cE '^(DOMAIN|DOMAIN-SUFFIX|DOMAIN-KEYWORD|DEST-PORT)' "$tpl_file" || echo 0)
+            # 统计 QX 格式的域名规则行数（host / host-suffix / host-keyword / dest-port 开头）
+            qx_count=$(grep -cE '^(host|host-suffix|host-keyword|dest-port)' "$qx_file" || echo 0)
+            echo "| ${pair} | Loon: ${tpl_count} | QX: ${qx_count} |" >> $GITHUB_STEP_SUMMARY
+            if [ "$tpl_count" -ne "$qx_count" ]; then
+              echo "❌ ${pair} 域名数量不一致: Loon=${tpl_count}, QX=${qx_count}" >> $GITHUB_STEP_SUMMARY
+              FAIL=$((FAIL+1))
+            fi
+          done
+          if [ "$FAIL" -eq 0 ]; then
+            echo "✅ 所有 snippet 双端域名数量一致" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ $FAIL 个 snippet 双端不一致" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          exit $FAIL
+
+      # ── 8. 主配置版本号一致性 ──
       - name: Check version consistency
         run: |
           echo "## Version Consistency" >> $GITHUB_STEP_SUMMARY
