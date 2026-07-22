@@ -9,14 +9,17 @@
 WECHAT_MP=switch,"true","false",tag=是否开启公众号去广告,desc=开启后净化公众号图文广告
 WECHAT_MINI=switch,"true","false",tag=是否开启小程序去广告,desc=开启后净化小程序广告
 
+[Script]
+# ⚠️ 修复(v7.3): 迁移到 [Script] 段, 添加 requires-body + timeout
+# 公众号图文广告 — ddgksf2013 weixin.js 已 404, 替换为 app2smile 源
+http-response ^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/wechat-json.js, requires-body=true, timeout=10, tag=公众号净化, enable={WECHAT_MP}
+# 小程序通用
+http-response ^(https?://)?([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+[a-zA-Z]{2,}(:\d+)?/wp-json/[a-zA-Z0-9_-]+/(mp\/)?v\d/posts script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/applet.js, requires-body=true, timeout=10, tag=小程序净化, enable={WECHAT_MINI}
+
 [Rewrite]
-# 公众号图文广告
-^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad url script-response-body https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/weixin.js, enable={WECHAT_MP}
-# 小程序广告 API
+# 小程序广告 API (纯 reject, 不需要 body)
 ^https?:\/\/api\.blibee\.com\/cvsnotify-api\/cvs\/notify\/app\/banner\/v\d+$ url reject-200, enable={WECHAT_MINI}
 ^https?:\/\/ucmp\.sf-express\.com\/proxy\/operation-platform\/info-flow-adver\/query$ url reject-200, enable={WECHAT_MINI}
-# 小程序通用
-^(https?://)?([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+[a-zA-Z]{2,}(:\d+)?/wp-json/[a-zA-Z0-9_-]+/(mp\/)?v\d/posts url script-response-body https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/applet.js, enable={WECHAT_MINI}
 
 [MitM]
 hostname = %APPEND% mp.weixin.qq.com, api.blibee.com, ucmp.sf-express.com

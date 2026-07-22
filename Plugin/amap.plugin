@@ -62,4 +62,5 @@ http-response ^https:\/\/m5\.amap\.com\/dsp\/onscene_visual_optimization script-
 http-response ^https:\/\/m5\.amap\.com\/dsp\/content_info script-path=https://ws.wenn.in/main/Scripts/Amap.js, requires-body=true, timeout=10, tag=打车_内容, enable={AMAP_ENABLE}
 
 [MitM]
-hostname = %APPEND% m5.amap.com, m5-zb.amap.com, oss.amap.com, sns.amap.com, amdc.m.taobao.com
+# ⚠️ 修复(v7.3): 移除 oss.amap.com 和 sns.amap.com (无对应Rule/Script, 冗余 MitM 解密开销)
+hostname = %APPEND% m5.amap.com, m5-zb.amap.com, amdc.m.taobao.com

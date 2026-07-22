@@ -5,9 +5,12 @@
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/TaoPiao.png
 
-[Rewrite]
+[Script]
+# ⚠️ 修复(v7.3): 迁移到 [Script] 段, 添加 requires-body + timeout
 # AMDC
-^http:\/\/amdc\.m\.taobao\.com url script-response-body https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amdc.js
+http-response ^http:\/\/amdc\.m\.taobao\.com script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amdc.js, requires-body=true, timeout=10, tag=AMDC净化
+
+[Rewrite]
 # 开屏广告
 ^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopadvertiseapi\.queryloadingbanner url reject-200
 # 广告预加载
@@ -26,4 +29,4 @@
 ^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopitemadvertiseapi\.queryadvertise url reject-200
 
 [MitM]
-hostname = %APPEND% acs.m.taobao.com
+hostname = %APPEND% acs.m.taobao.com, amdc.m.taobao.com
