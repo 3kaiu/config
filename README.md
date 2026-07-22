@@ -61,7 +61,7 @@ https://ws.wenn.in/main/Profile/QX.conf
 *   **净化效果**：通过 [Zhihuifangdong.js](https://github.com/3kaiu/config/blob/main/Scripts/Zhihuifangdong.js) 拦截开屏与 Banner 横幅广告，Loon 端支持独立开关控制。
 
 ### 🤖 2.4 AI 服务分流
-*   **规则路径**：`Plugin/ai.plugin` (Loon) / `QX/ai.conf` 远程规则引用 (QX)
+*   **规则路径**：`Plugin/ai.plugin` (Loon) / `QX.conf` `[filter_local]` 段 (QX, v7.3 内联)
 *   **分流服务**：OpenAI (ChatGPT)、Anthropic (Claude)、Google AI (Gemini)、Perplexity、Groq、编程助手 (Cursor / Copilot / Windsurf / Supermaven) 等。所有 AI 流量自动走向 Proxy 代理策略组。
 
 ### 📹 2.5 YouTube 增强 (v7.1 统一 Maasea 方案)
@@ -215,7 +215,6 @@ https://ws.wenn.in/main/Profile/QX.conf
 │   ├── tieba.plugin             # 贴吧去广告 (v7.1 新增)
 │   └── zhihu.plugin             # 知乎去广告 (v7.1 新增)
 ├── QX/                         # QX 配置模块
-│   ├── ai.conf                  # AI 服务分流规则
 │   └── apple/                   # Apple 原生增强 (iRingo .plugin→.conf 转换)
 │       ├── WeatherKit.conf      # 天气增强
 │       ├── Maps.conf            # 地图增强
