@@ -376,7 +376,7 @@ https://raw.githubusercontent.com/ajune0527/vpn_tool/master/Tool/Loon/Plugin/Qui
 # App 精细化去广告 (自维护, 引用 ddgksf2013/app2smile 活跃上游脚本)
 # 按需开启/关闭, 默认已全开
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-https://ws.wenn.in/main/Plugin/weibo.plugin, enabled=true, tag=微博去广告
+# v7.6: weibo.plugin 已移除 — 微博去广告交给 ddgksf2013/WeiboAds.conf (QX) 或 skip
 https://ws.wenn.in/main/Plugin/wechat.plugin, enabled=true, tag=微信&小程序&公众号去广告
 https://ws.wenn.in/main/Plugin/bilibili.plugin, enabled=true, tag=B站去广告
 https://ws.wenn.in/main/Plugin/bilicomics.plugin, enabled=true, tag=B站漫画去广告

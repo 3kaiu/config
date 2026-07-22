@@ -9,7 +9,7 @@
 [Script]
 # ⚠️ 修复(v7.3): 迁移到 [Script] 段, 添加 requires-body + timeout
 # AMDC
-http-response ^http:\/\/amdc\.m\.taobao\.com script-path=https://raw.githubusercontent.com/3kaiu/config/main/Mirror/ddgksf2013/amdc.js, requires-body=true, timeout=10, tag=AMDC净化
+http-response ^http:\/\/amdc\.m\.taobao\.com script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amdc.js, requires-body=true, timeout=10, tag=AMDC净化
 
 [Rewrite]
 # 开屏广告

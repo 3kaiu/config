@@ -1,8 +1,8 @@
 #!name=微信去广告
 #!desc=微信 & 小程序 & 公众号 — 净化推广广告
-#!version=7.4
+#!version=7.6
 #!author=3kaiu (规则来源: ddgksf2013)
-#!fallback=备选: RuCu6 (Plugins/Weixin_Official_Accounts_remove_ads.plugin) — 纯规则无外部脚本依赖
+#!fallback=备选: 无脚本纯规则 — ddgksf2013/WeChat.conf 每日更新
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/WeChat.png
 
@@ -10,17 +10,17 @@
 WECHAT_MP=switch,"true","false",tag=是否开启公众号去广告,desc=开启后净化公众号图文广告
 WECHAT_MINI=switch,"true","false",tag=是否开启小程序去广告,desc=开启后净化小程序广告
 
-[Script]
-# ⚠️ 修复(v7.3): 迁移到 [Script] 段, 添加 requires-body + timeout
-# 公众号图文广告 — ddgksf2013 weixin.js 已 404, 替换为 app2smile 源
-http-response ^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad script-path=https://raw.githubusercontent.com/3kaiu/config/main/Mirror/app2smile/wechat-json.js, requires-body=true, timeout=10, tag=公众号净化, enable={WECHAT_MP}
-# 小程序通用
-http-response ^(https?://)?([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+[a-zA-Z]{2,}(:\d+)?/wp-json/[a-zA-Z0-9_-]+/(mp\/)?v\d/posts script-path=https://raw.githubusercontent.com/3kaiu/config/main/Mirror/ddgksf2013/applet.js, requires-body=true, timeout=10, tag=小程序净化, enable={WECHAT_MINI}
-
 [Rewrite]
-# 小程序广告 API (纯 reject, 不需要 body)
+# ⚠️ 修复(v7.6): weixin.js 和 wechat-json.js 均不存在, 改用纯 reject-dict
+# 公众号图文广告 — ddgksf2013/WeChat.conf 远程规则已覆盖, 此处做本地兜底
+^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad url reject-dict, enable={WECHAT_MP}
+# 小程序广告 API → applet.js 还活着
 ^https?:\/\/api\.blibee\.com\/cvsnotify-api\/cvs\/notify\/app\/banner\/v\d+$ url reject-200, enable={WECHAT_MINI}
 ^https?:\/\/ucmp\.sf-express\.com\/proxy\/operation-platform\/info-flow-adver\/query$ url reject-200, enable={WECHAT_MINI}
+
+[Script]
+# 小程序通用 (ddgksf2013 applet.js 仍可用)
+http-response ^(https?://)?([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+[a-zA-Z]{2,}(:\d+)?/wp-json/[a-zA-Z0-9_-]+/(mp\/)?v\d/posts script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/applet.js, requires-body=true, timeout=10, tag=小程序净化, enable={WECHAT_MINI}
 
 [MitM]
 hostname = %APPEND% mp.weixin.qq.com, api.blibee.com, ucmp.sf-express.com
