@@ -25,7 +25,7 @@ DOMAIN,h.trace.qq.com,REJECT,enable={QQMUSIC_ENABLE}
 DOMAIN,sdk.e.qq.com,REJECT,enable={QQMUSIC_ENABLE}
 DOMAIN,p.l.qq.com,REJECT,enable={QQMUSIC_ENABLE}
 DOMAIN,us.l.qq.com,REJECT,enable={QQMUSIC_ENABLE}
-DOMAIN,tangram.e.qq.com,REJECT,enable={QQMUSIC_ENABLE}
+# ⚠️ 修复(v7.3): tangram.e.qq.com 已由 qidian.plugin 统一 REJECT, 避免重复
 DOMAIN-SUFFIX,imtmp.net,REJECT,enable={QQMUSIC_ENABLE}
 
 # 纯 DNS 级 REJECT，无需 MitM

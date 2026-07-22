@@ -37,6 +37,8 @@ DOMAIN,free-aos-cdn-image.amap.com,REJECT,enable={AMAP_ENABLE}
 ^https?:\/\/amdc\.m\.taobao\.com\/amdc\/mobileDispatch reject-dict, enable={AMAP_ENABLE}
 
 [Script]
+# ⚠️ 设计说明(v7.3): Rewrite reject-dict 优先生效, Script http-response 作为 fallback
+# 双重覆盖防止 reject-dict 不生效时出现广告残留
 # ── 导航详情页 (4条) ──
 http-response ^https:\/\/m5-zb\.amap\.com\/dsp\/card-service-(car-end|route-plan) script-path=https://ws.wenn.in/main/Scripts/Amap.js, requires-body=true, timeout=10, tag=导航_卡片服务, enable={AMAP_ENABLE}
 http-response ^https:\/\/m5-zb\.amap\.com\/dsp\/new_hotword script-path=https://ws.wenn.in/main/Scripts/Amap.js, requires-body=true, timeout=10, tag=导航_热搜词, enable={AMAP_ENABLE}
