@@ -1,5 +1,5 @@
-#!name=起点全能助手 Pro v4.6
-#!desc=抓包驱动深度净化 · 福利中心精简 · 发现页白名单 · 自动静默签到 & 高阶福利任务自动化。v4.6: 修复 AllInOne MitM 导致的 $response 崩溃。
+#!name=起点全能助手 Pro v6.2
+#!desc=抓包驱动深度净化 · 福利中心精简 · 发现页白名单 · 自动静默签到 & 高阶福利任务自动化。v6.2: 紧急修复 finishWatch 回归 bug + QX cron argument。
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bookpedia.png

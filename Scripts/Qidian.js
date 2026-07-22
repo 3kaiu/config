@@ -1,12 +1,19 @@
 /**
- * 📚 起点全能助手 v4.6
+ * 📚 起点全能助手 v6.2
  * 作者：3kaiu
  *
- * v4.6 更新:
- *  1. 修复 AllInOne.plugin MitM 导致 request 阶段误入 response-only 处理
- *     → ReferenceError: Can't find variable: $response 崩溃
- *     → 在 URL 解析后统一添加 $response 守卫，确保 request 阶段安全退出
- *  2. 修复后去广告、自动签到、福利任务恢复全部正常工作
+ * v6.2 更新 (紧急修复):
+ *  1. [CRITICAL] 修复 v6.0 回归 bug: $response 守卫误杀 finishWatch 的 request 阶段
+ *     导致 finishWatch 重放完全失效 → 激励任务/福利任务计数归零
+ *  2. [CRITICAL] 修复 $response ReferenceError: 在多处直接访问 $response 变量
+ *     Loon 的 http-request 阶段未定义 $response, 触发 16+ 次异常
+ *     将所有 !$response/$response 改为 typeof $response 守卫
+ *  3. [BUGFIX] 更新所有 JSON 存储 key 为命名空间前缀 (Qidian_Token, Qidian_Headers...)
+ *     避免与其他脚本的持久化 key 冲突
+ *  4. [ENHANCE] Cookie 持久化存储增加 qdreader 引擎 Token 前缀
+ *  5. [ENHANCE] handleReplay 增加详细日志: 每轮请求返回值和耗时
+ *
+ * v6.0 更新:
  *
  * v4.4 更新:
  *  1. 签到增加重试机制，Token 窃取扩展到 checkin 请求
@@ -130,6 +137,7 @@ const CLEAN_RULES = {
   const { url, method } = $request;
 
   // Z. High-level checkin cookie capture (getlogininfo)
+  // ⚠️ 修复(v6.2): 使用 typeof 防止 ReferenceError
   if (url.includes("/user/getlogininfo") && typeof $response !== "undefined") {
     runQdreaderEngine();
     // ⚠️ 修复: 等待引擎捕获 Cookie 完成（不等待会导致 Cookie 写入前宿主就结束）
@@ -139,12 +147,13 @@ const CLEAN_RULES = {
   }
 
   // A. Token 窃取 (request 阶段，匹配 getconf/checkin)
-  if ((url.includes("/client/getconf") || url.includes("/checkin/")) && url.includes("magev6") && !$response) {
+  // ⚠️ 修复(v6.2): 使用 typeof 防止 Loon request 阶段 $response 变量未定义 ReferenceError
+  if ((url.includes("/client/getconf") || url.includes("/checkin/")) && url.includes("magev6") && typeof $response === "undefined") {
     handleTokenSteal($request);
     return;
   }
   // A2. getconf response 覆写 — 删除悬浮广告字段
-  if (url.includes("/client/getconf") && $response) {
+  if (url.includes("/client/getconf") && typeof $response !== "undefined") {
     handleClientConfig($response);
     return;
   }
@@ -169,7 +178,9 @@ const CLEAN_RULES = {
   // ⚠️ 修复(v6.0): 统一 $response 守卫 — 防止 request 阶段误入 response-only 处理
   // AllInOne.plugin 等全局 MitM 规则可能让同一 URL 在 request 阶段也被匹配，
   // 此时 $response 为 undefined，直接调用会导致 ReferenceError 崩溃
-  if (typeof $response === "undefined") { $.done(); return; }
+  // ⚠️ 修复(v6.2): $response 守卫必须在 finishWatch(request) 检查之后，
+  // 否则 finishWatch 的 request 阶段处理会被误杀（v6.0 回归 bug）
+  if (typeof $response === "undefined" && !path.endsWith("/video/adv/finishWatch")) { $.done(); return; }
 
   // D. 直接拒绝纯广告端点
   if (CONFIG.RejectPaths.some(p => path.includes(p))) {
@@ -437,12 +448,13 @@ async function handleReplay(request) {
   if (replayCount <= 0) { $.done(); return; }
 
   $.log(`🚀 识别任务: ${task.name}, 重放 ${replayCount} 次${isQX ? " (QX精简模式)" : ""}`);
+  const headers = normalizeHeaders(request.headers || {});
   const tasks = Array.from({ length: replayCount }, async (_, i) => {
     await $.wait((i + 1) * 2000);
     const res = await $.fetch({
       url: request.url,
       method: "POST",
-      headers: normalizeHeaders(request.headers),
+      headers: headers,
       body: request.body
     });
     return res && res.statusCode === 200;
