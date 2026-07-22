@@ -5,8 +5,8 @@
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse.png
 
 [Argument]
-appOpenAdsSwitch=switch,true,tag=开屏广告屏蔽,desc=开启后将屏蔽App启动时的开屏广告
-bannerAdsSwitch=switch,true,tag=Banner广告屏蔽,desc=开启后将屏蔽App内的Banner横幅广告
+appOpenAdsSwitch=switch,"true","false",tag=开屏广告屏蔽,desc=开启后将屏蔽App启动时的开屏广告
+bannerAdsSwitch=switch,"true","false",tag=Banner广告屏蔽,desc=开启后将屏蔽App内的Banner横幅广告
 
 [Script]
 # 开屏广告屏蔽
