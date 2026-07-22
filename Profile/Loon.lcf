@@ -143,78 +143,71 @@ DOMAIN-SUFFIX, wx.qq.com, DIRECT
 # AI 服务分流
 # OpenAI / Anthropic / Google AI / AI 编程工具 / 新兴 AI (v7.8)
 
-# OpenAI (ChatGPT / DALL-E / Sora / API)
+# OpenAI
 DOMAIN-SUFFIX, openai.com, Proxy
 DOMAIN-SUFFIX, ai.com, Proxy
 DOMAIN-SUFFIX, chatgpt.com, Proxy
 DOMAIN-SUFFIX, oaiusercontent.com, Proxy
 DOMAIN-SUFFIX, oaistatic.com, Proxy
+DOMAIN-KEYWORD, openai, Proxy
 DOMAIN-SUFFIX, openaiapi-site.azureedge.net, Proxy
 DOMAIN-SUFFIX, openaicom-api-bdcpf8c6d2e9b8.azurefd.net, Proxy
 DOMAIN, auth0.openai.com, Proxy
-DOMAIN-KEYWORD, openai, Proxy
-
-# Anthropic (Claude / API)
+# Anthropic
 DOMAIN-SUFFIX, anthropic.com, Proxy
 DOMAIN-SUFFIX, claude.ai, Proxy
-
-# Google AI (Gemini / AI Studio / PaLM)
+# Google AI
 DOMAIN-SUFFIX, gemini.google.com, Proxy
-DOMAIN-SUFFIX, bard.google.com, Proxy
 DOMAIN-SUFFIX, aistudio.google.com, Proxy
+DOMAIN-SUFFIX, deepmind.google, Proxy
+DOMAIN-SUFFIX, bard.google.com, Proxy
 DOMAIN-SUFFIX, makersuite.google.com, Proxy
 DOMAIN-SUFFIX, generativelanguage.googleapis.com, Proxy
 DOMAIN-SUFFIX, alkalimakersuite-pa.googleapis.com, Proxy
-DOMAIN-SUFFIX, deepmind.google, Proxy
 DOMAIN-SUFFIX, deepmind.com, Proxy
-
 # DeepSeek
 DOMAIN-SUFFIX, deepseek.com, Proxy
-
-# xAI (Grok)
+# Grok (xAI)
 DOMAIN-SUFFIX, x.ai, Proxy
-
-# Midjourney
+# AI 图像/视频
 DOMAIN-SUFFIX, midjourney.com, Proxy
-
-# AI 音视频生成
+DOMAIN-SUFFIX, runwayml.com, Proxy
+DOMAIN-SUFFIX, lumalabs.ai, Proxy
+# AI 音视频
 DOMAIN-SUFFIX, suno.ai, Proxy
 DOMAIN-SUFFIX, elevenlabs.io, Proxy
 DOMAIN-SUFFIX, elevenlabs.com, Proxy
-DOMAIN-SUFFIX, runwayml.com, Proxy
-DOMAIN-SUFFIX, lumalabs.ai, Proxy
-
-# 其他 AI 服务
+# AI 搜索/问答
 DOMAIN-SUFFIX, perplexity.ai, Proxy
-DOMAIN-SUFFIX, mistral.ai, Proxy
+# AI 基础设施
 DOMAIN-SUFFIX, groq.com, Proxy
-DOMAIN-SUFFIX, cohere.com, Proxy
 DOMAIN-SUFFIX, huggingface.co, Proxy
+# 新增 AI 服务
+DOMAIN-SUFFIX, mistral.ai, Proxy
+DOMAIN-SUFFIX, cohere.com, Proxy
 DOMAIN-SUFFIX, replicate.com, Proxy
 DOMAIN-SUFFIX, together.ai, Proxy
 DOMAIN-SUFFIX, fireworks.ai, Proxy
-
-# AI 编程工具 (Cursor / Copilot / Windsurf / Supermaven)
+# AI 编程工具
 DOMAIN-SUFFIX, cursor.sh, Proxy
 DOMAIN-SUFFIX, cursor.com, Proxy
 DOMAIN-SUFFIX, cursor-api.com, Proxy
 DOMAIN, github.copilot.com, Proxy
-DOMAIN-SUFFIX, copilot.microsoft.com, Proxy
 DOMAIN-SUFFIX, copilot-proxy.githubusercontent.com, Proxy
 DOMAIN-SUFFIX, codeium.com, Proxy
 DOMAIN-SUFFIX, codeiumserver.com, Proxy
 DOMAIN-SUFFIX, windsurf.ai, Proxy
 DOMAIN-SUFFIX, supermaven.com, Proxy
+DOMAIN-SUFFIX, copilot.microsoft.com, Proxy
 
 # 流媒体路由 (Loon 格式, QX 通过 quantumultx filter 转换)
-# YouTube
 DOMAIN-SUFFIX, youtube.com, Proxy
 DOMAIN-SUFFIX, googlevideo.com, Proxy
 DOMAIN-SUFFIX, ytimg.com, Proxy
-# Netflix
 DOMAIN-SUFFIX, netflix.com, Proxy
 DOMAIN-SUFFIX, nflxvideo.net, Proxy
 DOMAIN-SUFFIX, netflix.net, Proxy
+# Netflix CDN
 DOMAIN-SUFFIX, nflximg.net, Proxy
 DOMAIN-SUFFIX, nflximg.com, Proxy
 DOMAIN-SUFFIX, nflxext.com, Proxy
@@ -223,8 +216,8 @@ DOMAIN, nrdns.netflix.com, Proxy
 # Disney+
 DOMAIN-SUFFIX, disneyplus.com, Proxy
 DOMAIN-SUFFIX, disney-plus.net, Proxy
-DOMAIN, disney.api.edge.bamgrid.com, Proxy
 DOMAIN-SUFFIX, dssott.com, Proxy
+DOMAIN, disney.api.edge.bamgrid.com, Proxy
 # HBO Max
 DOMAIN-SUFFIX, hbomax.com, Proxy
 DOMAIN-SUFFIX, hbo.com, Proxy
@@ -234,20 +227,12 @@ DOMAIN-SUFFIX, spotify.com, Proxy
 DOMAIN-SUFFIX, scdn.co, Proxy
 DOMAIN-SUFFIX, spotify.map.fastly.net, Proxy
 DOMAIN-SUFFIX, scdn.co.global.ssl.fastly.net, Proxy
-# TikTok
+# TikTok CDN
 DOMAIN-SUFFIX, tiktok.com, Proxy
 DOMAIN-SUFFIX, byteoversea.com, Proxy
 DOMAIN-SUFFIX, tiktokcdn.com, Proxy
 DOMAIN-SUFFIX, tiktokv.com, Proxy
 DOMAIN-SUFFIX, muscdn.com, Proxy
-# Prime Video
-DOMAIN-SUFFIX, primevideo.com, Proxy
-# Twitch
-DOMAIN-SUFFIX, twitch.tv, Proxy
-# AbemaTV
-DOMAIN-SUFFIX, abema.tv, Proxy
-# TVB
-DOMAIN-SUFFIX, tvb.com, Proxy
 # Crunchyroll
 DOMAIN-SUFFIX, crunchyroll.com, Proxy
 DOMAIN-SUFFIX, v.vrv.co, Proxy
@@ -278,7 +263,15 @@ DOMAIN-SUFFIX, tidalhifi.com, Proxy
 # Deezer
 DOMAIN-SUFFIX, deezer.com, Proxy
 DOMAIN-SUFFIX, dzcdn.net, Proxy
-# Google 基础设施
+# Amazon Prime Video
+DOMAIN-SUFFIX, primevideo.com, Proxy
+# Twitch
+DOMAIN-SUFFIX, twitch.tv, Proxy
+# AbemaTV
+DOMAIN-SUFFIX, abema.tv, Proxy
+# TVB
+DOMAIN-SUFFIX, tvb.com, Proxy
+# Google 全家桶 (流媒体依赖)
 DOMAIN-SUFFIX, gstatic.com, Proxy
 DOMAIN-SUFFIX, googleapis.com, Proxy
 DOMAIN-SUFFIX, google.com, Proxy
@@ -294,7 +287,7 @@ DOMAIN-SUFFIX, x.com, Proxy
 DOMAIN-SUFFIX, twimg.com, Proxy
 DOMAIN-SUFFIX, t.co, Proxy
 DOMAIN-SUFFIX, twittercdn.com, Proxy
-# Facebook
+# Facebook / Meta
 DOMAIN-SUFFIX, facebook.com, Proxy
 DOMAIN-SUFFIX, fbcdn.net, Proxy
 # Telegram
@@ -308,7 +301,7 @@ DOMAIN-SUFFIX, redditstatic.com, Proxy
 DOMAIN-SUFFIX, redditmedia.com, Proxy
 DOMAIN-SUFFIX, redd.it, Proxy
 DOMAIN-SUFFIX, reddesignimg.com, Proxy
-# Discord (主配置 Rule 中已有 discordapp.com/discord.media/discordapp.net)
+# Discord (discord.com/discord.media/discordapp.com/discordapp.net/discord.gg 已在主配置 Rule 中处理)
 DOMAIN-SUFFIX, discord.com, Proxy
 # WhatsApp
 DOMAIN-SUFFIX, whatsapp.com, Proxy
@@ -336,6 +329,8 @@ DOMAIN-SUFFIX, bsky.app, Proxy
 DOMAIN-SUFFIX, bsky.social, Proxy
 
 # 开发者平台路由 (Loon 格式)
+# GitHub / Microsoft / Steam / Wikipedia / 文档与开发工具 (v7.8)
+
 # GitHub
 DOMAIN-SUFFIX, github.com, Proxy
 DOMAIN-SUFFIX, githubusercontent.com, Proxy
@@ -343,16 +338,16 @@ DOMAIN-SUFFIX, githubassets.com, Proxy
 # Microsoft
 DOMAIN-SUFFIX, microsoft.com, Proxy
 DOMAIN-SUFFIX, microsoftonline.com, Proxy
+DOMAIN-SUFFIX, onedrive.com, Proxy
+DOMAIN-SUFFIX, onedrive.live.com, Proxy
+DOMAIN-SUFFIX, office365.com, Proxy
+DOMAIN-SUFFIX, live.com, Proxy
+# Microsoft 开发者
 DOMAIN-SUFFIX, visualstudio.com, Proxy
 DOMAIN-SUFFIX, azure.com, Proxy
 DOMAIN-SUFFIX, azure-devices.com, Proxy
 DOMAIN-SUFFIX, nuget.org, Proxy
 DOMAIN-SUFFIX, msdn.com, Proxy
-# OneDrive / Office 365
-DOMAIN-SUFFIX, onedrive.com, Proxy
-DOMAIN-SUFFIX, onedrive.live.com, Proxy
-DOMAIN-SUFFIX, office365.com, Proxy
-DOMAIN-SUFFIX, live.com, Proxy
 # Google 开发者
 DOMAIN, developers.google.com, Proxy
 DOMAIN, cloud.google.com, Proxy
@@ -372,22 +367,24 @@ DOMAIN-SUFFIX, wikimediafoundation.org, Proxy
 # 文档/知识库
 DOMAIN-SUFFIX, medium.com, Proxy
 DOMAIN-SUFFIX, notion.so, Proxy
-DOMAIN-SUFFIX, figma.com, Proxy
 DOMAIN-SUFFIX, dev.to, Proxy
 DOMAIN-SUFFIX, hashnode.com, Proxy
 DOMAIN-SUFFIX, digitalocean.com, Proxy
 DOMAIN-SUFFIX, herokuapp.com, Proxy
+# 部署/托管平台
 DOMAIN-SUFFIX, vercel.com, Proxy
 DOMAIN-SUFFIX, netlify.com, Proxy
 DOMAIN-SUFFIX, netlify.app, Proxy
 DOMAIN-SUFFIX, cloudflare.com, Proxy
 DOMAIN-SUFFIX, workers.dev, Proxy
+# 设计工具
+DOMAIN-SUFFIX, figma.com, Proxy
 # Stack Exchange
 DOMAIN-SUFFIX, stackoverflow.com, Proxy
 DOMAIN-SUFFIX, stackexchange.com, Proxy
 DOMAIN-SUFFIX, serverfault.com, Proxy
 DOMAIN-SUFFIX, superuser.com, Proxy
-# 包管理器
+# 容器/包管理器
 DOMAIN-SUFFIX, docker.com, Proxy
 DOMAIN-SUFFIX, npmjs.com, Proxy
 DOMAIN-SUFFIX, npmjs.org, Proxy
@@ -416,12 +413,12 @@ DOMAIN-SUFFIX, archlinux.org, Proxy
 DOMAIN-SUFFIX, debian.org, Proxy
 DOMAIN-SUFFIX, ubuntu.com, Proxy
 
+
 # Google 全家桶
 DOMAIN-SUFFIX, googleusercontent.com, Proxy
 DOMAIN-SUFFIX, ggpht.com, Proxy
 DOMAIN-SUFFIX, withgoogle.com, Proxy
 DOMAIN, g.co, Proxy
-
 
 # GDT 广告 SDK 白名单
 DOMAIN, mi.gdt.qq.com, DIRECT
