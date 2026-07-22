@@ -1,5 +1,5 @@
-#!name=起点全能助手 Pro v4.5
-#!desc=抓包驱动深度净化 · 福利中心精简 · 发现页白名单 · 自动静默签到 & 高阶福利任务自动化。配置前需开启抓取重写，并打开起点 App -> 我的 -> 福利中心 抓取 Cookie。
+#!name=起点全能助手 Pro v4.6
+#!desc=抓包驱动深度净化 · 福利中心精简 · 发现页白名单 · 自动静默签到 & 高阶福利任务自动化。v4.6: 修复 AllInOne MitM 导致的 $response 崩溃。
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bookpedia.png

@@ -1,6 +1,12 @@
 /**
- * 📚 起点全能助手 v4.4
+ * 📚 起点全能助手 v4.6
  * 作者：3kaiu
+ *
+ * v4.6 更新:
+ *  1. 修复 AllInOne.plugin MitM 导致 request 阶段误入 response-only 处理
+ *     → ReferenceError: Can't find variable: $response 崩溃
+ *     → 在 URL 解析后统一添加 $response 守卫，确保 request 阶段安全退出
+ *  2. 修复后去广告、自动签到、福利任务恢复全部正常工作
  *
  * v4.4 更新:
  *  1. 签到增加重试机制，Token 窃取扩展到 checkin 请求
@@ -159,6 +165,11 @@ const CLEAN_RULES = {
   let urlObj;
   try { urlObj = new URL(url); } catch (e) { $.done(); return; }
   const path = urlObj.pathname;
+
+  // ⚠️ 修复(v6.0): 统一 $response 守卫 — 防止 request 阶段误入 response-only 处理
+  // AllInOne.plugin 等全局 MitM 规则可能让同一 URL 在 request 阶段也被匹配，
+  // 此时 $response 为 undefined，直接调用会导致 ReferenceError 崩溃
+  if (typeof $response === "undefined") { $.done(); return; }
 
   // D. 直接拒绝纯广告端点
   if (CONFIG.RejectPaths.some(p => path.includes(p))) {
