@@ -60,3 +60,13 @@ DOMAIN-SUFFIX, matters.news, Social
 DOMAIN, lihkg.com, Social
 DOMAIN-SUFFIX, dcard.tw, Social
 DOMAIN-SUFFIX, dcard.cc, Social
+# 小说/文学站 (需代理访问)
+DOMAIN-SUFFIX, 69shuba.com, Social
+DOMAIN-SUFFIX, 69shu.com, Social
+DOMAIN-SUFFIX, 69shu.cx, Social
+DOMAIN-SUFFIX, sytc.cc, Social
+DOMAIN-SUFFIX, xbiquge.la, Social
+DOMAIN-SUFFIX, biquge.com, Social
+DOMAIN-SUFFIX, pianbai.com, Social
+DOMAIN-SUFFIX, 23wx.com, Social
+DOMAIN-SUFFIX, wdhl.com, Social

@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [v7.8.1] — 2026-07-23
+
+### Added
+
+- **Kelee 功能增强插件引入（7 个）**：从 [hub.kelee.one](https://hub.kelee.one/) 引入 7 个 Loon 专属 `.lpx` 功能增强插件，远程引用 `https://kelee.one/Tool/Loon/Lpx/*.lpx`：
+  - **Google搜索重定向** (`Google.lpx`) — 将 Google 搜索重定向至 .com 域名，避免区域跳转
+  - **Spotify歌词翻译** (`Spotify_lyrics_translation.lpx`) — 外语歌词翻译为简体中文，双语翻译
+  - **微信外部链接解锁** (`Weixin_external_links_unlock.lpx`) — 解锁微信外部链接访问限制，跳过中间界面
+  - **京东比价** (`JD_Price.lpx`) — 商品详情页面查看比价（需安装慢慢买 App 捕获 Cookie）
+  - **VVebo时间线修复** (`VVebo_repair.lpx`) — 修复失效的用户时间线（与微博去广告冲突，**默认禁用**）
+  - **节点检测工具** (`Node_detection_tool.lpx`) — 地理位置/节点解锁/入口落地查询
+  - **代理链路检测** (`NodeLinkCheck.lpx`) — 查看目标节点的代理走向
+  - QX 端不支持 `.lpx` 格式，这些功能增强仅限 Loon 用户使用
+- **小说/文学站路由补全（9 条）**：新增 69书吧（69shuba.com / 69shu.com / 69shu.cx）、sytc.cc、xbiquge.la、biquge.com、pianbai.com、23wx.com、wdhl.com 路由规则，走 Social 策略组——这些小说站在中国大陆需代理访问，原配置缺失会导致走 FINAL(direct) 无法打开。双端同步（social.tpl + social.qx + Loon.lcf + QX.conf）。
+
+### Changed
+
+- **README 更新**：社交平台分流覆盖补充中文社区和小说/文学站说明；新增 v7.8.1 Kelee 功能增强插件章节（含插件表格、注意事项）；新增 v7.8.1 概述段落。
+
+---
+
 ## [v7.8] — 2026-07-22
 
 ### Added

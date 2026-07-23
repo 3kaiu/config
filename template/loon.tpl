@@ -229,6 +229,14 @@ https://github.com/NSRingo/News/releases/latest/download/iRingo.News.plugin, ena
 https://github.com/NSRingo/Siri/releases/latest/download/iRingo.Siri.plugin, enabled=true, tag=🍎Siri增强
 https://github.com/NSRingo/Siri/releases/latest/download/iRingo.Search.plugin, enabled=true, tag=🍎搜索建议增强
 https://github.com/NSRingo/TestFlight/releases/latest/download/iRingo.TestFlight.plugin, enabled=true, tag=🍎TestFlight增强
+# — Kelee 功能增强插件 (远程引用, Loon App 内通过 Cloudflare Turnstile) —
+https://kelee.one/Tool/Loon/Lpx/Google.lpx, enabled=true, tag=🔍 Google搜索重定向
+https://kelee.one/Tool/Loon/Lpx/Spotify_lyrics_translation.lpx, enabled=true, tag=🎵 Spotify歌词翻译
+https://kelee.one/Tool/Loon/Lpx/Weixin_external_links_unlock.lpx, enabled=true, tag=💬 微信外部链接解锁
+https://kelee.one/Tool/Loon/Lpx/JD_Price.lpx, enabled=true, tag=📦 京东比价
+https://kelee.one/Tool/Loon/Lpx/VVebo_repair.lpx, enabled=false, tag=📋 VVebo时间线修复
+https://kelee.one/Tool/Loon/Lpx/Node_detection_tool.lpx, enabled=true, tag=🌐 节点检测工具
+https://kelee.one/Tool/Loon/Lpx/NodeLinkCheck.lpx, enabled=true, tag=🔗 代理链路检测
 
 [Rewrite]
 ^https?:\/\/119\.29\.29\.29\/d reject-200

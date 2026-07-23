@@ -111,7 +111,7 @@ https://ws.wenn.in/main/Profile/QX.conf
 *   **规则路径**：`Profile/Loon.lcf` / `Profile/QX.conf` 的 `[Rule]` / `[filter_local]` 段。
 *   **分流覆盖**：
     *   **流媒体**：YouTube、Netflix（含 CDN）、Disney+、HBO Max、Spotify、TikTok、Prime Video、Twitch、AbemaTV、TVB、Crunchyroll、Hulu、Paramount+、Peacock、NOW TV、Bilibili 国际版、Apple TV+、Pandora、SoundCloud、Tidal、Deezer。
-    *   **社交平台**：Instagram、Twitter/X、Facebook/Meta、Telegram、Reddit、Discord、WhatsApp、Signal、Line、Threads、Mastodon、VK、Tumblr、Bluesky。
+    *   **社交平台**：Instagram、Twitter/X、Facebook/Meta、Telegram、Reddit、Discord、WhatsApp、Signal、Line、Threads、Mastodon、VK、Tumblr、Bluesky。**中文社区**：V2EX、Linux.do、NodeSeek、HostLoc、Matters、LIHKG、Dcard（需代理访问）。**小说/文学站**：69书吧、sytc.cc、xbiquge.la、biquge.com 等（需代理访问）。
     *   **AI 服务**：OpenAI、Claude、Gemini（含 CDN）、Perplexity、Cursor、Copilot、Codeium、Mistral、Cohere、Replicate、Together.ai、Fireworks.ai 等。
     *   **Google 全家桶**：google.com、googleapis.com、gstatic.com、googlevideo.com、googleusercontent.com、ggpht.com、withgoogle.com、g.co 等。
     *   **开发者平台 (v5.6 新增, v7.8 扩展)**：GitHub、Microsoft/OneDrive/Office 365、Steam、Wikipedia/Wikimedia、GitLab、BitBucket、Atlassian/Jira、npm/PyPI/crates.io、Vercel/Netlify/Cloudflare 等。
@@ -186,6 +186,22 @@ https://ws.wenn.in/main/Profile/QX.conf
 
 v7.0 淘汰停更 2 年的 `ajune0527/vpn_tool` 插件体系，替换为自维护的 19 个 `Plugin/*.plugin`；GeoIP/ASN 数据库改用 `Loyalsoldier/geoip` + `P3TERX/GeoLite.mmdb`；Kelee 插件仅保留 `Prevent_DNS_Leaks.plugin` 和自维护的 `YouTube_remove_ads.plugin`。See [CHANGELOG.md](./CHANGELOG.md) for full details.
 
+### v7.8.1 Kelee 功能增强插件引入 (2026-07-23)
+
+从 [hub.kelee.one](https://hub.kelee.one/) 引入 7 个功能增强类 `.lpx` 插件（Loon 专属，QX 不支持 `.lpx` 格式）：
+
+| 插件 | 功能 | 默认状态 |
+|------|------|----------|
+| Google搜索重定向 | 将 Google 搜索重定向至 .com 域名 | ✅ 启用 |
+| Spotify歌词翻译 | 外语歌词翻译为简体中文，双语翻译 | ✅ 启用 |
+| 微信外部链接解锁 | 解锁微信外部链接访问限制，跳过中间界面 | ✅ 启用 |
+| 京东比价 | 商品详情页面查看比价（需安装慢慢买 App） | ✅ 启用 |
+| VVebo时间线修复 | 修复失效的用户时间线（**与微博去广告冲突**） | ❌ 默认禁用 |
+| 节点检测工具 | 地理位置/节点解锁/入口落地查询 | ✅ 启用 |
+| 代理链路检测 | 查看目标节点的代理走向 | ✅ 启用 |
+
+> **注意**：这些插件通过 `https://kelee.one/Tool/Loon/Lpx/*.lpx` 远程引用。由于 kelee.one 部署了 Cloudflare Turnstile，curl/GitHub Actions 无法下载（返回 403），但 Loon App 内部的 WebKit 引擎可以正常加载。QX 端因不支持 `.lpx` 格式，这些功能增强仅限 Loon 用户使用。
+
 ### v7.5 演进
 
 v7.5 新建 `mirror-scripts.yml` 工作流创建外部脚本 CDN Mirror，将全量 plugin `script-path` 迁移到自建 mirror URL，19 个 plugin 统一添加版本元信息，并完成对抗审计加固（`$response` 守卫、MitM 收窄、超时加固）。See [CHANGELOG.md](./CHANGELOG.md) for full details.
@@ -194,7 +210,9 @@ v7.5 新建 `mirror-scripts.yml` 工作流创建外部脚本 CDN Mirror，将全
 
 v7.7 正式建立 `mirror-scripts.yml` 与 `Mirror/` 目录，将全量 script-path 切换到自建 CDN；上游健康检查扩展至 12 个检查点；修复 6 个 JS 脚本 Runtime Bug 与 PushPlus 安全漏洞；统一全部版本号为 v7.7；清理死规则。See [CHANGELOG.md](./CHANGELOG.md) for full details.
 
-### v7.8 路由规则全面补全 (2026-07-22)
+### v7.8.1 增强插件引入与小说站路由 (2026-07-23)
+
+v7.8.1 从 [hub.kelee.one](https://hub.kelee.one/) 引入 7 个 Loon 功能增强插件（Google搜索重定向/Spotify歌词翻译/微信外部链接解锁/京东比价/VVebo时间线修复/节点检测工具/代理链路检测），补充小说/文学站路由（69书吧/sytc.cc/xbiquge.la 等 9 条双端同步）。See [CHANGELOG.md](./CHANGELOG.md) for full details.
 
 v7.8 完成流媒体/社交平台/AI 服务/开发者平台四维路由补全，新增 Google 广告与追踪 SDK REJECT 规则（20 条双端同步），修复 QX MitM hostname 与 HTTPDNS Rewrite 双端对齐问题，扩展 DNS 泄露检测覆盖至 21 条，修复 README 文档错误，CI 防护从 5 项扩展到 8 项。**策略组拆分**：新增 Streaming/AI/Developer/Social 四个独立策略组，snippet 域名从硬编码 `Proxy` 改为各自策略组名。**定时通知**：新增 `health-notify.js`（每6小时节点健康检测）+ `traffic-notify.js`（每晚22点流量统计/心跳）+ `notify.plugin`。**Sub-Store/QuickSearch 迁移**：从停更的 `ajune0527/vpn_tool` 迁移到自维护 `Plugin/sub-store.plugin` 和 `Plugin/quicksearch.plugin`。**NSRingo bundle.js 镜像**：发现 6 个 NSRingo 插件依赖 8 个版本固定的 `.bundle.js`，已在 `mirror-scripts.yml` 中添加每日 mirror 逻辑到 `Mirror/nsringo/`，并在 `upstream-health.yml` 中添加健康检查。See [CHANGELOG.md](./CHANGELOG.md) for full details.
 

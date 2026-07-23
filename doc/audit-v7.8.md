@@ -349,3 +349,73 @@ Loon 和 QX 虽然都是 iOS 代理工具，但配置语法、支持的特性和
 1. **Mirror directory**: `/tmp/loon-config/Mirror/nsringo/` — 8 `bundle.js` files downloaded and committed (total ~830 KB).
 2. **`mirror-scripts.yml`**: Added 8 `mirror()` calls (lines 67–89) to daily-download all NSRingo `bundle.js` files at 03:00 UTC.
 3. **`upstream-health.yml`**: Added "Check NSRingo bundle.js artifacts" step (lines 70–87) with HTTP status checks for all 8 URLs, results surfaced in the health report and issue alert.
+
+---
+
+## v7.8.1 Kelee 功能增强插件引入与小说站路由补全 (2026-07-23)
+
+**审计方式**: kelee 插件库 list.json 全量分析 + 功能增强插件筛选 + 双端路由一致性校验
+
+### 1. Kelee 插件库分析
+
+从 `https://hub.kelee.one/list.json` 获取完整插件列表（257 个分类），按 tag 分类筛选：
+
+| 标签 | 数量 | 说明 |
+|------|------|------|
+| 去广告 | ~200 | 大量去广告插件，但本项目已有 21 个自维护 Plugin + ddgksf2013/app2smile 上游，无需引入 |
+| 功能增强 | 12 | 核心引入目标 |
+| 节点检测 | 3 | 节点诊断工具 |
+| 资源转换 | 2 | BoxJs / Script-Hub（过重，不引入） |
+
+### 2. 引入决策
+
+**引入的 7 个插件**：
+
+| 插件 | 理由 |
+|------|------|
+| Google搜索重定向 | 避免 Google 区域跳转，实用 |
+| Spotify歌词翻译 | 双语歌词翻译，Spotify 用户刚需 |
+| 微信外部链接解锁 | 微信内点击外部链接跳过中间页，高频需求 |
+| 京东比价 | 商品比价（需慢慢买 App），实用工具 |
+| VVebo时间线修复 | VVebo 用户必需（与微博去广告冲突，默认禁用） |
+| 节点检测工具 | 节点解锁/地理位置/落地查询，运维必备 |
+| 代理链路检测 | 查看代理走向，运维诊断 |
+
+**不引入的插件及理由**：
+
+| 插件 | 理由 |
+|------|------|
+| Apple天气增强 | 已有 NSRingo WeatherKit，功能重叠 |
+| TestFlight地区解锁 | 已有 NSRingo TestFlight，功能重叠 |
+| YouTube双语翻译 | kelee 描述明确说与 YouTube 去广告插件冲突 |
+| IPA工具箱助手 | 需额外购买 Scripting Pro 版本 |
+| BoxJs | 过重，与 Sub-Store 功能重叠 |
+| Script-Hub | 高级工具，非日常必需 |
+| Fileball网盘挂载 | 需额外 Fileball App |
+| WARP节点查询 | 过于特定（仅 WARP 节点） |
+
+### 3. Cloudflare Turnstile 兼容性
+
+kelee.one 部署了 Cloudflare Turnstile，`curl` 下载 `.lpx` 文件返回 403（已验证）。但 Loon App 内部的 WebKit 引擎可以正常加载远程插件。因此：
+- **Loon 端**：直接远程引用 `https://kelee.one/Tool/Loon/Lpx/*.lpx`，Loon App 内可正常更新
+- **QX 端**：不支持 `.lpx` 格式，这些功能增强仅限 Loon 用户
+
+### 4. 小说/文学站路由补全
+
+新增 9 条小说/文学站域名到 social snippet，走 Social 策略组：
+
+| 域名 | 站点 |
+|------|------|
+| 69shuba.com / 69shu.com / 69shu.cx | 69书吧 |
+| sytc.cc | 小说探索 |
+| xbiquge.la | 笔趣阁 |
+| biquge.com | 笔趣阁 |
+| pianbai.com | 片白 |
+| 23wx.com | 23文学网 |
+| wdhl.com | 文海罗 |
+
+四端同步验证：social.tpl(9) = social.qx(9) = Loon.lcf(9) = QX.conf(9) ✅
+
+### 5. VVebo 冲突说明
+
+VVebo 时间线修复插件与微博去广告插件存在 MitM hostname 冲突（kelee 官方描述明确警告）。因此该插件设为 `enabled=false`（默认禁用），用户需手动启用并同步禁用微博去广告插件。

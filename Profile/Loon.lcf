@@ -339,6 +339,16 @@ DOMAIN-SUFFIX, matters.news, Social
 DOMAIN, lihkg.com, Social
 DOMAIN-SUFFIX, dcard.tw, Social
 DOMAIN-SUFFIX, dcard.cc, Social
+# 小说/文学站 (需代理访问)
+DOMAIN-SUFFIX, 69shuba.com, Social
+DOMAIN-SUFFIX, 69shu.com, Social
+DOMAIN-SUFFIX, 69shu.cx, Social
+DOMAIN-SUFFIX, sytc.cc, Social
+DOMAIN-SUFFIX, xbiquge.la, Social
+DOMAIN-SUFFIX, biquge.com, Social
+DOMAIN-SUFFIX, pianbai.com, Social
+DOMAIN-SUFFIX, 23wx.com, Social
+DOMAIN-SUFFIX, wdhl.com, Social
 
 # 开发者平台路由 (Loon 格式)
 # GitHub / Microsoft / Steam / Wikipedia / 文档与开发工具 (v7.8)
@@ -522,6 +532,14 @@ https://github.com/NSRingo/News/releases/latest/download/iRingo.News.plugin, ena
 https://github.com/NSRingo/Siri/releases/latest/download/iRingo.Siri.plugin, enabled=true, tag=🍎Siri增强
 https://github.com/NSRingo/Siri/releases/latest/download/iRingo.Search.plugin, enabled=true, tag=🍎搜索建议增强
 https://github.com/NSRingo/TestFlight/releases/latest/download/iRingo.TestFlight.plugin, enabled=true, tag=🍎TestFlight增强
+# — Kelee 功能增强插件 (远程引用, Loon App 内通过 Cloudflare Turnstile) —
+https://kelee.one/Tool/Loon/Lpx/Google.lpx, enabled=true, tag=🔍 Google搜索重定向
+https://kelee.one/Tool/Loon/Lpx/Spotify_lyrics_translation.lpx, enabled=true, tag=🎵 Spotify歌词翻译
+https://kelee.one/Tool/Loon/Lpx/Weixin_external_links_unlock.lpx, enabled=true, tag=💬 微信外部链接解锁
+https://kelee.one/Tool/Loon/Lpx/JD_Price.lpx, enabled=true, tag=📦 京东比价
+https://kelee.one/Tool/Loon/Lpx/VVebo_repair.lpx, enabled=false, tag=📋 VVebo时间线修复
+https://kelee.one/Tool/Loon/Lpx/Node_detection_tool.lpx, enabled=true, tag=🌐 节点检测工具
+https://kelee.one/Tool/Loon/Lpx/NodeLinkCheck.lpx, enabled=true, tag=🔗 代理链路检测
 
 [Rewrite]
 ^https?:\/\/119\.29\.29\.29\/d reject-200
