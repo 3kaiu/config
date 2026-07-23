@@ -1,4 +1,4 @@
-# ⚠️ 与 QX.conf [filter_local] 同步维护 — 修改时务必双端对齐
+# ⚠️ 与 QX.conf [filter_local] / Loon.lcf [Rule] 同步维护 — 修改时务必双端对齐
 # 交通银行
 DOMAIN, creditcard.bankcomm.com, REJECT
 DOMAIN, creditcard.bankcomm.cn, REJECT

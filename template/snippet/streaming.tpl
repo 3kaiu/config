@@ -1,4 +1,4 @@
-# 流媒体路由 (Loon 格式, QX 通过 quantumultx filter 转换)
+# 流媒体路由 (Loon 格式)
 DOMAIN-SUFFIX, youtube.com, Streaming
 DOMAIN-SUFFIX, googlevideo.com, Streaming
 DOMAIN-SUFFIX, ytimg.com, Streaming

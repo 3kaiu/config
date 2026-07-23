@@ -250,6 +250,54 @@ v7.8 围绕路由规则补全展开，覆盖以下 4 个维度：
 
 ---
 
+## H 组 — Loon × QX 语法兼容性审计 (v7.8 补充)
+
+### 审计背景
+
+Loon 和 QX 虽然都是 iOS 代理工具，但配置语法、支持的特性和行为有显著差异。本组审计关注两端配置是否正确处理了这些差异。
+
+### 语法验证结论
+
+| 语法特性 | Loon 格式 | QX 格式 | 配置正确性 |
+|---|---|---|---|
+| 规则关键字 | `DOMAIN-SUFFIX, xxx, DIRECT` (大写) | `host-suffix, xxx, direct` (小写) | ✅ 双端各自正确 |
+| MitM 段名 | `[MITM]` | `[mitm]` | ✅ |
+| Rewrite 段名 | `[Rewrite]` | `[rewrite_local]` | ✅ |
+| Filter 段名 | `[Rule]` | `[filter_local]` | ✅ |
+| DNS 段名 | `[DNS]` + `server = xxx` | `[dns]` + `server=xxx` | ✅ |
+| reject 变体（规则段） | `[Rule]` 只支持 `REJECT` | `[filter_local]` 支持 `reject`/`reject-drop`/`reject-no-drop` | ✅ |
+| reject 变体（重写段） | `[Rewrite]` 支持 `reject-200`（3.3+，无 `url` 关键字） | `[rewrite_local]` 支持 `reject-200`/`reject-dict`（需 `url` 关键字） | ✅ |
+| 302 重定向 | `^pattern 302 url`（无 `url` 关键字） | `^pattern url 302 url`（需 `url` 关键字） | ✅ Loon 在 Plugin 中处理 |
+| Cron 段 | `[Cron]`（Loon 通过 Plugin 内 `[Script]` 段） | `[task_local]` | ✅ |
+| Plugin 支持 | 原生 `.plugin` 文件 | 不支持，需手动转换 | ✅ QX 通过 rewrite_remote + rewrite_local |
+| `%APPEND%` | 支持（Plugin 级 hostname 追加） | 不支持（hostname 全局唯一） | ✅ QX 在主配置 mitm hostname 中预声明 |
+| DNS 泄漏检测 | 通过 `Prevent_DNS_Leaks.plugin` 的 `[Rule]` 段 | 通过 `[filter_local]` 手动添加 21 条 | ✅ 机制不同但等价 |
+
+### 修复项
+
+| # | 修复 | 文件 | 状态 |
+|---|------|------|------|
+| H1 | Loon 端补充 GDT 白名单 3 条域名（adsmind.gdtimg.com / adsmind.ugdtimg.com / pgdt.gtimg.cn） | Loon.lcf + loon.tpl | ✅ |
+| H2 | QX 端补充 QuickSearch 重写规则（8 条 DuckDuckGo 302 重定向）+ MitM hostname 添加 duckduckgo.com | QX.conf + quantumultx.tpl | ✅ |
+| H3 | QX rewrite_local 统一风格：`http-response` 前缀格式 → 无前缀格式（2 条 Zhihu 规则） | QX.conf + quantumultx.tpl | ✅ |
+| H4 | snippet 注释修正：`.qx` 文件标注 `QX 格式`，`.tpl` 文件标注 `Loon 格式`，移除误导性的"QX 通过 quantumultx filter 转换"措辞 | streaming.qx/.tpl + social.qx/.tpl + developer.qx/.tpl + QX.conf + Loon.lcf | ✅ |
+| H5 | bank-ad-reject snippet 注释补充 Loon.lcf 同步维护提示 | bank-ad-reject.qx + bank-ad-reject.tpl | ✅ |
+
+### 设计差异（非问题）
+
+| 差异 | Loon 处理方式 | QX 处理方式 | 状态 |
+|---|---|---|---|
+| DNS 泄漏检测 | `Prevent_DNS_Leaks.plugin` 远程引用 | `[filter_local]` 21 条手动添加 | ✅ 等价 |
+| QQ音乐 DNS reject | 通过 `qqmusic.plugin` 处理 | `[filter_local]` 16 条 reject | ✅ 机制不同但覆盖 |
+| 局域网 IP-CIDR | `[Rule]` 4 条 IP-CIDR DIRECT | `excluded_routes` + `skip_dst_ip` | ✅ 架构差异 |
+| Sub-Store | 原生 Plugin + resource-parser | QX 有独立 Sub-Store 生态 | ⚠️ 设计差异，不强行转换 |
+| AdvertisingScript | `AdvertisingScript.plugin` 远程引用 | `AllInOne.conf` 已覆盖类似功能 | ⚠️ 设计差异 |
+| 起点签到 cron | `qidian.plugin` 内 `cron {CRONEXP}` | `[task_local]` `0 9 * * *` | ✅ 等价 |
+| 健康检测/流量通知 cron | `notify.plugin` 内 cron | `[task_local]` cron | ✅ 等价 |
+| `prefer-doh3` / `doq-server` | 原生支持 | 取决于 QX 版本，不支持则忽略 | ⚠️ QX 行为 |
+
+---
+
 ## 遗留问题和后续计划
 
 | 项 | 优先级 | 说明 |

@@ -1,4 +1,4 @@
-# 流媒体路由 (Loon 格式, QX 通过 quantumultx filter 转换)
+# 流媒体路由 (QX 格式)
 host-suffix, youtube.com, Streaming
 host-suffix, googlevideo.com, Streaming
 host-suffix, ytimg.com, Streaming

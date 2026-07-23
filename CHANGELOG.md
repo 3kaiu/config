@@ -37,6 +37,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **QX 端 GDT DIRECT 补全**：补充 6 条 GDT 广告 SDK DIRECT 规则（mi.gdt/ii.gdt/c.gdt/adsmind.gdtimg/adsmind.ugdtimg/pgdt.gtimg）。
 - **QX task_local 同步**：同步 Loon 端 3 个 cron 任务到 QX task_local（起点签到 / health-notify / traffic-notify）。
 - **QX apple conf script-path 迁移**：5 个 QX apple conf 文件（Maps / News / Siri / TestFlight / WeatherKit）的 24 个 `script-path` 从 `github.com/NSRingo/.../releases/download/vX.Y.Z/*.bundle.js` 迁移到 `ws.wenn.in/main/Mirror/nsringo/*.bundle.js` 自建 CDN。
+- **Loon × QX 语法兼容性审计**：全量交叉审计两端语法差异（规则关键字大小写、reject 变体支持、rewrite 语法格式、MitM 机制、Plugin 支持、Cron 机制、DNS 分流机制）。确认两端语法各自正确，无功能失效。
+- **Loon 端 GDT 白名单补全**：补充 `adsmind.gdtimg.com`、`adsmind.ugdtimg.com`、`pgdt.gtimg.cn` 3 条 DIRECT 规则，与 QX 端 6 条对齐（原仅 3 条）。
+- **QX 端 QuickSearch 补全**：QX 端补充 8 条 DuckDuckGo 302 重定向规则（Safari 快捷搜索），MitM hostname 添加 `duckduckgo.com`，与 Loon 端 `quicksearch.plugin` 功能对齐。
+- **QX rewrite_local 风格统一**：2 条 Zhihu 规则从 `http-response ^pattern url script-response-body` 改为 `^pattern url script-response-body`（无阶段前缀），与段内其余 40 条规则风格一致。
+- **snippet 注释修正**：`.qx` 文件标注 `QX 格式`，`.tpl` 文件标注 `Loon 格式`，移除误导性的"QX 通过 quantumultx filter 转换"措辞。
 
 ### Changed
 

@@ -149,6 +149,9 @@ DOMAIN, g.co, Proxy
 DOMAIN, mi.gdt.qq.com, DIRECT
 DOMAIN, ii.gdt.qq.com, DIRECT
 DOMAIN, c.gdt.qq.com, DIRECT
+DOMAIN, adsmind.gdtimg.com, DIRECT
+DOMAIN, adsmind.ugdtimg.com, DIRECT
+DOMAIN, pgdt.gtimg.cn, DIRECT
 DOMAIN-SUFFIX, pangolin-sdk-toutiao.com, DIRECT
 DOMAIN-SUFFIX, pangle.io, DIRECT
 

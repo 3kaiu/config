@@ -1,4 +1,4 @@
-# 社交平台路由 (Loon 格式)
+# 社交平台路由 (QX 格式)
 # Instagram
 host-suffix, instagram.com, Social
 host-suffix, cdninstagram.com, Social
