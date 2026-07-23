@@ -327,6 +327,18 @@ DOMAIN-SUFFIX, tumblr.co, Social
 # Bluesky
 DOMAIN-SUFFIX, bsky.app, Social
 DOMAIN-SUFFIX, bsky.social, Social
+# 中文技术社区 (需代理访问)
+DOMAIN-SUFFIX, v2ex.com, Social
+DOMAIN-SUFFIX, v2ex.co, Social
+DOMAIN, linux.do, Social
+DOMAIN-SUFFIX, nodeseek.com, Social
+DOMAIN-SUFFIX, hostloc.com, Social
+DOMAIN-SUFFIX, 1024.com, Social
+# 中文内容/社区 (需代理访问)
+DOMAIN-SUFFIX, matters.news, Social
+DOMAIN, lihkg.com, Social
+DOMAIN-SUFFIX, dcard.tw, Social
+DOMAIN-SUFFIX, dcard.cc, Social
 
 # 开发者平台路由 (Loon 格式)
 # GitHub / Microsoft / Steam / Wikipedia / 文档与开发工具 (v7.8)

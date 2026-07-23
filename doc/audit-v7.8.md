@@ -282,6 +282,7 @@ Loon 和 QX 虽然都是 iOS 代理工具，但配置语法、支持的特性和
 | H3 | QX rewrite_local 统一风格：`http-response` 前缀格式 → 无前缀格式（2 条 Zhihu 规则） | QX.conf + quantumultx.tpl | ✅ |
 | H4 | snippet 注释修正：`.qx` 文件标注 `QX 格式`，`.tpl` 文件标注 `Loon 格式`，移除误导性的"QX 通过 quantumultx filter 转换"措辞 | streaming.qx/.tpl + social.qx/.tpl + developer.qx/.tpl + QX.conf + Loon.lcf | ✅ |
 | H5 | bank-ad-reject snippet 注释补充 Loon.lcf 同步维护提示 | bank-ad-reject.qx + bank-ad-reject.tpl | ✅ |
+| H6 | 中文社区路由补全：V2EX / Linux.do / NodeSeek / HostLoc / 1024 / Matters / LIHKG / Dcard — 12 条域名走 Social 策略组 | social.tpl + social.qx + Loon.lcf + QX.conf | ✅ |
 
 ### 设计差异（非问题）
 

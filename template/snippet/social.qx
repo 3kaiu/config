@@ -48,3 +48,15 @@ host-suffix, tumblr.co, Social
 # Bluesky
 host-suffix, bsky.app, Social
 host-suffix, bsky.social, Social
+# 中文技术社区 (需代理访问)
+host-suffix, v2ex.com, Social
+host-suffix, v2ex.co, Social
+host, linux.do, Social
+host-suffix, nodeseek.com, Social
+host-suffix, hostloc.com, Social
+host-suffix, 1024.com, Social
+# 中文内容/社区 (需代理访问)
+host-suffix, matters.news, Social
+host, lihkg.com, Social
+host-suffix, dcard.tw, Social
+host-suffix, dcard.cc, Social
