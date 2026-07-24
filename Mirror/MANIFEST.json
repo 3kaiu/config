@@ -1,96 +1,360 @@
 {
   "$comment": "镜像文件哈希清单 — 由 mirror-scripts.yml 维护; 变更会出现在镜像 PR 的 diff 中, 合并前请核对 source 变更是否符合预期",
-  "generated_at": "2026-07-24T00:00:00Z (baseline)",
+  "generated_at": "2026-07-25T00:00:00Z (baseline)",
   "files": {
     "netease.adblock.js": {
       "source_url": "https://gist.githubusercontent.com/ddgksf2013/4f53b7c6083678df25fecc8ff68b52c4/raw/netease.adblock.js",
       "sha256": "6ba468eb994e3843d69563f8f3b31c2d63a62a68d60fc3a1fd61947c1546936f",
       "bytes": 122922,
-      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
     },
     "amdc.js": {
       "source_url": "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amdc.js",
       "sha256": "8217f2150f8d12ae04d2c49b5da0a838e83f4de68b34df71c2da16cc1267898f",
       "bytes": 633,
-      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
     },
     "applet.js": {
       "source_url": "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/applet.js",
       "sha256": "0e2ffdd010b7f1ee38c526af5b7842f8fe3af89bf7ccd298596025baa4471855",
       "bytes": 793,
-      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
     },
     "bilibili-json.js": {
       "source_url": "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js",
       "sha256": "748ad16a92532bde2c439a8b9975f465381d20e24328cf2a58ff3a2a27328d84",
       "bytes": 4959,
-      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
     },
     "bilibili-proto.js": {
       "source_url": "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-proto.js",
       "sha256": "70fa7cf0e3390da24db93bcfbf0c81c2af17b16f99012b483783f046f62c476e",
       "bytes": 106934,
-      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
     },
     "youtube.request.js": {
       "source_url": "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.request.js",
       "sha256": "3ecca15e06e76a31720092c581180f648ef2c45e494644941ba985c878efbb26",
       "bytes": 44024,
-      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
     },
     "youtube.response.js": {
       "source_url": "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js",
       "sha256": "f98483d5f5017514f82502253c0db5ce2d4ffb7839887aa2cadc22666f5a7f12",
       "bytes": 132973,
-      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-resource-parser.js": {
+      "source_url": "https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/resource-parser.js",
+      "sha256": "7a3a6b2c2a1c87fc15b888aa8120a4a4dde0922835d2787b12028cbecee10114",
+      "bytes": 250290,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-ip-api.js": {
+      "source_url": "https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/IP_API.js",
+      "sha256": "703e3bf30d0e0ef44bb65d9033d47e16359fa958e92c5544641f97238a512ed6",
+      "bytes": 5328,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-geo-location.js": {
+      "source_url": "https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/geo_location.js",
+      "sha256": "d76b2888019a257c321405839637965ccf33f796b93a05f5a7b697bd3f7e1000",
+      "bytes": 4593,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-streaming-ui-check.js": {
+      "source_url": "https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/streaming-ui-check.js",
+      "sha256": "64970f9a7b230da08d7d5989605c9a9f73fbb7b94c3b3c01b2cab3eea8f09783",
+      "bytes": 25217,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-traffic-check.js": {
+      "source_url": "https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/traffic-check.js",
+      "sha256": "4bc40e888c698fc619f60e05a00e0d4d0f92ce8a66206844c579fcba316f2dc0",
+      "bytes": 6206,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/loon-sub-store-parser.js": {
+      "source_url": "https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store-parser.loon.min.js",
+      "sha256": "b06d43cef4b73ac7a5ca53296006b7e1aaabd1c7d32f063513b16b192675a124",
+      "bytes": 1268479,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-Advertising.list": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/QuantumultX/Advertising/Advertising.list",
+      "sha256": "bc62ee780df065223d5ef05290beb371e238b7a4cdce21b5db2b93ce029ed79e",
+      "bytes": 11106593,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/loon-Advertising.list": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Advertising/Advertising.list",
+      "sha256": "79df0c977a5ac0b0fa2f7c0e2a3d4e0366b992ce859156a022292be8b703e9d5",
+      "bytes": 26870,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-Privacy.list": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/QuantumultX/Privacy/Privacy.list",
+      "sha256": "2791fc2b3c4cf242caaa3e27f0393ea908aa82baa0b54b62c0ed2f4ec2d68198",
+      "bytes": 1684697,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/loon-Privacy.list": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Privacy/Privacy.list",
+      "sha256": "24b048634166c810833c424455586e57d0db6991ed1bab2adafa09603b4f4c22",
+      "bytes": 821,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-Hijacking.list": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/QuantumultX/Hijacking/Hijacking.list",
+      "sha256": "f876f136c51c3d646607eca74239a611410b796d5903f6bf36f3b211ff24cdb8",
+      "bytes": 8176,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/loon-Hijacking.list": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Hijacking/Hijacking.list",
+      "sha256": "47bffe4e8d4f56e736e43f1ed5f639f0b909591de09c5908df6cddad4b9e4e5b",
+      "bytes": 6734,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-Epic.list": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/QuantumultX/Epic/Epic.list",
+      "sha256": "e0528b31301024b59817c22f098540823e43ae2e4dd1eaa7096699b8deba0449",
+      "bytes": 631,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/loon-Epic.list": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Epic/Epic.list",
+      "sha256": "8f5fcadadd967023aa81273803de80beb2ceadd9af4e9352b565b3b00ccf464d",
+      "bytes": 588,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-China.list": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/QuantumultX/China/China.list",
+      "sha256": "d1db36ac45b3615ee989cc2294e49559cf7d2c7e9826b00d716bc2cb436c09e1",
+      "bytes": 115682,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/loon-China.list": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/China/China.list",
+      "sha256": "f47b46695d6c4cb6d4c0a878ae00bb4842dd7f60c180ac1023e476bab1426f31",
+      "bytes": 2056,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-Global.list": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/QuantumultX/Global/Global.list",
+      "sha256": "bdf60076526461df9a595e2f318c2d1236e271f241a3e75b844dbafca447edf2",
+      "bytes": 1203671,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/loon-Global.list": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Global/Global.list",
+      "sha256": "0f96875a01211b7cb4e1f97a0509df1a05dad3194ceef189863b6b9222eaf922",
+      "bytes": 6115,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-AllInOne.conf": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/QuantumultX/AllInOne/AllInOne.conf",
+      "sha256": "468bf205f258460c4cdc5d4b8ec4f66e355e195bbaed05a553b8048b65340945",
+      "bytes": 83205,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-ddgksf-FakeiOSAds.conf": {
+      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/FakeiOSAds.conf",
+      "sha256": "d729d6e6d3bdce404fa12b1f7b1d1c9042c060e29407de12fcb338c32604383f",
+      "bytes": 1101,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-ddgksf-KeepAds.conf": {
+      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/KeepAds.conf",
+      "sha256": "a9d5ec743aed3d7fedc2874d3cefd2d623b7fcd290647f70cf7fec7ff83aa41e",
+      "bytes": 2492,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-ddgksf-WeiboAds.conf": {
+      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/WeiboAds.conf",
+      "sha256": "9cc47e68231ae05324f50eea108e0f1e5175fa2cfeeb6c8bae241db1556b038a",
+      "bytes": 19438,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-ddgksf-WeChat.conf": {
+      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/WeChat.conf",
+      "sha256": "5da780f3beb9ef3656af8249ebb3cbadfa0987971d1d3ba38f444ec1e8bc1707",
+      "bytes": 623,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-ddgksf-NeteaseAds.conf": {
+      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/NeteaseAds.conf",
+      "sha256": "3d09d41ed78536e091612afd10fc471455ae82b274bbbf2f0b37399078e1677b",
+      "bytes": 7127,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-ddgksf-AmapAds.conf": {
+      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/AmapAds.conf",
+      "sha256": "d0c1caf909e3e9151ec890eb31bc14dc28b34c49d6c8a1ef42c147cd949564b3",
+      "bytes": 3924,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-ddgksf-TieBaAds.conf": {
+      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/TieBaAds.conf",
+      "sha256": "377b0d3379329cf29c52dc081c565b4d7efa190d5a54f2a035736297f412aaf4",
+      "bytes": 1932,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-ddgksf-GoofishAds.conf": {
+      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/GoofishAds.conf",
+      "sha256": "6112a98d133ccd602b6906e05c811f402ee1902a15b56397db9ebdde8d4321d1",
+      "bytes": 3423,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-ddgksf-SmzdmAds.conf": {
+      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/SmzdmAds.conf",
+      "sha256": "1a7b0c4a4c4bcb6ab474c447f2def2b526fa60fec36e21cf4d10fe327fe7ba33",
+      "bytes": 3282,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-ddgksf-BiliBiliComicsAds.conf": {
+      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/BiliBiliComicsAds.conf",
+      "sha256": "43f979729075573c453bc7bde7e5433a959e9f25b4cb653564b7670127399976",
+      "bytes": 6233,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-ddgksf-QiShuiMusicAds.conf": {
+      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/QiShuiMusicAds.conf",
+      "sha256": "4754b7eeffc2c73b61b8abc23e4a2c3a51c3fdf63f1c374277c97625c6f0a150",
+      "bytes": 2259,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-ddgksf-RedditAds.conf": {
+      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/RedditAds.conf",
+      "sha256": "15a17fb23d210144cc3530af925fb20116d89cbfbaf96abd9f2a140a8d24f595",
+      "bytes": 957,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-ddgksf-CainiaoAds.conf": {
+      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/CainiaoAds.conf",
+      "sha256": "c45b9717c6f474b652a2c8c49f0cb224c2592d222912932ffd127455c257ab6c",
+      "bytes": 3309,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-ddgksf-TaoPiaoPiaoAds.conf": {
+      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/TaoPiaoPiaoAds.conf",
+      "sha256": "c53eeb2abc507bf998e7823efa5547138d00665e44a6bd425ac245e2679830c8",
+      "bytes": 2280,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-ddgksf-CaiYunAds.conf": {
+      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/CaiYunAds.conf",
+      "sha256": "8ba68f9affa24bf759d157d1ab88c9920e1ea25b2cfc36720d0966ceb9220842",
+      "bytes": 3267,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-ddgksf-Applet.conf": {
+      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/Applet.conf",
+      "sha256": "6259647585e993f4b28897e8cba3b96366a775ed8f897b87d6cf8547e7ae28f0",
+      "bytes": 2970,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/qx-bilibili.conf": {
+      "source_url": "https://raw.githubusercontent.com/app2smile/rules/master/module/bilibili-qx.conf",
+      "sha256": "754551d06255a4518aec286d9b3c55a4b659e6b71e3bc954caba611d8c3c9c1b",
+      "bytes": 678,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/loon-AllInOne.plugin": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AllInOne/AllInOne.plugin",
+      "sha256": "040e068462e5d6afbc29c4afb6626787bcf485b53c0cd06debded5c00cb5270f",
+      "bytes": 73348,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "rules/loon-AdvertisingScript.plugin": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AdvertisingScript/AdvertisingScript.plugin",
+      "sha256": "ab24b736480daee9cab99968e905cdf86f8f632a6b67b227eafaa92210811c48",
+      "bytes": 8741,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
     },
     "nsringo/WeatherKit-v3.1.0-response.bundle.js": {
       "source_url": "https://github.com/NSRingo/WeatherKit/releases/download/v3.1.0/response.bundle.js",
       "sha256": "e7c75725d67c4e8f78d3fdc003481762a377c624ae89bba64b23b2cb5ea9f342",
       "bytes": 240960,
-      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
     },
     "nsringo/GeoServices-v4.6.1-request.bundle.js": {
       "source_url": "https://github.com/NSRingo/GeoServices/releases/download/v4.6.1/request.bundle.js",
       "sha256": "4483623a4b6b9cbef897b25e7881a03143461055696fc5a750af518165b96dc2",
       "bytes": 151666,
-      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
     },
     "nsringo/GeoServices-v4.6.1-response.bundle.js": {
       "source_url": "https://github.com/NSRingo/GeoServices/releases/download/v4.6.1/response.bundle.js",
       "sha256": "4d6c18dca53c4ae85ac836a2d3d19f7be1a7fc32e2c74af5783ec6a62cb75fd0",
       "bytes": 155957,
-      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
     },
     "nsringo/News-v3.2.1-request.bundle.js": {
       "source_url": "https://github.com/NSRingo/News/releases/download/v3.2.1/request.bundle.js",
       "sha256": "04702194e559f448b78b169fa266719898ece4da725e49d89dd730df844703fc",
       "bytes": 64150,
-      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
     },
     "nsringo/Siri-v4.2.7-request.bundle.js": {
       "source_url": "https://github.com/NSRingo/Siri/releases/download/v4.2.7/request.bundle.js",
       "sha256": "0725d734f78195438e7cc87e4d3e8464b3a237a6cb83514e60750cfd78b2f8ef",
       "bytes": 145455,
-      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
     },
     "nsringo/Siri-v4.2.7-response.bundle.js": {
       "source_url": "https://github.com/NSRingo/Siri/releases/download/v4.2.7/response.bundle.js",
       "sha256": "42401aa3ea5b8bd784ec3cf3f9070e237291f975e395a068b938cc27672cc38b",
       "bytes": 65085,
-      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
     },
     "nsringo/TestFlight-v3.4.0-request.bundle.js": {
       "source_url": "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/request.bundle.js",
       "sha256": "a03f141a5a715e00fc97a07d17d41607b9acec0e68953b0caa7ec5c185965ea9",
       "bytes": 25108,
-      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
     },
     "nsringo/TestFlight-v3.4.0-response.bundle.js": {
       "source_url": "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/response.bundle.js",
       "sha256": "af148b947a0340427ba2df7ad5775b3fe7233462790c66a9096140bb97fe4406",
       "bytes": 24225,
-      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "iringo/iRingo.WeatherKit.plugin": {
+      "source_url": "https://github.com/NSRingo/WeatherKit/releases/download/v3.1.0/iRingo.WeatherKit.plugin",
+      "sha256": "13863a13d44ee0c823c5f4a790af538764d712c80460c65ab39701de0889338a",
+      "bytes": 3299,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "iringo/iRingo.Maps.plugin": {
+      "source_url": "https://github.com/NSRingo/Maps/releases/download/v4.6.1/iRingo.Maps.plugin",
+      "sha256": "345552f14fa2ac9755e3fcbc69ac073ba65430810fe6bbc73799c542836985fc",
+      "bytes": 5556,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "iringo/iRingo.News.plugin": {
+      "source_url": "https://github.com/NSRingo/News/releases/download/v3.2.1/iRingo.News.plugin",
+      "sha256": "7678fe8ef5f9613be4bd79afd3be2331bb4986c19a9c3f30a4c3e745388cc85b",
+      "bytes": 2391,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "iringo/iRingo.Siri.plugin": {
+      "source_url": "https://github.com/NSRingo/Siri/releases/download/v4.2.7/iRingo.Siri.plugin",
+      "sha256": "cd7286bae8b2e6717d40caf315f013dfe91a7232fe3e0d0084626533ca92cc63",
+      "bytes": 4185,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "iringo/iRingo.Search.plugin": {
+      "source_url": "https://github.com/NSRingo/Siri/releases/download/v4.2.7/iRingo.Search.plugin",
+      "sha256": "9fe744d8d4045edc8b2555ad3bbe569c44f5fb9cf73d9fad994e189440dddab5",
+      "bytes": 2904,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "iringo/iRingo.TestFlight.plugin": {
+      "source_url": "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/iRingo.TestFlight.plugin",
+      "sha256": "d227651085bce0280e3e2a3bac0aca913b9b0cbcc318f732811d7d95890a47ae",
+      "bytes": 2272,
+      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
     }
   }
 }

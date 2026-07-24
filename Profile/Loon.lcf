@@ -21,7 +21,7 @@ dns-reject-mode = LOOPBACKIP
 disconnect-on-policy-change = false
 geoip-url = https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb
 ipasn-url = https://raw.githubusercontent.com/P3TERX/GeoLite.mmdb/download/GeoLite2-ASN.mmdb
-resource-parser = https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store-parser.loon.min.js
+resource-parser = https://ws.wenn.in/main/Mirror/rules/loon-sub-store-parser.js
 allow-wifi-access = false
 wifi-access-http-port = 7222
 wifi-access-socks5-port = 6225
@@ -494,17 +494,17 @@ GEOIP, CN, DIRECT
 FINAL, Final
 
 [Remote Rule]
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Advertising/Advertising.list, policy=REJECT, tag=🚫 广告域名, enabled=true
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Privacy/Privacy.list, policy=REJECT, tag=🔒 隐私保护, enabled=true
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Hijacking/Hijacking.list, policy=REJECT, tag=🛡️ 反劫持, enabled=true
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Epic/Epic.list, policy=Proxy, tag=🎮 Epic Games, enabled=true
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/China/China.list, policy=DIRECT, tag=🇨🇳 国内域名, enabled=true
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Global/Global.list, policy=Proxy, tag=🌍 国际域名, enabled=true
+https://ws.wenn.in/main/Mirror/rules/loon-Advertising.list, policy=REJECT, tag=🚫 广告域名, enabled=true
+https://ws.wenn.in/main/Mirror/rules/loon-Privacy.list, policy=REJECT, tag=🔒 隐私保护, enabled=true
+https://ws.wenn.in/main/Mirror/rules/loon-Hijacking.list, policy=REJECT, tag=🛡️ 反劫持, enabled=true
+https://ws.wenn.in/main/Mirror/rules/loon-Epic.list, policy=Proxy, tag=🎮 Epic Games, enabled=true
+https://ws.wenn.in/main/Mirror/rules/loon-China.list, policy=DIRECT, tag=🇨🇳 国内域名, enabled=true
+https://ws.wenn.in/main/Mirror/rules/loon-Global.list, policy=Proxy, tag=🌍 国际域名, enabled=true
 
 [Plugin]
 https://ws.wenn.in/main/Kelee/Prevent_DNS_Leaks.plugin, policy=Proxy, enabled=true
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AllInOne/AllInOne.plugin, enabled=true, tag=通用广告域名层
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AdvertisingScript/AdvertisingScript.plugin, enabled=true, tag=广告脚本增强
+https://ws.wenn.in/main/Mirror/rules/loon-AllInOne.plugin, enabled=true, tag=通用广告域名层
+https://ws.wenn.in/main/Mirror/rules/loon-AdvertisingScript.plugin, enabled=true, tag=广告脚本增强
 https://ws.wenn.in/main/Plugin/sub-store.plugin, enabled=true, tag=Sub-Store 订阅管理
 https://ws.wenn.in/main/Plugin/quicksearch.plugin, enabled=true, tag=快捷搜索
 https://ws.wenn.in/main/Plugin/notify.plugin, enabled=true, tag=🔔 定时通知
@@ -527,12 +527,12 @@ https://ws.wenn.in/main/Plugin/life.plugin, enabled=true, tag=生活出行去广
 https://ws.wenn.in/main/Plugin/ai.plugin, enabled=true, tag=AI 服务分流
 https://ws.wenn.in/main/Plugin/zhihuifangdong.plugin, enabled=true, tag=智慧房东去广告
 https://ws.wenn.in/main/Kelee/YouTube_remove_ads.plugin, enabled=true, tag=YouTube去广告
-https://github.com/NSRingo/WeatherKit/releases/latest/download/iRingo.WeatherKit.plugin, enabled=true, tag=🍎天气增强
-https://github.com/NSRingo/Maps/releases/latest/download/iRingo.Maps.plugin, enabled=true, tag=🍎地图增强
-https://github.com/NSRingo/News/releases/latest/download/iRingo.News.plugin, enabled=true, tag=🍎News解锁
-https://github.com/NSRingo/Siri/releases/latest/download/iRingo.Siri.plugin, enabled=true, tag=🍎Siri增强
-https://github.com/NSRingo/Siri/releases/latest/download/iRingo.Search.plugin, enabled=true, tag=🍎搜索建议增强
-https://github.com/NSRingo/TestFlight/releases/latest/download/iRingo.TestFlight.plugin, enabled=true, tag=🍎TestFlight增强
+https://ws.wenn.in/main/Mirror/iringo/iRingo.WeatherKit.plugin, enabled=true, tag=🍎天气增强
+https://ws.wenn.in/main/Mirror/iringo/iRingo.Maps.plugin, enabled=true, tag=🍎地图增强
+https://ws.wenn.in/main/Mirror/iringo/iRingo.News.plugin, enabled=true, tag=🍎News解锁
+https://ws.wenn.in/main/Mirror/iringo/iRingo.Siri.plugin, enabled=true, tag=🍎Siri增强
+https://ws.wenn.in/main/Mirror/iringo/iRingo.Search.plugin, enabled=true, tag=🍎搜索建议增强
+https://ws.wenn.in/main/Mirror/iringo/iRingo.TestFlight.plugin, enabled=true, tag=🍎TestFlight增强
 # — Kelee 功能增强插件 (远程引用, Loon App 内通过 Cloudflare Turnstile) —
 https://kelee.one/Tool/Loon/Lpx/Google.lpx, enabled=true, tag=🔍 Google搜索重定向
 https://kelee.one/Tool/Loon/Lpx/Spotify_lyrics_translation.lpx, enabled=true, tag=🎵 Spotify歌词翻译

@@ -16,18 +16,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 安全改造 (2026-07-24 审计 P0):
-      # 1. 写入前门禁: node --check 语法 + 最小体积 + 非 HTML 错误页 — 任一不过则保留旧文件
+      # 安全改造 (2026-07 审计):
+      # 1. 写入前门禁: *.js 过 node --check 语法 / 体积≥200B / 非 HTML 错误页 — 任一不过保留旧文件
       # 2. MANIFEST.json: 每个镜像文件记录 source_url + sha256 + 抓取时间, 变更在 PR diff 中高亮
       # 3. PR 制: 不再直推 main — 推送到 mirror/<date> 分支并开/更新 PR, 人工审 diff 后合并
-      - name: Mirror scripts from upstream sources (with gates)
+      # 4. 覆盖范围: 脚本 + 规则列表 + rewrite 模块 + NSRingo 插件 (版本固定),
+      #    Profile 全部远程引用收敛到自建 CDN (ws.wenn.in/main/Mirror/...)
+      - name: Mirror upstream resources (with gates)
         run: |
           SUCCESS=0
           FAIL=0
           GATED=0
           OLD_MANIFEST="Mirror/MANIFEST.json"
-          NEW_MANIFEST="/tmp/MANIFEST.new.json"
-          echo "{" > "$NEW_MANIFEST.tmp"
 
           # 读取旧清单中某文件的记录 (用于抓取失败时保留旧 sha)
           old_entry() {
@@ -47,14 +47,11 @@ jobs:
             local path="Mirror/$dest"
             mkdir -p "$(dirname "$path")"
             local tmpf; tmpf=$(mktemp)
-            if ! curl -fsSL -m 60 -A "Loon/3.3.9" "$url" -o "$tmpf"; then
+            if ! curl -fsSL -m 90 --retry 3 -A "Loon/3.3.9" "$url" -o "$tmpf"; then
               echo "❌ $name (FETCH FAILED)"
               FAIL=$((FAIL + 1))
-              # 保留旧清单记录
-              local oe; oe=$(old_entry "$dest")
-              [ -n "$oe" ] && ENTRIES+=("\"$dest\": $oe")
-              rm -f "$tmpf"
-              return
+              local oe; oe=$(old_entry "$dest"); [ -n "$oe" ] && ENTRIES+=("\"$dest\": $oe")
+              rm -f "$tmpf"; return
             fi
             # ── 门禁 1: 体积下限 (防 200 状态码的 HTML 错误页/半截传输) ──
             local size; size=$(wc -c < "$tmpf")
@@ -71,13 +68,17 @@ jobs:
               local oe; oe=$(old_entry "$dest"); [ -n "$oe" ] && ENTRIES+=("\"$dest\": $oe")
               rm -f "$tmpf"; return
             fi
-            # ── 门禁 3: JS 语法 (minified 同样适用; bundle 同样可过) ──
-            if ! node --check "$tmpf" 2>/dev/null; then
-              echo "🚫 $name 门禁拦截: node --check 语法错误, 保留旧版"
-              GATED=$((GATED + 1)); FAIL=$((FAIL + 1))
-              local oe; oe=$(old_entry "$dest"); [ -n "$oe" ] && ENTRIES+=("\"$dest\": $oe")
-              rm -f "$tmpf"; return
-            fi
+            # ── 门禁 3: JS 语法 (仅 .js; .list/.conf/.plugin 非 JS) ──
+            case "$dest" in
+              *.js)
+                if ! node --check "$tmpf" 2>/dev/null; then
+                  echo "🚫 $name 门禁拦截: node --check 语法错误 (可能半截下载), 保留旧版"
+                  GATED=$((GATED + 1)); FAIL=$((FAIL + 1))
+                  local oe; oe=$(old_entry "$dest"); [ -n "$oe" ] && ENTRIES+=("\"$dest\": $oe")
+                  rm -f "$tmpf"; return
+                fi
+                ;;
+            esac
             cp "$tmpf" "$path"
             rm -f "$tmpf"
             local sha; sha=$(sha256sum "$path" | awk '{print $1}')
@@ -86,55 +87,93 @@ jobs:
             ENTRIES+=("\"$dest\": {\"source_url\": \"$url\", \"sha256\": \"$sha\", \"bytes\": $size, \"fetched_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}")
           }
 
-          # ── ddgksf2013 (gist: netease.adblock.js) ──
+          # ═══════════════ 脚本 (执行于 MitM 上下文, 最高敏感) ═══════════════
           mirror "https://gist.githubusercontent.com/ddgksf2013/4f53b7c6083678df25fecc8ff68b52c4/raw/netease.adblock.js" \
             "netease.adblock.js" "ddgksf2013 gist / netease.adblock.js"
-
-          # ── ddgksf2013/Scripts ──
           mirror "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amdc.js" \
             "amdc.js" "ddgksf2013/Scripts / amdc.js"
-
           mirror "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/applet.js" \
             "applet.js" "ddgksf2013/Scripts / applet.js"
-
-          # ── app2smile/rules (Bilibili) ──
           mirror "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js" \
             "bilibili-json.js" "app2smile / bilibili-json.js"
-
           mirror "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-proto.js" \
             "bilibili-proto.js" "app2smile / bilibili-proto.js"
-
-          # ── Maasea/sgmodule (YouTube) ──
           mirror "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.request.js" \
             "youtube.request.js" "Maasea / youtube.request.js"
-
           mirror "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js" \
             "youtube.response.js" "Maasea / youtube.response.js"
 
-          # ── NSRingo bundle.js (version-pinned release artifacts) ──
+          # ═══════════════ 解析器脚本 (订阅解析时执行, 可见全部节点凭据) ═══════════════
+          mirror "https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/resource-parser.js" \
+            "rules/qx-resource-parser.js" "KOP-XIAO / resource-parser.js"
+          mirror "https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/IP_API.js" \
+            "rules/qx-ip-api.js" "KOP-XIAO / IP_API.js"
+          mirror "https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store-parser.loon.min.js" \
+            "rules/loon-sub-store-parser.js" "Sub-Store / sub-store-parser.loon.min.js"
+          for s in "geo_location.js:qx-geo-location.js" "streaming-ui-check.js:qx-streaming-ui-check.js" "traffic-check.js:qx-traffic-check.js"; do
+            src="${s%%:*}"; dst="${s##*:}"
+            mirror "https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/$src" \
+              "rules/$dst" "KOP-XIAO / $src"
+          done
+
+          # ═══════════════ 规则列表 (blackmatrix7, 双端格式) ═══════════════
+          for n in Advertising Privacy Hijacking Epic China Global; do
+            mirror "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/QuantumultX/$n/$n.list" \
+              "rules/qx-$n.list" "blackmatrix7 QX / $n.list"
+            mirror "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/$n/$n.list" \
+              "rules/loon-$n.list" "blackmatrix7 Loon / $n.list"
+          done
+
+          # ═══════════════ QX rewrite 模块 ═══════════════
+          mirror "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/QuantumultX/AllInOne/AllInOne.conf" \
+            "rules/qx-AllInOne.conf" "blackmatrix7 / AllInOne.conf"
+          for n in FakeiOSAds KeepAds WeiboAds WeChat NeteaseAds AmapAds TieBaAds GoofishAds SmzdmAds BiliBiliComicsAds QiShuiMusicAds RedditAds CainiaoAds TaoPiaoPiaoAds CaiYunAds Applet; do
+            mirror "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/$n.conf" \
+              "rules/qx-ddgksf-$n.conf" "ddgksf2013 / $n.conf"
+          done
+          mirror "https://raw.githubusercontent.com/app2smile/rules/master/module/bilibili-qx.conf" \
+            "rules/qx-bilibili.conf" "app2smile / bilibili-qx.conf"
+
+          # ═══════════════ Loon rewrite 插件 ═══════════════
+          # 注: 这两个插件内部 script-path 仍指向 blackmatrix7 raw (传递性依赖),
+          # 镜像仅消除插件文件本身的单点, 传递引用风险见 doc/infrastructure.md
+          mirror "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AllInOne/AllInOne.plugin" \
+            "rules/loon-AllInOne.plugin" "blackmatrix7 Loon / AllInOne.plugin"
+          mirror "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AdvertisingScript/AdvertisingScript.plugin" \
+            "rules/loon-AdvertisingScript.plugin" "blackmatrix7 Loon / AdvertisingScript.plugin"
+
+          # ═══════════════ NSRingo bundle.js (版本固定 release 资产) ═══════════════
+          # NSRingo .plugin 引用的 bundle.js; 若上游清理旧 release 会 404, 镜像消除单点
           mirror "https://github.com/NSRingo/WeatherKit/releases/download/v3.1.0/response.bundle.js" \
             "nsringo/WeatherKit-v3.1.0-response.bundle.js" "NSRingo WeatherKit / response.bundle.js v3.1.0"
-
           mirror "https://github.com/NSRingo/GeoServices/releases/download/v4.6.1/request.bundle.js" \
             "nsringo/GeoServices-v4.6.1-request.bundle.js" "NSRingo GeoServices / request.bundle.js v4.6.1"
-
           mirror "https://github.com/NSRingo/GeoServices/releases/download/v4.6.1/response.bundle.js" \
             "nsringo/GeoServices-v4.6.1-response.bundle.js" "NSRingo GeoServices / response.bundle.js v4.6.1"
-
           mirror "https://github.com/NSRingo/News/releases/download/v3.2.1/request.bundle.js" \
             "nsringo/News-v3.2.1-request.bundle.js" "NSRingo News / request.bundle.js v3.2.1"
-
           mirror "https://github.com/NSRingo/Siri/releases/download/v4.2.7/request.bundle.js" \
             "nsringo/Siri-v4.2.7-request.bundle.js" "NSRingo Siri / request.bundle.js v4.2.7"
-
           mirror "https://github.com/NSRingo/Siri/releases/download/v4.2.7/response.bundle.js" \
             "nsringo/Siri-v4.2.7-response.bundle.js" "NSRingo Siri / response.bundle.js v4.2.7"
-
           mirror "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/request.bundle.js" \
             "nsringo/TestFlight-v3.4.0-request.bundle.js" "NSRingo TestFlight / request.bundle.js v3.4.0"
-
           mirror "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/response.bundle.js" \
             "nsringo/TestFlight-v3.4.0-response.bundle.js" "NSRingo TestFlight / response.bundle.js v3.4.0"
+
+          # ═══════════════ NSRingo Loon 插件 (版本固定, 替代 releases/latest) ═══════════════
+          mirror "https://github.com/NSRingo/WeatherKit/releases/download/v3.1.0/iRingo.WeatherKit.plugin" \
+            "iringo/iRingo.WeatherKit.plugin" "NSRingo / iRingo.WeatherKit.plugin v3.1.0"
+          mirror "https://github.com/NSRingo/Maps/releases/download/v4.6.1/iRingo.Maps.plugin" \
+            "iringo/iRingo.Maps.plugin" "NSRingo / iRingo.Maps.plugin v4.6.1"
+          mirror "https://github.com/NSRingo/News/releases/download/v3.2.1/iRingo.News.plugin" \
+            "iringo/iRingo.News.plugin" "NSRingo / iRingo.News.plugin v3.2.1"
+          mirror "https://github.com/NSRingo/Siri/releases/download/v4.2.7/iRingo.Siri.plugin" \
+            "iringo/iRingo.Siri.plugin" "NSRingo / iRingo.Siri.plugin v4.2.7"
+          mirror "https://github.com/NSRingo/Siri/releases/download/v4.2.7/iRingo.Search.plugin" \
+            "iringo/iRingo.Search.plugin" "NSRingo / iRingo.Search.plugin v4.2.7"
+          mirror "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/iRingo.TestFlight.plugin" \
+            "iringo/iRingo.TestFlight.plugin" "NSRingo / iRingo.TestFlight.plugin v3.4.0"
 
           # ── 写出新清单 (按文件名排序) ──
           node -e '
@@ -171,16 +210,16 @@ jobs:
           fi
           BRANCH="mirror/$(date +%Y-%m-%d)"
           git checkout -B "$BRANCH"
-          git commit -m "chore(mirror): 上游脚本同步 ($(date +%Y-%m-%d)) — 待审核"
+          git commit -m "chore(mirror): 上游资源同步 ($(date +%Y-%m-%d)) — 待审核"
           git push -f origin "$BRANCH"
           CHANGED=$(git diff --name-only main...HEAD -- Mirror/ | grep -v MANIFEST.json | wc -l)
           if gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' | grep -q .; then
-            gh pr edit "$BRANCH" --body "$(printf '## 镜像同步 %s\n\n变更文件: %s 个 (不含 MANIFEST)\n\n```%s```\n\n### 审核清单\n- [ ] MANIFEST.json diff: 每个变更文件的 sha256 与 source_url 已核对\n- [ ] 上游变更符合预期 (非投毒/非破坏性更新)\n- [ ] CI 全绿\n\n> 门禁: node --check 语法 / 体积≥200B / 非 HTML 错误页; 未过门禁的文件保留旧版' "$(date +%Y-%m-%d)" "$CHANGED" "$(git diff --stat main...HEAD -- Mirror/)")"
+            gh pr edit "$BRANCH" --body "$(printf '## 镜像同步 %s\n\n变更文件: %s 个 (不含 MANIFEST)\n\n```%s```\n\n### 审核清单\n- [ ] MANIFEST.json diff: 每个变更文件的 sha256 与 source_url 已核对\n- [ ] 上游变更符合预期 (非投毒/非破坏性更新)\n- [ ] CI 全绿\n\n> 门禁: *.js 过 node --check 语法 / 体积≥200B / 非 HTML 错误页; 未过门禁的文件保留旧版' "$(date +%Y-%m-%d)" "$CHANGED" "$(git diff --stat main...HEAD -- Mirror/)")"
             echo "pr_action=updated" >> $GITHUB_ENV
           else
             gh pr create --base main --head "$BRANCH" \
-              --title "chore(mirror): 上游脚本同步 ($(date +%Y-%m-%d))" \
-              --body "$(printf '## 镜像同步 %s\n\n变更文件: %s 个 (不含 MANIFEST)\n\n```%s```\n\n### 审核清单\n- [ ] MANIFEST.json diff: 每个变更文件的 sha256 与 source_url 已核对\n- [ ] 上游变更符合预期 (非投毒/非破坏性更新)\n- [ ] CI 全绿\n\n> 门禁: node --check 语法 / 体积≥200B / 非 HTML 错误页; 未过门禁的文件保留旧版' "$(date +%Y-%m-%d)" "$CHANGED" "$(git diff --stat main...HEAD -- Mirror/)")"
+              --title "chore(mirror): 上游资源同步 ($(date +%Y-%m-%d))" \
+              --body "$(printf '## 镜像同步 %s\n\n变更文件: %s 个 (不含 MANIFEST)\n\n```%s```\n\n### 审核清单\n- [ ] MANIFEST.json diff: 每个变更文件的 sha256 与 source_url 已核对\n- [ ] 上游变更符合预期 (非投毒/非破坏性更新)\n- [ ] CI 全绿\n\n> 门禁: *.js 过 node --check 语法 / 体积≥200B / 非 HTML 错误页; 未过门禁的文件保留旧版' "$(date +%Y-%m-%d)" "$CHANGED" "$(git diff --stat main...HEAD -- Mirror/)")"
             echo "pr_action=created" >> $GITHUB_ENV
           fi
 

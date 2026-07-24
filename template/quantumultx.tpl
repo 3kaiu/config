@@ -4,11 +4,11 @@
 # ═══════════════════════════════════════════════════════════
 
 [general]
-resource_parser_url=https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/resource-parser.js
+resource_parser_url=https://ws.wenn.in/main/Mirror/rules/qx-resource-parser.js
 network_check_url=http://cp.cloudflare.com/generate_204
 server_check_url=http://cp.cloudflare.com/generate_204
 server_check_timeout=5000
-geo_location_checker=http://ip-api.com/json/?lang=zh-CN, https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/IP_API.js
+geo_location_checker=http://ip-api.com/json/?lang=zh-CN, https://ws.wenn.in/main/Mirror/rules/qx-ip-api.js
 fallback_udp_policy=direct
 icmp_auto_reply = true
 excluded_routes = 192.168.0.0/16, 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 224.0.0.0/4, 255.255.255.255/32
@@ -68,12 +68,12 @@ static=Social, Proxy, direct, img-url=https://raw.githubusercontent.com/Koolson/
 # 容灾: Proxy url-latency-benchmark (server_regex=.) 自动纳管新节点 — 订阅加第二节点即双节点容灾 (见 README 3.6)
 
 [filter_remote]
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/QuantumultX/Advertising/Advertising.list, tag=🚫 广告域名, force-policy=reject, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/QuantumultX/Privacy/Privacy.list, tag=🔒 隐私保护, force-policy=reject, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/QuantumultX/Hijacking/Hijacking.list, tag=🛡️ 反劫持, force-policy=reject, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/QuantumultX/Epic/Epic.list, tag=🎮 Epic Games, force-policy=Proxy, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/QuantumultX/China/China.list, tag=🇨🇳 国内域名, force-policy=direct, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/QuantumultX/Global/Global.list, tag=🌍 国际域名, force-policy=Proxy, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-Advertising.list, tag=🚫 广告域名, force-policy=reject, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-Privacy.list, tag=🔒 隐私保护, force-policy=reject, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-Hijacking.list, tag=🛡️ 反劫持, force-policy=reject, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-Epic.list, tag=🎮 Epic Games, force-policy=Proxy, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-China.list, tag=🇨🇳 国内域名, force-policy=direct, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-Global.list, tag=🌍 国际域名, force-policy=Proxy, update-interval=86400, opt-parser=true, enabled=true
 
 [filter_local]
 dest-port, 5223, direct
@@ -226,24 +226,24 @@ geoip, cn, direct
 final, Final
 
 [rewrite_remote]
-https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/QuantumultX/AllInOne/AllInOne.conf, tag=全能去广告(基础), update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/FakeiOSAds.conf, tag=开屏广告通杀, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/KeepAds.conf, tag=墨鱼 App去广告, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/WeiboAds.conf, tag=微博净化, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/WeChat.conf, tag=微信去广告, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/NeteaseAds.conf, tag=网易云音乐净化, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/AmapAds.conf, tag=高德地图去广告, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/TieBaAds.conf, tag=百度贴吧净化, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/GoofishAds.conf, tag=闲鱼去广告, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/SmzdmAds.conf, tag=什么值得买净化, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/BiliBiliComicsAds.conf, tag=Bilibili漫画净化, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/app2smile/rules/master/module/bilibili-qx.conf, tag=Bilibili去广告, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/QiShuiMusicAds.conf, tag=汽水音乐净化, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/RedditAds.conf, tag=Reddit去广告, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/CainiaoAds.conf, tag=菜鸟裹裹净化, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/TaoPiaoPiaoAds.conf, tag=淘票票净化, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/CaiYunAds.conf, tag=彩云天气净化, update-interval=86400, opt-parser=true, enabled=true
-https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/Applet.conf, tag=微信小程序去广告, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-AllInOne.conf, tag=全能去广告(基础), update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-ddgksf-FakeiOSAds.conf, tag=开屏广告通杀, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-ddgksf-KeepAds.conf, tag=墨鱼 App去广告, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-ddgksf-WeiboAds.conf, tag=微博净化, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-ddgksf-WeChat.conf, tag=微信去广告, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-ddgksf-NeteaseAds.conf, tag=网易云音乐净化, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-ddgksf-AmapAds.conf, tag=高德地图去广告, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-ddgksf-TieBaAds.conf, tag=百度贴吧净化, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-ddgksf-GoofishAds.conf, tag=闲鱼去广告, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-ddgksf-SmzdmAds.conf, tag=什么值得买净化, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-ddgksf-BiliBiliComicsAds.conf, tag=Bilibili漫画净化, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-bilibili.conf, tag=Bilibili去广告, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-ddgksf-QiShuiMusicAds.conf, tag=汽水音乐净化, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-ddgksf-RedditAds.conf, tag=Reddit去广告, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-ddgksf-CainiaoAds.conf, tag=菜鸟裹裹净化, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-ddgksf-TaoPiaoPiaoAds.conf, tag=淘票票净化, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-ddgksf-CaiYunAds.conf, tag=彩云天气净化, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-ddgksf-Applet.conf, tag=微信小程序去广告, update-interval=86400, opt-parser=true, enabled=true
 https://ws.wenn.in/main/QX/apple/WeatherKit.conf, tag=🍎天气增强, update-interval=86400, enabled=true
 https://ws.wenn.in/main/QX/apple/Maps.conf, tag=🍎地图增强, update-interval=86400, enabled=true
 https://ws.wenn.in/main/QX/apple/News.conf, tag=🍎News解锁, update-interval=86400, enabled=true
@@ -315,9 +315,9 @@ https://ws.wenn.in/main/QX/apple/TestFlight.conf, tag=🍎TestFlight增强, upda
 0 11 2 * * * https://ws.wenn.in/main/Scripts/Qidian.js, tag=起点全自动签到, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Daily.png, enabled=true, argument=debug=false&QDREADER_ADV_JOB_ENABLE=true&QDREADER_EXTRA_ADV_JOB_ENABLE=true&QDREADER_LOTTERY_ENABLE=true&QDREADER_WEEKLY_EXCHANGE_ENABLE=true&QDREADER_CHAPTER_CARD_ENABLE=true&QDREADER_MESSAGE_BOX_ENABLE=true
 0 */6 * * * https://ws.wenn.in/main/Scripts/health-notify.js, tag=节点健康检测, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Speedtest.png, enabled=true
 0 22 * * * https://ws.wenn.in/main/Scripts/traffic-notify.js, tag=流量统计通知, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Day.png, enabled=true
-event-interaction https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/geo_location.js, tag=查看IP信息, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Area.png, enabled=true
-event-interaction https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/traffic-check.js, tag=策略流量查询, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Speedtest.png, enabled=true
-event-interaction https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/streaming-ui-check.js, tag=流媒体解锁检测, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png, enabled=true
+event-interaction https://ws.wenn.in/main/Mirror/rules/qx-geo-location.js, tag=查看IP信息, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Area.png, enabled=true
+event-interaction https://ws.wenn.in/main/Mirror/rules/qx-traffic-check.js, tag=策略流量查询, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Speedtest.png, enabled=true
+event-interaction https://ws.wenn.in/main/Mirror/rules/qx-streaming-ui-check.js, tag=流媒体解锁检测, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png, enabled=true
 
 [mitm]
 skip_validating_cert=false
