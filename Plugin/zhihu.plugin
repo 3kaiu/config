@@ -49,7 +49,8 @@ IP-CIDR6,2402:4e00:1200:ed00:0:9089:6dac:96b6/128,REJECT,no-resolve,enable={ZHIH
 ^https:\/\/appcloud2\.zhihu\.com\/v3\/resource reject-dict, enable={ZHIHU_ENABLE}
 
 # ── 外链追踪 → 直达目标URL ──
-^https:\/\/link\.zhihu\.com\/\?target=(https?)?(%3A|:)?(\/\/|%2F%2F)?(.*?)(&source.*)?$ 302 http://$4, enable={ZHIHU_ENABLE}
+# 保留原协议 https, 不降级 http (审计修复: 降级后跳转地址明文可见且可被中间人改写)
+^https:\/\/link\.zhihu\.com\/\?target=(https?)?(%3A|:)?(\/\/|%2F%2F)?(.*?)(&source.*)?$ 302 https://$4, enable={ZHIHU_ENABLE}
 
 # ── 网页版 ──
 ^https:\/\/api\.zhihu\.com\/distribute\/rhea reject-dict, enable={ZHIHU_ENABLE}

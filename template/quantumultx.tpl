@@ -199,9 +199,9 @@ host-suffix, google-analytics.com, reject
 host-suffix, googletagmanager.com, reject
 host-suffix, googletagservices.com, reject
 host-suffix, adservice.google.com, reject
-# Firebase
-host-suffix, firebaseinstallations.googleapis.com, reject
 # 常见分析 SDK
+# 注: firebaseinstallations.googleapis.com 不再 reject — 它是 FCM 推送
+# token 注册/刷新的前置接口, 拒绝会导致部分 App 收不到推送 (2026-07 审计修复)
 host-suffix, app-measurement.com, reject
 host-suffix, analytics.google.com, reject
 host-suffix, crashlytics.googleapis.com, reject
@@ -216,7 +216,7 @@ host-suffix, sentry.io, reject
 
 # Google 通配域名 (流媒体依赖) — QX 按书写顺序匹配, 必须置于 AI 分流与 Google 分析 reject 之后,
 # 否则会截胡 gemini.google.com/generativelanguage.googleapis.com (误入 Streaming) 与
-# adservice/analytics.google.com、firebaseinstallations/crashlytics.googleapis.com (reject 失效)
+# adservice/analytics.google.com、crashlytics.googleapis.com (reject 失效)
 host-suffix, gstatic.com, Streaming
 host-suffix, googleapis.com, Streaming
 host-suffix, google.com, Streaming
@@ -292,7 +292,8 @@ https://ws.wenn.in/main/QX/apple/TestFlight.conf, tag=🍎TestFlight增强, upda
 ^https:\/\/api\.zhihu\.com\/unlimited\/go\/my_card url reject
 ^https:\/\/api\.zhihu\.com\/search\/preset_words url reject-dict
 ^https:\/\/www\.zhihu\.com\/search\/related_queries url reject-dict
-^https:\/\/link\.zhihu\.com\/\?target=(https?)?(%3A|:)?(\/\/|%2F%2F)?(.*?)(&source.*)?$ url 302 http://$4
+# 保留原协议 https, 不降级 http (审计修复: 降级后跳转地址明文可见且可被中间人改写)
+^https:\/\/link\.zhihu\.com\/\?target=(https?)?(%3A|:)?(\/\/|%2F%2F)?(.*?)(&source.*)?$ url 302 https://$4
 ^https:\/\/api\.zhihu\.com\/ab\/api url reject-dict
 ^https:\/\/api\.zhihu\.com\/(commercial_api\/answer\/banners|commercial_api\/banners|content-distribution-core|moments\/drama|root\/window|prague\/related_suggestion|v5\.1\/topics\/answer\/relation|hot_recommendation|mcn\/v2\/linkcards|distribute\/rhea|answers\/questions\/related-readings|commercial_api\/mobile_banner|zhuanlan\/api\/articles|ab\/api|ad-style-service) url script-response-body https://ws.wenn.in/main/Scripts/Zhihu.js
 ^https:\/\/api\.zhihu\.com\/search\/preset_words url script-response-body https://ws.wenn.in/main/Scripts/Zhihu.js
@@ -322,4 +323,4 @@ event-interaction https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/
 skip_validating_cert=false
 force_sni_domain_name=false
 skip_dst_ip = 192.168.0.0/16, 10.0.0.0/8, 100.64.0.0/10, 169.254.0.0/16, 172.16.0.0/12, 127.0.0.1/32, 224.0.0.0/4
-hostname = -*.apple.com, -*.icloud.com, -*.icloud.com.cn, -*.95516.com, -*.cup.com.cn, -*.95516.com.cn, -*.unionpay.com, -*.icbc.com.cn, -*.mybank.icbc.com.cn, -*.icbc.com, -*.ccb.com, -*.ccb.cn, -*.boc.cn, -*.bankofchina.com, -*.jf365.boc.cn, -*.abchina.com, -*.abchina.com.cn, -*.cdn-static.abchina.com.cn, -*.cdn-static.abchina.com, -*.bankcomm.com, -*.bankcomm.cn, -*.creditcard.bankcomm.com, -*.creditcard.bankcomm.cn, -*.cmbchina.com, -*.cmbimg.com, -*.psbc.com, -*.spdb.com.cn, -*.spdbccc.com.cn, -*.citicbank.com, -*.citibank.com, -*.ecitic.com, -*.pingan.com.cn, -*.pingan.com, -*.hcz-member.pingan.com.cn, -*.iobs.pingan.com.cn, -*.stock.pingan.com, -*.cmbc.com.cn, -*.cib.com.cn, -*.cebbank.com, -*.ebchinabank.com, -*.hxb.com.cn, -*.cgbchina.com.cn, -*.95508.com, -*.static.95508.com, -*.bankofbeijing.com.cn, -*.bosc.cn, -*.js96008.com, -*.tenpay.com, -*.qianbao.qq.com, weatherkit.apple.com, configuration.ls.apple.com, gspe35-ssl.ls.apple.com, gspe35-ssl.ls.apple.cn, news-edge.apple.com, news-todayconfig-edge.apple.com, news-events.apple.com, news-sports-events.apple.com, news-client.apple.com, news-client-search.apple.com, guzzoni.smoot.apple.com, api2.smoot.apple.com, *.smoot.apple.com, *.smoot.apple.cn, testflight.apple.com, boxjs.com, duckduckgo.com, h5.if.qidian.com, magev6.if.qidian.com, ii.gdt.qq.com, adsmind.gdtimg.com, adsmind.ugdtimg.com, pgdt.gtimg.cn, api-access.pangolin-sdk-toutiao.com, api-access.pangolin-sdk-toutiao1.com, api.zhihuifangdong.net, netflow-mtop.cainiao.com, nbcps-mtop.cainiao.com, cn-acs.m.cainiao.com, e2e-mtop.cainiao.com, longquan-mtop.cainiao.com, -redirector*.googlevideo.com, *.googlevideo.com, *.youtube.com, youtubei.googleapis.com, api.m.jd.com, api.zhihu.com, www.zhihu.com, appcloud2.zhihu.com, link.zhihu.com, zhuanlan.zhihu.com, amdc.m.taobao.com, m5.amap.com, m5-zb.amap.com, m-cloud.zhihu.com, tiebac.baidu.com, tieba.baidu.com, tiebaapi.baidu.com, gql.reddit.com, gql-fed.reddit.com
+hostname = -*.apple.com, -*.icloud.com, -*.icloud.com.cn, -*.95516.com, -*.cup.com.cn, -*.95516.com.cn, -*.unionpay.com, -*.icbc.com.cn, -*.mybank.icbc.com.cn, -*.icbc.com, -*.ccb.com, -*.ccb.cn, -*.boc.cn, -*.bankofchina.com, -*.jf365.boc.cn, -*.abchina.com, -*.abchina.com.cn, -*.cdn-static.abchina.com.cn, -*.cdn-static.abchina.com, -*.bankcomm.com, -*.bankcomm.cn, -*.creditcard.bankcomm.com, -*.creditcard.bankcomm.cn, -*.cmbchina.com, -*.cmbimg.com, -*.psbc.com, -*.spdb.com.cn, -*.spdbccc.com.cn, -*.citicbank.com, -*.citibank.com, -*.ecitic.com, -*.pingan.com.cn, -*.pingan.com, -*.hcz-member.pingan.com.cn, -*.iobs.pingan.com.cn, -*.stock.pingan.com, -*.cmbc.com.cn, -*.cib.com.cn, -*.cebbank.com, -*.ebchinabank.com, -*.hxb.com.cn, -*.cgbchina.com.cn, -*.95508.com, -*.static.95508.com, -*.bankofbeijing.com.cn, -*.bosc.cn, -*.js96008.com, -*.tenpay.com, -*.qianbao.qq.com, weatherkit.apple.com, configuration.ls.apple.com, gspe35-ssl.ls.apple.com, gspe35-ssl.ls.apple.cn, news-edge.apple.com, news-todayconfig-edge.apple.com, news-events.apple.com, news-sports-events.apple.com, news-client.apple.com, news-client-search.apple.com, guzzoni.smoot.apple.com, api2.smoot.apple.com, *.smoot.apple.com, *.smoot.apple.cn, testflight.apple.com, duckduckgo.com, h5.if.qidian.com, magev6.if.qidian.com, ii.gdt.qq.com, adsmind.gdtimg.com, adsmind.ugdtimg.com, pgdt.gtimg.cn, api-access.pangolin-sdk-toutiao.com, api-access.pangolin-sdk-toutiao1.com, api.zhihuifangdong.net, netflow-mtop.cainiao.com, nbcps-mtop.cainiao.com, cn-acs.m.cainiao.com, e2e-mtop.cainiao.com, longquan-mtop.cainiao.com, -redirector*.googlevideo.com, *.googlevideo.com, *.youtube.com, youtubei.googleapis.com, api.m.jd.com, api.zhihu.com, www.zhihu.com, appcloud2.zhihu.com, link.zhihu.com, zhuanlan.zhihu.com, amdc.m.taobao.com, m5.amap.com, m5-zb.amap.com, m-cloud.zhihu.com, tiebac.baidu.com, tieba.baidu.com, tiebaapi.baidu.com, gql.reddit.com, gql-fed.reddit.com
