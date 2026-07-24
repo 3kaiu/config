@@ -187,6 +187,10 @@ DOMAIN-SUFFIX, appsflyer.com, REJECT
 DOMAIN-SUFFIX, kochava.com, REJECT
 DOMAIN-SUFFIX, sentry.io, REJECT
 
+# DNS 隐私语义 (Loon): 命中域名类规则的代理流量由代理远端解析, 不产生本地 DNS 查询;
+# 本地解析 (国内 DoH, 解析器侧有记录) 仅发生在: ①走到下面 GEOIP 规则的域名
+# ②未匹配任何规则落入 Final 且 Final 为 DIRECT 的域名 ③直连流量本身 (国内域, 合理)。
+# 零泄漏姿态: 删除下面 GEOIP 行 + 将 Final 组切到 Proxy (代价: 未收录国内小站绕路)。
 GEOIP, CN, DIRECT
 FINAL, Final
 

@@ -42,7 +42,22 @@
 3. **GeoIP/ASN 库**（Loyalsoldier / P3TERX）：客户端直连上游，被篡改只会导致路由误判（非代码执行），风险低，暂不镜像。
 4. **NSRingo 版本升级流程**：Loon 插件与 QX bundle 均已钉死版本（WeatherKit v3.1.0 / Maps·GeoServices v4.6.1 / News v3.2.1 / Siri v4.2.7 / TestFlight v3.4.0）。上游发新版时：改 `mirror-scripts.yml` 中的版本号 + `template/loon.tpl` 引用，跑一次 mirror 工作流。`upstream-health.yml` 会探测已钉死 URL 的可用性，但**不会**提示有新版本（受管陈旧）。
 
-## 4. 应急切换（ws.wenn.in 不可用/被劫持）
+## 4. DNS 隐私（泄漏面精确说明）
+
+双端（Loon/QX）的解析语义一致：**命中域名类规则（DOMAIN-SUFFIX 等）的代理流量不做本地 DNS 查询**——域名直接发给代理服务器远端解析，解析器侧无记录。本地解析（走国内 DoH：阿里/腾讯/字节，ISP 不可见但解析器侧有记录）只发生在三处：
+
+| 泄漏面 | 触发条件 | 现状缓解 |
+|--------|----------|----------|
+| GEOIP 求值 | 域名未命中任何域名规则，需解析出 IP 再匹配 `GEOIP, CN` | blackmatrix7 Global/China 列表覆盖主流域名，走到 GEOIP 的只剩长尾 |
+| Final 兜底 | 未匹配任何规则 + Final 组为 DIRECT（当前默认） | Final 为 select 组，可手动切 Proxy |
+| 直连流量 | 国内域名的 DIRECT 连接 | 用国内解析器本就正确（低延迟/无污染） |
+
+**默认姿态**（当前）：便利性优先——GEOIP 兜底 + Final 默认 DIRECT，保证未收录的国内小站直连可用。
+**零泄漏姿态**（按需）：删除 `geoip, cn, direct` 规则 + Final 组切到 Proxy——所有长尾域名走代理远端解析，代价是未收录的国内站点绕路代理（变慢或不可用）。
+**本地解析加密**：本地解析全部走 DoH/DoQ（`prefer-doh3`），ISP 与中间人不可见查询内容；`circumvent-ipv4-answer`（QX）防污染应答；`hijack-dns`（Loon）防 App 明文 DNS 绕过。
+**解析器选择说明**：未采用 1.1.1.1/Quad9 等隐私解析器作为默认——大陆网络下不可达/高延迟，会导致国内直连流量解析失败；国内 DoH 的记录风险仅覆盖上述三处长尾，代理流量不在其列。
+
+## 5. 应急切换（ws.wenn.in 不可用/被劫持）
 
 **被劫持（内容被篡改，cdn-verify 告警）**：
 1. 立即在 Loon/QX 中停用本配置或断网，防止恶意脚本继续在 MitM 上下文执行；
@@ -60,7 +75,7 @@
    `https://3kaiu.github.io/config/Profile/Loon.lcf`（QX.conf / Surge.conf 同理）。
 3. 注意：Loon 已安装插件内嵌的 script-path 不会自动切换，需重装插件（插件 URL 同样替换前缀即可）。
 
-## 5. 变更 checklist（动 CDN/域名前过一遍）
+## 6. 变更 checklist（动 CDN/域名前过一遍）
 
 - [ ] `cdn-verify.yml` 手动触发一次全绿
 - [ ] 变更窗口避开 02:00-03:10（mirror/kelee/health/cdn-verify 定时任务集中段）
