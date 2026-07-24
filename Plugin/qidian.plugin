@@ -10,7 +10,7 @@
 CAPTURE_ENABLE=switch,"true","false",tag=是否开启抓取重写, desc=是否开启抓取重写以捕获 Cookie
 CRONEXP=input,"11 2 * * *",tag=CRONEXP, desc=默认每天2点11分执行, 建议自行配置。
 QDREADER_DEBUG=switch,"false","true",tag=是否开启调试模式, desc=是否开启调试模式
-TIMEOUT=input,60,tag=脚本执行超时时间, 默认60秒, desc=TIMEOUT
+TIMEOUT=input,300,tag=脚本执行超时时间, 默认300秒(高阶任务全量需2-3分钟), desc=TIMEOUT
 QDREADER_ADV_JOB_ENABLE=switch,"true","false",tag=激励任务, desc=开启后执行激励碎片任务
 QDREADER_EXTRA_ADV_JOB_ENABLE=switch,"true","false",tag=每日任务, desc=开启后执行每日广告任务
 QDREADER_LOTTERY_ENABLE=switch,"true","false",tag=每日抽奖, desc=开启后执行每日抽奖

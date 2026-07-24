@@ -663,8 +663,10 @@ async function executeCronTasks() {
   // ⚠️ 修复: runQdreaderEngine 内部 eval 注入异步引擎，无法真正 await
   // 但需要给引擎足够的执行时间，否则宿主会在引擎异步 fetch 进行中回收上下文
   runQdreaderEngine();
-  // 等待引擎执行（高阶任务含多次 fetch，通常需要 15-30 秒）
-  await $.wait(30000);
+  // 等待引擎执行：高阶任务 = 激励×9 + 每日×5 次 finishWatch，每步随机等待 5-10s，
+  // 全量需 2-3 分钟。等 280s（略低于插件 TIMEOUT=300），避免引擎中途被截断
+  // （历史 bug: 30s 等待 + 60s 超时 → 激励 7/9、每日任务 0/3）
+  await $.wait(280000);
 }
 
 // ==========================================
