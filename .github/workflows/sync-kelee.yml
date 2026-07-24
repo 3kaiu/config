@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Sync Prevent_DNS_Leaks.plugin (ajune0527/vpn_tool mirror)
         run: |

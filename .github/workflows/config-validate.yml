@@ -12,14 +12,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # ── 1. Plugin 元信息检查 ──
       - name: Check plugin metadata
         run: |
           echo "## Plugin Metadata Check" >> $GITHUB_STEP_SUMMARY
           MISSING=0
-          for f in Plugin/*.plugin Kelee/*.plugin; do
+          # 自维护插件: 严格要求 #!name + #!version
+          for f in Plugin/*.plugin; do
             name=$(grep -m1 '#!name=' "$f" | sed 's/#!name=//')
             ver=$(grep -m1 '#!version=' "$f" | sed 's/#!version=//')
             desc=$(grep -m1 '#!desc=' "$f" | sed 's/#!desc=//')
@@ -27,6 +28,13 @@ jobs:
             if [ -z "$ver" ]; then echo "⚠️ $f: missing #!version"; MISSING=$((MISSING+1)); fi
             if [ -z "$desc" ]; then echo "⚠️ $f: missing #!desc"; fi
             echo "| $(basename $f) | ${name:-UNKNOWN} | v${ver:-?} | OK |" >> $GITHUB_STEP_SUMMARY
+          done
+          # Kelee/ 为 vendored 第三方插件 (sync-kelee 每日覆写), 元信息仅警告不阻断
+          for f in Kelee/*.plugin; do
+            name=$(grep -m1 '#!name=' "$f" | sed 's/#!name=//')
+            ver=$(grep -m1 '#!version=' "$f" | sed 's/#!version=//')
+            if [ -z "$ver" ]; then echo "ℹ️ $f: vendored 插件无 #!version (不阻断)"; fi
+            echo "| $(basename $f) | ${name:-UNKNOWN} | v${ver:-?} (vendored) | OK |" >> $GITHUB_STEP_SUMMARY
           done
           echo "" >> $GITHUB_STEP_SUMMARY
           exit $MISSING
