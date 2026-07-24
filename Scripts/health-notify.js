@@ -28,38 +28,41 @@ function _notify(title, sub, body) {
 const TEST_URL = 'http://cp.cloudflare.com/generate_204';
 const TIMEOUT_MS = 10000;
 
+// 远程推送统一 Promise 化: $done() 会回收 JS 上下文, fire-and-forget 的
+// $httpClient 请求会被中止 — 必须 await 完成后再 $done() (历史 bug 修复)
 function barkPush(title, body) {
   const barkKey = _read('Bark_Key');
-  if (!barkKey) return;
+  if (!barkKey) return Promise.resolve();
   const url = `https://api.day.app/${barkKey}/${encodeURIComponent(title)}/${encodeURIComponent(body)}`;
-  $httpClient.get({ url: url, timeout: TIMEOUT_MS }, () => {});
+  return new Promise((resolve) => $httpClient.get({ url: url, timeout: TIMEOUT_MS }, () => resolve()));
 }
 
 function telegramPush(title, body) {
   const token = _read('TG_BOT_TOKEN');
   const chatId = _read('TG_USER_ID');
-  if (!token || !chatId) return;
+  if (!token || !chatId) return Promise.resolve();
   const url = `https://api.telegram.org/bot${token}/sendMessage`;
   const params = { chat_id: chatId, text: `${title}\n${body}` };
-  $httpClient.post({ url: url, timeout: TIMEOUT_MS, body: JSON.stringify(params), headers: { 'Content-Type': 'application/json' } }, () => {});
+  return new Promise((resolve) => $httpClient.post({ url: url, timeout: TIMEOUT_MS, body: JSON.stringify(params), headers: { 'Content-Type': 'application/json' } }, () => resolve()));
 }
 
 function notify(title, body) {
   _notify(title, body, '');
-  barkPush(title, body);
-  telegramPush(title, body);
+  return Promise.allSettled([barkPush(title, body), telegramPush(title, body)]);
 }
 
 const start = Date.now();
 $httpClient.get({ url: TEST_URL, timeout: TIMEOUT_MS }, (error, response, data) => {
   const elapsed = Date.now() - start;
+  let push = Promise.resolve();
   if (error) {
-    notify('⚠️ 节点健康检测', `代理连接失败: ${error}\n测试地址: ${TEST_URL}\n应急: 将 Final 策略组临时切换为 DIRECT (见 README 节点故障应急)`);
+    push = notify('⚠️ 节点健康检测', `代理连接失败: ${error}\n测试地址: ${TEST_URL}\n应急: 将 Final 策略组临时切换为 DIRECT (见 README 节点故障应急)`);
   } else if (response && (response.status === 204 || response.statusCode === 204)) {
     console.log(`✅ 节点正常, 延迟 ${elapsed}ms`);
   } else {
     const status = response ? (response.status || response.statusCode) : 'unknown';
-    notify('⚠️ 节点健康检测', `代理响应异常: HTTP ${status} (${elapsed}ms)\n测试地址: ${TEST_URL}\n应急: 将 Final 策略组临时切换为 DIRECT (见 README 节点故障应急)`);
+    push = notify('⚠️ 节点健康检测', `代理响应异常: HTTP ${status} (${elapsed}ms)\n测试地址: ${TEST_URL}\n应急: 将 Final 策略组临时切换为 DIRECT (见 README 节点故障应急)`);
   }
-  $done();
+  // 等待推送完成再结束, 否则上下文回收会中止推送
+  Promise.resolve(push).then(() => $done());
 });

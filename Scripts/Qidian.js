@@ -463,7 +463,8 @@ async function handleReplay(request) {
   const ok = results.filter(r => r.status === "fulfilled" && r.value).length;
   const total = replayCount + 1; // +1 for the original request
   if (!CONFIG.SilentMode) {
-    $.notify("起点助手", "", `${task.name}: ${ok + 1}/${total}`);
+    // ⚠️ 响应阶段: 必须 await 推送完成后再 $done(), 否则上下文回收中止推送
+    await $.notify("起点助手", "", `${task.name}: ${ok + 1}/${total}`);
   } else {
     $.log(`[静默模式] ${task.name}: ${ok + 1}/${total}`);
   }
@@ -772,19 +773,22 @@ function Env(n) {
     else $notify(t, s, b);
 
     // 2. 远程推送 (Bark, Telegram, PushPlus)
+    // 返回 Promise — 响应阶段调用方必须 await 后再 $done(),
+    // 否则上下文回收会中止未完成的推送 (历史 bug: 推送全部静默失败)
     const barkKey = this.get("Bark_Key") || this.get("barkKey");
     const tgToken = this.get("TG_BOT_TOKEN") || this.get("tgToken");
     const tgChatId = this.get("TG_USER_ID") || this.get("tgChatId");
     const pushplusToken = this.get("PUSHPLUS_TOKEN") || this.get("pushplusToken");
 
+    const pushes = [];
     if (barkKey) {
-      this.fetch({
+      pushes.push(this.fetch({
         url: `https://api.day.app/${barkKey}/${encodeURIComponent(t)}/${encodeURIComponent((s ? s + "\n" : "") + b)}`,
         method: "GET"
-      }).then(() => this.log("Bark 推送成功")).catch(e => this.log("Bark 推送失败: " + e));
+      }).then(() => this.log("Bark 推送成功")).catch(e => this.log("Bark 推送失败: " + e)));
     }
     if (tgToken && tgChatId) {
-      this.fetch({
+      pushes.push(this.fetch({
         url: `https://api.telegram.org/bot${tgToken}/sendMessage`,
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -792,10 +796,10 @@ function Env(n) {
           chat_id: String(tgChatId),
           text: `${t}\n${s ? s + "\n" : ""}${b}`
         })
-      }).then(() => this.log("Telegram 推送成功")).catch(e => this.log("Telegram 推送失败: " + e));
+      }).then(() => this.log("Telegram 推送成功")).catch(e => this.log("Telegram 推送失败: " + e)));
     }
     if (pushplusToken) {
-      this.fetch({
+      pushes.push(this.fetch({
         url: "https://www.pushplus.plus/send",
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -804,8 +808,9 @@ function Env(n) {
           title: t,
           content: `${s ? s + "\n" : ""}${b}`
         })
-      }).then(() => this.log("PushPlus 推送成功")).catch(e => this.log("PushPlus 推送失败: " + e));
+      }).then(() => this.log("PushPlus 推送成功")).catch(e => this.log("PushPlus 推送失败: " + e)));
     }
+    return Promise.allSettled(pushes);
   };
 }
 

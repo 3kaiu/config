@@ -24,43 +24,46 @@ function _notify(title, sub, body) {
   else $notification.post(title, sub, body);
 }
 
+// 远程推送统一 Promise 化: $done() 会回收 JS 上下文, fire-and-forget 的
+// $httpClient 请求会被中止 — 必须 await 完成后再 $done() (历史 bug 修复)
 function barkPush(title, body) {
   const barkKey = _read('Bark_Key');
-  if (!barkKey) return;
+  if (!barkKey) return Promise.resolve();
   const url = `https://api.day.app/${barkKey}/${encodeURIComponent(title)}/${encodeURIComponent(body)}`;
-  $httpClient.get({ url: url, timeout: 10000 }, () => {});
+  return new Promise((resolve) => $httpClient.get({ url: url, timeout: 10000 }, () => resolve()));
 }
 
 function telegramPush(title, body) {
   const token = _read('TG_BOT_TOKEN');
   const chatId = _read('TG_USER_ID');
-  if (!token || !chatId) return;
+  if (!token || !chatId) return Promise.resolve();
   const url = `https://api.telegram.org/bot${token}/sendMessage`;
   const params = { chat_id: chatId, text: `${title}\n${body}` };
-  $httpClient.post({ url: url, timeout: 10000, body: JSON.stringify(params), headers: { 'Content-Type': 'application/json' } }, () => {});
+  return new Promise((resolve) => $httpClient.post({ url: url, timeout: 10000, body: JSON.stringify(params), headers: { 'Content-Type': 'application/json' } }, () => resolve()));
 }
 
 function notify(title, body) {
   _notify(title, body, '');
-  barkPush(title, body);
-  telegramPush(title, body);
+  return Promise.allSettled([barkPush(title, body), telegramPush(title, body)]);
 }
 
+let push = Promise.resolve();
 try {
   if (isQX) {
     // QX 无 $environment API, 推送心跳通知
-    notify('📊 运行心跳', 'QX 正常运行中\n(流量详情不可用, QX 不支持 $environment)');
+    push = notify('📊 运行心跳', 'QX 正常运行中\n(流量详情不可用, QX 不支持 $environment)');
   } else {
     const env = $environment;
     if (env && env.surgeVersion) {
       var info = 'Loon ' + env.surgeVersion;
       if (env.buildVersion) info += ' (build ' + env.buildVersion + ')';
-      notify('📊 Loon 流量统计', info + '\nLoon 正常运行中');
+      push = notify('📊 Loon 流量统计', info + '\nLoon 正常运行中');
     } else {
-      notify('📊 Loon 运行心跳', 'Loon 正常运行中\n(流量详情不可用)');
+      push = notify('📊 Loon 运行心跳', 'Loon 正常运行中\n(流量详情不可用)');
     }
   }
 } catch (e) {
-  notify('📊 运行心跳', '正常运行中\n(环境信息获取异常)');
+  push = notify('📊 运行心跳', '正常运行中\n(环境信息获取异常)');
 }
-$done();
+// 等待推送完成再结束, 否则上下文回收会中止推送
+Promise.resolve(push).then(() => $done());
