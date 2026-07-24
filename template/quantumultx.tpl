@@ -139,12 +139,6 @@ host, ip-scan.adspower.net, Proxy
 
 {% include "./snippet/developer.qx" %}
 
-# Google 通配域名 (流媒体依赖) — 必须在 developer.qx 之后, 避免 googleapis.com 截胡 firebase.googleapis.com
-host-suffix, gstatic.com, Streaming
-host-suffix, googleapis.com, Streaming
-host-suffix, google.com, Streaming
-host-suffix, google.co.jp, Streaming
-
 # Google 全家桶
 host-suffix, googleusercontent.com, Proxy
 host-suffix, ggpht.com, Proxy
@@ -219,6 +213,14 @@ host-suffix, adjust.com, reject
 host-suffix, appsflyer.com, reject
 host-suffix, kochava.com, reject
 host-suffix, sentry.io, reject
+
+# Google 通配域名 (流媒体依赖) — QX 按书写顺序匹配, 必须置于 AI 分流与 Google 分析 reject 之后,
+# 否则会截胡 gemini.google.com/generativelanguage.googleapis.com (误入 Streaming) 与
+# adservice/analytics.google.com、firebaseinstallations/crashlytics.googleapis.com (reject 失效)
+host-suffix, gstatic.com, Streaming
+host-suffix, googleapis.com, Streaming
+host-suffix, google.com, Streaming
+host-suffix, google.co.jp, Streaming
 
 geoip, cn, direct
 final, Final
