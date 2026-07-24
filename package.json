@@ -5,9 +5,14 @@
   "description": "3kaiu Loon & Quantumult X config — Surgio project",
   "scripts": {
     "generate": "surgio generate",
-    "preview": "surgio preview"
+    "preview": "surgio preview",
+    "test": "node test/run-tests.js",
+    "lint": "eslint Scripts/ test/"
   },
   "dependencies": {
     "surgio": "^3.17.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.5"
   }
 }

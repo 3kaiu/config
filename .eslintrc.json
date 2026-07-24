@@ -1,8 +1,0 @@
-{
-  "root": true,
-  "ignorePatterns": [
-    "Mirror/*.js",
-    "Scripts/*.js",
-    "node_modules/"
-  ]
-}

@@ -1,0 +1,28 @@
+# 脚本回归测试 (中期演进 #1: 测试基建)
+# 零依赖, vm 沙箱模拟 Loon/QX 运行时, 覆盖净化类脚本与 Qidian 包装层核心逻辑
+name: Script Tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run script tests
+        run: node test/run-tests.js
