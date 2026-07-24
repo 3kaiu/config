@@ -288,17 +288,18 @@ jobs:
       - name: QX rule-order shadowing guard
         run: |
           echo "## QX Rule-Order Guard" >> $GITHUB_STEP_SUMMARY
+          # 注: firebaseinstallations 已按审计修复移出 reject, 此处以 crashlytics 为锚点
           wild_line=$(grep -n '^host-suffix, googleapis\.com, Streaming' Profile/QX.conf | cut -d: -f1)
           wild2_line=$(grep -n '^host-suffix, google\.com, Streaming' Profile/QX.conf | cut -d: -f1)
           ai_line=$(grep -n '^host-suffix, generativelanguage\.googleapis\.com' Profile/QX.conf | cut -d: -f1)
-          fb_line=$(grep -n '^host-suffix, firebaseinstallations\.googleapis\.com, reject' Profile/QX.conf | cut -d: -f1)
+          crash_line=$(grep -n '^host-suffix, crashlytics\.googleapis\.com, reject' Profile/QX.conf | cut -d: -f1)
           ads_line=$(grep -n '^host-suffix, adservice\.google\.com, reject' Profile/QX.conf | cut -d: -f1)
-          if [ -z "$wild_line" ] || [ -z "$wild2_line" ] || [ -z "$ai_line" ] || [ -z "$fb_line" ] || [ -z "$ads_line" ]; then
-            echo "❌ 缺少必要规则行 (wild=$wild_line/$wild2_line ai=$ai_line fb=$fb_line ads=$ads_line)" >> $GITHUB_STEP_SUMMARY
+          if [ -z "$wild_line" ] || [ -z "$wild2_line" ] || [ -z "$ai_line" ] || [ -z "$crash_line" ] || [ -z "$ads_line" ]; then
+            echo "❌ 缺少必要规则行 (wild=$wild_line/$wild2_line ai=$ai_line crash=$crash_line ads=$ads_line)" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
           FAIL=0
-          for anchor in "AI:$ai_line" "Firebase:$fb_line" "adservice:$ads_line"; do
+          for anchor in "AI:$ai_line" "crashlytics:$crash_line" "adservice:$ads_line"; do
             name=${anchor%%:*}; line=${anchor##*:}
             if [ "$wild_line" -lt "$line" ]; then
               echo "❌ Google 通配 (L$wild_line) 在 $name (L$line) 之前 — $name 被遮蔽" >> $GITHUB_STEP_SUMMARY
