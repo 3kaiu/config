@@ -15,6 +15,13 @@ module.exports = defineSurgioConfig({
       provider: 'tokyo',
       destDir: 'Profile',
     },
+    {
+      // 第三端冗余: Surge 配置 (v1 覆盖范围见模板头部注释)
+      name: 'Surge.conf',
+      template: 'surge',
+      provider: 'tokyo',
+      destDir: 'Profile',
+    },
   ],
 
   // 远程规则片段 (blackmatrix7 + ddgksf2013)
@@ -52,5 +59,7 @@ module.exports = defineSurgioConfig({
     doh3_primary: 'h3://dns.alidns.com/dns-query',
     doh3_fallback: 'h3://doh.pub/dns-query',
     doq_server: 'quic://dns.alidns.com:853',
+    // Surge 节点 policy-path (Sub-Store 集合的 Surge 节点列表 URL); 留空时 Proxy 组降级为 select DIRECT
+    surge_node_policy_path: '',
   },
 });
