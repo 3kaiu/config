@@ -61,6 +61,7 @@ mtalk.google.com = 108.177.125.188
 [Proxy]
 # Surgio 自动生成节点: npx surgio generate
 # 通过 SURGIO_SUBSCRIPTION_URL (机场订阅) 或 Secrets (HY2_HOST 等) 传入
+# 容灾: Proxy url-test 组 (".*") 自动纳管新节点 — 订阅中加入第二节点即双节点容灾 (见 README 3.6)
 
 [Proxy Group]
 Proxy = url-test, ".*", url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50

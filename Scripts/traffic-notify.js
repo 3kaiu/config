@@ -2,11 +2,15 @@
  * traffic-notify.js — 流量统计通知 (v7.8)
  *
  * Loon: 通过 $environment 获取运行状态信息, 推送流量摘要。
- * QX: $environment 不可用, 推送心跳通知。
- * 兼容 Loon / Quantumult X
+ * QX / Surge: $environment 不可用, 推送心跳通知。
+ * 兼容 Loon / Quantumult X / Surge
+ *
+ * 注: 本脚本实际为运行心跳 (两端 JS 环境均无真实流量统计 API),
+ * 名称保留是为与 notify.plugin / task_local 的 tag 对齐。
  *
  * Loon cron: 0 22 * * *
  * QX cron: 0 22 * * *
+ * Surge cron: 0 22 * * * (5 字段)
  */
 
 // ── QX / Loon 兼容层 ──

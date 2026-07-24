@@ -65,6 +65,7 @@ static=Social, Proxy, direct, img-url=https://raw.githubusercontent.com/Koolson/
 
 [server_local]
 # Surgio 自动生成节点 — 通过 SURGIO_SUBSCRIPTION_URL 或 Secrets
+# 容灾: Proxy url-latency-benchmark (server_regex=.) 自动纳管新节点 — 订阅加第二节点即双节点容灾 (见 README 3.6)
 
 [filter_remote]
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/QuantumultX/Advertising/Advertising.list, tag=🚫 广告域名, force-policy=reject, update-interval=86400, opt-parser=true, enabled=true
