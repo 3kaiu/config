@@ -1,0 +1,51 @@
+# 第二分发源: GitHub Pages 兜底 (长期演进 #13)
+#
+# 用途: ws.wenn.in 故障/域名丢失时的备用分发通道。
+#   ws.wenn.in/main/<path>  ←→  https://3kaiu.github.io/config/<path>
+# 启用方法 (一次性): 仓库 Settings → Pages → Source 选 "GitHub Actions"。
+# 切换方法: 见 doc/infrastructure.md「应急切换」。
+
+name: Deploy Fallback (GitHub Pages)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 排除 .git / node_modules / 审计产物，其余全量发布
+      - name: Prepare artifact
+        run: |
+          mkdir -p /tmp/pages
+          rsync -a --exclude='.git' --exclude='node_modules' --exclude='.github' ./ /tmp/pages/
+          echo "Published files:" && find /tmp/pages -type f | wc -l
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: /tmp/pages
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

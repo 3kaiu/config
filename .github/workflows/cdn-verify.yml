@@ -1,0 +1,115 @@
+# CDN 内容哈希校验 (长期演进 #13)
+#
+# 每日核对 ws.wenn.in 分发内容与仓库实际文件的 sha256:
+#   - 哈希不一致 = CDN 被篡改/缓存污染/回退未同步 → 开 Issue (+Bark 告警)
+#   - 拉取失败 ≥3 个 = CDN 可用性异常 → 开 Issue
+# 上游 200 状态码健康检查 (upstream-health.yml) 的补强: 那个只查可达, 这个查内容。
+
+name: CDN Content Verify
+
+on:
+  schedule:
+    - cron: '34 2 * * *'   # 02:34, 错开 mirror(03:00)/kelee(02:00)/health(02:17)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compare CDN content hashes
+        id: check
+        run: |
+          echo "## CDN Content Verify" >> $GITHUB_STEP_SUMMARY
+          MISMATCH=""
+          FETCHFAIL=""
+          OK=0
+          FILES=$(git ls-files 'Scripts/*.js' 'Mirror/*.js' 'Mirror/nsringo/*.js' \
+                    'Plugin/*.plugin' 'Kelee/*.plugin' 'QX/apple/*.conf' \
+                    'Profile/Loon.lcf' 'Profile/QX.conf' 'Profile/Surge.conf')
+          for f in $FILES; do
+            url="https://ws.wenn.in/main/$f"
+            tmp=$(mktemp)
+            if ! curl -fsSL -m 30 --retry 2 -o "$tmp" "$url"; then
+              FETCHFAIL="$FETCHFAIL$f\n"
+              echo "⚠️ fetch failed: $f"
+              rm -f "$tmp"
+              continue
+            fi
+            remote=$(sha256sum "$tmp" | awk '{print $1}')
+            local=$(sha256sum "$f" | awk '{print $1}')
+            rm -f "$tmp"
+            if [ "$remote" != "$local" ]; then
+              MISMATCH="$MISMATCH$f\n"
+              echo "❌ hash mismatch: $f"
+            else
+              OK=$((OK+1))
+            fi
+          done
+          MISMATCH_COUNT=$(printf "$MISMATCH" | grep -c . || true)
+          FETCHFAIL_COUNT=$(printf "$FETCHFAIL" | grep -c . || true)
+          echo "| Result | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| ✅ 哈希一致 | $OK |" >> $GITHUB_STEP_SUMMARY
+          echo "| ❌ 哈希不一致 | $MISMATCH_COUNT |" >> $GITHUB_STEP_SUMMARY
+          echo "| ⚠️ 拉取失败 | $FETCHFAIL_COUNT |" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "mismatch_count=$MISMATCH_COUNT"
+            echo "fetchfail_count=$FETCHFAIL_COUNT"
+            echo "mismatch_files<<EOF"
+            printf "$MISMATCH"
+            echo "EOF"
+            echo "fetchfail_files<<EOF"
+            printf "$FETCHFAIL"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+          # 不一致即失败 (拉取失败容忍 <3 个的瞬时抖动)
+          if [ "$MISMATCH_COUNT" -gt 0 ] || [ "$FETCHFAIL_COUNT" -ge 3 ]; then
+            echo "alert_needed=true" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      # Bark 告警 (可选: 仓库 Secrets 配置 BARK_PUSH 后启用)
+      - name: Bark alert
+        if: failure() && env.BARK_PUSH != ''
+        env:
+          BARK_PUSH: ${{ secrets.BARK_PUSH }}
+        run: |
+          curl -fsSL -m 15 -o /dev/null \
+            "$BARK_PUSH/CDN校验失败/mismatch=${{ steps.check.outputs.mismatch_count }}%20fetchfail=${{ steps.check.outputs.fetchfail_count }}?group=config&icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Back.png" \
+            || echo "Bark 推送失败(不阻断)"
+
+      - name: Create issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '[cdn-verify] ws.wenn.in 内容与仓库不一致';
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'cdn-verify'
+            });
+            if (issues.length > 0) {
+              core.info('已存在 open issue, 跳过创建');
+              return;
+            }
+            const mismatch = `${{ steps.check.outputs.mismatch_files }}`.split('\n').filter(Boolean);
+            const fetchfail = `${{ steps.check.outputs.fetchfail_files }}`.split('\n').filter(Boolean);
+            const body = [
+              '## CDN 内容哈希校验失败',
+              '',
+              mismatch.length ? '### ❌ 哈希不一致 (可能被篡改/缓存污染)\n```\n' + mismatch.join('\n') + '\n```' : '',
+              fetchfail.length ? '### ⚠️ 拉取失败\n```\n' + fetchfail.join('\n') + '\n```' : '',
+              '',
+              '处理: 检查 CDN 回源源是否指向本仓库 main 分支最新内容; 哈希不一致时立即排查 CDN 配置与域名安全 (见 doc/infrastructure.md)。'
+            ].filter(Boolean).join('\n');
+            await github.rest.issues.create({
+              owner: context.repo.owner, repo: context.repo.repo,
+              title, body, labels: ['cdn-verify']
+            });
