@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   mirror:
@@ -15,23 +16,74 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Mirror scripts from upstream sources
+      # 安全改造 (2026-07-24 审计 P0):
+      # 1. 写入前门禁: node --check 语法 + 最小体积 + 非 HTML 错误页 — 任一不过则保留旧文件
+      # 2. MANIFEST.json: 每个镜像文件记录 source_url + sha256 + 抓取时间, 变更在 PR diff 中高亮
+      # 3. PR 制: 不再直推 main — 推送到 mirror/<date> 分支并开/更新 PR, 人工审 diff 后合并
+      - name: Mirror scripts from upstream sources (with gates)
         run: |
           SUCCESS=0
           FAIL=0
+          GATED=0
+          OLD_MANIFEST="Mirror/MANIFEST.json"
+          NEW_MANIFEST="/tmp/MANIFEST.new.json"
+          echo "{" > "$NEW_MANIFEST.tmp"
+
+          # 读取旧清单中某文件的记录 (用于抓取失败时保留旧 sha)
+          old_entry() {
+            [ -f "$OLD_MANIFEST" ] && node -e '
+              const m = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+              const e = m.files && m.files[process.argv[2]];
+              if (e) console.log(JSON.stringify(e));
+            ' "$OLD_MANIFEST" "$1" 2>/dev/null || true
+          }
+
+          declare -a ENTRIES
 
           mirror() {
             local url="$1"
             local dest="$2"
             local name="$3"
-            mkdir -p "$(dirname "Mirror/$dest")"
-            if curl -fsSL -m 60 -A "Loon/3.3.9" "$url" -o "Mirror/$dest"; then
-              echo "✅ $name → Mirror/$dest"
-              SUCCESS=$((SUCCESS + 1))
-            else
-              echo "❌ $name (FAILED)"
+            local path="Mirror/$dest"
+            mkdir -p "$(dirname "$path")"
+            local tmpf; tmpf=$(mktemp)
+            if ! curl -fsSL -m 60 -A "Loon/3.3.9" "$url" -o "$tmpf"; then
+              echo "❌ $name (FETCH FAILED)"
               FAIL=$((FAIL + 1))
+              # 保留旧清单记录
+              local oe; oe=$(old_entry "$dest")
+              [ -n "$oe" ] && ENTRIES+=("\"$dest\": $oe")
+              rm -f "$tmpf"
+              return
             fi
+            # ── 门禁 1: 体积下限 (防 200 状态码的 HTML 错误页/半截传输) ──
+            local size; size=$(wc -c < "$tmpf")
+            if [ "$size" -lt 200 ]; then
+              echo "🚫 $name 门禁拦截: 体积过小 (${size}B), 保留旧版"
+              GATED=$((GATED + 1)); FAIL=$((FAIL + 1))
+              local oe; oe=$(old_entry "$dest"); [ -n "$oe" ] && ENTRIES+=("\"$dest\": $oe")
+              rm -f "$tmpf"; return
+            fi
+            # ── 门禁 2: 非 HTML ──
+            if head -c 200 "$tmpf" | grep -qi '<!doctype\|<html'; then
+              echo "🚫 $name 门禁拦截: 内容为 HTML 错误页, 保留旧版"
+              GATED=$((GATED + 1)); FAIL=$((FAIL + 1))
+              local oe; oe=$(old_entry "$dest"); [ -n "$oe" ] && ENTRIES+=("\"$dest\": $oe")
+              rm -f "$tmpf"; return
+            fi
+            # ── 门禁 3: JS 语法 (minified 同样适用; bundle 同样可过) ──
+            if ! node --check "$tmpf" 2>/dev/null; then
+              echo "🚫 $name 门禁拦截: node --check 语法错误, 保留旧版"
+              GATED=$((GATED + 1)); FAIL=$((FAIL + 1))
+              local oe; oe=$(old_entry "$dest"); [ -n "$oe" ] && ENTRIES+=("\"$dest\": $oe")
+              rm -f "$tmpf"; return
+            fi
+            cp "$tmpf" "$path"
+            rm -f "$tmpf"
+            local sha; sha=$(sha256sum "$path" | awk '{print $1}')
+            echo "✅ $name → $path (sha256:${sha:0:12}…, ${size}B)"
+            SUCCESS=$((SUCCESS + 1))
+            ENTRIES+=("\"$dest\": {\"source_url\": \"$url\", \"sha256\": \"$sha\", \"bytes\": $size, \"fetched_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}")
           }
 
           # ── ddgksf2013 (gist: netease.adblock.js) ──
@@ -60,10 +112,6 @@ jobs:
             "youtube.response.js" "Maasea / youtube.response.js"
 
           # ── NSRingo bundle.js (version-pinned release artifacts) ──
-          # These .bundle.js files are referenced by NSRingo .plugin files
-          # with version-pinned URLs (e.g. releases/download/v3.1.0/).
-          # If NSRingo cleans up old releases, those URLs would 404.
-          # Mirroring eliminates this single-point-of-failure.
           mirror "https://github.com/NSRingo/WeatherKit/releases/download/v3.1.0/response.bundle.js" \
             "nsringo/WeatherKit-v3.1.0-response.bundle.js" "NSRingo WeatherKit / response.bundle.js v3.1.0"
 
@@ -88,32 +136,62 @@ jobs:
           mirror "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/response.bundle.js" \
             "nsringo/TestFlight-v3.4.0-response.bundle.js" "NSRingo TestFlight / response.bundle.js v3.4.0"
 
+          # ── 写出新清单 (按文件名排序) ──
+          node -e '
+            const entries = process.argv.slice(1).map(s => { const i = s.indexOf(":"); return [s.slice(1, i-1).trim().replace(/^"|"$/g,""), s.slice(i+1).trim()]; });
+            entries.sort((a,b) => a[0].localeCompare(b[0]));
+            const files = {};
+            for (const [k, v] of entries) files[k] = JSON.parse(v);
+            const manifest = {
+              "$comment": "镜像文件哈希清单 — 由 mirror-scripts.yml 维护; 变更会出现在镜像 PR 的 diff 中, 合并前请核对 source 变更是否符合预期",
+              generated_at: new Date().toISOString().replace(/\.\d+Z$/, "Z"),
+              files
+            };
+            require("fs").writeFileSync("Mirror/MANIFEST.json", JSON.stringify(manifest, null, 2) + "\n");
+          ' "${ENTRIES[@]}"
+
           echo ""
-          echo "== Mirror Summary: $SUCCESS succeeded, $FAIL failed =="
+          echo "== Mirror Summary: $SUCCESS succeeded, $FAIL failed (gated: $GATED) =="
           echo "success=$SUCCESS" >> $GITHUB_ENV
           echo "fail=$FAIL" >> $GITHUB_ENV
+          echo "gated=$GATED" >> $GITHUB_ENV
 
-      - name: Commit and push changes
+      # PR 制: 变更推送到 mirror/<date> 分支并开/更新 PR, 不再直推 main
+      - name: Open or update mirror PR
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add Mirror/
           if git diff --cached --quiet; then
-            echo "No changes to commit"
+            echo "无变更, 跳过 PR"
+            echo "pr_action=none" >> $GITHUB_ENV
+            exit 0
+          fi
+          BRANCH="mirror/$(date +%Y-%m-%d)"
+          git checkout -B "$BRANCH"
+          git commit -m "chore(mirror): 上游脚本同步 ($(date +%Y-%m-%d)) — 待审核"
+          git push -f origin "$BRANCH"
+          CHANGED=$(git diff --name-only main...HEAD -- Mirror/ | grep -v MANIFEST.json | wc -l)
+          if gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' | grep -q .; then
+            gh pr edit "$BRANCH" --body "$(printf '## 镜像同步 %s\n\n变更文件: %s 个 (不含 MANIFEST)\n\n```%s```\n\n### 审核清单\n- [ ] MANIFEST.json diff: 每个变更文件的 sha256 与 source_url 已核对\n- [ ] 上游变更符合预期 (非投毒/非破坏性更新)\n- [ ] CI 全绿\n\n> 门禁: node --check 语法 / 体积≥200B / 非 HTML 错误页; 未过门禁的文件保留旧版' "$(date +%Y-%m-%d)" "$CHANGED" "$(git diff --stat main...HEAD -- Mirror/)")"
+            echo "pr_action=updated" >> $GITHUB_ENV
           else
-            git commit -m "Auto-mirror external scripts ($(date +%Y-%m-%d))"
-            git push
+            gh pr create --base main --head "$BRANCH" \
+              --title "chore(mirror): 上游脚本同步 ($(date +%Y-%m-%d))" \
+              --body "$(printf '## 镜像同步 %s\n\n变更文件: %s 个 (不含 MANIFEST)\n\n```%s```\n\n### 审核清单\n- [ ] MANIFEST.json diff: 每个变更文件的 sha256 与 source_url 已核对\n- [ ] 上游变更符合预期 (非投毒/非破坏性更新)\n- [ ] CI 全绿\n\n> 门禁: node --check 语法 / 体积≥200B / 非 HTML 错误页; 未过门禁的文件保留旧版' "$(date +%Y-%m-%d)" "$CHANGED" "$(git diff --stat main...HEAD -- Mirror/)")"
+            echo "pr_action=created" >> $GITHUB_ENV
           fi
 
       - name: Report summary
         if: always()
         run: |
           echo "### Mirror Scripts Report" >> $GITHUB_STEP_SUMMARY
-          echo "| Date | Succeeded | Failed |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|-----------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| $(date +%Y-%m-%d) | ${{ env.success }} | ${{ env.fail }} |" >> $GITHUB_STEP_SUMMARY
-
+          echo "| Date | Succeeded | Failed | Gated | PR |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-----------|--------|-------|----|" >> $GITHUB_STEP_SUMMARY
+          echo "| $(date +%Y-%m-%d) | ${{ env.success }} | ${{ env.fail }} | ${{ env.gated }} | ${{ env.pr_action }} |" >> $GITHUB_STEP_SUMMARY
           if [ "${{ env.fail }}" -gt 0 ]; then
-            echo "### ⚠️ Some mirrors failed" >> $GITHUB_STEP_SUMMARY
-            echo "Check run logs for details." >> $GITHUB_STEP_SUMMARY
+            echo "### ⚠️ Some mirrors failed or were gated" >> $GITHUB_STEP_SUMMARY
+            echo "Check run logs for details. 被门禁拦截的文件保留旧版, 不影响分发。" >> $GITHUB_STEP_SUMMARY
           fi

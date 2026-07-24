@@ -1,0 +1,96 @@
+{
+  "$comment": "镜像文件哈希清单 — 由 mirror-scripts.yml 维护; 变更会出现在镜像 PR 的 diff 中, 合并前请核对 source 变更是否符合预期",
+  "generated_at": "2026-07-24T00:00:00Z (baseline)",
+  "files": {
+    "netease.adblock.js": {
+      "source_url": "https://gist.githubusercontent.com/ddgksf2013/4f53b7c6083678df25fecc8ff68b52c4/raw/netease.adblock.js",
+      "sha256": "6ba468eb994e3843d69563f8f3b31c2d63a62a68d60fc3a1fd61947c1546936f",
+      "bytes": 122922,
+      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+    },
+    "amdc.js": {
+      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amdc.js",
+      "sha256": "8217f2150f8d12ae04d2c49b5da0a838e83f4de68b34df71c2da16cc1267898f",
+      "bytes": 633,
+      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+    },
+    "applet.js": {
+      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/applet.js",
+      "sha256": "0e2ffdd010b7f1ee38c526af5b7842f8fe3af89bf7ccd298596025baa4471855",
+      "bytes": 793,
+      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+    },
+    "bilibili-json.js": {
+      "source_url": "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js",
+      "sha256": "748ad16a92532bde2c439a8b9975f465381d20e24328cf2a58ff3a2a27328d84",
+      "bytes": 4959,
+      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+    },
+    "bilibili-proto.js": {
+      "source_url": "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-proto.js",
+      "sha256": "70fa7cf0e3390da24db93bcfbf0c81c2af17b16f99012b483783f046f62c476e",
+      "bytes": 106934,
+      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+    },
+    "youtube.request.js": {
+      "source_url": "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.request.js",
+      "sha256": "3ecca15e06e76a31720092c581180f648ef2c45e494644941ba985c878efbb26",
+      "bytes": 44024,
+      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+    },
+    "youtube.response.js": {
+      "source_url": "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js",
+      "sha256": "f98483d5f5017514f82502253c0db5ce2d4ffb7839887aa2cadc22666f5a7f12",
+      "bytes": 132973,
+      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+    },
+    "nsringo/WeatherKit-v3.1.0-response.bundle.js": {
+      "source_url": "https://github.com/NSRingo/WeatherKit/releases/download/v3.1.0/response.bundle.js",
+      "sha256": "e7c75725d67c4e8f78d3fdc003481762a377c624ae89bba64b23b2cb5ea9f342",
+      "bytes": 240960,
+      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+    },
+    "nsringo/GeoServices-v4.6.1-request.bundle.js": {
+      "source_url": "https://github.com/NSRingo/GeoServices/releases/download/v4.6.1/request.bundle.js",
+      "sha256": "4483623a4b6b9cbef897b25e7881a03143461055696fc5a750af518165b96dc2",
+      "bytes": 151666,
+      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+    },
+    "nsringo/GeoServices-v4.6.1-response.bundle.js": {
+      "source_url": "https://github.com/NSRingo/GeoServices/releases/download/v4.6.1/response.bundle.js",
+      "sha256": "4d6c18dca53c4ae85ac836a2d3d19f7be1a7fc32e2c74af5783ec6a62cb75fd0",
+      "bytes": 155957,
+      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+    },
+    "nsringo/News-v3.2.1-request.bundle.js": {
+      "source_url": "https://github.com/NSRingo/News/releases/download/v3.2.1/request.bundle.js",
+      "sha256": "04702194e559f448b78b169fa266719898ece4da725e49d89dd730df844703fc",
+      "bytes": 64150,
+      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+    },
+    "nsringo/Siri-v4.2.7-request.bundle.js": {
+      "source_url": "https://github.com/NSRingo/Siri/releases/download/v4.2.7/request.bundle.js",
+      "sha256": "0725d734f78195438e7cc87e4d3e8464b3a237a6cb83514e60750cfd78b2f8ef",
+      "bytes": 145455,
+      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+    },
+    "nsringo/Siri-v4.2.7-response.bundle.js": {
+      "source_url": "https://github.com/NSRingo/Siri/releases/download/v4.2.7/response.bundle.js",
+      "sha256": "42401aa3ea5b8bd784ec3cf3f9070e237291f975e395a068b938cc27672cc38b",
+      "bytes": 65085,
+      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+    },
+    "nsringo/TestFlight-v3.4.0-request.bundle.js": {
+      "source_url": "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/request.bundle.js",
+      "sha256": "a03f141a5a715e00fc97a07d17d41607b9acec0e68953b0caa7ec5c185965ea9",
+      "bytes": 25108,
+      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+    },
+    "nsringo/TestFlight-v3.4.0-response.bundle.js": {
+      "source_url": "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/response.bundle.js",
+      "sha256": "af148b947a0340427ba2df7ad5775b3fe7233462790c66a9096140bb97fe4406",
+      "bytes": 24225,
+      "fetched_at": "2026-07-23T03:00:00Z (baseline: 取仓库现状, 上次自动 mirror)"
+    }
+  }
+}
