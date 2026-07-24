@@ -1,0 +1,31 @@
+{
+  "$comment": "起点全能助手内嵌 qdreader 引擎治理清单 — CI (config-validate.yml step 9) 强制校验 embedded_blob_sha256；更新引擎必须同步更新本文件",
+  "engine": {
+    "name": "qdreader (起点读书自动签到高阶任务引擎)",
+    "upstream_repo": "https://github.com/Yuheng0101/X",
+    "upstream_path": "Tasks/QDReader/qdreader.js",
+    "upstream_commit_at_embed": "4c2d672cc134a2595483d58ef50131497abc7ab5",
+    "upstream_commit_date": "2026-05-20",
+    "embedded_at": "2026-07-24"
+  },
+  "integrity": {
+    "blob_start_marker": "!function(){var qdreader_QvWpI=",
+    "blob_end_marker": "qdreader_g_jQbSB8fG(qdreader_QvWpI)}();",
+    "embedded_blob_sha256": "fec4cceacc316ba52fc0ba8ef1103c5fd51794fa56c40ef9c0838c86cccae165",
+    "rc4_payload_sha256": "d428041a871eb8d2399d39ddbfca583ae8c4dab6cb14eacde4489dea9b53645c",
+    "rc4_key_hardcoded": "2e48e0932cabbd045d4bf30e781e6abb"
+  },
+  "obfuscation": "三层: base64(RC4(字节码)) → utf8 → javascript-obfuscator(2177 条字符串表, 旋转偏移 k=130, 内层偏移 438)",
+  "known_risks": [
+    "引擎为加密+双层混淆代码，静态不可审计，等价于信任一个不公布源码的第三方；拥有 $httpClient 网络能力与全部持久化读写权限",
+    "引擎在 Cookie 新增/更新时调用 notify，正文包含完整 cmfuToken（锁屏通知可见），并写入 Loon 调试日志；该行为不受 QDREADER_DEBUG 开关控制（已反混淆验证）",
+    "每次 cron 签到与每次 getlogininfo 抓包都会执行引擎 eval"
+  ],
+  "update_procedure": [
+    "1. 从上游获取新版 qdreader.js，diff/反混淆审查变更（解码方法: base64→RC4(key 见上)→utf8，再用字符串表 k=130 还原）",
+    "2. 替换 Qidian.js 中两个 marker 之间的 IIFE",
+    "3. 重新计算 blob sha256 与 rc4_payload sha256，更新本清单三个字段 (upstream_commit_at_embed / embedded_blob_sha256 / rc4_payload_sha256)",
+    "4. 本地运行: node -e 校验脚本（同 config-validate.yml step 9）确认通过",
+    "5. 提交并观察 CI"
+  ]
+}

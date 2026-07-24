@@ -810,6 +810,12 @@ function Env(n) {
 
 // ==========================================
 // 📦 起点读书自动签到(高阶任务) - 注入 Yuheng0101 的 qdreader 引擎
+// ⚠️ 供应链治理 (2026-07-24 审计后建立):
+//   - 下方 IIFE 为 RC4+双层混淆的第三方引擎，静态不可审计
+//   - 版本/来源/哈希/风险/更新流程见 Scripts/ENGINE-MANIFEST.json
+//   - CI (config-validate.yml step 9) 强制校验 blob 哈希，
+//     引擎变更必须同步更新清单，否则 CI 失败
+//   - 已知: 引擎在 Cookie 变更通知正文中含完整 cmfuToken（不受 debug 开关控制）
 // ==========================================
 function runQdreaderEngine() {
   // ⚠️ 修复: 确保 $argument 在 QX 下也能经 globalThis 访问

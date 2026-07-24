@@ -227,6 +227,36 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           exit $FAIL
 
+      # ── 9. Qidian 内嵌引擎完整性校验 ──
+      - name: Qidian engine integrity check
+        run: |
+          echo "## Qidian Engine Integrity" >> $GITHUB_STEP_SUMMARY
+          node -e '
+            const fs = require("fs"), crypto = require("crypto");
+            const s = fs.readFileSync("Scripts/Qidian.js", "utf8");
+            const manifest = JSON.parse(fs.readFileSync("Scripts/ENGINE-MANIFEST.json", "utf8"));
+            const start = manifest.integrity.blob_start_marker;
+            const endMark = manifest.integrity.blob_end_marker;
+            const i = s.indexOf(start), j = s.indexOf(endMark);
+            if (i < 0 || j < 0) { console.log("❌ 引擎 blob marker 未找到"); process.exit(1); }
+            const blob = s.slice(i, j + endMark.length);
+            const h = crypto.createHash("sha256").update(blob).digest("hex");
+            const pm = blob.match(/[\x27"]([A-Za-z0-9+/=]{10000,})[\x27"]/);
+            const ph = pm ? crypto.createHash("sha256").update(pm[1]).digest("hex") : "(未提取到)";
+            console.log("| Field | Manifest | Actual |");
+            console.log("|-------|----------|--------|");
+            console.log("| blob sha256 | `" + manifest.integrity.embedded_blob_sha256.slice(0, 16) + "…` | `" + h.slice(0, 16) + "…` |");
+            console.log("| rc4 payload sha256 | `" + manifest.integrity.rc4_payload_sha256.slice(0, 16) + "…` | `" + ph.slice(0, 16) + "…` |");
+            console.log("| upstream commit | " + manifest.engine.upstream_commit_at_embed.slice(0, 10) + " | - |");
+            if (h !== manifest.integrity.embedded_blob_sha256) {
+              console.log("❌ 引擎 blob 哈希与 ENGINE-MANIFEST.json 不符 — 引擎已被修改但清单未更新");
+              console.log("按 manifest 的 update_procedure 审查变更并更新清单后重试");
+              process.exit(1);
+            }
+            console.log("✅ 引擎 blob 与清单一致 (upstream " + manifest.engine.upstream_commit_at_embed.slice(0, 10) + ")");
+          ' 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          exit ${PIPESTATUS[0]}
+
       # ── 8. 主配置版本号一致性 ──
       - name: Check version consistency
         run: |
