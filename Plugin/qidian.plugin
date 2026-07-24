@@ -63,9 +63,12 @@ DOMAIN, apmplus.volces.com, REJECT
 DOMAIN, mssdk.volces.com, REJECT
 DOMAIN, tobapplog.ctobsnssdk.com, REJECT
 DOMAIN, hd.ctobsnssdk.com, REJECT
-DOMAIN-KEYWORD, pglstatp-toutiao, REJECT
-DOMAIN-KEYWORD, zijieapi, REJECT
-DOMAIN-KEYWORD, bytescm, REJECT
+# 字节系 SDK/CDN 拦截 — 限定起点 App UA (QDReader*), 避免全局通杀误伤
+# 抖音/头条/飞书等字节系 App (*.bytescm.com 是图片 CDN, *-zijieapi.com 是
+# 网络配置端点); 同时避免抢占汽水音乐对 tnc*.zijieapi.com 的 reject-200 语义
+AND,((USER-AGENT,QDReader*),(DOMAIN-KEYWORD,pglstatp-toutiao)),REJECT
+AND,((USER-AGENT,QDReader*),(DOMAIN-KEYWORD,zijieapi)),REJECT
+AND,((USER-AGENT,QDReader*),(DOMAIN-KEYWORD,bytescm)),REJECT
 DOMAIN, connect.yuewen.com, REJECT
 DOMAIN, fockrt.yuewen.com, REJECT
 DOMAIN, noahqd.yuewen.com, REJECT
