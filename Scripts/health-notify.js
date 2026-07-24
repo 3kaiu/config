@@ -7,8 +7,8 @@
  *
  * 兼容 Loon / Quantumult X / Surge (Surge: $notification.post 同 Loon 分支)
  * Loon cron: 0 \/*\/6 * * * (every 6 hours)
- * QX cron: 0 */6 * * *
- * Surge cron: 0 */6 * * * (5 字段)
+ * QX cron: 0 *\/6 * * *
+ * Surge cron: 0 *\/6 * * * (5 字段)
  *
  * 已知局限: Bark/Telegram 远程推送为 fire-and-forget, $done() 后上下文
  * 回收会中止未完成的推送请求 (本地通知不受影响), 待统一修复。
