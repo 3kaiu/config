@@ -1,0 +1,10 @@
+schema_version: 1
+module_path: mirror_scripts/rules
+title: 代理分流规则与脚本资源镜像
+scope:
+    - Mirror/rules/
+source_files: []
+depends_on: []
+related_to:
+    - path: mirror_scripts/standalone_adapters
+    - path: profiles

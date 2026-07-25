@@ -1,0 +1,12 @@
+schema_version: 1
+module_path: mirror_scripts/standalone_adapters
+title: 独立镜像脚本适配器（Shadowrocket/Loon 去广告）
+scope:
+    - Mirror/amdc.js
+    - Mirror/applet.js
+    - Mirror/bilibili-json.js
+    - Mirror/MANIFEST.json
+source_files: []
+depends_on: []
+related_to:
+    - path: mirror_scripts/rules
