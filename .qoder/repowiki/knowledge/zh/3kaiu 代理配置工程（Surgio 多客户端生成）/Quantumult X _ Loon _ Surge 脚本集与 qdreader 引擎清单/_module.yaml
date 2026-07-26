@@ -1,9 +1,0 @@
-schema_version: 1
-module_path: scripts
-title: Quantumult X / Loon / Surge 脚本集与 qdreader 引擎清单
-scope:
-    - Scripts/
-source_files: []
-depends_on: []
-related_to:
-    - path: profiles

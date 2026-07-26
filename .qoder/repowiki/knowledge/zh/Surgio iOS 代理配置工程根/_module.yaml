@@ -1,0 +1,14 @@
+schema_version: 1
+module_path: ""
+title: Surgio iOS 代理配置工程根
+scope:
+    - README.md
+    - .gitignore
+    - package.json
+    - package-lock.json
+    - eslint.config.mjs
+    - surgio.conf.js
+    - CHANGELOG.md
+source_files: []
+depends_on: []
+related_to: []

@@ -1,3 +1,182 @@
+# 🎯 Git Ignore Configuration for Loon/QX v8.7 Project
+# Last Updated: 2026-07-26
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Node.js Dependencies (CRITICAL)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 node_modules/
-.surgio-cache/
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Build Artifacts & Cache (GENERATED FILES)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Build outputs
+dist/
+build/
+.surgio-cache/
+.cache/
+
+# Temporary build files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.swp
+*~
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# IDE & Editor Files (LOCAL CONFIGURATION)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Emacs
+*~
+\#*\#
+.elc
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Operating System Files
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+.Trash-*
+.gdk-pixacs-thumbnail-cache
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Research Archive Directory
+# ⚠️ MARKED AS ARCHIVED - NOT FOR PRODUCTION
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# The entire research/ directory is now ARCHIVED
+# It contains historical research materials and should NOT be:
+# - Loaded by the main build system (surgio.conf.js)
+# - Included in production builds
+# - Modified without proper version control review
+
+research/
+!research/ARCHIVE-INDEX.md  # Keep the index file as reference
+!research/*.md              # Keep top-level documentation
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Backup Files Created During Development
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Auto-generated backups from editors or tools
+*.orig
+*.old
+*.save
+
+# Local development configurations
+.env.local
+.env.development.local
+.env.test.local
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Log Files (CAN BE REGENERATED)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Test Coverage Reports (REGENERATABLE)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+coverage/
+.nyc_output/
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Database Files (PER-ENVIRONMENT)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+*.db
+*.sqlite
+*.ldb
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Environment Variables & Secrets
+# ⚠️ NEVER COMMIT CREDENTIALS!
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# AWS credentials
+.aws/credentials
+.aws/config
+
+# GitHub tokens (if stored locally)
+.github/token.txt
+
+# Any environment file containing secrets
+*.pem
+*.key
+*.secret
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Temporary Archives & Compressed Files
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Compressed archives (can be regenerated if needed)
+*.tar.gz
+*.zip
+*.rar
+*.7z
+*.tar.bz2
+
+# Note: Only keep compressed archives that are truly immutable
+# (e.g., externally hosted assets, not locally generated)
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Miscellaneous
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Editor swap files
+.swp
+.swp
+.*.swp
+
+# Version control backup
+CVS
+cvsignore
+
+# Sentry.io
+.sentryclirc
+
+# Debug
+debug.log
+
+# Misc
+.eslintcache
+.stylelintcache

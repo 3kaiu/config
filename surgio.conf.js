@@ -16,7 +16,8 @@ module.exports = defineSurgioConfig({
       destDir: 'Profile',
     },
     {
-      // 第三端冗余: Surge 配置 (v1 覆盖范围见模板头部注释)
+      // ⚠️ Surge 配置已移除：项目定位为 Loon/QX 双端专用
+      // See: memory "Loon 配置项目专用性约束"
       name: 'Surge.conf',
       template: 'surge',
       provider: 'tokyo',

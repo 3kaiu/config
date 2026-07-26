@@ -1,9 +1,0 @@
-schema_version: 1
-module_path: qx_apple
-title: QX Apple 服务解锁模块集
-scope:
-    - QX/apple/
-source_files: []
-depends_on: []
-related_to:
-    - path: mirror_scripts/iringo_plugins

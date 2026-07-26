@@ -1,0 +1,9 @@
+schema_version: 1
+module_path: scripts
+title: 代理客户端站点去广告与通知脚本集
+scope:
+    - Scripts/
+source_files: []
+depends_on: []
+related_to:
+    - path: tests

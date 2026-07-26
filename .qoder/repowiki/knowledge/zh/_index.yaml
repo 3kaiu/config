@@ -3,11 +3,11 @@ schema_version: 1
 locale: zh-CN
 branch: main
 nodes_managed: true
-exported_at: "2026-07-25T17:20:48Z"
+exported_at: "2026-07-25T17:42:46Z"
 modules:
     "":
-        dir_name: 3kaiu 代理配置工程（Surgio 多客户端生成）
-        title: 3kaiu 代理配置工程（Surgio 多客户端生成）
+        dir_name: Surgio iOS 代理配置工程根
+        title: Surgio iOS 代理配置工程根
         scope:
             - README.md
             - .gitignore
@@ -40,10 +40,11 @@ modules:
         related_to:
             - path: docs
             - path: mirror_scripts
+            - path: profiles
             - path: tests
     docs:
-        dir_name: 配置审计与基础设施文档
-        title: 配置审计与基础设施文档
+        dir_name: 配置审计与分发基础设施文档
+        title: 配置审计与分发基础设施文档
         scope:
             - doc/
         source_files: []
@@ -73,7 +74,7 @@ modules:
         children: []
         depends_on: []
         related_to:
-            - path: qx_apple
+            - path: profiles
     mirror_scripts/rules:
         dir_name: 代理分流规则与脚本资源镜像
         title: 代理分流规则与脚本资源镜像
@@ -116,8 +117,10 @@ modules:
         children: []
         depends_on: []
         related_to:
+            - path: ci_workflows
+            - path: mirror_scripts/iringo_plugins
             - path: mirror_scripts/rules
-            - path: scripts
+            - path: qx_apple
             - path: templates
     qx_apple:
         dir_name: QX Apple 服务解锁模块集
@@ -128,20 +131,20 @@ modules:
         children: []
         depends_on: []
         related_to:
-            - path: mirror_scripts/iringo_plugins
+            - path: profiles
     scripts:
-        dir_name: Quantumult X _ Loon _ Surge 脚本集与 qdreader 引擎清单
-        title: Quantumult X / Loon / Surge 脚本集与 qdreader 引擎清单
+        dir_name: 代理客户端站点去广告与通知脚本集
+        title: 代理客户端站点去广告与通知脚本集
         scope:
             - Scripts/
         source_files: []
         children: []
         depends_on: []
         related_to:
-            - path: profiles
+            - path: tests
     templates:
-        dir_name: 多客户端代理配置模板（Loon _ Surge _ Quantumult X）
-        title: 多客户端代理配置模板（Loon / Surge / Quantumult X）
+        dir_name: iOS 代理客户端模板（Loon _ Surge _ Quantumult X）
+        title: iOS 代理客户端模板（Loon / Surge / Quantumult X）
         scope:
             - template/
         source_files: []
@@ -159,3 +162,4 @@ modules:
         depends_on: []
         related_to:
             - path: ci_workflows
+            - path: scripts

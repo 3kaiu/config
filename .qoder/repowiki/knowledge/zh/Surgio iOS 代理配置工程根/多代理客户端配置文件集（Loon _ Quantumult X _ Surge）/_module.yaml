@@ -1,0 +1,13 @@
+schema_version: 1
+module_path: profiles
+title: 多代理客户端配置文件集（Loon / Quantumult X / Surge）
+scope:
+    - Profile/
+source_files: []
+depends_on: []
+related_to:
+    - path: ci_workflows
+    - path: mirror_scripts/iringo_plugins
+    - path: mirror_scripts/rules
+    - path: qx_apple
+    - path: templates
