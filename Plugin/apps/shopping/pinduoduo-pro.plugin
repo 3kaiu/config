@@ -1,0 +1,67 @@
+#!name=拼多多 Pro v8.0
+#!desc=拼多多 — 开屏/首页/搜索/推荐全流程净化 + 百亿补贴优化
+#!version=8.0
+#!author=3kaiu (参考 ddgksf2013/pinduoduo.js + app2smile)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Pinduoduo.png
+
+#!arguments-desc=\n- \{ENABLE_PDD}: ["true","false"],tag=总开关，desc=开启后执行所有拼多多功能\n- \{PDD_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,90,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{PDD_SPLASH_ENABLE}: switch,"true","false",tag=开屏广告，desc=去除 APP 开屏广告\n- \{PDD_HOME_ENABLE}: switch,"true","false",tag=首页净化，desc=去除首页推荐广告\n- \{PDD_SEARCH_ENABLE}: switch,"true","false",tag=搜索净化，desc=去除搜索推广词条\n- \{PDD_RECOMMEND_ENABLE}: switch,"true","false",tag=推荐净化，desc=去除个性化推荐\n- \{PDD_SUBSIDY_ENABLE}: switch,"true","false",tag=百亿补贴优化，desc=优化补贴展示\n- \{PDD_DEBUG_ENABLE}: switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Argument]
+ENABLE_PDD=switch,"true","false",tag=总开关，desc=开启后执行所有拼多多功能
+PDD_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
+TIMEOUT=input,90,tag=超时时间 (秒), desc=脚本最大执行时长
+PDD_SPLASH_ENABLE=switch,"true","false",tag=开屏广告，desc=去除 APP 开屏广告
+PDD_HOME_ENABLE=switch,"true","false",tag=首页净化，desc=去除首页推荐广告
+PDD_SEARCH_ENABLE=switch,"true","false",tag=搜索净化，desc=去除搜索推广词条
+PDD_RECOMMEND_ENABLE=switch,"true","false",tag=推荐净化，desc=去除个性化推荐
+PDD_SUBSIDY_ENABLE=switch,"true","false",tag=百亿补贴优化，desc=优化补贴展示
+PDD_DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Script]
+# ════════════════════════════════════════
+# 🔄 实时净化规则（响应阶段）
+# ════════════════════════════════════════
+
+# ── 开屏广告模块 ───────────────────────
+http-response ^https?:\/\/ads\.api\.pinduoduo\.com\/splash url reject-200, enable={ENABLE_PDD}&{PDD_SPLASH_ENABLE}
+http-response ^https?:\/\/flash\.pddpic\.com\/splash list reject-200, enable={ENABLE_PDD}&{PDD_SPLASH_ENABLE}
+http-response ^https?:\/\/open\.api\.pinduoduo\.com\/ad open-ad-filter, enable={ENABLE_PDD}&{PDD_SPLASH_ENABLE}
+
+# ── 首页净化模块 ──────────────────────
+http-response ^https?::\/\/mobile\.yangkeduo\.com\/proxy feed-filter, enable={ENABLE_PDD}&{PDD_HOME_ENABLE}
+http-response ^https?::\/\/api\.pinduoduo\.com\/home home-ad-filter, enable={ENABLE_PDD}&{PDD_HOME_ENABLE}
+http-response ^https?::\/\/gateway\.pinduoduo\.com\/banner banner-filter, enable={ENABLE_PDD}&{PDD_HOME_ENABLE}
+http-response ^https?::\/\/mms\.pinduoduo\.com\/pop pop-ad-filter, enable={ENABLE_PDD}&{PDD_HOME_ENABLE}
+
+# ── 搜索净化模块 ──────────────────────
+http-response ^https?::\/\/search\.api\.pinduoduo\.com\/suggest suggest-ad-filter, enable={ENABLE_PDD}&{PDD_SEARCH_ENABLE}
+http-response ^https?::\/\/hot\.search\.pinduoduo\.com\/hotsearch hot-search-filter, enable={ENABLE_PDD}&{PDD_SEARCH_ENABLE}
+http-response ^https?::\/\/recommend\.api\.pinduoduo\.com\/rec rec-ad-filter, enable={ENABLE_PDD}&{PDD_SEARCH_ENABLE}
+
+# ── 推荐净化模块 ──────────────────────
+http-response ^https?::\/\/recommend\.api\.pinduoduo\.com\/feed personalized-filter, enable={ENABLE_PDD}&{PDD_RECOMMEND_ENABLE}
+http-response ^https?::\/\/discovery\.api\.pinduoduo\.com\/discover discovery-filter, enable={ENABLE_PDD}&{PDD_RECOMMEND_ENABLE}
+
+# ── 百亿补贴优化模块 ─────────────────
+# 优化补贴商品展示，去除营销干扰
+http-response ^https?::\/\/subsidy\.api\.pinduoduo\.com\/list subsidy-clean-filter, enable={ENABLE_PDD}&{PDD_SUBSIDY_ENABLE}
+http-response ^https?::\/\/promotion\.api\.pinduoduo\.com\/promo promo-clean-filter, enable={ENABLE_PDD}&{PDD_SUBSIDY_ENABLE}
+
+# ── 其他净化模块 ─────────────────────
+http-response ^https?::\/\/analytics\.pinduoduo\.com\/track tracking-blocker, enable={ENABLE_PDD}
+http-response ^https?::\/\/log\.pinduoduo\.com\/event event-filter, enable={ENABLE_PDD}
+
+# ════════════════════════════════════════
+# ⏰ Cron 定时任务（可选功能）
+# ════════════════════════════════════════
+cron {PDD_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/Pinduoduo.js, timeout={TIMEOUT}, tag=拼多多定时任务，argument=[{PDD_DEBUG_ENABLE}], enable={ENABLE_PDD}
+
+[Rewrite]
+# ── 白名单配置 ────────────────────────
+DOMAIN-SUFFIX, pinduoduo.com, DIRECT
+DOMAIN-SUFFIX, yangkeduo.com, DIRECT
+DOMAIN-SUFFIX, pddpic.com, DIRECT
+
+[MitM]
+hostname = %APPEND% ads.api.pinduoduo.com, flash.pddpic.com, open.api.pinduoduo.com, mobile.yangkeduo.com, api.pinduoduo.com, gateway.pinduoduo.com, search.api.pinduoduo.com, recommend.api.pinduoduo.com, subsidy.api.pinduoduo.com

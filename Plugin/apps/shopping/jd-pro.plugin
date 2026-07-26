@@ -1,0 +1,49 @@
+#!name=京东去广告 Pro v7.8
+#!desc=京东 — 签到/逛商城/领券/抽奖全流程净化 + 比价工具
+#!version=7.8
+#!author=3kaiu (功能开关架构参考起点引擎模式)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/JD.png
+
+#!arguments-desc=\n- \{ENABLE_JD}: ["true","false"],tag=总开关, desc=开启后执行所有京东功能\n- \{JD_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,180,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{JD_SIGNIN_ENABLE}: switch,"true","false",tag=每日签到，desc=签到 + 抽奖\n- \{JD_MALL_ENABLE}: switch,"true","false",tag=逛商城，desc=净化商城推荐流\n- \{JD_COUPON_ENABLE}: switch,"true","false",tag=领券中心，desc=领取可用优惠券\n- \{JD_LOTTERY_ENABLE}: switch,"true","false",tag=天天抽奖，desc=自动参与抽奖活动\n- \{JD_PRICE_ENABLE}: switch,"true","false",tag=比价工具，desc=价格监控与历史对比\n- \{JD_DEBUG_ENABLE}: switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Argument]
+ENABLE_JD=switch,"true","false",tag=总开关，desc=开启后执行所有京东功能
+JD_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
+TIMEOUT=input,180,tag=超时时间 (秒), desc=脚本最大执行时长
+JD_SIGNIN_ENABLE=switch,"true","false",tag=每日签到，desc=签到 + 抽奖
+JD_MALL_ENABLE=switch,"true","false",tag=逛商城，desc=净化商城推荐流
+JD_COUPON_ENABLE=switch,"true","false",tag=领券中心，desc=领取可用优惠券
+JD_LOTTERY_ENABLE=switch,"true","false",tag=天天抽奖，desc=自动参与抽奖活动
+JD_PRICE_ENABLE=switch,"true","false",tag=比价工具，desc=价格监控与历史对比
+JD_DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Script]
+# ═══════════════════════════════════════════════
+# 🔄 实时净化规则（响应阶段）
+# ═══════════════════════════════════════════════
+
+# 商城首页净化
+http-response ^https?:\/\/(m|app)\.jd\.com\/(mind|item)/ script-path=https://ws.wenn.in/main/Scripts/JD.js, requires-body=true, timeout=10, tag=商城净化，enable={ENABLE_JD}&{JD_MALL_ENABLE}
+
+# 领券中心净化
+http-response ^https?:\/\/api\.360buy\.com\/marketing\/window\/get_window_info script-path=https://ws.wenn.in/main/Scripts/JD.js, requires-body=true, timeout=10, tag=领券净化，enable={ENABLE_JD}&{JD_COUPON_ENABLE}
+
+# 商品详情页
+http-response ^https?:\/\/(m|item)\.jd\.com\/item\/script-path=https://ws.wenn.in/main/Scripts/JD.js, requires-body=true, timeout=10, tag=商品页净化，enable={ENABLE_JD}
+
+# 比价工具
+http-response ^https?:\/\/p.360buy\.com\/price\/tower script-path=https://ws.wenn.in/main/Scripts/JD.js, requires-body=true, timeout=10, tag=比价工具，enable={ENABLE_JD}&{JD_PRICE_ENABLE}
+
+# ═══════════════════════════════════════════════
+# ⏰ Cron 定时任务（包含全部功能模块）
+# ═══════════════════════════════════════════════
+cron {JD_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/JD.js, timeout={TIMEOUT}, tag=京东定时任务 (含签到/领券/抽奖), argument=[{JD_DEBUG_ENABLE},{JD_SIGNIN_ENABLE},{JD_MALL_ENABLE},{JD_COUPON_ENABLE},{JD_LOTTERY_ENABLE}], enable={ENABLE_JD}
+
+[Rewrite]
+# 广告拦截白名单
+DOMAIN-SUFFIX,ad.jddg.com, DIRECT
+DOMAIN-SUFFIX,bjzhnl.jd.com, DIRECT
+
+[MitM]
+hostname = %APPEND% jd.com, 360buy.com, m.jd.com, app.jd.com

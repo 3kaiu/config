@@ -96,17 +96,27 @@ https://ws.wenn.in/main/Profile/QX.conf
 *   **MitM 安全**：所有 Apple 增强域名均为具体子域，不影响银行安全。QX 端在 ` -*.apple.com` 负向排除后显式声明这些具体域名来覆盖排除，确保正常解密。
 *   **引用格式**：Loon 使用 `.plugin`（GitHub Releases 下载），QX 使用本地转换的 `.conf`（从 iRingo `.plugin` 手动转换为 QX 原生格式，托管在 `QX/apple/` 目录）。⚠️ iRingo 官方的 `.yaml` 不是 QX 原生格式（QX 无法解析），故 v5.8 改为本地转换。QX 端 rewrite 级参数由转换脚本内化处理或采用简化预设。
 
-### 🚫 2.6 全网系统级与 App 深度去广告 (多引擎全覆盖, v7.0 重构)
+### 🚫 2.6 全网系统级与 App 深度去广告 (多引擎全覆盖，v8.0 Pro 增强)
 
 *   **规则路径**：Loon 插件 (`Plugin/`) / QX 远程重写 (`rewrite_remote`) 默认内置。
-*   **v7.0 架构重构**：淘汰停更 2 年的 `ajune0527/vpn_tool` 插件体系，全部改为自维护插件 (引用 ddgksf2013/app2smile 活跃上游脚本)。v7.8 起 Sub-Store.plugin 和 QuickSearch.plugin 也已本地化到 `Plugin/` 目录，完全消除对 ajune0527 仓库的依赖。
-*   **净化范围**：
+*   **v8.0 Pro 增强**: 引入10个Pro版本插件，支持细粒度功能开关控制 + 分阶段执行模型。
+    *   **墨鱼去开屏 2.0 Pro**: 覆盖50+App的开屏广告通杀过滤
+    *   **京东 Pro v7.8**: 签到/逛商城/领券/抽奖全流程净化
+    *   **网易云音乐 Pro v7.8**: 签到/打卡/广告净化全流程
+    *   **淘票票 Pro v7.8**: 开屏/首页/搜索/影院全程净化
+    *   **知乎 Pro v7.9**: 升级至完整版，支持 videoID 修复/market_card 等
+    *   **贴吧 Pro v7.8**: Proto+JSON双引擎深度净化
+    *   **微博 Pro v8.0**: 开屏/信息流/热搜/评论区四重净化（新增）
+    *   **小红书 Pro v8.0**: 去广告 + 去水印双重净化（新增）
+    *   **B 站 Pro v7.9**: 高清画质解锁 + 直播净化增强（新增）
+    *   **百度网盘 Pro v8.0**: 净化 + 倍速解锁双模式集成（新增）
+*   **净化范围**:
     *   **通用去广告层**：`blackmatrix7/AllInOne.plugin`（Loon + QX 双端统一），740+ MitM hostname + 698 reject 规则 + 21 response 脚本，每日更新。已修复 safebrowsing/jiguang/umeng 误杀风险。
-    *   **广告脚本增强层**：`blackmatrix7/AdvertisingScript.plugin`（Loon），含哲也知乎深度净化 + B站/京东/爱奇艺/美团开屏脚本。
-    *   **开屏广告通杀层**：`ddgksf2013/FakeiOSAds`（QX）拦截 iOS 系统/第三方 SDK 开屏广告。
-    *   **App 精细化去广告**（19 个自维护插件，Loon + QX 双端覆盖）：
-        *   **Loon 端**：bilibili、bilicomics、wechat、netease、goofish、qishui、taopiaopiao、amap、jd、qqmusic、reddit、tieba、zhihu（ddgksf2013/app2smile 活跃上游脚本）
-        *   **QX 端**：WeiboAds、WeChat、NeteaseAds、AmapAds、TieBaAds、GoofishAds、SmzdmAds、BiliBiliComicsAds、QiShuiMusicAds、RedditAds、CainiaoAds、TaoPiaoPiaoAds、CaiYunAds、Applet（ddgksf2013 独立 conf，每日更新）
+    *   **广告脚本增强层**：`blackmatrix7/AdvertisingScript.plugin`（Loon），含哲也知乎深度净化 + B 站/京东/爱奇艺/美团开屏脚本。
+    *   **开屏广告通杀层**：`ddgksf2013/FakeiOSAds`（QX）+ **墨鱼去开屏 2.0 Pro**（Loon）双重防护
+    *   **App 精细化去广告**（23 个自维护插件，Loon + QX 双端覆盖）:
+        *   **Loon 端**: bilibili-pro, bilicomics, wechat, netease-pro, goofish, qishui, taopiaopiao-pro, amap, jd-pro, qqmusic, reddit, tieba-pro, zhihu-pro, **wechat-pro, xiaohongshu-pro, bdpan-pro, startup-adblock-pro**（ddgksf2013/app2smile 活跃上游脚本）
+        *   **QX 端**: WeiboAds、WeChat、NeteaseAds、AmapAds、TieBaAds、GoofishAds、SmzdmAds、BiliBiliComicsAds、QiShuiMusicAds、RedditAds、CainiaoAds、TaoPiaoPiaoAds、CaiYunAds、Applet（ddgksf2013 独立 conf，每日更新）
         *   **京东**：ddgksf2013 无 JDAds.conf，Loon 端自维护 `jd.plugin`，QX 端本地 `[rewrite_local]` 维护
         *   **知乎**：ddgksf2013 无 ZhihuAds.conf，Loon 端自维护 `zhihu.plugin`，QX 端本地 `[rewrite_local]` 维护
         *   **QQ音乐**：纯 DNS REJECT，无需 MitM（Loon 端 `qqmusic.plugin`，QX 端 `[filter_local]`）

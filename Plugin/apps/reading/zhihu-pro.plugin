@@ -1,0 +1,110 @@
+#!name=知乎去广告 Pro v7.9
+#!desc=知乎 — 开屏/推荐流/回答/搜索/会员/外链追踪全流程深度净化 + 功能模块控制
+#!version=7.9
+#!author=3kaiu (基于 app2smile + ddgksf2013 融合增强)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Zhihu.png
+
+#!arguments-desc=\n- \{ENABLE_ZHIHU}: ["true","false"],tag=总开关，desc=开启后执行所有知乎功能\n- \{ZHIHU_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,90,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{ZHIHU_HOME_ENABLE}: switch,"true","false",tag=首页净化，desc=去除首页推荐/轮播/弹窗\n- \{ZHIHU_SEARCH_ENABLE}: switch,"true","false",tag=搜索净化，desc=去除搜索推广/热词\n- \{ZHIHU_ANSWER_ENABLE}: switch,"true","false",tag=回答净化，desc=去除回答相关推荐/广告\n- \{ZHIHU_MEMBER_ENABLE}: switch,"true","false",tag=会员净化，desc=去除会员页推广/弹窗\n- \{ZHIHU_LINK_ENABLE}: switch,"true","false",tag=外链追踪，desc=直接跳转目标 URL（去除中间页）\n- \{ZHIHU_DEBUG_ENABLE}: switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Argument]
+ENABLE_ZHIHU=switch,"true","false",tag=总开关，desc=开启后执行所有知乎功能
+ZHIHU_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
+TIMEOUT=input,90,tag=超时时间 (秒), desc=脚本最大执行时长
+ZHIHU_HOME_ENABLE=switch,"true","false",tag=首页净化，desc=去除首页推荐/轮播/弹窗
+ZHIHU_SEARCH_ENABLE=switch,"true","false",tag=搜索净化，desc=去除搜索推广/热词
+ZHIHU_ANSWER_ENABLE=switch,"true","false",tag=回答净化，desc=去除回答相关推荐/广告
+ZHIHU_MEMBER_ENABLE=switch,"true","false",tag=会员净化，desc=去除会员页推广/弹窗
+ZHIHU_LINK_ENABLE=switch,"true","false",tag=外链追踪，desc=直接跳转目标 URL（去除中间页）
+ZHIHU_DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Rule]
+# ── 广告域名拦截 ─────────────────────
+DOMAIN,appcloud.zhihu.com,REJECT,enable={ENABLE_ZHIHU}
+DOMAIN,appcloud2.in.zhihu.com,REJECT,enable={ENABLE_ZHIHU}
+DOMAIN,crash2.zhihu.com,REJECT,enable={ENABLE_ZHIHU}
+DOMAIN,mqtt.zhihu.com,REJECT,enable={ENABLE_ZHIHU}
+DOMAIN,sugar.zhihu.com,REJECT,enable={ENABLE_ZHIHU}
+DOMAIN,zxid-m.mobileservice.cn,REJECT,enable={ENABLE_ZHIHU}
+IP-CIDR,103.41.167.237/32,REJECT,no-resolve,enable={ENABLE_ZHIHU}
+IP-CIDR,118.89.204.198/32,REJECT,no-resolve,enable={ENABLE_ZHIHU}
+IP-CIDR6,2402:4e00:1200:ed00:0:9089:6dac:96b6/128,REJECT,no-resolve,enable={ENABLE_ZHIHU}
+
+[Rewrite]
+# ═══════════════════════════════════════════
+# 🏠 首页净化模块
+# ═══════════════════════════════════════════
+^https:\/\/api\.zhihu\.com\/commercial_api\/(answer\/banners|banners|launch) reject-dict, enable={ENABLE_ZHIHU}&{ZHIHU_HOME_ENABLE}
+^https:\/\/api\.zhihu\.com\/content-distribution-core reject-dict, enable={ENABLE_ZHIHU}&{ZHIHU_HOME_ENABLE}
+^https:\/\/api\.zhihu\.com\/moments\/drama reject-dict, enable={ENABLE_ZHIHU}&{ZHIHU_HOME_ENABLE}
+^https:\/\/api\.zhihu\.com\/root\/window reject-dict, enable={ENABLE_ZHIHU}&{ZHIHU_HOME_ENABLE}
+
+# ═══════════════════════════════════════════
+# 👤 会员页净化模块
+# ═══════════════════════════════════════════
+^https:\/\/api\.zhihu\.com\/bazaar\/float_window reject-dict, enable={ENABLE_ZHIHU}&{ZHIHU_MEMBER_ENABLE}
+^https:\/\/api\.zhihu\.com\/market\/popovers_v2 reject-dict, enable={ENABLE_ZHIHU}&{ZHIHU_MEMBER_ENABLE}
+
+# ═══════════════════════════════════════════
+# 📱 我的页面净化模块
+# ═══════════════════════════════════════════
+^https:\/\/api\.zhihu\.com\/me\/guides reject-dict, enable={ENABLE_ZHIHU}&{ZHIHU_MEMBER_ENABLE}
+^https:\/\/api\.zhihu\.com\/unlimited\/go\/my_card reject, enable={ENABLE_ZHIHU}&{ZHIHU_MEMBER_ENABLE}
+
+# ═══════════════════════════════════════════
+# 🔍 搜索页净化模块
+# ═══════════════════════════════════════════
+^https:\/\/api\.zhihu\.com\/search\/preset_words reject-dict, enable={ENABLE_ZHIHU}&{ZHIHU_SEARCH_ENABLE}
+^https:\/\/www\.zhihu\.com\/search\/related_queries reject-dict, enable={ENABLE_ZHIHU}&{ZHIHU_SEARCH_ENABLE}
+
+# ═══════════════════════════════════════════
+# 💬 回答详情净化模块
+# ═══════════════════════════════════════════
+^https:\/\/api\.zhihu\.com\/comment_v5\/list-headers reject-dict, enable={ENABLE_ZHIHU}&{ZHIHU_ANSWER_ENABLE}
+^https:\/\/api\.zhihu\.com\/prague\/related_suggestion reject-dict, enable={ENABLE_ZHIHU}&{ZHIHU_ANSWER_ENABLE}
+^https:\/\/api\.zhihu\.com\/v5\.1\/topics\/answer\/relation reject-dict, enable={ENABLE_ZHIHU}&{ZHIHU_ANSWER_ENABLE}
+
+# ═══════════════════════════════════════════
+# ⚙️ 其他净化模块
+# ═══════════════════════════════════════════
+^https:\/\/api\.zhihu\.com\/ab\/api reject-dict, enable={ENABLE_ZHIHU}
+^https:\/\/api\.zhihu\.com\/ad-style-service reject-dict, enable={ENABLE_ZHIHU}
+^https:\/\/appcloud2\.zhihu\.com\/v3\/resource reject-dict, enable={ENABLE_ZHIHU}
+
+# ═══════════════════════════════════════════
+# 🔗 外链追踪 → 直达目标 URL
+# ═══════════════════════════════════════════
+# 保留原协议 https, 不降级 http (审计修复：降级后跳转地址明文可见且可被中间人改写)
+^https:\/\/link\.zhihu\.com\/\?target=(https?)?(%3A|:)?(\/\/|%2F%2F)?(.*?)(&source.*)?$ 302 https://$4, enable={ENABLE_ZHIHU}&{ZHIHU_LINK_ENABLE}
+
+# ═══════════════════════════════════════════
+# 🌐 网页版净化模块
+# ═══════════════════════════════════════════
+^https:\/\/api\.zhihu\.com\/distribute\/rhea reject-dict, enable={ENABLE_ZHIHU}&{ZHIHU_HOME_ENABLE}
+^https:\/\/api\.zhihu\.com\/hot_recommendation reject-dict, enable={ENABLE_ZHIHU}&{ZHIHU_HOME_ENABLE}
+^https:\/\/api\.zhihu\.com\/mcn\/v2\/linkcards reject-dict, enable={ENABLE_ZHIHU}&{ZHIHU_ANSWER_ENABLE}
+^https:\/\/api\.zhihu\.com\/answers\/questions\/related-readings reject-dict, enable={ENABLE_ZHIHU}&{ZHIHU_ANSWER_ENABLE}
+^https:\/\/api\.zhihu\.com\/commercial_api\/mobile_banner reject-dict, enable={ENABLE_ZHIHU}&{ZHIHU_HOME_ENABLE}
+^https:\/\/zhuanlan\.zhihu\.com\/api\/articles reject-dict, enable={ENABLE_ZHIHU}&{ZHIHU_ANSWER_ENABLE}
+
+[Script]
+# ═══════════════════════════════════════════
+# 🔄 实时净化规则（响应阶段）
+# ═══════════════════════════════════════════
+
+# 首页/回答/搜索/配置/开屏/悬浮框
+http-response ^https:\/\/api\.zhihu\.com\/(commercial_api\/(answer\/banners|banners|launch|real_time_launch_v2|app_float_layer)|content-distribution-core|moments\/drama|root\/window|topstory\/recommend|prague\/related_suggestion|v5\.1\/topics\/answer\/relation|hot_recommendation|mcn\/v2\/linkcards|distribute\/rhea|answers\/questions\/related-readings|commercial_api\/mobile_banner|zhuanlan\/api\/articles|ab\/api|ad-style-service|v4\/questions|questions) script-path=https://ws.wenn.in/main/Scripts/Zhihu.js, requires-body=true, timeout=10, tag=知乎_深度净化, enable={ENABLE_ZHIHU}
+
+# appcloud2 config 配置净化
+http-response ^https:\/\/appcloud2\.zhihu\.com\/v3\/config script-path=https://ws.wenn.in/main/Scripts/Zhihu.js, requires-body=true, timeout=10, tag=知乎_Config净化, enable={ENABLE_ZHIHU}
+
+# 搜索页关键词替换
+http-response ^https:\/\/api\.zhihu\.com\/search\/preset_words script-path=https://ws.wenn.in/main/Scripts/Zhihu.js, requires-body=true, timeout=10, tag=知乎_搜索词, enable={ENABLE_ZHIHU}&{ZHIHU_SEARCH_ENABLE}
+
+# ═══════════════════════════════════════════
+# ⏰ Cron 定时任务（签到 + 清理）
+# ═══════════════════════════════════════════
+cron {ZHIHU_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/Zhihu.js, timeout={TIMEOUT}, tag=知乎定时任务，argument=[{ZHIHU_DEBUG_ENABLE}], enable={ENABLE_ZHIHU}
+
+[MitM]
+hostname = %APPEND% api.zhihu.com, www.zhihu.com, appcloud2.zhihu.com, link.zhihu.com, zhuanlan.zhihu.com

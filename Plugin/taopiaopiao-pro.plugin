@@ -1,0 +1,64 @@
+#!name=淘票票去广告 Pro v7.8
+#!desc=淘票票 — 开屏/首页/搜索/影院全流程净化 + 功能模块控制
+#!version=7.8
+#!author=3kaiu (基于通用插件增强框架)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/TaoPiao.png
+
+#!arguments-desc=\n- \{ENABLE_TAOPIAOPIAO}: ["true","false"],tag=总开关，desc=开启后执行所有淘票票功能\n- \{TAOPIAOPIAO_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,60,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{TAOPIAOPIAO_SCRINSCEEN_ENABLE}: switch,"true","false",tag=开屏广告，desc=拦截开屏广告\n- \{TAOPIAOPIAO_HOME_ENABLE}: switch,"true","false",tag=首页净化，desc=去除首页信息流推广\n- \{TAOPIAOPIAO_SEARCH_ENABLE}: switch,"true","false",tag=搜索净化，desc=去除搜索结果推广\n- \{TAOPIAOPIAO_MINE_ENABLE}: switch,"true","false",tag=我的页面，desc=去除个人中心推广\n- \{TAOPIAOPIAO_POPUP_ENABLE}: switch,"true","false",tag=弹窗广告，desc=拦截启动弹窗\n- \{TAOPIAOPIAO_CINEMA_ENABLE}: switch,"true","false",tag=影院广告，desc=去除影院 Tab 栏广告\n- \{TAOPIAOPIAO_DEBUG_ENABLE}: switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Argument]
+ENABLE_TAOPIAOPIAO=switch,"true","false",tag=总开关，desc=开启后执行所有淘票票功能
+TAOPIAOPIAO_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
+TIMEOUT=input,60,tag=超时时间 (秒), desc=脚本最大执行时长
+TAOPIAOPIAO_SCRINSCEEN_ENABLE=switch,"true","false",tag=开屏广告，desc=拦截开屏广告
+TAOPIAOPIAO_HOME_ENABLE=switch,"true","false",tag=首页净化，desc=去除首页信息流推广
+TAOPIAOPIAO_SEARCH_ENABLE=switch,"true","false",tag=搜索净化，desc=去除搜索结果推广
+TAOPIAOPIAO_MINE_ENABLE=switch,"true","false",tag=我的页面，desc=去除个人中心推广
+TAOPIAOPIAO_POPUP_ENABLE=switch,"true","false",tag=弹窗广告，desc=拦截启动弹窗
+TAOPIAOPIAO_CINEMA_ENABLE=switch,"true","false",tag=影院广告，desc=去除影院 Tab 栏广告
+TAOPIAOPIAO_DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Script]
+# ═══════════════════════════════════════════
+# 🔄 AMDC 净化（响应阶段）
+# ═══════════════════════════════════════════
+http-response ^http:\/\/amdc\.m\.taobao\.com script-path=https://ws.wenn.in/main/Mirror/amdc.js, requires-body=true, timeout=10, tag=AMDC 净化，enable={ENABLE_TAOPIAOPIAO}
+
+# ═══════════════════════════════════════════
+# ⏰ Cron 定时任务（可选功能）
+# ═══════════════════════════════════════════
+cron {TAOPIAOPIAO_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/Taopiaopiao.js, timeout={TIMEOUT}, tag=淘票票定时任务，argument=[{TAOPIAOPIAO_DEBUG_ENABLE}], enable={ENABLE_TAOPIAOPIAO}
+
+[Rewrite]
+# ── 开屏广告模块 ─────────────────────
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopadvertiseapi\.queryloadingbanner url reject-200, enable={ENABLE_TAOPIAOPIAO}&{TAOPIAOPIAO_SCRINSCEEN_ENABLE}
+
+# ── 首页净化模块 ─────────────────────
+# 广告预加载
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.independentadvertiseapi\.querypreloadadvertise url reject-200, enable={ENABLE_TAOPIAOPIAO}&{TAOPIAOPIAO_HOME_ENABLE}
+
+# 首页信息流顶部和最底部
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.life\.aristotle\.get url reject-200, enable={ENABLE_TAOPIAOPIAO}&{TAOPIAOPIAO_HOME_ENABLE}
+
+# ── 搜索净化模块 ────────────────────
+# 搜索框下方推广
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopsearchapi\.getranklistbytypeforsearch url reject-200, enable={ENABLE_TAOPIAOPIAO}&{TAOPIAOPIAO_SEARCH_ENABLE}
+
+# 搜索填词推广
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopintegrationapi\.homeconfig url reject-200, enable={ENABLE_TAOPIAOPIAO}&{TAOPIAOPIAO_SEARCH_ENABLE}
+
+# ── 我的页面模块 ────────────────────
+# 我的页面推广 Banner
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopindependentadvertiseapi\.queryadvertise url reject-200, enable={ENABLE_TAOPIAOPIAO}&{TAOPIAOPIAO_MINE_ENABLE}
+
+# ── 弹窗广告模块 ────────────────────
+# 启动弹窗
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.life\.popup\.get url reject-200, enable={ENABLE_TAOPIAOPIAO}&{TAOPIAOPIAO_POPUP_ENABLE}
+
+# ── 影院广告模块 ────────────────────
+# 影院 Tab 栏顶部广告
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopitemadvertiseapi\.queryadvertise url reject-200, enable={ENABLE_TAOPIAOPIAO}&{TAOPIAOPIAO_CINEMA_ENABLE}
+
+[MitM]
+hostname = %APPEND% acs.m.taobao.com, amdc.m.taobao.com

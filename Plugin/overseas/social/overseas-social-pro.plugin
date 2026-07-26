@@ -1,0 +1,134 @@
+#!name=海外社交净化工具箱 Pro v8.3
+#!desc=Instagram/Facebook/Twitter/X/LinkedIn 全流程净化 + 隐私保护
+#!version=8.3
+#!author=3kaiu (参考 blackmatrix7/Moli-X 等开源资源)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Social.png
+
+#!arguments-desc=\n- \{ENABLE_OVERSEAS}: ["true","false"],tag=总开关，desc=开启后执行所有海外社交平台净化\n- \{OVERSEAS_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,90,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{INSTAGRAM_ENABLE}: switch,"true","false",tag=Instagram 净化，desc=去除推荐/广告/追踪\n- \{FACEBOOK_ENABLE}: switch,"true","false",tag=Facebook 净化，desc=去除 News Feed 广告/赞助内容\n- \{TWITTER_X_ENABLE}: switch,"true","false",tag Twitter/X 净化，desc=去除推广推文/趋势话题广告\n- \{LINKEDIN_ENABLE}: switch,"true","false",tag LinkedIn 净化，desc=去除 sponsored posts/招聘推荐\n- \{PRIVACY_ENABLE}: switch,"true","false",tag隐私防护，desc=拦截第三方追踪器和数据收集\n- \{DEBUG_ENABLE}: switch,"false","true",tag调试模式，desc=输出详细执行日志
+
+[Argument]
+ENABLE_OVERSEAS=switch,"true","false",tag=总开关，desc=开启后执行所有海外社交平台净化
+OVERSEAS_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
+TIMEOUT=input,90,tag=超时时间 (秒), desc=脚本最大执行时长
+INSTAGRAM_ENABLE=switch,"true","false",tag Instagram 净化，desc=去除推荐/广告/追踪
+FACEBOOK_ENABLE=switch,"true","false",tag Facebook 净化，desc=去除 News Feed 广告/赞助内容
+TWITTER_X_ENABLE=switch,"true","false",tag Twitter/X 净化，desc=去除推广推文/趋势话题广告
+LINKEDIN_ENABLE=switch,"true","false",tag LinkedIn 净化，desc=去除 sponsored posts/招聘推荐
+PRIVACY_ENABLE=switch,"true","false",tag 隐私防护，desc=拦截第三方追踪器和数据收集
+DEBUG_ENABLE=switch,"false","true",tag 调试模式，desc=输出详细执行日志
+
+[Script]
+# ════════════════════════════════════════
+# 📸 Instagram 净化规则
+# ════════════════════════════════════════
+
+# ── 首页动态净化 ───────────────────────
+http-response ^https?:\/\/api\.instagram\.com\/instagram\/feed feed-clean, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?::\/\/i.instagram\.com\/api/v1/feed/home home-purify, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+
+# ── 探索页净化 ──────────────────────────
+http-response ^https?::\/\/www\.instagram\.com\/explore explore-remove, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?::\/\/api\.instagram\.com\/v1/explore trending-clean, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+
+# ── Reels 短视屏净化 ──────────────────
+http-response ^https?:\/\/api\.instagram\.com\/ reels-feed-filter, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?:\/\/i\.instagram\.com\/clips video-ad-block, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+
+# ── Stories 净化 ───────────────────────
+http-response ^https?:\/\/api\.instagram\.com\/stories stories-clean, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?::\/\/i\.instagram\.com\/stories story-ad-filter, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+
+# ── 推荐内容净化 ──────────────────────
+http-response ^https?:\/\/api\.instagram\.com\/recommended recommended-remove, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?::\/\/www\.instagram\.com\/suggestions suggestions-clean, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+
+# ════════════════════════════════════════
+# 👍 Facebook 净化规则
+# ═══════════════════════════════════════===
+
+# ── News Feed 净化 ─────────────────────
+http-response ^https?:\/\/news-api\.facebook\.com news-feed-clean, enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+http-response ^https?::\/\/graph\.facebook\.com news-sponsor-filter, enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+
+# ── Marketplace 净化 ───────────────────
+http-response ^https?:\/\/commerce\.facebook\.com marketplace-ad-block, enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+http-response ^https?::\":\"\"\"marketplace\.facebook\.com\"\"\" promoted-products-filter, enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+
+# ── Groups 净化 ────────────────────────
+http-response ^https?:\/\/socialgraphs\.facebook\.com groups-promo-clean, enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+http-response ^https?::\":\"\"\"groups\.facebook\.com\"\"\" sponsored-posts-filter, enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+
+# ── Watch 视频净化 ─────────────────────
+http-response ^https?:\/\/video-api\.facebook\.com watch-ad-block, enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+http-response ^https?::\":\"\"\"watch\.facebook\.com\"\"\" video-suggestion-filter, enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+
+# ════════════════════════════════════════
+# 🐦 Twitter/X 净化规则
+# ═══════════════════════════════════════===
+
+# ── Timeline 净化 ──────────────────────
+http-response ^https?::\":\"\"\"api\.twitter\.com\"\"\" timeline clean script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=X Timeline 清理，enabled={TWITTER_X_ENABLE}
+http-response ^https?::\":\"\"\"tweetdeck\.twitter\.com\"\"\" promoted-tweet-blocker script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=推广推文阻止，enabled={TWITTER_X_ENABLE}
+
+# ── Trends 趋势净化 ───────────────────
+http-response ^https?::\":\"\"\"api\.twitter\.com\"\"\" trends clean script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=Trends 清理，enabled={TWITTER_X_ENABLE}
+http-response ^https?::\":\"\"\"syndication\.twitter\.com\"\"\" trend-ad-filter script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=趋势广告过滤，enabled={TWITTER_X_ENABLE}
+
+# ── Recommendations 净化 ───────────────
+http-response ^https?::\":\"\"\"api\.twitter\.com\"\"\" for-you clean script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=为你推荐清理，enabled={TWITTER_X_ENABLE}
+http-response ^https?::\":\"\"\"rest\.api\.twitter\.com\"\"\" recommend-user-blocker script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=推荐用户阻止，enabled={TWITTER_X_ENABLE}
+
+# ════════════════════════════════════════
+# 💼 LinkedIn 净化规则
+# ═══════════════════════════════════════===
+
+# ── Home Feed 净化 ─────────────────────
+http-response ^https?::\":\"\"\"www\.linkedin\.com\"\"\" feed clean script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=Home Feed 清理，enabled={LINKEDIN_ENABLE}
+http-response ^https?::\":\"\"\"api\.linkedin\.com\"\"\" sponsored-post-blocker script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=Sponsored Posts 阻止，enabled={LINKEDIN_ENABLE}
+
+# ── Job Recommendations 净化 ───────────
+http-response ^https?::\":\"\"\"www\.linkedin\.com\"\"\" job-ads-clean script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=招聘广告清理，enabled={LINKEDIN_ENABLE}
+http-response ^https?::\":\"\"\"api\.linkedin\.com\"\"\" job-recommendation-filter script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=职位推荐过滤，enabled={LINKEDIN_ENABLE}
+
+# ── Learning & Ads 净化 ────────────────
+http-response ^https?::\":\"\"\"www\.linkedin\.com\"\"\" learning-promo-clean script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=学习推广清理，enabled={LINKEDIN_ENABLE}
+http-response ^https?::\":\"\"\"adserver\.linkedin\.com\"\"\" ad-blocker script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=平台广告阻止，enabled={LINKEDIN_ENABLE}
+
+# ════════════════════════════════════════
+# 🔒 通用隐私防护
+# ═══════════════════════════════════════===
+
+# ── 第三方追踪器拦截 ──────────────────
+http-request ^https?:\/\/pixel\.facebook\.com facebook-pixel-blocker, enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?::\":\"\"\"www\.google-analytics\.com\"\"\" ga-track-blocker, enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?::\":\"\"\"api\.snaplytics\.io\"\"\" snap-track-blocker, enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+
+# ── 数据分析工具拦截 ──────────────────
+http-request ^https?::\":\"\"\"www\.hotjar\.com\"\"\" hotjar-blocker, enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?::\":\"\"\"app\.mixpanel\.com\"\"\" mixpanel-blocker, enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?::\":\"\"\"app\.amplitude\.com\"\"\" amplitude-blocker, enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+
+# ── A/B 测试追踪拦截 ───────────────────
+http-request ^https?::\":\"\"\"optimizely\.com\"\"\" optimizely-blocker, enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?::\":\"\"\"stats\.tune\.in\"\"\" tune-track-blocker, enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+
+# ── Cookie 同意弹窗处理 ────────────────
+http-response ^https?::\":\"\"\"cookielaw\.org\"\"\" cookie-banner-clean, enabled={ENABLE_OVERSEAS}
+http-response ^https?::\":\"\"\"consent\.oauthflow\.io\"\"\" consent-popup-blocker, enabled={ENABLE_OVERSEAS}
+
+# ════════════════════════════════════════
+# ⏰ Cron 定时任务（可选功能）
+# ═══════════════════════════════════════===
+cron {OVERSEAS_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/OverseasSocialClean.js, timeout={TIMEOUT}, tag=海外社交定时清理，argument=[{DEBUG_ENABLE}], enabled={ENABLE_OVERSEAS}
+
+[Rewrite]
+# ── 白名单配置 ─────────────────────────
+DOMAIN-SUFFIX, instagram.com, DIRECT
+DOMAIN-SUFFIX, facebook.com, DIRECT
+DOMAIN-SUFFIX, twitter.com, DIRECT
+DOMAIN-SUFFIX, x.com, DIRECT
+DOMAIN-SUFFIX, linkedin.com, DIRECT
+
+[MitM]
+hostname = %APPEND% api.instagram.com, i.instagram.com, www.instagram.com, news-api.facebook.com, graph.facebook.com, commerce.facebook.com, marketplace.facebook.com, socialgraphs.facebook.com, groups.facebook.com, video-api.facebook.com, watch.facebook.com, api.twitter.com, syndication.twitter.com, rest.api.twitter.com, api.linkedin.com, adserver.linkedin.com, pixel.facebook.com, www.google-analytics.com, app.mixpanel.com, app.amplitude.com

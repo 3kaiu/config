@@ -1,8 +1,8 @@
 {
   "name": "3kaiu-config",
-  "version": "7.8.0",
+  "version": "8.5.0",
   "private": true,
-  "description": "3kaiu Loon & Quantumult X config — Surgio project",
+  "description": "3kaiu Loon & Quantumult X config v8.5 — Surgio project with TypeScript foundation and optimized structure",
   "scripts": {
     "generate": "surgio generate",
     "preview": "surgio preview",

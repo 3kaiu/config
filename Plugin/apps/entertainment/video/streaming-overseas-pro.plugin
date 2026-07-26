@@ -1,0 +1,149 @@
+#!name=海外流媒体增强 Pro v8.3
+#!desc=Netflix/Disney+/HBO Max/Spotify/YouTube 画质解锁 + 广告净化 + 区域解锁
+#!version=8.3
+#!author=3kaiu (参考 Maasea/sgmodule + blackmatrix7)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png
+
+#!arguments-desc=\n- \{ENABLE_STREAMING}: ["true","false"],tag=总开关，desc=开启后执行所有海外流媒体增强\n- \{STREAMING_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,90,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{NETFLIX_ENABLE}: switch,"true","false",tag Netflix 增强，desc=画质解锁 + 广告净化\n- \{DISNEY_ENABLE}: switch,"true","false",tag Disney+ 增强，desc=区域解锁 + 内容增强\n- \{HBO_ENABLE}: switch,"true","false",tag HBO Max 增强，desc=画质优化 + 广告净化\n- \{SPOTIFY_ENABLE}: switch,"true","false",tag Spotify 增强，desc=无损音质 + 歌词翻译\n- \{YOUTUBE_ENABLE}: switch,"true","false",tag YouTube 增强，desc=去广告 + SponsorBlock\n- \{PRIVACY_ENABLE}: switch,"true","false",tag隐私防护，desc=拦截流媒体追踪和数据收集\n- \{DEBUG_ENABLE}: switch,"false","true",tag调试模式，desc=输出详细执行日志
+
+[Argument]
+ENABLE_STREAMING=switch,"true","false",tag=总开关，desc=开启后执行所有海外流媒体增强
+STREAMING_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
+TIMEOUT=input,90,tag=超时时间 (秒), desc=脚本最大执行时长
+NETFLIX_ENABLE=switch,"true","false",tag Netflix 增强，desc=画质解锁 + 广告净化
+DISNEY_ENABLE=switch,"true","false",tag Disney+ 增强，desc=区域解锁 + 内容增强
+HBO_ENABLE=switch,"true","false",tag HBO Max 增强，desc=画质优化 + 广告净化
+SPOTIFY_ENABLE=switch,"true","false",tag Spotify 增强，desc=无损音质 + 歌词翻译
+YOUTUBE_ENABLE=switch,"true","false",tag YouTube 增强，desc=去广告 + SponsorBlock
+PRIVACY_ENABLE=switch,"true","false",tag 隐私防护，desc=拦截流媒体追踪和数据收集
+DEBUG_ENABLE=switch,"true","false",tag 调试模式，desc=输出详细执行日志
+
+[Script]
+# ════════════════════════════════════════
+# 🎬 Netflix 增强规则
+# ════════════════════════════════════════
+
+# ── 画质解锁 ───────────────────────────
+http-response ^https?:\/\/api\.netflix\.com\/api\/shakti video-quality-unlock, enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
+http-response ^https?:::\/\/www\.netflix\.com\/api\/shakti quality-enhance, enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
+
+# ── 广告净化 ───────────────────────────
+http-response ^https?:\/\/api\.netflix\.com\/api\/shakti\/ads ad-clean, enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
+http-response ^https?:::\/\/www\.netflix\.com\/api\/shakti\/promotions promo-clean, enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
+
+# ── 区域解锁 ───────────────────────────
+http-response ^https?:\/\/api\.netflix\.com\/api\/shakti\/profiles profile-region-unlock, enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
+http-response ^https?:::\/\/www\.netflix\.com\/api\/shakti\/catalog catalog-unlock, enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
+
+# ── CDN 优化 ───────────────────────────
+http-response ^https?:\/\/ipv4-c\d+-\d+-\d+\.1\.nflxvideo\.net cdn-optimize, enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
+http-response ^https?:::\/\/nrdns\.netflix\.com dns-optimize, enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
+
+# ════════════════════════════════════════
+# 🏰 Disney+ 增强规则
+# ═══════════════════════════════════════===
+
+# ── 区域解锁 ───────────────────────────
+http-response ^https?:\/\/disney\.api\.edge\.bamgrid\.com region-unlock, enable={ENABLE_STREAMING}&{DISNEY_ENABLE}
+http-response ^https?:::\/\/disney-plus\.net content-unlock, enable={ENABLE_STREAMING}&{DISNEY_ENABLE}
+
+# ── 内容增强 ───────────────────────────
+http-response ^https?:\/\/disney\.api\.edge\.bamgrid\.com\/v1\/catalog content-enhance, enable={ENABLE_STREAMING}&{DISNEY_ENABLE}
+http-response ^https?:::\/\/disney-plus\.net\/v1\/recommendations recommend-enhance, enable={ENABLE_STREAMING}&{DISNEY_ENABLE}
+
+# ── 画质优化 ───────────────────────────
+http-response ^https?:\/\/disney\.api\.edge\.bamgrid\.com\/v1\/video quality-optimize, enable={ENABLE_STREAMING}&{DISNEY_ENABLE}
+http-response ^https?:::\/\/disney-plus\.net\/v1\/playback playback-optimize, enable={ENABLE_STREAMING}&{DISNEY_ENABLE}
+
+# ════════════════════════════════════════
+# 🎭 HBO Max 增强规则
+# ═══════════════════════════════════════===
+
+# ── 画质优化 ───────────────────────────
+http-response ^https?:\/\/api\.hbomax\.com video-quality-optimize, enable={ENABLE_STREAMING}&{HBO_ENABLE}
+http-response ^https?:::\/\/hbomaxcdn\.com quality-enhance, enable={ENABLE_STREAMING}&{HBO_ENABLE}
+
+# ── 广告净化 ───────────────────────────
+http-response ^https?:\/\/api\.hbomax\.com\/ads ad-clean, enable={ENABLE_STREAMING}&{HBO_ENABLE}
+http-response ^https?:::\/\/hbomaxcdn\.com\/promotions promo-clean, enable={ENABLE_STREAMING}&{HBO_ENABLE}
+
+# ── 内容解锁 ───────────────────────────
+http-response ^https?:\/\/api\.hbomax\.com\/catalog content-unlock, enable={ENABLE_STREAMING}&{HBO_ENABLE}
+http-response ^https?:::\/\/hbomaxcdn\.com\/recommendations recommend-unlock, enable={ENABLE_STREAMING}&{HBO_ENABLE}
+
+# ════════════════════════════════════════
+# 🎵 Spotify 增强规则
+# ═══════════════════════════════════════===
+
+# ── 无损音质解锁 ──────────────────────
+http-response ^https?:\/\/api\.spotify\.com lossless-unlock, enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
+http-response ^https?:::\/\/api\.spotify\.com\/v1\/tracks quality-enhance, enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
+
+# ── 歌词翻译增强 ──────────────────────
+http-response ^https?:\/\/api\.spotify\.com\/v1\/lyrics lyrics-translate, enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
+http-response ^https?:::\/\/api\.spotify\.com\/v1\/songs song-info-enhance, enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
+
+# ── 广告净化 ───────────────────────────
+http-response ^https?:\/\/api\.spotify\.com\/v1\/ads ad-clean, enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
+http-response ^https?:::\/\/api\.spotify\.com\/v1\/promotions promo-clean, enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
+
+# ── 推荐净化 ───────────────────────────
+http-response ^https?:\/\/api\.spotify\.com\/v1\/recommendations recommend-clean, enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
+http-response ^https?:::\/\/api\.spotify\.com\/v1\/charts chart-clean, enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
+
+# ════════════════════════════════════════
+# 📺 YouTube 增强规则 (扩展 Maasea 方案)
+# ═══════════════════════════════════════===
+
+# ── 去广告 ─────────────────────────────
+http-response ^https?:\/\/youtubei\.googleapis\.com ad-block, enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
+http-response ^https?:::\/\/www\.youtube\.com\/api\/stats stats-clean, enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
+
+# ── 画质解锁 ───────────────────────────
+http-response ^https?:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/player quality-unlock, enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
+http-response ^https?:::\/\/www\.youtube\.com\/watch quality-enhance, enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
+
+# ── 后台播放/PiP ───────────────────────
+http-response ^https?:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/player background-play, enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
+http-response ^https?:::\/\/www\.youtube\.com\/watch pip-enable, enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
+
+# ── SponsorBlock 集成 ──────────────────
+http-response ^https?:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/next sponsorblock-skip, enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
+http-response ^https?:::\/\/www\.youtube\.com\/watch sponsor-skip, enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
+
+# ════════════════════════════════════════
+# 🔒 流媒体隐私防护
+# ═══════════════════════════════════════===
+
+# ── 追踪拦截 ───────────────────────────
+http-request ^https?:\/\/netflix\.com\/track netflix-track-blocker, enabled={ENABLE_STREAMING}&{PRIVACY_ENABLE}
+http-request ^https?:::\/\/disney\.com\/track disney-track-blocker, enabled={ENABLE_STREAMING}&{PRIVACY_ENABLE}
+http-request ^https?:::\/\/hbomax\.com\/track hbo-track-blocker, enabled={ENABLE_STREAMING}&{PRIVACY_ENABLE}
+
+# ── 数据分析拦截 ──────────────────────
+http-request ^https?:::\/\/api\.spotify\.com\/v1\/analytics spotify-analytics-blocker, enabled={ENABLE_STREAMING}&{PRIVACY_ENABLE}
+http-request ^https?:::\/\/youtube\.com\/api\/stats youtube-stats-blocker, enabled={ENABLE_STREAMING}&{PRIVACY_ENABLE}
+
+# ── 广告标识符拦截 ─────────────────────
+http-request ^https?:::\/\/netflix\.com\/idfa netflix-idfa-blocker, enabled={ENABLE_STREAMING}&{PRIVACY_ENABLE}
+http-request ^https?:::\/\/disney\.com\/idfa disney-idfa-blocker, enabled={ENABLE_STREAMING}&{PRIVACY_ENABLE}
+
+# ════════════════════════════════════════
+# ⏰ Cron 定时任务（可选功能）
+# ═══════════════════════════════════════===
+cron {STREAMING_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/StreamingServices.js, timeout={TIMEOUT}, tag=流媒体服务定时优化，argument=[{DEBUG_ENABLE}], enabled={ENABLE_STREAMING}
+
+[Rewrite]
+# ── 白名单配置 ─────────────────────────
+DOMAIN-SUFFIX, netflix.com, DIRECT
+DOMAIN-SUFFIX, nflxvideo.net, DIRECT
+DOMAIN-SUFFIX, disneyplus.com, DIRECT
+DOMAIN-SUFFIX, bamgrid.com, DIRECT
+DOMAIN-SUFFIX, hbomax.com, DIRECT
+DOMAIN-SUFFIX, spotify.com, DIRECT
+DOMAIN-SUFFIX, youtube.com, DIRECT
+DOMAIN-SUFFIX, googlevideo.com, DIRECT
+
+[MitM]
+hostname = %APPEND% api.netflix.com, www.netflix.com, ipv4-c*.1.nflxvideo.net, nrdns.netflix.com, disney.api.edge.bamgrid.com, disney-plus.net, api.hbomax.com, hbomaxcdn.com, api.spotify.com, youtubei.googleapis.com, www.youtube.com

@@ -1,0 +1,116 @@
+#!name=墨鱼去开屏广告 Pro v2.0
+#!desc=覆盖数百个 App 的开屏广告通杀过滤 · 基于 ddgksf2013 的 StartUp.conf + AllInOne 综合净化
+#!version=2.0
+#!author=3kaiu (参考 ddgksf2013 + blackmatrix7)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Advertising.png
+
+#!arguments-desc=\n- \{ENABLE_STARTUP}: ["true","false"],tag=总开关，desc=开启后过滤所有 App 开屏广告\n- \{STARTUP_DEBUG}: switch,"false","true",tag=调试模式，desc=输出详细日志
+
+[Argument]
+ENABLE_STARTUP=switch,"true","false",tag=总开关，desc=开启后过滤所有 App 开屏广告
+STARTUP_DEBUG=switch,"false","true",tag=调试模式，desc=输出详细日志
+
+[Script]
+# ════════════════════════════════════════
+# ⏰ Cron 定时任务（可选）
+# ════════════════════════════════════════
+cron "0 0 * * *" script-path=https://ws.wenn.in/main/Scripts/Cleanup.js, tag=App 清理提醒，enable={ENABLE_STARTUP}
+
+[Rewrite]
+# ── 🎬 开屏广告通杀层 (ddgksf2013 风格) ────────────────────
+
+# ════════════════════════════════════════
+# ① 视频/直播类 App
+# ══════════════
+^https?:\/\/ads\.api\.(yy|6rooms)\.com\/.*\/splash url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/mcs\.mm\.(cc|tv)\.cn\/splash\/getSplashAd url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/live-bd\.biliapi\.net\/open\/app\/splash\/v2\/detail url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/app-api\.huya\.com\/splash\/load list reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/splash\.snssdk\.com\/splash\/widget\/list url reject-200, enable={ENABLE_STARTUP}
+
+# ════════════════════════════════════════
+# ② 电商购物类 App  
+# ═══════════════════
+^https?:\/\/ad\.taobao\.com\/serv\/KP_SplashAD\.json url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/ad\.m\.taobao\.com\/feed\/splash\/list\.json url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/pinduo\.du\.ru\/index\.php\/mobile\/Splash\/ url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/splash\.jd\.com\/static\/splash\// url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/ads\.api\.meituan\.com\/splashurl\/list url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/ads\.suning\.com\/splash\/getSplashAd url reject-200, enable={ENABLE_STARTUP}
+
+# ════════════════════════════════════════
+# ③ 社交/通讯类 App
+# ════════════════════
+^https?:\/\/flash\.qq\.com\/splash\/list\.json url reject-200, enable={ENABLE_STARTUP}
+^https?::\/\/api\.wan*.weixin.qq\.com\/cgi-bin\/ad\/launch url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/api\.mqq\.com\/splash\/control url reject-200, enable={ENABLE_STARTUP}
+
+# ════════════════════════════════════════
+# ④ 资讯阅读类 App
+# ════════════════════
+^https?:\/\/ads\.sina\.com\.cn\/app\/api\/splash\/info url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/api\.zhuishushenqi\.com\/splashes\/ios url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/api\.zcool\.com\.cn\/common\/open-screen url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/app3\.qdaily\.com\/app3\/boot_advertisements\.json url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/sf3-fe-tos\.pglstatp-toutiao\.com\/obj\/tos-cn\/i-4r7-eur\/splash url reject-200, enable={ENABLE_STARTUP}
+
+# ════════════════════════════════════════
+# ⑤ 工具效率类 App
+# ════════════════════
+^https?:\/\/ads\.api\.wps\.cn\/web\/splash url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/flash\.iciba\.com\/open\/screens url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/service\.iciba\.com\/popo\/open\/screens\/v\d\?adjson url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/flashscreen\.duokan\.com\/getFlashScreenPage url reject-200, enable={ENABLE_STARTUP}
+
+# ════════════════════════════════════════
+# ⑥ 音乐/音频类 App
+# ════════════════════
+^https?:\/\/god\.gameyw\.netease\.com\/v\d\/ad\/serving\/app-start url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/music\.interface\.163\.com\/api\/splash\/get url reject-200, enable={ENABLE_STARTUP}
+
+# ════════════════════════════════════════
+# ⑦ 出行/旅游类 App
+# ════════════════════
+^https?:\/\/flightcheckin\.ctrip\.com\/splash\/splashUrl url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/apigw\.fliggy\.com\/splash\/list url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/api\.gaode\.com\/splash\/config url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/busi\.kuaidi100\.com\/splash\/getSplashAd url reject-200, enable={ENABLE_STARTUP}
+
+# ════════════════════════════════════════
+# ⑧ 教育/学习类 App
+# ════════════════════
+^https?:\/\/splash\.yuanfudao\.com\/splash\/list url reject-200, enable={ENABLE_STARTUP}
+^https?::\/\/ad\.class\.tiktokv\.com\/splash\/info url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/splash\.xueersi\.com\/splash\/config url reject-200, enable={ENABLE_STARTUP}
+
+# ════════════════════════════════════════
+# ⑨ 金融银行类 App
+# ════════════════════
+^https?:\/\/creditcardapp\.bankcomm\.cn\/mappweb_interface\/common\/qryLaunchAds\.do url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/m\.ccb\.com\/splash\/getSplashAd url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/app\.abc\.china.cn\/splash\/config url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/app\.cmbchina\.com\/splash\/get url reject-200, enable={ENABLE_STARTUP}
+
+# ════════════════════════════════════════
+# ⑩ 地图导航类 App
+# ════════════════════
+^https?:\/\/api\.amap\.com\/splash\/config url reject-200, enable={ENABLE_STARTUP}
+^https?::\/\/lbs\.yunli\.com\.cn\/splash\/config url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/map\\.baidu\.com\/splash\/config url reject-200, enable={ENABLE_STARTUP}
+
+# ── 特殊应用补充 ───────────────────────
+# 小红书
+^https?:\/\/home-api\.xiaohongshu\.com\/splash\/config url reject-200, enable={ENABLE_STARTUP}
+# 抖音/TikTok
+^https?:\/\/push\.snssdk\.com\/splash\/log url reject-200, enable={ENABLE_STARTUP}
+# 快手
+^https?:\/\/splash\.kuaishou\.com\/splash\/list url reject-200, enable={ENABLE_STARTUP}
+# 哔哩哔哩漫画
+^https?:\/\/acmt\.bilifast\.net\/splash\/load url reject-200, enable={ENABLE_STARTUP}
+# 微博国际版
+^https?::\/\/api\.weibo\.cn\/2\/splash url reject-200, enable={ENABLE_STARTUP}
+
+[MitM]
+# ⚠️ 注意：部分 App 禁用了 MITM，无法拦截其开屏广告
+hostname = %APPEND% splash.*, ad.*, flash.*

@@ -1,0 +1,201 @@
+name: E2E Test Suite
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Scripts/**'
+      - 'Plugin/**'
+      - 'test/**'
+      - 'package.json'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Scripts/**'
+      - 'Plugin/**'
+      - 'test/**'
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm install --production
+      
+      - name: Run E2E Integration Tests
+        id: tests
+        run: |
+          npm test -- --verbose --reporter spec
+      
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test-results
+          path: test/results/
+          retention-days: 14
+      
+      - name: Generate Coverage Report
+        run: |
+          mkdir -p coverage
+          # Calculate code coverage (placeholder for future implementation)
+          echo "Coverage report generation placeholder" > coverage/coverage-report.txt
+      
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: github.ref == 'refs/heads/main'
+        with:
+          files: ./coverage/lcov.info
+          flags: e2e
+          name: codecov-e2e
+          fail_ci_if_error: false
+
+  plugin-syntax-check:
+    runs-on: ubuntu-latest
+    needs: e2e-tests
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      
+      - name: Check Plugin Syntax
+        run: |
+          echo "🔍 Checking plugin file syntax..."
+          
+          # Count total plugins
+          PLUGIN_COUNT=$(ls -1 Plugin/*.plugin 2>/dev/null | wc -l)
+          echo "Total plugins found: $PLUGIN_COUNT"
+          
+          # Check for common syntax errors
+          ERRORS=0
+          for plugin in Plugin/*.plugin; do
+            if [ -f "$plugin" ]; then
+              # Check for missing required fields
+              if ! grep -q "^#!name=" "$plugin"; then
+                echo "❌ Missing #!name in $plugin"
+                ((ERRORS++))
+              fi
+              
+              if ! grep -q "^#!version=" "$plugin"; then
+                echo "❌ Missing #!version in $plugin"
+                ((ERRORS++))
+              fi
+              
+              if ! grep -q "^\[Script\]" "$plugin" && \
+                 ! grep -q "^\[Rewrite\]" "$plugin" && \
+                 ! grep -q "^\[Rule\]" "$plugin"; then
+                echo "❌ Missing required section in $plugin"
+                ((ERRORS++))
+              fi
+            fi
+          done
+          
+          if [ $ERRORS -gt 0 ]; then
+            echo "❌ Found $ERRORS syntax errors in plugins"
+            exit 1
+          else
+            echo "✅ All plugins passed syntax check"
+          fi
+
+  configuration-validation:
+    runs-on: ubuntu-latest
+    needs: plugin-syntax-check
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      
+      - name: Validate Loon.lcf
+        run: |
+          echo "🔍 Validating Loon.lcf..."
+          
+          LOON_FILE="Profile/Loon.lcf"
+          
+          if [ ! -f "$LOON_FILE" ]; then
+            echo "❌ Loon.lcf not found"
+            exit 1
+          fi
+          
+          # Check version number
+          VERSION=$(grep -oP 'version:\s*\K[^ ]+' "$LOON_FILE" || grep -oP '#\s*version:\s*\K[^ ]+' "$LOON_FILE")
+          echo "Found version: $VERSION"
+          
+          if [[ ! "$VERSION" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            echo "❌ Invalid version format: $VERSION"
+            exit 1
+          fi
+          
+          # Check for required sections
+          REQUIRED_SECTIONS=("General" "Proxy" "Script" "Rewrite" "Rule")
+          MISSING_SECTIONS=""
+          
+          for section in "${REQUIRED_SECTIONS[@]}"; do
+            if ! grep -q "^\[$section\]" "$LOON_FILE"; then
+              MISSING_SECTIONS="$MISSING_SECTIONS $section"
+            fi
+          done
+          
+          if [ -n "$MISSING_SECTIONS" ]; then
+            echo "❌ Missing sections:$MISSING_SECTIONS"
+            exit 1
+          fi
+          
+          echo "✅ Loon.lcf validation passed"
+      
+      - name: Validate QX.conf
+        run: |
+          echo "🔍 Validating QX.conf..."
+          
+          QX_FILE="Profile/QX.conf"
+          
+          if [ ! -f "$QX_FILE" ]; then
+            echo "❌ QX.conf not found"
+            exit 1
+          fi
+          
+          # Check version number
+          VERSION=$(grep -oP 'version:\s*\K[^ ]+' "$QX_FILE" || grep -oP '#\s*version:\s*\K[^ ]+' "$QX_FILE")
+          echo "Found version: $VERSION"
+          
+          if [[ ! "$VERSION" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            echo "❌ Invalid version format: $VERSION"
+            exit 1
+          fi
+          
+          echo "✅ QX.conf validation passed"
+      
+      - name: Check Plugin References
+        run: |
+          echo "🔍 Checking plugin references in configurations..."
+          
+          # Extract all plugin references from Loon.lcf
+          PLUGIN_REFS=$(grep -oP 'https?://[^"\s]*\.plugin' Profile/Loon.lcf | sort -u)
+          LOCAL_PLUGINS=$(ls -1 Plugin/*.plugin | xargs -n1 basename | sort -u)
+          
+          echo "Found ${#PLUGIN_REFS[@]} external plugin references"
+          echo "Found ${#LOCAL_PLUGINS[@]} local plugins"
+          
+          # Check if all referenced plugins exist
+          REF_ERRORS=0
+          for ref in $PLUGIN_REFS; do
+            # Skip internal URLs
+            if [[ "$ref" != *".ws.wenn.in"* ]] && [[ "$ref" != *".github.com"* ]]; then
+              # Check if it's a local reference
+              PLUGIN_NAME=$(basename "$ref" .plugin)
+              if ! grep -q "$PLUGIN_NAME" <<< "$LOCAL_PLUGINS"; then
+                echo "⚠️  External plugin reference may be broken: $ref"
+              fi
+            fi
+          done
+          
+          echo "✅ Plugin reference check completed"

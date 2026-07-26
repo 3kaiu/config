@@ -1,0 +1,66 @@
+#!name=钉钉 Pro v8.1
+#!desc=钉钉 — 消息/工作台/文档/视频会议全流程净化 + 企业助手优化
+#!version=8.1
+#!author=3kaiu (参考 ddgksf2013/dingtalk.js + app2smile)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/DingTalk.png
+
+#!arguments-desc=\n- \{ENABLE_DINGTALK}: ["true","false"],tag=总开关，desc=开启后执行所有钉钉功能\n- \{DINGTALK_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,90,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{DINGTALK_MSG_ENABLE}: switch,"true","false",tag=消息净化，desc=去除消息页推广\n- \{DINGTALK_WORK_ENABLE}: switch,"true","false",tag=工作台净化，desc=去除工作台中推荐应用\n- \{DINGTALK_DOC_ENABLE}: switch,"true","false",tag=文档净化，desc=去除钉钉文档推荐\n- \{DINGTALK_MEET_ENABLE}: switch,"true","false",tag=会议净化，desc=去除视频会议推广\n- \{DINGTALK_ASSISTANT_ENABLE}: switch,"true","false",tag=助手优化，desc=优化钉钉小蜜助手\n- \{DINGTALK_DEBUG_ENABLE}: switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Argument]
+ENABLE_DINGTALK=switch,"true","false",tag=总开关，desc=开启后执行所有钉钉功能
+DINGTALK_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
+TIMEOUT=input,90,tag=超时时间 (秒), desc=脚本最大执行时长
+DINGTALK_MSG_ENABLE=switch,"true","false",tag=消息净化，desc=去除消息页推广
+DINGTALK_WORK_ENABLE=switch,"true","false",tag=工作台净化，desc=去除工作台中推荐应用
+DINGTALK_DOC_ENABLE=switch,"true","false",tag=文档净化，desc=去除钉钉文档推荐
+DINGTALK_MEET_ENABLE=switch,"true","false",tag=会议净化，desc=去除视频会议推广
+DINGTALK_ASSISTANT_ENABLE=switch,"true","false",tag=助手优化，desc=优化钉钉小蜜助手
+DINGTALK_DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Script]
+# ════════════════════════════════════════
+# 🔄 实时净化规则（响应阶段）
+# ════════════════════════════════════════
+
+# ── 消息净化模块 ──────────────────────
+http-response ^https?:\/\/api\.dingtalk\.com\/v1\.0\/im/chat\/getChatMessage feed-filter, enable={ENABLE_DINGTALK}&{DINGTALK_MSG_ENABLE}
+http-response ^https?:::\/\/a\.dingtalk\.com\/wb new-ad-filter, enable={ENABLE_DINGTALK}&{DINGTALK_MSG_ENABLE}
+http-response ^https?:::\/\/top\.dingtalk\.com\/feed list-ad-filter, enable={ENABLE_DINGTALK}&{DINGTALK_MSG_ENABLE}
+
+# ── 工作台净化模块 ────────────────────
+http-response ^https?:::\/\/tapd\.cn\/apps recommend-filter, enable={ENABLE_DINGTALK}&{DINGTALK_WORK_ENABLE}
+http-response ^https?:::\/\/oa\.dingtalk\.com\/app market-ad-filter, enable={ENABLE_DINGTALK}&{DINGTALK_WORK_ENABLE}
+http-response ^https?:::\/\/rds\.dingtalk\.com\/market store-promo-filter, enable={ENABLE_DINGTALK}&{DINGTALK_WORK_ENABLE}
+
+# ── 文档净化模块 ──────────────────────
+http-response ^https?:::\/\/docs\.dingtalk\.com\/recommend doc-recommend-filter, enable={ENABLE_DINGTALK}&{DINGTALK_DOC_ENABLE}
+http-response ^https?:::\/\/cloud\.dingtalk\.com\/share share-promo-filter, enable={ENABLE_DINGTALK}&{DINGTALK_DOC_ENABLE}
+
+# ── 会议净化模块 ──────────────────────
+http-response ^https?:::\/\/meeting\.dingtalk\.com\/promotion meeting-promo-filter, enable={ENABLE_DINGTALK}&{DINGTALK_MEET_ENABLE}
+http-response ^https?:::\/\/v\.dingtalk\.com\/ads ads-filter, enable={ENABLE_DINGTALK}&{DINGTALK_MEET_ENABLE}
+
+# ── 助手优化模块 ──────────────────────
+# 优化钉钉小蜜智能助手
+http-request ^https?:::\/\/nls-gateway\.cn-shanghai\.aliyuncs\.com\/v1 action post header X-Ding-Assist: optimize $done, enable={ENABLE_DINGTALK}&{DINGTALK_ASSISTANT_ENABLE}
+
+# 去除小蜜推荐内容
+http-response ^https?:::\/\/nls\.gateway\.aliyun\.com\/recommend assist-rec-filter, enable={ENABLE_DINGTALK}&{DINGTALK_ASSISTANT_ENABLE}
+
+# ── 其他净化模块 ─────────────────────
+http-response ^https?:::\/\/log\.dingtalk\.com\/track tracking-blocker, enable={ENABLE_DINGTALK}
+http-response ^https?:::\/\/data\.dingtalk\.com\/event event-filter, enable={ENABLE_DINGTALK}
+
+# ════════════════════════════════════════
+# ⏰ Cron 定时任务（可选功能）
+# ════════════════════════════════════════
+cron {DINGTALK_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/DingTalk.js, timeout={TIMEOUT}, tag=钉钉定时任务，argument=[{DINGTALK_DEBUG_ENABLE}], enable={ENABLE_DINGTALK}
+
+[Rewrite]
+# ── 白名单配置 ────────────────────────
+DOMAIN-SUFFIX, dingtalk.com, DIRECT
+DOMAIN-SUFFIX, alibaba.com, DIRECT
+
+[MitM]
+hostname = %APPEND% api.dingtalk.com, a.dingtalk.com, top.dingtalk.com, tapd.cn, oa.dingtalk.com, rds.dingtalk.com, docs.dingtalk.com, cloud.dingtalk.com, meeting.dingtalk.com, v.dingtalk.com, nls-gateway.cn-shanghai.aliyuncs.com, nls.gateway.aliyun.com

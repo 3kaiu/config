@@ -1,0 +1,70 @@
+#!name=滴滴出行 Pro v8.1
+#!desc=滴滴 — 开屏/首页/行程/乘车全流程净化 + 优惠券管理
+#!version=8.1
+#!author=3kaiu (参考 ddgksf2013/didi.js + app2smile)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/DiDi.png
+
+#!arguments-desc=\n- \{ENABLE_DIDI}: ["true","false"],tag=总开关，desc=开启后执行所有滴滴功能\n- \{DIDI_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,90,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{DIDI_SPLASH_ENABLE}: switch,"true","false",tag=开屏广告，desc=去除 APP 开屏广告\n- \{DIDI_HOME_ENABLE}: switch,"true","false",tag=首页净化，desc=去除首页推荐广告\n- \{DIDI_ORDER_ENABLE}: switch,"true","false",tag=订单净化，desc=去除订单页营销\n- \{DIDI_COUPON_ENABLE}: switch,"true","false",tag=优惠券管理，desc=优化优惠券展示\n- \{DIDI_VIP_ENABLE}: switch,"true","false",tag=D 豆会员，desc=D 豆权益增强\n- \{DIDI_DEBUG_ENABLE}: switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Argument]
+ENABLE_DIDI=switch,"true","false",tag=总开关，desc=开启后执行所有滴滴功能
+DIDI_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
+TIMEOUT=input,90,tag=超时时间 (秒), desc=脚本最大执行时长
+DIDI_SPLASH_ENABLE=switch,"true","false",tag=开屏广告，desc=去除 APP 开屏广告
+DIDI_HOME_ENABLE=switch,"true","false",tag=首页净化，desc=去除首页推荐广告
+DIDI_ORDER_ENABLE=switch,"true","false",tag=订单净化，desc=去除订单页营销
+DIDI_COUPON_ENABLE=switch,"true","false",tag=优惠券管理，desc=优化优惠券展示
+DIDI_VIP_ENABLE=switch,"true","false",tag=D 豆会员，desc=D 豆权益增强
+DIDI_DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Script]
+# ════════════════════════════════════════
+# 🔄 实时净化规则（响应阶段）
+# ════════════════════════════════════════
+
+# ── 开屏广告模块 ───────────────────────
+http-response ^https?:\/\/ads\.didiglobal\.com\/splash splash-filter, enable={ENABLE_DIDI}&{DIDI_SPLASH_ENABLE}
+http-response ^https?::\/\/sdkopen\.vip\.didi\.cn\/splash open-splash-filter, enable={ENABLE_DIDI}&{DIDI_SPLASH_ENABLE}
+http-response ^https?::\/\/mbs\.didiglobal\.com\/splash ad-splash-filter, enable={ENABLE_DIDI}&{DIDI_SPLASH_ENABLE}
+
+# ── 首页净化模块 ──────────────────────
+http-response ^https?:\/\/api\.didiglobal\.com\/gateway feed-filter, enable={ENABLE_DIDI}&{DIDI_HOME_ENABLE}
+http-response ^https?::\/\/portal\.didiglobal\.com\/portal portal-ad-filter, enable={ENABLE_DIDI}&{DIDI_HOME_ENABLE}
+http-response ^https?::\/\/news\.didiglobal\.com\/feed news-feed-filter, enable={ENABLE_DIDI}&{DIDI_HOME_ENABLE}
+http-response ^https?::\/\/recommend\.didi\.cn\/rec rec-filter, enable={ENABLE_DIDI}&{DIDI_HOME_ENABLE}
+
+# ── 订单净化模块 ──────────────────────
+http-response ^https?:::\/\/order\.didi\.cn\/promo order-promo-filter, enable={ENABLE_DIDI}&{DIDI_ORDER_ENABLE}
+http-response ^https?:::\/\/invoice\.didiglobal\.com\/gift gift-promo-filter, enable={ENABLE_DIDI}&{DIDI_ORDER_ENABLE}
+http-response ^https?:::\/\/receipt\.didi\.cn\/discount receipt-discount-filter, enable={ENABLE_DIDI}&{DIDI_ORDER_ENABLE}
+
+# ── 优惠券管理模块 ────────────────────
+http-response ^https?:::\/\/coupon\.didi\.cn\/popup popup-filter, enable={ENABLE_DIDI}&{DIDI_COUPON_ENABLE}
+http-response ^https?:: vouchers\.didiglobal\.com\/list voucher-filter, enable={ENABLE_DIDI}&{DIDI_COUPON_ENABLE}
+http-response ^https?:::\/\/ticket\.didi\.cn\/promotion promo-filter, enable={ENABLE_DIDI}&{DIDI_COUPON_ENABLE}
+
+# ── D 豆会员增强模块 ──────────────────
+# 优化 D 豆积分显示和兑换
+http-request ^https?:::\/\/points\.didi\.cn\/level action post header X-DPoints: premium $done, enable={ENABLE_DIDI}&{DIDI_VIP_ENABLE}
+
+# 解锁会员专属优惠
+http-response ^https?:::\/\/member\.didi\.cn\/vip member-offer-filter, enable={ENABLE_DIDI}&{DIDI_VIP_ENABLE}
+
+# ── 其他净化模块 ─────────────────────
+http-response ^https?::\/\/tracking\.didi\.cn\/track tracking-blocker, enable={ENABLE_DIDI}
+http-response ^https?::\/\/log\.didiglobal\.com\/event event-filter, enable={ENABLE_DIDI}
+
+# ════════════════════════════════════════
+# ⏰ Cron 定时任务（可选功能）
+# ════════════════════════════════════════
+cron {DIDI_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/DiDi.js, timeout={TIMEOUT}, tag=滴滴出行定时任务，argument=[{DIDI_DEBUG_ENABLE}], enable={ENABLE_DIDI}
+
+[Rewrite]
+# ── 白名单配置 ────────────────────────
+DOMAIN-SUFFIX, didiglobal.com, DIRECT
+DOMAIN-SUFFIX, didi.cn, DIRECT
+DOMAIN-SUFFIX, didi.com, DIRECT
+
+[MitM]
+hostname = %APPEND% ads.didiglobal.com, sdkopen.vip.didi.cn, mbs.didiglobal.com, api.didiglobal.com, portal.didiglobal.com, news.didiglobal.com, recommend.didi.cn, order.didi.cn, invoice.didiglobal.com, receipt.didi.cn, coupon.didi.cn, vouchers.didiglobal.com, ticket.didi.cn, points.didi.cn, member.didi.cn

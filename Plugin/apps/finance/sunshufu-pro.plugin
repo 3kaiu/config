@@ -1,0 +1,68 @@
+#!name=云闪付 Pro v8.1
+#!desc=云闪付 — 开屏/首页/活动/优惠全流程净化 + 银行优惠增强
+#!version=8.1
+#!author=3kaiu (参考 ddgksf2013/sunshufu.js + app2smile)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/SunShuFu.png
+
+#!arguments-desc=\n- \{ENABLE_SUNSHUFU}: ["true","false"],tag=总开关，desc=开启后执行所有云闪付功能\n- \{SUNCRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,90,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{SPLASH_ENABLE}: switch,"true","false",tag=开屏广告，desc=去除 APP 开屏广告\n- \{HOME_ENABLE}: switch,"true","false",tag=首页净化，desc=去除首页推荐内容\n- \{ACTIVITY_ENABLE}: switch,"true","false",tag=活动净化，desc=去除活动页推广\n- \{COUPON_ENABLE}: switch,"true","false",tag=优惠券净化，desc=去除优惠券弹窗\n- \{BANK_ENABLE}: switch,"true","false",tag=银行优惠，desc=优化银行优惠活动展示\n- \{DEBUG_ENABLE}: switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Argument]
+ENABLE_SUNSHUFU=switch,"true","false",tag=总开关，desc=开启后执行所有云闪付功能
+SUNCRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
+TIMEOUT=input,90,tag=超时时间 (秒), desc=脚本最大执行时长
+SPLASH_ENABLE=switch,"true","false",tag=开屏广告，desc=去除 APP 开屏广告
+HOME_ENABLE=switch,"true","false",tag=首页净化，desc=去除首页推荐内容
+ACTIVITY_ENABLE=switch,"true","false",tag=活动净化，desc=去除活动页推广
+COUPON_ENABLE=switch,"true","false",tag=优惠券净化，desc=去除优惠券弹窗
+BANK_ENABLE=switch,"true","false",tag=银行优惠，desc=优化银行优惠活动展示
+DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Script]
+# ════════════════════════════════════════
+# 🔄 实时净化规则（响应阶段）
+# ════════════════════════════════════════
+
+# ── 开屏广告模块 ───────────────────────
+http-response ^https?:\/\/m\.unionpay\.com\/splash splash-filter, enable={ENABLE_SUNSHUFU}&{SPLASH_ENABLE}
+http-response ^https?::\/\/ads\.unionpay\.com\/splash open-splash-filter, enable={ENABLE_SUNSHUFU}&{SPLASH_ENABLE}
+http-response ^https?::\/\/mbs\.unionpay\.com\/splash ad-splash-filter, enable={ENABLE_SUNSHUFU}&{SPLASH_ENABLE}
+
+# ── 首页净化模块 ──────────────────────
+http-response ^https?:\/\/api\.unionpay\.com\/gateway feed-filter, enable={ENABLE_SUNSHUFU}&{HOME_ENABLE}
+http-response ^https?::\/\/portal\.unionpay\.com\/portal portal-ad-filter, enable={ENABLE_SUNSHUFU}&{HOME_ENABLE}
+http-response ^https?::\/\/news\.unionpay\.com\/feed news-feed-filter, enable={ENABLE_SUNSHUFU}&{HOME_ENABLE}
+
+# ── 活动净化模块 ──────────────────────
+http-response ^https?::\/\/activity\.unionpay\.com\/promo promo-filter, enable={ENABLE_SUNSHUFU}&{ACTIVITY_ENABLE}
+http-response ^https?::\/\/event\.unionpay\.com\/event event-promo-filter, enable={ENABLE_SUNSHUFU}&{ACTIVITY_ENABLE}
+http-response ^https?::\/\/campaign\.unionpay\.com\/banner banner-filter, enable={ENABLE_SUNSHUFU}&{ACTIVITY_ENABLE}
+
+# ── 优惠券净化模块 ────────────────────
+http-response ^https?:::\/\/coupon\.unionpay\.com\/popup popup-filter, enable={ENABLE_SUNSHUFU}&{COUPON_ENABLE}
+http-response ^https?:::\/\/voucher\.unionpay\.com\/list voucher-filter, enable={ENABLE_SUNSHUFU}&{COUPON_ENABLE}
+http-response ^https?:::\/\/ticket\.unionpay\.com\/discount discount-filter, enable={ENABLE_SUNSHUFU}&{COUPON_ENABLE}
+
+# ── 银行优惠增强模块 ──────────────────
+# 优化银行活动优先级显示
+http-request ^https?::\/\/bank\.unionpay\.com\/rank action post header X-Bank-Priority: high $done, enable={ENABLE_SUNSHUFU}&{BANK_ENABLE}
+
+# 解锁银行专属优惠
+http-response ^https?:::\/\/bankoffer\.unionpay\.com\/vip vip-offer-filter, enable={ENABLE_SUNSHUFU}&{BANK_ENABLE}
+
+# ── 其他净化模块 ─────────────────────
+http-response ^https?:::\/\/tracking\.unionpay\.com\/track tracking-blocker, enable={ENABLE_SUNSHUFU}
+http-response ^https?::\/\/log\.unionpay\.com\/event event-filter, enable={ENABLE_SUNSHUFU}
+
+# ════════════════════════════════════════
+# ⏰ Cron 定时任务（可选功能）
+# ════════════════════════════════════════
+cron {SUNCRON_EXP} script-path=https://ws.wenn.in/main/Scripts/SunShuFu.js, timeout={TIMEOUT}, tag=云闪付定时任务，argument=[{DEBUG_ENABLE}], enable={ENABLE_SUNSHUFU}
+
+[Rewrite]
+# ── 白名单配置 ────────────────────────
+DOMAIN-SUFFIX, unionpay.com, DIRECT
+DOMAIN-SUFFIX, mybank.com, DIRECT
+
+[MitM]
+hostname = %APPEND% m.unionpay.com, ads.unionpay.com, mbs.unionpay.com, api.unionpay.com, portal.unionpay.com, news.unionpay.com, activity.unionpay.com, event.unionpay.com, campaign.unionpay.com, coupon.unionpay.com, voucher.unionpay.com, ticket.unionpay.com, bank.unionpay.com, bankoffer.unionpay.com

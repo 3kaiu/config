@@ -1,0 +1,70 @@
+#!name=支付宝 Pro v8.1
+#!desc=支付宝 — 开屏/首页/转账/理财全流程净化 + 会员权益增强
+#!version=8.1
+#!author=3kaiu (参考 ddgksf2013/alipay.js + app2smile)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Alipay.png
+
+#!arguments-desc=\n- \{ENABLE_ALIPAY}: ["true","false"],tag=总开关，desc=开启后执行所有支付宝功能\n- \{ALIPAY_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,120,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{ALIPAY_SPLASH_ENABLE}: switch,"true","false",tag=开屏广告，desc=去除 APP 开屏广告\n- \{ALIPAY_HOME_ENABLE}: switch,"true","false",tag=首页净化，desc=去除首页推荐广告\n- \{ALIPAY_TRANSFER_ENABLE}: switch,"true","false",tag=转账净化，desc=去除转账页面营销\n- \{ALIPAY_INVEST_ENABLE}: switch,"true","false",tag=理财净化，desc=去除理财推广内容\n- \{ALIPAY_MEMBER_ENABLE}: switch,"true","false",tag=会员增强，desc=优化支付宝会员权益\n- \{ALIPAY_DEBUG_ENABLE}: switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Argument]
+ENABLE_ALIPAY=switch,"true","false",tag=总开关，desc=开启后执行所有支付宝功能
+ALIPAY_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
+TIMEOUT=input,120,tag=超时时间 (秒), desc=脚本最大执行时长
+ALIPAY_SPLASH_ENABLE=switch,"true","false",tag=开屏广告，desc=去除 APP 开屏广告
+ALIPAY_HOME_ENABLE=switch,"true","false",tag=首页净化，desc=去除首页推荐广告
+ALIPAY_TRANSFER_ENABLE=switch,"true","false",tag=转账净化，desc=去除转账页面营销
+ALIPAY_INVEST_ENABLE=switch,"true","false",tag=理财净化，desc=去除理财推广内容
+ALIPAY_MEMBER_ENABLE=switch,"true","false",tag=会员增强，desc=优化支付宝会员权益
+ALIPAY_DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Script]
+# ════════════════════════════════════════
+# 🔄 实时净化规则（响应阶段）
+# ════════════════════════════════════════
+
+# ── 开屏广告模块 ───────────────────────
+http-response ^https?:\/\/sdkopen\.vip\.alipay\.com\/splash splash-filter, enable={ENABLE_ALIPAY}&{ALIPAY_SPLASH_ENABLE}
+http-response ^https?::\/\/mobileserving\.gt\.algocdn\.cn\/splash open-splash-filter, enable={ENABLE_ALIPAY}&{ALIPAY_SPLASH_ENABLE}
+http-response ^https?::\/\/adsapi\.smartmarketing\.aliyun\.com\/splash ad-splash-filter, enable={ENABLE_ALIPAY}&{ALIPAY_SPLASH_ENABLE}
+
+# ── 首页净化模块 ──────────────────────
+http-response ^https?:\/\/h5api\.alipay\.com\/gateway feed-filter, enable={ENABLE_ALIPAY}&{ALIPAY_HOME_ENABLE}
+http-response ^https?::\/\/render\.alipay.com\/portal portal-ad-filter, enable={ENABLE_ALIPAY}&{ALIPAY_HOME_ENABLE}
+http-response ^https?::\/\/nws\.pscpub\.com\/feed news-feed-filter, enable={ENABLE_ALIPAY}&{ALIPAY_HOME_ENABLE}
+http-response ^https?::\/\/masset\.balancer\.amcs\.lab\?.* banner-filter, enable={ENABLE_ALIPAY}&{ALIPAY_HOME_ENABLE}
+
+# ── 转账净化模块 ──────────────────────
+http-response ^https?::\/\/transfer\.alipay\.com\/activity transfer-promo-filter, enable={ENABLE_ALIPAY}&{ALIPAY_TRANSFER_ENABLE}
+http-response ^https?::\/\/prompt\.service\.alipay\.com\/redpacket red-packet-filter, enable={ENABLE_ALIPAY}&{ALIPAY_TRANSFER_ENABLE}
+http-response ^https?::\/\/fav\.favapipub\.com\/gift gift-promo-filter, enable={ENABLE_ALIPAY}&{ALIPAY_TRANSFER_ENABLE}
+
+# ── 理财净化模块 ──────────────────────
+http-response ^https?:::\/\/fund\.fundmate\.alibaba\.com\/recommend fund-rec-filter, enable={ENABLE_ALIPAY}&{ALIPAY_INVEST_ENABLE}
+http-response ^https?:::\/\/wealth\.service\.alipay\.com\/ad wealth-ad-filter, enable={ENABLE_ALIPAY}&{ALIPAY_INVEST_ENABLE}
+http-response ^https?::\/\/insurance\.insurtech\.alibaba\.com\/promo insurance-promo-filter, enable={ENABLE_ALIPAY}&{ALIPAY_INVEST_ENABLE}
+
+# ── 会员增强模块 ──────────────────────
+# 优化支付宝会员等级标识显示
+http-request ^https?:::\/\/member\.service\.alipay\.com\/level action post header X-Member-Level: user-custom $done, enable={ENABLE_ALIPAY}&{ALIPAY_MEMBER_ENABLE}
+
+# 解锁会员专属优惠
+http-response ^https?::\/\/coupon\.member\.alipay\.com\/list vip-coupon-filter, enable={ENABLE_ALIPAY}&{ALIPAY_MEMBER_ENABLE}
+
+# ── 其他净化模块 ─────────────────────
+http-response ^https?:::\/\/tracking\.alipay\.com\/track tracking-blocker, enable={ENABLE_ALIPAY}
+http-response ^https?::\/\/log\.alipay\.com\/event event-filter, enable={ENABLE_ALIPAY}
+
+# ════════════════════════════════════════
+# ⏰ Cron 定时任务（可选功能）
+# ════════════════════════════════════════
+cron {ALIPAY_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/Alipay.js, timeout={TIMEOUT}, tag=支付宝定时任务，argument=[{ALIPAY_DEBUG_ENABLE}], enable={ENABLE_ALIPAY}
+
+[Rewrite]
+# ── 白名单配置 ────────────────────────
+DOMAIN-SUFFIX, alipay.com, DIRECT
+DOMAIN-SUFFIX, aliyun.com, DIRECT
+DOMAIN-SUFFIX, taobao.com, DIRECT
+
+[MitM]
+hostname = %APPEND% sdkopen.vip.alipay.com, mobileserving.gt.algocdn.cn, adsapi.smartmarketing.aliyun.com, h5api.alipay.com, render.alibaba.com, nws.pscpub.com, masset.balancer.amcs.lab, transfer.alipay.com, prompt.service.alipay.com, fav.favapipub.com, fund.fundmate.alibaba.com, wealth.service.alipay.com, insurance.insurtech.alibaba.com, member.service.alipay.com, coupon.member.alipay.com

@@ -1,0 +1,8 @@
+schema_version: 1
+module_path: plugin_rules
+title: Surge 插件规则集合
+scope:
+    - Plugin/
+source_files: []
+depends_on: []
+related_to: []

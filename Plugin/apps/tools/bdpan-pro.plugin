@@ -1,0 +1,68 @@
+#!name=百度网盘 Pro v8.0
+#!desc=百度网盘 — 开屏/信息流净化 + 倍速播放解锁 + 会员权益增强
+#!version=8.0
+#!author=3kaiu (参考 ddgksf2013/bdpan.ads.js + bdpan.unlock.js)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/BaiduPan.png
+
+#!arguments-desc=\n- \{ENABLE_BDPAN}: ["true","false"],tag=总开关，desc=开启后执行所有百度网盘功能\n- \{BDPAN_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,90,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{BDPAN_SPLASH_ENABLE}: switch,"true","false",tag=开屏净化，desc=去除 APP 开屏广告\n- \{BDPAN_FEED_ENABLE}: switch,"true","false",tag=信息流净化，desc=去除首页推荐广告\n- \{BDPAN_SPEED_ENABLE}: switch,"true","false",tag=倍速解锁，desc=解锁不限速下载 + 倍速播放\n- \{BDPAN_VIP_ENABLE}: switch,"true","false",tag=会员增强，desc=解锁 VIP 特权\n- \{BDPAN_DEBUG_ENABLE}: switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Argument]
+ENABLE_BDPAN=switch,"true","false",tag=总开关，desc=开启后执行所有百度网盘功能
+BDPAN_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
+TIMEOUT=input,90,tag=超时时间 (秒), desc=脚本最大执行时长
+BDPAN_SPLASH_ENABLE=switch,"true","false",tag=开屏净化，desc=去除 APP 开屏广告
+BDPAN_FEED_ENABLE=switch,"true","false",tag=信息流净化，desc=去除首页推荐广告
+BDPAN_SPEED_ENABLE=switch,"true","false",tag=倍速解锁，desc=解锁不限速下载 + 倍速播放
+BDPAN_VIP_ENABLE=switch,"true","false",tag=会员增强，desc=解锁 VIP 特权
+BDPAN_DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Script]
+# ════════════════════════════════════════
+# 🔄 实时净化规则（响应阶段）
+# ════════════════════════════════════════
+
+# ── 开屏广告模块 ───────────────────────
+http-response ^https?:\/\/api\.netdisk\.com\/api\/splash\/get url reject-200, enable={ENABLE_BDPAN}&{BDPAN_SPLASH_ENABLE}
+http-response ^https?:\/\/open\.bce\.baidupcs\.com\/app\/flash screen-reject, enable={ENABLE_BDPAN}&{BDPAN_SPLASH_ENABLE}
+
+# ── 信息流净化模块 ────────────────────
+http-response ^https?:\/\/api\.netdisk\.com\/api\/home\/info info-filter, enable={ENABLE_BDPAN}&{BDPAN_FEED_ENABLE}
+http-response ^https?:\/\/api\.netdisk\.com\/api\/activity\/list list-filter, enable={ENABLE_BDPAN}&{BDPAN_FEED_ENABLE}
+http-response ^https?:\/\/api\.netdisk\.com\/api\/recommend\/feed recommend-filter, enable={ENABLE_BDPAN}&{BDPAN_FEED_ENABLE}
+http-response ^https?:\/\/api\.netdisk\.com\/api\/ad\/show ads-filter, enable={ENABLE_BDPAN}&{BDPAN_FEED_ENABLE}
+
+# ── 倍速解锁模块 ──────────────────────
+# 模拟 VIP 加速响应
+http-request ^https?:\/\/pcs\.baidu\.com\/download.* method POST header X-Extra-Info: vip_accelerate=true $done
+
+# 视频倍速播放配置
+http-response ^https?:\/\/api\.netdisk\.com\/api\/play\/url play-speed-filter, enable={ENABLE_BDPAN}&{BDPAN_SPEED_ENABLE}
+
+# ── 会员增强模块 ──────────────────────
+# 解锁超大文件上传限制
+http-response ^https?:\/\/api\.netdisk\.com\/api\/file\/upload upload-limit-filter, enable={ENABLE_BDPAN}&{BDPAN_VIP_ENABLE}
+
+# 解锁在线预览容量限制
+http-response ^https?:\/\/api\.netdisk\.com\/api\/file\/preview preview-capacity-filter, enable={ENABLE_BDPAN}&{BDPAN_VIP_ENABLE}
+
+# 解锁极速下载通道
+http-response ^https?:\/\/api\.netdisk\.com\/api\/share\/download download-speed-filter, enable={ENABLE_BDPAN}&{BDPAN_VIP_ENABLE}
+
+# ── 其他净化模块 ─────────────────────
+http-response ^https?:\/\/api\.netdisk\.com\/api\/notification\/msg notification-filter, enable={ENABLE_BDPAN}
+http-response ^https?:\/\/api\.netdisk\.com\/api\/task\/list task-filter, enable={ENABLE_BDPAN}
+
+# ════════════════════════════════════════
+# ⏰ Cron 定时任务（可选功能）
+# ════════════════════════════════════════
+cron {BDPAN_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/BdPan.js, timeout={TIMEOUT}, tag=百度网盘定时任务，argument=[{BDPAN_DEBUG_ENABLE}], enable={ENABLE_BDPAN}
+
+[Rewrite]
+# ── 白名单配置 ────────────────────────
+DOMAIN-SUFFIX, baidu.com, DIRECT
+DOMAIN-SUFFIX, baidupcs.com, DIRECT
+DOMAIN-SUFFIX, bcebos.com, DIRECT
+
+[MitM]
+hostname = %APPEND% api.netdisk.baidu.com, pcs.baidu.com, open.bce.baidupcs.com

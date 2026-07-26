@@ -3,11 +3,11 @@ schema_version: 1
 locale: zh-CN
 branch: main
 nodes_managed: true
-exported_at: "2026-07-26T03:44:54Z"
+exported_at: "2026-07-26T04:41:42Z"
 modules:
     "":
-        dir_name: 3kaiu iOS 代理配置工程（Surgio 编排中心）
-        title: 3kaiu iOS 代理配置工程（Surgio 编排中心）
+        dir_name: 3kaiu 代理配置工程（Surgio 编排中心）
+        title: 3kaiu 代理配置工程（Surgio 编排中心）
         scope:
             - README.md
             - .gitignore
@@ -43,8 +43,8 @@ modules:
             - path: profiles
             - path: tests
     docs:
-        dir_name: 配置审计与基础设施文档
-        title: 配置审计与基础设施文档
+        dir_name: 配置优化审计与分发基础设施文档集
+        title: 配置优化审计与分发基础设施文档集
         scope:
             - doc/
         source_files: []
@@ -100,8 +100,8 @@ modules:
         related_to:
             - path: mirror_scripts/rules
     plugin_rules:
-        dir_name: Surge 插件规则集
-        title: Surge 插件规则集
+        dir_name: Surge 插件规则集合
+        title: Surge 插件规则集合
         scope:
             - Plugin/
         source_files: []
@@ -133,8 +133,8 @@ modules:
         related_to:
             - path: profiles
     scripts:
-        dir_name: Loon_Quantumult X_Surge 站点去广告与运维脚本集
-        title: Loon/Quantumult X/Surge 站点去广告与运维脚本集
+        dir_name: Loon_Quantumult X_Surge 站点去广告与辅助脚本集
+        title: Loon/Quantumult X/Surge 站点去广告与辅助脚本集
         scope:
             - Scripts/
         source_files: []

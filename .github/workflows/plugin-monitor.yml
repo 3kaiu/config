@@ -1,0 +1,107 @@
+name: Plugin Monitor & Auto-Update
+
+on:
+  schedule:
+    # 每日 UTC+8 凌晨 2:00 执行监控
+    - cron: '0 18 * * *'
+  workflow_dispatch:
+    inputs:
+      plugin_name:
+        description: '指定监测的插件名称 (可选)'
+        required: false
+        default: ''
+      update_type:
+        description: '更新类型'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - scripts
+          - rules
+          - configs
+
+jobs:
+  monitor-upstream:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm install axios js-yaml chalk
+      
+      - name: Run upstream monitoring
+        run: node scripts/monitor/upstream-monitor.js
+        env:
+          MONITOR_MODE: ${{ github.event_name == 'schedule' && 'scheduled' || 'manual' }}
+          PLUGIN_NAME: ${{ github.event.inputs.plugin_name || '' }}
+          UPDATE_TYPE: ${{ github.event.inputs.update_type || 'all' }}
+      
+      - name: Check for updates
+        id: updates
+        run: node scripts/monitor/check-updates.js
+      
+      - name: Create update notification
+        if: steps.updates.outputs.has_update == 'true'
+        run: |
+          echo "=== Plugin Updates Detected ===" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          cat output/updates.json >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Create Issue on Update
+        if: steps.updates.outputs.has_update == 'true'
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: '⚠️ 上游脚本更新通知 - [Plugin Name]'
+          content-filepath: ./output/update-description.md
+          labels: upstream-update, auto-generated
+
+  validate-scripts:
+    runs-on: ubuntu-latest
+    needs: monitor-upstream
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Validate script syntax
+        run: |
+          # 检查所有 JS 脚本的语法
+          find Scripts/ Plugin/ -name "*.js" -exec node --check {} \;
+      
+      - name: Test critical plugins
+        run: npm test
+        working-directory: test
+
+  notify-telegram:
+    runs-on: ubuntu-latest
+    needs: [monitor-upstream, validate-scripts]
+    if: always()
+    steps:
+      - name: Send Telegram notification
+        uses: appleboy/telegram-action@v2.1.0
+        with:
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          format: Markdown
+          disable_notification: false
+          message: |
+            🤖 *自动监控报告*
+            
+            ✅ 监控时间：${{ github.event.head_commit.timestamp || '手动触发' }}
+            📊 监控状态：${{ needs.monitor-upstream.result }}
+            🔔 更新检测：${{ needs.monitor-upstream.result == 'failure' && '发现新更新!' || '无更新' }}
+            
+            查看详细报告：${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

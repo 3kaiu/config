@@ -1,0 +1,9 @@
+schema_version: 1
+module_path: docs
+title: 配置优化审计与分发基础设施文档集
+scope:
+    - doc/
+source_files: []
+depends_on: []
+related_to:
+    - path: ci_workflows

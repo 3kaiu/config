@@ -1,0 +1,76 @@
+#!name=爱奇艺 Pro v8.0
+#!desc=爱奇艺 — 开屏/首页/VIP 专属/播放体验全流程净化 + 高清画质解锁
+#!version=8.0
+#!author=3kaiu (参考 ddgksf2013/qiyi.js + app2smile)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/iQIYI.png
+
+#!arguments-desc=\n- \{ENABLE_IQIYI}: ["true","false"],tag=总开关，desc=开启后执行所有爱奇艺功能\n- \{IQIYI_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,60,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{IQIYI_SPLASH_ENABLE}: switch,"true","false",tag=开屏广告，desc=去除 APP 开屏广告\n- \{IQIYI_HOME_ENABLE}: switch,"true","false",tag=首页净化，desc=去除首页推荐广告\n- \{IQIYI_VIP_ENABLE}: switch,"true","false",tag=会员增强，desc=解锁 VIP 专属内容\n- \{IQIYI_PLAY_ENABLE}: switch,"true","false",tag=播放优化，desc=去除播放广告 + 流畅体验\n- \{IQIYI_4K_ENABLE}: switch,"true","false",tag=4K 画质解锁，desc=解锁 4K UHD 画质\n- \{IQIYI_DEBUG_ENABLE}: switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Argument]
+ENABLE_IQIYI=switch,"true","false",tag=总开关，desc=开启后执行所有爱奇艺功能
+IQIYI_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
+TIMEOUT=input,60,tag=超时时间 (秒), desc=脚本最大执行时长
+IQIYI_SPLASH_ENABLE=switch,"true","false",tag=开屏广告，desc=去除 APP 开屏广告
+IQIYI_HOME_ENABLE=switch,"true","false",tag=首页净化，desc=去除首页推荐广告
+IQIYI_VIP_ENABLE=switch,"true","false",tag=会员增强，desc=解锁 VIP 专属内容
+IQIYI_PLAY_ENABLE=switch,"true","false",tag=播放优化，desc=去除播放广告 + 流畅体验
+IQIYI_4K_ENABLE=switch,"true","false",tag=4K 画质解锁，desc=解锁 4K UHD 画质
+IQIYI_DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执行日志
+
+[Script]
+# ════════════════════════════════════════
+# 🔄 实时净化规则（响应阶段）
+# ════════════════════════════════════════
+
+# ── 开屏广告模块 ───────────────────────
+http-response ^https?:\/\/ads\.api\.iqiyi\.com\/splash url reject-200, enable={ENABLE_IQIYI}&{IQIYI_SPLASH_ENABLE}
+http-response ^https?:\/\/mobile\.ads\.iqiyi\.com\/ad open-ad-filter, enable={ENABLE_IQIYI}&{IQIYI_SPLASH_ENABLE}
+http-response ^https?:\/\/open\.api\.iqiyi\.com\/splash splash-reject, enable={ENABLE_IQIYI}&{IQIYI_SPLASH_ENABLE}
+
+# ── 首页净化模块 ──────────────────────
+http-response ^https?::\/\/feed\.pgc\.iqiyi\.com\/home home-feed-filter, enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
+http-response ^https?::\/\/hot\.v\.iqiyi\.com\/hotsearch hot-search-filter, enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
+http-response ^https?::\/\/gateway\.iqiyi\.com\/intent ad-intent-filter, enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
+http-response ^https?::\/\/api\.bubble\.iqiyi\.com\/bubble bubble-ad-filter, enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
+
+# ── VIP 增强模块 ───────────────────────
+# 解锁 VIP 专属影片库
+http-request ^https?::\/\/srvp\.qy\.tencent\.com\/play action post header X-Vip-Res: true $done, enable={ENABLE_IQIYI}&{IQIYI_VIP_ENABLE}
+
+# 解锁 VIP 免广告权益
+http-response ^https?::\/\/modues\.iqiyi\.com\/vip vip-module-filter, enable={ENABLE_IQIYI}&{IQIYI_VIP_ENABLE}
+
+# ── 播放优化模块 ──────────────────────
+# 跳过片头广告
+http-response ^https?::\/\/data\.v\.iqiyi\.com\/ad skip-ad-filter, enable={ENABLE_IQIYI}&{IQIYI_PLAY_ENABLE}
+
+# 去除片尾推广
+http-response ^https?::\/\/m\.api\.cn\.iqiyi\.com\/end end-promo-filter, enable={ENABLE_IQIYI}&{IQIYI_PLAY_ENABLE}
+
+# 清除暂停广告
+http-response ^https?::\/\/pause\.api\.iqiyi\.com\/ad pause-ad-filter, enable={ENABLE_IQIYI}&{IQIYI_PLAY_ENABLE}
+
+# ── 4K 画质解锁模块 ──────────────────
+# 解锁 4K/UHD 选项
+http-response ^https?::\/\/player\.api\.iqiyi\.com\/video video-quality-filter, enable={ENABLE_IQIYI}&{IQIYI_4K_ENABLE}
+http-response ^https?::\/\/stream\.aqi\.iqiyi\.com\/bitrate bitrate-limit-filter, enable={ENABLE_IQIYI}&{IQIYI_4K_ENABLE}
+http-response ^https?::\/\/cdn\.iqiyi\.com\/app state-filter, enable={ENABLE_IQIYI}&{IQIYI_4K_ENABLE}
+
+# ── 其他净化模块 ─────────────────────
+http-response ^https?::\/\/analytics\.iqiyi\.com\/track tracking-blocker, enable={ENABLE_IQIYI}
+http-response ^https?::\/\/log\.snssdk\.com\/event event-filter, enable={ENABLE_IQIYI}
+
+# ════════════════════════════════════════
+# ⏰ Cron 定时任务（可选功能）
+# ════════════════════════════════════════
+cron {IQIYI_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/Iqiyi.js, timeout={TIMEOUT}, tag=爱奇艺定时任务，argument=[{IQIYI_DEBUG_ENABLE}], enable={ENABLE_IQIYI}
+
+[Rewrite]
+# ── 白名单配置 ────────────────────────
+DOMAIN-SUFFIX, iqiyi.com, DIRECT
+DOMAIN-SUFFIX, qiyi.com, DIRECT
+DOMAIN-SUFFIX, iqiyi.video, DIRECT
+
+[MitM]
+hostname = %APPEND% ads.api.iqiyi.com, mobile.ads.iqiyi.com, open.api.iqiyi.com, feed.pgc.iqiyi.com, hot.v.iqiyi.com, gateway.iqiyi.com, modules.iqiyi.com, player.api.iqiyi.com, stream.aqi.iqiyi.com
