@@ -1,6 +1,14 @@
 /**
- * 📚 起点全能助手 v6.2
+ * 📚 起点全能助手 v6.3
  * 作者：3kaiu
+ *
+ * v6.3 更新 (性能修复):
+ *  1. [PERF] checkin 快速失败: 重试 3→2 次，单次 10s 超时，间隔 3s→1.5s
+ *     历史问题: 凌晨 DNS 慢时 3 次无超时重试消耗 68s，引擎启动过晚
+ *  2. [PERF] DNS 预热: 引擎启动前预建 h5.if.qidian.com 连接，减少首次请求延迟
+ *  3. [PERF] TIMEOUT 300→420s，$.wait 280→400s，给引擎更充裕的执行时间
+ *     历史 bug: 280s + 300s timeout - 68s checkin = 引擎只有 212s → 激励 8/9
+ *  4. [BUGFIX] checkinLottery 也加 10s 超时，防止抽奖请求挂起阻塞引擎
  *
  * v6.2 更新 (紧急修复):
  *  1. [CRITICAL] 修复 v6.0 回归 bug: $response 守卫误杀 finishWatch 的 request 阶段
@@ -565,7 +573,8 @@ async function checkinLottery(headers) {
       url: "https://magev6.if.qidian.com/argus/api/v1/checkin/checkinlottery",
       method: "POST",
       headers: normalizeHeaders(headers),
-      body: ""
+      body: "",
+      timeout: 10000 // v6.3: 防止抽奖请求挂起阻塞引擎启动
     });
     if (res && res.statusCode === 200) {
       const obj = safeJsonParse(res.body);
@@ -588,7 +597,11 @@ async function handleSimpleCheckin() {
     return;
   }
 
-  const maxRetry = 3;
+  // v6.3 修复: 快速失败策略 — 最多 2 次尝试，单次 10s 超时，间隔 1.5s
+  // 历史问题: 3 次重试 × 无超时 → 凌晨 DNS 慢时消耗 68s，引擎启动过晚
+  // 目标: 签到阶段 ≤15s，确保引擎在 cron 启动后 20s 内开始执行
+  const maxRetry = 2;
+  const perRequestTimeout = 10000; // 10s 单次超时
   let lastError = "";
   for (let i = 0; i < maxRetry; i++) {
     try {
@@ -596,7 +609,8 @@ async function handleSimpleCheckin() {
         url: "https://magev6.if.qidian.com/argus/api/v2/checkin/checkin",
         method: "POST",
         headers: normalizeHeaders(headers),
-        body: ""
+        body: "",
+        timeout: perRequestTimeout
       });
 
       if (res && res.statusCode === 200) {
@@ -631,7 +645,7 @@ async function handleSimpleCheckin() {
       lastError = `HTTP ${res ? res.statusCode : "未知"}`;
       if (i < maxRetry - 1) {
         $.log(`[签到] ${lastError}, 重试 ${i + 1}/${maxRetry}...`);
-        await $.wait(3000);
+        await $.wait(1500);
       }
     } catch (e) {
       lastError = String(e);
@@ -644,11 +658,11 @@ async function handleSimpleCheckin() {
         }
       } else {
         $.log(`[签到] 网络异常, 重试 ${i + 1}/${maxRetry}...`);
-        await $.wait(3000);
+        await $.wait(1500);
       }
     }
   }
-  // 3 次重试全部非 200 且未进入 catch — 兜底通知
+  // 重试全部失败 — 兜底通知（不阻塞引擎启动）
   const errMsg = '重试' + maxRetry + '次后仍失败 (HTTP ' + lastError + ')';
   if (!CONFIG.SilentMode) {
     $.notify("起点助手", "❌ 签到失败", errMsg);
@@ -661,13 +675,29 @@ async function executeCronTasks() {
   $.log("⚙️ 开始执行起点简单签到...");
   await handleSimpleCheckin();
   $.log("⚙️ 开始执行起点高阶任务...");
+
+  // v6.3: DNS 预热 — 在引擎启动前预建连接，减少引擎首次请求的 DNS 延迟
+  // 历史问题: 凌晨 DNS 解析慢（DoH3 超时回退），引擎首次请求挂起 60s+
+  try {
+    await $.fetch({
+      url: "https://h5.if.qidian.com/argus/api/v2/video/adv/mainPage",
+      method: "GET",
+      headers: normalizeHeaders($.get("Qidian_Headers") || {}),
+      timeout: 8000
+    });
+    $.log("✨ DNS 预热完成");
+  } catch (e) {
+    $.log(`⚠️ DNS 预热失败(不影响引擎): ${e}`);
+  }
+
   // ⚠️ 修复: runQdreaderEngine 内部 eval 注入异步引擎，无法真正 await
   // 但需要给引擎足够的执行时间，否则宿主会在引擎异步 fetch 进行中回收上下文
   runQdreaderEngine();
-  // 等待引擎执行：高阶任务 = 激励×9 + 每日×5 次 finishWatch，每步随机等待 5-10s，
-  // 全量需 2-3 分钟。等 280s（略低于插件 TIMEOUT=300），避免引擎中途被截断
+  // v6.3: 等待引擎执行 — 激励×9 + 每日×5 次 finishWatch，每步随机等待 5-10s，
+  // 全量需 2-3 分钟。等 400s（略低于插件 TIMEOUT=420），避免引擎中途被截断
   // （历史 bug: 30s 等待 + 60s 超时 → 激励 7/9、每日任务 0/3）
-  await $.wait(280000);
+  // （v6.2 bug: 280s 等待 + 300s 超时 - 68s checkin = 引擎只有 212s → 激励 8/9）
+  await $.wait(400000);
 }
 
 // ==========================================

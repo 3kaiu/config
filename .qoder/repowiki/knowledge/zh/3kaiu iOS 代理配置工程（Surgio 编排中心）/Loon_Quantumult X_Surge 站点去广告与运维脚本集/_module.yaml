@@ -1,6 +1,6 @@
 schema_version: 1
 module_path: scripts
-title: 代理客户端站点去广告与通知脚本集
+title: Loon/Quantumult X/Surge 站点去广告与运维脚本集
 scope:
     - Scripts/
 source_files: []

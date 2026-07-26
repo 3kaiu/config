@@ -1,6 +1,6 @@
 schema_version: 1
 module_path: ""
-title: Surgio iOS 代理配置工程根
+title: 3kaiu iOS 代理配置工程（Surgio 编排中心）
 scope:
     - README.md
     - .gitignore

@@ -1,6 +1,9 @@
-# 3kaiu/config — Loon & Quantumult X 个人专属网络配置库 (v7.8)
+# 3kaiu/config — Loon & Quantumult X Dual-Platform Configuration (v8.7)
 
-这是一个专为个人网络环境（**单节点东京代理主路由**）深度优化的 iOS 网络工具（Loon 与 Quantumult X）自用配置库。针对您实际使用的 App 进行精准净化，并在双端实现模块化开关控制。
+这是一个专为个人网络环境（**单节点东京代理主路由**）深度优化的 iOS 网络工具（Loon 与 Quantumult X）**双端专用**配置库。针对您实际使用的 App 进行精准净化，并在双端实现模块化开关控制。
+
+**版本**: v8.7 (Latest Stable)  
+**架构**: Loon/QX Dual-Platform Only (Surge Removed per v8.7 Spec)  
 
 ---
 
@@ -16,13 +19,8 @@ https://ws.wenn.in/main/Profile/Loon.lcf
 https://ws.wenn.in/main/Profile/QX.conf
 ```
 
-### 🛡️ Surge (第三端冗余, v7.8 新增)
-```text
-https://ws.wenn.in/main/Profile/Surge.conf
-```
-> Surge 端为 v1 覆盖（路由规则+基础净化脚本，详见配置头部注释）。
-> 备用分发（ws.wenn.in 故障时，需先在仓库 Settings 启用 GitHub Pages）：
-> `https://3kaiu.github.io/config/Profile/Surge.conf`（Loon/QX 同理，见 `doc/infrastructure.md`）。
+### 🔒 平台支持说明
+本项目专注于 **Loon & Quantumult X** 双端。Surge 端自 v8.7 起已移除，配置归档仍可通过 git history 查阅。
 
 ---
 
@@ -288,11 +286,10 @@ v7.8 完成流媒体/社交平台/AI 服务/开发者平台四维路由补全，
 │   └── notify.plugin            # 定时通知: 节点健康+流量统计 (v7.8 新增)
 ├── provider/                   # Surgio provider 定义
 │   └── tokyo.js                   # 东京单节点 provider
-├── template/                   # Surgio 模板
+├── Template/                   # Surgio 模板
 │   ├── loon.tpl                  # Loon 主配置模板
 │   ├── quantumultx.tpl          # QX 主配置模板
-│   ├── surge.tpl                # Surge 主配置模板 (第三端冗余, v7.8)
-│   └── snippet/                  # 双端共享路由片段 (Surge 直接复用 .tpl)
+│   └── snippet/                  # 双端共享路由片段
 │       ├── streaming.tpl         # 流媒体路由 (Loon)
 │       ├── streaming.qx          # 流媒体路由 (QX)
 │       ├── social.tpl            # 社交平台路由 (Loon)
@@ -312,8 +309,7 @@ v7.8 完成流媒体/社交平台/AI 服务/开发者平台四维路由补全，
 │       └── TestFlight.conf      # TestFlight 区域解锁
 ├── Profile/
 │   ├── Loon.lcf                # Loon 客户端主配置文件
-│   ├── QX.conf                 # Quantumult X 客户端主配置文件
-│   └── Surge.conf              # Surge 客户端主配置文件 (v7.8 新增)
+│   └── QX.conf                 # Quantumult X 客户端主配置文件
 ├── Scripts/                    # 自维护脚本
 │   ├── ENGINE-MANIFEST.json    # Qidian 内嵌引擎治理清单 (哈希/来源/风险, CI 强校验)
 │   ├── Qidian.js               # 起点全能增强运行脚本
@@ -327,8 +323,6 @@ v7.8 完成流媒体/社交平台/AI 服务/开发者平台四维路由补全，
 │   ├── health-notify.js        # 节点健康检测通知 (v7.8 新增)
 │   └── traffic-notify.js       # 流量统计通知 (v7.8 新增)
 ├── doc/                        # 审计与评估文档
-│   ├── audit-v7.7.md           # v7.7 对抗审计报告
-│   ├── audit-v7.8.md           # v7.8 对抗审计报告
 │   ├── ecosystem-evaluation.md # Loon/QX 生态评估
 │   ├── surgio-migration.md     # Surgio 迁移记录
 │   └── infrastructure.md       # 分发基础设施台账 (CDN/域名/应急切换)

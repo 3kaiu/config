@@ -1,6 +1,6 @@
 schema_version: 1
 module_path: templates
-title: iOS 代理客户端模板（Loon / Surge / Quantumult X）
+title: iOS 代理客户端配置模板（Loon / Surge / Quantumult X）
 scope:
     - template/
 source_files: []

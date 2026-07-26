@@ -3,11 +3,11 @@ schema_version: 1
 locale: zh-CN
 branch: main
 nodes_managed: true
-exported_at: "2026-07-25T17:42:46Z"
+exported_at: "2026-07-26T03:44:54Z"
 modules:
     "":
-        dir_name: Surgio iOS 代理配置工程根
-        title: Surgio iOS 代理配置工程根
+        dir_name: 3kaiu iOS 代理配置工程（Surgio 编排中心）
+        title: 3kaiu iOS 代理配置工程（Surgio 编排中心）
         scope:
             - README.md
             - .gitignore
@@ -43,8 +43,8 @@ modules:
             - path: profiles
             - path: tests
     docs:
-        dir_name: 配置审计与分发基础设施文档
-        title: 配置审计与分发基础设施文档
+        dir_name: 配置审计与基础设施文档
+        title: 配置审计与基础设施文档
         scope:
             - doc/
         source_files: []
@@ -109,8 +109,8 @@ modules:
         depends_on: []
         related_to: []
     profiles:
-        dir_name: 多代理客户端配置文件集（Loon _ Quantumult X _ Surge）
-        title: 多代理客户端配置文件集（Loon / Quantumult X / Surge）
+        dir_name: iOS 代理客户端多端配置文件（Loon _ Quantumult X _ Surge）
+        title: iOS 代理客户端多端配置文件（Loon / Quantumult X / Surge）
         scope:
             - Profile/
         source_files: []
@@ -133,8 +133,8 @@ modules:
         related_to:
             - path: profiles
     scripts:
-        dir_name: 代理客户端站点去广告与通知脚本集
-        title: 代理客户端站点去广告与通知脚本集
+        dir_name: Loon_Quantumult X_Surge 站点去广告与运维脚本集
+        title: Loon/Quantumult X/Surge 站点去广告与运维脚本集
         scope:
             - Scripts/
         source_files: []
@@ -143,8 +143,8 @@ modules:
         related_to:
             - path: tests
     templates:
-        dir_name: iOS 代理客户端模板（Loon _ Surge _ Quantumult X）
-        title: iOS 代理客户端模板（Loon / Surge / Quantumult X）
+        dir_name: iOS 代理客户端配置模板（Loon _ Surge _ Quantumult X）
+        title: iOS 代理客户端配置模板（Loon / Surge / Quantumult X）
         scope:
             - template/
         source_files: []

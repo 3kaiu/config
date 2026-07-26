@@ -1,6 +1,6 @@
 schema_version: 1
 module_path: profiles
-title: 多代理客户端配置文件集（Loon / Quantumult X / Surge）
+title: iOS 代理客户端多端配置文件（Loon / Quantumult X / Surge）
 scope:
     - Profile/
 source_files: []
