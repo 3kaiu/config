@@ -513,24 +513,18 @@ https://ws.wenn.in/main/Plugin/sub-store.plugin, enabled=true, tag=Sub-Store 订
 https://ws.wenn.in/main/Plugin/quicksearch.plugin, enabled=true, tag=快捷搜索
 https://ws.wenn.in/main/Plugin/notify.plugin, enabled=true, tag=🔔 定时通知
 https://ws.wenn.in/main/Plugin/wechat.plugin, enabled=true, tag=微信&小程序&公众号去广告
-https://ws.wenn.in/main/Plugin/bilibili-pro.plugin, enabled=true, tag=B 站去广告 Pro
-https://ws.wenn.in/main/Plugin/bilicomics.plugin, enabled=true, tag=B 站漫画去广告
-file:///Users/seeu/self/config/Plugin/netease-pro.plugin, enabled=true, tag=网易云音乐 Pro
-https://ws.wenn.in/main/Plugin/alipay-pro.plugin, enabled=true, tag=支付宝去广告
-file:///Users/seeu/self/config/Plugin/alipay-miniprogram-pro.plugin, enabled=true, tag=支付宝小程序净化工具箱 Pro
+https://ws.wenn.in/main/Plugin/bilibili.plugin, enabled=true, tag=B站去广告
+https://ws.wenn.in/main/Plugin/bilicomics.plugin, enabled=true, tag=B站漫画去广告
+https://ws.wenn.in/main/Plugin/netease.plugin, enabled=true, tag=网易云音乐净化
 https://ws.wenn.in/main/Plugin/goofish.plugin, enabled=true, tag=闲鱼去广告
-file:///Users/seeu/self/config/Plugin/alipay-pro.plugin, enabled=true, tag=支付宝 Pro
-file:///Users/seeu/self/config/Plugin/taopiaopiao-pro.plugin, enabled=true, tag=淘票票 Pro
-file:///Users/seeu/self/config/Plugin/startup-adblock-pro.plugin, enabled=true, tag=墨鱼去开屏 2.0 Pro
+https://ws.wenn.in/main/Plugin/qishui.plugin, enabled=true, tag=汽水音乐净化
+https://ws.wenn.in/main/Plugin/taopiaopiao.plugin, enabled=true, tag=淘票票净化
 https://ws.wenn.in/main/Plugin/amap.plugin, enabled=true, tag=高德地图去广告
-https://ws.wenn.in/main/Plugin/jd-pro.plugin, enabled=true, tag=京东去广告 Pro
-https://ws.wenn.in/main/Plugin/qqmusic.plugin, enabled=true, tag=QQ 音乐去广告
-https://ws.wenn.in/main/Plugin/reddit.plugin, enabled=true, tag=Reddit 去广告
-file:///Users/seeu/self/config/Plugin/tieba-pro.plugin, enabled=true, tag=贴吧 Pro
-file:///Users/seeu/self/config/Plugin/zhihu-pro.plugin, enabled=true, tag=知乎 Pro
-https://ws.wenn.in/main/Plugin/bdpan-pro.plugin, enabled=true, tag=百度网盘 Pro
-file:///Users/seeu/self/config/Plugin/weibo-pro.plugin, enabled=true, tag=微博去广告 Pro
-file:///Users/seeu/self/config/Plugin/xiaohongshu-pro.plugin, enabled=true, tag=小红书去广告 Pro
+https://ws.wenn.in/main/Plugin/jd.plugin, enabled=true, tag=京东去广告
+https://ws.wenn.in/main/Plugin/qqmusic.plugin, enabled=true, tag=QQ音乐去广告
+https://ws.wenn.in/main/Plugin/reddit.plugin, enabled=true, tag=Reddit去广告
+https://ws.wenn.in/main/Plugin/tieba.plugin, enabled=true, tag=贴吧去广告
+https://ws.wenn.in/main/Plugin/zhihu.plugin, enabled=true, tag=知乎去广告
 https://ws.wenn.in/main/Plugin/qidian.plugin, enabled=true, tag=起点全能助手 Pro
 https://ws.wenn.in/main/Plugin/bank.plugin, enabled=true, tag=银行及云闪付去广告
 https://ws.wenn.in/main/Plugin/life.plugin, enabled=true, tag=生活出行去广告
