@@ -59,6 +59,11 @@ const UPSTREAM_SOURCES = [
 async function main() {
   console.log('🤖 Starting upstream plugin monitor...\n');
   
+  const outputDir = './output';
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
   const results = [];
   let hasUpdates = false;
   
