@@ -165,15 +165,10 @@ else if (url.includes("search/preset_words")) {
 // ── 9. 通用净化 (其他所有请求) ────────────
 else {
   console.log('知乎 - 通用净化');
-  try {
-    const obj = JSON.parse($response.body);
-    if (obj && obj.data) {
-      obj.data = {};
-    }
-    console.log('✅ 通用净化完成');
-  } catch (e) {
-    console.error('解析失败:', e);
+  if (body && body.data) {
+    body.data = {};
   }
+  console.log('✅ 通用净化完成');
 }
 
 $done({ body: JSON.stringify(body) });
