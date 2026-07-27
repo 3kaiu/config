@@ -87,8 +87,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "🔄 上游有更新，触发 Mirror External Scripts..."
-          gh api repos/3kaiu/config/dispatches -X POST \
-            -f event_type=mirror -f client_payload[ref]=main
+          echo '{"event_type":"mirror","client_payload":{"ref":"main"}}' | \
+            gh api repos/3kaiu/config/dispatches -X POST --input -
 
   validate-scripts:
     runs-on: ubuntu-latest
