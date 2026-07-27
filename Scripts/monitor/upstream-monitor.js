@@ -115,12 +115,14 @@ async function main() {
   console.log('========================================\n');
   
   // 📝 设置输出变量供 GitHub Actions 使用
+  const outPath = process.env.GITHUB_OUTPUT || '/dev/null';
   if (hasUpdates) {
+    if (!fs.existsSync('output')) fs.mkdirSync('output', { recursive: true });
     fs.writeFileSync('output/updates.json', JSON.stringify(results, null, 2));
     fs.writeFileSync('output/update-description.md', generateUpdateDescription(results));
-    process.stdout.write('::set-output name=has_update::true\n');
+    fs.appendFileSync(outPath, 'has_update=true\n');
   } else {
-    process.stdout.write('::set-output name=has_update::false\n');
+    fs.appendFileSync(outPath, 'has_update=false\n');
   }
 }
 

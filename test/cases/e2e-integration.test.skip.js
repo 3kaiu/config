@@ -284,7 +284,7 @@ describe('Plugin E2E Integration Tests', () => {
       assert.equal(parsed.audioSettings.quality, 'lossless', 'Should upgrade to lossless quality');
     });
     
-    it('should unlock regional content for Apple News', async (assert) {
+    it('should unlock regional content for Apple News', async (assert) => {
       const result = await runScript(sandbox, `
         const obj = JSON.parse($response.body);
         
@@ -384,7 +384,7 @@ describe('Plugin E2E Integration Tests', () => {
           console.error('[Test] Parse error:', e);
           $done();
         }
-      }, { response: { body: null } });
+      `, { response: { body: null } });
       
       assert.ok(result.doneCalls.length >= 1, 'Should handle empty body');
     });
@@ -399,7 +399,7 @@ describe('Plugin E2E Integration Tests', () => {
           console.error('[Test] JSON error:', error.message);
           $done();
         }
-      }, { response: { body: '{ invalid json }' } });
+      `, { response: { body: '{ invalid json }' } });
       
       assert.ok(result.doneCalls.length >= 1, 'Should handle invalid JSON');
     });

@@ -83,16 +83,27 @@ function createSandbox(opts = {}) {
 }
 
 /**
- * 在沙箱中执行脚本文件, 返回 state。
+ * 在沙箱中执行脚本, 返回 state。
+ * 两种调用方式:
+ *   runScript(path, sandbox)        — 从文件读取脚本
+ *   runScript(sandbox, src, opts)   — 直接传入脚本源码 (opts 可选, 兼容旧用例)
  * 脚本顶层允许 return (守卫语句), 故包一层 async function。
  */
-async function runScript(scriptPath, sandbox) {
-  const abs = path.isAbsolute(scriptPath) ? scriptPath : path.join(__dirname, "..", scriptPath);
-  const src = fs.readFileSync(abs, "utf8");
+async function runScript(scriptPathOrSandbox, sandboxOrSrc, opts) {
+  let sandbox, src, filename;
+  if (typeof scriptPathOrSandbox === "string") {
+    const abs = path.isAbsolute(scriptPathOrSandbox) ? scriptPathOrSandbox : path.join(__dirname, "..", scriptPathOrSandbox);
+    src = fs.readFileSync(abs, "utf8");
+    sandbox = sandboxOrSrc;
+    filename = path.basename(abs);
+  } else {
+    sandbox = scriptPathOrSandbox;
+    src = sandboxOrSrc;
+    filename = "inline.js";
+  }
   const wrapped = `(async function __proxyScript__() {\n${src}\n})()`;
-  const p = vm.runInContext(wrapped, sandbox.context, { filename: path.basename(abs) });
+  const p = vm.runInContext(wrapped, sandbox.context, { filename });
   await Promise.resolve(p).catch(() => {});
-  // 冲刷微任务与 setImmediate 回调 (fire-and-forget 的 http 回调等)
   await new Promise((r) => setTimeout(r, 30));
   return sandbox.state;
 }

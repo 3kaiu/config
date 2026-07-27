@@ -30,23 +30,23 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
-      
+       
       - name: Install dependencies
         run: npm install axios js-yaml chalk
-      
+       
       - name: Run upstream monitoring
         run: node scripts/monitor/upstream-monitor.js
         env:
           MONITOR_MODE: ${{ github.event_name == 'schedule' && 'scheduled' || 'manual' }}
           PLUGIN_NAME: ${{ github.event.inputs.plugin_name || '' }}
           UPDATE_TYPE: ${{ github.event.inputs.update_type || 'all' }}
-      
+       
       - name: Check for updates
         id: updates
         run: node scripts/monitor/check-updates.js
-      
+       
       - name: Create update notification
         if: steps.updates.outputs.has_update == 'true'
         run: |
@@ -56,7 +56,7 @@ jobs:
           cat output/updates.json >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-      
+       
       - name: Create Issue on Update
         if: steps.updates.outputs.has_update == 'true'
         uses: peter-evans/create-issue-from-file@v5
@@ -70,11 +70,11 @@ jobs:
     needs: monitor-upstream
     steps:
       - uses: actions/checkout@v4
-      
+       
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       
       - name: Validate script syntax
         run: |
@@ -91,7 +91,7 @@ jobs:
     if: always()
     steps:
       - name: Send Telegram notification
-        uses: appleboy/telegram-action@v2.1.0
+        uses: appleboy/telegram-action@v1.0.1
         with:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
