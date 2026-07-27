@@ -1,5 +1,9 @@
 name: Plugin Monitor & Auto-Update
 
+permissions:
+  contents: read
+  issues: write
+
 on:
   schedule:
     # 每日 UTC+8 凌晨 2:00 执行监控
@@ -62,9 +66,10 @@ jobs:
         if: steps.updates.outputs.has_update == 'true'
         uses: peter-evans/create-issue-from-file@v5
         with:
-          title: '⚠️ 上游脚本更新通知 - [Plugin Name]'
+          title: '⚠️ 上游脚本更新通知'
           content-filepath: ./output/update-description.md
           labels: upstream-update, auto-generated
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   validate-scripts:
     runs-on: ubuntu-latest
