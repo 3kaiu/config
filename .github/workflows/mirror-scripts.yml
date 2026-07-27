@@ -209,6 +209,11 @@ jobs:
           if git diff --cached --quiet; then
             echo "无变更, 跳过 PR"
             echo "pr_action=none" >> $GITHUB_ENV
+            # 关掉等待中的 upstream-update Issue（文件已是最新）
+            STALE=$(gh issue list --label upstream-update --state open --json number --jq '.[0].number' 2>/dev/null)
+            if [ -n "$STALE" ]; then
+              gh issue close "$STALE" --comment "📦 镜像文件已是最新，无需更新，关闭此 Issue" 2>/dev/null || true
+            fi
             exit 0
           fi
           BRANCH="mirror/$(date +%Y-%m-%d)"
