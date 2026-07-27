@@ -42,6 +42,7 @@ jobs:
           MONITOR_MODE: ${{ github.event_name == 'schedule' && 'scheduled' || 'manual' }}
           PLUGIN_NAME: ${{ github.event.inputs.plugin_name || '' }}
           UPDATE_TYPE: ${{ github.event.inputs.update_type || 'all' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
        
       - name: Check for updates
         id: updates

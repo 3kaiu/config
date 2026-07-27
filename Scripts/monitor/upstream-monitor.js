@@ -131,12 +131,13 @@ async function main() {
  */
 async function checkUpdate(source) {
   try {
-    const response = await axios.get(source.url, {
-      timeout: config.timeout,
-      headers: {
-        'User-Agent': 'Plugin-Monitor/1.0 (3kaiu/config)'
-      }
-    });
+    const headers = {
+      'User-Agent': 'Plugin-Monitor/1.0 (3kaiu/config)'
+    };
+    if (process.env.GITHUB_TOKEN) {
+      headers['Authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`;
+    }
+    const response = await axios.get(source.url, { timeout: config.timeout, headers });
     
     if (!response.data || !Array.isArray(response.data)) {
       return { has_update: false, status: 'invalid_response' };
