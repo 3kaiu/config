@@ -1,4 +1,4 @@
-name: Mirror External Scripts
+name: Mirror External Scripts v2
 
 on:
   schedule:
