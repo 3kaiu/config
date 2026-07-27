@@ -1,9 +1,10 @@
-name: Mirror External Scripts v2
+name: Mirror External Scripts
 
 on:
   schedule:
     - cron: '0 3 * * *'
   workflow_dispatch:
+
 
 permissions:
   contents: write
