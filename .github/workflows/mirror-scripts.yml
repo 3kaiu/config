@@ -46,7 +46,7 @@ jobs:
             local name="$3"
             local path="Mirror/$dest"
             mkdir -p "$(dirname "$path")"
-            local tmpf; tmpf=$(mktemp)
+            local tmpf; tmpf=$(mktemp /tmp/mirror.XXXXXXXX.js)
             if ! curl -fsSL -m 90 --retry 3 -A "Loon/3.3.9" "$url" -o "$tmpf"; then
               echo "❌ $name (FETCH FAILED)"
               FAIL=$((FAIL + 1))
