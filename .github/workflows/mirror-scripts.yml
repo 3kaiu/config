@@ -222,6 +222,12 @@ jobs:
               --body "$(printf '## 镜像同步 %s\n\n变更文件: %s 个 (不含 MANIFEST)\n\n```%s```\n\n### 审核清单\n- [ ] MANIFEST.json diff: 每个变更文件的 sha256 与 source_url 已核对\n- [ ] 上游变更符合预期 (非投毒/非破坏性更新)\n- [ ] CI 全绿\n\n> 门禁: *.js 过 node --check 语法 / 体积≥200B / 非 HTML 错误页; 未过门禁的文件保留旧版' "$(date +%Y-%m-%d)" "$CHANGED" "$(git diff --stat main...HEAD -- Mirror/ 2>/dev/null)")" 2>/dev/null || echo "pr creation skipped"
             echo "pr_action=created" >> $GITHUB_ENV
           fi
+          # 启用 auto-merge: CI 门禁全过则自动 squash 合并
+          PR_NUM=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' 2>/dev/null)
+          if [ -n "$PR_NUM" ]; then
+            gh pr merge "$PR_NUM" --auto --squash 2>/dev/null || true
+            echo "🔁 auto-merge 已启用 on #$PR_NUM"
+          fi
 
       - name: Report summary
         if: always()
