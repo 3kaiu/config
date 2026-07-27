@@ -37,7 +37,7 @@ jobs:
         run: npm install axios js-yaml chalk
        
       - name: Run upstream monitoring
-        run: node scripts/monitor/upstream-monitor.js
+        run: node Scripts/monitor/upstream-monitor.js
         env:
           MONITOR_MODE: ${{ github.event_name == 'schedule' && 'scheduled' || 'manual' }}
           PLUGIN_NAME: ${{ github.event.inputs.plugin_name || '' }}
@@ -46,7 +46,7 @@ jobs:
        
       - name: Check for updates
         id: updates
-        run: node scripts/monitor/check-updates.js
+        run: node Scripts/monitor/check-updates.js
        
       - name: Create update notification
         if: steps.updates.outputs.has_update == 'true'
