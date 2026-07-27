@@ -71,6 +71,14 @@ jobs:
           labels: upstream-update, auto-generated
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Trigger mirror workflow
+        if: steps.updates.outputs.has_update == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔄 上游有更新，触发 Mirror External Scripts..."
+          gh workflow run mirror-scripts.yml --ref main
+
   validate-scripts:
     runs-on: ubuntu-latest
     needs: monitor-upstream
