@@ -62,15 +62,17 @@ jobs:
         if: steps.primary.outputs.status != 'healthy' && (steps.secondary.outputs.status != 'healthy' || steps.secondary.outputs.status == '')
         run: |
           echo "🚨 ALERT: Both providers are unhealthy!"
-          echo "Triggering failover notification..."
-          curl -X POST ${{ secrets.ALERT_WEBHOOK }} \
-            -H "Content-Type: application/json" \
-            -d "{\"text\": \"⚠️ Surgeo providers health check failed! Current status: Primary=${{ steps.primary.outputs.status }}, Secondary=${{ steps.secondary.outputs.status }}\"}"
-        
-        env:
-          ALERT_WEBHOOK: ${{ secrets.ALERT_WEBHOOK }}
-      
+          if [ -n "$ALERT_WEBHOOK" ]; then
+            echo "Triggering failover notification..."
+            curl -X POST "$ALERT_WEBHOOK" \
+              -H "Content-Type: application/json" \
+              -d "{\"text\": \"⚠️ Surgeo providers health check failed! Current status: Primary=${{ steps.primary.outputs.status }}, Secondary=${{ steps.secondary.outputs.status }}\"}" || true
+          else
+            echo "⚠️ ALERT_WEBHOOK not configured, skipping notification"
+          fi
+       
       - name: Generate Health Report
+        if: always()
         run: |
           mkdir -p output
           cat > output/health-report.md << EOF
