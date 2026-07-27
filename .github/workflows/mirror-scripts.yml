@@ -3,7 +3,7 @@ name: Mirror External Scripts
 on:
   schedule:
     - cron: '0 3 * * *' # Everyday at 03:00 UTC (after sync-kelee @02:00 + health @02:17)
-  workflow_dispatch:
+  workflow_dispatch: {}
 
 permissions:
   contents: write
