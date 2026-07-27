@@ -3,6 +3,7 @@ name: Plugin Monitor & Auto-Update
 permissions:
   contents: read
   issues: write
+  actions: write
 
 on:
   schedule:
