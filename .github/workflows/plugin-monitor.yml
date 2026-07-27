@@ -63,6 +63,15 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
        
+      - name: Close stale update issues
+        if: steps.updates.outputs.has_update == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for num in $(gh issue list --label upstream-update --state open --json number --jq '.[].number' 2>/dev/null); do
+            gh issue close "$num" --comment "🔄 已由新通知取代，关闭此 Issue" 2>/dev/null || true
+          done
+
       - name: Create Issue on Update
         if: steps.updates.outputs.has_update == 'true'
         uses: peter-evans/create-issue-from-file@v5
