@@ -9,7 +9,6 @@
 
 [Argument]
 ENABLE_SHOPPING=switch,"true","false",tag=总开关，desc=开启后执行所有海外购物应用净化
-SHOPPING_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
 TIMEOUT=input,90,tag=超时时间 (秒), desc=脚本最大执行时长
 AMAZON_ENABLE=switch,"true","false",tag Amazon 净化，desc=推荐广告净化 + 优惠券优化
 EBAY_ENABLE=switch,"true","false",tag eBay 净化，desc=搜索结果净化 + 广告过滤
@@ -123,7 +122,6 @@ http-request ^https?::\":\"\"\"google-analytics\.com reject-dict enabled={ENABLE
 # ═══════════════════════════════════════===
 # ⏰ Cron 定时任务（可选功能）
 # ═══════════════════════════════════════===
-cron {SHOPPING_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/ShoppingServices.js, timeout={TIMEOUT}, tag=海外购物服务定时优化，argument=[{DEBUG_ENABLE}], enabled={ENABLE_SHOPPING}
 
 [Rewrite]
 # ── 白名单配置 ─────────────────────────

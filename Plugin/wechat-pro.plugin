@@ -7,7 +7,6 @@
 
 [Argument]
 ENABLE_WECHAT=switch,"true","false",tag=总开关
-WECHAT_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式
 TIMEOUT=input,120,tag=超时时间 (秒)
 WECHAT_FRIEND_ENABLE=switch,"true","false",tag=朋友圈净化
 WECHAT_MP_ENABLE=switch,"true","false",tag=公众号净化
@@ -52,7 +51,6 @@ http-response ^https?:\/\/api\.blibee\.com\/cvsnotify-api\/cvs\/notify\/app\/ban
 http-response ^https?:\/\/ucmp\.sf-express\.com\/proxy\/operation-platform\/info-flow-adver\/query$ url reject-200, enable={ENABLE_WECHAT}&{WECHAT_MP_ENABLE}
 
 # 定时任务
-cron {WECHAT_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/WeChat.js, timeout={TIMEOUT}, tag=微信定时任务, enable={ENABLE_WECHAT}
 
 [Rule]
 DOMAIN-SUFFIX, weixin.qq.com, DIRECT

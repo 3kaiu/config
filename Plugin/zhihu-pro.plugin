@@ -9,7 +9,6 @@
 
 [Argument]
 ENABLE_ZHIHU=switch,"true","false",tag=总开关，desc=开启后执行所有知乎功能
-ZHIHU_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
 TIMEOUT=input,90,tag=超时时间 (秒), desc=脚本最大执行时长
 ZHIHU_HOME_ENABLE=switch,"true","false",tag=首页净化，desc=去除首页推荐/轮播/弹窗
 ZHIHU_SEARCH_ENABLE=switch,"true","false",tag=搜索净化，desc=去除搜索推广/热词

@@ -9,7 +9,6 @@
 
 [Argument]
 ENABLE_TAOPIAOPIAO=switch,"true","false",tag=总开关，desc=开启后执行所有淘票票功能
-TAOPIAOPIAO_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
 TIMEOUT=input,60,tag=超时时间 (秒), desc=脚本最大执行时长
 TAOPIAOPIAO_SCRINSCEEN_ENABLE=switch,"true","false",tag=开屏广告，desc=拦截开屏广告
 TAOPIAOPIAO_HOME_ENABLE=switch,"true","false",tag=首页净化，desc=去除首页信息流推广
@@ -28,7 +27,6 @@ http-response ^http:\/\/amdc\.m\.taobao\.com script-path=https://ws.wenn.in/main
 # ═══════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
 # ═══════════════════════════════════════════
-cron {TAOPIAOPIAO_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/Taopiaopiao.js, timeout={TIMEOUT}, tag=淘票票定时任务，argument=[{TAOPIAOPIAO_DEBUG_ENABLE}], enable={ENABLE_TAOPIAOPIAO}
 
 [Rewrite]
 # ── 开屏广告模块 ─────────────────────

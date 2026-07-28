@@ -15,10 +15,10 @@ interface $httpClientResponse {
 }
 
 declare const $httpClient: {
-  get(options: $httpClientOptions, cb: (err: Error | null, resp: $httpClientResponse, data: string) => void): void
-  post(options: $httpClientOptions, cb: (err: Error | null, resp: $httpClientResponse, data: string) => void): void
-  put(options: $httpClientOptions, cb: (err: Error | null, resp: $httpClientResponse, data: string) => void): void
-  delete(options: $httpClientOptions, cb: (err: Error | null, resp: $httpClientResponse, data: string) => void): void
+  get(options: $httpClientOptions, cb: (err: Error | null, resp: $httpClientResponse | null, data: string) => void): void
+  post(options: $httpClientOptions, cb: (err: Error | null, resp: $httpClientResponse | null, data: string) => void): void
+  put(options: $httpClientOptions, cb: (err: Error | null, resp: $httpClientResponse | null, data: string) => void): void
+  delete(options: $httpClientOptions, cb: (err: Error | null, resp: $httpClientResponse | null, data: string) => void): void
 }
 
 interface $notification {
@@ -40,7 +40,17 @@ declare const $persistentStore: {
 declare const $environment: {
   platform: string
   version: string
+  surgeVersion?: string
+  buildVersion?: string
 }
+
+// QX 特有
+declare const $task: unknown
+declare const $prefs: {
+  valueForKey(key: string): string | undefined
+  setValueForKey(value: string, key: string): void
+}
+declare function $notify(title: string, subtitle: string, body: string): void
 
 interface Console {
   log(...args: unknown[]): void

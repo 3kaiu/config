@@ -51,7 +51,6 @@ http-response ^https?:\/\/open\.alipay\.com openapi-clean script-path=https://ws
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选）
 # ═══════════════════════════════════════===
-cron {MINICRON_EXP} script-path=https://ws.wenn.in/main/Scripts/AlipayMiniClean.js, timeout={TIMEOUT}, tag=支付宝小程序定时清理，argument=[{DEBUG_ENABLE}], enabled={ENABLE_ALIPAY_MINI}
 
 [Rewrite]
 # ── DNS 级拦截白名单 ────────────────────

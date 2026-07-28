@@ -9,7 +9,6 @@
 
 [Argument]
 ENABLE_APPLE=switch,"true","false",tag=总开关，desc=开启后执行所有 Apple 服务增强
-APPLE_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
 TIMEOUT=input,90,tag=超时时间 (秒), desc=脚本最大执行时长
 APPSTORE_ENABLE=switch,"true","false",tag App Store 增强，desc=解锁区域限制 + 去广告
 MUSIC_ENABLE=switch,"true","false",tag Apple Music 增强，desc=无损音质 + 歌词翻译
@@ -128,7 +127,6 @@ http-request ^https?:::\/\/appleid\.apple\.com reject-dict enabled={ENABLE_APPLE
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
 # ═══════════════════════════════════════===
-cron {APPLE_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/AppleServices.js, timeout={TIMEOUT}, tag=Apple 服务定时优化，argument=[{DEBUG_ENABLE}], enabled={ENABLE_APPLE}
 
 [Rewrite]
 # ── 白名单配置 ─────────────────────────

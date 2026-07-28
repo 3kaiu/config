@@ -9,7 +9,6 @@
 
 [Argument]
 ENABLE_PDD=switch,"true","false",tag=总开关，desc=开启后执行所有拼多多功能
-PDD_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
 TIMEOUT=input,90,tag=超时时间 (秒), desc=脚本最大执行时长
 PDD_SPLASH_ENABLE=switch,"true","false",tag=开屏广告，desc=去除 APP 开屏广告
 PDD_HOME_ENABLE=switch,"true","false",tag=首页净化，desc=去除首页推荐广告
@@ -55,7 +54,6 @@ http-response ^https?::\/\/log\.pinduoduo\.com\/event reject-dict enable={ENABLE
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
 # ════════════════════════════════════════
-cron {PDD_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/Pinduoduo.js, timeout={TIMEOUT}, tag=拼多多定时任务，argument=[{PDD_DEBUG_ENABLE}], enable={ENABLE_PDD}
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────

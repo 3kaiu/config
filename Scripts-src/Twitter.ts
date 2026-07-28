@@ -1,13 +1,13 @@
 if (typeof $response === "undefined") { $done(); return; }
 try {
-  let body = JSON.parse($response.body);
-  function clean(obj) {
+  let body: Record<string, unknown> = JSON.parse($response.body);
+  function clean(obj: unknown): void {
     if (!obj || typeof obj !== "object") return;
-    for (const key of Object.keys(obj)) {
+    for (const key of Object.keys(obj as Record<string, unknown>)) {
       if (/^ad|sponsor|promot|recommend|trend/i.test(key)) {
-        delete obj[key];
+        delete (obj as Record<string, unknown>)[key];
       } else {
-        clean(obj[key]);
+        clean((obj as Record<string, unknown>)[key]);
       }
     }
   }

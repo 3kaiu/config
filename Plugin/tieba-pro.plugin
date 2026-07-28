@@ -9,7 +9,6 @@
 
 [Argument]
 ENABLE_TIEBA=switch,"true","false",tag=总开关，desc=开启后执行所有贴吧功能
-TIEBA_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
 TIMEOUT=input,60,tag=超时时间 (秒), desc=脚本最大执行时长
 TIEBA_HOME_ENABLE=switch,"true","false",tag=首页净化，desc=去除首页推荐/广告
 TIEBA_POST_ENABLE=switch,"true","false",tag=帖子净化，desc=去除帖子内广告/推广

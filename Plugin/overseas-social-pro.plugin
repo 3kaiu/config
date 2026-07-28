@@ -9,7 +9,6 @@
 
 [Argument]
 ENABLE_OVERSEAS=switch,"true","false",tag=总开关，desc=开启后执行所有海外社交平台净化
-OVERSEAS_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
 TIMEOUT=input,90,tag=超时时间 (秒), desc=脚本最大执行时长
 INSTAGRAM_ENABLE=switch,"true","false",tag Instagram 净化，desc=去除推荐/广告/追踪
 FACEBOOK_ENABLE=switch,"true","false",tag Facebook 净化，desc=去除 News Feed 广告/赞助内容
@@ -120,7 +119,6 @@ http-response ^https?::\":\"\"\"consent\.oauthflow\.io\"\"\" reject-dict enabled
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
 # ═══════════════════════════════════════===
-cron {OVERSEAS_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/OverseasSocialClean.js, timeout={TIMEOUT}, tag=海外社交定时清理，argument=[{DEBUG_ENABLE}], enabled={ENABLE_OVERSEAS}
 
 [Rewrite]
 # ── 白名单配置 ─────────────────────────

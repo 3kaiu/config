@@ -9,7 +9,6 @@
 
 [Argument]
 ENABLE_WEIBO=switch,"true","false",tag=总开关，desc=开启后执行所有微博功能
-WEIBO_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
 TIMEOUT=input,90,tag=超时时间 (秒), desc=脚本最大执行时长
 WEIBO_SPLASH_ENABLE=switch,"true","false",tag=开屏广告，desc=去除 APP 开屏广告
 WEIBO_FEED_ENABLE=switch,"true","false",tag=信息流净化，desc=去除首页/关注页推荐广告
@@ -55,7 +54,6 @@ http-response ^https?:\/\/api\.weibo\.cn\/2\/client\/ads reject-dict enable={ENA
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
 # ════════════════════════════════════════
-cron {WEIBO_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/Weibo.js, timeout={TIMEOUT}, tag=微博定时任务，argument=[{WEIBO_DEBUG_ENABLE}], enable={ENABLE_WEIBO}
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────

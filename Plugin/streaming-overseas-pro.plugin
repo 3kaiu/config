@@ -9,7 +9,6 @@
 
 [Argument]
 ENABLE_STREAMING=switch,"true","false",tag=总开关，desc=开启后执行所有海外流媒体增强
-STREAMING_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
 TIMEOUT=input,90,tag=超时时间 (秒), desc=脚本最大执行时长
 NETFLIX_ENABLE=switch,"true","false",tag Netflix 增强，desc=画质解锁 + 广告净化
 DISNEY_ENABLE=switch,"true","false",tag Disney+ 增强，desc=区域解锁 + 内容增强
@@ -132,7 +131,6 @@ http-request ^https?:::\/\/disney\.com\/idfa reject-dict enabled={ENABLE_STREAMI
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
 # ═══════════════════════════════════════===
-cron {STREAMING_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/StreamingServices.js, timeout={TIMEOUT}, tag=流媒体服务定时优化，argument=[{DEBUG_ENABLE}], enabled={ENABLE_STREAMING}
 
 [Rewrite]
 # ── 白名单配置 ─────────────────────────

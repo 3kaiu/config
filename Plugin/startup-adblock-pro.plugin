@@ -15,7 +15,6 @@ STARTUP_DEBUG=switch,"false","true",tag=调试模式，desc=输出详细日志
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选）
 # ════════════════════════════════════════
-cron "0 0 * * *" script-path=https://ws.wenn.in/main/Scripts/Cleanup.js, tag=App 清理提醒，enable={ENABLE_STARTUP}
 
 [Rewrite]
 # ── 🎬 开屏广告通杀层 (ddgksf2013 风格) ────────────────────

@@ -57,7 +57,6 @@ http-response ^https?::\/\/log\.unionpay\.com\/event reject-dict enable={ENABLE_
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
 # ════════════════════════════════════════
-cron {SUNCRON_EXP} script-path=https://ws.wenn.in/main/Scripts/SunShuFu.js, timeout={TIMEOUT}, tag=云闪付定时任务，argument=[{DEBUG_ENABLE}], enable={ENABLE_SUNSHUFU}
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────

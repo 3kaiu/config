@@ -9,7 +9,6 @@
 
 [Argument]
 ENABLE_NEMUSIC=switch,"true","false",tag=总开关，desc=开启后执行所有网易云功能
-NEMUSIC_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
 TIMEOUT=input,120,tag=超时时间 (秒), desc=脚本最大执行时长
 NEMUSIC_SIGNIN_ENABLE=switch,"true","false",tag=每日签到，desc=每日签到 + 福利
 NEMUSIC_CHECKIN_ENABLE=switch,"true","false",tag=周打卡，desc=连续听歌打卡

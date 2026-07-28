@@ -9,7 +9,6 @@
 
 [Argument]
 ENABLE_BROWSE=switch,"true","false",tag=总开关，desc=开启后执行所有浏览器净化功能
-BROWSE_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
 TIMEOUT=input,90,tag=超时时间 (秒), desc=脚本最大执行时长
 WEBVIEW_ENABLE=switch,"true","false",tag=WebView 净化，desc=清除 WebView 内嵌网页广告
 SAFARI_ENABLE=switch,"true","false",tag=Safari 净化，desc=清除 Safari 浏览器广告
@@ -101,7 +100,6 @@ http-request ^https?:\/\/ipinfo\.io reject-dict enable={ENABLE_BROWSE}
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
 # ════════════════════════════════════════
-cron {BROWSE_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/BrowserClean.js, timeout={TIMEOUT}, tag=Safari/WebView 定时清理，argument=[{DEBUG_ENABLE}], enable={ENABLE_BROWSE}
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────
