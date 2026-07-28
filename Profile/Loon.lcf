@@ -515,16 +515,16 @@ https://ws.wenn.in/main/Plugin/notify.plugin, enabled=true, tag=🔔 定时通�
 https://ws.wenn.in/main/Plugin/wechat.plugin, enabled=true, tag=微信&小程序&公众号去广告
 https://ws.wenn.in/main/Plugin/bilibili.plugin, enabled=true, tag=B站去广告
 https://ws.wenn.in/main/Plugin/bilicomics.plugin, enabled=true, tag=B站漫画去广告
-https://ws.wenn.in/main/Plugin/netease.plugin, enabled=true, tag=网易云音乐净化
+https://ws.wenn.in/main/Plugin/netease-pro.plugin, enabled=true, tag=网易云音乐净化 Pro
 https://ws.wenn.in/main/Plugin/goofish.plugin, enabled=true, tag=闲鱼去广告
 https://ws.wenn.in/main/Plugin/qishui.plugin, enabled=true, tag=汽水音乐净化
 https://ws.wenn.in/main/Plugin/taopiaopiao.plugin, enabled=true, tag=淘票票净化
 https://ws.wenn.in/main/Plugin/amap.plugin, enabled=true, tag=高德地图去广告
-https://ws.wenn.in/main/Plugin/jd.plugin, enabled=true, tag=京东去广告
+https://ws.wenn.in/main/Plugin/jd-pro.plugin, enabled=true, tag=京东去广告 Pro
 https://ws.wenn.in/main/Plugin/qqmusic.plugin, enabled=true, tag=QQ音乐去广告
 https://ws.wenn.in/main/Plugin/reddit.plugin, enabled=true, tag=Reddit去广告
-https://ws.wenn.in/main/Plugin/tieba.plugin, enabled=true, tag=贴吧去广告
-https://ws.wenn.in/main/Plugin/zhihu.plugin, enabled=true, tag=知乎去广告
+https://ws.wenn.in/main/Plugin/tieba-pro.plugin, enabled=true, tag=贴吧去广告 Pro
+https://ws.wenn.in/main/Plugin/zhihu-pro.plugin, enabled=true, tag=知乎去广告 Pro
 https://ws.wenn.in/main/Plugin/qidian.plugin, enabled=true, tag=起点全能助手 Pro
 https://ws.wenn.in/main/Plugin/bank.plugin, enabled=true, tag=银行及云闪付去广告
 https://ws.wenn.in/main/Plugin/life.plugin, enabled=true, tag=生活出行去广告
