@@ -94,8 +94,7 @@ http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/batch script-p
 # ═══════════════════════════════════════════
 cron {NEMUSIC_CRON_EXP} script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, timeout={TIMEOUT}, tag=网易云签到打卡，argument=[{NEMUSIC_DEBUG_ENABLE},{NEMUSIC_SIGNIN_ENABLE},{NEMUSIC_CHECKIN_ENABLE}], enable={ENABLE_NEMUSIC}&{NEMUSIC_SIGNIN_ENABLE}
 
-[Rewrite]
-# 白名单配置
+[Rule]
 DOMAIN-SUFFIX,music.163.com, DIRECT
 DOMAIN-SUFFIX,music.163.com.cn, DIRECT
 

@@ -40,8 +40,7 @@ http-response ^https?:\/\/p.360buy\.com\/price\/tower script-path=https://ws.wen
 # ═══════════════════════════════════════════════
 cron {JD_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/JD.js, timeout={TIMEOUT}, tag=京东定时任务 (含签到/领券/抽奖), argument=[{JD_DEBUG_ENABLE},{JD_SIGNIN_ENABLE},{JD_MALL_ENABLE},{JD_COUPON_ENABLE},{JD_LOTTERY_ENABLE}], enable={ENABLE_JD}
 
-[Rewrite]
-# 广告拦截白名单
+[Rule]
 DOMAIN-SUFFIX,ad.jddg.com, DIRECT
 DOMAIN-SUFFIX,bjzhnl.jd.com, DIRECT
 
