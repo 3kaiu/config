@@ -1,5 +1,1 @@
-/**
- * SunShuFu 定时任务 — 状态通知
- */
-$notification.post("云闪付定时检查", "定时检查", "净化规则运行中");
-$done();
+$notification.post("\u4E91\u95EA\u4ED8\u5B9A\u65F6\u68C0\u67E5","\u5B9A\u65F6\u68C0\u67E5","\u51C0\u5316\u89C4\u5219\u8FD0\u884C\u4E2D"),$done();

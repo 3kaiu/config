@@ -1,5 +1,1 @@
-/**
- * AppleServices 定时任务 — 状态通知
- */
-$notification.post("Apple 服务定时检查", "定时检查", "增强规则运行中");
-$done();
+$notification.post("Apple \u670D\u52A1\u5B9A\u65F6\u68C0\u67E5","\u5B9A\u65F6\u68C0\u67E5","\u589E\u5F3A\u89C4\u5219\u8FD0\u884C\u4E2D"),$done();

@@ -1,5 +1,1 @@
-/**
- * Cleanup 定时任务 — 状态通知
- */
-$notification.post("启动广告拦截", "定时检查", "规则运行中");
-$done();
+$notification.post("\u542F\u52A8\u5E7F\u544A\u62E6\u622A","\u5B9A\u65F6\u68C0\u67E5","\u89C4\u5219\u8FD0\u884C\u4E2D"),$done();

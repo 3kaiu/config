@@ -1,18 +1,1 @@
-if (typeof $response === "undefined") { $done(); return; }
-try {
-  let body = JSON.parse($response.body);
-  function clean(obj) {
-    if (!obj || typeof obj !== "object") return;
-    for (const key of Object.keys(obj)) {
-      if (/^ad|sponsor|promot|recommend/i.test(key)) {
-        delete obj[key];
-      } else {
-        clean(obj[key]);
-      }
-    }
-  }
-  clean(body);
-  $done({ body: JSON.stringify(body) });
-} catch (e) {
-  $done();
-}
+if(typeof $response>"u"){$done();return}try{let t=function(e){if(!(!e||typeof e!="object"))for(const n of Object.keys(e))/^ad|sponsor|promot|recommend/i.test(n)?delete e[n]:t(e[n])};var clean=t;let o=JSON.parse($response.body);t(o),$done({body:JSON.stringify(o)})}catch{$done()}

@@ -1,5 +1,1 @@
-/**
- * StreamingServices 定时任务 — 状态通知
- */
-$notification.post("海外流媒体定时检查", "定时检查", "增强规则运行中");
-$done();
+$notification.post("\u6D77\u5916\u6D41\u5A92\u4F53\u5B9A\u65F6\u68C0\u67E5","\u5B9A\u65F6\u68C0\u67E5","\u589E\u5F3A\u89C4\u5219\u8FD0\u884C\u4E2D"),$done();

@@ -1,5 +1,1 @@
-/**
- * 微信定时任务 — 状态通知
- */
-$notification.post("微信净化", "定时检查", "微信净化规则运行中");
-$done();
+$notification.post("\u5FAE\u4FE1\u51C0\u5316","\u5B9A\u65F6\u68C0\u67E5","\u5FAE\u4FE1\u51C0\u5316\u89C4\u5219\u8FD0\u884C\u4E2D"),$done();

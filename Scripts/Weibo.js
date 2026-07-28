@@ -1,5 +1,1 @@
-/**
- * 微博每日签到
- */
-$notification.post("微博净化", "定时签到", "微博净化规则运行中");
-$done();
+$notification.post("\u5FAE\u535A\u51C0\u5316","\u5B9A\u65F6\u7B7E\u5230","\u5FAE\u535A\u51C0\u5316\u89C4\u5219\u8FD0\u884C\u4E2D"),$done();
