@@ -1,42 +1,67 @@
+const isQX = typeof $task !== 'undefined';
+
+function read(key: string): string | undefined {
+  return isQX ? $prefs.valueForKey(key) : $persistentStore.read(key);
+}
+
+function notify(title: string, sub: string, body: string): void {
+  if (isQX) $notify(title, sub, body);
+  else $notification.post(title, sub, body);
+}
+
+function httpGet(url: string): Promise<void> {
+  if (isQX) {
+    return $task.fetch({ url, method: 'GET' }).then(() => {});
+  }
+  return new Promise<void>((resolve) => $httpClient.get({ url, timeout: 10000 }, () => resolve()));
+}
+
+function httpPost(url: string, body: string): Promise<void> {
+  if (isQX) {
+    return $task.fetch({ url, method: 'POST', body, headers: { 'Content-Type': 'application/json' } }).then(() => {});
+  }
+  return new Promise<void>((resolve) => $httpClient.post({ url, timeout: 10000, body, headers: { 'Content-Type': 'application/json' } }, () => resolve()));
+}
+
 const TEST_URL = 'http://cp.cloudflare.com/generate_204';
 const TIMEOUT_MS = 10000;
 
 function barkPush(title: string, body: string): Promise<void> {
-  const barkKey = $persistentStore.read('Bark_Key');
+  const barkKey = read('Bark_Key');
   if (!barkKey) return Promise.resolve();
-  const url = `https://api.day.app/${barkKey}/${encodeURIComponent(title)}/${encodeURIComponent(body)}`;
-  return new Promise<void>((resolve) => $httpClient.get({ url, timeout: TIMEOUT_MS }, () => resolve()));
+  return httpGet(`https://api.day.app/${barkKey}/${encodeURIComponent(title)}/${encodeURIComponent(body)}`);
 }
 
 function telegramPush(title: string, body: string): Promise<void> {
-  const token = $persistentStore.read('TG_BOT_TOKEN');
-  const chatId = $persistentStore.read('TG_USER_ID');
+  const token = read('TG_BOT_TOKEN');
+  const chatId = read('TG_USER_ID');
   if (!token || !chatId) return Promise.resolve();
-  const params = { chat_id: chatId, text: `${title}\n${body}` };
-  return new Promise<void>((resolve) => $httpClient.post({
-    url: `https://api.telegram.org/bot${token}/sendMessage`, timeout: TIMEOUT_MS,
-    body: JSON.stringify(params),
-    headers: { 'Content-Type': 'application/json' }
-  }, () => resolve()));
+  return httpPost(
+    `https://api.telegram.org/bot${token}/sendMessage`,
+    JSON.stringify({ chat_id: chatId, text: `${title}\n${body}` })
+  );
 }
 
-function notify(title: string, body: string): Promise<PromiseSettledResult<void>[]> {
-  if (typeof $task !== 'undefined') $notify(title, body, '');
-  else $notification.post(title, body, '');
+function doNotify(title: string, body: string): Promise<PromiseSettledResult<void>[]> {
+  notify(title, body, '');
   return Promise.allSettled([barkPush(title, body), telegramPush(title, body)]);
 }
 
+// QX cron: $task.fetch 发起检测
 const start = Date.now();
-$httpClient.get({ url: TEST_URL, timeout: TIMEOUT_MS }, (error: Error | null, response: $httpClientResponse | null) => {
+const req = isQX
+  ? $task.fetch({ url: TEST_URL }).then((r: { statusCode: number }) => ({ status: r.statusCode }))
+  : new Promise<{ status?: number }>((resolve) => $httpClient.get({ url: TEST_URL, timeout: TIMEOUT_MS }, (_e: Error | null, r: $httpClientResponse | null) => resolve(r || {})));
+
+req.then((response: { status?: number }) => {
   const elapsed = Date.now() - start;
   let push: Promise<unknown> = Promise.resolve();
-  if (error) {
-    push = notify('⚠️ 节点健康检测', `代理连接失败: ${error}\n测试地址: ${TEST_URL}\n应急: 将 Final 策略组临时切换为 DIRECT`);
-  } else if (response && response.status === 204) {
+  if (response.status === 204) {
     console.log(`✅ 节点正常, 延迟 ${elapsed}ms`);
+  } else if (response.status === undefined) {
+    push = doNotify('⚠️ 节点健康检测', `代理连接失败\n测试地址: ${TEST_URL}\n应急: 将 Final 策略组临时切换为 DIRECT`);
   } else {
-    const status = response ? response.status : 'unknown';
-    push = notify('⚠️ 节点健康检测', `代理响应异常: HTTP ${status} (${elapsed}ms)\n测试地址: ${TEST_URL}`);
+    push = doNotify('⚠️ 节点健康检测', `代理响应异常: HTTP ${response.status} (${elapsed}ms)\n测试地址: ${TEST_URL}`);
   }
-  Promise.resolve(push).then(() => $done());
-});
+  return Promise.resolve(push);
+}).catch(() => doNotify('⚠️ 节点健康检测', `代理请求失败\n测试地址: ${TEST_URL}`)).then(() => $done());

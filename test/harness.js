@@ -15,15 +15,16 @@ const path = require("path");
 
 function createSandbox(opts = {}) {
   const {
-    mode = "loon",          // "loon" | "qx"
-    request,                // $request 对象 (不传 = request 阶段未定义)
-    response,               // $response 对象 (不传 = $response undefined, 触发守卫)
-    argument,               // $argument (Loon 插件参数)
-    httpHandler,            // (req) => ({ err, res, body }) 自定义 $httpClient/$task.fetch 响应
-    fastTimers = true,      // setTimeout 立即触发 (加速重放类测试)
+    mode = "loon",
+    request,
+    response,
+    argument,
+    store: initStore = {},
+    httpHandler,
+    fastTimers = true,
   } = opts;
 
-  const state = { doneCalls: [], notifications: [], logs: [], httpCalls: [], store: {} };
+  const state = { doneCalls: [], notifications: [], logs: [], httpCalls: [], store: { ...initStore } };
   const timers = fastTimers
     ? { setTimeout: (fn) => { setImmediate(fn); return 0; }, clearTimeout: () => {} }
     : { setTimeout: (...a) => setTimeout(...a), clearTimeout: (...a) => clearTimeout(...a) };
@@ -57,7 +58,7 @@ function createSandbox(opts = {}) {
     };
     const makeHttp = (method) => (o, cb) => {
       state.httpCalls.push({ method, url: o.url, body: o.body, headers: o.headers });
-      let out = { err: null, res: { statusCode: 200 }, body: "{}" };
+      let out = { err: null, res: { status: 200 }, body: "{}" };
       if (httpHandler) out = Object.assign(out, httpHandler({ method, ...o }));
       setImmediate(() => cb(out.err, out.res, out.body));
     };
@@ -66,9 +67,9 @@ function createSandbox(opts = {}) {
     ctx.$task = {
       fetch: async (o) => {
         state.httpCalls.push({ method: o.method || "GET", url: o.url, body: o.body, headers: o.headers });
-        let out = { res: { statusCode: 200 }, body: "{}" };
+        let out = { res: { status: 200 }, body: "{}" };
         if (httpHandler) out = Object.assign(out, httpHandler(o));
-        return { statusCode: out.res.statusCode, body: out.body, headers: {} };
+        return { statusCode: out.res.status, status: out.res.status, body: out.body, headers: {} };
       },
     };
     ctx.$prefs = {
