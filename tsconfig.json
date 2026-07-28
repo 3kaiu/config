@@ -5,11 +5,7 @@
     "moduleResolution": "bundler",
     "strict": true,
     "noEmit": true,
-    "skipLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["Scripts-src/*"]
-    }
+    "skipLibCheck": true
   },
   "include": ["Scripts-src/**/*.ts"],
   "exclude": ["node_modules", "Scripts", "Mirror", "dist"]

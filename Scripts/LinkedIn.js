@@ -1,1 +1,1 @@
-if(typeof $response>"u"){$done();return}try{let t=function(e){if(!(!e||typeof e!="object"))for(const n of Object.keys(e))/^ad|sponsor|promot|recommend/i.test(n)?delete e[n]:t(e[n])};var clean=t;let o=JSON.parse($response.body);t(o),$done({body:JSON.stringify(o)})}catch{$done()}
+"use strict";if(typeof $response>"u"){$done();return}try{let t=function(e){if(!(!e||typeof e!="object"))for(const n of Object.keys(e))/^ad|sponsor|promot|recommend/i.test(n)?delete e[n]:t(e[n])};var clean=t;let o=JSON.parse($response.body);t(o),$done({body:JSON.stringify(o)})}catch{$done()}

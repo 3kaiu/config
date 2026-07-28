@@ -8,7 +8,7 @@
     "generate": "surgio generate",
     "preview": "surgio preview",
     "test": "node test/run-tests.js",
-    "lint": "eslint Scripts-src/ Scripts/ test/"
+    "lint": "eslint Scripts/ test/"
   },
   "dependencies": {
     "surgio": "^3.17.0"
