@@ -15,14 +15,6 @@ module.exports = defineSurgioConfig({
       provider: 'tokyo',
       destDir: 'Profile',
     },
-    {
-      // ⚠️ Surge 配置已移除：项目定位为 Loon/QX 双端专用
-      // See: memory "Loon 配置项目专用性约束"
-      name: 'Surge.conf',
-      template: 'surge',
-      provider: 'tokyo',
-      destDir: 'Profile',
-    },
   ],
 
   // 远程规则片段 (blackmatrix7 + ddgksf2013)
