@@ -32,7 +32,7 @@ jobs:
           OK=0
           FILES=$(git ls-files 'Scripts/*.js' 'Mirror/*.js' 'Mirror/nsringo/*.js' \
                     'Plugin/*.plugin' 'Kelee/*.plugin' 'QX/apple/*.conf' \
-                    'Profile/Loon.lcf' 'Profile/QX.conf' 'Profile/Surge.conf')
+                    'Profile/Loon.lcf' 'Profile/QX.conf')
           for f in $FILES; do
             url="https://ws.wenn.in/main/$f"
             tmp=$(mktemp)
