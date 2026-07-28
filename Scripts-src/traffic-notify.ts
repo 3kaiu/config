@@ -1,6 +1,3 @@
-import { notification } from "@nsnanocat/util/lib/notification.mjs";
-import { done } from "@nsnanocat/util/lib/done.mjs";
-
 function barkPush(title: string, body: string): Promise<void> {
   const barkKey = $persistentStore.read('Bark_Key');
   if (!barkKey) return Promise.resolve();
@@ -21,7 +18,8 @@ function telegramPush(title: string, body: string): Promise<void> {
 }
 
 function notify(title: string, body: string): Promise<PromiseSettledResult<void>[]> {
-  notification(title, body, '');
+  if (typeof $task !== 'undefined') $notify(title, body, '');
+  else $notification.post(title, body, '');
   return Promise.allSettled([barkPush(title, body), telegramPush(title, body)]);
 }
 
@@ -39,4 +37,4 @@ try {
   push = notify('📊 运行心跳', '正常运行中');
 }
 
-Promise.resolve(push).then(() => done());
+Promise.resolve(push).then(() => $done());

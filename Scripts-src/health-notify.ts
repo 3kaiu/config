@@ -1,6 +1,3 @@
-import { notification } from "@nsnanocat/util/lib/notification.mjs";
-import { done } from "@nsnanocat/util/lib/done.mjs";
-
 const TEST_URL = 'http://cp.cloudflare.com/generate_204';
 const TIMEOUT_MS = 10000;
 
@@ -24,7 +21,8 @@ function telegramPush(title: string, body: string): Promise<void> {
 }
 
 function notify(title: string, body: string): Promise<PromiseSettledResult<void>[]> {
-  notification(title, body, '');
+  if (typeof $task !== 'undefined') $notify(title, body, '');
+  else $notification.post(title, body, '');
   return Promise.allSettled([barkPush(title, body), telegramPush(title, body)]);
 }
 
@@ -40,5 +38,5 @@ $httpClient.get({ url: TEST_URL, timeout: TIMEOUT_MS }, (error: Error | null, re
     const status = response ? response.status : 'unknown';
     push = notify('⚠️ 节点健康检测', `代理响应异常: HTTP ${status} (${elapsed}ms)\n测试地址: ${TEST_URL}`);
   }
-  Promise.resolve(push).then(() => done());
+  Promise.resolve(push).then(() => $done());
 });

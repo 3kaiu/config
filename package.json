@@ -4,14 +4,13 @@
   "private": true,
   "description": "3kaiu Loon & Quantumult X config v8.5 — Surgio project with TypeScript foundation and optimized structure",
   "scripts": {
-    "build": "esbuild $(find Scripts-src -name '*.ts' ! -path '*/types/*' ! -name 'Qidian.ts') --bundle --format=iife --outdir=Scripts --minify --target=es2020",
+    "build": "esbuild $(find Scripts-src -name '*.ts' ! -path '*/types/*' ! -name 'Qidian.ts') --outdir=Scripts --minify --target=es2020",
     "generate": "surgio generate",
     "preview": "surgio preview",
     "test": "node test/run-tests.js",
     "lint": "eslint Scripts/ test/"
   },
   "dependencies": {
-    "@nsnanocat/util": "^2.7.0",
     "surgio": "^3.17.0"
   },
   "devDependencies": {
