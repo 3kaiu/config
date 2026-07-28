@@ -7,6 +7,6 @@
     "noEmit": true,
     "skipLibCheck": true
   },
-  "include": ["Scripts-src/**/*.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "Scripts", "Mirror", "dist"]
 }
