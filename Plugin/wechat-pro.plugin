@@ -1,73 +1,63 @@
 #!name=微信 Pro v8.1
 #!desc=微信 — 朋友圈/公众号/视频号/小程序全流程净化 + 功能增强
 #!version=8.1
-#!author=3kaiu (参考 ddgksf2013/WeChat.conf + app2smile/wechat.js)
+#!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/WeChat.png
 
-#!arguments-desc=\n- \{ENABLE_WECHAT}: ["true","false"],tag=总开关，desc=开启后执行所有微信功能\n- \{WECHAT_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,120,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{WECHAT_FRIEND_ENABLE}: switch,"true","false",tag=朋友圈净化，desc=去除朋友圈推荐广告\n- \{WECHAT_MP_ENABLE}: switch,"true","false",tag=公众号净化，desc=去除公众号文章推广\n- \{WECHAT_VIDEO_ENABLE}: switch,"true","false",tag=视频号净化，desc=去除视频号推荐\n- \{WECHAT_MINI_ENABLE}: switch,"true","false",tag=小程序净化，desc=去除小程序广告\n- \{WECHAT_SEARCH_ENABLE}: switch,"true","false",tag=搜索净化，desc=去除搜一搜推广\n- \{WECHAT_UNBLOCK_ENABLE}: switch,"true","false",tag=外链解锁，desc=微信外部链接直接打开\n- \{WECHAT_DEBUG_ENABLE}: switch,"false","true",tag=调试模式，desc=输出详细执行日志
-
 [Argument]
-ENABLE_WECHAT=switch,"true","false",tag=总开关，desc=开启后执行所有微信功能
-WECHAT_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
-TIMEOUT=input,120,tag=超时时间 (秒), desc=脚本最大执行时长
-WECHAT_FRIEND_ENABLE=switch,"true","false",tag=朋友圈净化，desc=去除朋友圈推荐广告
-WECHAT_MP_ENABLE=switch,"true","false",tag=公众号净化，desc=去除公众号文章推广
-WECHAT_VIDEO_ENABLE=switch,"true","false",tag=视频号净化，desc=去除视频号推荐
-WECHAT_MINI_ENABLE=switch,"true","false",tag=小程序净化，desc=去除小程序广告
-WECHAT_SEARCH_ENABLE=switch,"true","false",tag=搜索净化，desc=去除搜一搜推广
-WECHAT_UNBLOCK_ENABLE=switch,"true","false",tag=外链解锁，desc=微信外部链接直接打开
-WECHAT_DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执行日志
+ENABLE_WECHAT=switch,"true","false",tag=总开关
+WECHAT_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式
+TIMEOUT=input,120,tag=超时时间 (秒)
+WECHAT_FRIEND_ENABLE=switch,"true","false",tag=朋友圈净化
+WECHAT_MP_ENABLE=switch,"true","false",tag=公众号净化
+WECHAT_VIDEO_ENABLE=switch,"true","false",tag=视频号净化
+WECHAT_MINI_ENABLE=switch,"true","false",tag=小程序净化
+WECHAT_SEARCH_ENABLE=switch,"true","false",tag=搜索净化
+WECHAT_UNBLOCK_ENABLE=switch,"true","false",tag=外链解锁
+WECHAT_DEBUG_ENABLE=switch,"false","true",tag=调试模式
 
 [Script]
-# ════════════════════════════════════════
-# 🔄 实时净化规则（响应阶段）
-# ════════════════════════════════════════
+# 朋友圈广告
+http-response ^https?:\/\/api\.weixin\.qq\.com\/cgi-bin\/appmsg url reject-dict, enable={ENABLE_WECHAT}&{WECHAT_FRIEND_ENABLE}
+http-response ^https?:\/\/new\.weixin\.qq\.com\/mp\/getappmsgad url reject-dict, enable={ENABLE_WECHAT}&{WECHAT_FRIEND_ENABLE}
+http-response ^https?:\/\/file\.weixin\.qq\.com\/cgi-bin\/appreadpage url reject-dict, enable={ENABLE_WECHAT}&{WECHAT_FRIEND_ENABLE}
 
-# ── 朋友圈净化模块 ────────────────────
-http-response ^https?:\/\/api\.weixin\.qq\.com\/cgi-bin\/appmsg feed-filter, enable={ENABLE_WECHAT}&{WECHAT_FRIEND_ENABLE}
-http-response ^https?:\/\/new\.weixin\.qq\.com\/mp\/getappmsgad ad-filter, enable={ENABLE_WECHAT}&{WECHAT_FRIEND_ENABLE}
-http-response ^https?::\/\/file\.weixin\.qq\.com\/cgi-bin\/appreadpage new-ad-filter, enable={ENABLE_WECHAT}&{WECHAT_FRIEND_ENABLE}
+# 公众号广告
+http-response ^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsg url reject-dict, enable={ENABLE_WECHAT}&{WECHAT_MP_ENABLE}
+http-response ^https?:\/\/biz\.weixin\.qq\.com\/cgi-bin\/biz\/tmpl\/tmpl url reject-dict, enable={ENABLE_WECHAT}&{WECHAT_MP_ENABLE}
+http-response ^https?:\/\/mp\.tencent\.news\/cgi-bin\/mp\/tmpl url reject-dict, enable={ENABLE_WECHAT}&{WECHAT_MP_ENABLE}
 
-# ── 公众号净化模块 ────────────────────
-http-response ^https?::\/\/mp\.weixin\.qq\.com\/mp\/getappmsg new-article-filter, enable={ENABLE_WECHAT}&{WECHAT_MP_ENABLE}
-http-response ^https?:::\/\/biz\.weixin\.qq\.com\/cgi-bin\/biz\/tmpl\/tmpl biz-tmpl-filter, enable={ENABLE_WECHAT}&{WECHAT_MP_ENABLE}
-http-response ^https?:::\/\/mp\.tencent\.news\/cgi-bin\/mp\/tmpl tmpl-news-filter, enable={ENABLE_WECHAT}&{WECHAT_MP_ENABLE}
+# 视频号净化
+http-response ^https?:\/\/channels\.video\.qq\.com\/channel url reject-dict, enable={ENABLE_WECHAT}&{WECHAT_VIDEO_ENABLE}
+http-response ^https?:\/\/channels\.video\.qq\.com\/(feed|recommend) url reject-dict, enable={ENABLE_WECHAT}&{WECHAT_VIDEO_ENABLE}
 
-# ── 视频号净化模块 ────────────────────
-http-response ^https?::\/\/channels\.video\.qq\.com\/channel info-feed-filter, enable={ENABLE_WECHAT}&{WECHAT_VIDEO_ENABLE}
-http-response ^https?:::\/\/channels\.video\.qq\.com\/feed personal-feed-filter, enable={ENABLE_WECHAT}&{WECHAT_VIDEO_ENABLE}
-http-response ^https?:::\/\/channels\.video\.qq\.com\/recommend recommend-feed-filter, enable={ENABLE_WECHAT}&{WECHAT_VIDEO_ENABLE}
+# 小程序净化 (沿用 applet.js)
+http-response ^(https?://)?([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+[a-zA-Z]{2,}(:\d+)?/wp-json/[a-zA-Z0-9_-]+/(mp\/)?v\d/posts script-path=https://ws.wenn.in/main/Mirror/applet.js, requires-body=true, timeout=10, tag=小程序净化, enable={ENABLE_WECHAT}&{WECHAT_MINI_ENABLE}
 
-# ── 小程序净化模块 ────────────────────
-http-response ^https?:::\/\/api\.m\.wechat\.qq\.com\/sandbox\/bcw bcw-filter, enable={ENABLE_WECHAT}&{WECHAT_MINI_ENABLE}
-http-response ^https?:::\/\/api\.m\.wechat\.qq\.com\/cgi-bin\/mmredirect redirect-filter, enable={ENABLE_WECHAT}&{WECHAT_MINI_ENABLE}
-http-response ^https?:::\/\/wx\.a\.qq\.com\/sns\/appinfo appinfo-filter, enable={ENABLE_WECHAT}&{WECHAT_MINI_ENABLE}
+# 搜索净化
+http-response ^https?:\/\/cgi\.wechat\.qq\.com\/(msg|search) url reject-dict, enable={ENABLE_WECHAT}&{WECHAT_SEARCH_ENABLE}
 
-# ── 搜索净化模块 ──────────────────────
-http-response ^https?:::\/\/cgi\.wechat\.qq\.com\/msg search-ad-filter, enable={ENABLE_WECHAT}&{WECHAT_SEARCH_ENABLE}
-http-response ^https?:::\/\/cgi\.wechat\.qq\.com\/search suggestion-filter, enable={ENABLE_WECHAT}&{WECHAT_SEARCH_ENABLE}
-
-# ── 外链解锁模块 ──────────────────────
-# 直接打开微信外部链接（不走中间页）
+# 外链解锁
 http-request ^https?:\/\/link\.zhihu\.com\/\?.* url 302 https://$4, enable={ENABLE_WECHAT}&{WECHAT_UNBLOCK_ENABLE}
-http-request ^https?::\/\/url\.me\.qq\.com\/\?.* url 302 https://$4, enable={ENABLE_WECHAT}&{WECHAT_UNBLOCK_ENABLE}
-http-request ^https?::\/\/go\.cc\.link\/\?.* url 302 https://$4, enable={ENABLE_WECHAT}&{WECHAT_UNBLOCK_ENABLE}
+http-request ^https?:\/\/url\.me\.qq\.com\/\?.* url 302 https://$4, enable={ENABLE_WECHAT}&{WECHAT_UNBLOCK_ENABLE}
+http-request ^https?:\/\/go\.cc\.link\/\?.* url 302 https://$4, enable={ENABLE_WECHAT}&{WECHAT_UNBLOCK_ENABLE}
 
-# ── 其他净化模块 ─────────────────────
-http-response ^https?:::\/\/pay\.wechat\.qq\.com\/cgi-bin\/commercial commercial-filter, enable={ENABLE_WECHAT}
-http-response ^https?:::\/\/cgi\.wechat\.qq\.com\/ad ad-display-filter, enable={ENABLE_WECHAT}
+# 其他
+http-response ^https?:\/\/pay\.wechat\.qq\.com\/cgi-bin\/commercial url reject-dict, enable={ENABLE_WECHAT}
+http-response ^https?:\/\/cgi\.wechat\.qq\.com\/ad url reject-dict, enable={ENABLE_WECHAT}
 
-# ════════════════════════════════════════
-# ⏰ Cron 定时任务（可选功能）
-# ════════════════════════════════════════
-cron {WECHAT_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/WeChat.js, timeout={TIMEOUT}, tag=微信定时任务，argument=[{WECHAT_DEBUG_ENABLE}], enable={ENABLE_WECHAT}
+# 公众号本地兜底 (沿用常规版规则)
+http-response ^https?:\/\/api\.blibee\.com\/cvsnotify-api\/cvs\/notify\/app\/banner\/v\d+$ url reject-200, enable={ENABLE_WECHAT}&{WECHAT_MP_ENABLE}
+http-response ^https?:\/\/ucmp\.sf-express\.com\/proxy\/operation-platform\/info-flow-adver\/query$ url reject-200, enable={ENABLE_WECHAT}&{WECHAT_MP_ENABLE}
 
-[Rewrite]
-# ── 白名单配置 ────────────────────────
+# 定时任务
+cron {WECHAT_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/WeChat.js, timeout={TIMEOUT}, tag=微信定时任务, enable={ENABLE_WECHAT}
+
+[Rule]
 DOMAIN-SUFFIX, weixin.qq.com, DIRECT
 DOMAIN-SUFFIX, weixin.com, DIRECT
 DOMAIN-SUFFIX, qq.com, DIRECT
 
 [MitM]
-hostname = %APPEND% api.weixin.qq.com, new.weixin.qq.com, file.weixin.qq.com, mp.weixin.qq.com, biz.weixin.qq.com, channels.video.qq.com, api.m.wechat.qq.com, pay.wechat.qq.com, cgi.wechat.qq.com
+hostname = %APPEND% api.weixin.qq.com, new.weixin.qq.com, file.weixin.qq.com, mp.weixin.qq.com, biz.weixin.qq.com, channels.video.qq.com, api.m.wechat.qq.com, pay.wechat.qq.com, cgi.wechat.qq.com, api.blibee.com, ucmp.sf-express.com

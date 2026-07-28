@@ -1,68 +1,59 @@
 #!name=B 站去广告 Pro v7.9
 #!desc=B 站 — 首页/视频推荐/直播/动态全流程净化 + 高清画质解锁
 #!version=7.9
-#!author=3kaiu (参考 ddgksf2013/BiliBiliAdsLite.conf + app2smile)
+#!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bilibili.png
 
-#!arguments-desc=\n- \{ENABLE_BILI}: ["true","false"],tag=总开关，desc=开启后执行所有 B 站功能\n- \{BILI_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,60,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{BILI_SPLASH_ENABLE}: switch,"true","false",tag=开屏广告，desc=去除 APP 开屏广告\n- \{BILI_FEED_ENABLE}: switch,"true","false",tag=信息流净化，desc=去除首页/推荐页广告\n- \{BILI_LIVE_ENABLE}: switch,"true","false",tag=直播净化，desc=去除直播间推广\n- \{BILI_DYNAMIC_ENABLE}: switch,"true","false",tag=动态净化，desc=去除动态广告\n- \{BILI_1080P_ENABLE}: switch,"true","false",tag=高清画质解锁，desc=解锁 1080P+画质\n- \{BILI_DEBUG_ENABLE}: switch,"false","true",tag=调试模式，desc=输出详细执行日志
-
 [Argument]
-ENABLE_BILI=switch,"true","false",tag=总开关，desc=开启后执行所有 B 站功能
-BILI_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
-TIMEOUT=input,60,tag=超时时间 (秒), desc=脚本最大执行时长
-BILI_SPLASH_ENABLE=switch,"true","false",tag=开屏广告，desc=去除 APP 开屏广告
-BILI_FEED_ENABLE=switch,"true","false",tag=信息流净化，desc=去除首页/推荐页广告
-BILI_LIVE_ENABLE=switch,"true","false",tag=直播净化，desc=去除直播间推广
-BILI_DYNAMIC_ENABLE=switch,"true","false",tag=动态净化，desc=去除动态广告
-BILI_1080P_ENABLE=switch,"true","false",tag=高清画质解锁，desc=解锁 1080P+ 画质
-BILI_DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执行日志
+ENABLE_BILI=switch,"true","false",tag=总开关
+BILI_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式
+TIMEOUT=input,60,tag=超时时间 (秒)
+BILI_SPLASH_ENABLE=switch,"true","false",tag=开屏广告
+BILI_FEED_ENABLE=switch,"true","false",tag=信息流净化
+BILI_LIVE_ENABLE=switch,"true","false",tag=直播净化
+BILI_DYNAMIC_ENABLE=switch,"true","false",tag=动态净化
+BILI_1080P_ENABLE=switch,"true","false",tag=高清画质解锁
+BILI_DEBUG_ENABLE=switch,"false","true",tag=调试模式
 
 [Script]
-# ════════════════════════════════════════
-# 🔄 实时净化规则（响应阶段）
-# ════════════════════════════════════════
-
-# ── 开屏广告模块 ───────────────────────
-http-response ^https?:\/\/api\.bilibili\.com\/x\/app/home/splash url reject-200, enable={ENABLE_BILI}&{BILI_SPLASH_ENABLE}
+# 开屏广告
+http-response ^https?:\/\/api\.bilibili\.com\/x\/app\/home\/splash url reject-200, enable={ENABLE_BILI}&{BILI_SPLASH_ENABLE}
 http-response ^https?:\/\/mobi\.bilibili\.com\/open\/splash list reject-200, enable={ENABLE_BILI}&{BILI_SPLASH_ENABLE}
 
-# ── 信息流净化模块 ────────────────────
-http-response ^https?:\/\/api\.bilibili\.com\/x\/web-interface\/home feed-filter, enable={ENABLE_BILI}&{BILI_FEED_ENABLE}
-http-response ^https?:\/\/api\.bilibili\.com\/x\/feed-section\/section feed-filter, enable={ENABLE_BILI}&{BILI_FEED_ENABLE}
-http-response ^https?:\/\/api\.bilibili\.com\/x\/web-interface\/nav info-filter, enable={ENABLE_BILI}&{BILI_FEED_ENABLE}
-http-response ^https?:\/\/api\.bilibili\.com\/pgc\/season\/home info-filter, enable={ENABLE_BILI}&{BILI_FEED_ENABLE}
-http-response ^https?:\/\/api\.bilibili\.com\/x\/ad\/home ads-filter, enable={ENABLE_BILI}&{BILI_FEED_ENABLE}
-http-response ^https?:\/\/api\.bilibili\.com\/x\/v2\/rank rank-filter, enable={ENABLE_BILI}&{BILI_FEED_ENABLE}
+# 信息流净化
+http-response ^https?:\/\/api\.bilibili\.com\/x\/(web-interface\/home|feed-section\/section|ad\/home) script-path=https://ws.wenn.in/main/Mirror/bilibili-json.js, requires-body=true, timeout=10, tag=去广告, enable={ENABLE_BILI}&{BILI_FEED_ENABLE}
+http-response ^https?:\/\/api\.bilibili\.com\/x\/web-interface\/nav url reject-dict, enable={ENABLE_BILI}&{BILI_FEED_ENABLE}
+http-response ^https?:\/\/api\.bilibili\.com\/pgc\/season\/home url reject-dict, enable={ENABLE_BILI}&{BILI_FEED_ENABLE}
+http-response ^https?:\/\/api\.bilibili\.com\/x\/v2\/rank url reject-dict, enable={ENABLE_BILI}&{BILI_FEED_ENABLE}
 
-# ── 直播净化模块 ──────────────────────
-http-response ^https?:\/\/api\.live\.bilibili\.com\/xlive\/app-room\/v2\/room\/get_info stream-filter, enable={ENABLE_BILI}&{BILI_LIVE_ENABLE}
-http-response ^https?:\/\/api\.live\.bilibili\.com\/pay/v1\/Order\/get_gift_stream stream-filter, enable={ENABLE_BILI}&{BILI_LIVE_ENABLE}
-http-response ^https?:\/\/api\.live\.bilibili\.com\/msg\/v2\/Msg\/read_hot_msg stream-filter, enable={ENABLE_BILI}&{BILI_LIVE_ENABLE}
+# Proto 去广告 (沿用常规版方案)
+http-response ^https:\/\/(grpc\.biliapi\.net|app\.bilibili\.com)\/bilibili\.app\.(viewunite\.v1\.View\/View|dynamic\.v2\.Dynamic\/DynAll) script-path=https://ws.wenn.in/main/Mirror/bilibili-proto.js, binary-body-mode=true, requires-body=true, timeout=10, tag=Proto去广告, enable={ENABLE_BILI}&{BILI_FEED_ENABLE}
 
-# ── 动态净化模块 ──────────────────────
-http-response ^https?:\/\/api\.bilibili\.com\/x/polymer/web-dynamic/v1/feed\/tab dynamic-filter, enable={ENABLE_BILI}&{BILI_DYNAMIC_ENABLE}
-http-response ^https?:\/\/api\.bilibili\.com\/x/policy\/show-config display-filter, enable={ENABLE_BILI}&{BILI_DYNAMIC_ENABLE}
+# 直播净化
+http-response ^https?:\/\/api\.live\.bilibili\.com\/xlive\/app-room\/v2\/room\/get_info url reject-dict, enable={ENABLE_BILI}&{BILI_LIVE_ENABLE}
+http-response ^https?:\/\/api\.live\.bilibili\.com\/pay/v1\/Order\/get_gift_stream url reject-dict, enable={ENABLE_BILI}&{BILI_LIVE_ENABLE}
 
-# ── 高清画质解锁模块 ─────────────────
-http-response ^https?:\/\/api\.bilibili\.com\/x\/interface\/wbi\// play-quality-filter, enable={ENABLE_BILI}&{BILI_1080P_ENABLE}
-http-response ^https?:\/\/api\.bilibili\.com\/pgc/player/web/playurl video-quality-filter, enable={ENABLE_BILI}&{BILI_1080P_ENABLE}
+# 动态净化
+http-response ^https?:\/\/api\.bilibili\.com\/x/polymer/web-dynamic/v1/feed\/tab url reject-dict, enable={ENABLE_BILI}&{BILI_DYNAMIC_ENABLE}
+http-response ^https?:\/\/api\.bilibili\.com\/x/policy\/show-config url reject-dict, enable={ENABLE_BILI}&{BILI_DYNAMIC_ENABLE}
 
-# ── 其他净化模块 ─────────────────────
-http-response ^https?:\/\/api\.bilibili\.com\/x\\/app\\// ad-block-filter, enable={ENABLE_BILI}
-http-response ^https?:\/\/api\.bilibili\.com\\/x\\/web-interface\\/nav nav-filter, enable={ENABLE_BILI}
-http-response ^https?:\/\/api\.bilibili\.com\\/x\\/playroom\\// room-ad-filter, enable={ENABLE_BILI}
+# 高清画质解锁
+http-response ^https?:\/\/api\.bilibili\.com\/x\/interface\/wbi url reject-dict, enable={ENABLE_BILI}&{BILI_1080P_ENABLE}
+http-response ^https?:\/\/api\.bilibili\.com\/pgc/player/web/playurl url reject-dict, enable={ENABLE_BILI}&{BILI_1080P_ENABLE}
 
-# ════════════════════════════════════════
-# ⏰ Cron 定时任务（可选功能）
-# ════════════════════════════════════════
-cron {BILI_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/Bilibili.js, timeout={TIMEOUT}, tag=B 站定时任务，argument=[{BILI_DEBUG_ENABLE}], enable={ENABLE_BILI}
+# 定时任务
+cron {BILI_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/Bilibili.js, timeout={TIMEOUT}, tag=B 站定时任务, enable={ENABLE_BILI}
 
 [Rewrite]
-# ── 白名单配置 ────────────────────────
+# 港澳台地区解锁
+^https?:\/\/app\.bilibili\.com\/(x\/)?(intl|dm|reply|history|v\d\/(fav|msgfeed)).+?(&s_locale=zh-Hans_[A-Z]{2})(.+?)(&sim_code=\d+)(.+) $1$2$3$4$5&s_locale=zh-Hans_PH&sim_code=51503$7 302, enable={ENABLE_BILI}
+^https?:\/\/passport\.bilibili\.com\/x\/intl\/passport-login\/.+(&s_locale=zh-Hans_[A-Z]{2})(.+)(&sim_code=\d+)(.+) $1$2$3$4&s_locale=zh-Hans_PH&sim_code=51503$4 302, enable={ENABLE_BILI}
+
+[Rule]
 DOMAIN-SUFFIX, bilibili.com, DIRECT
 DOMAIN-SUFFIX, bilivideo.com, DIRECT
 DOMAIN-SUFFIX, hdslb.com, DIRECT
 
 [MitM]
-hostname = %APPEND% api.bilibili.com, mobi.bilibili.com, live.bilibili.com, i0.hdslb.com
+hostname = %APPEND% api.bilibili.com, mobi.bilibili.com, live.bilibili.com, i0.hdslb.com, app.bilibili.com, grpc.biliapi.net
