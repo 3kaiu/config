@@ -19,6 +19,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -30,9 +31,18 @@ jobs:
           MISMATCH=""
           FETCHFAIL=""
           OK=0
-          FILES=$(git ls-files 'Scripts/*.js' 'Mirror/*.js' 'Mirror/nsringo/*.js' \
-                    'Plugin/*.plugin' 'Kelee/*.plugin' 'QX/apple/*.conf' \
-                    'Profile/Loon.lcf' 'Profile/QX.conf')
+
+          # Mirror/ 文件列表来自 MANIFEST.json（权威清单，新增镜像自动纳入校验）
+          MIRROR_FILES=$(node -e '
+            const m = JSON.parse(require("fs").readFileSync("Mirror/MANIFEST.json","utf8"));
+            Object.keys(m.files).forEach(f => console.log("Mirror/" + f));
+          ')
+          # 非 Mirror 文件仍用 git ls-files
+          LOCAL_FILES=$(git ls-files 'Scripts/*.js' 'Plugin/*.plugin' 'Kelee/*.plugin' \
+                        'QX/apple/*.conf' 'Profile/Loon.lcf' 'Profile/QX.conf')
+
+          FILES=$(echo "$MIRROR_FILES"$'\n'"$LOCAL_FILES" | sort -u)
+
           for f in $FILES; do
             url="https://ws.wenn.in/main/$f"
             tmp=$(mktemp)

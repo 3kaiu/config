@@ -1,0 +1,19 @@
+* text=auto eol=lf
+
+*.js text
+*.ts text
+*.json text
+*.yml text
+*.yaml text
+*.md text
+*.conf text
+*.plugin text
+*.lcf text
+*.tpl text
+*.qx text
+*.list text
+*.lpx text
+
+*.png binary
+*.jpg binary
+*.mmdb binary

@@ -6,16 +6,17 @@ on:
     paths:
       - 'surgio.conf.js'
       - 'template/**'
-      - 'provider/**'
       - 'package.json'
   workflow_dispatch:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   generate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -34,14 +35,37 @@ jobs:
           SURGIO_SUBSCRIPTION_URL: ${{ secrets.SURGIO_SUBSCRIPTION_URL || '' }}
 
       - name: Check for changes
+        id: check
         run: |
           if git diff --quiet Profile/Loon.lcf Profile/QX.conf; then
             echo "No changes to generated configs"
+            echo "changed=false" >> $GITHUB_OUTPUT
           else
+            echo "changed=true" >> $GITHUB_OUTPUT
             echo "Configs were updated by Surgio generation"
-            git config --local user.email "github-actions[bot]@users.noreply.github.com"
-            git config --local user.name "github-actions[bot]"
-            git add Profile/Loon.lcf Profile/QX.conf
-            git commit -m "chore: auto-update Surgio generated configs"
-            git push
+          fi
+
+      - name: Open or update PR
+        if: steps.check.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          BRANCH="surgio-auto/$(date +%Y-%m-%d)"
+          git checkout -B "$BRANCH"
+          git add Profile/Loon.lcf Profile/QX.conf
+          git commit -m "chore(surgio): auto-update generated configs ($(date +%Y-%m-%d))"
+          git push -f origin "$BRANCH" 2>&1 || echo "push skipped"
+
+          BODY="## Surgio 自动配置更新\n\nSurgio 配置模板变更触发生成，Profile/ 文件已自动更新。\n\n### 审核清单\n- [ ] Loon.lcf 变更符合预期\n- [ ] QX.conf 变更符合预期\n- [ ] 双端规则一致性保持\n- [ ] CI 全绿"
+
+          if gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' 2>/dev/null | grep -q .; then
+            gh pr edit "$BRANCH" --body "$BODY" 2>/dev/null || true
+            echo "PR updated"
+          else
+            gh pr create --base main --head "$BRANCH" \
+              --title "chore(surgio): auto-update generated configs ($(date +%Y-%m-%d))" \
+              --body "$BODY" 2>/dev/null || echo "PR creation skipped"
+            echo "PR created"
           fi

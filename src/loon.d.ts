@@ -46,6 +46,7 @@ declare const $environment: {
 
 // QX 特有
 declare const $task: unknown
+declare const $loon: { version: string } | undefined
 declare const $prefs: {
   valueForKey(key: string): string | undefined
   setValueForKey(value: string, key: string): void

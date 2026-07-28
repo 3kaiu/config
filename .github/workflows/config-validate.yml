@@ -10,6 +10,7 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -235,6 +236,23 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           exit $FAIL
 
+      # ── 8. 主配置版本号一致性 ──
+      - name: Check version consistency
+        run: |
+          echo "## Version Consistency" >> $GITHUB_STEP_SUMMARY
+          loon_ver=$(grep -oP 'v\d+\.\d+' Profile/Loon.lcf | head -1)
+          qx_ver=$(grep -oP 'v\d+\.\d+' Profile/QX.conf | head -1)
+          plugin_vers=$(grep -rh '#!version=' Plugin/*.plugin Kelee/*.plugin | sed 's/#!version=//' | sort -u | tr '\n' ' ')
+          echo "| Config | Version |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Loon.lcf | $loon_ver |" >> $GITHUB_STEP_SUMMARY
+          echo "| QX.conf | $qx_ver |" >> $GITHUB_STEP_SUMMARY
+          if [ "$loon_ver" != "$qx_ver" ]; then
+            echo "❌ 版本不一致: Loon=$loon_ver, QX=$qx_ver" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+          echo "✅ 版本一致: $loon_ver" >> $GITHUB_STEP_SUMMARY
+
       # ── 9. Qidian 内嵌引擎完整性校验 ──
       - name: Qidian engine integrity check
         run: |
@@ -265,23 +283,6 @@ jobs:
           ' 2>&1 | tee -a $GITHUB_STEP_SUMMARY
           exit ${PIPESTATUS[0]}
 
-      # ── 8. 主配置版本号一致性 ──
-      - name: Check version consistency
-        run: |
-          echo "## Version Consistency" >> $GITHUB_STEP_SUMMARY
-          loon_ver=$(grep -oP 'v\d+\.\d+' Profile/Loon.lcf | head -1)
-          qx_ver=$(grep -oP 'v\d+\.\d+' Profile/QX.conf | head -1)
-          plugin_vers=$(grep -rh '#!version=' Plugin/*.plugin Kelee/*.plugin | sed 's/#!version=//' | sort -u | tr '\n' ' ')
-          echo "| Config | Version |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|---------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Loon.lcf | $loon_ver |" >> $GITHUB_STEP_SUMMARY
-          echo "| QX.conf | $qx_ver |" >> $GITHUB_STEP_SUMMARY
-          if [ "$loon_ver" != "$qx_ver" ]; then
-            echo "❌ 版本不一致: Loon=$loon_ver, QX=$qx_ver" >> $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
-          echo "✅ 版本一致: $loon_ver" >> $GITHUB_STEP_SUMMARY
-
       # ── 10. QX 规则顺序防遮蔽检查 ──
       # QX 按书写顺序匹配: Google 通配 (googleapis.com/google.com → Streaming)
       # 若写在 AI 分流或 Google 分析 reject 之前, 会截胡 Gemini API 并使 4 条 reject 静默失效
@@ -307,6 +308,6 @@ jobs:
             fi
           done
           if [ "$FAIL" -eq 0 ]; then
-            echo "✅ 顺序正确: Google 通配 L$wild_line 位于 AI L$ai_line / Firebase L$fb_line / adservice L$ads_line 之后" >> $GITHUB_STEP_SUMMARY
+            echo "✅ 顺序正确: Google 通配 L$wild_line 位于 AI L$ai_line / crashlytics L$crash_line / adservice L$ads_line 之后" >> $GITHUB_STEP_SUMMARY
           fi
           exit $FAIL

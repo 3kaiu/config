@@ -1,6 +1,15 @@
 const { defineSurgioConfig } = require('surgio');
 
+const tokyoProvider = (() => {
+  const url = process.env.SURGIO_SUBSCRIPTION_URL;
+  return url
+    ? { type: 'shadowsocks_subscription', url }
+    : { type: 'custom', nodeList: [] };
+})();
+
 module.exports = defineSurgioConfig({
+  providers: [{ name: 'tokyo', ...tokyoProvider }],
+
   artifacts: [
     {
       name: 'Loon.lcf',

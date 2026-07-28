@@ -16,6 +16,7 @@ permissions:
 jobs:
   mirror:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -235,12 +236,6 @@ jobs:
               --title "chore(mirror): 上游资源同步 ($(date +%Y-%m-%d))" \
               --body "$BODY" 2>/dev/null || echo "pr creation skipped"
             echo "pr_action=created" >> $GITHUB_ENV
-          fi
-          # 启用 auto-merge: CI 门禁全过则自动 squash 合并
-          PR_NUM=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' 2>/dev/null)
-          if [ -n "$PR_NUM" ]; then
-            gh pr merge "$PR_NUM" --auto --squash 2>/dev/null || true
-            echo "🔁 auto-merge 已启用 on #$PR_NUM"
           fi
 
       - name: Report summary
