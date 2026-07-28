@@ -525,6 +525,25 @@ https://ws.wenn.in/main/Plugin/qqmusic.plugin, enabled=true, tag=QQ音乐去广�
 https://ws.wenn.in/main/Plugin/reddit.plugin, enabled=true, tag=Reddit去广告
 https://ws.wenn.in/main/Plugin/tieba-pro.plugin, enabled=true, tag=贴吧去广告 Pro
 https://ws.wenn.in/main/Plugin/zhihu-pro.plugin, enabled=true, tag=知乎去广告 Pro
+# — App Pro 深度净化 —
+https://ws.wenn.in/main/Plugin/weibo-pro.plugin, enabled=true, tag=微博去广告 Pro
+https://ws.wenn.in/main/Plugin/xiaohongshu-pro.plugin, enabled=true, tag=小红书净化 Pro
+https://ws.wenn.in/main/Plugin/iqiyi-pro.plugin, enabled=true, tag=爱奇艺净化 Pro
+https://ws.wenn.in/main/Plugin/tencent-video-pro.plugin, enabled=true, tag=腾讯视频净化 Pro
+https://ws.wenn.in/main/Plugin/taobao-tmall-pro.plugin, enabled=true, tag=淘宝天猫净化 Pro
+https://ws.wenn.in/main/Plugin/pinduoduo-pro.plugin, enabled=true, tag=拼多多净化 Pro
+https://ws.wenn.in/main/Plugin/alipay-pro.plugin, enabled=true, tag=支付宝净化 Pro
+https://ws.wenn.in/main/Plugin/alipay-miniprogram-pro.plugin, enabled=true, tag=支付宝小程序净化 Pro
+https://ws.wenn.in/main/Plugin/sunshufu-pro.plugin, enabled=true, tag=云闪付净化 Pro
+https://ws.wenn.in/main/Plugin/bdpan-pro.plugin, enabled=true, tag=百度网盘净化 Pro
+https://ws.wenn.in/main/Plugin/didi-pro.plugin, enabled=true, tag=滴滴出行净化 Pro
+https://ws.wenn.in/main/Plugin/dingtalk-pro.plugin, enabled=true, tag=钉钉净化 Pro
+https://ws.wenn.in/main/Plugin/overseas-social-pro.plugin, enabled=true, tag=海外社交净化 Pro
+https://ws.wenn.in/main/Plugin/streaming-overseas-pro.plugin, enabled=true, tag=海外流媒体增强 Pro
+https://ws.wenn.in/main/Plugin/shopping-overseas-pro.plugin, enabled=true, tag=海外购物净化 Pro
+https://ws.wenn.in/main/Plugin/apple-services-pro.plugin, enabled=true, tag=Apple 服务增强 Pro
+https://ws.wenn.in/main/Plugin/safari-webview-pro.plugin, enabled=true, tag=浏览器净化 Pro
+https://ws.wenn.in/main/Plugin/startup-adblock-pro.plugin, enabled=true, tag=开屏广告通杀 Pro
 https://ws.wenn.in/main/Plugin/qidian.plugin, enabled=true, tag=起点全能助手 Pro
 https://ws.wenn.in/main/Plugin/bank.plugin, enabled=true, tag=银行及云闪付去广告
 https://ws.wenn.in/main/Plugin/life.plugin, enabled=true, tag=生活出行去广告
