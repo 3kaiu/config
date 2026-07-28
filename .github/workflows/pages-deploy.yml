@@ -30,7 +30,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       # Pages 未启用时优雅跳过 (启用方法: Settings → Pages → Source: GitHub Actions, 一次性)
       - name: Check Pages enabled

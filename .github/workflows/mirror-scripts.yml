@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       # 安全改造 (2026-07 审计):
       # 1. 写入前门禁: *.js 过 node --check 语法 / 体积≥200B / 非 HTML 错误页 — 任一不过保留旧文件
