@@ -512,13 +512,13 @@ https://ws.wenn.in/main/Mirror/rules/loon-AdvertisingScript.plugin, enabled=true
 https://ws.wenn.in/main/Plugin/sub-store.plugin, enabled=true, tag=Sub-Store 订阅管理
 https://ws.wenn.in/main/Plugin/quicksearch.plugin, enabled=true, tag=快捷搜索
 https://ws.wenn.in/main/Plugin/notify.plugin, enabled=true, tag=🔔 定时通知
-https://ws.wenn.in/main/Plugin/wechat.plugin, enabled=true, tag=微信&小程序&公众号去广告
-https://ws.wenn.in/main/Plugin/bilibili.plugin, enabled=true, tag=B站去广告
+https://ws.wenn.in/main/Plugin/wechat-pro.plugin, enabled=true, tag=微信去广告 Pro
+https://ws.wenn.in/main/Plugin/bilibili-pro.plugin, enabled=true, tag=B站去广告 Pro
 https://ws.wenn.in/main/Plugin/bilicomics.plugin, enabled=true, tag=B站漫画去广告
 https://ws.wenn.in/main/Plugin/netease-pro.plugin, enabled=true, tag=网易云音乐净化 Pro
 https://ws.wenn.in/main/Plugin/goofish.plugin, enabled=true, tag=闲鱼去广告
 https://ws.wenn.in/main/Plugin/qishui.plugin, enabled=true, tag=汽水音乐净化
-https://ws.wenn.in/main/Plugin/taopiaopiao.plugin, enabled=true, tag=淘票票净化
+https://ws.wenn.in/main/Plugin/taopiaopiao-pro.plugin, enabled=true, tag=淘票票净化 Pro
 https://ws.wenn.in/main/Plugin/amap.plugin, enabled=true, tag=高德地图去广告
 https://ws.wenn.in/main/Plugin/jd-pro.plugin, enabled=true, tag=京东去广告 Pro
 https://ws.wenn.in/main/Plugin/qqmusic.plugin, enabled=true, tag=QQ音乐去广告
