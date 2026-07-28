@@ -1,1 +1,1 @@
-"use strict";if(typeof $response>"u"){$done();return}try{const e=JSON.parse($response.body);e&&e.data&&(e.data={}),$done({body:JSON.stringify(e)})}catch{$done()}
+"use strict";(()=>{var d=(e,n)=>()=>{try{return n||e((n={exports:{}}).exports,n),n.exports}catch(o){throw n=0,o}};var r=d(()=>{if(typeof $response>"u"){$done();return}try{let e=JSON.parse($response.body);e&&e.data&&(e.data={}),$done({body:JSON.stringify(e)})}catch{$done()}});r();})();
