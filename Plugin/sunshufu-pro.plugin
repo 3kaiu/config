@@ -24,35 +24,35 @@ DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执行日
 # ════════════════════════════════════════
 
 # ── 开屏广告模块 ───────────────────────
-http-response ^https?:\/\/m\.unionpay\.com\/splash splash-filter, enable={ENABLE_SUNSHUFU}&{SPLASH_ENABLE}
-http-response ^https?::\/\/ads\.unionpay\.com\/splash open-splash-filter, enable={ENABLE_SUNSHUFU}&{SPLASH_ENABLE}
-http-response ^https?::\/\/mbs\.unionpay\.com\/splash ad-splash-filter, enable={ENABLE_SUNSHUFU}&{SPLASH_ENABLE}
+http-response ^https?:\/\/m\.unionpay\.com\/splash reject-dict enable={ENABLE_SUNSHUFU}&{SPLASH_ENABLE}
+http-response ^https?::\/\/ads\.unionpay\.com\/splash reject-dict enable={ENABLE_SUNSHUFU}&{SPLASH_ENABLE}
+http-response ^https?::\/\/mbs\.unionpay\.com\/splash reject-dict enable={ENABLE_SUNSHUFU}&{SPLASH_ENABLE}
 
 # ── 首页净化模块 ──────────────────────
-http-response ^https?:\/\/api\.unionpay\.com\/gateway feed-filter, enable={ENABLE_SUNSHUFU}&{HOME_ENABLE}
-http-response ^https?::\/\/portal\.unionpay\.com\/portal portal-ad-filter, enable={ENABLE_SUNSHUFU}&{HOME_ENABLE}
-http-response ^https?::\/\/news\.unionpay\.com\/feed news-feed-filter, enable={ENABLE_SUNSHUFU}&{HOME_ENABLE}
+http-response ^https?:\/\/api\.unionpay\.com\/gateway reject-dict enable={ENABLE_SUNSHUFU}&{HOME_ENABLE}
+http-response ^https?::\/\/portal\.unionpay\.com\/portal reject-dict enable={ENABLE_SUNSHUFU}&{HOME_ENABLE}
+http-response ^https?::\/\/news\.unionpay\.com\/feed reject-dict enable={ENABLE_SUNSHUFU}&{HOME_ENABLE}
 
 # ── 活动净化模块 ──────────────────────
-http-response ^https?::\/\/activity\.unionpay\.com\/promo promo-filter, enable={ENABLE_SUNSHUFU}&{ACTIVITY_ENABLE}
-http-response ^https?::\/\/event\.unionpay\.com\/event event-promo-filter, enable={ENABLE_SUNSHUFU}&{ACTIVITY_ENABLE}
-http-response ^https?::\/\/campaign\.unionpay\.com\/banner banner-filter, enable={ENABLE_SUNSHUFU}&{ACTIVITY_ENABLE}
+http-response ^https?::\/\/activity\.unionpay\.com\/promo reject-dict enable={ENABLE_SUNSHUFU}&{ACTIVITY_ENABLE}
+http-response ^https?::\/\/event\.unionpay\.com\/event reject-dict enable={ENABLE_SUNSHUFU}&{ACTIVITY_ENABLE}
+http-response ^https?::\/\/campaign\.unionpay\.com\/banner reject-dict enable={ENABLE_SUNSHUFU}&{ACTIVITY_ENABLE}
 
 # ── 优惠券净化模块 ────────────────────
-http-response ^https?:::\/\/coupon\.unionpay\.com\/popup popup-filter, enable={ENABLE_SUNSHUFU}&{COUPON_ENABLE}
-http-response ^https?:::\/\/voucher\.unionpay\.com\/list voucher-filter, enable={ENABLE_SUNSHUFU}&{COUPON_ENABLE}
-http-response ^https?:::\/\/ticket\.unionpay\.com\/discount discount-filter, enable={ENABLE_SUNSHUFU}&{COUPON_ENABLE}
+http-response ^https?:::\/\/coupon\.unionpay\.com\/popup reject-dict enable={ENABLE_SUNSHUFU}&{COUPON_ENABLE}
+http-response ^https?:::\/\/voucher\.unionpay\.com\/list reject-dict enable={ENABLE_SUNSHUFU}&{COUPON_ENABLE}
+http-response ^https?:::\/\/ticket\.unionpay\.com\/discount reject-dict enable={ENABLE_SUNSHUFU}&{COUPON_ENABLE}
 
 # ── 银行优惠增强模块 ──────────────────
 # 优化银行活动优先级显示
-http-request ^https?::\/\/bank\.unionpay\.com\/rank action post header X-Bank-Priority: high $done, enable={ENABLE_SUNSHUFU}&{BANK_ENABLE}
+http-request ^https?::\/\/bank\.unionpay\.com\/rank reject-dict post header X-Bank-Priority: high $done, enable={ENABLE_SUNSHUFU}&{BANK_ENABLE}
 
 # 解锁银行专属优惠
-http-response ^https?:::\/\/bankoffer\.unionpay\.com\/vip vip-offer-filter, enable={ENABLE_SUNSHUFU}&{BANK_ENABLE}
+http-response ^https?:::\/\/bankoffer\.unionpay\.com\/vip reject-dict enable={ENABLE_SUNSHUFU}&{BANK_ENABLE}
 
 # ── 其他净化模块 ─────────────────────
-http-response ^https?:::\/\/tracking\.unionpay\.com\/track tracking-blocker, enable={ENABLE_SUNSHUFU}
-http-response ^https?::\/\/log\.unionpay\.com\/event event-filter, enable={ENABLE_SUNSHUFU}
+http-response ^https?:::\/\/tracking\.unionpay\.com\/track reject-dict enable={ENABLE_SUNSHUFU}
+http-response ^https?::\/\/log\.unionpay\.com\/event reject-dict enable={ENABLE_SUNSHUFU}
 
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
@@ -61,6 +61,8 @@ cron {SUNCRON_EXP} script-path=https://ws.wenn.in/main/Scripts/SunShuFu.js, time
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────
+
+[Rule]
 DOMAIN-SUFFIX, unionpay.com, DIRECT
 DOMAIN-SUFFIX, mybank.com, DIRECT
 

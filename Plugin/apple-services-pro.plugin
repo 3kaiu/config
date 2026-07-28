@@ -26,104 +26,104 @@ DEBUG_ENABLE=switch,"false","true",tag 调试模式，desc=输出详细执行日
 # ════════════════════════════════════════
 
 # ── 区域解锁 ───────────────────────────
-http-response ^https?:\/\/apps\.apple\.com\/v1\/catalog\/app store-region-unlock, enable={ENABLE_APPLE}&{APPSTORE_ENABLE}
-http-response ^https?:::\/\/apps\.apple\.com\/v1\/catalog\/apps store-apps-unlock, enable={ENABLE_APPLE}&{APPSTORE_ENABLE}
+http-response ^https?:\/\/apps\.apple\.com\/v1\/catalog\/app reject-dict enable={ENABLE_APPLE}&{APPSTORE_ENABLE}
+http-response ^https?:::\/\/apps\.apple\.com\/v1\/catalog\/apps reject-dict enable={ENABLE_APPLE}&{APPSTORE_ENABLE}
 
 # ── 广告净化 ───────────────────────────
-http-response ^https?:\/\/apps\.apple\.com\/v1\/advertising ad-clean, enable={ENABLE_APPLE}&{APPSTORE_ENABLE}
-http-response ^https?:::\/\/apps\.apple\.com\/v1\/recommendations recommend-clean, enable={ENABLE_APPLE}&{APPSTORE_ENABLE}
+http-response ^https?:\/\/apps\.apple\.com\/v1\/advertising reject-dict enable={ENABLE_APPLE}&{APPSTORE_ENABLE}
+http-response ^https?:::\/\/apps\.apple\.com\/v1\/recommendations reject-dict enable={ENABLE_APPLE}&{APPSTORE_ENABLE}
 
 # ── 搜索优化 ───────────────────────────
-http-response ^https?:\/\/apps\.apple\.com\/v1\/search search-optimize, enable={ENABLE_APPLE}&{APPSTORE_ENABLE}
-http-response ^https?:::\/\/apps\.apple\.com\/v1\/suggestions suggest-clean, enable={ENABLE_APPLE}&{APPSTORE_ENABLE}
+http-response ^https?:\/\/apps\.apple\.com\/v1\/search reject-dict enable={ENABLE_APPLE}&{APPSTORE_ENABLE}
+http-response ^https?:::\/\/apps\.apple\.com\/v1\/suggestions reject-dict enable={ENABLE_APPLE}&{APPSTORE_ENABLE}
 
 # ════════════════════════════════════════
 # 🎵 Apple Music 增强规则
 # ═══════════════════════════════════════===
 
 # ── 无损音质解锁 ──────────────────────
-http-response ^https?:\/\/amp-api\.music\.apple\.com lossless-unlock, enable={ENABLE_APPLE}&{MUSIC_ENABLE}
-http-response ^https?:::\/\/amp-api\.music\.apple\.com\/v1\/catalog quality-enhance, enable={ENABLE_APPLE}&{MUSIC_ENABLE}
+http-response ^https?:\/\/amp-api\.music\.apple\.com reject-dict enable={ENABLE_APPLE}&{MUSIC_ENABLE}
+http-response ^https?:::\/\/amp-api\.music\.apple\.com\/v1\/catalog reject-dict enable={ENABLE_APPLE}&{MUSIC_ENABLE}
 
 # ── 歌词翻译增强 ──────────────────────
-http-response ^https?:\/\/amp-api\.music\.apple\.com\/v1\/lyrics lyrics-translate, enable={ENABLE_APPLE}&{MUSIC_ENABLE}
-http-response ^https?:::\/\/amp-api\.music\.apple\.com\/v1\/songs song-info-enhance, enable={ENABLE_APPLE}&{MUSIC_ENABLE}
+http-response ^https?:\/\/amp-api\.music\.apple\.com\/v1\/lyrics reject-dict enable={ENABLE_APPLE}&{MUSIC_ENABLE}
+http-response ^https?:::\/\/amp-api\.music\.apple\.com\/v1\/songs reject-dict enable={ENABLE_APPLE}&{MUSIC_ENABLE}
 
 # ── 推荐净化 ───────────────────────────
-http-response ^https?:\/\/amp-api\.music\.apple\.com\/v1\/recommendations music-recommend-clean, enable={ENABLE_APPLE}&{MUSIC_ENABLE}
-http-response ^https?:::\/\/amp-api\.music\.apple\.com\/v1\/charts chart-clean, enable={ENABLE_APPLE}&{MUSIC_ENABLE}
+http-response ^https?:\/\/amp-api\.music\.apple\.com\/v1\/recommendations reject-dict enable={ENABLE_APPLE}&{MUSIC_ENABLE}
+http-response ^https?:::\/\/amp-api\.music\.apple\.com\/v1\/charts reject-dict enable={ENABLE_APPLE}&{MUSIC_ENABLE}
 
 # ════════════════════════════════════════
 # ☁️ iCloud 增强规则
 # ═══════════════════════════════════════===
 
 # ── 存储空间优化 ──────────────────────
-http-response ^https?:\/\/icloud\.com\/v1\/storage storage-optimize, enable={ENABLE_APPLE}&{ICLOUD_ENABLE}
-http-response ^https?:::\/\/icloud\.com\/v1\/backup backup-clean, enable={ENABLE_APPLE}&{ICLOUD_ENABLE}
+http-response ^https?:\/\/icloud\.com\/v1\/storage reject-dict enable={ENABLE_APPLE}&{ICLOUD_ENABLE}
+http-response ^https?:::\/\/icloud\.com\/v1\/backup reject-dict enable={ENABLE_APPLE}&{ICLOUD_ENABLE}
 
 # ── 隐私保护 ───────────────────────────
-http-response ^https?:\/\/icloud\.com\/v1\/privacy privacy-protect, enable={ENABLE_APPLE}&{ICLOUD_ENABLE}
-http-response ^https?:::\/\/icloud\.com\/v1\/analytics analytics-block, enable={ENABLE_APPLE}&{ICLOUD_ENABLE}
+http-response ^https?:\/\/icloud\.com\/v1\/privacy reject-dict enable={ENABLE_APPLE}&{ICLOUD_ENABLE}
+http-response ^https?:::\/\/icloud\.com\/v1\/analytics reject-dict enable={ENABLE_APPLE}&{ICLOUD_ENABLE}
 
 # ════════════════════════════════════════
 # 🗺️ Maps 增强规则 (扩展 iRingo)
 # ═══════════════════════════════════════===
 
 # ── 卫星地图解锁 ──────────────────────
-http-response ^https?:\/\/configuration\.ls\.apple\.com satellite-unlock, enable={ENABLE_APPLE}&{MAPS_ENABLE}
-http-response ^https?:::\/\/gspe35-ssl\.ls\.apple\.com map-data-enhance, enable={ENABLE_APPLE}&{MAPS_ENABLE}
+http-response ^https?:\/\/configuration\.ls\.apple\.com reject-dict enable={ENABLE_APPLE}&{MAPS_ENABLE}
+http-response ^https?:::\/\/gspe35-ssl\.ls\.apple\.com reject-dict enable={ENABLE_APPLE}&{MAPS_ENABLE}
 
 # ── 国际导航功能 ──────────────────────
-http-response ^https?:\/\/gspe35-ssl\.ls\.apple\.com navigation-intl, enable={ENABLE_APPLE}&{MAPS_ENABLE}
-http-response ^https?:::\/\/gspe35-ssl\.ls\.apple\.com\/search search-global, enable={ENABLE_APPLE}&{MAPS_ENABLE}
+http-response ^https?:\/\/gspe35-ssl\.ls\.apple\.com reject-dict enable={ENABLE_APPLE}&{MAPS_ENABLE}
+http-response ^https?:::\/\/gspe35-ssl\.ls\.apple\.com\/search reject-dict enable={ENABLE_APPLE}&{MAPS_ENABLE}
 
 # ── 周边探索增强 ──────────────────────
-http-response ^https?:\/\/gspe35-ssl\.ls\.apple\.com nearby-explore, enable={ENABLE_APPLE}&{MAPS_ENABLE}
-http-response ^https?:::\/\/gspe35-ssl\.ls\.apple\.com\/poi poi-enhance, enable={ENABLE_APPLE}&{MAPS_ENABLE}
+http-response ^https?:\/\/gspe35-ssl\.ls\.apple\.com reject-dict enable={ENABLE_APPLE}&{MAPS_ENABLE}
+http-response ^https?:::\/\/gspe35-ssl\.ls\.apple\.com\/poi reject-dict enable={ENABLE_APPLE}&{MAPS_ENABLE}
 
 # ════════════════════════════════════════
 # 📰 News 增强规则 (扩展 iRingo)
 # ═══════════════════════════════════════===
 
 # ── 区域解锁 ───────────────────────────
-http-response ^https?:\/\/news-edge\.apple\.com news-region-unlock, enable={ENABLE_APPLE}&{NEWS_ENABLE}
-http-response ^https?:::\/\/news-todayconfig-edge\.apple\.com news-config-unlock, enable={ENABLE_APPLE}&{NEWS_ENABLE}
+http-response ^https?:\/\/news-edge\.apple\.com reject-dict enable={ENABLE_APPLE}&{NEWS_ENABLE}
+http-response ^https?:::\/\/news-todayconfig-edge\.apple\.com reject-dict enable={ENABLE_APPLE}&{NEWS_ENABLE}
 
 # ── 内容增强 ───────────────────────────
-http-response ^https?:\/\/news-events\.apple\.com news-content-enhance, enable={ENABLE_APPLE}&{NEWS_ENABLE}
-http-response ^https?:::\/\/news-sports-events\.apple\.com sports-news-enhance, enable={ENABLE_APPLE}&{NEWS_ENABLE}
+http-response ^https?:\/\/news-events\.apple\.com reject-dict enable={ENABLE_APPLE}&{NEWS_ENABLE}
+http-response ^https?:::\/\/news-sports-events\.apple\.com reject-dict enable={ENABLE_APPLE}&{NEWS_ENABLE}
 
 # ── 广告净化 ───────────────────────────
-http-response ^https?:\/\/news-client\.apple\.com news-ad-clean, enable={ENABLE_APPLE}&{NEWS_ENABLE}
-http-response ^https?:::\/\/news-client-search\.apple\.com news-search-clean, enable={ENABLE_APPLE}&{NEWS_ENABLE}
+http-response ^https?:\/\/news-client\.apple\.com reject-dict enable={ENABLE_APPLE}&{NEWS_ENABLE}
+http-response ^https?:::\/\/news-client-search\.apple\.com reject-dict enable={ENABLE_APPLE}&{NEWS_ENABLE}
 
 # ════════════════════════════════════════
 # 🎤 Siri 增强规则 (扩展 iRingo)
 # ═══════════════════════════════════════===
 
 # ── 国际版功能解锁 ────────────────────
-http-response ^https?:\/\/guzzoni\.smoot\.apple\.com siri-intl-unlock, enable={ENABLE_APPLE}&{SIRI_ENABLE}
-http-response ^https?:::\/\/api2\.smoot\.apple\.com siri-api-enhance, enable={ENABLE_APPLE}&{SIRI_ENABLE}
+http-response ^https?:\/\/guzzoni\.smoot\.apple\.com reject-dict enable={ENABLE_APPLE}&{SIRI_ENABLE}
+http-response ^https?:::\/\/api2\.smoot\.apple\.com reject-dict enable={ENABLE_APPLE}&{SIRI_ENABLE}
 
 # ── 搜索建议优化 ──────────────────────
-http-response ^https?:\/\/guzzoni\.smoot\.apple\.com\/search search-suggest-optimize, enable={ENABLE_APPLE}&{SIRI_ENABLE}
-http-response ^https?:::\/\/api2\.smoot\.apple\.com\/suggestions suggestion-clean, enable={ENABLE_APPLE}&{SIRI_ENABLE}
+http-response ^https?:\/\/guzzoni\.smoot\.apple\.com\/search reject-dict enable={ENABLE_APPLE}&{SIRI_ENABLE}
+http-response ^https?:::\/\/api2\.smoot\.apple\.com\/suggestions reject-dict enable={ENABLE_APPLE}&{SIRI_ENABLE}
 
 # ════════════════════════════════════════
 # 🔒 Apple 隐私防护
 # ═══════════════════════════════════════===
 
 # ── Apple 追踪拦截 ─────────────────────
-http-request ^https?:\/\/xp\.apple\.com apple-track-blocker, enabled={ENABLE_APPLE}&{PRIVACY_ENABLE}
-http-request ^https?:::\/\/securemetrics\.apple\.com metrics-blocker, enabled={ENABLE_APPLE}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/xp\.apple\.com reject-dict enabled={ENABLE_APPLE}&{PRIVACY_ENABLE}
+http-request ^https?:::\/\/securemetrics\.apple\.com reject-dict enabled={ENABLE_APPLE}&{PRIVACY_ENABLE}
 
 # ── 数据分析拦截 ──────────────────────
-http-request ^https?:::\/\/api\.analytics\.apple\.com analytics-blocker, enabled={ENABLE_APPLE}&{PRIVACY_ENABLE}
-http-request ^https?:::\/\/init\.ess\.apple\.com init-blocker, enabled={ENABLE_APPLE}&{PRIVACY_ENABLE}
+http-request ^https?:::\/\/api\.analytics\.apple\.com reject-dict enabled={ENABLE_APPLE}&{PRIVACY_ENABLE}
+http-request ^https?:::\/\/init\.ess\.apple\.com reject-dict enabled={ENABLE_APPLE}&{PRIVACY_ENABLE}
 
 # ── 广告标识符拦截 ─────────────────────
-http-request ^https?:::\/\/idmsa\.apple\.com idfa-blocker, enabled={ENABLE_APPLE}&{PRIVACY_ENABLE}
-http-request ^https?:::\/\/appleid\.apple\.com appleid-track-blocker, enabled={ENABLE_APPLE}&{PRIVACY_ENABLE}
+http-request ^https?:::\/\/idmsa\.apple\.com reject-dict enabled={ENABLE_APPLE}&{PRIVACY_ENABLE}
+http-request ^https?:::\/\/appleid\.apple\.com reject-dict enabled={ENABLE_APPLE}&{PRIVACY_ENABLE}
 
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
@@ -132,6 +132,8 @@ cron {APPLE_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/AppleServices.
 
 [Rewrite]
 # ── 白名单配置 ─────────────────────────
+
+[Rule]
 DOMAIN-SUFFIX, apple.com, DIRECT
 DOMAIN-SUFFIX, apple-mapkit.com, DIRECT
 DOMAIN-SUFFIX, icloud.com, DIRECT

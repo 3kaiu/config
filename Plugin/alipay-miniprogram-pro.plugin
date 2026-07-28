@@ -55,11 +55,13 @@ cron {MINICRON_EXP} script-path=https://ws.wenn.in/main/Scripts/AlipayMiniClean.
 
 [Rewrite]
 # ── DNS 级拦截白名单 ────────────────────
+
+# ── 广告服务黑名单 ──────────────────────
+
+[Rule]
 DOMAIN-SUFFIX, alipay.com, DIRECT
 DOMAIN-SUFFIX, alipayobjects.com, DIRECT
 DOMAIN-SUFFIX, 2c.log.alipay.com, DIRECT
-
-# ── 广告服务黑名单 ──────────────────────
 DOMAIN-SUFFIX, ad.alipay.com, REJECT
 DOMAIN-SUFFIX, track.alipay.com, REJECT
 DOMAIN-SUFFIX, log.alipay.com, REJECT

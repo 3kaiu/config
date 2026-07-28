@@ -25,41 +25,41 @@ IQIYI_DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执
 
 # ── 开屏广告模块 ───────────────────────
 http-response ^https?:\/\/ads\.api\.iqiyi\.com\/splash url reject-200, enable={ENABLE_IQIYI}&{IQIYI_SPLASH_ENABLE}
-http-response ^https?:\/\/mobile\.ads\.iqiyi\.com\/ad open-ad-filter, enable={ENABLE_IQIYI}&{IQIYI_SPLASH_ENABLE}
+http-response ^https?:\/\/mobile\.ads\.iqiyi\.com\/ad reject-dict enable={ENABLE_IQIYI}&{IQIYI_SPLASH_ENABLE}
 http-response ^https?:\/\/open\.api\.iqiyi\.com\/splash splash-reject, enable={ENABLE_IQIYI}&{IQIYI_SPLASH_ENABLE}
 
 # ── 首页净化模块 ──────────────────────
-http-response ^https?::\/\/feed\.pgc\.iqiyi\.com\/home home-feed-filter, enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
-http-response ^https?::\/\/hot\.v\.iqiyi\.com\/hotsearch hot-search-filter, enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
-http-response ^https?::\/\/gateway\.iqiyi\.com\/intent ad-intent-filter, enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
-http-response ^https?::\/\/api\.bubble\.iqiyi\.com\/bubble bubble-ad-filter, enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
+http-response ^https?::\/\/feed\.pgc\.iqiyi\.com\/home reject-dict enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
+http-response ^https?::\/\/hot\.v\.iqiyi\.com\/hotsearch reject-dict enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
+http-response ^https?::\/\/gateway\.iqiyi\.com\/intent reject-dict enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
+http-response ^https?::\/\/api\.bubble\.iqiyi\.com\/bubble reject-dict enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
 
 # ── VIP 增强模块 ───────────────────────
 # 解锁 VIP 专属影片库
-http-request ^https?::\/\/srvp\.qy\.tencent\.com\/play action post header X-Vip-Res: true $done, enable={ENABLE_IQIYI}&{IQIYI_VIP_ENABLE}
+http-request ^https?::\/\/srvp\.qy\.tencent\.com\/play reject-dict post header X-Vip-Res: true $done, enable={ENABLE_IQIYI}&{IQIYI_VIP_ENABLE}
 
 # 解锁 VIP 免广告权益
-http-response ^https?::\/\/modues\.iqiyi\.com\/vip vip-module-filter, enable={ENABLE_IQIYI}&{IQIYI_VIP_ENABLE}
+http-response ^https?::\/\/modues\.iqiyi\.com\/vip reject-dict enable={ENABLE_IQIYI}&{IQIYI_VIP_ENABLE}
 
 # ── 播放优化模块 ──────────────────────
 # 跳过片头广告
-http-response ^https?::\/\/data\.v\.iqiyi\.com\/ad skip-ad-filter, enable={ENABLE_IQIYI}&{IQIYI_PLAY_ENABLE}
+http-response ^https?::\/\/data\.v\.iqiyi\.com\/ad reject-dict enable={ENABLE_IQIYI}&{IQIYI_PLAY_ENABLE}
 
 # 去除片尾推广
-http-response ^https?::\/\/m\.api\.cn\.iqiyi\.com\/end end-promo-filter, enable={ENABLE_IQIYI}&{IQIYI_PLAY_ENABLE}
+http-response ^https?::\/\/m\.api\.cn\.iqiyi\.com\/end reject-dict enable={ENABLE_IQIYI}&{IQIYI_PLAY_ENABLE}
 
 # 清除暂停广告
-http-response ^https?::\/\/pause\.api\.iqiyi\.com\/ad pause-ad-filter, enable={ENABLE_IQIYI}&{IQIYI_PLAY_ENABLE}
+http-response ^https?::\/\/pause\.api\.iqiyi\.com\/ad reject-dict enable={ENABLE_IQIYI}&{IQIYI_PLAY_ENABLE}
 
 # ── 4K 画质解锁模块 ──────────────────
 # 解锁 4K/UHD 选项
-http-response ^https?::\/\/player\.api\.iqiyi\.com\/video video-quality-filter, enable={ENABLE_IQIYI}&{IQIYI_4K_ENABLE}
-http-response ^https?::\/\/stream\.aqi\.iqiyi\.com\/bitrate bitrate-limit-filter, enable={ENABLE_IQIYI}&{IQIYI_4K_ENABLE}
-http-response ^https?::\/\/cdn\.iqiyi\.com\/app state-filter, enable={ENABLE_IQIYI}&{IQIYI_4K_ENABLE}
+http-response ^https?::\/\/player\.api\.iqiyi\.com\/video reject-dict enable={ENABLE_IQIYI}&{IQIYI_4K_ENABLE}
+http-response ^https?::\/\/stream\.aqi\.iqiyi\.com\/bitrate reject-dict enable={ENABLE_IQIYI}&{IQIYI_4K_ENABLE}
+http-response ^https?::\/\/cdn\.iqiyi\.com\/app reject-dict enable={ENABLE_IQIYI}&{IQIYI_4K_ENABLE}
 
 # ── 其他净化模块 ─────────────────────
-http-response ^https?::\/\/analytics\.iqiyi\.com\/track tracking-blocker, enable={ENABLE_IQIYI}
-http-response ^https?::\/\/log\.snssdk\.com\/event event-filter, enable={ENABLE_IQIYI}
+http-response ^https?::\/\/analytics\.iqiyi\.com\/track reject-dict enable={ENABLE_IQIYI}
+http-response ^https?::\/\/log\.snssdk\.com\/event reject-dict enable={ENABLE_IQIYI}
 
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
@@ -68,6 +68,8 @@ cron {IQIYI_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/Iqiyi.js, time
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────
+
+[Rule]
 DOMAIN-SUFFIX, iqiyi.com, DIRECT
 DOMAIN-SUFFIX, qiyi.com, DIRECT
 DOMAIN-SUFFIX, iqiyi.video, DIRECT

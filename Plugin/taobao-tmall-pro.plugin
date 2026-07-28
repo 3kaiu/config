@@ -26,34 +26,34 @@ TAOBAO_DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细�
 # ── 开屏广告模块 ───────────────────────
 http-response ^https?:\/\/ads\.api\.taobao\.com\/splash url reject-200, enable={ENABLE_TAOBAO}&{TAOBAO_SPLASH_ENABLE}
 http-response ^https?:\/\/flash\.tmall\.com\/splash list reject-200, enable={ENABLE_TAOBAO}&{TAOBAO_SPLASH_ENABLE}
-http-response ^https?:\/\/open\.api\.taobao\.com\/ad open-ad-filter, enable={ENABLE_TAOBAO}&{TAOBAO_SPLASH_ENABLE}
+http-response ^https?:\/\/open\.api\.taobao\.com\/ad reject-dict enable={ENABLE_TAOBAO}&{TAOBAO_SPLASH_ENABLE}
 
 # ── 首页净化模块 ──────────────────────
-http-response ^https?::\/\/h5\.msearch\.taobao\.com\/search feed-filter, enable={ENABLE_TAOBAO}&{TAOBAO_HOME_ENABLE}
-http-response ^https?::\/\/api\.taobao\.com\/home home-ad-filter, enable={ENABLE_TAOBAO}&{TAOBAO_HOME_ENABLE}
-http-response ^https?::\/\/gateway\.tmall\.com\/banner banner-filter, enable={ENABLE_TAOBAO}&{TAOBAO_HOME_ENABLE}
-http-response ^https?::\/\/mms\.taobao\.com\/pop pop-ad-filter, enable={ENABLE_TAOBAO}&{TAOBAO_HOME_ENABLE}
+http-response ^https?::\/\/h5\.msearch\.taobao\.com\/search reject-dict enable={ENABLE_TAOBAO}&{TAOBAO_HOME_ENABLE}
+http-response ^https?::\/\/api\.taobao\.com\/home reject-dict enable={ENABLE_TAOBAO}&{TAOBAO_HOME_ENABLE}
+http-response ^https?::\/\/gateway\.tmall\.com\/banner reject-dict enable={ENABLE_TAOBAO}&{TAOBAO_HOME_ENABLE}
+http-response ^https?::\/\/mms\.taobao\.com\/pop reject-dict enable={ENABLE_TAOBAO}&{TAOBAO_HOME_ENABLE}
 
 # ── 搜索净化模块 ──────────────────────
-http-response ^https?::\/\/criteo\.taobao\.com\/recommend suggest-ad-filter, enable={ENABLE_TAOBAO}&{TAOBAO_SEARCH_ENABLE}
-http-response ^https?::\/\/hotsearch\.tmall\.com\/hot hot-search-filter, enable={ENABLE_TAOBAO}&{TAOBAO_SEARCH_ENABLE}
-http-response ^https?::\/\/recengine\.mobile\.taobao\.com\/rec rec-ad-filter, enable={ENABLE_TAOBAO}&{TAOBAO_SEARCH_ENABLE}
+http-response ^https?::\/\/criteo\.taobao\.com\/recommend reject-dict enable={ENABLE_TAOBAO}&{TAOBAO_SEARCH_ENABLE}
+http-response ^https?::\/\/hotsearch\.tmall\.com\/hot reject-dict enable={ENABLE_TAOBAO}&{TAOBAO_SEARCH_ENABLE}
+http-response ^https?::\/\/recengine\.mobile\.taobao\.com\/rec reject-dict enable={ENABLE_TAOBAO}&{TAOBAO_SEARCH_ENABLE}
 
 # ── 购物车净化模块 ────────────────────
-http-response ^https?::\/\/cart\.taobao\.com\/cart cart-math-filter, enable={ENABLE_TAOBAO}&{TAOBAO_CART_ENABLE}
-http-response ^https?::\/\/promote\.cart\.taobao\.com\/promo promo-clean-filter, enable={ENABLE_TAOBAO}&{TAOBAO_CART_ENABLE}
-http-response ^https?::\/\/gift\.cart\.taobao\.com\/gift gift-remove-filter, enable={ENABLE_TAOBAO}&{TAOBAO_CART_ENABLE}
+http-response ^https?::\/\/cart\.taobao\.com\/cart reject-dict enable={ENABLE_TAOBAO}&{TAOBAO_CART_ENABLE}
+http-response ^https?::\/\/promote\.cart\.taobao\.com\/promo reject-dict enable={ENABLE_TAOBAO}&{TAOBAO_CART_ENABLE}
+http-response ^https?::\/\/gift\.cart\.taobao\.com\/gift reject-dict enable={ENABLE_TAOBAO}&{TAOBAO_CART_ENABLE}
 
 # ── 88VIP 增强模块 ──────────────────────
 # 优化 VIP 专属标识和权益展示
-http-request ^https?::\/\/vip\.service\.taobao\.com\/member action post header X-Vip-Level: 88 $done, enable={ENABLE_TAOBAO}&{TAOBAO_88VIP_ENABLE}
+http-request ^https?::\/\/vip\.service\.taobao\.com\/member reject-dict post header X-Vip-Level: 88 $done, enable={ENABLE_TAOBAO}&{TAOBAO_88VIP_ENABLE}
 
 # 解锁 VIP 专属优惠券
-http-response ^https?::\/\/coupon\.vip\.taobao\.com\/list vip-coupon-filter, enable={ENABLE_TAOBAO}&{TAOBAO_88VIP_ENABLE}
+http-response ^https?::\/\/coupon\.vip\.taobao\.com\/list reject-dict enable={ENABLE_TAOBAO}&{TAOBAO_88VIP_ENABLE}
 
 # ── 其他净化模块 ─────────────────────
-http-response ^https?::\/\/umtrack\.taobao\.com\/track tracking-blocker, enable={ENABLE_TAOBAO}
-http-response ^https?::\/\/log\.tmall\.com\/event event-filter, enable={ENABLE_TAOBAO}
+http-response ^https?::\/\/umtrack\.taobao\.com\/track reject-dict enable={ENABLE_TAOBAO}
+http-response ^https?::\/\/log\.tmall\.com\/event reject-dict enable={ENABLE_TAOBAO}
 
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
@@ -62,6 +62,8 @@ cron {TAOBAO_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/Taobao.js, ti
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────
+
+[Rule]
 DOMAIN-SUFFIX, taobao.com, DIRECT
 DOMAIN-SUFFIX, tmall.com, DIRECT
 DOMAIN-SUFFIX, alibaba.com, DIRECT

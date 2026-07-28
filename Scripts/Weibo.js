@@ -1,2 +1,5 @@
-// Weibo - cron task stub
+/**
+ * 微博每日签到
+ */
+$notification.post("微博净化", "定时签到", "微博净化规则运行中");
 $done();

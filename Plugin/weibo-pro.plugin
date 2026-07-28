@@ -28,29 +28,29 @@ http-response ^https?:\/\/flash\.weibo\.com\/splash\/list url reject-200, enable
 http-response ^https?:\/\/api\.weibo\.cn\/2\/splash url reject-200, enable={ENABLE_WEIBO}&{WEIBO_SPLASH_ENABLE}
 
 # ── 信息流净化模块 ────────────────────
-http-response ^https?:\/\/api\.weibo\.cn\/2\/statusmates\/feed流 stream-filter, enable={ENABLE_WEIBO}&{WEIBO_FEED_ENABLE}
-http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/unreadflow stream-filter, enable={ENABLE_WEIBO}&{WEIBO_FEED_ENABLE}
-http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/timeline flow-filter, enable={ENABLE_WEIBO}&{WEIBO_FEED_ENABLE}
-http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/favoritelist stream-filter, enable={ENABLE_WEIBO}&{WEIBO_FEED_ENABLE}
-http-response ^https?:\/\/api\.weibo\.cn\/2\/comments\/build_comment stream-filter, enable={ENABLE_WEIBO}&{WEIBO_FEED_ENABLE}
-http-response ^https?:\/\/api\.weibo\.cn\/2\/comments\/hotcomment stream-filter, enable={ENABLE_WEIBO}&{WEIBO_FEED_ENABLE}
+http-response ^https?:\/\/api\.weibo\.cn\/2\/statusmates\/feed流 reject-dict enable={ENABLE_WEIBO}&{WEIBO_FEED_ENABLE}
+http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/unreadflow reject-dict enable={ENABLE_WEIBO}&{WEIBO_FEED_ENABLE}
+http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/timeline reject-dict enable={ENABLE_WEIBO}&{WEIBO_FEED_ENABLE}
+http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/favoritelist reject-dict enable={ENABLE_WEIBO}&{WEIBO_FEED_ENABLE}
+http-response ^https?:\/\/api\.weibo\.cn\/2\/comments\/build_comment reject-dict enable={ENABLE_WEIBO}&{WEIBO_FEED_ENABLE}
+http-response ^https?:\/\/api\.weibo\.cn\/2\/comments\/hotcomment reject-dict enable={ENABLE_WEIBO}&{WEIBO_FEED_ENABLE}
 
 # ── 热搜净化模块 ──────────────────────
-http-response ^https?:\/\/api\.weibo\.cn\/2\/hot_search stream-filter, enable={ENABLE_WEIBO}&{WEIBO_HOT_ENABLE}
-http-response ^https?:\/\/top\.weibo\.com\/rest\/db\/v2\/search hot-filter, enable={ENABLE_WEIBO}&{WEIBO_HOT_ENABLE}
-http-response ^https?:\/\/api\.weibo\.cn\/2\/hotsearch hot-filter, enable={ENABLE_WEIBO}&{WEIBO_HOT_ENABLE}
-http-response ^https?:\/\/api\.weibo\.cn\/2\/top\/100 hot-filter, enable={ENABLE_WEIBO}&{WEIBO_HOT_ENABLE}
+http-response ^https?:\/\/api\.weibo\.cn\/2\/hot_search reject-dict enable={ENABLE_WEIBO}&{WEIBO_HOT_ENABLE}
+http-response ^https?:\/\/top\.weibo\.com\/rest\/db\/v2\/search reject-dict enable={ENABLE_WEIBO}&{WEIBO_HOT_ENABLE}
+http-response ^https?:\/\/api\.weibo\.cn\/2\/hotsearch reject-dict enable={ENABLE_WEIBO}&{WEIBO_HOT_ENABLE}
+http-response ^https?:\/\/api\.weibo\.cn\/2\/top\/100 reject-dict enable={ENABLE_WEIBO}&{WEIBO_HOT_ENABLE}
 
 # ── 评论区净化模块 ───────────────────
-http-response ^https?:\/\/api\.weibo\.cn\/2\/comments\/show comment-filter, enable={ENABLE_WEIBO}&{WEIBO_COMMENT_ENABLE}
-http-response ^https?:\/\/api\.weibo\.cn\/2\/comments\/compatible shows comment-filter, enable={ENABLE_WEIBO}&{WEIBO_COMMENT_ENABLE}
+http-response ^https?:\/\/api\.weibo\.cn\/2\/comments\/show reject-dict enable={ENABLE_WEIBO}&{WEIBO_COMMENT_ENABLE}
+http-response ^https?:\/\/api\.weibo\.cn\/2\/comments\/compatible reject-dict comment-filter, enable={ENABLE_WEIBO}&{WEIBO_COMMENT_ENABLE}
 
 # ── 其他净化模块 ─────────────────────
-http-response ^https?:\/\/api\.weibo\.cn\/2\/ad\/home stream-filter, enable={ENABLE_WEIBO}
-http-response ^https?:\/\/api\.weibo\.cn\/2\/topic\/recommend ad-filter, enable={ENABLE_WEIBO}
-http-response ^https?:\/\/api\.weibo\.cn\/2\/page/ad page-ad-filter, enable={ENABLE_WEIBO}
-http-response ^https?:\/\/api\.weibo\.cn\/2\/profile\/info recommend-filter, enable={ENABLE_WEIBO}
-http-response ^https?:\/\/api\.weibo\.cn\/2\/client\/ads ads-filter, enable={ENABLE_WEIBO}
+http-response ^https?:\/\/api\.weibo\.cn\/2\/ad\/home reject-dict enable={ENABLE_WEIBO}
+http-response ^https?:\/\/api\.weibo\.cn\/2\/topic\/recommend reject-dict enable={ENABLE_WEIBO}
+http-response ^https?:\/\/api\.weibo\.cn\/2\/page/ad reject-dict enable={ENABLE_WEIBO}
+http-response ^https?:\/\/api\.weibo\.cn\/2\/profile\/info reject-dict enable={ENABLE_WEIBO}
+http-response ^https?:\/\/api\.weibo\.cn\/2\/client\/ads reject-dict enable={ENABLE_WEIBO}
 
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
@@ -59,11 +59,13 @@ cron {WEIBO_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/Weibo.js, time
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────
-DOMAIN-SUFFIX, weibo.com, DIRECT
-DOMAIN-SUFFIX, weibocdn.com, DIRECT
 
 # ── 特殊域名重定向 ──────────────────
 ^https?:\/\/t\.co\/\?.* url 302 https://$4, enable={ENABLE_WEIBO}
+
+[Rule]
+DOMAIN-SUFFIX, weibo.com, DIRECT
+DOMAIN-SUFFIX, weibocdn.com, DIRECT
 
 [MitM]
 hostname = %APPEND% api.weibo.cn, api.weibo.com, ads.weibo.com, flash.weibo.com, top.weibo.com

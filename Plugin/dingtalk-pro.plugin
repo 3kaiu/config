@@ -24,33 +24,33 @@ DINGTALK_DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细
 # ════════════════════════════════════════
 
 # ── 消息净化模块 ──────────────────────
-http-response ^https?:\/\/api\.dingtalk\.com\/v1\.0\/im/chat\/getChatMessage feed-filter, enable={ENABLE_DINGTALK}&{DINGTALK_MSG_ENABLE}
-http-response ^https?:::\/\/a\.dingtalk\.com\/wb new-ad-filter, enable={ENABLE_DINGTALK}&{DINGTALK_MSG_ENABLE}
-http-response ^https?:::\/\/top\.dingtalk\.com\/feed list-ad-filter, enable={ENABLE_DINGTALK}&{DINGTALK_MSG_ENABLE}
+http-response ^https?:\/\/api\.dingtalk\.com\/v1\.0\/im/chat\/getChatMessage reject-dict enable={ENABLE_DINGTALK}&{DINGTALK_MSG_ENABLE}
+http-response ^https?:::\/\/a\.dingtalk\.com\/wb reject-dict enable={ENABLE_DINGTALK}&{DINGTALK_MSG_ENABLE}
+http-response ^https?:::\/\/top\.dingtalk\.com\/feed reject-dict enable={ENABLE_DINGTALK}&{DINGTALK_MSG_ENABLE}
 
 # ── 工作台净化模块 ────────────────────
-http-response ^https?:::\/\/tapd\.cn\/apps recommend-filter, enable={ENABLE_DINGTALK}&{DINGTALK_WORK_ENABLE}
-http-response ^https?:::\/\/oa\.dingtalk\.com\/app market-ad-filter, enable={ENABLE_DINGTALK}&{DINGTALK_WORK_ENABLE}
-http-response ^https?:::\/\/rds\.dingtalk\.com\/market store-promo-filter, enable={ENABLE_DINGTALK}&{DINGTALK_WORK_ENABLE}
+http-response ^https?:::\/\/tapd\.cn\/apps reject-dict enable={ENABLE_DINGTALK}&{DINGTALK_WORK_ENABLE}
+http-response ^https?:::\/\/oa\.dingtalk\.com\/app reject-dict enable={ENABLE_DINGTALK}&{DINGTALK_WORK_ENABLE}
+http-response ^https?:::\/\/rds\.dingtalk\.com\/market reject-dict enable={ENABLE_DINGTALK}&{DINGTALK_WORK_ENABLE}
 
 # ── 文档净化模块 ──────────────────────
-http-response ^https?:::\/\/docs\.dingtalk\.com\/recommend doc-recommend-filter, enable={ENABLE_DINGTALK}&{DINGTALK_DOC_ENABLE}
-http-response ^https?:::\/\/cloud\.dingtalk\.com\/share share-promo-filter, enable={ENABLE_DINGTALK}&{DINGTALK_DOC_ENABLE}
+http-response ^https?:::\/\/docs\.dingtalk\.com\/recommend reject-dict enable={ENABLE_DINGTALK}&{DINGTALK_DOC_ENABLE}
+http-response ^https?:::\/\/cloud\.dingtalk\.com\/share reject-dict enable={ENABLE_DINGTALK}&{DINGTALK_DOC_ENABLE}
 
 # ── 会议净化模块 ──────────────────────
-http-response ^https?:::\/\/meeting\.dingtalk\.com\/promotion meeting-promo-filter, enable={ENABLE_DINGTALK}&{DINGTALK_MEET_ENABLE}
-http-response ^https?:::\/\/v\.dingtalk\.com\/ads ads-filter, enable={ENABLE_DINGTALK}&{DINGTALK_MEET_ENABLE}
+http-response ^https?:::\/\/meeting\.dingtalk\.com\/promotion reject-dict enable={ENABLE_DINGTALK}&{DINGTALK_MEET_ENABLE}
+http-response ^https?:::\/\/v\.dingtalk\.com\/ads reject-dict enable={ENABLE_DINGTALK}&{DINGTALK_MEET_ENABLE}
 
 # ── 助手优化模块 ──────────────────────
 # 优化钉钉小蜜智能助手
-http-request ^https?:::\/\/nls-gateway\.cn-shanghai\.aliyuncs\.com\/v1 action post header X-Ding-Assist: optimize $done, enable={ENABLE_DINGTALK}&{DINGTALK_ASSISTANT_ENABLE}
+http-request ^https?:::\/\/nls-gateway\.cn-shanghai\.aliyuncs\.com\/v1 reject-dict post header X-Ding-Assist: optimize $done, enable={ENABLE_DINGTALK}&{DINGTALK_ASSISTANT_ENABLE}
 
 # 去除小蜜推荐内容
-http-response ^https?:::\/\/nls\.gateway\.aliyun\.com\/recommend assist-rec-filter, enable={ENABLE_DINGTALK}&{DINGTALK_ASSISTANT_ENABLE}
+http-response ^https?:::\/\/nls\.gateway\.aliyun\.com\/recommend reject-dict enable={ENABLE_DINGTALK}&{DINGTALK_ASSISTANT_ENABLE}
 
 # ── 其他净化模块 ─────────────────────
-http-response ^https?:::\/\/log\.dingtalk\.com\/track tracking-blocker, enable={ENABLE_DINGTALK}
-http-response ^https?:::\/\/data\.dingtalk\.com\/event event-filter, enable={ENABLE_DINGTALK}
+http-response ^https?:::\/\/log\.dingtalk\.com\/track reject-dict enable={ENABLE_DINGTALK}
+http-response ^https?:::\/\/data\.dingtalk\.com\/event reject-dict enable={ENABLE_DINGTALK}
 
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
@@ -59,6 +59,8 @@ cron {DINGTALK_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/DingTalk.js
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────
+
+[Rule]
 DOMAIN-SUFFIX, dingtalk.com, DIRECT
 DOMAIN-SUFFIX, alibaba.com, DIRECT
 

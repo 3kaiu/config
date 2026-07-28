@@ -24,44 +24,44 @@ DEBUG_ENABLE=switch,"false","true",tag 调试模式，desc=输出详细执行日
 # ════════════════════════════════════════
 
 # ── 首页动态净化 ───────────────────────
-http-response ^https?:\/\/api\.instagram\.com\/instagram\/feed feed-clean, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
-http-response ^https?::\/\/i.instagram\.com\/api/v1/feed/home home-purify, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?:\/\/api\.instagram\.com\/instagram\/feed reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?::\/\/i.instagram\.com\/api/v1/feed/home reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
 
 # ── 探索页净化 ──────────────────────────
-http-response ^https?::\/\/www\.instagram\.com\/explore explore-remove, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
-http-response ^https?::\/\/api\.instagram\.com\/v1/explore trending-clean, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?::\/\/www\.instagram\.com\/explore reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?::\/\/api\.instagram\.com\/v1/explore reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
 
 # ── Reels 短视屏净化 ──────────────────
-http-response ^https?:\/\/api\.instagram\.com\/ reels-feed-filter, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
-http-response ^https?:\/\/i\.instagram\.com\/clips video-ad-block, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?:\/\/api\.instagram\.com\/ reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?:\/\/i\.instagram\.com\/clips reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
 
 # ── Stories 净化 ───────────────────────
-http-response ^https?:\/\/api\.instagram\.com\/stories stories-clean, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
-http-response ^https?::\/\/i\.instagram\.com\/stories story-ad-filter, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?:\/\/api\.instagram\.com\/stories reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?::\/\/i\.instagram\.com\/stories reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
 
 # ── 推荐内容净化 ──────────────────────
-http-response ^https?:\/\/api\.instagram\.com\/recommended recommended-remove, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
-http-response ^https?::\/\/www\.instagram\.com\/suggestions suggestions-clean, enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?:\/\/api\.instagram\.com\/recommended reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?::\/\/www\.instagram\.com\/suggestions reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
 
 # ════════════════════════════════════════
 # 👍 Facebook 净化规则
 # ═══════════════════════════════════════===
 
 # ── News Feed 净化 ─────────────────────
-http-response ^https?:\/\/news-api\.facebook\.com news-feed-clean, enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
-http-response ^https?::\/\/graph\.facebook\.com news-sponsor-filter, enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+http-response ^https?:\/\/news-api\.facebook\.com reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+http-response ^https?::\/\/graph\.facebook\.com reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
 
 # ── Marketplace 净化 ───────────────────
-http-response ^https?:\/\/commerce\.facebook\.com marketplace-ad-block, enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
-http-response ^https?::\":\"\"\"marketplace\.facebook\.com\"\"\" promoted-products-filter, enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+http-response ^https?:\/\/commerce\.facebook\.com reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+http-response ^https?::\":\"\"\"marketplace\.facebook\.com\"\"\" reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
 
 # ── Groups 净化 ────────────────────────
-http-response ^https?:\/\/socialgraphs\.facebook\.com groups-promo-clean, enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
-http-response ^https?::\":\"\"\"groups\.facebook\.com\"\"\" sponsored-posts-filter, enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+http-response ^https?:\/\/socialgraphs\.facebook\.com reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+http-response ^https?::\":\"\"\"groups\.facebook\.com\"\"\" reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
 
 # ── Watch 视频净化 ─────────────────────
-http-response ^https?:\/\/video-api\.facebook\.com watch-ad-block, enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
-http-response ^https?::\":\"\"\"watch\.facebook\.com\"\"\" video-suggestion-filter, enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+http-response ^https?:\/\/video-api\.facebook\.com reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+http-response ^https?::\":\"\"\"watch\.facebook\.com\"\"\" reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
 
 # ════════════════════════════════════════
 # 🐦 Twitter/X 净化规则
@@ -100,22 +100,22 @@ http-response ^https?::\":\"\"\"adserver\.linkedin\.com\"\"\" ad-blocker script-
 # ═══════════════════════════════════════===
 
 # ── 第三方追踪器拦截 ──────────────────
-http-request ^https?:\/\/pixel\.facebook\.com facebook-pixel-blocker, enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
-http-request ^https?::\":\"\"\"www\.google-analytics\.com\"\"\" ga-track-blocker, enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
-http-request ^https?::\":\"\"\"api\.snaplytics\.io\"\"\" snap-track-blocker, enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/pixel\.facebook\.com reject-dict enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?::\":\"\"\"www\.google-analytics\.com\"\"\" reject-dict enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?::\":\"\"\"api\.snaplytics\.io\"\"\" reject-dict enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
 
 # ── 数据分析工具拦截 ──────────────────
-http-request ^https?::\":\"\"\"www\.hotjar\.com\"\"\" hotjar-blocker, enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
-http-request ^https?::\":\"\"\"app\.mixpanel\.com\"\"\" mixpanel-blocker, enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
-http-request ^https?::\":\"\"\"app\.amplitude\.com\"\"\" amplitude-blocker, enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?::\":\"\"\"www\.hotjar\.com\"\"\" reject-dict enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?::\":\"\"\"app\.mixpanel\.com\"\"\" reject-dict enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?::\":\"\"\"app\.amplitude\.com\"\"\" reject-dict enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
 
 # ── A/B 测试追踪拦截 ───────────────────
-http-request ^https?::\":\"\"\"optimizely\.com\"\"\" optimizely-blocker, enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
-http-request ^https?::\":\"\"\"stats\.tune\.in\"\"\" tune-track-blocker, enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?::\":\"\"\"optimizely\.com\"\"\" reject-dict enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?::\":\"\"\"stats\.tune\.in\"\"\" reject-dict enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
 
 # ── Cookie 同意弹窗处理 ────────────────
-http-response ^https?::\":\"\"\"cookielaw\.org\"\"\" cookie-banner-clean, enabled={ENABLE_OVERSEAS}
-http-response ^https?::\":\"\"\"consent\.oauthflow\.io\"\"\" consent-popup-blocker, enabled={ENABLE_OVERSEAS}
+http-response ^https?::\":\"\"\"cookielaw\.org\"\"\" reject-dict enabled={ENABLE_OVERSEAS}
+http-response ^https?::\":\"\"\"consent\.oauthflow\.io\"\"\" reject-dict enabled={ENABLE_OVERSEAS}
 
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
@@ -124,6 +124,8 @@ cron {OVERSEAS_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/OverseasSoc
 
 [Rewrite]
 # ── 白名单配置 ─────────────────────────
+
+[Rule]
 DOMAIN-SUFFIX, instagram.com, DIRECT
 DOMAIN-SUFFIX, facebook.com, DIRECT
 DOMAIN-SUFFIX, twitter.com, DIRECT

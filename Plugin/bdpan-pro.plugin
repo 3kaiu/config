@@ -27,31 +27,31 @@ http-response ^https?:\/\/api\.netdisk\.com\/api\/splash\/get url reject-200, en
 http-response ^https?:\/\/open\.bce\.baidupcs\.com\/app\/flash screen-reject, enable={ENABLE_BDPAN}&{BDPAN_SPLASH_ENABLE}
 
 # ── 信息流净化模块 ────────────────────
-http-response ^https?:\/\/api\.netdisk\.com\/api\/home\/info info-filter, enable={ENABLE_BDPAN}&{BDPAN_FEED_ENABLE}
-http-response ^https?:\/\/api\.netdisk\.com\/api\/activity\/list list-filter, enable={ENABLE_BDPAN}&{BDPAN_FEED_ENABLE}
-http-response ^https?:\/\/api\.netdisk\.com\/api\/recommend\/feed recommend-filter, enable={ENABLE_BDPAN}&{BDPAN_FEED_ENABLE}
-http-response ^https?:\/\/api\.netdisk\.com\/api\/ad\/show ads-filter, enable={ENABLE_BDPAN}&{BDPAN_FEED_ENABLE}
+http-response ^https?:\/\/api\.netdisk\.com\/api\/home\/info reject-dict enable={ENABLE_BDPAN}&{BDPAN_FEED_ENABLE}
+http-response ^https?:\/\/api\.netdisk\.com\/api\/activity\/list reject-dict enable={ENABLE_BDPAN}&{BDPAN_FEED_ENABLE}
+http-response ^https?:\/\/api\.netdisk\.com\/api\/recommend\/feed reject-dict enable={ENABLE_BDPAN}&{BDPAN_FEED_ENABLE}
+http-response ^https?:\/\/api\.netdisk\.com\/api\/ad\/show reject-dict enable={ENABLE_BDPAN}&{BDPAN_FEED_ENABLE}
 
 # ── 倍速解锁模块 ──────────────────────
 # 模拟 VIP 加速响应
-http-request ^https?:\/\/pcs\.baidu\.com\/download.* method POST header X-Extra-Info: vip_accelerate=true $done
+http-request ^https?:\/\/pcs\.baidu\.com\/download.* reject-dict POST header X-Extra-Info: vip_accelerate=true $done
 
 # 视频倍速播放配置
-http-response ^https?:\/\/api\.netdisk\.com\/api\/play\/url play-speed-filter, enable={ENABLE_BDPAN}&{BDPAN_SPEED_ENABLE}
+http-response ^https?:\/\/api\.netdisk\.com\/api\/play\/url reject-dict enable={ENABLE_BDPAN}&{BDPAN_SPEED_ENABLE}
 
 # ── 会员增强模块 ──────────────────────
 # 解锁超大文件上传限制
-http-response ^https?:\/\/api\.netdisk\.com\/api\/file\/upload upload-limit-filter, enable={ENABLE_BDPAN}&{BDPAN_VIP_ENABLE}
+http-response ^https?:\/\/api\.netdisk\.com\/api\/file\/upload reject-dict enable={ENABLE_BDPAN}&{BDPAN_VIP_ENABLE}
 
 # 解锁在线预览容量限制
-http-response ^https?:\/\/api\.netdisk\.com\/api\/file\/preview preview-capacity-filter, enable={ENABLE_BDPAN}&{BDPAN_VIP_ENABLE}
+http-response ^https?:\/\/api\.netdisk\.com\/api\/file\/preview reject-dict enable={ENABLE_BDPAN}&{BDPAN_VIP_ENABLE}
 
 # 解锁极速下载通道
-http-response ^https?:\/\/api\.netdisk\.com\/api\/share\/download download-speed-filter, enable={ENABLE_BDPAN}&{BDPAN_VIP_ENABLE}
+http-response ^https?:\/\/api\.netdisk\.com\/api\/share\/download reject-dict enable={ENABLE_BDPAN}&{BDPAN_VIP_ENABLE}
 
 # ── 其他净化模块 ─────────────────────
-http-response ^https?:\/\/api\.netdisk\.com\/api\/notification\/msg notification-filter, enable={ENABLE_BDPAN}
-http-response ^https?:\/\/api\.netdisk\.com\/api\/task\/list task-filter, enable={ENABLE_BDPAN}
+http-response ^https?:\/\/api\.netdisk\.com\/api\/notification\/msg reject-dict enable={ENABLE_BDPAN}
+http-response ^https?:\/\/api\.netdisk\.com\/api\/task\/list reject-dict enable={ENABLE_BDPAN}
 
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
@@ -60,6 +60,8 @@ cron {BDPAN_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/BdPan.js, time
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────
+
+[Rule]
 DOMAIN-SUFFIX, baidu.com, DIRECT
 DOMAIN-SUFFIX, baidupcs.com, DIRECT
 DOMAIN-SUFFIX, bcebos.com, DIRECT

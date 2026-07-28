@@ -24,36 +24,36 @@ DIDI_DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执�
 # ════════════════════════════════════════
 
 # ── 开屏广告模块 ───────────────────────
-http-response ^https?:\/\/ads\.didiglobal\.com\/splash splash-filter, enable={ENABLE_DIDI}&{DIDI_SPLASH_ENABLE}
-http-response ^https?::\/\/sdkopen\.vip\.didi\.cn\/splash open-splash-filter, enable={ENABLE_DIDI}&{DIDI_SPLASH_ENABLE}
-http-response ^https?::\/\/mbs\.didiglobal\.com\/splash ad-splash-filter, enable={ENABLE_DIDI}&{DIDI_SPLASH_ENABLE}
+http-response ^https?:\/\/ads\.didiglobal\.com\/splash reject-dict enable={ENABLE_DIDI}&{DIDI_SPLASH_ENABLE}
+http-response ^https?::\/\/sdkopen\.vip\.didi\.cn\/splash reject-dict enable={ENABLE_DIDI}&{DIDI_SPLASH_ENABLE}
+http-response ^https?::\/\/mbs\.didiglobal\.com\/splash reject-dict enable={ENABLE_DIDI}&{DIDI_SPLASH_ENABLE}
 
 # ── 首页净化模块 ──────────────────────
-http-response ^https?:\/\/api\.didiglobal\.com\/gateway feed-filter, enable={ENABLE_DIDI}&{DIDI_HOME_ENABLE}
-http-response ^https?::\/\/portal\.didiglobal\.com\/portal portal-ad-filter, enable={ENABLE_DIDI}&{DIDI_HOME_ENABLE}
-http-response ^https?::\/\/news\.didiglobal\.com\/feed news-feed-filter, enable={ENABLE_DIDI}&{DIDI_HOME_ENABLE}
-http-response ^https?::\/\/recommend\.didi\.cn\/rec rec-filter, enable={ENABLE_DIDI}&{DIDI_HOME_ENABLE}
+http-response ^https?:\/\/api\.didiglobal\.com\/gateway reject-dict enable={ENABLE_DIDI}&{DIDI_HOME_ENABLE}
+http-response ^https?::\/\/portal\.didiglobal\.com\/portal reject-dict enable={ENABLE_DIDI}&{DIDI_HOME_ENABLE}
+http-response ^https?::\/\/news\.didiglobal\.com\/feed reject-dict enable={ENABLE_DIDI}&{DIDI_HOME_ENABLE}
+http-response ^https?::\/\/recommend\.didi\.cn\/rec reject-dict enable={ENABLE_DIDI}&{DIDI_HOME_ENABLE}
 
 # ── 订单净化模块 ──────────────────────
-http-response ^https?:::\/\/order\.didi\.cn\/promo order-promo-filter, enable={ENABLE_DIDI}&{DIDI_ORDER_ENABLE}
-http-response ^https?:::\/\/invoice\.didiglobal\.com\/gift gift-promo-filter, enable={ENABLE_DIDI}&{DIDI_ORDER_ENABLE}
-http-response ^https?:::\/\/receipt\.didi\.cn\/discount receipt-discount-filter, enable={ENABLE_DIDI}&{DIDI_ORDER_ENABLE}
+http-response ^https?:::\/\/order\.didi\.cn\/promo reject-dict enable={ENABLE_DIDI}&{DIDI_ORDER_ENABLE}
+http-response ^https?:::\/\/invoice\.didiglobal\.com\/gift reject-dict enable={ENABLE_DIDI}&{DIDI_ORDER_ENABLE}
+http-response ^https?:::\/\/receipt\.didi\.cn\/discount reject-dict enable={ENABLE_DIDI}&{DIDI_ORDER_ENABLE}
 
 # ── 优惠券管理模块 ────────────────────
-http-response ^https?:::\/\/coupon\.didi\.cn\/popup popup-filter, enable={ENABLE_DIDI}&{DIDI_COUPON_ENABLE}
-http-response ^https?:: vouchers\.didiglobal\.com\/list voucher-filter, enable={ENABLE_DIDI}&{DIDI_COUPON_ENABLE}
-http-response ^https?:::\/\/ticket\.didi\.cn\/promotion promo-filter, enable={ENABLE_DIDI}&{DIDI_COUPON_ENABLE}
+http-response ^https?:::\/\/coupon\.didi\.cn\/popup reject-dict enable={ENABLE_DIDI}&{DIDI_COUPON_ENABLE}
+http-response ^https?:: reject-dict voucher-filter, enable={ENABLE_DIDI}&{DIDI_COUPON_ENABLE}
+http-response ^https?:::\/\/ticket\.didi\.cn\/promotion reject-dict enable={ENABLE_DIDI}&{DIDI_COUPON_ENABLE}
 
 # ── D 豆会员增强模块 ──────────────────
 # 优化 D 豆积分显示和兑换
-http-request ^https?:::\/\/points\.didi\.cn\/level action post header X-DPoints: premium $done, enable={ENABLE_DIDI}&{DIDI_VIP_ENABLE}
+http-request ^https?:::\/\/points\.didi\.cn\/level reject-dict post header X-DPoints: premium $done, enable={ENABLE_DIDI}&{DIDI_VIP_ENABLE}
 
 # 解锁会员专属优惠
-http-response ^https?:::\/\/member\.didi\.cn\/vip member-offer-filter, enable={ENABLE_DIDI}&{DIDI_VIP_ENABLE}
+http-response ^https?:::\/\/member\.didi\.cn\/vip reject-dict enable={ENABLE_DIDI}&{DIDI_VIP_ENABLE}
 
 # ── 其他净化模块 ─────────────────────
-http-response ^https?::\/\/tracking\.didi\.cn\/track tracking-blocker, enable={ENABLE_DIDI}
-http-response ^https?::\/\/log\.didiglobal\.com\/event event-filter, enable={ENABLE_DIDI}
+http-response ^https?::\/\/tracking\.didi\.cn\/track reject-dict enable={ENABLE_DIDI}
+http-response ^https?::\/\/log\.didiglobal\.com\/event reject-dict enable={ENABLE_DIDI}
 
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
@@ -62,6 +62,8 @@ cron {DIDI_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/DiDi.js, timeou
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────
+
+[Rule]
 DOMAIN-SUFFIX, didiglobal.com, DIRECT
 DOMAIN-SUFFIX, didi.cn, DIRECT
 DOMAIN-SUFFIX, didi.com, DIRECT

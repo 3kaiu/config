@@ -24,79 +24,79 @@ DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执行日
 # ════════════════════════════════════════
 
 # ── 通用 WebView 净化 ───────────────────
-http-response ^https?:\/\/.*\.inapps\.com\/ads ad-filter, enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
-http-response ^https?:\/\/sdkopen\.vip\.alipay\.com\/popup popup-filter, enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
-http-response ^https?::\/\/mbs\.didiglobal\.com\/banner banner-filter, enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?:\/\/.*\.inapps\.com\/ads reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?:\/\/sdkopen\.vip\.alipay\.com\/popup reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?::\/\/mbs\.didiglobal\.com\/banner reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
 
 # ── 支付宝 WebView ─────────────────────
-http-response ^https?::\/\/render\.alipay.com\/portal portal-ad-filter, enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
-http-response ^https?::\/\/h5api\.alipay\.com\/gateway gateway-filter, enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?::\/\/render\.alipay.com\/portal reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?::\/\/h5api\.alipay\.com\/gateway reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
 
 # ── 微信 WebView ───────────────────────
-http-response ^https?:::\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad wechat-article-filter, enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
-http-response ^https?:::\/\/app\.weixin\.qq\.com\/cgi-bin app-wechat-filter, enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?:::\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?:::\/\/app\.weixin\.qq\.com\/cgi-bin reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
 
 # ── 微博 WebView ───────────────────────
-http-response ^https?::\/\/api\.weibo\.cn\/2\/WBFrameFrame wb-frame-filter, enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
-http-response ^https?::\/\/h5\.weibo\.com\/wbframe wb-h5-filter, enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?::\/\/api\.weibo\.cn\/2\/WBFrameFrame reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?::\/\/h5\.weibo\.com\/wbframe reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
 
 # ── 淘宝 WebView ───────────────────────
-http-response ^https?::\/\/g\.huxiu\.com\/feed feed-filter, enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
-http-response ^https?::\/\/mobileserving\.gt\.algocdn\.cn\/splash open-splash-filter, enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?::\/\/g\.huxiu\.com\/feed reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?::\/\/mobileserving\.gt\.algocdn\.cn\/splash reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
 
 # ── 抖音/快手 WebView ──────────────────
-http-response ^https?::\/\/aweme\.snssdk\.com\/feed video-feed-filter, enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
-http-response ^https?::\/\/open\.api\.kuaishou\.com\/v1 kuaishou-filter, enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?::\/\/aweme\.snssdk\.com\/feed reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?::\/\/open\.api\.kuaishou\.com\/v1 reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
 
 # ── 小红书 WebView ─────────────────────
-http-response ^https?::\/\/app\.xiaohongshu\.com\/feed xhs-feed-filter, enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
-http-response ^https?::\/\/home-api\.xiaohongshu\.com splash-filter, enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?::\/\/app\.xiaohongshu\.com\/feed reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?::\/\/home-api\.xiaohongshu\.com reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
 
 # ════════════════════════════════════════
 # 🌐 Safari 浏览器净化规则
 # ════════════════════════════════════════
 
 # ── 网站广告拦截 ───────────────────────
-http-response ^https?:\/\/page\.ad\.qq\.com ad-block-filter, enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
-http-response ^https?:\/\/count\.appannie\.com analytics-filter, enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
-http-response ^https?:\/\/stats\.expand\.microad\.jp tracking-filter, enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
+http-response ^https?:\/\/page\.ad\.qq\.com reject-dict enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
+http-response ^https?:\/\/count\.appannie\.com reject-dict enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
+http-response ^https?:\/\/stats\.expand\.microad\.jp reject-dict enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
 
 # ── 新闻站净化 ──────────────────────────
-http-response ^https?:\/\/news\.so\.com\/search search-ad-filter, enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
-http-response ^https?:\/\/view\.inewsweek\.cn news-filter, enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
-http-response ^https?:\/\/roll\.news\.163\.com news-roll-filter, enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
+http-response ^https?:\/\/news\.so\.com\/search reject-dict enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
+http-response ^https?:\/\/view\.inewsweek\.cn reject-dict enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
+http-response ^https?:\/\/roll\.news\.163\.com reject-dict enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
 
 # ── 电商站净化 ─────────────────────────
-http-response ^https?:\/\/item\.taobao\.com\/detail product-recommend-filter, enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
-http-response ^https?:\/\/pinnable\.pinterest\.com pin-ad-filter, enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
+http-response ^https?:\/\/item\.taobao\.com\/detail reject-dict enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
+http-response ^https?:\/\/pinnable\.pinterest\.com reject-dict enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
 
 # ── 视频站净化 ─────────────────────────
-http-response ^https?:\/\/www\.youku\.com\/v-play pre-roll-filter, enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
-http-response ^https?:\/\/live\.bilibili\.com\/blank live-ad-filter, enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
+http-response ^https?:\/\/www\.youku\.com\/v-play reject-dict enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
+http-response ^https?:\/\/live\.bilibili\.com\/blank reject-dict enable={ENABLE_BROWSE}&{SAFARI_ENABLE}
 
 # ════════════════════════════════════════
 # 🔒 隐私与追踪防护
 # ════════════════════════════════════════
 
 # ── 第三方追踪器 ───────────────────────
-http-request ^https?:\/\/api\.loglyco\.com track-blocker, enable={ENABLE_BROWSE}&{TRACKER_ENABLE}
-http-request ^https?:\/\/beacon\.telerik\.com analytics-blocker, enable={ENABLE_BROWSE}&{TRACKER_ENABLE}
-http-request ^https?:\/\/collector\.gitlab\.com event-blocker, enable={ENABLE_BROWSE}&{TRACKER_ENABLE}
+http-request ^https?:\/\/api\.loglyco\.com reject-dict enable={ENABLE_BROWSE}&{TRACKER_ENABLE}
+http-request ^https?:\/\/beacon\.telerik\.com reject-dict enable={ENABLE_BROWSE}&{TRACKER_ENABLE}
+http-request ^https?:\/\/collector\.gitlab\.com reject-dict enable={ENABLE_BROWSE}&{TRACKER_ENABLE}
 
 # ── 指纹识别防护 ───────────────────────
 # 伪造浏览器指纹
-http-response ^https?:\/\/who\.ami\.anti-fingerprint\.com fingerprint-mask, enable={ENABLE_BROWSE}&{PRIVACY_ENABLE}
-http-response ^https?:\/\/browserleaks\.com canvas-leak, enable={ENABLE_BROWSE}&{PRIVACY_ENABLE}
+http-response ^https?:\/\/who\.ami\.anti-fingerprint\.com reject-dict enable={ENABLE_BROWSE}&{PRIVACY_ENABLE}
+http-response ^https?:\/\/browserleaks\.com reject-dict enable={ENABLE_BROWSE}&{PRIVACY_ENABLE}
 
 # ── Cookies 智能管理 ───────────────────
 # 自动清理第三方 Cookies
-http-response ^https?:\/\/cookieconsent\.disqus\.com consent-clean, enable={ENABLE_BROWSE}&{COOKIES_ENABLE}
-http-response ^https?:\/\/gdpr\.eu\/cookie cookie-consent-filter, enable={ENABLE_BROWSE}&{COOKIES_ENABLE}
+http-response ^https?:\/\/cookieconsent\.disqus\.com reject-dict enable={ENABLE_BROWSE}&{COOKIES_ENABLE}
+http-response ^https?:\/\/gdpr\.eu\/cookie reject-dict enable={ENABLE_BROWSE}&{COOKIES_ENABLE}
 
 # ── 其他防护 ───────────────────────────
 # DNS 欺骗防护
-http-request ^https?:\/\/dns\.leak\.test dns-test-blocker, enable={ENABLE_BROWSE}
-http-request ^https?:\/\/ipinfo\.io ip-expose-blocker, enable={ENABLE_BROWSE}
+http-request ^https?:\/\/dns\.leak\.test reject-dict enable={ENABLE_BROWSE}
+http-request ^https?:\/\/ipinfo\.io reject-dict enable={ENABLE_BROWSE}
 
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
@@ -105,6 +105,8 @@ cron {BROWSE_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/BrowserClean.
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────
+
+[Rule]
 DOMAIN-SUFFIX, apple.com, DIRECT
 DOMAIN-SUFFIX, apple-mapkit.com, DIRECT
 

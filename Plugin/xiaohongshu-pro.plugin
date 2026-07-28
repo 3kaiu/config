@@ -28,29 +28,29 @@ http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/system_service\/
 http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/system_service\/ads url reject-200, enable={ENABLE_XHS}&{XHS_SPLASH_ENABLE}
 
 # ── 信息流净化模块 ────────────────────
-http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/homefeed stream-filter, enable={ENABLE_XHS}&{XHS_FEED_ENABLE}
-http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/note\/feed stream-filter, enable={ENABLE_XHS}&{XHS_FEED_ENABLE}
-http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/user\/posted stream-filter, enable={ENABLE_XHS}&{XHS_FEED_ENABLE}
-http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/discovery\/recommend stream-filter, enable={ENABLE_XHS}&{XHS_FEED_ENABLE}
-http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/page\/notes stream-filter, enable={ENABLE_XHS}&{XHS_FEED_ENABLE}
+http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/homefeed reject-dict enable={ENABLE_XHS}&{XHS_FEED_ENABLE}
+http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/note\/feed reject-dict enable={ENABLE_XHS}&{XHS_FEED_ENABLE}
+http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/user\/posted reject-dict enable={ENABLE_XHS}&{XHS_FEED_ENABLE}
+http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/discovery\/recommend reject-dict enable={ENABLE_XHS}&{XHS_FEED_ENABLE}
+http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/page\/notes reject-dict enable={ENABLE_XHS}&{XHS_FEED_ENABLE}
 
 # ── 搜索净化模块 ──────────────────────
-http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/search\/notes hot-filter, enable={ENABLE_XHS}&{XHS_SEARCH_ENABLE}
-http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/search\/recommend hot-filter, enable={ENABLE_XHS}&{XHS_SEARCH_ENABLE}
-http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/search\/trending hot-filter, enable={ENABLE_XHS}&{XHS_SEARCH_ENABLE}
-http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/search\/hot_list hot-filter, enable={ENABLE_XHS}&{XHS_SEARCH_ENABLE}
+http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/search\/notes reject-dict enable={ENABLE_XHS}&{XHS_SEARCH_ENABLE}
+http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/search\/recommend reject-dict enable={ENABLE_XHS}&{XHS_SEARCH_ENABLE}
+http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/search\/trending reject-dict enable={ENABLE_XHS}&{XHS_SEARCH_ENABLE}
+http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/search\/hot_list reject-dict enable={ENABLE_XHS}&{XHS_SEARCH_ENABLE}
 
 # ── 去水印模块 ────────────────────────
-http-response ^https?:\/\/sns-img-bd\.xhscdn\.com\/.*\.jpg watermark-remove, enable={ENABLE_XHS}&{XHS_WATERMARK_ENABLE}
-http-response ^https?:\/\/sns-video-bd\.xhscdn\.com\/.*\.mp4 watermark-remove, enable={ENABLE_XHS}&{XHS_WATERMARK_ENABLE}
-http-response ^https?:\/\/ci\.xiaohongshu\.com\/.*\.(jpg|png|mp4) watermark-remove, enable={ENABLE_XHS}&{XHS_WATERMARK_ENABLE}
+http-response ^https?:\/\/sns-img-bd\.xhscdn\.com\/.*\.jpg reject-dict enable={ENABLE_XHS}&{XHS_WATERMARK_ENABLE}
+http-response ^https?:\/\/sns-video-bd\.xhscdn\.com\/.*\.mp4 reject-dict enable={ENABLE_XHS}&{XHS_WATERMARK_ENABLE}
+http-response ^https?:\/\/ci\.xiaohongshu\.com\/.*\.(jpg|png|mp4) reject-dict enable={ENABLE_XHS}&{XHS_WATERMARK_ENABLE}
 
 # ── 其他净化模块 ─────────────────────
-http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/ads\/home stream-filter, enable={ENABLE_XHS}
-http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/ads\/feed stream-filter, enable={ENABLE_XHS}
-http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/ads\/note stream-filter, enable={ENABLE_XHS}
-http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/ads\/profile stream-filter, enable={ENABLE_XHS}
-http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/ads\/search stream-filter, enable={ENABLE_XHS}
+http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/ads\/home reject-dict enable={ENABLE_XHS}
+http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/ads\/feed reject-dict enable={ENABLE_XHS}
+http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/ads\/note reject-dict enable={ENABLE_XHS}
+http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/ads\/profile reject-dict enable={ENABLE_XHS}
+http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/ads\/search reject-dict enable={ENABLE_XHS}
 
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
@@ -59,11 +59,13 @@ cron {XHS_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/XiaoHongShu.js, 
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────
-DOMAIN-SUFFIX, xiaohongshu.com, DIRECT
-DOMAIN-SUFFIX, xhscdn.com, DIRECT
 
 # ── 特殊域名重定向 ──────────────────
 ^https?:\/\/xhslink\.com\/\?.* url 302 https://$4, enable={ENABLE_XHS}
+
+[Rule]
+DOMAIN-SUFFIX, xiaohongshu.com, DIRECT
+DOMAIN-SUFFIX, xhscdn.com, DIRECT
 
 [MitM]
 hostname = %APPEND% api.xiaohongshu.com, home-api.xiaohongshu.com, sns-img-bd.xhscdn.com, sns-video-bd.xhscdn.com, ci.xiaohongshu.com
