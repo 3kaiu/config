@@ -132,3 +132,25 @@ jobs:
                 labels: ['upstream-health']
               });
             }
+
+      - name: Close issue if upstreams recovered
+        if: env.all_ok == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: ['upstream-health']
+            });
+            for (const issue of issues) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: issue.number,
+                body: '✅ All upstreams have recovered. Closing this alert.'
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed'
+              });
+            }

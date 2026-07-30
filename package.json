@@ -8,7 +8,8 @@
     "generate": "surgio generate",
     "preview": "surgio preview",
     "test": "node test/run-tests.js",
-    "lint": "eslint Scripts/ test/"
+    "lint": "eslint Scripts/ test/",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "surgio": "^3.17.0"
@@ -16,6 +17,7 @@
   "devDependencies": {
     "esbuild": "^0.28.1",
     "eslint": "^9.39.5",
+    "patch-package": "^8.0.1",
     "typescript": "^7.0.2"
   }
 }
