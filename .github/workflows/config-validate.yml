@@ -75,10 +75,10 @@ jobs:
             fi
           done
           # 检查策略组路由是否双端一致 (Global.list 未完整覆盖的域名)
-          # v7.8: 策略组拆分后, twittercdn/tdesktop 走 Social, steamcdn/onedrive/wikimedia 走 Developer
+          # v7.8: 策略组拆分后, twittercdn/tdesktop 走 Social, steamcdn 走 Gaming, onedrive/wikimedia 走 Developer
           for domain in twittercdn.com tdesktop.com steamcdn-a.akamaihd.net onedrive.live.com wikimediafoundation.org; do
-            in_qx=$(grep -cE "host-suffix, $domain, (Proxy|Streaming|Social|Developer|AI)" Profile/QX.conf)
-            in_loon=$(grep -cE "DOMAIN-SUFFIX, $domain, (Proxy|Streaming|Social|Developer|AI)" Profile/Loon.lcf)
+            in_qx=$(grep -cE "host-suffix, $domain, (Proxy|Streaming|Social|Developer|AI|Gaming)" Profile/QX.conf)
+            in_loon=$(grep -cE "DOMAIN-SUFFIX, $domain, (Proxy|Streaming|Social|Developer|AI|Gaming)" Profile/Loon.lcf)
             if [ "$in_qx" -eq 0 ]; then echo "⚠️ QX 缺少 $domain 代理规则"; MISSING=$((MISSING+1)); fi
             if [ "$in_loon" -eq 0 ]; then echo "⚠️ Loon 缺少 $domain 代理规则"; MISSING=$((MISSING+1)); fi
           done
