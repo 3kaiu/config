@@ -97,7 +97,7 @@ jobs:
 
       - name: Create issue on failure
         if: failure()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const title = '[cdn-verify] ws.wenn.in 内容与仓库不一致';
