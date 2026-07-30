@@ -69,4 +69,13 @@ DOMAIN-SUFFIX, twitch.tv, Streaming
 DOMAIN-SUFFIX, abema.tv, Streaming
 # TVB
 DOMAIN-SUFFIX, tvb.com, Streaming
+# Max (原 HBO Max)
+DOMAIN-SUFFIX, max.com, Streaming
+# Discovery+
+DOMAIN-SUFFIX, discoveryplus.com, Streaming
+# 亚太流媒体
+DOMAIN-SUFFIX, hotstar.com, Streaming
+DOMAIN-SUFFIX, viu.com, Streaming
+DOMAIN-SUFFIX, wetv.vip, Streaming
+DOMAIN-SUFFIX, iq.com, Streaming
 # Google 通配域名已移至 developer snippet 之后 (P1-1: 避免 googleapis.com 截胡 firebase.googleapis.com)

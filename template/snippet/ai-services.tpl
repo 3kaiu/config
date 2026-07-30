@@ -57,3 +57,9 @@ DOMAIN-SUFFIX, codeiumserver.com, AI
 DOMAIN-SUFFIX, windsurf.ai, AI
 DOMAIN-SUFFIX, supermaven.com, AI
 DOMAIN-SUFFIX, copilot.microsoft.com, AI
+# Meta AI
+DOMAIN-SUFFIX, meta.ai, AI
+DOMAIN-SUFFIX, llama.com, AI
+# Google AI 实验室
+DOMAIN, notebooklm.google.com, AI
+DOMAIN, labs.google.com, AI

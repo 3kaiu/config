@@ -48,6 +48,15 @@ DOMAIN-SUFFIX, tumblr.co, Social
 # Bluesky
 DOMAIN-SUFFIX, bsky.app, Social
 DOMAIN-SUFFIX, bsky.social, Social
+# LinkedIn
+DOMAIN-SUFFIX, linkedin.com, Social
+DOMAIN-SUFFIX, licdn.com, Social
+# Pinterest
+DOMAIN-SUFFIX, pinterest.com, Social
+DOMAIN-SUFFIX, pinimg.com, Social
+# Snapchat
+DOMAIN-SUFFIX, snapchat.com, Social
+DOMAIN-SUFFIX, sc-cdn.net, Social
 # 中文技术社区 (需代理访问)
 DOMAIN-SUFFIX, v2ex.com, Social
 DOMAIN-SUFFIX, v2ex.co, Social

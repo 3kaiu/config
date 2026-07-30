@@ -69,4 +69,13 @@ host-suffix, twitch.tv, Streaming
 host-suffix, abema.tv, Streaming
 # TVB
 host-suffix, tvb.com, Streaming
+# Max (原 HBO Max)
+host-suffix, max.com, Streaming
+# Discovery+
+host-suffix, discoveryplus.com, Streaming
+# 亚太流媒体
+host-suffix, hotstar.com, Streaming
+host-suffix, viu.com, Streaming
+host-suffix, wetv.vip, Streaming
+host-suffix, iq.com, Streaming
 # Google 通配域名已移至 developer snippet 之后 (P1-1: 避免 googleapis.com 截胡 firebase.googleapis.com)

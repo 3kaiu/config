@@ -74,6 +74,18 @@ DOMAIN-SUFFIX, atlassian.com, Developer
 DOMAIN-SUFFIX, confluence.com, Developer
 DOMAIN-SUFFIX, jira.com, Developer
 DOMAIN-SUFFIX, hashicorp.com, Developer
+# 现代 PaaS
+DOMAIN-SUFFIX, fly.io, Developer
+DOMAIN-SUFFIX, render.com, Developer
+DOMAIN-SUFFIX, railway.app, Developer
+# 现代数据库
+DOMAIN-SUFFIX, supabase.com, Developer
+DOMAIN-SUFFIX, neon.tech, Developer
+DOMAIN-SUFFIX, planetscale.com, Developer
+# 运行时/语言
+DOMAIN-SUFFIX, deno.com, Developer
+DOMAIN-SUFFIX, deno.land, Developer
+DOMAIN-SUFFIX, jsr.io, Developer
 # Linux/开源
 DOMAIN-SUFFIX, kernel.org, Developer
 DOMAIN-SUFFIX, gnu.org, Developer

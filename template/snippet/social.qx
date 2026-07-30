@@ -48,6 +48,15 @@ host-suffix, tumblr.co, Social
 # Bluesky
 host-suffix, bsky.app, Social
 host-suffix, bsky.social, Social
+# LinkedIn
+host-suffix, linkedin.com, Social
+host-suffix, licdn.com, Social
+# Pinterest
+host-suffix, pinterest.com, Social
+host-suffix, pinimg.com, Social
+# Snapchat
+host-suffix, snapchat.com, Social
+host-suffix, sc-cdn.net, Social
 # 中文技术社区 (需代理访问)
 host-suffix, v2ex.com, Social
 host-suffix, v2ex.co, Social

@@ -74,6 +74,18 @@ host-suffix, atlassian.com, Developer
 host-suffix, confluence.com, Developer
 host-suffix, jira.com, Developer
 host-suffix, hashicorp.com, Developer
+# 现代 PaaS
+host-suffix, fly.io, Developer
+host-suffix, render.com, Developer
+host-suffix, railway.app, Developer
+# 现代数据库
+host-suffix, supabase.com, Developer
+host-suffix, neon.tech, Developer
+host-suffix, planetscale.com, Developer
+# 运行时/语言
+host-suffix, deno.com, Developer
+host-suffix, deno.land, Developer
+host-suffix, jsr.io, Developer
 # Linux/开源
 host-suffix, kernel.org, Developer
 host-suffix, gnu.org, Developer

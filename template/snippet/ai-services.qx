@@ -57,3 +57,9 @@ host-suffix, codeiumserver.com, AI
 host-suffix, windsurf.ai, AI
 host-suffix, supermaven.com, AI
 host-suffix, copilot.microsoft.com, AI
+# Meta AI
+host-suffix, meta.ai, AI
+host-suffix, llama.com, AI
+# Google AI 实验室
+host, notebooklm.google.com, AI
+host, labs.google.com, AI
