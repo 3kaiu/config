@@ -65,14 +65,13 @@ mtalk.google.com = 108.177.125.188
 
 [Proxy Group]
 Proxy = url-test, ".*", url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
-Fallback = fallback, ".*", url=http://cp.cloudflare.com/generate_204, interval=600, timeout=10
 Apple = select, DIRECT, Proxy
-Final = select, Proxy, Fallback, DIRECT
-Streaming = select, Proxy, Fallback, DIRECT, tag=流媒体
-AI = select, Proxy, Fallback, DIRECT, tag=AI服务
-Developer = select, Proxy, Fallback, DIRECT, tag=开发者
+Final = select, DIRECT, Proxy
+Streaming = select, Proxy, DIRECT, tag=流媒体
+AI = select, Proxy, DIRECT, tag=AI服务
+Developer = select, Proxy, DIRECT, tag=开发者
 Gaming = select, Proxy, DIRECT, tag=游戏平台
-Social = select, Proxy, Fallback, DIRECT, tag=社交平台
+Social = select, Proxy, DIRECT, tag=社交平台
 
 [Rule]
 DEST-PORT, 5223, DIRECT
@@ -548,6 +547,25 @@ DOMAIN-SUFFIX, pangle.io, DIRECT
 DOMAIN, heic.alicdn.com, REJECT
 DOMAIN-SUFFIX, h-adashx.ut.taobao.com, REJECT
 
+# QQ音乐 DNS REJECT
+DOMAIN, adstats.tencentmusic.com, REJECT
+DOMAIN, ad.tencentmusic.com, REJECT
+DOMAIN, adcdn.tencentmusic.com, REJECT
+DOMAIN, adcdn6.tencentmusic.com, DROP
+DOMAIN, adexpo.tencentmusic.com, DROP
+DOMAIN, adclick.tencentmusic.com, DROP
+DOMAIN, otheve.beacon.qq.com, DROP
+DOMAIN, mazu.m.qq.com, DROP
+DOMAIN, monitor.music.qq.com, DROP
+DOMAIN, stat.y.qq.com, REJECT
+DOMAIN, tmead.y.qq.com, REJECT
+DOMAIN, oth.str.mdt.qq.com, REJECT
+DOMAIN, h.trace.qq.com, REJECT
+DOMAIN, sdk.e.qq.com, REJECT
+DOMAIN, p.l.qq.com, REJECT
+DOMAIN, us.l.qq.com, REJECT
+DOMAIN-SUFFIX, imtmp.net, REJECT
+
 # 追踪
 DOMAIN-KEYWORD, qreport, REJECT
 DOMAIN, aegis.cdn-go.cn, REJECT
@@ -669,19 +687,6 @@ https://kelee.one/Tool/Loon/Lpx/JD_Price.lpx, enabled=true, tag=📦 京东比�
 https://kelee.one/Tool/Loon/Lpx/VVebo_repair.lpx, enabled=false, tag=📋 VVebo时间线修复
 https://kelee.one/Tool/Loon/Lpx/Node_detection_tool.lpx, enabled=true, tag=🌐 节点检测工具
 https://kelee.one/Tool/Loon/Lpx/NodeLinkCheck.lpx, enabled=true, tag=🔗 代理链路检测
-# - 🆕 v8.0 新增插件 -
-https://ws.wenn.in/main/Plugin/douyin.plugin, enabled=true, tag=抖音去广告
-https://ws.wenn.in/main/Plugin/kuaishou.plugin, enabled=true, tag=快手去广告
-https://ws.wenn.in/main/Plugin/meituan.plugin, enabled=true, tag=美团去广告
-https://ws.wenn.in/main/Plugin/dianping.plugin, enabled=true, tag=大众点评去广告
-https://ws.wenn.in/main/Plugin/youku.plugin, enabled=true, tag=优酷去广告
-https://ws.wenn.in/main/Plugin/kugou.plugin, enabled=true, tag=酷狗音乐去广告
-https://ws.wenn.in/main/Plugin/kuwo.plugin, enabled=true, tag=酷我音乐去广告
-https://ws.wenn.in/main/Plugin/fanqie.plugin, enabled=true, tag=番茄小说去广告
-https://ws.wenn.in/main/Plugin/wechat-read.plugin, enabled=true, tag=微信读书去广告
-https://ws.wenn.in/main/Plugin/feishu.plugin, enabled=true, tag=飞书去广告
-https://ws.wenn.in/main/Plugin/wps.plugin, enabled=true, tag=WPS去广告
-https://ws.wenn.in/main/Plugin/privacy-shield.plugin, enabled=true, tag=隐私防护
 
 [Rewrite]
 ^https?:\/\/119\.29\.29\.29\/d reject-200
@@ -692,4 +697,4 @@ https://ws.wenn.in/main/Plugin/privacy-shield.plugin, enabled=true, tag=隐私�
 
 [MitM]
 skip-server-cert-verify = false
-hostname = -*.apple.com, -*.icloud.com, -*.icloud.com.cn, -*.95516.com, -*.cup.com.cn, -*.95516.com.cn, -*.unionpay.com, -*.icbc.com.cn, -*.mybank.icbc.com.cn, -*.icbc.com, -*.ccb.com, -*.ccb.cn, -*.boc.cn, -*.bankofchina.com, -*.jf365.boc.cn, -*.abchina.com, -*.abchina.com.cn, -*.cdn-static.abchina.com.cn, -*.cdn-static.abchina.com, -*.bankcomm.com, -*.bankcomm.cn, -*.creditcard.bankcomm.com, -*.creditcard.bankcomm.cn, -*.cmbchina.com, -*.cmbimg.com, -*.psbc.com, -*.spdb.com.cn, -*.spdbccc.com.cn, -*.citicbank.com, -*.citibank.com, -*.ecitic.com, -*.pingan.com.cn, -*.pingan.com, -*.hcz-member.pingan.com.cn, -*.iobs.pingan.com.cn, -*.stock.pingan.com, -*.cmbc.com.cn, -*.cib.com.cn, -*.cebbank.com, -*.ebchinabank.com, -*.hxb.com.cn, -*.cgbchina.com.cn, -*.95508.com, -*.static.95508.com, -*.bankofbeijing.com.cn, -*.bosc.cn, -*.js96008.com, -*.tenpay.com, -*.qianbao.qq.com, weatherkit.apple.com, configuration.ls.apple.com, gspe35-ssl.ls.apple.com, gspe35-ssl.ls.apple.cn, news-edge.apple.com, news-todayconfig-edge.apple.com, news-events.apple.com, news-sports-events.apple.com, news-client.apple.com, news-client-search.apple.com, guzzoni.smoot.apple.com, api2.smoot.apple.com, *.smoot.apple.com, *.smoot.apple.cn, testflight.apple.com, h5.if.qidian.com, magev6.if.qidian.com, ii.gdt.qq.com, adsmind.gdtimg.com, adsmind.ugdtimg.com, pgdt.gtimg.cn, api-access.pangolin-sdk-toutiao.com, api-access.pangolin-sdk-toutiao1.com, api.zhihuifangdong.net, netflow-mtop.cainiao.com, nbcps-mtop.cainiao.com, cn-acs.m.cainiao.com, e2e-mtop.cainiao.com, longquan-mtop.cainiao.com, -redirector*.googlevideo.com, *.googlevideo.com, *.youtube.com, youtubei.googleapis.com, m5.amap.com, m5-zb.amap.com, amdc.m.taobao.com, api.m.jd.com, api.zhihu.com, www.zhihu.com, appcloud2.zhihu.com, link.zhihu.com, zhuanlan.zhihu.com, m-cloud.zhihu.com, tiebac.baidu.com, tieba.baidu.com, tiebaapi.baidu.com, gql.reddit.com, gql-fed.reddit.com, *.oca.nflxvideo.net, api.amemv.com, aweme.snssdk.com, api5-normal-dsa.amemv.com, log.snssdk.com, graphql.kuaishou.com, api2.kuaishou.com, api.meituan.com, i.waimai.meituan.com, papi.meituan.com, mapi.dianping.com, check.dianping.com, api.youku.com, iyes.youku.com, vali.cp31.ott.cibntv.net, ads.kugou.com, mobilead.kugou.com, gateway.kugou.com, rich.kuwo.cn, mobilead.kuwo.cn, api5-normal-snkmer.fqnovel.com, ada.fqnovel.com, weread.qq.com, i.weread.qq.com, internal-api.feishu.cn, open.feishu.cn, adservice.wps.cn, docer.wps.cn
+hostname = -*.apple.com, -*.icloud.com, -*.icloud.com.cn, -*.95516.com, -*.cup.com.cn, -*.95516.com.cn, -*.unionpay.com, -*.icbc.com.cn, -*.mybank.icbc.com.cn, -*.icbc.com, -*.ccb.com, -*.ccb.cn, -*.boc.cn, -*.bankofchina.com, -*.jf365.boc.cn, -*.abchina.com, -*.abchina.com.cn, -*.cdn-static.abchina.com.cn, -*.cdn-static.abchina.com, -*.bankcomm.com, -*.bankcomm.cn, -*.creditcard.bankcomm.com, -*.creditcard.bankcomm.cn, -*.cmbchina.com, -*.cmbimg.com, -*.psbc.com, -*.spdb.com.cn, -*.spdbccc.com.cn, -*.citicbank.com, -*.citibank.com, -*.ecitic.com, -*.pingan.com.cn, -*.pingan.com, -*.hcz-member.pingan.com.cn, -*.iobs.pingan.com.cn, -*.stock.pingan.com, -*.cmbc.com.cn, -*.cib.com.cn, -*.cebbank.com, -*.ebchinabank.com, -*.hxb.com.cn, -*.cgbchina.com.cn, -*.95508.com, -*.static.95508.com, -*.bankofbeijing.com.cn, -*.bosc.cn, -*.js96008.com, -*.tenpay.com, -*.qianbao.qq.com, weatherkit.apple.com, configuration.ls.apple.com, gspe35-ssl.ls.apple.com, gspe35-ssl.ls.apple.cn, gspe1-ssl.ls.apple.com, news-edge.apple.com, news-todayconfig-edge.apple.com, news-events.apple.com, news-sports-events.apple.com, news-client.apple.com, news-client-search.apple.com, guzzoni.smoot.apple.com, api2.smoot.apple.com, *.smoot.apple.com, *.smoot.apple.cn, testflight.apple.com, uts-api.itunes.apple.com, umc-tempo-api.apple.com, play-cdn.itunes.apple.com, play-edge-cdn.itunes.apple.com, h5.if.qidian.com, magev6.if.qidian.com, ii.gdt.qq.com, adsmind.gdtimg.com, adsmind.ugdtimg.com, pgdt.gtimg.cn, api-access.pangolin-sdk-toutiao.com, api-access.pangolin-sdk-toutiao1.com, api.zhihuifangdong.net, netflow-mtop.cainiao.com, nbcps-mtop.cainiao.com, cn-acs.m.cainiao.com, e2e-mtop.cainiao.com, longquan-mtop.cainiao.com, -redirector*.googlevideo.com, *.googlevideo.com, *.youtube.com, youtubei.googleapis.com, m5.amap.com, m5-zb.amap.com, amdc.m.taobao.com, dispatcher.is.autonavi.com, api.m.jd.com, api.zhihu.com, www.zhihu.com, appcloud2.zhihu.com, link.zhihu.com, zhuanlan.zhihu.com, m-cloud.zhihu.com, tiebac.baidu.com, tieba.baidu.com, tiebaapi.baidu.com, gql.reddit.com, gql-fed.reddit.com, duckduckgo.com, *.oca.nflxvideo.net
