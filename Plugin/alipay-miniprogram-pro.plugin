@@ -24,29 +24,29 @@ DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执行日
 # ═══════════════════════════════════════===
 
 # ── 开屏广告净化 ────────────────────────
-http-response ^https?:\/\/mapi\.alipay\.com\/gw\/open.*splash ad-splash-filter script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=开屏广告清理，enabled={ENABLE_ALIPAY_MINI}&{MINI_SPLASH_ENABLE}
+http-response ^https?:\/\/mapi\.alipay\.com\/gw\/open.*splash ad-splash-filter script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=开屏广告清理，enable={ENABLE_ALIPAY_MINI}&{MINI_SPLASH_ENABLE}
 
 # ── 信息流净化 ──────────────────────────
-http-response ^https?:\/\/mapi\.alipay\.com\/gateway homefeed-clean script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=首页信息流净化，enabled={ENABLE_ALIPAY_MINI}&{MINI_FEED_ENABLE}
-http-response ^https?:\/\/life\.service\.alipay\.com newsfeed-ad-clear script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=生活号信息流净化，enabled={ENABLE_ALIPAY_MINI}&{MINI_FEED_ENABLE}
-http-response ^https?:\/\/recommend\.alipay\.com rec-filter script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=推荐卡片净化，enabled={ENABLE_ALIPAY_MINI}&{MINI_FEED_ENABLE}
+http-response ^https?:\/\/mapi\.alipay\.com\/gateway homefeed-clean script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=首页信息流净化，enable={ENABLE_ALIPAY_MINI}&{MINI_FEED_ENABLE}
+http-response ^https?:\/\/life\.service\.alipay\.com newsfeed-ad-clear script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=生活号信息流净化，enable={ENABLE_ALIPAY_MINI}&{MINI_FEED_ENABLE}
+http-response ^https?:\/\/recommend\.alipay\.com rec-filter script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=推荐卡片净化，enable={ENABLE_ALIPAY_MINI}&{MINI_FEED_ENABLE}
 
 # ── 弹窗广告净化 ────────────────────────
-http-response ^https?:\/\/mp\.alipay\.com services-popup-filter script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=服务页弹窗净化，enabled={ENABLE_ALIPAY_MINI}&{MINI_POPUP_ENABLE}
-http-response ^https?:\/\/act\.alipay\.com popup-ad-clear script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=活动弹窗净化，enabled={ENABLE_ALIPAY_MINI}&{MINI_POPUP_ENABLE}
-http-response ^https?:\/\/msgpush\.alipay\.com message-clear script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=消息推送净化，enabled={ENABLE_ALIPAY_MINI}&{MINI_POPUP_ENABLE}
+http-response ^https?:\/\/mp\.alipay\.com services-popup-filter script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=服务页弹窗净化，enable={ENABLE_ALIPAY_MINI}&{MINI_POPUP_ENABLE}
+http-response ^https?:\/\/act\.alipay\.com popup-ad-clear script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=活动弹窗净化，enable={ENABLE_ALIPAY_MINI}&{MINI_POPUP_ENABLE}
+http-response ^https?:\/\/msgpush\.alipay\.com message-clear script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=消息推送净化，enable={ENABLE_ALIPAY_MINI}&{MINI_POPUP_ENABLE}
 
 # ── 搜索推广净化 ────────────────────────
-http-response ^https?:\/\/s\.alipay\.com search-purify script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=搜索结果净化，enabled={ENABLE_ALIPAY_MINI}&{MINI_SEARCH_ENABLE}
-http-response ^https?:\/\/logsearch\.alipay\.com logsearch-clean script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=搜索联想净化，enabled={ENABLE_ALIPAY_MINI}&{MINI_SEARCH_ENABLE}
+http-response ^https?:\/\/s\.alipay\.com search-purify script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=搜索结果净化，enable={ENABLE_ALIPAY_MINI}&{MINI_SEARCH_ENABLE}
+http-response ^https?:\/\/logsearch\.alipay\.com logsearch-clean script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=搜索联想净化，enable={ENABLE_ALIPAY_MINI}&{MINI_SEARCH_ENABLE}
 
 # ── 支付页净化 ──────────────────────────
-http-response ^https?:\/\/traffix\.alipay\.com payment-promo-clean script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=支付页面净化，enabled={ENABLE_ALIPAY_MINI}&{MINI_TRAFFIC_ENABLE}
-http-response ^https?:\/\/success\.alipay\.com success-page-clean script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=支付成功页净化，enabled={ENABLE_ALIPAY_MINI}&{MINI_TRAFFIC_ENABLE}
+http-response ^https?:\/\/traffix\.alipay\.com payment-promo-clean script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=支付页面净化，enable={ENABLE_ALIPAY_MINI}&{MINI_TRAFFIC_ENABLE}
+http-response ^https?:\/\/success\.alipay\.com success-page-clean script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=支付成功页净化，enable={ENABLE_ALIPAY_MINI}&{MINI_TRAFFIC_ENABLE}
 
 # ── 通用 API 净化 ────────────────────────
-http-response ^https?:\/\/microapp\.alipay\.com mini-general-clean script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=小程序通用净化，enabled={ENABLE_ALIPAY_MINI}
-http-response ^https?:\/\/open\.alipay\.com openapi-clean script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=开放平台净化，enabled={ENABLE_ALIPAY_MINI}
+http-response ^https?:\/\/microapp\.alipay\.com mini-general-clean script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=小程序通用净化，enable={ENABLE_ALIPAY_MINI}
+http-response ^https?:\/\/open\.alipay\.com openapi-clean script-path=https://ws.wenn.in/main/Scripts/AlipayMini.js, timeout=60, requires-body=true, tag=开放平台净化，enable={ENABLE_ALIPAY_MINI}
 
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选）

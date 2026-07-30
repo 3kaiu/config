@@ -24,35 +24,35 @@ ALIPAY_DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细�
 
 # ── 开屏广告模块 ───────────────────────
 http-response ^https?:\/\/sdkopen\.vip\.alipay\.com\/splash reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_SPLASH_ENABLE}
-http-response ^https?::\/\/mobileserving\.gt\.algocdn\.cn\/splash reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_SPLASH_ENABLE}
-http-response ^https?::\/\/adsapi\.smartmarketing\.aliyun\.com\/splash reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_SPLASH_ENABLE}
+http-response ^https?:\/\/mobileserving\.gt\.algocdn\.cn\/splash reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_SPLASH_ENABLE}
+http-response ^https?:\/\/adsapi\.smartmarketing\.aliyun\.com\/splash reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_SPLASH_ENABLE}
 
 # ── 首页净化模块 ──────────────────────
 http-response ^https?:\/\/h5api\.alipay\.com\/gateway reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_HOME_ENABLE}
-http-response ^https?::\/\/render\.alipay.com\/portal reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_HOME_ENABLE}
-http-response ^https?::\/\/nws\.pscpub\.com\/feed reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_HOME_ENABLE}
-http-response ^https?::\/\/masset\.balancer\.amcs\.lab\?.* reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_HOME_ENABLE}
+http-response ^https?:\/\/render\.alipay.com\/portal reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_HOME_ENABLE}
+http-response ^https?:\/\/nws\.pscpub\.com\/feed reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_HOME_ENABLE}
+http-response ^https?:\/\/masset\.balancer\.amcs\.lab\?.* reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_HOME_ENABLE}
 
 # ── 转账净化模块 ──────────────────────
-http-response ^https?::\/\/transfer\.alipay\.com\/activity reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_TRANSFER_ENABLE}
-http-response ^https?::\/\/prompt\.service\.alipay\.com\/redpacket reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_TRANSFER_ENABLE}
-http-response ^https?::\/\/fav\.favapipub\.com\/gift reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_TRANSFER_ENABLE}
+http-response ^https?:\/\/transfer\.alipay\.com\/activity reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_TRANSFER_ENABLE}
+http-response ^https?:\/\/prompt\.service\.alipay\.com\/redpacket reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_TRANSFER_ENABLE}
+http-response ^https?:\/\/fav\.favapipub\.com\/gift reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_TRANSFER_ENABLE}
 
 # ── 理财净化模块 ──────────────────────
-http-response ^https?:::\/\/fund\.fundmate\.alibaba\.com\/recommend reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_INVEST_ENABLE}
-http-response ^https?:::\/\/wealth\.service\.alipay\.com\/ad reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_INVEST_ENABLE}
-http-response ^https?::\/\/insurance\.insurtech\.alibaba\.com\/promo reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_INVEST_ENABLE}
+http-response ^https?:\/\/fund\.fundmate\.alibaba\.com\/recommend reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_INVEST_ENABLE}
+http-response ^https?:\/\/wealth\.service\.alipay\.com\/ad reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_INVEST_ENABLE}
+http-response ^https?:\/\/insurance\.insurtech\.alibaba\.com\/promo reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_INVEST_ENABLE}
 
 # ── 会员增强模块 ──────────────────────
 # 优化支付宝会员等级标识显示
-http-request ^https?:::\/\/member\.service\.alipay\.com\/level reject-dict post header X-Member-Level: user-custom $done, enable={ENABLE_ALIPAY}&{ALIPAY_MEMBER_ENABLE}
+http-request ^https?:\/\/member\.service\.alipay\.com\/level reject-dict post header X-Member-Level: user-custom $done, enable={ENABLE_ALIPAY}&{ALIPAY_MEMBER_ENABLE}
 
 # 解锁会员专属优惠
-http-response ^https?::\/\/coupon\.member\.alipay\.com\/list reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_MEMBER_ENABLE}
+http-response ^https?:\/\/coupon\.member\.alipay\.com\/list reject-dict enable={ENABLE_ALIPAY}&{ALIPAY_MEMBER_ENABLE}
 
 # ── 其他净化模块 ─────────────────────
-http-response ^https?:::\/\/tracking\.alipay\.com\/track reject-dict enable={ENABLE_ALIPAY}
-http-response ^https?::\/\/log\.alipay\.com\/event reject-dict enable={ENABLE_ALIPAY}
+http-response ^https?:\/\/tracking\.alipay\.com\/track reject-dict enable={ENABLE_ALIPAY}
+http-response ^https?:\/\/log\.alipay\.com\/event reject-dict enable={ENABLE_ALIPAY}
 
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
@@ -67,4 +67,4 @@ DOMAIN-SUFFIX, aliyun.com, DIRECT
 DOMAIN-SUFFIX, taobao.com, DIRECT
 
 [MitM]
-hostname = %APPEND% sdkopen.vip.alipay.com, mobileserving.gt.algocdn.cn, adsapi.smartmarketing.aliyun.com, h5api.alipay.com, render.alibaba.com, nws.pscpub.com, masset.balancer.amcs.lab, transfer.alipay.com, prompt.service.alipay.com, fav.favapipub.com, fund.fundmate.alibaba.com, wealth.service.alipay.com, insurance.insurtech.alibaba.com, member.service.alipay.com, coupon.member.alipay.com
+hostname = %APPEND% sdkopen.vip.alipay.com, mobileserving.gt.algocdn.cn, adsapi.smartmarketing.aliyun.com, h5api.alipay.com, render.alipay.com, nws.pscpub.com, masset.balancer.amcs.lab, transfer.alipay.com, prompt.service.alipay.com, fav.favapipub.com, fund.fundmate.alibaba.com, wealth.service.alipay.com, insurance.insurtech.alibaba.com, member.service.alipay.com, coupon.member.alipay.com

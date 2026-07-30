@@ -13,9 +13,7 @@
 # ======= 视频广告请求拦截 =======
 # ctier 302 重定向: 移除低质量层级参数, 绕过广告插入点
 (^https?:\/\/[\w-]+\.googlevideo\.com\/(?!dclk_video_ads).+?)&ctier=L(&.+?),ctier,(.+) 302 $1$2$3
-# initplayback 广告请求拦截
-^https?:\/\/[\w-]+\.googlevideo\.com\/initplayback.+&oad reject-200
-# 视频广告请求 (排除正常视频回放和广告点击追踪)
+# 视频广告请求 (排除正常视频回放和广告点击追踪; 覆盖 initplayback 等)
 ^https?:\/\/[\w-]+\.googlevideo\.com\/(?!(dclk_video_ads|videoplayback\?)).+&oad reject-200
 
 # ======= 通用广告请求拦截 =======

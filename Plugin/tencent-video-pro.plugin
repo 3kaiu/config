@@ -29,30 +29,30 @@ http-response ^https?:\/\/api\.live\.qq\.com\/openApi\/splash reject-dict enable
 
 # ── 首页净化模块 ──────────────────────
 http-response ^https?:\/\/att\.video\.qcloud\.com\/appinfo reject-dict enable={ENABLE_TVP}&{TVP_HOME_ENABLE}
-http-response ^https?::\/\/sdk\.open\.tv\.qzone\.qq\.com\/cgi-bin\/cgi\/proxy reject-dict enable={ENABLE_TVP}&{TVP_HOME_ENABLE}
-http-response ^https?::\/\/live\.cgi\.intl\.qq\.com\/ad reject-dict ad-filter, enable={ENABLE_TVP}&{TVP_HOME_ENABLE}
-http-response ^https?::\/\/op\.movieteen\.qq\.com\/cgi-bin\/op reject-dict enable={ENABLE_TVP}&{TVP_HOME_ENABLE}
+http-response ^https?:\/\/sdk\.open\.tv\.qzone\.qq\.com\/cgi-bin\/cgi\/proxy reject-dict enable={ENABLE_TVP}&{TVP_HOME_ENABLE}
+http-response ^https?:\/\/live\.cgi\.intl\.qq\.com\/ad reject-dict ad-filter, enable={ENABLE_TVP}&{TVP_HOME_ENABLE}
+http-response ^https?:\/\/op\.movieteen\.qq\.com\/cgi-bin\/op reject-dict enable={ENABLE_TVP}&{TVP_HOME_ENABLE}
 
 # ── 推荐净化模块 ──────────────────────
-http-response ^https?::\/\/news\.app\.log\.ts\.qq\.com\/logger reject-dict enable={ENABLE_TVP}&{TVP_RECOMMEND_ENABLE}
-http-response ^https?::\/\/livesdk\.poll\.mc\.qq\.cn\/live reject-dict poll-filter, enable={ENABLE_TVP}&{TVP_RECOMMEND_ENABLE}
+http-response ^https?:\/\/news\.app\.log\.ts\.qq\.com\/logger reject-dict enable={ENABLE_TVP}&{TVP_RECOMMEND_ENABLE}
+http-response ^https?:\/\/livesdk\.poll\.mc\.qq\.cn\/live reject-dict poll-filter, enable={ENABLE_TVP}&{TVP_RECOMMEND_ENABLE}
 
 # ── 会员增强模块 ──────────────────────
 # 解锁 VIP 专属内容权限
 http-request ^https?:\/\/pay\.video\.qcloud\.com\/pay reject-dict post header X-Vip-Status: true $done, enable={ENABLE_TVP}&{TVP_VIP_ENABLE}
 
 # 解锁免广告权益
-http-response ^https?::\/\/pay\.video\.qcloud\.com\/vip reject-dict vip-status-filter, enable={ENABLE_TVP}&{TVP_VIP_ENABLE}
+http-response ^https?:\/\/pay\.video\.qcloud\.com\/vip reject-dict vip-status-filter, enable={ENABLE_TVP}&{TVP_VIP_ENABLE}
 
 # ── 4K 画质解锁模块 ──────────────────
 # 解锁 4K/UHD 画质选项
-http-response ^https?::\/\/api\.web\.vv\.qq\.com\/findmodule reject-dict enable={ENABLE_TVP}&{TVP_4K_ENABLE}
-http-response ^https?::\/\/open\.play\.qq\.com\/cgi-bin\/qqopen reject-dict enable={ENABLE_TVP}&{TVP_4K_ENABLE}
-http-response ^https?::\/\/players\.cloud\.tencentcs\.com\/appstate reject-dict enable={ENABLE_TVP}&{TVP_4K_ENABLE}
+http-response ^https?:\/\/api\.web\.vv\.qq\.com\/findmodule reject-dict enable={ENABLE_TVP}&{TVP_4K_ENABLE}
+http-response ^https?:\/\/open\.play\.qq\.com\/cgi-bin\/qqopen reject-dict enable={ENABLE_TVP}&{TVP_4K_ENABLE}
+http-response ^https?:\/\/players\.cloud\.tencentcs\.com\/appstate reject-dict enable={ENABLE_TVP}&{TVP_4K_ENABLE}
 
 # ── 其他净化模块 ─────────────────────
-http-response ^https?::\/\/live\.cgi\.intl\.qq\.com\/msg reject-dict enable={ENABLE_TVP}
-http-response ^https?::\/\/sdk\.open\.tv\.qzone\.qq\.com reject-dict enable={ENABLE_TVP}
+http-response ^https?:\/\/live\.cgi\.intl\.qq\.com\/msg reject-dict enable={ENABLE_TVP}
+http-response ^https?:\/\/sdk\.open\.tv\.qzone\.qq\.com reject-dict enable={ENABLE_TVP}
 
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）
@@ -68,4 +68,4 @@ DOMAIN-SUFFIX, qcloud.com, DIRECT
 DOMAIN-SUFFIX, video.qq.com, DIRECT
 
 [MitM]
-hostname = %APPEND% ads.api.tencent.com, flash.video.qcloud.com, live.cgi.intl.qq.com, op.movieteen.qq.com, pay.video.qcloud.com, players.cloud.tencentcdn.com
+hostname = %APPEND% ads.api.tencent.com, flash.video.qcloud.com, live.cgi.intl.qq.com, op.movieteen.qq.com, pay.video.qcloud.com, players.cloud.tencentcs.com

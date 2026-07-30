@@ -71,6 +71,13 @@ IP-CIDR6,2402:4e00:1200:ed00:0:9089:6dac:96b6/128,REJECT,no-resolve,enable={ENAB
 ^https:\/\/appcloud2\.zhihu\.com\/v3\/resource reject-dict, enable={ENABLE_ZHIHU}
 
 # ═══════════════════════════════════════════
+# 🔔 通知/电商/广告模块拦截
+# ═══════════════════════════════════════════
+^https:\/\/api\.zhihu\.com\/notifications\/v3\/(count|message) reject-dict, enable={ENABLE_ZHIHU}
+^https:\/\/api\.zhihu\.com\/api\/v4\/ecom_data\/config reject-dict, enable={ENABLE_ZHIHU}
+^https:\/\/api\.zhihu\.com\/fringe\/ad reject-dict, enable={ENABLE_ZHIHU}
+
+# ═══════════════════════════════════════════
 # 🔗 外链追踪 → 直达目标 URL
 # ═══════════════════════════════════════════
 # 保留原协议 https, 不降级 http (审计修复：降级后跳转地址明文可见且可被中间人改写)

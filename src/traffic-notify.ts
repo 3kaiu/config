@@ -53,6 +53,7 @@ try {
     push = doNotify('📊 运行心跳', '正常运行中');
   }
 } catch (e) {
+  console.error('traffic-notify error:', e);
   push = doNotify('📊 运行心跳', '正常运行中');
 }
 

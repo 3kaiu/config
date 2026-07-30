@@ -28,37 +28,37 @@ http-response ^https?:\/\/mobile\.ads\.iqiyi\.com\/ad reject-dict enable={ENABLE
 http-response ^https?:\/\/open\.api\.iqiyi\.com\/splash splash-reject, enable={ENABLE_IQIYI}&{IQIYI_SPLASH_ENABLE}
 
 # ── 首页净化模块 ──────────────────────
-http-response ^https?::\/\/feed\.pgc\.iqiyi\.com\/home reject-dict enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
-http-response ^https?::\/\/hot\.v\.iqiyi\.com\/hotsearch reject-dict enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
-http-response ^https?::\/\/gateway\.iqiyi\.com\/intent reject-dict enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
-http-response ^https?::\/\/api\.bubble\.iqiyi\.com\/bubble reject-dict enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
+http-response ^https?:\/\/feed\.pgc\.iqiyi\.com\/home reject-dict enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
+http-response ^https?:\/\/hot\.v\.iqiyi\.com\/hotsearch reject-dict enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
+http-response ^https?:\/\/gateway\.iqiyi\.com\/intent reject-dict enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
+http-response ^https?:\/\/api\.bubble\.iqiyi\.com\/bubble reject-dict enable={ENABLE_IQIYI}&{IQIYI_HOME_ENABLE}
 
 # ── VIP 增强模块 ───────────────────────
 # 解锁 VIP 专属影片库
-http-request ^https?::\/\/srvp\.qy\.tencent\.com\/play reject-dict post header X-Vip-Res: true $done, enable={ENABLE_IQIYI}&{IQIYI_VIP_ENABLE}
+http-request ^https?:\/\/srvp\.qy\.tencent\.com\/play reject-dict post header X-Vip-Res: true $done, enable={ENABLE_IQIYI}&{IQIYI_VIP_ENABLE}
 
 # 解锁 VIP 免广告权益
-http-response ^https?::\/\/modues\.iqiyi\.com\/vip reject-dict enable={ENABLE_IQIYI}&{IQIYI_VIP_ENABLE}
+http-response ^https?:\/\/modues\.iqiyi\.com\/vip reject-dict enable={ENABLE_IQIYI}&{IQIYI_VIP_ENABLE}
 
 # ── 播放优化模块 ──────────────────────
 # 跳过片头广告
-http-response ^https?::\/\/data\.v\.iqiyi\.com\/ad reject-dict enable={ENABLE_IQIYI}&{IQIYI_PLAY_ENABLE}
+http-response ^https?:\/\/data\.v\.iqiyi\.com\/ad reject-dict enable={ENABLE_IQIYI}&{IQIYI_PLAY_ENABLE}
 
 # 去除片尾推广
-http-response ^https?::\/\/m\.api\.cn\.iqiyi\.com\/end reject-dict enable={ENABLE_IQIYI}&{IQIYI_PLAY_ENABLE}
+http-response ^https?:\/\/m\.api\.cn\.iqiyi\.com\/end reject-dict enable={ENABLE_IQIYI}&{IQIYI_PLAY_ENABLE}
 
 # 清除暂停广告
-http-response ^https?::\/\/pause\.api\.iqiyi\.com\/ad reject-dict enable={ENABLE_IQIYI}&{IQIYI_PLAY_ENABLE}
+http-response ^https?:\/\/pause\.api\.iqiyi\.com\/ad reject-dict enable={ENABLE_IQIYI}&{IQIYI_PLAY_ENABLE}
 
 # ── 4K 画质解锁模块 ──────────────────
 # 解锁 4K/UHD 选项
-http-response ^https?::\/\/player\.api\.iqiyi\.com\/video reject-dict enable={ENABLE_IQIYI}&{IQIYI_4K_ENABLE}
-http-response ^https?::\/\/stream\.aqi\.iqiyi\.com\/bitrate reject-dict enable={ENABLE_IQIYI}&{IQIYI_4K_ENABLE}
-http-response ^https?::\/\/cdn\.iqiyi\.com\/app reject-dict enable={ENABLE_IQIYI}&{IQIYI_4K_ENABLE}
+http-response ^https?:\/\/player\.api\.iqiyi\.com\/video reject-dict enable={ENABLE_IQIYI}&{IQIYI_4K_ENABLE}
+http-response ^https?:\/\/stream\.aqi\.iqiyi\.com\/bitrate reject-dict enable={ENABLE_IQIYI}&{IQIYI_4K_ENABLE}
+http-response ^https?:\/\/cdn\.iqiyi\.com\/app reject-dict enable={ENABLE_IQIYI}&{IQIYI_4K_ENABLE}
 
 # ── 其他净化模块 ─────────────────────
-http-response ^https?::\/\/analytics\.iqiyi\.com\/track reject-dict enable={ENABLE_IQIYI}
-http-response ^https?::\/\/log\.snssdk\.com\/event reject-dict enable={ENABLE_IQIYI}
+http-response ^https?:\/\/analytics\.iqiyi\.com\/track reject-dict enable={ENABLE_IQIYI}
+http-response ^https?:\/\/log\.snssdk\.com\/event reject-dict enable={ENABLE_IQIYI}
 
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）

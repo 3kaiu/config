@@ -27,7 +27,7 @@ http-response ^https?:\/\/flash\.weibo\.com\/splash\/list url reject-200, enable
 http-response ^https?:\/\/api\.weibo\.cn\/2\/splash url reject-200, enable={ENABLE_WEIBO}&{WEIBO_SPLASH_ENABLE}
 
 # ── 信息流净化模块 ────────────────────
-http-response ^https?:\/\/api\.weibo\.cn\/2\/statusmates\/feed流 reject-dict enable={ENABLE_WEIBO}&{WEIBO_FEED_ENABLE}
+http-response ^https?:\/\/api\.weibo\.cn\/2\/statusmates\/feed reject-dict enable={ENABLE_WEIBO}&{WEIBO_FEED_ENABLE}
 http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/unreadflow reject-dict enable={ENABLE_WEIBO}&{WEIBO_FEED_ENABLE}
 http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/timeline reject-dict enable={ENABLE_WEIBO}&{WEIBO_FEED_ENABLE}
 http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/favoritelist reject-dict enable={ENABLE_WEIBO}&{WEIBO_FEED_ENABLE}

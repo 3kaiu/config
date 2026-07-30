@@ -26,22 +26,6 @@ module.exports = defineSurgioConfig({
     },
   ],
 
-  // 远程规则片段 (blackmatrix7 + ddgksf2013)
-  remoteSnippets: [
-    {
-      url: 'https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Advertising/Advertising.list',
-      name: 'blackmatrix7-advertising',
-    },
-    {
-      url: 'https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Hijacking/Hijacking.list',
-      name: 'blackmatrix7-hijacking',
-    },
-    {
-      url: 'https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Privacy/Privacy.list',
-      name: 'blackmatrix7-privacy',
-    },
-  ],
-
   // 节点测试配置
   proxyTestUrl: 'http://cp.cloudflare.com/generate_204',
   proxyTestInterval: 300,

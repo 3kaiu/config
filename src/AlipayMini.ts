@@ -17,8 +17,6 @@ interface AdItem {
   is_promote?: boolean;
 }
 
-let $: { done: (obj?: { body?: string }) => void; log: (...args: unknown[]) => void } = { done: () => {}, log: () => {} };
-
 const CONFIG: { routes: RouteConfig; adKeywords: string[]; debug: boolean } = {
   routes: {
     splash: /gw\/open\.ap.*splash|alipaysplash/,

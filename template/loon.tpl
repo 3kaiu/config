@@ -118,6 +118,29 @@ IP-CIDR, 127.0.0.0/8, DIRECT, no-resolve
 # HTTPDNS 拦截
 DOMAIN-KEYWORD, httpdns, REJECT
 
+# DNS/隐私泄漏检测 (需走代理远端解析)
+DOMAIN-SUFFIX, dnsleaktest.com, Proxy
+DOMAIN-SUFFIX, dnsleak.com, Proxy
+DOMAIN-SUFFIX, expressvpn.com, Proxy
+DOMAIN-SUFFIX, nordvpn.com, Proxy
+DOMAIN-SUFFIX, surfshark.com, Proxy
+DOMAIN-SUFFIX, ipleak.net, Proxy
+DOMAIN-SUFFIX, perfect-privacy.com, Proxy
+DOMAIN-SUFFIX, browserleaks.com, Proxy
+DOMAIN-SUFFIX, browserleaks.org, Proxy
+DOMAIN-SUFFIX, vpnunlimited.com, Proxy
+DOMAIN-SUFFIX, whoer.net, Proxy
+DOMAIN-SUFFIX, whrq.net, Proxy
+DOMAIN-SUFFIX, astrill.com, Proxy
+DOMAIN-SUFFIX, astrill.org, Proxy
+DOMAIN-SUFFIX, dnsleak.asn247.net, Proxy
+DOMAIN-SUFFIX, surfsharkdns.com, Proxy
+DOMAIN-SUFFIX, pixelscan.net, Proxy
+DOMAIN-SUFFIX, ipapi.co, Proxy
+DOMAIN, ipv4.ping0.cc, Proxy
+DOMAIN, ipv6.ping0.cc, Proxy
+DOMAIN, ip-scan.adspower.net, Proxy
+
 # Apple
 DOMAIN, news-edge.apple.com, Proxy
 DOMAIN-SUFFIX, apple.com, Apple
@@ -135,12 +158,6 @@ DOMAIN-SUFFIX, wx.qq.com, DIRECT
 {% include "./snippet/social.tpl" %}
 {% include "./snippet/developer.tpl" %}
 {% include "./snippet/gaming.tpl" %}
-
-# Google 通配域名 (流媒体依赖) — 必须在 developer snippet 之后, 避免 googleapis.com 截胡 firebase.googleapis.com
-DOMAIN-SUFFIX, gstatic.com, Streaming
-DOMAIN-SUFFIX, googleapis.com, Streaming
-DOMAIN-SUFFIX, google.com, Streaming
-DOMAIN-SUFFIX, google.co.jp, Streaming
 
 # Google 全家桶
 DOMAIN-SUFFIX, googleusercontent.com, Proxy
@@ -161,6 +178,25 @@ DOMAIN-SUFFIX, pangle.io, DIRECT
 # 淘宝
 DOMAIN, heic.alicdn.com, REJECT
 DOMAIN-SUFFIX, h-adashx.ut.taobao.com, REJECT
+
+# QQ音乐 DNS REJECT
+DOMAIN, adstats.tencentmusic.com, REJECT
+DOMAIN, ad.tencentmusic.com, REJECT
+DOMAIN, adcdn.tencentmusic.com, REJECT
+DOMAIN, adcdn6.tencentmusic.com, DROP
+DOMAIN, adexpo.tencentmusic.com, DROP
+DOMAIN, adclick.tencentmusic.com, DROP
+DOMAIN, otheve.beacon.qq.com, DROP
+DOMAIN, mazu.m.qq.com, DROP
+DOMAIN, monitor.music.qq.com, DROP
+DOMAIN, stat.y.qq.com, REJECT
+DOMAIN, tmead.y.qq.com, REJECT
+DOMAIN, oth.str.mdt.qq.com, REJECT
+DOMAIN, h.trace.qq.com, REJECT
+DOMAIN, sdk.e.qq.com, REJECT
+DOMAIN, p.l.qq.com, REJECT
+DOMAIN, us.l.qq.com, REJECT
+DOMAIN-SUFFIX, imtmp.net, REJECT
 
 # 追踪
 DOMAIN-KEYWORD, qreport, REJECT
@@ -189,6 +225,12 @@ DOMAIN-SUFFIX, appsflyer.com, REJECT
 DOMAIN-SUFFIX, kochava.com, REJECT
 DOMAIN-SUFFIX, sentry.io, REJECT
 
+# Google 通配域名 (流媒体依赖) — ⚠️ 必须在 Analytics/Ad REJECT 之后, 避免截胡 crashlytics.googleapis.com / adservice.google.com / analytics.google.com (2026-07 审计修复)
+DOMAIN-SUFFIX, gstatic.com, Streaming
+DOMAIN-SUFFIX, googleapis.com, Streaming
+DOMAIN-SUFFIX, google.com, Streaming
+DOMAIN-SUFFIX, google.co.jp, Streaming
+
 # DNS 隐私语义 (Loon): 命中域名类规则的代理流量由代理远端解析, 不产生本地 DNS 查询;
 # 本地解析 (国内 DoH, 解析器侧有记录) 仅发生在: ①走到下面 GEOIP 规则的域名
 # ②未匹配任何规则落入 Final 且 Final 为 DIRECT 的域名 ③直连流量本身 (国内域, 合理)。
@@ -205,7 +247,7 @@ https://ws.wenn.in/main/Mirror/rules/loon-China.list, policy=DIRECT, tag=🇨�
 https://ws.wenn.in/main/Mirror/rules/loon-Global.list, policy=Proxy, tag=🌍 国际域名, enabled=true
 
 [Plugin]
-https://ws.wenn.in/main/Kelee/Prevent_DNS_Leaks.plugin, policy=Proxy, enabled=true
+# 注: DNS leak 规则已直接内置在 [Rule] 段, 不再需要独立插件
 https://ws.wenn.in/main/Mirror/rules/loon-AllInOne.plugin, enabled=true, tag=通用广告域名层
 https://ws.wenn.in/main/Mirror/rules/loon-AdvertisingScript.plugin, enabled=true, tag=广告脚本增强
 https://ws.wenn.in/main/Plugin/sub-store.plugin, enabled=true, tag=Sub-Store 订阅管理
@@ -255,10 +297,20 @@ https://ws.wenn.in/main/Mirror/iringo/iRingo.News.plugin, enabled=true, tag=🍎
 https://ws.wenn.in/main/Mirror/iringo/iRingo.Siri.plugin, enabled=true, tag=🍎Siri增强
 https://ws.wenn.in/main/Mirror/iringo/iRingo.Search.plugin, enabled=true, tag=🍎搜索建议增强
 https://ws.wenn.in/main/Mirror/iringo/iRingo.TestFlight.plugin, enabled=true, tag=🍎TestFlight增强
+https://ws.wenn.in/main/Mirror/iringo/iRingo.TV.plugin, enabled=true, tag=🍎TV增强
+https://ws.wenn.in/main/Mirror/iringo/iRingo.LocationService.plugin, enabled=true, tag=🍎定位服务增强
 # — 🍿️ DualSubs 双语字幕增强 —
 https://ws.wenn.in/main/Mirror/dualsubs/DualSubs.Universal.plugin, enabled=true, tag=🍿️ DualSubs: 流媒体双语字幕
 https://ws.wenn.in/main/Mirror/dualsubs/DualSubs.YouTube.plugin, enabled=true, tag=🍿️ DualSubs: YouTube 双语字幕
 https://ws.wenn.in/main/Mirror/dualsubs/DualSubs.Netflix.plugin, enabled=true, tag=🍿️ DualSubs: Netflix 双语字幕
+# — ☁️ Auraflare Cloudflare 增强 —
+https://ws.wenn.in/main/Mirror/auraflare/Cloudflare.1.1.1.1.plugin, enabled=true, tag=☁️ 1.1.1.1 WARP 面板
+https://ws.wenn.in/main/Mirror/auraflare/Cloudflare.DNS.plugin, enabled=true, tag=☁️ Cloudflare DNS 管理
+# — 📺 BiliUniverse B站增强 —
+https://ws.wenn.in/main/Mirror/biliuniverse/BiliBili.Enhanced.plugin, enabled=true, tag=📺 B站增强模式
+https://ws.wenn.in/main/Mirror/biliuniverse/BiliBili.Global.plugin, enabled=true, tag=📺 B站全球模式
+https://ws.wenn.in/main/Mirror/biliuniverse/BiliBili.ADBlock.plugin, enabled=true, tag=📺 B站去广告
+https://ws.wenn.in/main/Mirror/biliuniverse/BiliBili.Redirect.plugin, enabled=true, tag=📺 B站CDN重定向
 # — Kelee 功能增强插件 (远程引用, Loon App 内通过 Cloudflare Turnstile) —
 https://kelee.one/Tool/Loon/Lpx/Google.lpx, enabled=true, tag=🔍 Google搜索重定向
 https://kelee.one/Tool/Loon/Lpx/Spotify_lyrics_translation.lpx, enabled=true, tag=🎵 Spotify歌词翻译
@@ -277,4 +329,4 @@ https://kelee.one/Tool/Loon/Lpx/NodeLinkCheck.lpx, enabled=true, tag=🔗 代理
 
 [MitM]
 skip-server-cert-verify = false
-hostname = -*.apple.com, -*.icloud.com, -*.icloud.com.cn, -*.95516.com, -*.cup.com.cn, -*.95516.com.cn, -*.unionpay.com, -*.icbc.com.cn, -*.mybank.icbc.com.cn, -*.icbc.com, -*.ccb.com, -*.ccb.cn, -*.boc.cn, -*.bankofchina.com, -*.jf365.boc.cn, -*.abchina.com, -*.abchina.com.cn, -*.cdn-static.abchina.com.cn, -*.cdn-static.abchina.com, -*.bankcomm.com, -*.bankcomm.cn, -*.creditcard.bankcomm.com, -*.creditcard.bankcomm.cn, -*.cmbchina.com, -*.cmbimg.com, -*.psbc.com, -*.spdb.com.cn, -*.spdbccc.com.cn, -*.citicbank.com, -*.citibank.com, -*.ecitic.com, -*.pingan.com.cn, -*.pingan.com, -*.hcz-member.pingan.com.cn, -*.iobs.pingan.com.cn, -*.stock.pingan.com, -*.cmbc.com.cn, -*.cib.com.cn, -*.cebbank.com, -*.ebchinabank.com, -*.hxb.com.cn, -*.cgbchina.com.cn, -*.95508.com, -*.static.95508.com, -*.bankofbeijing.com.cn, -*.bosc.cn, -*.js96008.com, -*.tenpay.com, -*.qianbao.qq.com, weatherkit.apple.com, configuration.ls.apple.com, gspe35-ssl.ls.apple.com, gspe35-ssl.ls.apple.cn, news-edge.apple.com, news-todayconfig-edge.apple.com, news-events.apple.com, news-sports-events.apple.com, news-client.apple.com, news-client-search.apple.com, guzzoni.smoot.apple.com, api2.smoot.apple.com, *.smoot.apple.com, *.smoot.apple.cn, testflight.apple.com, h5.if.qidian.com, magev6.if.qidian.com, ii.gdt.qq.com, adsmind.gdtimg.com, adsmind.ugdtimg.com, pgdt.gtimg.cn, api-access.pangolin-sdk-toutiao.com, api-access.pangolin-sdk-toutiao1.com, api.zhihuifangdong.net, netflow-mtop.cainiao.com, nbcps-mtop.cainiao.com, cn-acs.m.cainiao.com, e2e-mtop.cainiao.com, longquan-mtop.cainiao.com, -redirector*.googlevideo.com, *.googlevideo.com, *.youtube.com, youtubei.googleapis.com, m5.amap.com, m5-zb.amap.com, amdc.m.taobao.com, api.m.jd.com, api.zhihu.com, www.zhihu.com, appcloud2.zhihu.com, link.zhihu.com, zhuanlan.zhihu.com, m-cloud.zhihu.com, tiebac.baidu.com, tieba.baidu.com, tiebaapi.baidu.com, gql.reddit.com, gql-fed.reddit.com, *.oca.nflxvideo.net
+hostname = -*.apple.com, -*.icloud.com, -*.icloud.com.cn, -*.95516.com, -*.cup.com.cn, -*.95516.com.cn, -*.unionpay.com, -*.icbc.com.cn, -*.mybank.icbc.com.cn, -*.icbc.com, -*.ccb.com, -*.ccb.cn, -*.boc.cn, -*.bankofchina.com, -*.jf365.boc.cn, -*.abchina.com, -*.abchina.com.cn, -*.cdn-static.abchina.com.cn, -*.cdn-static.abchina.com, -*.bankcomm.com, -*.bankcomm.cn, -*.creditcard.bankcomm.com, -*.creditcard.bankcomm.cn, -*.cmbchina.com, -*.cmbimg.com, -*.psbc.com, -*.spdb.com.cn, -*.spdbccc.com.cn, -*.citicbank.com, -*.citibank.com, -*.ecitic.com, -*.pingan.com.cn, -*.pingan.com, -*.hcz-member.pingan.com.cn, -*.iobs.pingan.com.cn, -*.stock.pingan.com, -*.cmbc.com.cn, -*.cib.com.cn, -*.cebbank.com, -*.ebchinabank.com, -*.hxb.com.cn, -*.cgbchina.com.cn, -*.95508.com, -*.static.95508.com, -*.bankofbeijing.com.cn, -*.bosc.cn, -*.js96008.com, -*.tenpay.com, -*.qianbao.qq.com, weatherkit.apple.com, configuration.ls.apple.com, gspe35-ssl.ls.apple.com, gspe35-ssl.ls.apple.cn, gspe1-ssl.ls.apple.com, news-edge.apple.com, news-todayconfig-edge.apple.com, news-events.apple.com, news-sports-events.apple.com, news-client.apple.com, news-client-search.apple.com, guzzoni.smoot.apple.com, api2.smoot.apple.com, *.smoot.apple.com, *.smoot.apple.cn, testflight.apple.com, uts-api.itunes.apple.com, umc-tempo-api.apple.com, play-cdn.itunes.apple.com, play-edge-cdn.itunes.apple.com, h5.if.qidian.com, magev6.if.qidian.com, ii.gdt.qq.com, adsmind.gdtimg.com, adsmind.ugdtimg.com, pgdt.gtimg.cn, api-access.pangolin-sdk-toutiao.com, api-access.pangolin-sdk-toutiao1.com, api.zhihuifangdong.net, netflow-mtop.cainiao.com, nbcps-mtop.cainiao.com, cn-acs.m.cainiao.com, e2e-mtop.cainiao.com, longquan-mtop.cainiao.com, -redirector*.googlevideo.com, *.googlevideo.com, *.youtube.com, youtubei.googleapis.com, m5.amap.com, m5-zb.amap.com, amdc.m.taobao.com, dispatcher.is.autonavi.com, api.m.jd.com, api.zhihu.com, www.zhihu.com, appcloud2.zhihu.com, link.zhihu.com, zhuanlan.zhihu.com, m-cloud.zhihu.com, tiebac.baidu.com, tieba.baidu.com, tiebaapi.baidu.com, gql.reddit.com, gql-fed.reddit.com, duckduckgo.com, *.oca.nflxvideo.net

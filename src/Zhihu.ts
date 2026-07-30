@@ -119,9 +119,16 @@ else if (url.includes("topstory/recommend")) {
     console.log(body.data.length === dataArr.length ? '✅ 列表无广告' : '✅ 成功过滤广告');
   }
 }
-// ── 3. 问题回答列表 ──────────────────────
-else if (url.includes("questions") || url.includes("v4/questions")) {
-  console.log(url.includes("v4/questions") ? '知乎-v4/questions' : '知乎-questions');
+// ── 3. 文章下推荐回答广告 ────────────────
+// ⚠️ 必须在 questions 检查之前, 避免被 url.includes("questions") 截胡 (2026-07 审计修复)
+else if (url.includes("answers/questions/related-readings")) {
+  console.log('知乎 - 文章推荐回答');
+  if (body.data) body.data = null;
+  console.log('✅ 成功去除文章推荐回答');
+}
+// ── 4. 问题回答列表 ──────────────────────
+else if (url.includes("questions")) {
+  console.log('知乎-questions');
   if (!body.data.ad_info && !body.ad_info) {
     console.log('问题回答列表无广告');
   } else {
@@ -129,12 +136,6 @@ else if (url.includes("questions") || url.includes("v4/questions")) {
     body.ad_info = null;
     console.log('✅ 成功去除问答列表广告');
   }
-}
-// ── 4. 文章下推荐回答广告 ────────────────
-else if (url.includes("answers/questions/related-readings")) {
-  console.log('知乎 - 文章推荐回答');
-  if (body.data) body.data = null;
-  console.log('✅ 成功去除文章推荐回答');
 }
 // ── 5. 文章回答下广告 ────────────────────
 else if (url.includes("api/v4/articles/")) {

@@ -29,7 +29,7 @@ http-response ^https?:\/\/(m|app)\.jd\.com\/(mind|item)/ script-path=https://ws.
 http-response ^https?:\/\/api\.360buy\.com\/marketing\/window\/get_window_info script-path=https://ws.wenn.in/main/Scripts/JD.js, requires-body=true, timeout=10, tag=领券净化，enable={ENABLE_JD}&{JD_COUPON_ENABLE}
 
 # 商品详情页
-http-response ^https?:\/\/(m|item)\.jd\.com\/item\/script-path=https://ws.wenn.in/main/Scripts/JD.js, requires-body=true, timeout=10, tag=商品页净化，enable={ENABLE_JD}
+http-response ^https?:\/\/(m|item)\.jd\.com\/item\/ script-path=https://ws.wenn.in/main/Scripts/JD.js, requires-body=true, timeout=10, tag=商品页净化，enable={ENABLE_JD}
 
 # 比价工具
 http-response ^https?:\/\/p.360buy\.com\/price\/tower script-path=https://ws.wenn.in/main/Scripts/JD.js, requires-body=true, timeout=10, tag=比价工具，enable={ENABLE_JD}&{JD_PRICE_ENABLE}

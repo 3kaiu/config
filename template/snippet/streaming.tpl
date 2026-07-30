@@ -78,4 +78,4 @@ DOMAIN-SUFFIX, hotstar.com, Streaming
 DOMAIN-SUFFIX, viu.com, Streaming
 DOMAIN-SUFFIX, wetv.vip, Streaming
 DOMAIN-SUFFIX, iq.com, Streaming
-# Google 通配域名已移至 developer snippet 之后 (P1-1: 避免 googleapis.com 截胡 firebase.googleapis.com)
+# Google 通配域名已移至 loon.tpl 主配置中 Analytics/Ad REJECT 之后 (避免截胡 crashlytics.googleapis.com / firebase.googleapis.com)

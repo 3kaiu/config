@@ -25,19 +25,19 @@ DEBUG_ENABLE=switch,"true","false",tag 调试模式，desc=输出详细执行日
 
 # ── 画质解锁 ───────────────────────────
 http-response ^https?:\/\/api\.netflix\.com\/api\/shakti reject-dict enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
-http-response ^https?:::\/\/www\.netflix\.com\/api\/shakti reject-dict enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
+http-response ^https?:\/\/www\.netflix\.com\/api\/shakti reject-dict enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
 
 # ── 广告净化 ───────────────────────────
 http-response ^https?:\/\/api\.netflix\.com\/api\/shakti\/ads reject-dict enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
-http-response ^https?:::\/\/www\.netflix\.com\/api\/shakti\/promotions reject-dict enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
+http-response ^https?:\/\/www\.netflix\.com\/api\/shakti\/promotions reject-dict enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
 
 # ── 区域解锁 ───────────────────────────
 http-response ^https?:\/\/api\.netflix\.com\/api\/shakti\/profiles reject-dict enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
-http-response ^https?:::\/\/www\.netflix\.com\/api\/shakti\/catalog reject-dict enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
+http-response ^https?:\/\/www\.netflix\.com\/api\/shakti\/catalog reject-dict enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
 
 # ── CDN 优化 ───────────────────────────
 http-response ^https?:\/\/ipv4-c\d+-\d+-\d+\.1\.nflxvideo\.net reject-dict enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
-http-response ^https?:::\/\/nrdns\.netflix\.com reject-dict enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
+http-response ^https?:\/\/nrdns\.netflix\.com reject-dict enable={ENABLE_STREAMING}&{NETFLIX_ENABLE}
 
 # ════════════════════════════════════════
 # 🏰 Disney+ 增强规则
@@ -45,15 +45,15 @@ http-response ^https?:::\/\/nrdns\.netflix\.com reject-dict enable={ENABLE_STREA
 
 # ── 区域解锁 ───────────────────────────
 http-response ^https?:\/\/disney\.api\.edge\.bamgrid\.com reject-dict enable={ENABLE_STREAMING}&{DISNEY_ENABLE}
-http-response ^https?:::\/\/disney-plus\.net reject-dict enable={ENABLE_STREAMING}&{DISNEY_ENABLE}
+http-response ^https?:\/\/disney-plus\.net reject-dict enable={ENABLE_STREAMING}&{DISNEY_ENABLE}
 
 # ── 内容增强 ───────────────────────────
 http-response ^https?:\/\/disney\.api\.edge\.bamgrid\.com\/v1\/catalog reject-dict enable={ENABLE_STREAMING}&{DISNEY_ENABLE}
-http-response ^https?:::\/\/disney-plus\.net\/v1\/recommendations reject-dict enable={ENABLE_STREAMING}&{DISNEY_ENABLE}
+http-response ^https?:\/\/disney-plus\.net\/v1\/recommendations reject-dict enable={ENABLE_STREAMING}&{DISNEY_ENABLE}
 
 # ── 画质优化 ───────────────────────────
 http-response ^https?:\/\/disney\.api\.edge\.bamgrid\.com\/v1\/video reject-dict enable={ENABLE_STREAMING}&{DISNEY_ENABLE}
-http-response ^https?:::\/\/disney-plus\.net\/v1\/playback reject-dict enable={ENABLE_STREAMING}&{DISNEY_ENABLE}
+http-response ^https?:\/\/disney-plus\.net\/v1\/playback reject-dict enable={ENABLE_STREAMING}&{DISNEY_ENABLE}
 
 # ════════════════════════════════════════
 # 🎭 HBO Max 增强规则
@@ -61,15 +61,15 @@ http-response ^https?:::\/\/disney-plus\.net\/v1\/playback reject-dict enable={E
 
 # ── 画质优化 ───────────────────────────
 http-response ^https?:\/\/api\.hbomax\.com reject-dict enable={ENABLE_STREAMING}&{HBO_ENABLE}
-http-response ^https?:::\/\/hbomaxcdn\.com reject-dict enable={ENABLE_STREAMING}&{HBO_ENABLE}
+http-response ^https?:\/\/hbomaxcdn\.com reject-dict enable={ENABLE_STREAMING}&{HBO_ENABLE}
 
 # ── 广告净化 ───────────────────────────
 http-response ^https?:\/\/api\.hbomax\.com\/ads reject-dict enable={ENABLE_STREAMING}&{HBO_ENABLE}
-http-response ^https?:::\/\/hbomaxcdn\.com\/promotions reject-dict enable={ENABLE_STREAMING}&{HBO_ENABLE}
+http-response ^https?:\/\/hbomaxcdn\.com\/promotions reject-dict enable={ENABLE_STREAMING}&{HBO_ENABLE}
 
 # ── 内容解锁 ───────────────────────────
 http-response ^https?:\/\/api\.hbomax\.com\/catalog reject-dict enable={ENABLE_STREAMING}&{HBO_ENABLE}
-http-response ^https?:::\/\/hbomaxcdn\.com\/recommendations reject-dict enable={ENABLE_STREAMING}&{HBO_ENABLE}
+http-response ^https?:\/\/hbomaxcdn\.com\/recommendations reject-dict enable={ENABLE_STREAMING}&{HBO_ENABLE}
 
 # ════════════════════════════════════════
 # 🎵 Spotify 增强规则
@@ -77,19 +77,19 @@ http-response ^https?:::\/\/hbomaxcdn\.com\/recommendations reject-dict enable={
 
 # ── 无损音质解锁 ──────────────────────
 http-response ^https?:\/\/api\.spotify\.com reject-dict enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
-http-response ^https?:::\/\/api\.spotify\.com\/v1\/tracks reject-dict enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
+http-response ^https?:\/\/api\.spotify\.com\/v1\/tracks reject-dict enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
 
 # ── 歌词翻译增强 ──────────────────────
 http-response ^https?:\/\/api\.spotify\.com\/v1\/lyrics reject-dict enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
-http-response ^https?:::\/\/api\.spotify\.com\/v1\/songs reject-dict enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
+http-response ^https?:\/\/api\.spotify\.com\/v1\/songs reject-dict enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
 
 # ── 广告净化 ───────────────────────────
 http-response ^https?:\/\/api\.spotify\.com\/v1\/ads reject-dict enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
-http-response ^https?:::\/\/api\.spotify\.com\/v1\/promotions reject-dict enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
+http-response ^https?:\/\/api\.spotify\.com\/v1\/promotions reject-dict enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
 
 # ── 推荐净化 ───────────────────────────
 http-response ^https?:\/\/api\.spotify\.com\/v1\/recommendations reject-dict enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
-http-response ^https?:::\/\/api\.spotify\.com\/v1\/charts reject-dict enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
+http-response ^https?:\/\/api\.spotify\.com\/v1\/charts reject-dict enable={ENABLE_STREAMING}&{SPOTIFY_ENABLE}
 
 # ════════════════════════════════════════
 # 📺 YouTube 增强规则 (扩展 Maasea 方案)
@@ -97,36 +97,36 @@ http-response ^https?:::\/\/api\.spotify\.com\/v1\/charts reject-dict enable={EN
 
 # ── 去广告 ─────────────────────────────
 http-response ^https?:\/\/youtubei\.googleapis\.com reject-dict enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
-http-response ^https?:::\/\/www\.youtube\.com\/api\/stats reject-dict enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
+http-response ^https?:\/\/www\.youtube\.com\/api\/stats reject-dict enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
 
 # ── 画质解锁 ───────────────────────────
 http-response ^https?:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/player reject-dict enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
-http-response ^https?:::\/\/www\.youtube\.com\/watch reject-dict enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
+http-response ^https?:\/\/www\.youtube\.com\/watch reject-dict enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
 
 # ── 后台播放/PiP ───────────────────────
 http-response ^https?:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/player reject-dict enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
-http-response ^https?:::\/\/www\.youtube\.com\/watch reject-dict enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
+http-response ^https?:\/\/www\.youtube\.com\/watch reject-dict enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
 
 # ── SponsorBlock 集成 ──────────────────
 http-response ^https?:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/next reject-dict enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
-http-response ^https?:::\/\/www\.youtube\.com\/watch reject-dict enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
+http-response ^https?:\/\/www\.youtube\.com\/watch reject-dict enable={ENABLE_STREAMING}&{YOUTUBE_ENABLE}
 
 # ════════════════════════════════════════
 # 🔒 流媒体隐私防护
 # ═══════════════════════════════════════===
 
 # ── 追踪拦截 ───────────────────────────
-http-request ^https?:\/\/netflix\.com\/track reject-dict enabled={ENABLE_STREAMING}&{PRIVACY_ENABLE}
-http-request ^https?:::\/\/disney\.com\/track reject-dict enabled={ENABLE_STREAMING}&{PRIVACY_ENABLE}
-http-request ^https?:::\/\/hbomax\.com\/track reject-dict enabled={ENABLE_STREAMING}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/netflix\.com\/track reject-dict enable={ENABLE_STREAMING}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/disney\.com\/track reject-dict enable={ENABLE_STREAMING}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/hbomax\.com\/track reject-dict enable={ENABLE_STREAMING}&{PRIVACY_ENABLE}
 
 # ── 数据分析拦截 ──────────────────────
-http-request ^https?:::\/\/api\.spotify\.com\/v1\/analytics reject-dict enabled={ENABLE_STREAMING}&{PRIVACY_ENABLE}
-http-request ^https?:::\/\/youtube\.com\/api\/stats reject-dict enabled={ENABLE_STREAMING}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/api\.spotify\.com\/v1\/analytics reject-dict enable={ENABLE_STREAMING}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/youtube\.com\/api\/stats reject-dict enable={ENABLE_STREAMING}&{PRIVACY_ENABLE}
 
 # ── 广告标识符拦截 ─────────────────────
-http-request ^https?:::\/\/netflix\.com\/idfa reject-dict enabled={ENABLE_STREAMING}&{PRIVACY_ENABLE}
-http-request ^https?:::\/\/disney\.com\/idfa reject-dict enabled={ENABLE_STREAMING}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/netflix\.com\/idfa reject-dict enable={ENABLE_STREAMING}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/disney\.com\/idfa reject-dict enable={ENABLE_STREAMING}&{PRIVACY_ENABLE}
 
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）

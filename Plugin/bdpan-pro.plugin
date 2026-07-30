@@ -65,4 +65,4 @@ DOMAIN-SUFFIX, baidupcs.com, DIRECT
 DOMAIN-SUFFIX, bcebos.com, DIRECT
 
 [MitM]
-hostname = %APPEND% api.netdisk.baidu.com, pcs.baidu.com, open.bce.baidupcs.com
+hostname = %APPEND% api.netdisk.com, pcs.baidu.com, open.bce.baidupcs.com

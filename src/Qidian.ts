@@ -656,6 +656,7 @@ async function handleSimpleCheckin() {
         } else {
           $.log(`[静默模式] ❌ 签到失败: ${errMsg}`);
         }
+        return;
       } else {
         $.log(`[签到] 网络异常, 重试 ${i + 1}/${maxRetry}...`);
         await $.wait(1500);

@@ -24,11 +24,11 @@ DEBUG_ENABLE=switch,"false","true",tag 调试模式，desc=输出详细执行日
 
 # ── 首页动态净化 ───────────────────────
 http-response ^https?:\/\/api\.instagram\.com\/instagram\/feed reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
-http-response ^https?::\/\/i.instagram\.com\/api/v1/feed/home reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?:\/\/i.instagram\.com\/api/v1/feed/home reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
 
 # ── 探索页净化 ──────────────────────────
-http-response ^https?::\/\/www\.instagram\.com\/explore reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
-http-response ^https?::\/\/api\.instagram\.com\/v1/explore reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?:\/\/www\.instagram\.com\/explore reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?:\/\/api\.instagram\.com\/v1/explore reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
 
 # ── Reels 短视屏净化 ──────────────────
 http-response ^https?:\/\/api\.instagram\.com\/ reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
@@ -36,11 +36,11 @@ http-response ^https?:\/\/i\.instagram\.com\/clips reject-dict enable={ENABLE_OV
 
 # ── Stories 净化 ───────────────────────
 http-response ^https?:\/\/api\.instagram\.com\/stories reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
-http-response ^https?::\/\/i\.instagram\.com\/stories reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?:\/\/i\.instagram\.com\/stories reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
 
 # ── 推荐内容净化 ──────────────────────
 http-response ^https?:\/\/api\.instagram\.com\/recommended reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
-http-response ^https?::\/\/www\.instagram\.com\/suggestions reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
+http-response ^https?:\/\/www\.instagram\.com\/suggestions reject-dict enable={ENABLE_OVERSEAS}&{INSTAGRAM_ENABLE}
 
 # ════════════════════════════════════════
 # 👍 Facebook 净化规则
@@ -48,73 +48,73 @@ http-response ^https?::\/\/www\.instagram\.com\/suggestions reject-dict enable={
 
 # ── News Feed 净化 ─────────────────────
 http-response ^https?:\/\/news-api\.facebook\.com reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
-http-response ^https?::\/\/graph\.facebook\.com reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+http-response ^https?:\/\/graph\.facebook\.com reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
 
 # ── Marketplace 净化 ───────────────────
 http-response ^https?:\/\/commerce\.facebook\.com reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
-http-response ^https?::\":\"\"\"marketplace\.facebook\.com\"\"\" reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+http-response ^https?:\/\/marketplace\.facebook\.com reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
 
 # ── Groups 净化 ────────────────────────
 http-response ^https?:\/\/socialgraphs\.facebook\.com reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
-http-response ^https?::\":\"\"\"groups\.facebook\.com\"\"\" reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+http-response ^https?:\/\/groups\.facebook\.com reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
 
 # ── Watch 视频净化 ─────────────────────
 http-response ^https?:\/\/video-api\.facebook\.com reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
-http-response ^https?::\":\"\"\"watch\.facebook\.com\"\"\" reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
+http-response ^https?:\/\/watch\.facebook\.com reject-dict enable={ENABLE_OVERSEAS}&{FACEBOOK_ENABLE}
 
 # ════════════════════════════════════════
 # 🐦 Twitter/X 净化规则
 # ═══════════════════════════════════════===
 
 # ── Timeline 净化 ──────────────────────
-http-response ^https?::\":\"\"\"api\.twitter\.com\"\"\" timeline clean script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=X Timeline 清理，enabled={TWITTER_X_ENABLE}
-http-response ^https?::\":\"\"\"tweetdeck\.twitter\.com\"\"\" promoted-tweet-blocker script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=推广推文阻止，enabled={TWITTER_X_ENABLE}
+http-response ^https?:\/\/api\.twitter\.com timeline clean script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=X Timeline 清理，enable={TWITTER_X_ENABLE}
+http-response ^https?:\/\/tweetdeck\.twitter\.com promoted-tweet-blocker script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=推广推文阻止，enable={TWITTER_X_ENABLE}
 
 # ── Trends 趋势净化 ───────────────────
-http-response ^https?::\":\"\"\"api\.twitter\.com\"\"\" trends clean script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=Trends 清理，enabled={TWITTER_X_ENABLE}
-http-response ^https?::\":\"\"\"syndication\.twitter\.com\"\"\" trend-ad-filter script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=趋势广告过滤，enabled={TWITTER_X_ENABLE}
+http-response ^https?:\/\/api\.twitter\.com trends clean script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=Trends 清理，enable={TWITTER_X_ENABLE}
+http-response ^https?:\/\/syndication\.twitter\.com trend-ad-filter script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=趋势广告过滤，enable={TWITTER_X_ENABLE}
 
 # ── Recommendations 净化 ───────────────
-http-response ^https?::\":\"\"\"api\.twitter\.com\"\"\" for-you clean script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=为你推荐清理，enabled={TWITTER_X_ENABLE}
-http-response ^https?::\":\"\"\"rest\.api\.twitter\.com\"\"\" recommend-user-blocker script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=推荐用户阻止，enabled={TWITTER_X_ENABLE}
+http-response ^https?:\/\/api\.twitter\.com for-you clean script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=为你推荐清理，enable={TWITTER_X_ENABLE}
+http-response ^https?:\/\/rest\.api\.twitter\.com recommend-user-blocker script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=推荐用户阻止，enable={TWITTER_X_ENABLE}
 
 # ════════════════════════════════════════
 # 💼 LinkedIn 净化规则
 # ═══════════════════════════════════════===
 
 # ── Home Feed 净化 ─────────────────────
-http-response ^https?::\":\"\"\"www\.linkedin\.com\"\"\" feed clean script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=Home Feed 清理，enabled={LINKEDIN_ENABLE}
-http-response ^https?::\":\"\"\"api\.linkedin\.com\"\"\" sponsored-post-blocker script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=Sponsored Posts 阻止，enabled={LINKEDIN_ENABLE}
+http-response ^https?:\/\/www\.linkedin\.com feed clean script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=Home Feed 清理，enable={LINKEDIN_ENABLE}
+http-response ^https?:\/\/api\.linkedin\.com sponsored-post-blocker script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=Sponsored Posts 阻止，enable={LINKEDIN_ENABLE}
 
 # ── Job Recommendations 净化 ───────────
-http-response ^https?::\":\"\"\"www\.linkedin\.com\"\"\" job-ads-clean script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=招聘广告清理，enabled={LINKEDIN_ENABLE}
-http-response ^https?::\":\"\"\"api\.linkedin\.com\"\"\" job-recommendation-filter script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=职位推荐过滤，enabled={LINKEDIN_ENABLE}
+http-response ^https?:\/\/www\.linkedin\.com job-ads-clean script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=招聘广告清理，enable={LINKEDIN_ENABLE}
+http-response ^https?:\/\/api\.linkedin\.com job-recommendation-filter script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=职位推荐过滤，enable={LINKEDIN_ENABLE}
 
 # ── Learning & Ads 净化 ────────────────
-http-response ^https?::\":\"\"\"www\.linkedin\.com\"\"\" learning-promo-clean script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=学习推广清理，enabled={LINKEDIN_ENABLE}
-http-response ^https?::\":\"\"\"adserver\.linkedin\.com\"\"\" ad-blocker script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=平台广告阻止，enabled={LINKEDIN_ENABLE}
+http-response ^https?:\/\/www\.linkedin\.com learning-promo-clean script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=学习推广清理，enable={LINKEDIN_ENABLE}
+http-response ^https?:\/\/adserver\.linkedin\.com ad-blocker script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=平台广告阻止，enable={LINKEDIN_ENABLE}
 
 # ════════════════════════════════════════
 # 🔒 通用隐私防护
 # ═══════════════════════════════════════===
 
 # ── 第三方追踪器拦截 ──────────────────
-http-request ^https?:\/\/pixel\.facebook\.com reject-dict enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
-http-request ^https?::\":\"\"\"www\.google-analytics\.com\"\"\" reject-dict enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
-http-request ^https?::\":\"\"\"api\.snaplytics\.io\"\"\" reject-dict enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/pixel\.facebook\.com reject-dict enable={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/www\.google-analytics\.com reject-dict enable={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/api\.snaplytics\.io reject-dict enable={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
 
 # ── 数据分析工具拦截 ──────────────────
-http-request ^https?::\":\"\"\"www\.hotjar\.com\"\"\" reject-dict enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
-http-request ^https?::\":\"\"\"app\.mixpanel\.com\"\"\" reject-dict enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
-http-request ^https?::\":\"\"\"app\.amplitude\.com\"\"\" reject-dict enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/www\.hotjar\.com reject-dict enable={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/app\.mixpanel\.com reject-dict enable={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/app\.amplitude\.com reject-dict enable={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
 
 # ── A/B 测试追踪拦截 ───────────────────
-http-request ^https?::\":\"\"\"optimizely\.com\"\"\" reject-dict enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
-http-request ^https?::\":\"\"\"stats\.tune\.in\"\"\" reject-dict enabled={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/optimizely\.com reject-dict enable={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/stats\.tune\.in reject-dict enable={ENABLE_OVERSEAS}&{PRIVACY_ENABLE}
 
 # ── Cookie 同意弹窗处理 ────────────────
-http-response ^https?::\":\"\"\"cookielaw\.org\"\"\" reject-dict enabled={ENABLE_OVERSEAS}
-http-response ^https?::\":\"\"\"consent\.oauthflow\.io\"\"\" reject-dict enabled={ENABLE_OVERSEAS}
+http-response ^https?:\/\/cookielaw\.org reject-dict enable={ENABLE_OVERSEAS}
+http-response ^https?:\/\/consent\.oauthflow\.io reject-dict enable={ENABLE_OVERSEAS}
 
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）

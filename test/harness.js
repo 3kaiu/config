@@ -30,7 +30,7 @@ function createSandbox(opts = {}) {
     : { setTimeout: (...a) => setTimeout(...a), clearTimeout: (...a) => clearTimeout(...a) };
 
   const ctx = {
-    console: { log: (...a) => state.logs.push(a.join(" ")) },
+    console: { log: (...a) => state.logs.push(a.join(" ")), error: (...a) => state.logs.push("[ERROR] " + a.join(" ")) },
     setTimeout: timers.setTimeout,
     clearTimeout: timers.clearTimeout,
     setImmediate: (fn) => setImmediate(fn),

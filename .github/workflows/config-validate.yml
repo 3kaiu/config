@@ -175,7 +175,7 @@ jobs:
         run: |
           echo "## Snippet Alignment Check (Content-Level Diff)" >> $GITHUB_STEP_SUMMARY
           FAIL=0
-          for pair in streaming social ai-services developer bank-ad-reject; do
+          for pair in streaming social ai-services developer gaming bank-ad-reject; do
             tpl_file="template/snippet/${pair}.tpl"
             qx_file="template/snippet/${pair}.qx"
             if [ ! -f "$tpl_file" ] || [ ! -f "$qx_file" ]; then
@@ -317,5 +317,35 @@ jobs:
           done
           if [ "$FAIL" -eq 0 ]; then
             echo "✅ 顺序正确: Google 通配位于所有 AI/Reject 锚点之后" >> $GITHUB_STEP_SUMMARY
+          fi
+          exit $FAIL
+
+      # ── 11. Loon 规则顺序防遮蔽检查 (与 QX 同步) ──
+      - name: Loon rule-order shadowing guard
+        run: |
+          echo "## Loon Rule-Order Guard" >> $GITHUB_STEP_SUMMARY
+          wild_line=$(grep -n '^DOMAIN-SUFFIX, googleapis\.com, Streaming' Profile/Loon.lcf | cut -d: -f1)
+          wild2_line=$(grep -n '^DOMAIN-SUFFIX, google\.com, Streaming' Profile/Loon.lcf | cut -d: -f1)
+          ai_glm_line=$(grep -n '^DOMAIN-SUFFIX, generativelanguage\.googleapis\.com' Profile/Loon.lcf | cut -d: -f1)
+          crash_line=$(grep -n '^DOMAIN-SUFFIX, crashlytics\.googleapis\.com' Profile/Loon.lcf | cut -d: -f1)
+          ads_line=$(grep -n '^DOMAIN-SUFFIX, adservice\.google\.com' Profile/Loon.lcf | cut -d: -f1)
+          anl_line=$(grep -n '^DOMAIN-SUFFIX, analytics\.google\.com' Profile/Loon.lcf | cut -d: -f1)
+          if [ -z "$wild_line" ] || [ -z "$wild2_line" ] || [ -z "$crash_line" ] || [ -z "$ads_line" ]; then
+            echo "❌ 缺少必要规则行 (wild=$wild_line/$wild2_line crash=$crash_line ads=$ads_line)" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+          FAIL=0
+          for wild_label in "googleapis.com:$wild_line" "google.com:$wild2_line"; do
+            wname=${wild_label%%:*}; wline=${wild_label##*:}
+            for anchor in "crashlytics:$crash_line" "adservice:$ads_line" "analytics:$anl_line"; do
+              aname=${anchor%%:*}; aline=${anchor##*:}
+              if [ -n "$aline" ] && [ "$wline" -lt "$aline" ]; then
+                echo "❌ $wname 通配 (L$wline) 在 $aname (L$aline) 之前 — $aname 被遮蔽" >> $GITHUB_STEP_SUMMARY
+                FAIL=1
+              fi
+            done
+          done
+          if [ "$FAIL" -eq 0 ]; then
+            echo "✅ 顺序正确: Google 通配位于所有 Reject 锚点之后" >> $GITHUB_STEP_SUMMARY
           fi
           exit $FAIL

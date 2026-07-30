@@ -28,28 +28,28 @@ http-response ^https?:\/\/flash\.pddpic\.com\/splash list reject-200, enable={EN
 http-response ^https?:\/\/open\.api\.pinduoduo\.com\/ad reject-dict enable={ENABLE_PDD}&{PDD_SPLASH_ENABLE}
 
 # ── 首页净化模块 ──────────────────────
-http-response ^https?::\/\/mobile\.yangkeduo\.com\/proxy reject-dict enable={ENABLE_PDD}&{PDD_HOME_ENABLE}
-http-response ^https?::\/\/api\.pinduoduo\.com\/home reject-dict enable={ENABLE_PDD}&{PDD_HOME_ENABLE}
-http-response ^https?::\/\/gateway\.pinduoduo\.com\/banner reject-dict enable={ENABLE_PDD}&{PDD_HOME_ENABLE}
-http-response ^https?::\/\/mms\.pinduoduo\.com\/pop reject-dict enable={ENABLE_PDD}&{PDD_HOME_ENABLE}
+http-response ^https?:\/\/mobile\.yangkeduo\.com\/proxy reject-dict enable={ENABLE_PDD}&{PDD_HOME_ENABLE}
+http-response ^https?:\/\/api\.pinduoduo\.com\/home reject-dict enable={ENABLE_PDD}&{PDD_HOME_ENABLE}
+http-response ^https?:\/\/gateway\.pinduoduo\.com\/banner reject-dict enable={ENABLE_PDD}&{PDD_HOME_ENABLE}
+http-response ^https?:\/\/mms\.pinduoduo\.com\/pop reject-dict enable={ENABLE_PDD}&{PDD_HOME_ENABLE}
 
 # ── 搜索净化模块 ──────────────────────
-http-response ^https?::\/\/search\.api\.pinduoduo\.com\/suggest reject-dict enable={ENABLE_PDD}&{PDD_SEARCH_ENABLE}
-http-response ^https?::\/\/hot\.search\.pinduoduo\.com\/hotsearch reject-dict enable={ENABLE_PDD}&{PDD_SEARCH_ENABLE}
-http-response ^https?::\/\/recommend\.api\.pinduoduo\.com\/rec reject-dict enable={ENABLE_PDD}&{PDD_SEARCH_ENABLE}
+http-response ^https?:\/\/search\.api\.pinduoduo\.com\/suggest reject-dict enable={ENABLE_PDD}&{PDD_SEARCH_ENABLE}
+http-response ^https?:\/\/hot\.search\.pinduoduo\.com\/hotsearch reject-dict enable={ENABLE_PDD}&{PDD_SEARCH_ENABLE}
+http-response ^https?:\/\/recommend\.api\.pinduoduo\.com\/rec reject-dict enable={ENABLE_PDD}&{PDD_SEARCH_ENABLE}
 
 # ── 推荐净化模块 ──────────────────────
-http-response ^https?::\/\/recommend\.api\.pinduoduo\.com\/feed reject-dict enable={ENABLE_PDD}&{PDD_RECOMMEND_ENABLE}
-http-response ^https?::\/\/discovery\.api\.pinduoduo\.com\/discover reject-dict enable={ENABLE_PDD}&{PDD_RECOMMEND_ENABLE}
+http-response ^https?:\/\/recommend\.api\.pinduoduo\.com\/feed reject-dict enable={ENABLE_PDD}&{PDD_RECOMMEND_ENABLE}
+http-response ^https?:\/\/discovery\.api\.pinduoduo\.com\/discover reject-dict enable={ENABLE_PDD}&{PDD_RECOMMEND_ENABLE}
 
 # ── 百亿补贴优化模块 ─────────────────
 # 优化补贴商品展示，去除营销干扰
-http-response ^https?::\/\/subsidy\.api\.pinduoduo\.com\/list reject-dict enable={ENABLE_PDD}&{PDD_SUBSIDY_ENABLE}
-http-response ^https?::\/\/promotion\.api\.pinduoduo\.com\/promo reject-dict enable={ENABLE_PDD}&{PDD_SUBSIDY_ENABLE}
+http-response ^https?:\/\/subsidy\.api\.pinduoduo\.com\/list reject-dict enable={ENABLE_PDD}&{PDD_SUBSIDY_ENABLE}
+http-response ^https?:\/\/promotion\.api\.pinduoduo\.com\/promo reject-dict enable={ENABLE_PDD}&{PDD_SUBSIDY_ENABLE}
 
 # ── 其他净化模块 ─────────────────────
-http-response ^https?::\/\/analytics\.pinduoduo\.com\/track reject-dict enable={ENABLE_PDD}
-http-response ^https?::\/\/log\.pinduoduo\.com\/event reject-dict enable={ENABLE_PDD}
+http-response ^https?:\/\/analytics\.pinduoduo\.com\/track reject-dict enable={ENABLE_PDD}
+http-response ^https?:\/\/log\.pinduoduo\.com\/event reject-dict enable={ENABLE_PDD}
 
 # ════════════════════════════════════════
 # ⏰ Cron 定时任务（可选功能）

@@ -78,4 +78,4 @@ host-suffix, hotstar.com, Streaming
 host-suffix, viu.com, Streaming
 host-suffix, wetv.vip, Streaming
 host-suffix, iq.com, Streaming
-# Google 通配域名已移至 developer snippet 之后 (P1-1: 避免 googleapis.com 截胡 firebase.googleapis.com)
+# Google 通配域名已移至 QX [filter_local] 中 Analytics/Ad REJECT 之后 (避免截胡 crashlytics.googleapis.com / firebase.googleapis.com)

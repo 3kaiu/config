@@ -134,6 +134,29 @@ IP-CIDR, 127.0.0.0/8, DIRECT, no-resolve
 # HTTPDNS 拦截
 DOMAIN-KEYWORD, httpdns, REJECT
 
+# DNS/隐私泄漏检测 (需走代理远端解析)
+DOMAIN-SUFFIX, dnsleaktest.com, Proxy
+DOMAIN-SUFFIX, dnsleak.com, Proxy
+DOMAIN-SUFFIX, expressvpn.com, Proxy
+DOMAIN-SUFFIX, nordvpn.com, Proxy
+DOMAIN-SUFFIX, surfshark.com, Proxy
+DOMAIN-SUFFIX, ipleak.net, Proxy
+DOMAIN-SUFFIX, perfect-privacy.com, Proxy
+DOMAIN-SUFFIX, browserleaks.com, Proxy
+DOMAIN-SUFFIX, browserleaks.org, Proxy
+DOMAIN-SUFFIX, vpnunlimited.com, Proxy
+DOMAIN-SUFFIX, whoer.net, Proxy
+DOMAIN-SUFFIX, whrq.net, Proxy
+DOMAIN-SUFFIX, astrill.com, Proxy
+DOMAIN-SUFFIX, astrill.org, Proxy
+DOMAIN-SUFFIX, dnsleak.asn247.net, Proxy
+DOMAIN-SUFFIX, surfsharkdns.com, Proxy
+DOMAIN-SUFFIX, pixelscan.net, Proxy
+DOMAIN-SUFFIX, ipapi.co, Proxy
+DOMAIN, ipv4.ping0.cc, Proxy
+DOMAIN, ipv6.ping0.cc, Proxy
+DOMAIN, ip-scan.adspower.net, Proxy
+
 # Apple
 DOMAIN, news-edge.apple.com, Proxy
 DOMAIN-SUFFIX, apple.com, Apple
@@ -292,7 +315,7 @@ DOMAIN-SUFFIX, hotstar.com, Streaming
 DOMAIN-SUFFIX, viu.com, Streaming
 DOMAIN-SUFFIX, wetv.vip, Streaming
 DOMAIN-SUFFIX, iq.com, Streaming
-# Google 通配域名已移至 developer snippet 之后 (P1-1: 避免 googleapis.com 截胡 firebase.googleapis.com)
+# Google 通配域名已移至 loon.tpl 主配置中 Analytics/Ad REJECT 之后 (避免截胡 crashlytics.googleapis.com / firebase.googleapis.com)
 
 # 社交平台路由 (Loon 格式)
 # Instagram
@@ -504,12 +527,6 @@ DOMAIN-SUFFIX, battle.net, Gaming
 DOMAIN-SUFFIX, blizzard.com, Gaming
 
 
-# Google 通配域名 (流媒体依赖) — 必须在 developer snippet 之后, 避免 googleapis.com 截胡 firebase.googleapis.com
-DOMAIN-SUFFIX, gstatic.com, Streaming
-DOMAIN-SUFFIX, googleapis.com, Streaming
-DOMAIN-SUFFIX, google.com, Streaming
-DOMAIN-SUFFIX, google.co.jp, Streaming
-
 # Google 全家桶
 DOMAIN-SUFFIX, googleusercontent.com, Proxy
 DOMAIN-SUFFIX, ggpht.com, Proxy
@@ -557,6 +574,12 @@ DOMAIN-SUFFIX, appsflyer.com, REJECT
 DOMAIN-SUFFIX, kochava.com, REJECT
 DOMAIN-SUFFIX, sentry.io, REJECT
 
+# Google 通配域名 (流媒体依赖) — ⚠️ 必须在 Analytics/Ad REJECT 之后, 避免截胡 crashlytics.googleapis.com / adservice.google.com / analytics.google.com (2026-07 审计修复)
+DOMAIN-SUFFIX, gstatic.com, Streaming
+DOMAIN-SUFFIX, googleapis.com, Streaming
+DOMAIN-SUFFIX, google.com, Streaming
+DOMAIN-SUFFIX, google.co.jp, Streaming
+
 # DNS 隐私语义 (Loon): 命中域名类规则的代理流量由代理远端解析, 不产生本地 DNS 查询;
 # 本地解析 (国内 DoH, 解析器侧有记录) 仅发生在: ①走到下面 GEOIP 规则的域名
 # ②未匹配任何规则落入 Final 且 Final 为 DIRECT 的域名 ③直连流量本身 (国内域, 合理)。
@@ -573,7 +596,7 @@ https://ws.wenn.in/main/Mirror/rules/loon-China.list, policy=DIRECT, tag=🇨�
 https://ws.wenn.in/main/Mirror/rules/loon-Global.list, policy=Proxy, tag=🌍 国际域名, enabled=true
 
 [Plugin]
-https://ws.wenn.in/main/Kelee/Prevent_DNS_Leaks.plugin, policy=Proxy, enabled=true
+# 注: DNS leak 规则已直接内置在 [Rule] 段, 不再需要独立插件
 https://ws.wenn.in/main/Mirror/rules/loon-AllInOne.plugin, enabled=true, tag=通用广告域名层
 https://ws.wenn.in/main/Mirror/rules/loon-AdvertisingScript.plugin, enabled=true, tag=广告脚本增强
 https://ws.wenn.in/main/Plugin/sub-store.plugin, enabled=true, tag=Sub-Store 订阅管理
@@ -623,10 +646,20 @@ https://ws.wenn.in/main/Mirror/iringo/iRingo.News.plugin, enabled=true, tag=🍎
 https://ws.wenn.in/main/Mirror/iringo/iRingo.Siri.plugin, enabled=true, tag=🍎Siri增强
 https://ws.wenn.in/main/Mirror/iringo/iRingo.Search.plugin, enabled=true, tag=🍎搜索建议增强
 https://ws.wenn.in/main/Mirror/iringo/iRingo.TestFlight.plugin, enabled=true, tag=🍎TestFlight增强
+https://ws.wenn.in/main/Mirror/iringo/iRingo.TV.plugin, enabled=true, tag=🍎TV增强
+https://ws.wenn.in/main/Mirror/iringo/iRingo.LocationService.plugin, enabled=true, tag=🍎定位服务增强
 # — 🍿️ DualSubs 双语字幕增强 —
 https://ws.wenn.in/main/Mirror/dualsubs/DualSubs.Universal.plugin, enabled=true, tag=🍿️ DualSubs: 流媒体双语字幕
 https://ws.wenn.in/main/Mirror/dualsubs/DualSubs.YouTube.plugin, enabled=true, tag=🍿️ DualSubs: YouTube 双语字幕
 https://ws.wenn.in/main/Mirror/dualsubs/DualSubs.Netflix.plugin, enabled=true, tag=🍿️ DualSubs: Netflix 双语字幕
+# — ☁️ Auraflare Cloudflare 增强 —
+https://ws.wenn.in/main/Mirror/auraflare/Cloudflare.1.1.1.1.plugin, enabled=true, tag=☁️ 1.1.1.1 WARP 面板
+https://ws.wenn.in/main/Mirror/auraflare/Cloudflare.DNS.plugin, enabled=true, tag=☁️ Cloudflare DNS 管理
+# — 📺 BiliUniverse B站增强 —
+https://ws.wenn.in/main/Mirror/biliuniverse/BiliBili.Enhanced.plugin, enabled=true, tag=📺 B站增强模式
+https://ws.wenn.in/main/Mirror/biliuniverse/BiliBili.Global.plugin, enabled=true, tag=📺 B站全球模式
+https://ws.wenn.in/main/Mirror/biliuniverse/BiliBili.ADBlock.plugin, enabled=true, tag=📺 B站去广告
+https://ws.wenn.in/main/Mirror/biliuniverse/BiliBili.Redirect.plugin, enabled=true, tag=📺 B站CDN重定向
 # — Kelee 功能增强插件 (远程引用, Loon App 内通过 Cloudflare Turnstile) —
 https://kelee.one/Tool/Loon/Lpx/Google.lpx, enabled=true, tag=🔍 Google搜索重定向
 https://kelee.one/Tool/Loon/Lpx/Spotify_lyrics_translation.lpx, enabled=true, tag=🎵 Spotify歌词翻译

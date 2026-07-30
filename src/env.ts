@@ -64,41 +64,20 @@ export function Env(this: EnvInstance, n: string) {
       body: JSON.stringify({ chat_id: String(chatId), text: `${title}\n${body}` })
     }).then(() => {}).catch(() => {});
   };
-  this.doNotify = (title: string, body: string) => {
-    this.notify(title, "", body);
-    return Promise.allSettled([this.barkPush(title, body), this.telegramPush(title, body)]);
-  };
   this.notify = (t: string, s: string, b: string) => {
     if (this.isL) $notification.post(t, s, b);
     else $notify(t, s, b);
-    const barkKey = this.get("Bark_Key") || this.get("barkKey");
-    const tgToken = this.get("TG_BOT_TOKEN") || this.get("tgToken");
-    const tgChatId = this.get("TG_USER_ID") || this.get("tgChatId");
+  };
+  this.doNotify = (title: string, body: string) => {
+    this.notify(title, "", body);
+    const pushes: Promise<unknown>[] = [this.barkPush(title, body), this.telegramPush(title, body)];
     const pushplusToken = this.get("PUSHPLUS_TOKEN") || this.get("pushplusToken");
-    const pushes: Promise<unknown>[] = [];
-    if (barkKey) {
-      pushes.push(this.fetch({
-        url: `https://api.day.app/${barkKey}/${encodeURIComponent(t)}/${encodeURIComponent((s ? s + "\n" : "") + b)}`,
-        method: "GET"
-      }).then(() => this.log("Bark 推送成功")).catch(e => this.log("Bark 推送失败: " + e)));
-    }
-    if (tgToken && tgChatId) {
-      pushes.push(this.fetch({
-        url: `https://api.telegram.org/bot${tgToken}/sendMessage`,
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: String(tgChatId),
-          text: `${t}\n${s ? s + "\n" : ""}${b}`
-        })
-      }).then(() => this.log("Telegram 推送成功")).catch(e => this.log("Telegram 推送失败: " + e)));
-    }
     if (pushplusToken) {
       pushes.push(this.fetch({
         url: "https://www.pushplus.plus/send",
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: String(pushplusToken), title: t, content: `${s ? s + "\n" : ""}${b}` })
+        body: JSON.stringify({ token: String(pushplusToken), title, content: body })
       }).then(() => this.log("PushPlus 推送成功")).catch(e => this.log("PushPlus 推送失败: " + e)));
     }
     return Promise.allSettled(pushes);

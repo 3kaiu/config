@@ -8,49 +8,36 @@ const DEBUG: boolean = typeof $argument !== "undefined" && $argument.includes("B
 
 function log(msg: string): void { if (DEBUG) console.log(msg); }
 
-function liveSignIn(): Promise<SignResult> {
-  return new Promise<SignResult>((resolve) => {
-    $httpClient.get({
-      url: "https://api.live.bilibili.com/xlive/web-interface/v1/sign/doSign",
-      headers: {
-        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15",
-        "Referer": "https://live.bilibili.com",
-      }
-    }, (err: Error | null, _resp: $httpClientResponse, body: string) => {
-      if (err) { resolve({ ok: false, msg: "请求失败: " + err }); return; }
-      try {
-        const data: { code: number; data?: { text?: string }; message?: string } = JSON.parse(body);
-        if (data.code === 0) {
-          resolve({ ok: true, msg: data.data && data.data.text || "签到成功" });
-        } else if (data.code === 1011040) {
-          resolve({ ok: true, msg: "已签到过" });
-        } else {
-          resolve({ ok: false, msg: data.message || "未知错误" });
-        }
-      } catch (e) {
-        resolve({ ok: false, msg: "解析失败" });
-      }
+const TIMEOUT = 10000;
+
+function httpGet<T>(url: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("timeout")), TIMEOUT);
+    $httpClient.get({ url, headers: { "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15" }, timeout: TIMEOUT }, (err: Error | null, _resp: $httpClientResponse, body: string) => {
+      clearTimeout(timer);
+      if (err) { reject(err); return; }
+      try { resolve(JSON.parse(body)); } catch { reject(new Error("parse")); }
     });
   });
 }
 
+function liveSignIn(): Promise<SignResult> {
+  return httpGet<{ code: number; data?: { text?: string }; message?: string }>("https://api.live.bilibili.com/xlive/web-interface/v1/sign/doSign")
+    .then(data => {
+      if (data.code === 0) return { ok: true, msg: data.data?.text || "签到成功" };
+      if (data.code === 1011040) return { ok: true, msg: "已签到过" };
+      return { ok: false, msg: data.message || "未知错误" };
+    })
+    .catch(e => ({ ok: false, msg: "请求失败: " + (e.message || e) }));
+}
+
 function getCoinBalance(): Promise<SignResult> {
-  return new Promise<SignResult>((resolve) => {
-    $httpClient.get({
-      url: "https://api.bilibili.com/x/web-interface/coin/balance",
-      headers: { "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15" }
-    }, (err: Error | null, _resp: $httpClientResponse, body: string) => {
-      if (err) { resolve({ ok: false, msg: "请求失败" }); return; }
-      try {
-        const data: { code: number; data?: number; message?: string } = JSON.parse(body);
-        if (data.code === 0) {
-          resolve({ ok: true, coins: data.data || 0, msg: "" });
-        } else {
-          resolve({ ok: false, msg: data.message || "未登录" });
-        }
-      } catch (e) { resolve({ ok: false, msg: "解析失败" }); }
-    });
-  });
+  return httpGet<{ code: number; data?: number; message?: string }>("https://api.bilibili.com/x/web-interface/coin/balance")
+    .then(data => {
+      if (data.code === 0) return { ok: true, coins: data.data || 0, msg: "" };
+      return { ok: false, msg: data.message || "未登录" };
+    })
+    .catch(() => ({ ok: false, msg: "请求失败" }));
 }
 
 async function run(): Promise<void> {

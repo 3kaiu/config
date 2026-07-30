@@ -57,8 +57,8 @@ Profile/QX.conf     Profile/QX.conf.njk
 
 ## 4. 保留手动维护的部分
 
-- **19 个 Plugin/*.plugin** — Surgio 不支持 Loon plugin 格式
-- **5 个 QX/apple/*.conf** — NSRingo 模块手动转换
+- **39 个 Plugin/*.plugin** — Surgio 不支持 Loon plugin 格式
+- **7 个 QX/apple/*.conf** — NSRingo 模块手动转换
 - **9 个 Scripts/*.js** — 独立脚本，与生成无关
 - **Kelee/*.plugin** — 外部插件缓存
 - **Mirror/** — 外部脚本缓存
@@ -93,7 +93,7 @@ npm init surgio-project ./surgio
 | Surgio 停更 | 生成结果是静态文件，可继续手动维护 |
 | 学习曲线 | 模板语法 Nunjucks 与现有 Jinja2 相似 |
 | 生成 vs 手写差异 | CI 中配置 git diff 检查保证覆盖一致性 |
-| 插件不兼容 | 保持 Plugin/ 目录手动维护不变 |
+| 插件不兼容 | 保持 Plugin/ + Mirror/ 目录手动维护不变 |
 
 ## 7. 结论
 

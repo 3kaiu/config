@@ -25,23 +25,23 @@ DEBUG_ENABLE=switch,"false","true",tag 调试模式，desc=输出详细执行日
 
 # ── 首页推荐净化 ───────────────────────
 http-response ^https?:\/\/api\.atlas\.amazon\.com reject-dict enable={ENABLE_SHOPPING}&{AMAZON_ENABLE}
-http-response ^https?:::\/\/www\.amazon\.com/gp/fma reject-dict enable={ENABLE_SHOPPING}&{AMAZON_ENABLE}
+http-response ^https?:\/\/www\.amazon\.com/gp/fma reject-dict enable={ENABLE_SHOPPING}&{AMAZON_ENABLE}
 
 # ── 搜索结果净化 ───────────────────────
 http-response ^https?:\/\/api\.dn7\.amazonaws\.com reject-dict enable={ENABLE_SHOPPING}&{AMAZON_ENABLE}
-http-response ^https?:::\/\/www\.amazon\.com/s reject-dict enable={ENABLE_SHOPPING}&{AMAZON_ENABLE}
+http-response ^https?:\/\/www\.amazon\.com/s reject-dict enable={ENABLE_SHOPPING}&{AMAZON_ENABLE}
 
 # ── 商品详情净化 ───────────────────────
 http-response ^https?:\/\/dp\.images\.amazon\.com reject-dict enable={ENABLE_SHOPPING}&{AMAZON_ENABLE}
-http-response ^https?:::\/\/www\.amazon\.com/dp reject-dict enable={ENABLE_SHOPPING}&{AMAZON_ENABLE}
+http-response ^https?:\/\/www\.amazon\.com/dp reject-dict enable={ENABLE_SHOPPING}&{AMAZON_ENABLE}
 
 # ── 购物车/结算净化 ───────────────────
 http-response ^https?:\/\/api\.na\.results\.amazon\.com reject-dict enable={ENABLE_SHOPPING}&{AMAZON_ENABLE}
-http-response ^https?:::\/\/www\.amazon\.com/ap/cart reject-dict enable={ENABLE_SHOPPING}&{AMAZON_ENABLE}
+http-response ^https?:\/\/www\.amazon\.com/ap/cart reject-dict enable={ENABLE_SHOPPING}&{AMAZON_ENABLE}
 
 # ── 优惠券优化 ──────────────────────────
 http-response ^https?:\/\/coupons\.amazon\.com reject-dict enable={ENABLE_SHOPPING}&{AMAZON_ENABLE}
-http-response ^https?:::\/\/www\.amazon\.com/bundle reject-dict enable={ENABLE_SHOPPING}&{AMAZON_ENABLE}
+http-response ^https?:\/\/www\.amazon\.com/bundle reject-dict enable={ENABLE_SHOPPING}&{AMAZON_ENABLE}
 
 # ═══════════════════════════════════════===
 # 🏷️ eBay 净化规则
@@ -49,15 +49,15 @@ http-response ^https?:::\/\/www\.amazon\.com/bundle reject-dict enable={ENABLE_S
 
 # ── 搜索结果净化 ───────────────────────
 http-response ^https?:\/\/api\.ebay\.com reject-dict enable={ENABLE_SHOPPING}&{EBAY_ENABLE}
-http-response ^https?::\":\"\"\"www\.ebay\.com\/sch reject-dict enable={ENABLE_SHOPPING}&{EBAY_ENABLE}
+http-response ^https?:\/\/www\.ebay\.com\/sch reject-dict enable={ENABLE_SHOPPING}&{EBAY_ENABLE}
 
 # ── 商品页面净化 ───────────────────────
 http-response ^https?:\/\/api\.ebay\.com\/restads reject-dict enable={ENABLE_SHOPPING}&{EBAY_ENABLE}
-http-response ^https?::\":\"\"\"www\.ebay\.com\/itm reject-dict enable={ENABLE_SHOPPING}&{EBAY_ENABLE}
+http-response ^https?:\/\/www\.ebay\.com\/itm reject-dict enable={ENABLE_SHOPPING}&{EBAY_ENABLE}
 
 # ── 购物车净化 ──────────────────────────
 http-response ^https?:\/\/api\.ebay\.com\/cart reject-dict enable={ENABLE_SHOPPING}&{EBAY_ENABLE}
-http-response ^https?::\":\"\"\"signin\.ebay\.com\/ws\/eBayISAPI\.dll reject-dict enable={ENABLE_SHOPPING}&{EBAY_ENABLE}
+http-response ^https?:\/\/signin\.ebay\.com\/ws\/eBayISAPI\.dll reject-dict enable={ENABLE_SHOPPING}&{EBAY_ENABLE}
 
 # ═══════════════════════════════════════===
 # 💳 PayPal 净化规则
@@ -65,15 +65,15 @@ http-response ^https?::\":\"\"\"signin\.ebay\.com\/ws\/eBayISAPI\.dll reject-dic
 
 # ── 主页净化 ────────────────────────────
 http-response ^https?:\/\/www\.paypal\.com/home reject-dict enable={ENABLE_SHOPPING}&{PAYPAL_ENABLE}
-http-response ^https?::\":\"\"\"www\.paypal\.com\/webapps reject-dict enable={ENABLE_SHOPPING}&{PAYPAL_ENABLE}
+http-response ^https?:\/\/www\.paypal\.com\/webapps reject-dict enable={ENABLE_SHOPPING}&{PAYPAL_ENABLE}
 
 # ── 交易流程净化 ───────────────────────
 http-response ^https?:\/\/api\.paypal\.com reject-dict enable={ENABLE_SHOPPING}&{PAYPAL_ENABLE}
-http-response ^https?::\":\"\"\"www\.paypal\.com\/checkout reject-dict enable={ENABLE_SHOPPING}&{PAYPAL_ENABLE}
+http-response ^https?:\/\/www\.paypal\.com\/checkout reject-dict enable={ENABLE_SHOPPING}&{PAYPAL_ENABLE}
 
 # ── 通知推送净化 ───────────────────────
 http-response ^https?:\/\/www\.paypal\.com reject-dict enable={ENABLE_SHOPPING}&{PAYPAL_ENABLE}
-http-response ^https?::\":\"\"\"www\.paypal\.com\/messages reject-dict enable={ENABLE_SHOPPING}&{PAYPAL_ENABLE}
+http-response ^https?:\/\/www\.paypal\.com\/messages reject-dict enable={ENABLE_SHOPPING}&{PAYPAL_ENABLE}
 
 # ═══════════════════════════════════════===
 # 🌍 AliExpress 净化规则
@@ -81,15 +81,15 @@ http-response ^https?::\":\"\"\"www\.paypal\.com\/messages reject-dict enable={E
 
 # ── 首页推荐净化 ───────────────────────
 http-response ^https?:\/\/recommendation\.aliexpress\.com reject-dict enable={ENABLE_SHOPPING}&{ALIEXPRESS_ENABLE}
-http-response ^https?::\":\"\"\"www\.aliexpress\.com reject-dict enable={ENABLE_SHOPPING}&{ALIEXPRESS_ENABLE}
+http-response ^https?:\/\/www\.aliexpress\.com reject-dict enable={ENABLE_SHOPPING}&{ALIEXPRESS_ENABLE}
 
 # ── 搜索结果净化 ───────────────────────
 http-response ^https?:\/\/alimama\.web\.api\.taobao\.com reject-dict enable={ENABLE_SHOPPING}&{ALIEXPRESS_ENABLE}
-http-response ^https?::\":\"\"\"www\.aliexpress\.com\/item reject-dict enable={ENABLE_SHOPPING}&{ALIEXPRESS_ENABLE}
+http-response ^https?:\/\/www\.aliexpress\.com\/item reject-dict enable={ENABLE_SHOPPING}&{ALIEXPRESS_ENABLE}
 
 # ── 商品详情净化 ───────────────────────
 http-response ^https?:\/\/sku\.service\.aliexpress\.com reject-dict enable={ENABLE_SHOPPING}&{ALIEXPRESS_ENABLE}
-http-response ^https?::\":\"\"\"productkey\.service\.aliexpress\.com reject-dict enable={ENABLE_SHOPPING}&{ALIEXPRESS_ENABLE}
+http-response ^https?:\/\/productkey\.service\.aliexpress\.com reject-dict enable={ENABLE_SHOPPING}&{ALIEXPRESS_ENABLE}
 
 # ═══════════════════════════════════════===
 # 💰 价格追踪增强
@@ -97,27 +97,27 @@ http-response ^https?::\":\"\"\"productkey\.service\.aliexpress\.com reject-dict
 
 # ── 历史价格查询 ───────────────────────
 http-response ^https?:\/\/camelcamelcamel\.com reject-dict enable={ENABLE_SHOPPING}&{PRICE_ENABLE}
-http-response ^https?::\":\"\"\"keepa\.com reject-dict enable={ENABLE_SHOPPING}&{PRICE_ENABLE}
+http-response ^https?:\/\/keepa\.com reject-dict enable={ENABLE_SHOPPING}&{PRICE_ENABLE}
 
 # ── 降价提醒设置 ────────────────────────
 http-response ^https?:\/\/api\.pricealert\.com reject-dict enable={ENABLE_SHOPPING}&{PRICE_ENABLE}
-http-response ^https?::\":\"\"\"www\.camelcamelcamel\.com reject-dict enable={ENABLE_SHOPPING}&{PRICE_ENABLE}
+http-response ^https?:\/\/www\.camelcamelcamel\.com reject-dict enable={ENABLE_SHOPPING}&{PRICE_ENABLE}
 
 # ═══════════════════════════════════════===
 # 🔒 购物隐私防护
 # ═══════════════════════════════════════===
 
 # ── 行为追踪拦截 ───────────────────────
-http-request ^https?:\/\/pixel\.amazon\.com reject-dict enabled={ENABLE_SHOPPING}&{PRIVACY_ENABLE}
-http-request ^https?::\":\"\"\"www\.ebay\.com\/analytics reject-dict enabled={ENABLE_SHOPPING}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/pixel\.amazon\.com reject-dict enable={ENABLE_SHOPPING}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/www\.ebay\.com\/analytics reject-dict enable={ENABLE_SHOPPING}&{PRIVACY_ENABLE}
 
 # ── Cookie 管理 ──────────────────────────
-http-response ^https?:\/\/www\.amazon\.com/cookies reject-dict enabled={ENABLE_SHOPPING}
-http-response ^https?::\":\"\"\"www\.ebay\.com\/cookies reject-dict enabled={ENABLE_SHOPPING}
+http-response ^https?:\/\/www\.amazon\.com/cookies reject-dict enable={ENABLE_SHOPPING}
+http-response ^https?:\/\/www\.ebay\.com\/cookies reject-dict enable={ENABLE_SHOPPING}
 
 # ── 第三方追踪器拦截 ───────────────────
-http-request ^https?::\":\"\"\"tracking\.facebook\.com reject-dict enabled={ENABLE_SHOPPING}&{PRIVACY_ENABLE}
-http-request ^https?::\":\"\"\"google-analytics\.com reject-dict enabled={ENABLE_SHOPPING}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/tracking\.facebook\.com reject-dict enable={ENABLE_SHOPPING}&{PRIVACY_ENABLE}
+http-request ^https?:\/\/google-analytics\.com reject-dict enable={ENABLE_SHOPPING}&{PRIVACY_ENABLE}
 
 # ═══════════════════════════════════════===
 # ⏰ Cron 定时任务（可选功能）
@@ -133,4 +133,4 @@ DOMAIN-SUFFIX, paypal.com, DIRECT
 DOMAIN-SUFFIX, aliexpress.com, DIRECT
 
 [MitM]
-hostname = %APPEND% api.atlas.amazon.com, www.amazon.com, dp.images.amazon.com, api.dn7.amazonaws.com, api.ebay.com, signin.ebay.com/ws/eBayISAPI.dll, www.paypal.com, api.paypal.com, recommendation.aliexpress.com, alimama.web.api.taobao.com, sku.service.aliexpress.com, productkey.service.aliexpress.com, pixel.amazon.com, tracking.facebook.com
+hostname = %APPEND% api.atlas.amazon.com, www.amazon.com, dp.images.amazon.com, api.dn7.amazonaws.com, api.ebay.com, signin.ebay.com, www.paypal.com, api.paypal.com, recommendation.aliexpress.com, alimama.web.api.taobao.com, sku.service.aliexpress.com, productkey.service.aliexpress.com, pixel.amazon.com, tracking.facebook.com

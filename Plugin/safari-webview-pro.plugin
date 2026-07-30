@@ -25,31 +25,31 @@ DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执行日
 # ── 通用 WebView 净化 ───────────────────
 http-response ^https?:\/\/.*\.inapps\.com\/ads reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
 http-response ^https?:\/\/sdkopen\.vip\.alipay\.com\/popup reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
-http-response ^https?::\/\/mbs\.didiglobal\.com\/banner reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?:\/\/mbs\.didiglobal\.com\/banner reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
 
 # ── 支付宝 WebView ─────────────────────
-http-response ^https?::\/\/render\.alipay.com\/portal reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
-http-response ^https?::\/\/h5api\.alipay\.com\/gateway reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?:\/\/render\.alipay.com\/portal reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?:\/\/h5api\.alipay\.com\/gateway reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
 
 # ── 微信 WebView ───────────────────────
-http-response ^https?:::\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
-http-response ^https?:::\/\/app\.weixin\.qq\.com\/cgi-bin reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?:\/\/app\.weixin\.qq\.com\/cgi-bin reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
 
 # ── 微博 WebView ───────────────────────
-http-response ^https?::\/\/api\.weibo\.cn\/2\/WBFrameFrame reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
-http-response ^https?::\/\/h5\.weibo\.com\/wbframe reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?:\/\/api\.weibo\.cn\/2\/WBFrameFrame reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?:\/\/h5\.weibo\.com\/wbframe reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
 
 # ── 淘宝 WebView ───────────────────────
-http-response ^https?::\/\/g\.huxiu\.com\/feed reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
-http-response ^https?::\/\/mobileserving\.gt\.algocdn\.cn\/splash reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?:\/\/g\.huxiu\.com\/feed reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?:\/\/mobileserving\.gt\.algocdn\.cn\/splash reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
 
 # ── 抖音/快手 WebView ──────────────────
-http-response ^https?::\/\/aweme\.snssdk\.com\/feed reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
-http-response ^https?::\/\/open\.api\.kuaishou\.com\/v1 reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?:\/\/aweme\.snssdk\.com\/feed reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?:\/\/open\.api\.kuaishou\.com\/v1 reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
 
 # ── 小红书 WebView ─────────────────────
-http-response ^https?::\/\/app\.xiaohongshu\.com\/feed reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
-http-response ^https?::\/\/home-api\.xiaohongshu\.com reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?:\/\/app\.xiaohongshu\.com\/feed reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
+http-response ^https?:\/\/home-api\.xiaohongshu\.com reject-dict enable={ENABLE_BROWSE}&{WEBVIEW_ENABLE}
 
 # ════════════════════════════════════════
 # 🌐 Safari 浏览器净化规则
@@ -109,4 +109,4 @@ DOMAIN-SUFFIX, apple.com, DIRECT
 DOMAIN-SUFFIX, apple-mapkit.com, DIRECT
 
 [MitM]
-hostname = %APPEND% inapps.com, sdkopen.vip.alipay.com, mbs.didiglobal.com, render.alipay.com, h5api.alipay.com, mp.weixin.qq.com, app.weixin.qq.com, api.weibo.cn, h5.weibo.com, g.huxiu.com, mobile.serving.gt.algocdn.cn, aweme.snssdk.com, open.api.kuaishou.com, app.xiaohongshu.com, home-api.xiaohongshu.com, page.ad.qq.com, count.appannie.com, stats.expand.microad.jp, news.so.com, view.inewsweek.cn, roll.news.163.com, item.taobao.com, pinnable.pinterest.com, www.youku.com, live.bilibili.com, api.loglyco.com, beacon.telerik.com, collector.gitlab.com, who.ami.anti-fingerprint.com, browserleaks.com, cookieconsent.disqus.com, gdpr.eu/, dns.leak.test, ipinfo.io
+hostname = %APPEND% inapps.com, sdkopen.vip.alipay.com, mbs.didiglobal.com, render.alipay.com, h5api.alipay.com, mp.weixin.qq.com, app.weixin.qq.com, api.weibo.cn, h5.weibo.com, g.huxiu.com, mobileserving.gt.algocdn.cn, aweme.snssdk.com, open.api.kuaishou.com, app.xiaohongshu.com, home-api.xiaohongshu.com, page.ad.qq.com, count.appannie.com, stats.expand.microad.jp, news.so.com, view.inewsweek.cn, roll.news.163.com, item.taobao.com, pinnable.pinterest.com, www.youku.com, live.bilibili.com, api.loglyco.com, beacon.telerik.com, collector.gitlab.com, who.ami.anti-fingerprint.com, browserleaks.com, cookieconsent.disqus.com, gdpr.eu, dns.leak.test, ipinfo.io

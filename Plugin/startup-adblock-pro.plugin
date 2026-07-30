@@ -42,7 +42,7 @@ STARTUP_DEBUG=switch,"false","true",tag=调试模式，desc=输出详细日志
 # ③ 社交/通讯类 App
 # ════════════════════
 ^https?:\/\/flash\.qq\.com\/splash\/list\.json url reject-200, enable={ENABLE_STARTUP}
-^https?::\/\/api\.wan*.weixin.qq\.com\/cgi-bin\/ad\/launch url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/api\.wan\..*\.weixin\.qq\.com\/cgi-bin\/ad\/launch url reject-200, enable={ENABLE_STARTUP}
 ^https?:\/\/api\.mqq\.com\/splash\/control url reject-200, enable={ENABLE_STARTUP}
 
 # ════════════════════════════════════════
@@ -80,7 +80,7 @@ STARTUP_DEBUG=switch,"false","true",tag=调试模式，desc=输出详细日志
 # ⑧ 教育/学习类 App
 # ════════════════════
 ^https?:\/\/splash\.yuanfudao\.com\/splash\/list url reject-200, enable={ENABLE_STARTUP}
-^https?::\/\/ad\.class\.tiktokv\.com\/splash\/info url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/ad\.class\.tiktokv\.com\/splash\/info url reject-200, enable={ENABLE_STARTUP}
 ^https?:\/\/splash\.xueersi\.com\/splash\/config url reject-200, enable={ENABLE_STARTUP}
 
 # ════════════════════════════════════════
@@ -95,7 +95,7 @@ STARTUP_DEBUG=switch,"false","true",tag=调试模式，desc=输出详细日志
 # ⑩ 地图导航类 App
 # ════════════════════
 ^https?:\/\/api\.amap\.com\/splash\/config url reject-200, enable={ENABLE_STARTUP}
-^https?::\/\/lbs\.yunli\.com\.cn\/splash\/config url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/lbs\.yunli\.com\.cn\/splash\/config url reject-200, enable={ENABLE_STARTUP}
 ^https?:\/\/map\\.baidu\.com\/splash\/config url reject-200, enable={ENABLE_STARTUP}
 
 # ── 特殊应用补充 ───────────────────────
@@ -108,7 +108,7 @@ STARTUP_DEBUG=switch,"false","true",tag=调试模式，desc=输出详细日志
 # 哔哩哔哩漫画
 ^https?:\/\/acmt\.bilifast\.net\/splash\/load url reject-200, enable={ENABLE_STARTUP}
 # 微博国际版
-^https?::\/\/api\.weibo\.cn\/2\/splash url reject-200, enable={ENABLE_STARTUP}
+^https?:\/\/api\.weibo\.cn\/2\/splash url reject-200, enable={ENABLE_STARTUP}
 
 [MitM]
 # ⚠️ 注意：部分 App 禁用了 MITM，无法拦截其开屏广告
