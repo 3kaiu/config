@@ -70,6 +70,7 @@ Final = select, DIRECT, Proxy
 Streaming = select, Proxy, DIRECT, tag=流媒体
 AI = select, Proxy, DIRECT, tag=AI服务
 Developer = select, Proxy, DIRECT, tag=开发者
+Gaming = select, Proxy, DIRECT, tag=游戏平台
 Social = select, Proxy, DIRECT, tag=社交平台
 
 [Rule]
@@ -133,6 +134,7 @@ DOMAIN-SUFFIX, wx.qq.com, DIRECT
 {% include "./snippet/streaming.tpl" %}
 {% include "./snippet/social.tpl" %}
 {% include "./snippet/developer.tpl" %}
+{% include "./snippet/gaming.tpl" %}
 
 # Google 通配域名 (流媒体依赖) — 必须在 developer snippet 之后, 避免 googleapis.com 截胡 firebase.googleapis.com
 DOMAIN-SUFFIX, gstatic.com, Streaming

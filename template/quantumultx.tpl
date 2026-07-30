@@ -58,6 +58,7 @@ static=Final, direct, Proxy, img-url=https://raw.githubusercontent.com/Koolson/Q
 static=Streaming, Proxy, direct, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png
 static=AI, Proxy, direct, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Robot.png
 static=Developer, Proxy, direct, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Developer.png
+static=Gaming, Proxy, direct, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Games.png
 static=Social, Proxy, direct, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Social.png
 
 [server_remote]
@@ -138,6 +139,7 @@ host, ip-scan.adspower.net, Proxy
 {% include "./snippet/social.qx" %}
 
 {% include "./snippet/developer.qx" %}
+{% include "./snippet/gaming.qx" %}
 
 # Google 全家桶
 host-suffix, googleusercontent.com, Proxy

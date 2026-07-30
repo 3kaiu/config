@@ -1,5 +1,5 @@
 # 开发者平台路由 (Loon 格式)
-# GitHub / Microsoft / Steam / Wikipedia / 文档与开发工具 (v7.8)
+# GitHub / Microsoft / Wikipedia / 文档与开发工具 (v7.8)
 
 # GitHub
 DOMAIN-SUFFIX, github.com, Developer
@@ -24,12 +24,6 @@ DOMAIN, cloud.google.com, Developer
 DOMAIN, firebase.google.com, Developer
 DOMAIN-SUFFIX, firebaseio.com, Developer
 DOMAIN, firebase.googleapis.com, Developer
-# Steam
-DOMAIN-SUFFIX, steam.com, Developer
-DOMAIN-SUFFIX, steampowered.com, Developer
-DOMAIN-SUFFIX, steamcommunity.com, Developer
-DOMAIN-SUFFIX, steamstatic.com, Developer
-DOMAIN-SUFFIX, steamcdn-a.akamaihd.net, Developer
 # Wikipedia
 DOMAIN-SUFFIX, wikipedia.org, Developer
 DOMAIN-SUFFIX, wikimedia.org, Developer

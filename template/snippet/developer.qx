@@ -1,5 +1,5 @@
 # 开发者平台路由 (QX 格式)
-# GitHub / Microsoft / Steam / Wikipedia / 文档与开发工具 (v7.8)
+# GitHub / Microsoft / Wikipedia / 文档与开发工具 (v7.8)
 
 # GitHub
 host-suffix, github.com, Developer
@@ -24,12 +24,6 @@ host, cloud.google.com, Developer
 host, firebase.google.com, Developer
 host-suffix, firebaseio.com, Developer
 host, firebase.googleapis.com, Developer
-# Steam
-host-suffix, steam.com, Developer
-host-suffix, steampowered.com, Developer
-host-suffix, steamcommunity.com, Developer
-host-suffix, steamstatic.com, Developer
-host-suffix, steamcdn-a.akamaihd.net, Developer
 # Wikipedia
 host-suffix, wikipedia.org, Developer
 host-suffix, wikimedia.org, Developer
