@@ -1,0 +1,30 @@
+#!name = ☁️ Cloudflare: 🇩 DNS
+#!desc = Cloudflare (D)DNS 管理与更新
+#!openUrl = http://boxjs.com/#/app/Cloudflare.DNS
+#!author = VirgilClyne[https://github.com/VirgilClyne]
+#!homepage = https://Auraflare.github.io/guide/DNS
+#!icon = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Cloudflare.png
+#!tag = ⛅ Auraflare
+#!system = iOS,iPadOS,macOS,tvOS
+#!date = 2024-12-25 07:42:21
+#!version = 2.6.3
+#!system_version = 15
+
+[Argument]
+CronExp = input,"*/10 * * * *",tag=Cron 表达式,desc=请填写 Cron 表达式，作为运行脚本定时任务的时间或周期。
+IPServer = select,"ipw.cn","my-ip.io",tag=[服务商] 外部/公共 IP,desc=请选择用来检测外部/公共 IP 的服务商。
+Verify.Mode = select,"Token","Key","ServiceKey",tag=[API] 验证方式,desc=请选择验证方式。
+Verify.Content = input,"",tag=[API] 验证内容,desc=请填写验证内容，‘令牌’与‘用户服务密钥’验证方式的值写一行即可, ‘密钥’验证方式的key与email以换行方式写两行。
+zone.id = input,"",tag=[DNS 信息] 区域 ID,desc=请填写‘区域 ID’，‘区域 ID’和‘区域名称’至少提供一个。
+zone.name = input,"",tag=[DNS 信息] 区域名称,desc=请填写‘区域名称’，‘区域 ID’和‘区域名称’至少提供一个。
+zone.dns_records = input,"",tag=[DNS 信息] 记录内容,desc=请填写‘记录内容’，一行一条，多行记录请换行填写, 名称仅是子域名, 类型与名称是必填项, 没有的项目就删掉别写, 内容为空的A与AAAA记录会自动获取当前外部IP地址。
+LogLevel = select,"WARN","OFF","ERROR","INFO","DEBUG","ALL",tag=[调试] 日志等级,desc=选择脚本日志的输出等级，低于所选等级的日志将全部输出。
+
+[Rule]
+DOMAIN-SUFFIX,ipw.cn,DIRECT
+DOMAIN,api4.my-ip.io,DIRECT
+DOMAIN,api6.my-ip.io,DIRECT
+
+[Script]
+network-changed script-path=https://github.com/Auraflare/DNS/releases/download/v2.6.3/event.bundle.js, tag=☁ Cloudflare.DNS.event, timeout=60, argument=[{IPServer},{Verify.Mode},{Verify.Content},{zone.id},{zone.name},{zone.dns_records},{LogLevel}]
+cron {CronExp} script-path=https://github.com/Auraflare/DNS/releases/download/v2.6.3/event.bundle.js, tag=☁ Cloudflare.DNS.cron, timeout=60, argument=[{IPServer},{Verify.Mode},{Verify.Content},{zone.id},{zone.name},{zone.dns_records},{LogLevel}]

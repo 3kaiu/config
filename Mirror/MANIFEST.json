@@ -1,6 +1,6 @@
 {
   "$comment": "镜像文件哈希清单 — 由 mirror-scripts.yml 维护; 变更会出现在镜像 PR 的 diff 中, 合并前请核对 source 变更是否符合预期",
-  "generated_at": "2026-07-25T00:00:00Z (baseline)",
+  "generated_at": "2026-07-30T03:29:55Z",
   "files": {
     "netease.adblock.js": {
       "source_url": "https://gist.githubusercontent.com/ddgksf2013/4f53b7c6083678df25fecc8ff68b52c4/raw/netease.adblock.js",
@@ -355,6 +355,192 @@
       "sha256": "d227651085bce0280e3e2a3bac0aca913b9b0cbcc318f732811d7d95890a47ae",
       "bytes": 2272,
       "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "nsringo/TV-v3.4.4-request.bundle.js": {
+      "source_url": "https://github.com/NSRingo/TV/releases/download/v3.4.4/request.bundle.js",
+      "sha256": "5e4a3339d51f01e92059055de07a76bfd4f072ae57e3073059c1a04a3f490f9a",
+      "bytes": 52816,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "nsringo/TV-v3.4.4-response.bundle.js": {
+      "source_url": "https://github.com/NSRingo/TV/releases/download/v3.4.4/response.bundle.js",
+      "sha256": "35567e0bc825ee19a5a543edc85495cdf6cea9616c43e2d7e9dbf15c42a51302",
+      "bytes": 50532,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "nsringo/LocationServices-v1.0.1-request.bundle.js": {
+      "source_url": "https://github.com/NSRingo/LocationServices/releases/download/v1.0.1/request.bundle.js",
+      "sha256": "7d5485f6420b8505e7636423a04bfd75bdded10e37b9f667cf958b6f5711658d",
+      "bytes": 459760,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "nsringo/LocationServices-v1.0.1-response.bundle.js": {
+      "source_url": "https://github.com/NSRingo/LocationServices/releases/download/v1.0.1/response.bundle.js",
+      "sha256": "c3cbe06b7dc684d35c69018c732abd5ed67e4c63a31badeb7fa63fd81dd42284",
+      "bytes": 461792,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "iringo/iRingo.TV.plugin": {
+      "source_url": "https://github.com/NSRingo/TV/releases/download/v3.4.4/iRingo.TV.plugin",
+      "sha256": "fbd04f3be3dedba1b7038eb274c32c885ba8103be336429479df9565c8b14425",
+      "bytes": 2141,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "iringo/iRingo.LocationService.plugin": {
+      "source_url": "https://github.com/NSRingo/LocationServices/releases/download/v1.0.1/iRingo.LocationService.plugin",
+      "sha256": "21b3e2e2fac7ed5b7e8d9d54f7ff4b30892e8df9b3cee1b5b06f5d25e5dee66e",
+      "bytes": 2317,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "dualsubs/DualSubs.Universal.plugin": {
+      "source_url": "https://github.com/DualSubs/Universal/releases/download/v1.7.5/DualSubs.Universal.plugin",
+      "sha256": "5d15c171c214d8fb020b9b44c0934310769fb6080032ec7616787209ee8c59b3",
+      "bytes": 53037,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "dualsubs/Composite.Subtitles.response.bundle.js": {
+      "source_url": "https://github.com/DualSubs/Universal/releases/download/v1.7.5/Composite.Subtitles.response.bundle.js",
+      "sha256": "5929a9af89baf763775d642e002f91ce51f76ebe68f70e397d546e1f4cb8020d",
+      "bytes": 60169,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "dualsubs/External.Lyrics.response.bundle.js": {
+      "source_url": "https://github.com/DualSubs/Universal/releases/download/v1.7.5/External.Lyrics.response.bundle.js",
+      "sha256": "9d5751980ecd6295e175d0168864eef45f463dfaf4f04441d198e387564be7fd",
+      "bytes": 95312,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "dualsubs/Manifest.response.bundle.js": {
+      "source_url": "https://github.com/DualSubs/Universal/releases/download/v1.7.5/Manifest.response.bundle.js",
+      "sha256": "708b655f39b89a4bb469731aeba20d77f7972c66598a83ac6cb3e06b44479971",
+      "bytes": 55110,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "dualsubs/Translate.response.bundle.js": {
+      "source_url": "https://github.com/DualSubs/Universal/releases/download/v1.7.5/Translate.response.bundle.js",
+      "sha256": "3289e75916b05b4700a0394b3dd03f458a68e3806adc3ab3526f45d59d85ba4b",
+      "bytes": 119390,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "dualsubs/DualSubs.YouTube.plugin": {
+      "source_url": "https://github.com/DualSubs/YouTube/releases/download/v1.5.11/DualSubs.YouTube.plugin",
+      "sha256": "850c58a1ec7b068b00e551f7f99e87f384f35ff421e11cb235063bd0b1e4bd2b",
+      "bytes": 5847,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "dualsubs/DualSubs.YouTube.request.bundle.js": {
+      "source_url": "https://github.com/DualSubs/YouTube/releases/download/v1.5.11/request.bundle.js",
+      "sha256": "bcc3f609678e27d6e3dd4f901359b3f5359c9d4cb8d60f05e9be5e158f1d06b6",
+      "bytes": 122307,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "dualsubs/DualSubs.YouTube.response.bundle.js": {
+      "source_url": "https://github.com/DualSubs/YouTube/releases/download/v1.5.11/response.bundle.js",
+      "sha256": "b970db912ca06e32c25e18ab70deaed94a308aad6d50b7a5b25cd8a88cf888e9",
+      "bytes": 116788,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "dualsubs/DualSubs.Netflix.plugin": {
+      "source_url": "https://github.com/DualSubs/Netflix/releases/download/v0.5.7/DualSubs.Netflix.plugin",
+      "sha256": "cbd0288582e23259cd9e01e9d935f0af2ce8e6396e235ed33738e58407e1e083",
+      "bytes": 2084,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "auraflare/Cloudflare.1.1.1.1.plugin": {
+      "source_url": "https://raw.githubusercontent.com/Auraflare/1.1.1.1/main/modules/Cloudflare.1.1.1.1.plugin",
+      "sha256": "73c2c6599425b37f914ef0ea7f8c588a2bae2405e9c5a1c06fb5c0abe0bd1f55",
+      "bytes": 2086,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "auraflare/1.1.1.1.request.js": {
+      "source_url": "https://raw.githubusercontent.com/Auraflare/1.1.1.1/main/js/1.1.1.1.request.js",
+      "sha256": "3dbbac042b8aa49e92cb9b09c3724597122603c2dc68d4a878aca6e66713e66a",
+      "bytes": 19022,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "auraflare/1.1.1.1.response.js": {
+      "source_url": "https://raw.githubusercontent.com/Auraflare/1.1.1.1/main/js/1.1.1.1.response.js",
+      "sha256": "084e5f5e92bb07ed20adc9be0f3b2f6ce18c3622651f08377127d13cae2c1ad4",
+      "bytes": 24170,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "auraflare/1.1.1.1.panel.js": {
+      "source_url": "https://raw.githubusercontent.com/Auraflare/1.1.1.1/main/js/1.1.1.1.panel.js",
+      "sha256": "09d152d35b5eaa589f95b7fb9d6e3ba94a8c12a4e54afcb207df53a929835d22",
+      "bytes": 23675,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "auraflare/Cloudflare.DNS.plugin": {
+      "source_url": "https://github.com/Auraflare/DNS/releases/download/v2.6.3/Cloudflare.DNS.plugin",
+      "sha256": "717e1c62d491a803179d3e4d876e205f58bd61c883fcd3007e579dc835a652ae",
+      "bytes": 2389,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "auraflare/event.bundle.js": {
+      "source_url": "https://github.com/Auraflare/DNS/releases/download/v2.6.3/event.bundle.js",
+      "sha256": "4f12c2eab0700374ac676b0608eca79edfbac2daae17bac9f50ffae74b1a5736",
+      "bytes": 26382,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "biliuniverse/BiliBili.Enhanced.plugin": {
+      "source_url": "https://github.com/BiliUniverse/Enhanced/releases/download/v0.5.13/BiliBili.Enhanced.plugin",
+      "sha256": "e0eca33cd58a765283e863924030187448665e39397b1231e0dcc3db60429f52",
+      "bytes": 4088,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "biliuniverse/BiliBili.Enhanced.response.bundle.js": {
+      "source_url": "https://github.com/BiliUniverse/Enhanced/releases/download/v0.5.13/response.bundle.js",
+      "sha256": "f34238dce8fc4c525a371e934382d2241a6712a366de609892c710712808f445",
+      "bytes": 62302,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "biliuniverse/BiliBili.Global.plugin": {
+      "source_url": "https://github.com/BiliUniverse/Global/releases/download/v0.8.21/BiliBili.Global.plugin",
+      "sha256": "e88304d315e68f45c44b4fba8f69d05dcc3fe9ef9f96ec9612eb3960fc6c3a81",
+      "bytes": 8311,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "biliuniverse/BiliBili.Global.request.bundle.js": {
+      "source_url": "https://github.com/BiliUniverse/Global/releases/download/v0.8.21/request.bundle.js",
+      "sha256": "033d98c4752b10fc6ea698f918dcad159f21b389348984ec41de1eab2d1a4ec6",
+      "bytes": 702877,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "biliuniverse/BiliBili.Global.response.bundle.js": {
+      "source_url": "https://github.com/BiliUniverse/Global/releases/download/v0.8.21/response.bundle.js",
+      "sha256": "3be45ba8bc304cf2db72858f14bb5e3ea8c150ca94128f4e433d1219dcf0158e",
+      "bytes": 352949,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "biliuniverse/BiliBili.ADBlock.plugin": {
+      "source_url": "https://github.com/BiliUniverse/ADBlock/releases/download/v0.6.24/BiliBili.ADBlock.plugin",
+      "sha256": "5a6be286a5ef251525222672457b957afe78f309fb50b0a1388510232ce7e9da",
+      "bytes": 11422,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "biliuniverse/BiliBili.ADBlock.request.bundle.js": {
+      "source_url": "https://github.com/BiliUniverse/ADBlock/releases/download/v0.6.24/request.bundle.js",
+      "sha256": "adc2f2f2e09466ab9f21f4a0e39e212a741b753279b993a773c23af81bf43ecf",
+      "bytes": 20931,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "biliuniverse/BiliBili.ADBlock.response.bundle.js": {
+      "source_url": "https://github.com/BiliUniverse/ADBlock/releases/download/v0.6.24/response.bundle.js",
+      "sha256": "f805f7dd5dad9f43ac67ce47b9d3ac294b5848a59b1d0ea9d504707fe406f4a1",
+      "bytes": 862323,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "biliuniverse/BiliBili.Redirect.plugin": {
+      "source_url": "https://github.com/BiliUniverse/Redirect/releases/download/v0.2.20/BiliBili.Redirect.plugin",
+      "sha256": "73d93fc98e4d450fe760fbc03fd9bbfd2b66ba51b27a908d56fac60edb18005d",
+      "bytes": 4442,
+      "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "biliuniverse/BiliBili.Redirect.request.bundle.js": {
+      "source_url": "https://github.com/BiliUniverse/Redirect/releases/download/v0.2.20/request.bundle.js",
+      "sha256": "7a0d8e94993f48c622187029d8ddadd77005a422c54f7a0757906c80b22b466b",
+      "bytes": 22764,
+      "fetched_at": "2026-07-30T03:29:55Z"
     }
   }
 }

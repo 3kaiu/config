@@ -51,12 +51,14 @@ jobs:
           check_url "ddgksf2013/Scripts amdc.js" "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amdc.js"
           check_url "ddgksf2013/Scripts applet.js" "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/applet.js"
 
-          # NSRingo Apple 增强 (5 仓库)
+          # NSRingo Apple 增强
           check_url "NSRingo WeatherKit" "https://github.com/NSRingo/WeatherKit/releases/latest/download/iRingo.WeatherKit.plugin"
-          check_url "NSRingo Maps" "https://github.com/NSRingo/Maps/releases/latest/download/iRingo.Maps.plugin"
+          check_url "NSRingo MapKit" "https://github.com/NSRingo/MapKit/releases/latest/download/iRingo.Maps.plugin"
           check_url "NSRingo News" "https://github.com/NSRingo/News/releases/latest/download/iRingo.News.plugin"
           check_url "NSRingo Siri" "https://github.com/NSRingo/Siri/releases/latest/download/iRingo.Siri.plugin"
           check_url "NSRingo TestFlight" "https://github.com/NSRingo/TestFlight/releases/latest/download/iRingo.TestFlight.plugin"
+          check_url "NSRingo TV" "https://github.com/NSRingo/TV/releases/latest/download/iRingo.TV.plugin"
+          check_url "NSRingo LocationServices" "https://github.com/NSRingo/LocationServices/releases/latest/download/iRingo.LocationService.plugin"
 
           # NSRingo bundle.js (version-pinned)
           check_url "NSRingo bundle WeatherKit" "https://github.com/NSRingo/WeatherKit/releases/download/v3.1.0/response.bundle.js"
@@ -67,6 +69,25 @@ jobs:
           check_url "NSRingo bundle Siri res" "https://github.com/NSRingo/Siri/releases/download/v4.2.7/response.bundle.js"
           check_url "NSRingo bundle TestFlight req" "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/request.bundle.js"
           check_url "NSRingo bundle TestFlight res" "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/response.bundle.js"
+          check_url "NSRingo bundle TV req" "https://github.com/NSRingo/TV/releases/download/v3.4.4/request.bundle.js"
+          check_url "NSRingo bundle TV res" "https://github.com/NSRingo/TV/releases/download/v3.4.4/response.bundle.js"
+          check_url "NSRingo bundle LocationServices req" "https://github.com/NSRingo/LocationServices/releases/download/v1.0.1/request.bundle.js"
+          check_url "NSRingo bundle LocationServices res" "https://github.com/NSRingo/LocationServices/releases/download/v1.0.1/response.bundle.js"
+
+          # DualSubs (双语字幕)
+          check_url "DualSubs Universal" "https://github.com/DualSubs/Universal/releases/latest/download/DualSubs.Universal.plugin"
+          check_url "DualSubs YouTube" "https://github.com/DualSubs/YouTube/releases/latest/download/DualSubs.YouTube.plugin"
+          check_url "DualSubs Netflix" "https://github.com/DualSubs/Netflix/releases/latest/download/DualSubs.Netflix.plugin"
+
+          # Auraflare (Cloudflare 资源集成)
+          check_url "Auraflare 1.1.1.1" "https://raw.githubusercontent.com/Auraflare/1.1.1.1/main/modules/Cloudflare.1.1.1.1.plugin"
+          check_url "Auraflare DNS" "https://github.com/Auraflare/DNS/releases/latest/download/Cloudflare.DNS.plugin"
+
+          # BiliUniverse (哔哩哔哩增强)
+          check_url "BiliUniverse Enhanced" "https://github.com/BiliUniverse/Enhanced/releases/latest/download/BiliBili.Enhanced.plugin"
+          check_url "BiliUniverse Global" "https://github.com/BiliUniverse/Global/releases/latest/download/BiliBili.Global.plugin"
+          check_url "BiliUniverse ADBlock" "https://github.com/BiliUniverse/ADBlock/releases/latest/download/BiliBili.ADBlock.plugin"
+          check_url "BiliUniverse Redirect" "https://github.com/BiliUniverse/Redirect/releases/latest/download/BiliBili.Redirect.plugin"
 
           echo "all_ok=$ALL_OK" >> $GITHUB_ENV
           echo "results=$RESULTS" >> $GITHUB_ENV
@@ -96,6 +117,8 @@ jobs:
           check_nsringo "News" "v3.2.1" "NSRingo/News"
           check_nsringo "Siri" "v4.2.7" "NSRingo/Siri"
           check_nsringo "TestFlight" "v3.4.0" "NSRingo/TestFlight"
+          check_nsringo "TV" "v3.4.4" "NSRingo/TV"
+          check_nsringo "LocationServices" "v1.0.1" "NSRingo/LocationServices"
           echo "" >> $GITHUB_STEP_SUMMARY
 
       - name: Report results
