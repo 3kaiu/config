@@ -1,0 +1,18 @@
+#!name=快手去广告
+#!desc=Kuaishou - 信息流及广告净化
+#!version=7.8
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Kuaishou.png
+
+[Argument]
+KUAISHOU_ENABLE=switch,"true","false",tag=是否开启快手去广告,desc=开启后净化快手信息流及广告
+
+[Script]
+# GraphQL 响应体净化 (信息流广告)
+http-response ^https?:\/\/graphql\.kuaishou\.com script-path=https://ws.wenn.in/main/Scripts/Kuaishou.js, requires-body=true, timeout=10, tag=快手信息流净化, enable={KUAISHOU_ENABLE}
+# API 响应体净化 (广告内容)
+http-response ^https?:\/\/api2\.kuaishou\.com script-path=https://ws.wenn.in/main/Scripts/Kuaishou.js, requires-body=true, timeout=10, tag=快手广告净化, enable={KUAISHOU_ENABLE}
+
+[MitM]
+hostname = %APPEND% graphql.kuaishou.com, api2.kuaishou.com

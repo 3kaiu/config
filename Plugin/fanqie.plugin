@@ -1,0 +1,24 @@
+#!name=番茄小说去广告
+#!desc=番茄小说 - 信息流/书架/章节列表广告净化 + 追踪上报拦截
+#!version=1.0
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bookpedia.png
+
+#!arguments-desc=\n- \{FANQIE_ENABLE}: switch,"true","false",tag=总开关，desc=开启后执行所有番茄小说净化功能
+
+[Argument]
+FANQIE_ENABLE=switch,"true","false",tag=总开关，desc=开启后执行所有番茄小说净化功能
+
+[Script]
+# ── 信息流/书架净化模块 ────────────────
+http-response ^https?:\/\/api5-normal-snkmer\.fqnovel\.com script-path=https://ws.wenn.in/main/Scripts/Fanqie.js, requires-body=true, timeout=10, tag=番茄小说信息流净化, enable={FANQIE_ENABLE}
+
+# ── 广告服务净化模块 ──────────────────
+http-response ^https?:\/\/ada\.fqnovel\.com script-path=https://ws.wenn.in/main/Scripts/Fanqie.js, requires-body=true, timeout=10, tag=番茄小说广告服务净化, enable={FANQIE_ENABLE}
+
+# ── 追踪上报拦截模块 (与抖音共享) ──────
+http-response ^https?:\/\/log\.snssdk\.com url reject-200, enable={FANQIE_ENABLE}
+
+[MitM]
+hostname = %APPEND% api5-normal-snkmer.fqnovel.com, ada.fqnovel.com, log.snssdk.com

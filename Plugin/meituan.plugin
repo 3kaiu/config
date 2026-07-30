@@ -1,0 +1,17 @@
+#!name=美团去广告
+#!desc=美团 - 首页/外卖/推荐 深度净化
+#!version=1.0
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Meituan.png
+
+[Argument]
+MEITUAN_ENABLE=switch,"true","false",tag=是否开启美团去广告,desc=开启后深度净化美团首页/外卖/推荐等广告
+
+[Script]
+http-response ^https?:\/\/api\.meituan\.com script-path=https://ws.wenn.in/main/Scripts/Meituan.js, requires-body=true, timeout=10, tag=美团首页净化, enable={MEITUAN_ENABLE}
+http-response ^https?:\/\/i\.waimai\.meituan\.com script-path=https://ws.wenn.in/main/Scripts/Meituan.js, requires-body=true, timeout=10, tag=美团外卖净化, enable={MEITUAN_ENABLE}
+http-response ^https?:\/\/papi\.meituan\.com script-path=https://ws.wenn.in/main/Scripts/Meituan.js, requires-body=true, timeout=10, tag=美团推荐净化, enable={MEITUAN_ENABLE}
+
+[MitM]
+hostname = %APPEND% api.meituan.com, i.waimai.meituan.com, papi.meituan.com

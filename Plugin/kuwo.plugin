@@ -1,0 +1,16 @@
+#!name=酷我音乐去广告
+#!desc=酷我音乐 - 净化 rich.kuwo.cn / mobilead.kuwo.cn 广告服务响应
+#!version=1.0
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Kuwo_Music.png
+
+[Argument]
+KUWO_ENABLE=switch,"true","false",tag=是否开启酷我音乐去广告,desc=开启后净化酷我音乐广告服务响应数据
+
+[Script]
+http-response ^https?:\/\/rich\.kuwo\.cn script-path=https://ws.wenn.in/main/Scripts/Kuwo.js, requires-body=true, timeout=10, tag=酷我_广告服务, enable={KUWO_ENABLE}
+http-response ^https?:\/\/mobilead\.kuwo\.cn script-path=https://ws.wenn.in/main/Scripts/Kuwo.js, requires-body=true, timeout=10, tag=酷我_移动广告, enable={KUWO_ENABLE}
+
+[MitM]
+hostname = %APPEND% rich.kuwo.cn, mobilead.kuwo.cn

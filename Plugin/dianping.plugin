@@ -1,0 +1,16 @@
+#!name=大众点评去广告
+#!desc=大众点评 - 首页信息流/推荐流 深度净化
+#!version=1.0
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Dianping.png
+
+[Argument]
+DIANPING_ENABLE=switch,"true","false",tag=是否开启大众点评去广告,desc=开启后深度净化点评首页信息流/推荐流等广告
+
+[Script]
+http-response ^https?:\/\/mapi\.dianping\.com script-path=https://ws.wenn.in/main/Scripts/Dianping.js, requires-body=true, timeout=10, tag=点评首页净化, enable={DIANPING_ENABLE}
+http-response ^https?:\/\/check\.dianping\.com script-path=https://ws.wenn.in/main/Scripts/Dianping.js, requires-body=true, timeout=10, tag=点评推荐净化, enable={DIANPING_ENABLE}
+
+[MitM]
+hostname = %APPEND% mapi.dianping.com, check.dianping.com

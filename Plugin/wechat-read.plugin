@@ -1,0 +1,16 @@
+#!name=微信读书去广告
+#!desc=微信读书 - 横幅广告拦截
+#!version=1.0
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Weread.png
+
+[Argument]
+WECHAT_READ_ENABLE=switch,"true","false",tag=是否开启微信读书去广告,desc=开启后拦截微信读书横幅广告
+
+[Rewrite]
+http-response ^https?:\/\/weread\.qq\.com\/web\/book\/.*ad reject-dict, enable={WECHAT_READ_ENABLE}
+http-response ^https?:\/\/i\.weread\.qq\.com\/ad reject-dict, enable={WECHAT_READ_ENABLE}
+
+[MitM]
+hostname = %APPEND% weread.qq.com, i.weread.qq.com

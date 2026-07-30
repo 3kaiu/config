@@ -798,6 +798,13 @@ function Env(n) {
     }
   });
   this.notify = (t, s, b) => {
+    const maskToken = (str) => {
+      if (typeof str !== "string") return str;
+      return str.replace(/cmfuToken[=:]\s*([A-Za-z0-9_-]{8,})/gi, "cmfuToken=***MASKED***")
+                .replace(/(token|cookie|key|secret)[=:]\s*([A-Za-z0-9_+/=-]{16,})/gi, "$1=***MASKED***");
+    };
+    t = maskToken(t); s = maskToken(s); b = maskToken(b);
+
     // 1. 本地通知
     if (this.isL) $notification.post(t, s, b);
     else $notify(t, s, b);
@@ -852,7 +859,7 @@ function Env(n) {
 //   - 版本/来源/哈希/风险/更新流程见 Scripts/ENGINE-MANIFEST.json
 //   - CI (config-validate.yml step 9) 强制校验 blob 哈希，
 //     引擎变更必须同步更新清单，否则 CI 失败
-//   - 已知: 引擎在 Cookie 变更通知正文中含完整 cmfuToken（不受 debug 开关控制）
+//   - 已修复: notify 函数已添加 token 打码
 // ==========================================
 function runQdreaderEngine() {
   // ⚠️ 修复: 确保 $argument 在 QX 下也能经 globalThis 访问

@@ -1,0 +1,50 @@
+#!name=隐私防护
+#!desc=全局 DNS 级 REJECT 拦截 Google 广告/分析、国际归因/崩溃分析 SDK、国内统计 SDK 等追踪域名，无需 MitM。
+#!version=1.0
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Privacy.png
+
+[Argument]
+PRIVACY_ENABLE=switch,"true","false",tag=隐私防护总开关,desc=开启后 REJECT 所有追踪与分析统计域名（纯 DNS 拦截，无需 MitM）
+
+[Rule]
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Google 广告与分析
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN-SUFFIX, googletagmanager.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, googletagservices.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, google-analytics.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, googleadservices.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, doubleclick.net, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, adservice.google.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, app-measurement.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, analytics.google.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, crashlytics.googleapis.com, REJECT, enable={PRIVACY_ENABLE}
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 国际归因 / 崩溃分析 SDK
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN-SUFFIX, segment.io, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, amplitude.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, mixpanel.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, branch.io, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, adjust.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, appsflyer.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, kochava.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, sentry.io, REJECT, enable={PRIVACY_ENABLE}
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 国内统计 / 归因 SDK
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN-SUFFIX, umeng.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, umengcloud.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, umeng.co, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, sensors.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, talkingdata.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, growingio.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, mta.qq.com, REJECT, enable={PRIVACY_ENABLE}
+
+# 纯 DNS 级 REJECT，无需 MitM
+[MitM]
+# 无 MitM 域名 - 隐私防护全部走 DNS REJECT
