@@ -46,7 +46,7 @@ let push: Promise<unknown> = Promise.resolve();
 try {
   const env = $environment;
   if (env && env.surgeVersion) {
-    let info = 'Loon ' + env.surgeVersion;
+    let info = env.surgeVersion;
     if (env.buildVersion) info += ' (build ' + env.buildVersion + ')';
     push = doNotify('📊 Loon 流量统计', info + '\nLoon 正常运行中');
   } else {

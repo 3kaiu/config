@@ -1,1 +1,1 @@
-"use strict";if(typeof $response>"u"){$done();return}try{const e=JSON.parse($response.body);e&&e.data&&(e.data={}),$done({body:JSON.stringify(e)})}catch{$done()}
+"use strict";if(typeof $response>"u"){$done();return}try{const t=JSON.parse($response.body);t&&t.data&&(t.data={}),$done({body:JSON.stringify(t)})}catch{$done()}

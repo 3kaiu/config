@@ -24,6 +24,8 @@ if (url.includes("e2e.engine.page.fetch.cn")) {
   handleDiscover();
 } else if (url.includes("nbnetflow.ads")) {
   handleSplashAd();
+} else {
+  $done();
 }
 
 function handleHomePage() {
@@ -67,5 +69,3 @@ function handleSplashAd() {
     $done({ body: JSON.stringify(obj) });
   } catch (e) { $done(); }
 }
-
-$done();

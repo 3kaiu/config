@@ -29,7 +29,14 @@ if (!$response.body) {
 }
 
 const noticeTitle = "知乎 Pro 脚本错误";
-let body = JSON.parse($response.body);
+let body: Record<string, unknown>;
+try {
+  body = JSON.parse($response.body);
+} catch (e) {
+  console.log(`JSON parse 失败: ${url}`);
+  $done({});
+  return;
+}
 
 // ════════════════════════════════════════
 // 📱 功能模块：按 URL 路由分发
@@ -46,9 +53,15 @@ if (url.includes("commercial_api/real_time_launch_v2")) {
   console.log('知乎 - 开屏页');
   if (!body.launch) {
     console.log(`body:${$response.body}`);
-    // $notification.post(noticeTitle, name, "launch 字段为空");
   } else {
-    let launch = JSON.parse(body.launch);
+    let launch: { ads?: unknown[] };
+    try {
+      launch = JSON.parse(body.launch as string);
+    } catch (e) {
+      console.log('launch JSON parse 失败');
+      $done({ body: JSON.stringify(body) });
+      return;
+    }
     if (!launch.ads) {
       // ads 字段有时候为空，有时候没有 ads 字段
       // $notification.post(noticeTitle, name, "launch-ads 字段为空");
@@ -177,8 +190,10 @@ $done({ body: JSON.stringify(body) });
 // 🛠️ 工具函数
 // ════════════════════════════════════════
 
-function getUrlParamValue(url, queryName) {
-  return Object.fromEntries(url.substring(url.indexOf("?") + 1)
+function getUrlParamValue(url: string, queryName: string): string | undefined {
+  const qIdx = url.indexOf("?");
+  if (qIdx === -1) return undefined;
+  return Object.fromEntries(url.substring(qIdx + 1)
     .split("&")
     .map(pair => pair.split("="))
   )[queryName];

@@ -9,10 +9,11 @@ const AD_KEYS: string[] = [
 try {
   const obj: Record<string, unknown> = JSON.parse($response.body);
 
-  function clean(data: unknown): void {
+  function clean(data: unknown, depth = 0): void {
     if (!data || typeof data !== "object") return;
+    if (depth > 10) return;
     if (Array.isArray(data)) {
-      for (const item of data) clean(item);
+      for (const item of data) clean(item, depth + 1);
       return;
     }
     for (const key of Object.keys(data as Record<string, unknown>)) {
@@ -21,7 +22,7 @@ try {
       } else if (key.startsWith("ad_") || key.startsWith("ads_")) {
         delete (data as Record<string, unknown>)[key];
       } else {
-        clean((data as Record<string, unknown>)[key]);
+        clean((data as Record<string, unknown>)[key], depth + 1);
       }
     }
   }
