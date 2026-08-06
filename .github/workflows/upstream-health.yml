@@ -52,7 +52,9 @@ jobs:
           check_url "ddgksf2013/Scripts applet.js" "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/applet.js"
 
           # NSRingo Apple 增强
-          check_url "NSRingo WeatherKit" "https://github.com/NSRingo/WeatherKit/releases/latest/download/iRingo.WeatherKit.plugin"
+          # WeatherKit 自 v3.2.0 起不再发布 .plugin 资产 (仅 .lpx/.sgmodule/.snippet/.stoverride),
+          # 健康探活改查 bundle.js, 避免误报 404
+          check_url "NSRingo WeatherKit" "https://github.com/NSRingo/WeatherKit/releases/latest/download/response.bundle.js"
           check_url "NSRingo MapKit" "https://github.com/NSRingo/MapKit/releases/latest/download/iRingo.Maps.plugin"
           check_url "NSRingo News" "https://github.com/NSRingo/News/releases/latest/download/iRingo.News.plugin"
           check_url "NSRingo Siri" "https://github.com/NSRingo/Siri/releases/latest/download/iRingo.Siri.plugin"
@@ -122,17 +124,19 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
       - name: Report results
+        env:
+          RESULTS: ${{ env.results }}
         run: |
           echo "### Upstream Health Report" >> $GITHUB_STEP_SUMMARY
           echo "| Upstream | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "${{ env.results }}" | node -e '
-            const r = JSON.parse(process.argv[1]);
+          node -e '
+            const r = JSON.parse(process.env.RESULTS);
             for (const e of r) {
               const icon = e.status === "200" || e.status === "301" || e.status === "302" ? "✅" : "❌";
               console.log(`| ${icon} ${e.name} | ${e.status} |`);
             }
-          ' "${{ env.results }}" | while read line; do echo "$line" >> $GITHUB_STEP_SUMMARY; done
+          ' >> $GITHUB_STEP_SUMMARY
 
       - name: Create issue if upstreams down
         if: env.all_ok != 'true'
