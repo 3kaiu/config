@@ -513,7 +513,7 @@ $parser.uiToHash = function (values) {
 
 
 //
-let version = typeof $environment !== "undefined" ? Number($environment.version.split("build")[1]): 0 // 版本号
+let version = typeof $environment != "undefined" ? Number($environment.version.split("build")[1]): 0 // 版本号
 
 const UA_Retry= "Shadowrocket/3218 CFNetwork/3860.600.12 Darwin/25.5.0 iPhone18,1"
 const currentUA = $resource.user_agent;
@@ -551,7 +551,7 @@ const Field = {
   "server" : "server_remote"
 }  
 
-const subtag = typeof $resource.tag !== "undefined" ? $resource.tag : "";
+const subtag = typeof $resource.tag != "undefined" ? $resource.tag : "";
 ////// 非 raw 链接的沙雕情形
 content0 = content0.indexOf("DOCTYPE html") != -1 && link0.indexOf("github.com") != -1 ? ToRaw(content0) : content0 ;
 // loon插件链接
@@ -1612,7 +1612,7 @@ JSON-JQ rewrite 转换说明 ⟦2026-07-07 20:24:29 +08⟧
 */
 function JsonJQRewrite2QX(row) {
   function stripOuterJQQuotes(str) {
-    str = typeof str === "undefined" || str === null ? "" : String(str).trim();
+    str = typeof str == "undefined" || str === null ? "" : String(str).trim();
     if (str.length > 1 && ((str[0] == "'" && str[str.length - 1] == "'") || (str[0] == "\"" && str[str.length - 1] == "\""))) {
       return str.slice(1, -1);
     }
@@ -1872,7 +1872,7 @@ function JsonJQRewrite2QX(row) {
     }
     var parent = segments.slice(0, -1);
     var key = segments[segments.length - 1];
-    var typeCheck = typeof key === "number" ? "type == \"array\" and has(" + key + ")" : "type == \"object\" and has(" + JSON.stringify(key) + ")";
+    var typeCheck = typeof key == "number" ? "type == \"array\" and has(" + key + ")" : "type == \"object\" and has(" + JSON.stringify(key) + ")";
     return "if (getpath(" + JSON.stringify(parent) + ")? | " + typeCheck + ") then setpath(" + JSON.stringify(segments) + "; " + literal + ") else . end";
   }
 
@@ -1883,7 +1883,7 @@ function JsonJQRewrite2QX(row) {
     }
     try {
       var obj = JSON.parse(payload);
-      if (obj && typeof obj === "object" && !Array.isArray(obj)) {
+      if (obj && typeof obj == "object" && !Array.isArray(obj)) {
         return Object.keys(obj).map(function(key) {
           return buildSafeSetpath(key, JSON.stringify(obj[key]));
         }).join(" | ");
@@ -4157,7 +4157,7 @@ function YAMLFix(cnt){
   //2022-08-08 增加 .replace(/\*/g,"🌟@bug2") 以解决名字以 * 开始时引起的部分问题
   if (cnt.indexOf("{") != -1 && /\{\s*\"*(name|type|server)/.test(cnt)){ // - { } 类型 yaml
     cnt =  cleanYamlSpaces(cnt) // 2026-02-06 部分空格解析错误
-    cnt = cnt.replace(/(^|\n)- /g, "$1  - ").replace(/ {4}- /g,"  - ")
+    cnt = cnt.replace(/(^|\n)- /g, "$1  - ").replace(/    - /g,"  - ")
     //2022-04-11 remove tls|skip from replace(/, (Host|host|path|mux)/g,",   $1")
     console.log("1st:\n"+cnt)
     cnt = cnt.split("\n").map(expandInlineYamlMapLine).join("\n").replace(/, short-id\"{0,1}/gi,", short-id")
@@ -4458,7 +4458,7 @@ Clash YAML name Unicode 修复说明 ⟦2026-07-06 18:50:58 +08⟧
 ----------------------------------------------------------
 */
 function ClashNameFix(name) {
-  var text = typeof name === "undefined" || name === null ? "" : String(name);
+  var text = typeof name == "undefined" || name === null ? "" : String(name);
   function safeCodePoint(fallback, hex) {
     var code = parseInt(hex, 16);
     if (!isFinite(code) || code < 0 || code > 0x10FFFF) {
@@ -4525,9 +4525,9 @@ function CSSR2QX(cnt) {
   if(cnt["protocolparam"]) {
     cnt["protocol-param"] = cnt["protocolparam"]
   }
-  if (typeof(cnt["protocol-param"]) === "string") {
+  if (typeof(cnt["protocol-param"]) == "string") {
     ppara = "ssr-protocol-param=" + cnt["protocol-param"]
-  } else if (typeof(cnt["protocol-param"]) === "object") {
+  } else if (typeof(cnt["protocol-param"]) == "object") {
     console.log(typeof(cnt["protocol-param"]))
     ppara = "ssr-protocol-param=" + JSON.stringify(cnt["protocol-param"]).replace(/{|}|\s|"/g,"")
   }
@@ -4637,7 +4637,7 @@ function CH2QX(cnt){
     tag = "tag="+ClashNameFix(cnt.name)
     ipt = cnt.server+":"+cnt.port
     uname = cnt.username ? "username=" + cnt.username : ""
-    pwd = cnt.password && typeof(cnt.password) === "string" ? "password=" + cnt.password : ""
+    pwd = cnt.password && typeof(cnt.password) == "string" ? "password=" + cnt.password : ""
     tls = cnt.tls ? "over-tls=true" : ""
     cert = cnt["skip-cert-verify"] && cnt.tls ? "tls-verification=false" : ""
     if (Pcert0 == 1 && cnt.tls) {
@@ -4655,7 +4655,7 @@ function CS52QX(cnt){
     tag = "tag="+ClashNameFix(cnt.name)
     ipt = cnt.server+":"+cnt.port
     uname = cnt.username ? "username=" + cnt.username : ""
-    pwd = cnt.password && typeof(cnt.password) === "string" ? "password=" + cnt.password : ""
+    pwd = cnt.password && typeof(cnt.password) == "string" ? "password=" + cnt.password : ""
     tls = cnt.tls ? "over-tls=true" : ""
     cert = cnt["skip-cert-verify"] && cnt.tls ? "tls-verification=false" : ""
     if (Pcert0 == 1 && cnt.tls) {
@@ -4688,7 +4688,7 @@ function CVL2QX(cnt){
   const ppbk=getValue(()=>cnt["reality-opts"]["public-key"]) 
   const psid=getValue(()=>cnt["reality-opts"]["short-id"])
   pbk=ppbk? "reality-base64-pubkey="+ppbk : ""
-  sid=typeof(psid)==='string'? "reality-hex-shortid="+psid : ""
+  sid=typeof(psid)=='string'? "reality-hex-shortid="+psid : ""
 //  console.log(obfs)
   const phost = getValue(()=>cnt["ws-opts"]["headers"]["Host"]) 
   ohost = cnt["ws-headers"]? "obfs-host=" + cnt["ws-headers"]["Host"] : ""
@@ -4956,7 +4956,7 @@ function YAML() {
                         return target;
                 }
                 for (var key in source) {
-                        if (typeof target[key] === "undefined") {
+                        if (typeof target[key] == "undefined") {
                                 target[key] = clone(source[key]);
                         }
                 }
@@ -5154,7 +5154,7 @@ function YAML() {
 
         function processAlias(value) {
                 var name = String(value).slice(1).trim();
-                if (typeof reference_blocks[name] === "undefined") {
+                if (typeof reference_blocks[name] == "undefined") {
                         errors.push("Reference '" + name + "' not found");
                         return {};
                 }
@@ -5198,7 +5198,7 @@ function YAML() {
         }
 
         function processValue(val) {
-                val = typeof val === "undefined" || val === null ? "" : String(val).trim();
+                val = typeof val == "undefined" || val === null ? "" : String(val).trim();
                 if (val == "") {
                         return null;
                 }
