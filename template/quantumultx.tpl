@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════
-#  Quantumult X 配置 (QX.conf) — v7.8 (Surgio 生成)
+#  Quantumult X 配置 (QX.conf) — v8.0 (Surgio 生成)
 #  核心: 自动延迟检测 · 高质量多引擎去广告 · Apple原生增强 · 全球社交/流媒体分流 · 银行 MitM 冲突根治
 # ═══════════════════════════════════════════════════════════
 
@@ -53,13 +53,14 @@ address=/mtalk.google.com/108.177.125.188
 
 [policy]
 url-latency-benchmark=Proxy, server_regex=., check-interval=300, alive-checking=false, tolerance=50, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Proxy.png
+fallback=Fallback, server_regex=., check-interval=600, timeout=10, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Back.png
 static=Apple, direct, Proxy, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple.png
-static=Final, direct, Proxy, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Final.png
-static=Streaming, Proxy, direct, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png
-static=AI, Proxy, direct, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Robot.png
-static=Developer, Proxy, direct, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Developer.png
+static=Final, Proxy, Fallback, direct, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Final.png
+static=Streaming, Proxy, Fallback, direct, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png
+static=AI, Proxy, Fallback, direct, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Robot.png
+static=Developer, Proxy, Fallback, direct, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Developer.png
 static=Gaming, Proxy, direct, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Games.png
-static=Social, Proxy, direct, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Social.png
+static=Social, Proxy, Fallback, direct, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Social.png
 
 [server_remote]
 # Surgio 管理节点加载 — 通过 SURGIO_SUBSCRIPTION_URL 或 Secrets
@@ -226,8 +227,9 @@ host-suffix, google.co.jp, Streaming
 
 # DNS 隐私语义 (QX): 命中域名类规则的代理流量由代理远端解析, 不产生本地 DNS 查询;
 # 本地解析 (国内 DoH, 解析器侧有记录) 仅发生在: ①走到下面 geoip 规则的域名
-# ②未匹配任何规则落入 Final 且 Final 为 DIRECT 的域名 ③直连流量本身 (国内域, 合理)。
-# 零泄漏姿态: 删除下面 geoip 行 + 将 Final 组切到 Proxy (代价: 未收录国内小站绕路)。
+# ②直连流量本身 (国内域, 合理)。
+# 默认姿态: Final 默认 Proxy + Fallback 双节点容灾 — 长尾域名走代理远端解析;
+# 零代理姿态: Final 手动切 direct (代价: 长尾域名本地解析 + 直连)。
 geoip, cn, direct
 final, Final
 

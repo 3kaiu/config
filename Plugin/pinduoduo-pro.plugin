@@ -4,6 +4,8 @@
 #!author=3kaiu (参考 ddgksf2013/pinduoduo.js + app2smile)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Pinduoduo.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.5.1(978)
 
 #!arguments-desc=\n- \{ENABLE_PDD}: ["true","false"],tag=总开关，desc=开启后执行所有拼多多功能\n- \{PDD_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,90,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{PDD_SPLASH_ENABLE}: switch,"true","false",tag=开屏广告，desc=去除 APP 开屏广告\n- \{PDD_HOME_ENABLE}: switch,"true","false",tag=首页净化，desc=去除首页推荐广告\n- \{PDD_SEARCH_ENABLE}: switch,"true","false",tag=搜索净化，desc=去除搜索推广词条\n- \{PDD_RECOMMEND_ENABLE}: switch,"true","false",tag=推荐净化，desc=去除个性化推荐\n- \{PDD_SUBSIDY_ENABLE}: switch,"true","false",tag=百亿补贴优化，desc=优化补贴展示\n- \{PDD_DEBUG_ENABLE}: switch,"false","true",tag=调试模式，desc=输出详细执行日志
 

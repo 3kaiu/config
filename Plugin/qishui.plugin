@@ -4,33 +4,35 @@
 #!author=3kaiu (规则来源: ddgksf2013)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Qishui.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.5.1(978)
 
 [Argument]
 QISHUI_ENABLE=switch,"true","false",tag=是否开启汽水音乐去广告,desc=开启后通过 URL 拒绝规则净化汽水音乐
 
 [Rewrite]
 # ── 视频广告 ──
-^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/media_ads url reject-200
+request if ${url} ~= /^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/media_ads/i then reject(200)
 # ── 通用广告 ──
-^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/ads url reject-200
+request if ${url} ~= /^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/ads/i then reject(200)
 # ── 位置隐私 ──
-^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/location\/info url reject-200
+request if ${url} ~= /^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/location\/info/i then reject(200)
 # ── 广告弹窗 ──
-^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/commerce url reject-200
+request if ${url} ~= /^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/commerce/i then reject(200)
 # ── TAGS推荐 ──
-^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/hashtag\/recommend url reject-200
+request if ${url} ~= /^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/hashtag\/recommend/i then reject(200)
 # ── 热门搜索 ──
-^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/search-block url reject-200
+request if ${url} ~= /^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/search-block/i then reject(200)
 # ── DNS 处理 ──
-^https:\/\/tnc[\w-]*\.zijieapi\.com\/get_domains url reject-200
+request if ${url} ~= /^https:\/\/tnc[\w-]*\.zijieapi\.com\/get_domains/i then reject(200)
 # ── 我的页面推广 ──
-^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/me\? url reject-dict
+request if ${url} ~= /^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/me\?/i then reject_dict(200)
 # ── 会员免费听 ──
-^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/card(\?|$) url reject-dict
+request if ${url} ~= /^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/card(\?|$)/i then reject_dict(200)
 # ── 首页活动 ──
-^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/activities(\?|$) url reject-dict
+request if ${url} ~= /^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/activities(\?|$)/i then reject_dict(200)
 # ── 音乐流推荐 ──
-^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/feed\/song-tab(\?|$) url reject-dict
+request if ${url} ~= /^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/feed\/song-tab(\?|$)/i then reject_dict(200)
 
 [MitM]
 hostname = %APPEND% beta-luna.douyin.com, api.qishui.com, tnc-alisg.zijieapi.com, tnc-zijieapi.zijieapi.com

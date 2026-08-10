@@ -4,6 +4,8 @@
 #!author=Ethan / 3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.5.1(978)
 
 [Argument]
 appOpenAdsSwitch=switch,"true","false",tag=开屏广告屏蔽,desc=开启后将屏蔽App启动时的开屏广告

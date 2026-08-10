@@ -4,6 +4,8 @@
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Kuaishou.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.5.1(978)
 
 [Argument]
 KUAISHOU_ENABLE=switch,"true","false",tag=是否开启快手去广告,desc=开启后净化快手信息流及广告

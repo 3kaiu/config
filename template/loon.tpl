@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════
-#  Loon 配置 (Loon.lcf) — v7.8 (Surgio 生成)
+#  Loon 配置 (Loon.lcf) — v8.0 (Surgio 生成)
 #  核心: 自动健康检测 · 高质量多引擎去广告 · Apple原生增强 · 全球社交/流媒体分流 · 银行 MitM 冲突根治
 #  引擎支持: iOS Loon 3.3.9+
 # ═══════════════════════════════════════════════════════════
@@ -11,7 +11,7 @@ dns-server = 180.184.11.11, 180.184.22.22, 119.29.29.29, 223.5.5.5
 doh-server = {{ customParams.doh_primary }}, {{ customParams.doh_fallback }}
 doh3-server = {{ customParams.doh3_primary }}, {{ customParams.doh3_fallback }}
 doq-server = {{ customParams.doq_server }}
-hijack-dns = *:53, 8.8.8.8, 8.8.4.4, 1.1.1.1, 114.114.114.114, 223.6.6.6, 180.76.76.76
+hijack-dns = *:0, 8.8.8.8, 8.8.4.4, 1.1.1.1, 114.114.114.114, 223.6.6.6, 180.76.76.76
 sni-sniffing = true
 disable-stun = false
 udp-fallback-mode = DIRECT
@@ -65,13 +65,14 @@ mtalk.google.com = 108.177.125.188
 
 [Proxy Group]
 Proxy = url-test, ".*", url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
+Fallback = fallback, ".*", url=http://cp.cloudflare.com/generate_204, interval=600, timeout=10
 Apple = select, DIRECT, Proxy
-Final = select, DIRECT, Proxy
-Streaming = select, Proxy, DIRECT, tag=流媒体
-AI = select, Proxy, DIRECT, tag=AI服务
-Developer = select, Proxy, DIRECT, tag=开发者
+Final = select, Proxy, Fallback, DIRECT
+Streaming = select, Proxy, Fallback, DIRECT, tag=流媒体
+AI = select, Proxy, Fallback, DIRECT, tag=AI服务
+Developer = select, Proxy, Fallback, DIRECT, tag=开发者
 Gaming = select, Proxy, DIRECT, tag=游戏平台
-Social = select, Proxy, DIRECT, tag=社交平台
+Social = select, Proxy, Fallback, DIRECT, tag=社交平台
 
 [Rule]
 DEST-PORT, 5223, DIRECT
@@ -233,8 +234,9 @@ DOMAIN-SUFFIX, google.co.jp, Streaming
 
 # DNS 隐私语义 (Loon): 命中域名类规则的代理流量由代理远端解析, 不产生本地 DNS 查询;
 # 本地解析 (国内 DoH, 解析器侧有记录) 仅发生在: ①走到下面 GEOIP 规则的域名
-# ②未匹配任何规则落入 Final 且 Final 为 DIRECT 的域名 ③直连流量本身 (国内域, 合理)。
-# 零泄漏姿态: 删除下面 GEOIP 行 + 将 Final 组切到 Proxy (代价: 未收录国内小站绕路)。
+# ②直连流量本身 (国内域, 合理)。
+# 默认姿态: Final 默认 Proxy + Fallback 双节点容灾 — 长尾域名走代理远端解析;
+# 零代理姿态: Final 手动切 DIRECT (代价: 长尾域名本地解析 + 直连)。
 GEOIP, CN, DIRECT
 FINAL, Final
 
@@ -253,6 +255,7 @@ https://ws.wenn.in/main/Mirror/rules/loon-AdvertisingScript.plugin, enabled=true
 https://ws.wenn.in/main/Plugin/sub-store.plugin, enabled=true, tag=Sub-Store 订阅管理
 https://ws.wenn.in/main/Plugin/quicksearch.plugin, enabled=true, tag=快捷搜索
 https://ws.wenn.in/main/Plugin/notify.plugin, enabled=true, tag=🔔 定时通知
+https://ws.wenn.in/main/Plugin/privacy-shield.plugin, enabled=true, tag=🔒 隐私防护 (SDK 追踪全拦截)
 https://ws.wenn.in/main/Plugin/wechat-pro.plugin, enabled=true, tag=微信去广告 Pro
 https://ws.wenn.in/main/Plugin/bilibili-pro.plugin, enabled=true, tag=B站去广告 Pro
 https://ws.wenn.in/main/Plugin/bilicomics.plugin, enabled=true, tag=B站漫画去广告
@@ -263,6 +266,8 @@ https://ws.wenn.in/main/Plugin/taopiaopiao-pro.plugin, enabled=true, tag=淘票�
 https://ws.wenn.in/main/Plugin/amap.plugin, enabled=true, tag=高德地图去广告
 https://ws.wenn.in/main/Plugin/jd-pro.plugin, enabled=true, tag=京东去广告 Pro
 https://ws.wenn.in/main/Plugin/qqmusic.plugin, enabled=true, tag=QQ音乐去广告
+https://ws.wenn.in/main/Plugin/kugou.plugin, enabled=true, tag=酷狗音乐净化
+https://ws.wenn.in/main/Plugin/kuwo.plugin, enabled=true, tag=酷我音乐净化
 https://ws.wenn.in/main/Plugin/reddit.plugin, enabled=true, tag=Reddit去广告
 https://ws.wenn.in/main/Plugin/tieba-pro.plugin, enabled=true, tag=贴吧去广告 Pro
 https://ws.wenn.in/main/Plugin/zhihu-pro.plugin, enabled=true, tag=知乎去广告 Pro
@@ -271,6 +276,9 @@ https://ws.wenn.in/main/Plugin/weibo-pro.plugin, enabled=true, tag=微博去广�
 https://ws.wenn.in/main/Plugin/xiaohongshu-pro.plugin, enabled=true, tag=小红书净化 Pro
 https://ws.wenn.in/main/Plugin/iqiyi-pro.plugin, enabled=true, tag=爱奇艺净化 Pro
 https://ws.wenn.in/main/Plugin/tencent-video-pro.plugin, enabled=true, tag=腾讯视频净化 Pro
+https://ws.wenn.in/main/Plugin/youku.plugin, enabled=true, tag=优酷净化
+https://ws.wenn.in/main/Plugin/douyin.plugin, enabled=true, tag=抖音净化
+https://ws.wenn.in/main/Plugin/kuaishou.plugin, enabled=true, tag=快手净化
 https://ws.wenn.in/main/Plugin/taobao-tmall-pro.plugin, enabled=true, tag=淘宝天猫净化 Pro
 https://ws.wenn.in/main/Plugin/pinduoduo-pro.plugin, enabled=true, tag=拼多多净化 Pro
 https://ws.wenn.in/main/Plugin/alipay-pro.plugin, enabled=true, tag=支付宝净化 Pro
@@ -288,8 +296,14 @@ https://ws.wenn.in/main/Plugin/startup-adblock-pro.plugin, enabled=true, tag=开
 https://ws.wenn.in/main/Plugin/qidian.plugin, enabled=true, tag=起点全能助手 Pro
 https://ws.wenn.in/main/Plugin/bank.plugin, enabled=true, tag=银行及云闪付去广告
 https://ws.wenn.in/main/Plugin/life.plugin, enabled=true, tag=生活出行去广告
+https://ws.wenn.in/main/Plugin/meituan.plugin, enabled=true, tag=美团净化
+https://ws.wenn.in/main/Plugin/dianping.plugin, enabled=true, tag=大众点评净化
+https://ws.wenn.in/main/Plugin/feishu.plugin, enabled=true, tag=飞书净化
+https://ws.wenn.in/main/Plugin/wps.plugin, enabled=true, tag=WPS净化
 https://ws.wenn.in/main/Plugin/ai.plugin, enabled=true, tag=AI 服务分流
 https://ws.wenn.in/main/Plugin/zhihuifangdong.plugin, enabled=true, tag=智慧房东去广告
+https://ws.wenn.in/main/Plugin/fanqie.plugin, enabled=true, tag=番茄小说净化
+https://ws.wenn.in/main/Plugin/wechat-read.plugin, enabled=true, tag=微信读书去广告
 https://ws.wenn.in/main/Kelee/YouTube_remove_ads.plugin, enabled=true, tag=YouTube去广告
 https://ws.wenn.in/main/Mirror/iringo/iRingo.WeatherKit.plugin, enabled=true, tag=🍎天气增强
 https://ws.wenn.in/main/Mirror/iringo/iRingo.Maps.plugin, enabled=true, tag=🍎地图增强
@@ -321,11 +335,11 @@ https://kelee.one/Tool/Loon/Lpx/Node_detection_tool.lpx, enabled=true, tag=🌐 
 https://kelee.one/Tool/Loon/Lpx/NodeLinkCheck.lpx, enabled=true, tag=🔗 代理链路检测
 
 [Rewrite]
-^https?:\/\/119\.29\.29\.29\/d reject-200
-^https?:\/\/203\.107\.1\.1\/d reject-200
-^https?:\/\/223\.5\.5\.5\/d reject-200
-^https?:\/\/1\.12\.12\.12\/d reject-200
-^https?:\/\/120\.53\.53\.53\/d reject-200
+request if ${url} ~= /^https?:\/\/119\.29\.29\.29\/d/i then reject(200)
+request if ${url} ~= /^https?:\/\/203\.107\.1\.1\/d/i then reject(200)
+request if ${url} ~= /^https?:\/\/223\.5\.5\.5\/d/i then reject(200)
+request if ${url} ~= /^https?:\/\/1\.12\.12\.12\/d/i then reject(200)
+request if ${url} ~= /^https?:\/\/120\.53\.53\.53\/d/i then reject(200)
 
 [MitM]
 skip-server-cert-verify = false

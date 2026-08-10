@@ -4,13 +4,15 @@
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Weread.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.5.1(978)
 
 [Argument]
 WECHAT_READ_ENABLE=switch,"true","false",tag=是否开启微信读书去广告,desc=开启后拦截微信读书横幅广告
 
 [Rewrite]
-http-response ^https?:\/\/weread\.qq\.com\/web\/book\/.*ad reject-dict, enable={WECHAT_READ_ENABLE}
-http-response ^https?:\/\/i\.weread\.qq\.com\/ad reject-dict, enable={WECHAT_READ_ENABLE}
+request if ${url} ~= /^https?:\/\/weread\.qq\.com\/web\/book\/.*ad/i && ${WECHAT_READ_ENABLE} == true then reject_dict(200)
+request if ${url} ~= /^https?:\/\/i\.weread\.qq\.com\/ad/i && ${WECHAT_READ_ENABLE} == true then reject_dict(200)
 
 [MitM]
 hostname = %APPEND% weread.qq.com, i.weread.qq.com

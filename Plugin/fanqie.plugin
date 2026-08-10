@@ -4,6 +4,8 @@
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bookpedia.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.5.1(978)
 
 #!arguments-desc=\n- \{FANQIE_ENABLE}: switch,"true","false",tag=总开关，desc=开启后执行所有番茄小说净化功能
 

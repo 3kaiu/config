@@ -4,6 +4,8 @@
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/PayPal.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.5.1(978)
 
 [Argument]
 UNIONPAY_ENABLE=switch,"true","false",tag=是否开启云闪付去广告,desc=开启后将拦截云闪付开屏、弹窗与理财页等推广

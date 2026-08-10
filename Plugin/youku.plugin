@@ -4,6 +4,8 @@
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Youku.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.5.1(978)
 
 [Argument]
 YOUKU_ENABLE=switch,"true","false",tag=是否开启优酷去广告,desc=开启后净化优酷开屏/追踪/视频广告

@@ -5,6 +5,8 @@
 #!fallback=备选: 无独立备选 — ddgksf2013 停更时需自行维护 Rewrite 规则
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Goofish.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.5.1(978)
 
 [Rule]
 # 优酷推广域名
@@ -12,9 +14,9 @@ DOMAIN-SUFFIX,iyes.youku.com,REJECT
 
 [Rewrite]
 # 开屏广告
-^https?:\/\/(g-)?acs\.m\.goofish\.com\/gw\/mtop.*splash\.ads url reject-200
+request if ${url} ~= /^https?:\/\/(g-)?acs\.m\.goofish\.com\/gw\/mtop.*splash\.ads/i then reject(200)
 # 广告曝光
-^https?:\/\/(g-)?acs\.m\.goofish\.com\/gw\/mtop\.idle\.ad\.expose url reject-200
+request if ${url} ~= /^https?:\/\/(g-)?acs\.m\.goofish\.com\/gw\/mtop\.idle\.ad\.expose/i then reject(200)
 
 [Script]
 # ⚠️ 修复(v7.3): 迁移到 [Script] 段, 添加 requires-body + timeout

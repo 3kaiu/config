@@ -4,6 +4,8 @@
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/PostBox.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.5.1(978)
 
 [Argument]
 CAINIAO_ENABLE=switch,"true","false",tag=是否开启菜鸟包裹去广告,desc=开启后将对菜鸟包裹App及小程序进行去广告和净化
@@ -17,13 +19,13 @@ AND,((USER-AGENT,Cainiao4iPhone*), (DOMAIN,amdc.m.taobao.com)), REJECT, enable={
 # 1. 菜鸟包裹
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 首页瀑布流与推广
-^https:\/\/nbcps-mtop\.cainiao\.com\/gw\/mtop\.cainiao\.nbcps\.presentation\.fetch\.cn reject, enable={CAINIAO_ENABLE}
+request if ${url} ~= /^https:\/\/nbcps-mtop\.cainiao\.com\/gw\/mtop\.cainiao\.nbcps\.presentation\.fetch\.cn/i && ${CAINIAO_ENABLE} == true then reject(404)
 # 广告/推销中心
-^https:\/\/netflow-mtop\.cainiao\.com\/gw\/mtop\.cainiao\.guoguo\.nbnetflow\.ads\.index reject, enable={CAINIAO_ENABLE}
+request if ${url} ~= /^https:\/\/netflow-mtop\.cainiao\.com\/gw\/mtop\.cainiao\.guoguo\.nbnetflow\.ads\.index/i && ${CAINIAO_ENABLE} == true then reject(404)
 # 搜索栏推广词
-^https:\/\/cn-acs\.m\.cainiao\.com\/gw\/mtop\.cainiao\.adkeyword\.get\.cn reject, enable={CAINIAO_ENABLE}
+request if ${url} ~= /^https:\/\/cn-acs\.m\.cainiao\.com\/gw\/mtop\.cainiao\.adkeyword\.get\.cn/i && ${CAINIAO_ENABLE} == true then reject(404)
 # 寄件页红包/广告
-^https:\/\/cn-acs\.m\.cainiao\.com\/gw\/mtop\.cainiao\.guoguo\.nbnetflow\.ads\.m?show reject, enable={CAINIAO_ENABLE}
+request if ${url} ~= /^https:\/\/cn-acs\.m\.cainiao\.com\/gw\/mtop\.cainiao\.guoguo\.nbnetflow\.ads\.m?show/i && ${CAINIAO_ENABLE} == true then reject(404)
 
 [Script]
 # 首页卡片净化 — 首页/我的/发现/开屏广告 → Cainiao.js

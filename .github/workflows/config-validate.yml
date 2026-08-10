@@ -155,8 +155,8 @@ jobs:
       - name: HTTPDNS rewrite alignment check
         run: |
           echo "## HTTPDNS Rewrite Alignment" >> $GITHUB_STEP_SUMMARY
-          # 统计 Loon [Rewrite] 段中以 /d 结尾的 HTTPDNS reject-200 规则数
-          loon_httpdns=$(grep -c 'reject-200$' Profile/Loon.lcf || echo 0)
+          # 统计 Loon [Rewrite] 段中以 /d/ 结尾的 HTTPDNS reject 规则数 (Loon 3.5.1(978)+ 新语法)
+          loon_httpdns=$(grep -cE 'then reject\(200\)$' Profile/Loon.lcf || echo 0)
           # 统计 QX [rewrite_local] 段中 url reject-200 且含 /d 的 HTTPDNS 规则数
           qx_httpdns=$(grep '/d url reject-200' Profile/QX.conf | wc -l || echo 0)
           echo "| Config | HTTPDNS rewrite count |" >> $GITHUB_STEP_SUMMARY
@@ -349,3 +349,13 @@ jobs:
             echo "✅ 顺序正确: Google 通配位于所有 Reject 锚点之后" >> $GITHUB_STEP_SUMMARY
           fi
           exit $FAIL
+
+      # ── 12. 接线完整性检查 (审计修复 2026-08) ──
+      # 防"写了插件/脚本但没接线"的死代码回归:
+      #   每个 Plugin/*.plugin 必须被 loon.tpl 引用; 每个 Scripts/*.js 必须被引用;
+      #   反向引用 (模板/插件引用的文件必须存在) 一并校验
+      - name: Wiring integrity check (no dead code)
+        run: |
+          echo "## Wiring Integrity Check" >> $GITHUB_STEP_SUMMARY
+          node test/wiring-check.js 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          exit ${PIPESTATUS[0]}

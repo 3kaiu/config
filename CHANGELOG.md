@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [v8.0] — 2026-08-10
+
+### Added
+
+- **插件元信息全量补齐**：51 个插件统一添加 `#!system = iOS,iPadOS,macOS` 与 `#!loon_version = 3.5.1(978)`，明确声明 iOS/Mac 双端支持与最低版本要求。
+- **Rewrite 新语法迁移**：插件 144 行 + 主配置 5 行 [Rewrite] 从旧语法迁移至 Loon 3.5.1 (978)+ 新语法（`request if ${url} ~= /.../ && ${参数} == true then action`），旧语法官方仅作输入兼容、不再扩展。
+
+### Changed
+
+- **hijack-dns 增强**：`*:53` → `*:0`，劫持所有目标端口的 DNS 查询（文档建议值）。
+- **历史无效规则修复**：91 行 `url/list reject-200` 非标准 action（Loon 无此语法，长期未生效）规范化为 `reject-200`；bilibili-pro 2 行 302 替换值参数顺序纠正（app 行 `$5` 后误拼原 `$6`、passport 行 `$4` 重复引用导致跳转 URL 尾部参数重复拼接）、weibo/xiaohongshu 2 行 URL 正则补捕获组（`$4` 悬空导致重定向从未生效）。
+- **Amap 脚本净化 → JSON Action（试点）**：13 条 http-response 脚本替换为 3 条 `response.json.jq(".data = {}")`（行为与 Amap.js 逐字节等价），插件 v7.8 → v7.9。
+
+### Fixed
+
+- **上游工具审计（LoonManual / Loon0x00.github.io）**：发现并修复官方 Rewrite 转换器 3 个缺陷 —— ① 不支持插件 `enable={ARG}&{ARG2}` 后缀（转换后参数丢失）；② 正则字面量对连续 `//` 只转义一半；③ iOS Safari 剪贴板 fallback 静默失败（`textarea.select()` 只选中部分文本且不校验 `execCommand` 返回值）。另补 `-webkit-mask-image` / `-webkit-backdrop-filter` 前缀兼容旧 iOS。
+
+---
+
 ## [v7.8.1] — 2026-07-23
 
 ### Added

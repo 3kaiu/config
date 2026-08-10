@@ -4,6 +4,8 @@
 #!author=3kaiu (参考 ddgksf2013/XiaoHongShuAds.conf + app2smile)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/XiaoHongShu.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.5.1(978)
 
 #!arguments-desc=\n- \{ENABLE_XHS}: ["true","false"],tag=总开关，desc=开启后执行所有小红书功能\n- \{XHS_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,90,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{XHS_SPLASH_ENABLE}: switch,"true","false",tag=开屏广告，desc=去除 APP 开屏广告\n- \{XHS_FEED_ENABLE}: switch,"true","false",tag=信息流净化，desc=去除首页推荐广告\n- \{XHS_SEARCH_ENABLE}: switch,"true","false",tag=搜索净化，desc=去除搜索推广词条\n- \{XHS_WATERMARK_ENABLE}: switch,"true","false",tag=去水印，desc=去除图片/视频水印\n- \{XHS_DEBUG_ENABLE}: switch,"false","true",tag=调试模式，desc=输出详细执行日志
 
@@ -59,7 +61,7 @@ http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/ads\/search reje
 # ── 白名单配置 ────────────────────────
 
 # ── 特殊域名重定向 ──────────────────
-^https?:\/\/xhslink\.com\/\?.* url 302 https://$4, enable={ENABLE_XHS}
+request if ${url} ~= /^https?:\/\/xhslink\.com\/\?(https?)?(%3A|:)?(\/\/|%2F%2F)?(.*)$/i as urlMatch && ${ENABLE_XHS} == true then redirect(302, "https://${urlMatch.4}")
 
 [Rule]
 DOMAIN-SUFFIX, xiaohongshu.com, DIRECT

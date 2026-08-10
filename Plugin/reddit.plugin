@@ -4,6 +4,8 @@
 #!author=3kaiu (规则来源: xream)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Reddit.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.5.1(978)
 
 [Argument]
 REDDIT_ENABLE=switch,"true","false",tag=是否开启Reddit去广告,desc=开启后净化Reddit信息流中的推广帖子

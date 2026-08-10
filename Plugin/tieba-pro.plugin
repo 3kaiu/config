@@ -4,6 +4,8 @@
 #!author=3kaiu (基于通用插件增强框架)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Tieba.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.5.1(978)
 
 #!arguments-desc=\n- \{ENABLE_TIEBA}: ["true","false"],tag=总开关，desc=开启后执行所有贴吧功能\n- \{TIEBA_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,60,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{TIEBA_HOME_ENABLE}: switch,"true","false",tag=首页净化，desc=去除首页推荐/广告\n- \{TIEBA_POST_ENABLE}: switch,"true","false",tag=帖子净化，desc=去除帖子内广告/推广\n- \{TIEBA_SEARCH_ENABLE}: switch,"true","false",tag=搜索净化，desc=去除搜索结果推广\n- \{TIEBA_DEBUG_ENABLE}: switch,"false","true",tag=调试模式，desc=输出详细执行日志
 

@@ -4,6 +4,8 @@
 #!author=3kaiu (参考 ddgksf2013/alipay.js + app2smile)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Alipay.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.5.1(978)
 
 #!arguments-desc=\n- \{ENABLE_ALIPAY}: ["true","false"],tag=总开关，desc=开启后执行所有支付宝功能\n- \{ALIPAY_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,120,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{ALIPAY_SPLASH_ENABLE}: switch,"true","false",tag=开屏广告，desc=去除 APP 开屏广告\n- \{ALIPAY_HOME_ENABLE}: switch,"true","false",tag=首页净化，desc=去除首页推荐广告\n- \{ALIPAY_TRANSFER_ENABLE}: switch,"true","false",tag=转账净化，desc=去除转账页面营销\n- \{ALIPAY_INVEST_ENABLE}: switch,"true","false",tag=理财净化，desc=去除理财推广内容\n- \{ALIPAY_MEMBER_ENABLE}: switch,"true","false",tag=会员增强，desc=优化支付宝会员权益\n- \{ALIPAY_DEBUG_ENABLE}: switch,"false","true",tag=调试模式，desc=输出详细执行日志
 

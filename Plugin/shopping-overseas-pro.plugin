@@ -4,6 +4,8 @@
 #!author=3kaiu (参考 ddgksf2013/app2smile 等开源资源)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Shopping.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.5.1(978)
 
 #!arguments-desc=\n- \{ENABLE_SHOPPING}: ["true","false"],tag=总开关，desc=开启后执行所有海外购物应用净化\n- \{SHOPPING_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,90,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{AMAZON_ENABLE}: switch,"true","false",tag Amazon 净化，desc=推荐广告净化 + 优惠券优化\n- \{EBAY_ENABLE}: switch,"true","false",tag eBay 净化，desc=搜索结果净化 + 广告过滤\n- \{PAYPAL_ENABLE}: switch,"true","false",tag PayPal 净化，desc=界面净化 + 营销推广去除\n- \{ALIEXPRESS_ENABLE}: switch,"true","false",tag AliExpress 净化，desc=推荐净化 + 促销优化\n- \{PRICE_ENABLE}: switch,"true","false",tag 价格追踪，desc=历史价格查询 + 降价提醒\n- \{PRIVACY_ENABLE}: switch,"true","false",tag隐私防护，desc=拦截购物追踪和数据收集\n- \{DEBUG_ENABLE}: switch,"false","true",tag调试模式，desc=输出详细执行日志
 
