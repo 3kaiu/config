@@ -1,0 +1,32 @@
+#!name=影音阅读净化
+#!desc=聚合: 酷狗/酷我/优酷/番茄小说 — 单插件统一总开关, 各 App 独立子开关
+#!version=1.0
+#!author=3kaiu (聚合器生成)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+#!tag=🎵 影音阅读净化
+
+[Argument]
+MEDIA_ENABLE=switch,"true","false",tag=总开关,desc=关闭后整组净化全部停用
+KUGOU_ENABLE=switch,"true","false",tag=是否开启酷狗音乐去广告,desc=开启后净化开屏/移动/信息流 Banner 广告
+KUWO_ENABLE=switch,"true","false",tag=是否开启酷我音乐去广告,desc=开启后净化酷我音乐广告服务响应数据
+YOUKU_ENABLE=switch,"true","false",tag=是否开启优酷去广告,desc=开启后净化优酷开屏/追踪/视频广告
+FANQIE_ENABLE=switch,"true","false",tag=总开关，desc=开启后执行所有番茄小说净化功能
+
+[Script]
+http-response ^https?:\/\/ads\.kugou\.com script-path=https://ws.wenn.in/main/Scripts/Kugou.js, requires-body=true, timeout=10, tag=酷狗_广告投放, enable={MEDIA_ENABLE}&{KUGOU_ENABLE}
+http-response ^https?:\/\/mobilead\.kugou\.com script-path=https://ws.wenn.in/main/Scripts/Kugou.js, requires-body=true, timeout=10, tag=酷狗_移动广告, enable={MEDIA_ENABLE}&{KUGOU_ENABLE}
+http-response ^https?:\/\/gateway\.kugou\.com script-path=https://ws.wenn.in/main/Scripts/Kugou.js, requires-body=true, timeout=10, tag=酷狗_信息流, enable={MEDIA_ENABLE}&{KUGOU_ENABLE}
+http-response ^https?:\/\/rich\.kuwo\.cn script-path=https://ws.wenn.in/main/Scripts/Kuwo.js, requires-body=true, timeout=10, tag=酷我_广告服务, enable={MEDIA_ENABLE}&{KUWO_ENABLE}
+http-response ^https?:\/\/mobilead\.kuwo\.cn script-path=https://ws.wenn.in/main/Scripts/Kuwo.js, requires-body=true, timeout=10, tag=酷我_移动广告, enable={MEDIA_ENABLE}&{KUWO_ENABLE}
+http-response ^https?:\/\/api\.youku\.com script-path=https://ws.wenn.in/main/Scripts/Youku.js, requires-body=true, timeout=10, tag=优酷开屏净化, enable={MEDIA_ENABLE}&{YOUKU_ENABLE}
+http-response ^https?:\/\/iyes\.youku\.com script-path=https://ws.wenn.in/main/Scripts/Youku.js, requires-body=true, timeout=10, tag=优酷广告追踪, enable={MEDIA_ENABLE}&{YOUKU_ENABLE}
+http-response ^https?:\/\/vali\.cp31\.ott\.cibntv\.net script-path=https://ws.wenn.in/main/Scripts/Youku.js, requires-body=true, timeout=10, tag=优酷视频广告, enable={MEDIA_ENABLE}&{YOUKU_ENABLE}
+http-response ^https?:\/\/api5-normal-snkmer\.fqnovel\.com script-path=https://ws.wenn.in/main/Scripts/Fanqie.js, requires-body=true, timeout=10, tag=番茄小说信息流净化, enable={MEDIA_ENABLE}&{FANQIE_ENABLE}
+http-response ^https?:\/\/ada\.fqnovel\.com script-path=https://ws.wenn.in/main/Scripts/Fanqie.js, requires-body=true, timeout=10, tag=番茄小说广告服务净化, enable={MEDIA_ENABLE}&{FANQIE_ENABLE}
+http-response ^https?:\/\/log\.snssdk\.com url reject-200, enable={MEDIA_ENABLE}&{FANQIE_ENABLE}
+
+[MitM]
+hostname = %APPEND% ada.fqnovel.com, ads.kugou.com, api.youku.com, api5-normal-snkmer.fqnovel.com, gateway.kugou.com, iyes.youku.com, log.snssdk.com, mobilead.kugou.com, mobilead.kuwo.cn, rich.kuwo.cn, vali.cp31.ott.cibntv.net

@@ -1,0 +1,49 @@
+#!name=购物生活净化 Pro
+#!desc=聚合: 大众点评/美团/闲鱼/菜鸟/WPS/贴吧 — 单插件统一总开关, 各 App 独立子开关
+#!version=1.0
+#!author=3kaiu (聚合器生成)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ShoppingBags.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+#!tag=🛍 购物生活净化
+
+[Argument]
+SHOPPING_ENABLE=switch,"true","false",tag=总开关,desc=关闭后整组净化全部停用
+DIANPING_ENABLE=switch,"true","false",tag=是否开启大众点评去广告,desc=开启后深度净化点评首页信息流/推荐流等广告
+MEITUAN_ENABLE=switch,"true","false",tag=是否开启美团去广告,desc=开启后深度净化美团首页/外卖/推荐等广告
+CAINIAO_ENABLE=switch,"true","false",tag=是否开启菜鸟包裹去广告,desc=开启后将对菜鸟包裹App及小程序进行去广告和净化
+WPS_ENABLE=switch,"true","false",tag=是否开启WPS去广告,desc=开启后净化广告及文档推荐
+ENABLE_TIEBA=switch,"true","false",tag=总开关，desc=开启后执行所有贴吧功能
+
+[Rule]
+DOMAIN-SUFFIX,iyes.youku.com,REJECT
+AND,((USER-AGENT,Cainiao4iPhone*), (DOMAIN,amdc.m.taobao.com)), REJECT, enable={SHOPPING_ENABLE}&{CAINIAO_ENABLE}
+IP-CIDR,180.76.76.200/32,REJECT,no-resolve,enable={SHOPPING_ENABLE}&{ENABLE_TIEBA}
+
+[Rewrite]
+^https?:\/\/(g-)?acs\.m\.goofish\.com\/gw\/mtop.*splash\.ads reject-200
+^https?:\/\/(g-)?acs\.m\.goofish\.com\/gw\/mtop\.idle\.ad\.expose reject-200
+^https:\/\/nbcps-mtop\.cainiao\.com\/gw\/mtop\.cainiao\.nbcps\.presentation\.fetch\.cn reject enable={SHOPPING_ENABLE}&{CAINIAO_ENABLE}
+^https:\/\/netflow-mtop\.cainiao\.com\/gw\/mtop\.cainiao\.guoguo\.nbnetflow\.ads\.index reject enable={SHOPPING_ENABLE}&{CAINIAO_ENABLE}
+^https:\/\/cn-acs\.m\.cainiao\.com\/gw\/mtop\.cainiao\.adkeyword\.get\.cn reject enable={SHOPPING_ENABLE}&{CAINIAO_ENABLE}
+^https:\/\/cn-acs\.m\.cainiao\.com\/gw\/mtop\.cainiao\.guoguo\.nbnetflow\.ads\.m?show reject enable={SHOPPING_ENABLE}&{CAINIAO_ENABLE}
+
+[Script]
+http-response ^https?:\/\/mapi\.dianping\.com script-path=https://ws.wenn.in/main/Scripts/Dianping.js, requires-body=true, timeout=10, tag=点评首页净化, enable={SHOPPING_ENABLE}&{DIANPING_ENABLE}
+http-response ^https?:\/\/check\.dianping\.com script-path=https://ws.wenn.in/main/Scripts/Dianping.js, requires-body=true, timeout=10, tag=点评推荐净化, enable={SHOPPING_ENABLE}&{DIANPING_ENABLE}
+http-response ^https?:\/\/api\.meituan\.com script-path=https://ws.wenn.in/main/Scripts/Meituan.js, requires-body=true, timeout=10, tag=美团首页净化, enable={SHOPPING_ENABLE}&{MEITUAN_ENABLE}
+http-response ^https?:\/\/i\.waimai\.meituan\.com script-path=https://ws.wenn.in/main/Scripts/Meituan.js, requires-body=true, timeout=10, tag=美团外卖净化, enable={SHOPPING_ENABLE}&{MEITUAN_ENABLE}
+http-response ^https?:\/\/papi\.meituan\.com script-path=https://ws.wenn.in/main/Scripts/Meituan.js, requires-body=true, timeout=10, tag=美团推荐净化, enable={SHOPPING_ENABLE}&{MEITUAN_ENABLE}
+http-response ^https?:\/\/(amdc\.m\.(taobao|goofish|youku|tmall)\.com|acs\.m\.goofish\.com)\/amdc\/mobileDispatch script-path=https://ws.wenn.in/main/Mirror/amdc.js, requires-body=true, timeout=10, tag=AMDC净化
+http-response ^https:\/\/(cn-acs\.m|e2e-mtop)\.cainiao\.com\/gw\/mtop\.cainiao\.app\.e2e\.engine\.page\.fetch script-path=https://ws.wenn.in/main/Scripts/Cainiao.js, requires-body=true, timeout=10, tag=首页净化, enable={SHOPPING_ENABLE}&{CAINIAO_ENABLE}
+http-response ^https:\/\/e2e-mtop\.cainiao\.com\/gw\/mtop\.cainiao\.app\.e2e\.engine\.page\.fetch\.cn script-path=https://ws.wenn.in/main/Scripts/Cainiao.js, requires-body=true, timeout=10, tag=我的页净化, enable={SHOPPING_ENABLE}&{CAINIAO_ENABLE}
+http-response ^https:\/\/longquan-mtop\.cainiao\.com\/gw\/mtop\.com\.cainiao\.longquan\.place\.getpageresourcecontent\.cn script-path=https://ws.wenn.in/main/Scripts/Cainiao.js, requires-body=true, timeout=10, tag=发现页净化, enable={SHOPPING_ENABLE}&{CAINIAO_ENABLE}
+http-response ^https:\/\/netflow-mtop\.cainiao\.com\/gw\/mtop\.cainiao\.guoguo\.nbnetflow\.ads script-path=https://ws.wenn.in/main/Scripts/Cainiao.js, requires-body=true, timeout=10, tag=开屏净化, enable={SHOPPING_ENABLE}&{CAINIAO_ENABLE}
+http-response ^https?:\/\/adservice\.wps\.cn\/ script-path=https://ws.wenn.in/main/Scripts/WPS.js, requires-body=true, timeout=10, tag=WPS_广告拦截, enable={SHOPPING_ENABLE}&{WPS_ENABLE}
+http-response ^https?:\/\/docer\.wps\.cn\/ script-path=https://ws.wenn.in/main/Scripts/WPS.js, requires-body=true, timeout=10, tag=WPS_文档推荐净化, enable={SHOPPING_ENABLE}&{WPS_ENABLE}
+http-response ^https?:\/\/(tiebac|tieba|tiebaapi)\.baidu\.com script-path=https://ws.wenn.in/main/Scripts/Tieba.js, requires-body=true, timeout=10, tag=贴吧_JSON 净化，enable={SHOPPING_ENABLE}&{ENABLE_TIEBA}
+http-response ^https?:\/\/(tiebac|tieba|tiebaapi)\.baidu\.com.*\?cmd script-path=https://ws.wenn.in/main/Scripts/Tieba.js, binary-body-mode=true, requires-body=true, timeout=10, tag=贴吧_Proto 净化，enable={SHOPPING_ENABLE}&{ENABLE_TIEBA}
+
+[MitM]
+hostname = %APPEND% acs.m.goofish.com, adservice.wps.cn, amdc.m.taobao.com, api.meituan.com, check.dianping.com, cn-acs.m.cainiao.com, docer.wps.cn, e2e-mtop.cainiao.com, g-acs.m.goofish.com, i.waimai.meituan.com, longquan-mtop.cainiao.com, mapi.dianping.com, nbcps-mtop.cainiao.com, netflow-mtop.cainiao.com, papi.meituan.com, tieba.baidu.com, tiebaapi.baidu.com, tiebac.baidu.com
