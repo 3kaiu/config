@@ -4,8 +4,7 @@
  * 审计修复 (2026-08): 防止"写了插件/脚本但没接线"的死代码回归:
  *   1. 每个 Plugin/*.plugin 必须被 template/loon.tpl 引用 (反向: 引用的插件必须存在)
  *   2. 每个 Scripts/*.js (不含 lib/) 必须被任一模板或插件引用 (反向: 引用的脚本必须存在)
- *   3. 每个 QX/apple/*.conf 必须被 template/quantumultx.tpl 引用 (反向: 引用的模块必须存在)
- *   4. loon.tpl 引用的 Kelee/* 与 Mirror/* 插件文件必须存在
+ *   3. loon.tpl 引用的 Kelee/* 与 Mirror/* 插件文件必须存在
  *
  * 用法: node test/wiring-check.js   (退出码 0 = 通过)
  */
@@ -26,7 +25,6 @@ function read(p) {
 }
 
 const loonTpl = read("template/loon.tpl");
-const qxTpl = read("template/quantumultx.tpl");
 
 const pluginSrcs = fs
   .readdirSync(path.join(root, "Plugin"))
@@ -50,7 +48,7 @@ for (const m of loonTpl.matchAll(/main\/(Kelee|Mirror\/[a-z0-9-]+)\/([\w.-]+\.pl
 
 // ── 2. 脚本双向接线检查 ──
 console.log("── Scripts ↔ 引用 ──");
-const allRefs = [loonTpl, qxTpl]
+const allRefs = [loonTpl]
   .concat(pluginSrcs.map((f) => read(path.join("Plugin", f))))
   .join("\n");
 const scriptFiles = fs
@@ -66,20 +64,7 @@ for (const m of allRefs.matchAll(/Scripts\/([\w.-]+\.js)/g)) {
   log(fs.existsSync(path.join(root, "Scripts", name)), `引用 Scripts/${name} 存在`);
 }
 
-// ── 3. QX Apple 模块双向接线检查 ──
-console.log("── QX/apple ↔ quantumultx.tpl ──");
-const qxAppleFiles = fs
-  .readdirSync(path.join(root, "QX/apple"))
-  .filter((f) => f.endsWith(".conf"))
-  .sort();
-for (const f of qxAppleFiles) {
-  log(qxTpl.includes(`QX/apple/${f}`), `QX/apple/${f} 被 quantumultx.tpl 引用`);
-}
-for (const m of qxTpl.matchAll(/main\/QX\/apple\/([\w.-]+\.conf)/g)) {
-  const name = m[1];
-  log(fs.existsSync(path.join(root, "QX/apple", name)), `quantumultx.tpl 引用 QX/apple/${name} 存在`);
-}
-
+// ── 3. 接线完整性总结 ──
 console.log("");
 if (fail) {
   console.log(`❌ 接线检查失败: ${fail} 处问题 — 死代码或失效引用, 禁止合并`);

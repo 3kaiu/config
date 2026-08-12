@@ -116,22 +116,11 @@ jobs:
             "scripts/zheye.min.js" "blackmatrix7 gist / zheye.min.js"
 
           # ═══════════════ 解析器脚本 (订阅解析时执行, 可见全部节点凭据) ═══════════════
-          mirror "https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/resource-parser.js" \
-            "rules/qx-resource-parser.js" "KOP-XIAO / resource-parser.js"
-          mirror "https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/IP_API.js" \
-            "rules/qx-ip-api.js" "KOP-XIAO / IP_API.js"
           mirror "https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store-parser.loon.min.js" \
             "rules/loon-sub-store-parser.js" "Sub-Store / sub-store-parser.loon.min.js"
-          for s in "geo_location.js:qx-geo-location.js" "streaming-ui-check.js:qx-streaming-ui-check.js" "traffic-check.js:qx-traffic-check.js"; do
-            src="${s%%:*}"; dst="${s##*:}"
-            mirror "https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/$src" \
-              "rules/$dst" "KOP-XIAO / $src"
-          done
 
-          # ═══════════════ 规则列表 (blackmatrix7, 双端格式) ═══════════════
+          # ═══════════════ 规则列表 (blackmatrix7, Loon 格式) ═══════════════
           for n in Advertising Privacy Hijacking Epic China Global; do
-            mirror "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/QuantumultX/$n/$n.list" \
-              "rules/qx-$n.list" "blackmatrix7 QX / $n.list"
             mirror "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/$n/$n.list" \
               "rules/loon-$n.list" "blackmatrix7 Loon / $n.list"
           done
@@ -140,22 +129,12 @@ jobs:
           # 远端顺序已调整为 China → Global → Advertising → ... (国际流量提前终止),
           # 前提是 Global 列表不含广告/隐私/国内域 — 上游更新若引入污染立即拦截 (fail)
           GLOBAL_BAD='(doubleclick|googleadservices|googletagmanager|googlesyndication|google-analytics|app-measurement|crashlytics|appsflyer|mixpanel|segment\.io|amplitude|branch\.io|adjust\.com|kochava|sentry\.io|qq\.com|taobao|tmall|baidu\.com|163\.com|aliyun|jd\.com|bilibili|meituan|douyin)'
-          if grep -E "^(DOMAIN-SUFFIX|DOMAIN-KEYWORD|DOMAIN),.*${GLOBAL_BAD}" Mirror/rules/loon-Global.list Mirror/rules/qx-Global.list; then
+          if grep -E "^(DOMAIN-SUFFIX|DOMAIN-KEYWORD|DOMAIN),.*${GLOBAL_BAD}" Mirror/rules/loon-Global.list; then
             echo "❌ Global 列表检测到广告/隐私/国内域污染 (见上) — 已拦截, 需复检远端顺序前提"
             FAIL=$((FAIL+1))
           else
             echo "✅ Global 列表纯净度检查通过: 无广告/隐私/国内域"
           fi
-
-          # ═══════════════ QX rewrite 模块 ═══════════════
-          mirror "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/QuantumultX/AllInOne/AllInOne.conf" \
-            "rules/qx-AllInOne.conf" "blackmatrix7 / AllInOne.conf"
-          for n in FakeiOSAds KeepAds WeiboAds WeChat NeteaseAds AmapAds TieBaAds GoofishAds SmzdmAds BiliBiliComicsAds QiShuiMusicAds RedditAds CainiaoAds TaoPiaoPiaoAds CaiYunAds Applet; do
-            mirror "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/$n.conf" \
-              "rules/qx-ddgksf-$n.conf" "ddgksf2013 / $n.conf"
-          done
-          mirror "https://raw.githubusercontent.com/app2smile/rules/master/module/bilibili-qx.conf" \
-            "rules/qx-bilibili.conf" "app2smile / bilibili-qx.conf"
 
           # ═══════════════ Loon rewrite 插件 ═══════════════
           # 注: 插件内 script-path 传递性依赖已收敛 (2026-08), 见下方补丁;
@@ -169,7 +148,7 @@ jobs:
           # 覆盖 rewrite 行 (转义形式 m\.meitun\.com) 与 MITM hostname 行 (裸形式);
           # 每日镜像后强制修正, 若上游已修复则为 no-op (自愈)
           sed -i 's/m\\.meitun\\.com/m\\.meituan\\.com/g; s/m\.meitun\.com/m\.meituan\.com/g' \
-            Mirror/rules/loon-AllInOne.plugin Mirror/rules/qx-AllInOne.conf
+            Mirror/rules/loon-AllInOne.plugin
 
           # ── 本地补丁 (2026-08 审计): script-path 传递依赖收敛到自建 CDN ──
           # AllInOne (22 条) / AdvertisingScript (26 条) 内部 script-path 原直连
@@ -181,10 +160,10 @@ jobs:
           # 上游 blackmatrix7 Loon 版 Advertising 列表仅 278 KEYWORD + 486 IP-CIDR + 14 URL-REGEX,
           # 不含国内广告 SDK (beizi/jpush统计/mmstat/ugdtimg/1rtb/66mobi/cloooud/hubcloud 等);
           # Loon 主配置 [Rule] (template/loon.tpl) 已硬拦截 (GEOIP 之前, 本地规则优先),
-          # 此处同步追加列表兜底 (双端格式不同: Loon DOMAIN-*, QX HOST-*)。
+          # 此处同步追加列表兜底。
           # 幂等: 先删除旧追加块再追加; 推送保活: 仅统计子域, 保留 config.jpush.cn/user.jpush.cn (极光推送) 与 api.getui.com (个推推送)
           sed -i '/# === BEGIN 3kaiu 国内广告 SDK 追加 ===/,/# === END 3kaiu 国内广告 SDK 追加 ===/d' \
-            Mirror/rules/loon-Advertising.list Mirror/rules/qx-Advertising.list
+            Mirror/rules/loon-Advertising.list
           cat >> Mirror/rules/loon-Advertising.list <<'EOF'
           # === BEGIN 3kaiu 国内广告 SDK 追加 ===
           DOMAIN-SUFFIX,beizi.biz
@@ -206,29 +185,6 @@ jobs:
           DOMAIN,fockrt.yuewen.com
           DOMAIN,connect.yuewen.com
           DOMAIN,upushv6.qidian.com
-          # === END 3kaiu 国内广告 SDK 追加 ===
-          EOF
-          cat >> Mirror/rules/qx-Advertising.list <<'EOF'
-          # === BEGIN 3kaiu 国内广告 SDK 追加 ===
-          HOST-SUFFIX,beizi.biz,Advertising
-          HOST-SUFFIX,stats.jpush.cn,Advertising
-          HOST-SUFFIX,gd-stats.jpush.cn,Advertising
-          HOST-SUFFIX,mmstat.com,Advertising
-          HOST-SUFFIX,ugdtimg.com,Advertising
-          HOST-SUFFIX,1rtb.net,Advertising
-          HOST-SUFFIX,66mobi.com,Advertising
-          HOST-SUFFIX,cloooud.com,Advertising
-          HOST-SUFFIX,hubcloud.com.cn,Advertising
-          HOST,sdk-open-phone.getui.com,Advertising
-          HOST,snssdk-eu.ninebot.com,Advertising
-          HOST,snssdk-us.ninebot.com,Advertising
-          HOST,toblog.ctobsnssdk.com,Advertising
-          HOST,sentry-monitor-new.zdmimg.com,Advertising
-          HOST,path.book.qq.com,Advertising
-          HOST,ataru.qidian.com,Advertising
-          HOST,fockrt.yuewen.com,Advertising
-          HOST,connect.yuewen.com,Advertising
-          HOST,upushv6.qidian.com,Advertising
           # === END 3kaiu 国内广告 SDK 追加 ===
           EOF
 

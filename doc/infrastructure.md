@@ -24,12 +24,12 @@
 | CDN 实现 | TODO: 填写（Cloudflare Pages/Workers/Nginx 回源等） |
 | TLS 证书 | TODO: 自动续期/到期日 |
 
-> ⚠️ 域名过期被抢注 = 全量 script-path 可被第三方投毒（15 个插件 + 3 份 Profile + 5 个 QX 模块同时受影响）。
+> ⚠️ 域名过期被抢注 = 全量 script-path 可被第三方投毒（15 个插件 + 3 份 Profile 同时受影响）。
 > 建议：开启自动续费 + 注册商到期邮件 + 日历提醒（到期前 30 天）。
 
 ## 3. 完整性保障
 
-- `mirror-scripts.yml`：每日 03:00 从上游拉取 **61 个资源**（脚本 9 + 解析器 6 + 双端规则列表 12 + QX rewrite 模块 18 + Loon rewrite 插件 2 + NSRingo bundle 8 + NSRingo Loon 插件 6），经三重门禁（`*.js` 语法 / 体积≥200B / 非 HTML）后写入 `Mirror/`，**走 PR 人工审核**合并（不再直推 main）。Profile 全部远程引用已收敛到 `ws.wenn.in/main/Mirror/`。
+- `mirror-scripts.yml`：每日 03:00 从上游拉取 **61 个资源**（脚本 9 + 解析器 1 + Loon 规则列表 6 + Loon rewrite 插件 2 + NSRingo bundle 8 + NSRingo Loon 插件 6），经三重门禁（`*.js` 语法 / 体积≥200B / 非 HTML）后写入 `Mirror/`，**走 PR 人工审核**合并（不再直推 main）。Profile 全部远程引用已收敛到 `ws.wenn.in/main/Mirror/`。
 - `Mirror/MANIFEST.json`：全部镜像文件的 source_url + sha256 清单，上游变更在 PR diff 中高亮。
 - `cdn-verify.yml`：每日 02:34 拉取 CDN 全量分发文件与仓库做 sha256 比对，不一致开 Issue（标签 `cdn-verify`），可选 Bark 告警（Secret `BARK_PUSH`）。
 - `upstream-health.yml`：上游源可达性探活（状态码级）。
@@ -41,11 +41,11 @@
    - ~~blackmatrix7 Loon rewrite 插件的传递性引用~~：**已消除 (2026-08)** — `AllInOne.plugin` (22 条) 与 `AdvertisingScript.plugin` (26 条) 的 `script-path`（startup.js / zheye.min.js）已镜像至 `Mirror/scripts/` 并由 `mirror-scripts.yml` 补丁重写指向自建 CDN。已安装插件需重装（插件 URL 替换前缀）才生效。
 2. **kelee.one 7 个 `.lpx`**：Cloudflare Turnstile 阻挡自动抓取，无法镜像/校验，Loon 端直接从该站加载。介意者在 Loon 内停用对应插件。
 3. **GeoIP/ASN 库**（Loyalsoldier / P3TERX）：客户端直连上游，被篡改只会导致路由误判（非代码执行），风险低，暂不镜像。
-4. **NSRingo 版本升级流程**：Loon 插件与 QX bundle 均已钉死版本（WeatherKit v3.1.0 / Maps·GeoServices v4.6.1 / News v3.2.1 / Siri v4.2.7 / TestFlight v3.4.0）。上游发新版时：改 `mirror-scripts.yml` 中的版本号 + `template/loon.tpl` 引用，跑一次 mirror 工作流。`upstream-health.yml` 会探测已钉死 URL 的可用性，但**不会**提示有新版本（受管陈旧）。
+4. **NSRingo 版本升级流程**：Loon 插件与 bundle 均已钉死版本（WeatherKit v3.1.0 / Maps·GeoServices v4.6.1 / News v3.2.1 / Siri v4.2.7 / TestFlight v3.4.0）。上游发新版时：改 `mirror-scripts.yml` 中的版本号 + `template/loon.tpl` 引用，跑一次 mirror 工作流。`upstream-health.yml` 会探测已钉死 URL 的可用性，但**不会**提示有新版本（受管陈旧）。
 
 ## 4. DNS 隐私（泄漏面精确说明）
 
-双端（Loon/QX）的解析语义一致：**命中域名类规则（DOMAIN-SUFFIX 等）的代理流量不做本地 DNS 查询**——域名直接发给代理服务器远端解析，解析器侧无记录。本地解析（走国内 DoH：阿里/腾讯/字节，ISP 不可见但解析器侧有记录）只发生在三处：
+解析语义：**命中域名类规则（DOMAIN-SUFFIX 等）的代理流量不做本地 DNS 查询**——域名直接发给代理服务器远端解析，解析器侧无记录。本地解析（走国内 DoH：阿里/腾讯/字节，ISP 不可见但解析器侧有记录）只发生在三处：
 
 | 泄漏面 | 触发条件 | 现状缓解 |
 |--------|----------|----------|
@@ -55,13 +55,13 @@
 
 **默认姿态**（当前）：便利性优先——GEOIP 兜底 + Final 默认 DIRECT，保证未收录的国内小站直连可用。
 **零泄漏姿态**（按需）：删除 `geoip, cn, direct` 规则 + Final 组切到 Proxy——所有长尾域名走代理远端解析，代价是未收录的国内站点绕路代理（变慢或不可用）。
-**本地解析加密**：本地解析全部走 DoH/DoQ（`prefer-doh3`），ISP 与中间人不可见查询内容；`circumvent-ipv4-answer`（QX）防污染应答；`hijack-dns`（Loon）防 App 明文 DNS 绕过。
+**本地解析加密**：本地解析全部走 DoH/DoQ（`prefer-doh3`），ISP 与中间人不可见查询内容；`hijack-dns` 防 App 明文 DNS 绕过。
 **解析器选择说明**：未采用 1.1.1.1/Quad9 等隐私解析器作为默认——大陆网络下不可达/高延迟，会导致国内直连流量解析失败；国内 DoH 的记录风险仅覆盖上述三处长尾，代理流量不在其列。
 
 ## 5. 应急切换（ws.wenn.in 不可用/被劫持）
 
 **被劫持（内容被篡改，cdn-verify 告警）**：
-1. 立即在 Loon/QX 中停用本配置或断网，防止恶意脚本继续在 MitM 上下文执行；
+1. 立即在 Loon 中停用本配置或断网，防止恶意脚本继续在 MitM 上下文执行；
 2. 改 CDN 回源/DNS 恢复内容，或启用备用域名；
 3. 轮换所有"已对 MitM 暴露"的凭据：京东 pt_key、淘系 token、百度 BDUSS、网易 MUSIC_U、起点 cmfuToken 等；
 4. 排查 CDN 配置与域名账户安全，复盘后再恢复。
@@ -72,8 +72,8 @@
    ```sh
    sed -i '' 's#https://ws.wenn.in/main/#https://3kaiu.github.io/config/#g' 导出的配置.conf
    ```
-   QX 同理；或直接用 Pages 地址重新导入 Profile：
-   `https://3kaiu.github.io/config/Profile/Loon.lcf`（QX.conf / Surge.conf 同理）。
+   或直接用 Pages 地址重新导入 Profile：
+   `https://3kaiu.github.io/config/Profile/Loon.lcf`。
 3. 注意：Loon 已安装插件内嵌的 script-path 不会自动切换，需重装插件（插件 URL 同样替换前缀即可）。
 
 ## 6. 变更 checklist（动 CDN/域名前过一遍）

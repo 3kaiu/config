@@ -18,12 +18,6 @@ module.exports = defineSurgioConfig({
       // Loon.lcf 输出到 Profile/ 目录
       destDir: 'Profile',
     },
-    {
-      name: 'QX.conf',
-      template: 'quantumultx',
-      provider: 'tokyo',
-      destDir: 'Profile',
-    },
   ],
 
   // 节点测试配置

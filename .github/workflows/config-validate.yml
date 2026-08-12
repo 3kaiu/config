@@ -44,7 +44,7 @@ jobs:
       - name: Check script-path URLs (lightweight)
         run: |
           echo "## Script-Path URL Check" >> $GITHUB_STEP_SUMMARY
-          grep -rh 'script-path=' Plugin/*.plugin Kelee/*.plugin Profile/QX.conf 2>/dev/null | \
+          grep -rh 'script-path=' Plugin/*.plugin Kelee/*.plugin 2>/dev/null | \
             grep -oP 'https?://[^"'\'',]+' | sort -u > /tmp/urls.txt
           FAIL=0
           while IFS= read -r url; do
@@ -61,25 +61,15 @@ jobs:
           echo "Failures: $FAIL" >> $GITHUB_STEP_SUMMARY
           exit $FAIL
 
-      # ── 3. 双端配置交叉核对 ──
-      - name: Cross-check Loon vs QX rule coverage
+      # ── 3. Loon 规则覆盖检查 ──
+      - name: Check Loon rule coverage
         run: |
-          echo "## Loon vs QX Cross-Check" >> $GITHUB_STEP_SUMMARY
+          echo "## Loon Rule Coverage" >> $GITHUB_STEP_SUMMARY
           MISSING=0
-          # 检查微信域名是否在 QX 中直连
-          for domain in wechat.com weixin.qq.com wx.qq.com qpic.cn; do
-            in_qx=$(grep -c "host-suffix, $domain, direct" Profile/QX.conf)
-            if [ "$in_qx" -eq 0 ]; then
-              echo "⚠️ QX 缺少 $domain DIRECT 规则" >> $GITHUB_STEP_SUMMARY
-              MISSING=$((MISSING+1))
-            fi
-          done
-          # 检查策略组路由是否双端一致 (Global.list 未完整覆盖的域名)
+          # 检查策略组路由是否完整 (Global.list 未完整覆盖的域名)
           # v7.8: 策略组拆分后, twittercdn/tdesktop 走 Social, steamcdn 走 Gaming, onedrive/wikimedia 走 Developer
           for domain in twittercdn.com tdesktop.com steamcdn-a.akamaihd.net onedrive.live.com wikimediafoundation.org; do
-            in_qx=$(grep -cE "host-suffix, $domain, (Proxy|Streaming|Social|Developer|AI|Gaming)" Profile/QX.conf)
             in_loon=$(grep -cE "DOMAIN-SUFFIX, $domain, (Proxy|Streaming|Social|Developer|AI|Gaming)" Profile/Loon.lcf)
-            if [ "$in_qx" -eq 0 ]; then echo "⚠️ QX 缺少 $domain 代理规则"; MISSING=$((MISSING+1)); fi
             if [ "$in_loon" -eq 0 ]; then echo "⚠️ Loon 缺少 $domain 代理规则"; MISSING=$((MISSING+1)); fi
           done
           # 检查 Proxy 组正则一致性
@@ -101,54 +91,25 @@ jobs:
           echo "## Bank MitM Conflict Check" >> $GITHUB_STEP_SUMMARY
           # 提取银行负向排除域名列表
           loon_banks=$(grep -oP '(?<=, )-\*\.\w+\.(com|cn)' Profile/Loon.lcf | grep -v 'apple\|icloud' | sed 's/-\*\.//' | sort)
-          qx_banks=$(grep -oP '(?<=, )-\*\.\w+\.(com|cn)' Profile/QX.conf | grep -v 'apple\|icloud' | sed 's/-\*\.//' | sort)
           # 对比配置数量
           loon_count=$(echo "$loon_banks" | wc -l)
-          qx_count=$(echo "$qx_banks" | wc -l)
           echo "| Config | Bank excludes |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|---------------|" >> $GITHUB_STEP_SUMMARY
           echo "| Loon | $loon_count |" >> $GITHUB_STEP_SUMMARY
-          echo "| QX | $qx_count |" >> $GITHUB_STEP_SUMMARY
-          # 找差异
-          diff <(echo "$loon_banks") <(echo "$qx_banks") && echo "✅ 银行域名排除双端一致" >> $GITHUB_STEP_SUMMARY || echo "⚠️ 银行域名排除存在差异" >> $GITHUB_STEP_SUMMARY
+          echo "✅ 银行域名排除清单已就绪 ($loon_count 个)" >> $GITHUB_STEP_SUMMARY
 
-      # ── 5. MitM hostname 双端 diff 检查 ──
-      - name: MitM hostname cross-check
+      # ── 5. MitM hostname 正包含统计 ──
+      - name: MitM hostname inventory
         run: |
-          echo "## MitM Hostname Cross-Check" >> $GITHUB_STEP_SUMMARY
+          echo "## MitM Hostname Inventory" >> $GITHUB_STEP_SUMMARY
           # 提取 Loon.lcf 的 hostname 行中所有正向域名（非 - 开头）
           loon_hostname_line=$(grep '^hostname = ' Profile/Loon.lcf)
-          qx_hostname_line=$(grep '^hostname = ' Profile/QX.conf)
           # 提取正向域名（逗号分隔，去除前导空格，过滤 - 开头的负向排除）
           echo "$loon_hostname_line" | sed 's/^hostname = //' | tr ',' '\n' | sed 's/^ //' | grep -v '^-' | sort -u > /tmp/loon_hostnames.txt
-          echo "$qx_hostname_line" | sed 's/^hostname = //' | tr ',' '\n' | sed 's/^ //' | grep -v '^-' | sort -u > /tmp/qx_hostnames.txt
           loon_count=$(wc -l < /tmp/loon_hostnames.txt)
-          qx_count=$(wc -l < /tmp/qx_hostnames.txt)
           echo "| Config | Positive hostnames |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|-------------------|" >> $GITHUB_STEP_SUMMARY
           echo "| Loon | $loon_count |" >> $GITHUB_STEP_SUMMARY
-          echo "| QX | $qx_count |" >> $GITHUB_STEP_SUMMARY
-          # Loon 有但 QX 没有的域名
-          only_loon=$(comm -23 /tmp/loon_hostnames.txt /tmp/qx_hostnames.txt)
-          # QX 有但 Loon 没有的域名
-          only_qx=$(comm -13 /tmp/loon_hostnames.txt /tmp/qx_hostnames.txt)
-          if [ -n "$only_loon" ]; then
-            echo "⚠️ **Loon 有但 QX 没有的 MitM hostname**:" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            echo "$only_loon" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-          fi
-          if [ -n "$only_qx" ]; then
-            echo "⚠️ **QX 有但 Loon 没有的 MitM hostname**:" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            echo "$only_qx" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-          fi
-          if [ -z "$only_loon" ] && [ -z "$only_qx" ]; then
-            echo "✅ MitM hostname 双端完全一致" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "⚠️ MitM hostname 双端存在差异（warning，不阻断）" >> $GITHUB_STEP_SUMMARY
-          fi
           echo "" >> $GITHUB_STEP_SUMMARY
 
       # ── 5b. MitM 孤儿域校验 (最小范围原则) ──
@@ -172,109 +133,34 @@ jobs:
           node tools/tpl-sync-check.mjs 2>&1 | tee -a $GITHUB_STEP_SUMMARY
           exit ${PIPESTATUS[0]}
 
-      # ── 6. HTTPDNS Rewrite 对齐检查 ──
-      - name: HTTPDNS rewrite alignment check
+      # ── 6. HTTPDNS Rewrite 检查 ──
+      - name: HTTPDNS rewrite check
         run: |
-          echo "## HTTPDNS Rewrite Alignment" >> $GITHUB_STEP_SUMMARY
+          echo "## HTTPDNS Rewrite" >> $GITHUB_STEP_SUMMARY
           # 统计 Loon [Rewrite] 段中以 /d/ 结尾的 HTTPDNS reject 规则数 (旧语法, 字面匹配转义形式)
           loon_httpdns=$(grep -Fc '\/d reject-200' Profile/Loon.lcf || echo 0)
-          # 统计 QX [rewrite_local] 段中 url reject-200 且含 /d 的 HTTPDNS 规则数
-          qx_httpdns=$(grep '/d url reject-200' Profile/QX.conf | wc -l || echo 0)
           echo "| Config | HTTPDNS rewrite count |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|----------------------|" >> $GITHUB_STEP_SUMMARY
           echo "| Loon | $loon_httpdns |" >> $GITHUB_STEP_SUMMARY
-          echo "| QX | $qx_httpdns |" >> $GITHUB_STEP_SUMMARY
-          if [ "$loon_httpdns" -ne "$qx_httpdns" ]; then
-            echo "⚠️ HTTPDNS rewrite 数量不一致: Loon=$loon_httpdns, QX=$qx_httpdns（warning，不阻断）" >> $GITHUB_STEP_SUMMARY
+          if [ "$loon_httpdns" -lt 5 ]; then
+            echo "⚠️ Loon HTTPDNS rewrite 数量异常: $loon_httpdns 条" >> $GITHUB_STEP_SUMMARY
           else
-            echo "✅ HTTPDNS rewrite 数量一致: $loon_httpdns 条" >> $GITHUB_STEP_SUMMARY
+            echo "✅ Loon HTTPDNS rewrite: $loon_httpdns 条" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
 
-      # ── 7. Snippet 双端域名内容级 diff 检查 ──
-      - name: Snippet alignment check (content-level diff)
-        run: |
-          echo "## Snippet Alignment Check (Content-Level Diff)" >> $GITHUB_STEP_SUMMARY
-          FAIL=0
-          for pair in streaming social ai-services developer gaming bank-ad-reject; do
-            tpl_file="template/snippet/${pair}.tpl"
-            qx_file="template/snippet/${pair}.qx"
-            if [ ! -f "$tpl_file" ] || [ ! -f "$qx_file" ]; then
-              echo "⚠️ ${pair}: 缺少 .tpl 或 .qx 文件" >> $GITHUB_STEP_SUMMARY
-              FAIL=$((FAIL+1))
-              continue
-            fi
-            # 提取 Loon 格式的域名 (DOMAIN/DOMAIN-SUFFIX/DOMAIN-KEYWORD 后的域名，去除策略名)
-            # 格式: DOMAIN-SUFFIX, youtube.com, Streaming → 提取 youtube.com
-            grep -oE '^(DOMAIN-SUFFIX|DOMAIN-KEYWORD|DOMAIN), [^,]+,' "$tpl_file" \
-              | sed -E 's/^(DOMAIN-SUFFIX|DOMAIN-KEYWORD|DOMAIN), ([^,]+),/\2/' | sort -u > /tmp/tpl_${pair}_domains.txt
-            # 对于 DEST-PORT 也提取
-            grep -oE '^DEST-PORT, [0-9]+,' "$tpl_file" \
-              | sed -E 's/^DEST-PORT, ([0-9]+),/\1/' | sort -u >> /tmp/tpl_${pair}_domains.txt
-            sort -u -o /tmp/tpl_${pair}_domains.txt /tmp/tpl_${pair}_domains.txt
-
-            # 提取 QX 格式的域名 (host/host-suffix/host-keyword 后的域名，去除策略名)
-            # 格式: host-suffix, youtube.com, Streaming → 提取 youtube.com
-            grep -oE '^(host-suffix|host-keyword|host), [^,]+,' "$qx_file" \
-              | sed -E 's/^(host-suffix|host-keyword|host), ([^,]+),/\2/' | sort -u > /tmp/qx_${pair}_domains.txt
-            # 对于 dest-port 也提取
-            grep -oE '^dest-port, [0-9]+,' "$qx_file" \
-              | sed -E 's/^dest-port, ([0-9]+),/\1/' | sort -u >> /tmp/qx_${pair}_domains.txt
-            sort -u -o /tmp/qx_${pair}_domains.txt /tmp/qx_${pair}_domains.txt
-
-            tpl_count=$(wc -l < /tmp/tpl_${pair}_domains.txt)
-            qx_count=$(wc -l < /tmp/qx_${pair}_domains.txt)
-
-            # 逐域名 diff
-            only_tpl=$(comm -23 /tmp/tpl_${pair}_domains.txt /tmp/qx_${pair}_domains.txt)
-            only_qx=$(comm -13 /tmp/tpl_${pair}_domains.txt /tmp/qx_${pair}_domains.txt)
-
-            if [ -z "$only_tpl" ] && [ -z "$only_qx" ]; then
-              echo "| ${pair} | ${tpl_count} domains | ✅ 一致 |" >> $GITHUB_STEP_SUMMARY
-            else
-              echo "| ${pair} | Loon: ${tpl_count} / QX: ${qx_count} | ❌ 有差异 |" >> $GITHUB_STEP_SUMMARY
-              echo "❌ **${pair} 域名内容不一致**:" >> $GITHUB_STEP_SUMMARY
-              if [ -n "$only_tpl" ]; then
-                echo "- 仅 Loon 有:" >> $GITHUB_STEP_SUMMARY
-                echo '```' >> $GITHUB_STEP_SUMMARY
-                echo "$only_tpl" >> $GITHUB_STEP_SUMMARY
-                echo '```' >> $GITHUB_STEP_SUMMARY
-              fi
-              if [ -n "$only_qx" ]; then
-                echo "- 仅 QX 有:" >> $GITHUB_STEP_SUMMARY
-                echo '```' >> $GITHUB_STEP_SUMMARY
-                echo "$only_qx" >> $GITHUB_STEP_SUMMARY
-                echo '```' >> $GITHUB_STEP_SUMMARY
-              fi
-              FAIL=$((FAIL+1))
-            fi
-          done
-          if [ "$FAIL" -eq 0 ]; then
-            echo "✅ 所有 snippet 双端域名内容完全一致" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "❌ $FAIL 个 snippet 双端域名内容不一致" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-          exit $FAIL
-
-      # ── 8. 主配置版本号一致性 ──
+      # ── 7. 主配置版本号一致性 ──
       - name: Check version consistency
         run: |
           echo "## Version Consistency" >> $GITHUB_STEP_SUMMARY
           loon_ver=$(grep -oP 'v\d+\.\d+' Profile/Loon.lcf | head -1)
-          qx_ver=$(grep -oP 'v\d+\.\d+' Profile/QX.conf | head -1)
           plugin_vers=$(grep -rh '#!version=' Plugin/*.plugin Kelee/*.plugin | sed 's/#!version=//' | sort -u | tr '\n' ' ')
           echo "| Config | Version |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|---------|" >> $GITHUB_STEP_SUMMARY
           echo "| Loon.lcf | $loon_ver |" >> $GITHUB_STEP_SUMMARY
-          echo "| QX.conf | $qx_ver |" >> $GITHUB_STEP_SUMMARY
-          if [ "$loon_ver" != "$qx_ver" ]; then
-            echo "❌ 版本不一致: Loon=$loon_ver, QX=$qx_ver" >> $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
           echo "✅ 版本一致: $loon_ver" >> $GITHUB_STEP_SUMMARY
 
-      # ── 9. Qidian 内嵌引擎完整性校验 ──
+      # ── 8. Qidian 内嵌引擎完整性校验 ──
       - name: Qidian engine integrity check
         run: |
           echo "## Qidian Engine Integrity" >> $GITHUB_STEP_SUMMARY
@@ -304,44 +190,7 @@ jobs:
           ' 2>&1 | tee -a $GITHUB_STEP_SUMMARY
           exit ${PIPESTATUS[0]}
 
-      # ── 10. QX 规则顺序防遮蔽检查 ──
-      # QX 按书写顺序匹配: Google 通配 (googleapis.com/google.com → Streaming)
-      # 若写在 AI 分流或 Google 分析 reject 之前, 会截胡 Gemini API/NotebookLM 并使 reject 静默失效
-      - name: QX rule-order shadowing guard
-        run: |
-          echo "## QX Rule-Order Guard" >> $GITHUB_STEP_SUMMARY
-          # 注: firebaseinstallations 已按审计修复移出 reject, 此处以 crashlytics 为锚点
-          wild_line=$(grep -n '^host-suffix, googleapis\.com, Streaming' Profile/QX.conf | cut -d: -f1)
-          wild2_line=$(grep -n '^host-suffix, google\.com, Streaming' Profile/QX.conf | cut -d: -f1)
-          # AI anchors (被 googleapis.com 截胡)
-          ai_glm_line=$(grep -n '^host-suffix, generativelanguage\.googleapis\.com' Profile/QX.conf | cut -d: -f1)
-          # AI anchors (被 google.com 截胡)
-          ai_nb_line=$(grep -n '^host, notebooklm\.google\.com, AI' Profile/QX.conf | cut -d: -f1)
-          ai_labs_line=$(grep -n '^host, labs\.google\.com, AI' Profile/QX.conf | cut -d: -f1)
-          # Reject anchors (被两者任一截胡)
-          crash_line=$(grep -n '^host-suffix, crashlytics\.googleapis\.com, reject' Profile/QX.conf | cut -d: -f1)
-          ads_line=$(grep -n '^host-suffix, adservice\.google\.com, reject' Profile/QX.conf | cut -d: -f1)
-          if [ -z "$wild_line" ] || [ -z "$wild2_line" ] || [ -z "$ai_glm_line" ] || [ -z "$ai_nb_line" ] || [ -z "$ai_labs_line" ] || [ -z "$crash_line" ] || [ -z "$ads_line" ]; then
-            echo "❌ 缺少必要规则行 (wild=$wild_line/$wild2_line ai_glm=$ai_glm_line ai_nb=$ai_nb_line ai_labs=$ai_labs_line crash=$crash_line ads=$ads_line)" >> $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
-          FAIL=0
-          for wild_label in "googleapis.com:$wild_line" "google.com:$wild2_line"; do
-            wname=${wild_label%%:*}; wline=${wild_label##*:}
-            for anchor in "AI/GLM:$ai_glm_line" "AI/NotebookLM:$ai_nb_line" "AI/Labs:$ai_labs_line" "crashlytics:$crash_line" "adservice:$ads_line"; do
-              aname=${anchor%%:*}; aline=${anchor##*:}
-              if [ "$wline" -lt "$aline" ]; then
-                echo "❌ $wname 通配 (L$wline) 在 $aname (L$aline) 之前 — $aname 被遮蔽" >> $GITHUB_STEP_SUMMARY
-                FAIL=1
-              fi
-            done
-          done
-          if [ "$FAIL" -eq 0 ]; then
-            echo "✅ 顺序正确: Google 通配位于所有 AI/Reject 锚点之后" >> $GITHUB_STEP_SUMMARY
-          fi
-          exit $FAIL
-
-      # ── 11. Loon 规则顺序防遮蔽检查 (与 QX 同步) ──
+      # ── 9. Loon 规则顺序防遮蔽检查 ──
       - name: Loon rule-order shadowing guard
         run: |
           echo "## Loon Rule-Order Guard" >> $GITHUB_STEP_SUMMARY
@@ -371,7 +220,7 @@ jobs:
           fi
           exit $FAIL
 
-      # ── 12. 接线完整性检查 (审计修复 2026-08) ──
+      # ── 10. 接线完整性检查 (审计修复 2026-08) ──
       # 防"写了插件/脚本但没接线"的死代码回归:
       #   每个 Plugin/*.plugin 必须被 loon.tpl 引用; 每个 Scripts/*.js 必须被引用;
       #   反向引用 (模板/插件引用的文件必须存在) 一并校验

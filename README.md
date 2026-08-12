@@ -1,30 +1,28 @@
 # 3kaiu/config
 
-Loon & Quantumult X 代理配置 — 高质量多引擎去广告 · Apple 原生增强 · 全球社交/流媒体/AI 分流
+Loon 代理配置 — 高质量多引擎去广告 · Apple 原生增强 · 全球社交/流媒体/AI 分流
 
 ## 快速开始
 
 | 平台 | 导入链接 |
 |------|----------|
 | **Loon** | `https://ws.wenn.in/main/Profile/Loon.lcf` |
-| **Quantumult X** | `https://ws.wenn.in/main/Profile/QX.conf` |
 
 备用分发：`https://3kaiu.github.io/config/Profile/Loon.lcf`（GitHub Pages，需在 Settings → Pages 启用）
 
 ## 目录结构
 
 ```
-├── Profile/          # 生成的主配置（Loon.lcf + QX.conf）
-├── template/         # Surgio 模板 + 规则 snippet（双端同步）
+├── Profile/          # 生成的主配置（Loon.lcf）
+├── template/         # Surgio 模板 + 规则 snippet
 ├── Plugin/           # 39 个自维护 Loon 插件
 ├── Mirror/           # 上游资源镜像（门禁校验 + 哈希清单）
 │   ├── iringo/       #   NSRingo Loon 插件
 │   ├── nsringo/      #   NSRingo bundle.js
-│   └── rules/        #   规则列表 + rewrite 模块
+│   └── rules/        #   规则列表 + rewrite 插件
 ├── src/              # TypeScript 源文件
 ├── Scripts/          # 编译后 JS 脚本
 ├── Kelee/            # 第三方插件缓存
-├── QX/apple/         # QX Apple 增强模块
 ├── test/             # 测试用例（vm 沙箱模拟运行时）
 └── doc/              # 文档（分发台账、迁移评估等）
 ```

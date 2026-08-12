@@ -8,7 +8,7 @@
  *   - 其余全部行 (含 [Proxy Group]/[Rule]/[Rewrite]/[MitM]/[General] 静态行) 逐一比对
  *   - {% include "./snippet/x.tpl" %} 指令内联展开后比对
  *
- * 用法: node tools/tpl-sync-check.mjs [--qx]
+ * 用法: node tools/tpl-sync-check.mjs
  * 退出码: 0 = 无漂移; 1 = 存在漂移
  */
 import fs from "node:fs";
@@ -17,10 +17,9 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..");
-const QX = process.argv.includes("--qx");
 
-const TPL = path.join(ROOT, "template", QX ? "quantumultx.tpl" : "loon.tpl");
-const OUT = path.join(ROOT, "Profile", QX ? "QX.conf" : "Loon.lcf");
+const TPL = path.join(ROOT, "template", "loon.tpl");
+const OUT = path.join(ROOT, "Profile", "Loon.lcf");
 const SNIPPET_DIR = path.join(ROOT, "template", "snippet");
 
 function expandSnippet(line) {

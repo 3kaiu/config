@@ -44,14 +44,6 @@ fail += check(
 ) ? 0 : 1;
 
 fail += check(
-  "QX 硬拦截区先于 geoip",
-  "Profile/QX.conf",
-  "geoip, cn, direct",
-  /host(?:-suffix)?,\s*(?:beizi\.biz|adkwai\.com|api-access\.pangolin-sdk-toutiao\d*\.com|datagw-edge\.alipay\.com|sensors\.umetrip\.com\.cn|stats\.jpush\.cn|mobads\.baidu\.com|ugdtimg\.com)/g,
-  8
-) ? 0 : 1;
-
-fail += check(
   "Loon 穿山甲 REJECT 先于 SUFFIX DIRECT 白名单",
   "Profile/Loon.lcf",
   "DOMAIN-SUFFIX, pangolin-sdk-toutiao.com, DIRECT",

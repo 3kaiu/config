@@ -39,7 +39,7 @@ jobs:
           ')
           # 非 Mirror 文件仍用 git ls-files
           LOCAL_FILES=$(git ls-files 'Scripts/*.js' 'Plugin/*.plugin' 'Kelee/*.plugin' \
-                        'QX/apple/*.conf' 'Profile/Loon.lcf' 'Profile/QX.conf')
+                        'Profile/Loon.lcf')
 
           FILES=$(echo "$MIRROR_FILES"$'\n'"$LOCAL_FILES" | sort -u)
 

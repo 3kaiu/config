@@ -37,7 +37,7 @@ jobs:
       - name: Check for changes
         id: check
         run: |
-          if git diff --quiet Profile/Loon.lcf Profile/QX.conf; then
+          if git diff --quiet Profile/Loon.lcf; then
             echo "No changes to generated configs"
             echo "changed=false" >> $GITHUB_OUTPUT
           else
@@ -54,11 +54,11 @@ jobs:
           git config --local user.name "github-actions[bot]"
           BRANCH="surgio-auto/$(date +%Y-%m-%d)"
           git checkout -B "$BRANCH"
-          git add Profile/Loon.lcf Profile/QX.conf
+          git add Profile/Loon.lcf
           git commit -m "chore(surgio): auto-update generated configs ($(date +%Y-%m-%d))"
           git push -f origin "$BRANCH" 2>&1 || echo "push skipped"
 
-          BODY="## Surgio 自动配置更新\n\nSurgio 配置模板变更触发生成，Profile/ 文件已自动更新。\n\n### 审核清单\n- [ ] Loon.lcf 变更符合预期\n- [ ] QX.conf 变更符合预期\n- [ ] 双端规则一致性保持\n- [ ] CI 全绿"
+          BODY="## Surgio 自动配置更新\n\nSurgio 配置模板变更触发生成，Profile/ 文件已自动更新。\n\n### 审核清单\n- [ ] Loon.lcf 变更符合预期\n- [ ] CI 全绿"
 
           if gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' 2>/dev/null | grep -q .; then
             PR_NUM=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
