@@ -190,30 +190,6 @@ jobs:
 
           # ═══════════════ NSRingo bundle.js (版本固定 release 资产) ═══════════════
           # NSRingo .plugin 引用的 bundle.js; 若上游清理旧 release 会 404, 镜像消除单点
-          mirror "https://github.com/NSRingo/WeatherKit/releases/download/v3.1.0/response.bundle.js" \
-            "nsringo/WeatherKit-v3.1.0-response.bundle.js" "NSRingo WeatherKit / response.bundle.js v3.1.0"
-          mirror "https://github.com/NSRingo/GeoServices/releases/download/v4.6.1/request.bundle.js" \
-            "nsringo/GeoServices-v4.6.1-request.bundle.js" "NSRingo GeoServices / request.bundle.js v4.6.1"
-          mirror "https://github.com/NSRingo/GeoServices/releases/download/v4.6.1/response.bundle.js" \
-            "nsringo/GeoServices-v4.6.1-response.bundle.js" "NSRingo GeoServices / response.bundle.js v4.6.1"
-          mirror "https://github.com/NSRingo/News/releases/download/v3.2.1/request.bundle.js" \
-            "nsringo/News-v3.2.1-request.bundle.js" "NSRingo News / request.bundle.js v3.2.1"
-          mirror "https://github.com/NSRingo/Siri/releases/download/v4.2.7/request.bundle.js" \
-            "nsringo/Siri-v4.2.7-request.bundle.js" "NSRingo Siri / request.bundle.js v4.2.7"
-          mirror "https://github.com/NSRingo/Siri/releases/download/v4.2.7/response.bundle.js" \
-            "nsringo/Siri-v4.2.7-response.bundle.js" "NSRingo Siri / response.bundle.js v4.2.7"
-          mirror "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/request.bundle.js" \
-            "nsringo/TestFlight-v3.4.0-request.bundle.js" "NSRingo TestFlight / request.bundle.js v3.4.0"
-          mirror "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/response.bundle.js" \
-            "nsringo/TestFlight-v3.4.0-response.bundle.js" "NSRingo TestFlight / response.bundle.js v3.4.0"
-          mirror "https://github.com/NSRingo/TV/releases/download/v3.4.4/request.bundle.js" \
-            "nsringo/TV-v3.4.4-request.bundle.js" "NSRingo TV / request.bundle.js v3.4.4"
-          mirror "https://github.com/NSRingo/TV/releases/download/v3.4.4/response.bundle.js" \
-            "nsringo/TV-v3.4.4-response.bundle.js" "NSRingo TV / response.bundle.js v3.4.4"
-          mirror "https://github.com/NSRingo/LocationServices/releases/download/v1.0.1/request.bundle.js" \
-            "nsringo/LocationServices-v1.0.1-request.bundle.js" "NSRingo LocationServices / request.bundle.js v1.0.1"
-          mirror "https://github.com/NSRingo/LocationServices/releases/download/v1.0.1/response.bundle.js" \
-            "nsringo/LocationServices-v1.0.1-response.bundle.js" "NSRingo LocationServices / response.bundle.js v1.0.1"
 
           # ═══════════════ NSRingo Loon 插件 (版本固定, 替代 releases/latest) ═══════════════
           mirror "https://github.com/NSRingo/WeatherKit/releases/download/v3.1.0/iRingo.WeatherKit.plugin" \
@@ -236,58 +212,26 @@ jobs:
           # ═══════════════ DualSubs (双语字幕) ═══════════════
           mirror "https://github.com/DualSubs/Universal/releases/download/v1.7.5/DualSubs.Universal.plugin" \
             "dualsubs/DualSubs.Universal.plugin" "DualSubs Universal / .plugin v1.7.5"
-          mirror "https://github.com/DualSubs/Universal/releases/download/v1.7.5/Composite.Subtitles.response.bundle.js" \
-            "dualsubs/Composite.Subtitles.response.bundle.js" "DualSubs Universal / Composite.Subtitles.response.bundle.js v1.7.5"
-          mirror "https://github.com/DualSubs/Universal/releases/download/v1.7.5/External.Lyrics.response.bundle.js" \
-            "dualsubs/External.Lyrics.response.bundle.js" "DualSubs Universal / External.Lyrics.response.bundle.js v1.7.5"
-          mirror "https://github.com/DualSubs/Universal/releases/download/v1.7.5/Manifest.response.bundle.js" \
-            "dualsubs/Manifest.response.bundle.js" "DualSubs Universal / Manifest.response.bundle.js v1.7.5"
-          mirror "https://github.com/DualSubs/Universal/releases/download/v1.7.5/Translate.response.bundle.js" \
-            "dualsubs/Translate.response.bundle.js" "DualSubs Universal / Translate.response.bundle.js v1.7.5"
           mirror "https://github.com/DualSubs/YouTube/releases/download/v1.5.11/DualSubs.YouTube.plugin" \
             "dualsubs/DualSubs.YouTube.plugin" "DualSubs YouTube / .plugin v1.5.11"
-          mirror "https://github.com/DualSubs/YouTube/releases/download/v1.5.11/request.bundle.js" \
-            "dualsubs/DualSubs.YouTube.request.bundle.js" "DualSubs YouTube / request.bundle.js v1.5.11"
-          mirror "https://github.com/DualSubs/YouTube/releases/download/v1.5.11/response.bundle.js" \
-            "dualsubs/DualSubs.YouTube.response.bundle.js" "DualSubs YouTube / response.bundle.js v1.5.11"
           mirror "https://github.com/DualSubs/Netflix/releases/download/v0.5.7/DualSubs.Netflix.plugin" \
             "dualsubs/DualSubs.Netflix.plugin" "DualSubs Netflix / .plugin v0.5.7"
 
           # ═══════════════ Auraflare (Cloudflare 资源集成) ═══════════════
           mirror "https://raw.githubusercontent.com/Auraflare/1.1.1.1/main/modules/Cloudflare.1.1.1.1.plugin" \
             "auraflare/Cloudflare.1.1.1.1.plugin" "Auraflare 1.1.1.1 / .plugin (main)"
-          mirror "https://raw.githubusercontent.com/Auraflare/1.1.1.1/main/js/1.1.1.1.request.js" \
-            "auraflare/1.1.1.1.request.js" "Auraflare 1.1.1.1 / request.js (main)"
-          mirror "https://raw.githubusercontent.com/Auraflare/1.1.1.1/main/js/1.1.1.1.response.js" \
-            "auraflare/1.1.1.1.response.js" "Auraflare 1.1.1.1 / response.js (main)"
-          mirror "https://raw.githubusercontent.com/Auraflare/1.1.1.1/main/js/1.1.1.1.panel.js" \
-            "auraflare/1.1.1.1.panel.js" "Auraflare 1.1.1.1 / panel.js (main)"
           mirror "https://github.com/Auraflare/DNS/releases/download/v2.6.3/Cloudflare.DNS.plugin" \
             "auraflare/Cloudflare.DNS.plugin" "Auraflare DNS / .plugin v2.6.3"
-          mirror "https://github.com/Auraflare/DNS/releases/download/v2.6.3/event.bundle.js" \
-            "auraflare/event.bundle.js" "Auraflare DNS / event.bundle.js v2.6.3"
 
           # ═══════════════ BiliUniverse (哔哩哔哩功能增强) ═══════════════
           mirror "https://github.com/BiliUniverse/Enhanced/releases/download/v0.5.13/BiliBili.Enhanced.plugin" \
             "biliuniverse/BiliBili.Enhanced.plugin" "BiliUniverse Enhanced / .plugin v0.5.13"
-          mirror "https://github.com/BiliUniverse/Enhanced/releases/download/v0.5.13/response.bundle.js" \
-            "biliuniverse/BiliBili.Enhanced.response.bundle.js" "BiliUniverse Enhanced / response.bundle.js v0.5.13"
           mirror "https://github.com/BiliUniverse/Global/releases/download/v0.8.21/BiliBili.Global.plugin" \
             "biliuniverse/BiliBili.Global.plugin" "BiliUniverse Global / .plugin v0.8.21"
-          mirror "https://github.com/BiliUniverse/Global/releases/download/v0.8.21/request.bundle.js" \
-            "biliuniverse/BiliBili.Global.request.bundle.js" "BiliUniverse Global / request.bundle.js v0.8.21"
-          mirror "https://github.com/BiliUniverse/Global/releases/download/v0.8.21/response.bundle.js" \
-            "biliuniverse/BiliBili.Global.response.bundle.js" "BiliUniverse Global / response.bundle.js v0.8.21"
           mirror "https://github.com/BiliUniverse/ADBlock/releases/download/v0.6.24/BiliBili.ADBlock.plugin" \
             "biliuniverse/BiliBili.ADBlock.plugin" "BiliUniverse ADBlock / .plugin v0.6.24"
-          mirror "https://github.com/BiliUniverse/ADBlock/releases/download/v0.6.24/request.bundle.js" \
-            "biliuniverse/BiliBili.ADBlock.request.bundle.js" "BiliUniverse ADBlock / request.bundle.js v0.6.24"
-          mirror "https://github.com/BiliUniverse/ADBlock/releases/download/v0.6.24/response.bundle.js" \
-            "biliuniverse/BiliBili.ADBlock.response.bundle.js" "BiliUniverse ADBlock / response.bundle.js v0.6.24"
           mirror "https://github.com/BiliUniverse/Redirect/releases/download/v0.2.20/BiliBili.Redirect.plugin" \
             "biliuniverse/BiliBili.Redirect.plugin" "BiliUniverse Redirect / .plugin v0.2.20"
-          mirror "https://github.com/BiliUniverse/Redirect/releases/download/v0.2.20/request.bundle.js" \
-            "biliuniverse/BiliBili.Redirect.request.bundle.js" "BiliUniverse Redirect / request.bundle.js v0.2.20"
 
           # ── 写出新清单 (按文件名排序) ──
           node -e '
