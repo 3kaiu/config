@@ -44,6 +44,9 @@ jobs:
           }
 
           declare -a ENTRIES
+          # 抓取/门禁失败时保留旧清单条目 (镜像文件回退旧版, 清单不丢记录)
+          keep_old() { local oe; oe=$(old_entry "$1"); [ -n "$oe" ] && ENTRIES+=("\"$1\": $oe"); }
+
 
           mirror() {
             local url="$1"
@@ -55,7 +58,7 @@ jobs:
             if ! curl -fsSL -m 90 --retry 3 -A "Loon/3.3.9" "$url" -o "$tmpf"; then
               echo "❌ $name (FETCH FAILED)"
               FAIL=$((FAIL + 1))
-              local oe; oe=$(old_entry "$dest"); [ -n "$oe" ] && ENTRIES+=("\"$dest\": $oe")
+              keep_old "$dest"
               rm -f "$tmpf"; return
             fi
             # ── 门禁 1: 体积下限 (防 200 状态码的 HTML 错误页/半截传输) ──
@@ -63,14 +66,14 @@ jobs:
             if [ "$size" -lt 200 ]; then
               echo "🚫 $name 门禁拦截: 体积过小 (${size}B), 保留旧版"
               GATED=$((GATED + 1)); FAIL=$((FAIL + 1))
-              local oe; oe=$(old_entry "$dest"); [ -n "$oe" ] && ENTRIES+=("\"$dest\": $oe")
+              keep_old "$dest"
               rm -f "$tmpf"; return
             fi
             # ── 门禁 2: 非 HTML ──
             if head -c 200 "$tmpf" | grep -qi '<!doctype\|<html'; then
               echo "🚫 $name 门禁拦截: 内容为 HTML 错误页, 保留旧版"
               GATED=$((GATED + 1)); FAIL=$((FAIL + 1))
-              local oe; oe=$(old_entry "$dest"); [ -n "$oe" ] && ENTRIES+=("\"$dest\": $oe")
+              keep_old "$dest"
               rm -f "$tmpf"; return
             fi
             # ── 门禁 3: JS 语法 (仅 .js; .list/.conf/.plugin 非 JS) ──
@@ -79,7 +82,7 @@ jobs:
                 if ! node --check "$tmpf" 2>/dev/null; then
                   echo "🚫 $name 门禁拦截: node --check 语法错误 (可能半截下载), 保留旧版"
                   GATED=$((GATED + 1)); FAIL=$((FAIL + 1))
-                  local oe; oe=$(old_entry "$dest"); [ -n "$oe" ] && ENTRIES+=("\"$dest\": $oe")
+                  keep_old "$dest"
                   rm -f "$tmpf"; return
                 fi
                 ;;
