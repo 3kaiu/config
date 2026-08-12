@@ -1,0 +1,16 @@
+#!name=小桔充电去广告
+#!desc=移除横幅广告、弹窗广告，精简我的页面。
+#!version=1.0
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/XiaojukejiCharge.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+[Rewrite]
+^https:\/\/energy\.xiaojukeji\.com\/energy\/hummer\/api\/resource\/display($|\?) reject-dict
+^https:\/\/energy\.xiaojukeji\.com\/am\/marketing\/api\/member\/facade\/charge\/personal\/center\? response-body-json-del data
+^https:\/\/energy\.xiaojukeji\.com\/lego\/api\/orderSprint\/stair\/info($|\?) reject-dict
+^https:\/\/energy\.xiaojukeji\.com\/station-api\/search\/preWords$ reject-dict
+^https:\/\/am\.didistatic\.com\/static\/am\/cf-terminal\/epower\/epower-thanos-app\/\d+\.\d+\.\d+\/pages\/people\/index\.js$ mock-response-body data-type=text data-path="https://kelee.one/Resource/JavaScript/XiaojukejiCharge/XiaojukejiCharge_remove_ads.js" status-code=200
+[MitM]
+hostname=energy.xiaojukeji.com, am.didistatic.com

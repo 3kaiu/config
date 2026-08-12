@@ -1,0 +1,10 @@
+#!name=蜗牛睡眠去广告
+#!desc=移除音乐页面横幅、日报告解决方案商品推广，移除我的页面服务推广。
+#!version=1.0
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/SnailSleep.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+[Rule]
+DOMAIN, ad.snailsleep.net, REJECT

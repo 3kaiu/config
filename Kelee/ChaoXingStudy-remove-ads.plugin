@@ -1,0 +1,18 @@
+#!name=学习通去广告
+#!desc=移除开屏广告、横幅推广，精简校园补给站频道。
+#!version=1.0
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/ChaoXingStudy.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+[Rewrite]
+^https:\/\/learn\.chaoxing\.com\/apis\/service\/appConfig\? response-body-json-del data.ad
+^https:\/\/home-yd\.chaoxing\.com\/apis\/data\/getAdsRecommend\? reject-dict
+^https:\/\/home-yd\.chaoxing\.com\/apis\/banner\/getConfigInfoForXsqy\? reject-dict
+^https:\/\/apps\.chaoxing\.com\/apis\/home\/getHpXsqy\.jspx\? response-body-json-jq '.data.list |= map(select(.pid == 4 or .pid == 44)) | .data.list_xsqy |= map(select(.pid == 4 or .pid == 44)) | .data.list_xysqbj |= map(select(.pid == 4 or .pid == 44)) | .data.lanmu |= map(select(.id == 4 or .id == 44))'
+^https:\/\/apps\.chaoxing\.com\/apis\/home\/getHpXsqy\.jspx\? response-body-json-del data.list_timeapp
+^https:\/\/groupyd2\.chaoxing\.com\/apis\/activity\/getActivitys_attention\? reject-dict
+^https:\/\/appswh\.chaoxing\.com\/apis\/activity\/getNoteTopicList\? reject-dict
+[MitM]
+hostname=learn.chaoxing.com, home-yd.chaoxing.com, apps.chaoxing.com, groupyd2.chaoxing.com, appswh.chaoxing.com

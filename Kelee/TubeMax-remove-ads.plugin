@@ -1,0 +1,22 @@
+#!name=TubeMax去广告
+#!desc=过滤TubeMax广告
+#!version=1.0
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/TubeMax.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+[Rule]
+DOMAIN, app.tubemaxapp.com, PROXY
+DOMAIN-SUFFIX, adjust.com, REJECT
+DOMAIN-SUFFIX, applvn.com, REJECT
+DOMAIN-SUFFIX, app-measurement.com, REJECT
+DOMAIN-SUFFIX, pangle.io, REJECT
+DOMAIN-SUFFIX, applovin.com, REJECT
+DOMAIN-SUFFIX, appier.net, REJECT
+DOMAIN-SUFFIX, adsmoloco.com, REJECT
+DOMAIN-SUFFIX, adcanvas.com, REJECT
+[Rewrite]
+^https:\/\/.*\.i18n-pglstatp\.com\/obj\/ad-pattern-sg reject
+[MitM]
+hostname=*.i18n-pglstatp.com

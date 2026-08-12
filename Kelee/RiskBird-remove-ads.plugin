@@ -1,0 +1,13 @@
+#!name=风鸟去广告
+#!desc=移除首页信息流和轮播图 (规则版: 已去除原版外部脚本, 自维护)
+#!version=1.0
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/RiskBird.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+[Rewrite]
+^https:\/\/m\.riskbird\.com\/prod-qbb-api\/user\/getBannerList reject-dict
+^https:\/\/m\.riskbird\.com\/prod-qbb-api\/searchHotEnt reject-dict
+[MitM]
+hostname=m.riskbird.com

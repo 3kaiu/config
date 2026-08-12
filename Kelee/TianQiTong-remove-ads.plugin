@@ -1,0 +1,17 @@
+#!name=天气通去广告
+#!desc=移除开屏广告、横幅广告、弹窗广告，精简底栏及我的页面。
+#!version=1.0
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/TianQiTong.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+[Rewrite]
+^https:\/\/forecast\.sina\.cn\/app\/overall\/switch\.php\? reject-dict
+^https:\/\/tqt\.weibo\.cn\/business\/advert\/ reject-dict
+^https:\/\/tqt\.weibo\.cn\/user\/device\/ad_multi_star\? reject-dict
+^https:\/\/tqt\.weibo\.cn\/operation\/activity\/ reject-dict
+^https:\/\/tqt\.weibo\.cn\/master\/nav\/tab\? response-body-json-jq 'map(.tabs|=map(select(.type=="weather" or .type=="radar" or .type=="my")))'
+^https:\/\/tqt\.weibo\.cn\/api\/user\/user\/\d\.\d\/\?method=personal_center$ reject-dict
+[MitM]
+hostname=forecast.sina.cn, tqt.weibo.cn

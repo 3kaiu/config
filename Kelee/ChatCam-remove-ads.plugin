@@ -1,0 +1,13 @@
+#!name=看家王去广告
+#!desc=移除开屏广告、横幅广告。
+#!version=1.0
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/ChatCam.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+[Rewrite]
+^https:\/\/fast\.jfgou\.com:1443\/api\/web\/v\d\/no\/app\/advertisement\/ reject-dict
+^https:\/\/jiafeigou-1251885898\.cos\.ap-guangzhou\.myqcloud\.com\/forever\/web_server\/app_config\/banner_\d+ reject
+[MitM]
+hostname=fast.jfgou.com, jiafeigou-1251885898.cos.ap-guangzhou.myqcloud.com

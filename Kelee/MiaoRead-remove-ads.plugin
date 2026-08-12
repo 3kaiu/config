@@ -1,0 +1,12 @@
+#!name=小喵看书去广告
+#!desc=移除小喵看书章末广告
+#!version=1.0
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/MiaoRead.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+[Rewrite]
+^https:\/\/api\.miaomiaoyd\.com\/book\/config\/getAdsSettings$ reject
+[MitM]
+hostname=api.miaomiaoyd.com

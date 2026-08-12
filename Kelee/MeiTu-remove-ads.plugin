@@ -1,0 +1,14 @@
+#!name=美图秀秀去广告
+#!desc=移除开屏广告、横幅推广，精简我的页面。
+#!version=1.0
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/MeiTu.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+[Rule]
+DOMAIN, adui.tg.meitu.com, REJECT
+[Rewrite]
+^https:\/\/api\.posters\.meitu\.com\/common\/init\.json response-body-json-del data.vip
+[MitM]
+hostname=api.posters.meitu.com

@@ -1,0 +1,15 @@
+#!name=行者户外去广告
+#!desc=移除弹窗广告、发现页面横幅推广的推广金刚位，移除我的页面横幅推广。
+#!version=1.0
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/OnTheWay.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+[Rewrite]
+^https:\/\/www\.imxingzhe\.com\/api\/v1\/pop\/window\/\? reject-dict
+^https:\/\/www\.imxingzhe\.com\/api\/v4\/account\/get_user_info\? response-body-json-del banner
+^https:\/\/www\.imxingzhe\.com\/api\/v4\/discovery\/ios\/\? response-body-json-del banners ad
+^https:\/\/www\.imxingzhe\.com\/api\/v4\/discovery\/ios\/\? response-body-json-jq '.display_areas |= map(select(.name == "赛事" or .name == "行者帮" or .name == "头条" or .name == "排行榜" or .name == "约伴"))'
+[MitM]
+hostname=www.imxingzhe.com

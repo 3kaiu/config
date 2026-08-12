@@ -1,0 +1,13 @@
+#!name=医考帮去广告
+#!desc=移除横幅推广、弹窗、首页悬浮挂件。
+#!version=1.0
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/YiKaoBang.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+[Rewrite]
+^https:\/\/api\.yikaobang\.com\.cn\/index\.php\/client\/main\/ads\? reject-dict
+^https:\/\/api\.yikaobang\.com\.cn\/index\.php\/client\/Main\/startPage\? reject-dict
+[MitM]
+hostname=api.yikaobang.com.cn

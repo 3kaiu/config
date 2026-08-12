@@ -1,0 +1,21 @@
+#!name=酷狗概念版去广告
+#!desc=移除广告服务模块、播放器广告，精简乐库及搜索页面。
+#!version=1.0
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/KuGouYouth.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+[Rewrite]
+^https:\/\/gateway\.kugou\.com\/ads\.service\/ reject-dict
+^https:\/\/gateway\.kugou\.com\/youth\/v1\/start_img\/last\? reject-dict
+^https:\/\/gateway\.kugou\.com\/youth\/v1\/yueku\/tab\? response-body-json-jq '.data.responses |= map(select(.module == "new_song_publish" or .module == "song_rank"))'
+^https:\/\/gateway\.kugou\.com\/ads\.gateway\/ reject-dict
+^http:\/\/mobilelog\.kugou\.com\/adtrackconfig\.json$ reject-dict
+^https:\/\/gateway\.kugou\.com\/youth\/v1\/experiment\/get_params\? reject-dict
+^https:\/\/gateway\.kugou\.com\/youth\/api\/user\/v1\/init\? reject-dict
+^https:\/\/gateway\.kugou\.com\/youth\/v2\/activity\/task_list\? reject-dict
+^https:\/\/gateway\.kugou\.com\/youth\/v1\/channel\/tab_list\? reject-dict
+^https:\/\/gateway\.kugou\.com\/goddess\/v1\/content\/biz_list\? reject-dict
+[MitM]
+hostname=gateway.kugou.com

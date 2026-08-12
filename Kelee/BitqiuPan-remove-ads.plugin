@@ -1,0 +1,14 @@
+#!name=比特球云盘去广告
+#!desc=移除开屏广告和各类横幅推广。
+#!version=1.0
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/BitqiuPan.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+[Rewrite]
+^https:\/\/pan-api\.bitqiu\.com\/activity\/getPromoteGuide$ reject-dict
+^http:\/\/pan-api\.bitqiu\.com\/activity\/getUrlList$ reject-dict
+^https:\/\/pan-api\.bitqiu\.com\/activity\/guides$ reject-dict
+[MitM]
+hostname=pan-api.bitqiu.com

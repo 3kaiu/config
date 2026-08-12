@@ -1,0 +1,16 @@
+#!name=海雀去广告
+#!desc=移除开屏广告、横幅广告、弹窗广告，拦截商城和资讯页面。
+#!version=1.0
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/AlcidaeVideo.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+[Rewrite]
+^https:\/\/app-api-32\.ihaique\.net\/api\/app\/v\d\/appad\/cmd\/AppadGetSplashAds\? reject-dict
+^https:\/\/app-api-32\.ihaique\.net\/api\/app\/v\d\/appad\/cmd\/AppGetAttentionInfos\? reject-dict
+^https:\/\/app-api-32\.ihaique\.net\/api\/app\/v\d\/appad\/cmd\/AppadGetBannerAds\? reject-dict
+^https:\/\/g\.ihaique\.net\/alcidae\/info\/index\.html$ reject
+^https:\/\/shop151522958\.youzan\.com\/v\d\/showcase\/homepage\? reject
+[MitM]
+hostname=app-api-32.ihaique.net, g.ihaique.net, shop151522958.youzan.com

@@ -1,0 +1,14 @@
+#!name=ECOVACS HOME去广告
+#!desc=移除横幅推广，精简底栏。
+#!version=1.0
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/EcovacsHome.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+[Rewrite]
+^https:\/\/gl-cn-api\.ecovacs\.cn\/v3\/private\/ response-body-json-jq '.data.navigateInfoResponseList |= map(select(.positionType == "Robot" or .positionType == "Mine"))'
+^https:\/\/api-app\.dc-cn\.cn\.ecouser\.net\/api\/ecms\/app\/ad\/ reject-dict
+^https:\/\/gl-cn-api\.ecovacs\.cn\/v1\/private\/ reject-dict
+[MitM]
+hostname=gl-cn-api.ecovacs.cn, api-app.dc-cn.cn.ecouser.net

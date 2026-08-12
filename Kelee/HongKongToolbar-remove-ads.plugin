@@ -1,0 +1,13 @@
+#!name=Hong Kong Toolbar去广告
+#!desc=移除开屏互动广告、直播前贴片广告及视频广告
+#!version=1.0
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/HongKongToolbar.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+[Rule]
+URL-REGEX, "^https:\/\/a\.881903\.com\/live\/preroll\/.*\/.*", REJECT-DROP
+URL-REGEX, "^https:\/\/a\.881903\.com\/v\d\/app\/game\/.*", REJECT-DROP
+[MitM]
+hostname=a.881903.com
