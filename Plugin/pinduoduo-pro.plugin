@@ -1,6 +1,6 @@
 #!name=拼多多 Pro v8.0
-#!desc=拼多多 — 开屏/首页/搜索/推荐全流程净化 + 百亿补贴优化
-#!version=8.0
+#!desc=拼多多 — 开屏/首页/搜索/推荐全流程净化 + 百亿补贴优化 (整合 kelee 规则)
+#!version=9.0
 #!author=3kaiu (参考 ddgksf2013/pinduoduo.js + app2smile)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Pinduoduo.png
@@ -59,9 +59,56 @@ http-response ^https?:\/\/log\.pinduoduo\.com\/event reject-dict enable={ENABLE_
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────
+^https:\/\/api\.pinduoduo\.com\/api\/aristotle\/unrated_order_for_unreceived_tab\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/aristotle\/query_order_list_tabs_element\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/aquarius\/hungary\/global\/homepage\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/order_express_group\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/search_hotquery\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/zaire_biz\/chat\/resource\/get_list_data\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/new_chat_group\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/alexa\/goods\/back_up\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/personal\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/brand-olay\/goods_detail\/bybt_guide\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/engels\/reviews\/require\/append\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/my_order_group\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/likes\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/phantom\/gbdbpdv\/extra\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/manufacturer\/cross\/shortcut\/list\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/dunkirk\/liveactivity\/push\/create\/url\/report\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/growth\/nagato\/app\/index\/gather\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/engels\/wait\/receive\/review\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/buffon\/nasus\/recommend\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v2\/query\/goods_detail_with_tags\? reject-dict enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/alexa\/homepage\/hub\? response-body-json-del result.dy_module.irregular_banner_dy result.icon_set result.search_bar_hot_query result.dy_module.irregular_banner_dy enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/alexa\/homepage\/hub\? response-body-json-jq '.result.bottom_tabs? |= map(select(.link | IN("index.html", "chat_list.html", "personal.html"))) | .result.buffer_bottom_tabs? |= map(select(.link | IN("index.html", "chat_list.html", "personal.html"))) | .result.all_top_opts |= map(del(.selected_image, .image, .height, .width))' enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/search\? response-body-json-del expansion enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/philo\/personal\/hub\? response-body-json-del monthly_card_entrance personal_center_style_v2_vo icon_set.icons icon_set.top_personal_icons personal_banner enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/oak\/integration\/render\? response-body-json-del bottom_section_list ui.bottom_section ui.live_section.float_info enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/order_detail_group\? response-body-json-del data.goods_list enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/order\/ response-body-json-del marketing_banner_vo shipping.banner_above_recommend enable={ENABLE_PDD}
+^https:\/\/api\.pinduoduo\.com\/api\/aristotle\/order_list_v4\? response-body-json-jq '.orders |= map(.order_buttons |= map(del(.order_growth_tip)))' enable={ENABLE_PDD}
+
 
 [Rule]
 DOMAIN-SUFFIX, pinduoduo.com, DIRECT
+AND, ((URL-REGEX, "^http:\/\/((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/d(\d)?"), (USER-AGENT, "*com.xunmeng.pinduoduo*")), REJECT,enable={ENABLE_PDD}
+AND, ((URL-REGEX, "^http:\/\/\[[0-9a-fA-F:]+\]\/d(\d)?\?"), (USER-AGENT, "*com.xunmeng.pinduoduo*")), REJECT,enable={ENABLE_PDD}
+AND, ((DOMAIN, api.pinduoduo.com), (PROTOCOL, QUIC)), REJECT,enable={ENABLE_PDD}
+DOMAIN, titan.pinduoduo.com, REJECT,enable={ENABLE_PDD}
+DOMAIN, xg.pinduoduo.com, REJECT,enable={ENABLE_PDD}
+DOMAIN, cdl-1.pddpic.com, REJECT,enable={ENABLE_PDD}
+DOMAIN, titan.pinduoduo.com, REJECT,enable={ENABLE_PDD}
+DOMAIN, cdl-p2.pddpic.com, REJECT,enable={ENABLE_PDD}
+DOMAIN, cd-1.pddpic.com, REJECT,enable={ENABLE_PDD}
+DOMAIN, apm.pinduoduo.com, REJECT,enable={ENABLE_PDD}
+DOMAIN, th-b.pinduoduo.com, REJECT,enable={ENABLE_PDD}
+DOMAIN, ta.pinduoduo.com, REJECT,enable={ENABLE_PDD}
+DOMAIN, th.pinduoduo.com, REJECT,enable={ENABLE_PDD}
+DOMAIN, th-a.pinduoduo.com, REJECT,enable={ENABLE_PDD}
+DOMAIN, ta-a.pinduoduo.com, REJECT,enable={ENABLE_PDD}
+DOMAIN, meta.pinduoduo.com, REJECT,enable={ENABLE_PDD}
+DOMAIN, apm-a.pinduoduo.com, REJECT,enable={ENABLE_PDD}
+
 DOMAIN-SUFFIX, yangkeduo.com, DIRECT
 DOMAIN-SUFFIX, pddpic.com, DIRECT
 

@@ -1,6 +1,6 @@
 #!name=B 站去广告 Pro v8.2
-#!desc=B 站 — 首页/视频推荐/直播/动态全流程净化 + 高清画质解锁
-#!version=8.2
+#!desc=B 站 — 首页/视频推荐/直播/动态全流程净化 + 高清画质解锁 (整合 kelee 规则)
+#!version=9.2
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bilibili.png
@@ -49,14 +49,40 @@ cron {BILI_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/Bilibili.js, ti
 
 [Rewrite]
 # 港澳台地区解锁
+^https:\/\/api\.bilibili\.com\/x\/pd-proxy\/tracker\? response-body-json-jq '.data[][]?="stun.chat.bilibili.com:3478"' enable={ENABLE_BILI}
+^https:\/\/app\.bilibili\.com\/x\/v2\/splash\/(show|event\/list2)\? response-body-json-jq '.data |= with_entries(if .key | IN("show", "event_list") then .value = [] else . end)' enable={ENABLE_BILI}
+^https:\/\/app\.bilibili\.com\/x\/v2\/splash\/list\? mock-response-body data-type=text status-code=200 data="{"code":0,"message":"OK","ttl":1,"data":{"max_time":0,"min_interval":31536000,"pull_interval":31536000,"keep_ids":[],"show":[],"list":[{}],"splash_request_id":""}}" enable={ENABLE_BILI}
+^https:\/\/app\.bilibili\.com\/x\/v2\/feed\/index\? response-body-json-jq 'if .data.items then .data.items |= map(select((.banner_item == null) and (.ad_info == null) and (.card_goto == "av") and (.card_type | IN("small_cover_v2", "large_cover_single_v9", "large_cover_v1")))) end' enable={ENABLE_BILI}
+^https:\/\/api\.bilibili\.com\/pgc\/activity\/deliver\/material\/receive\? mock-response-body data-type=text status-code=200 data="{"code":0,"data":{"closeType":"close_win","container":[],"showTime":""},"message":"success"}" enable={ENABLE_BILI}
+^https:\/\/api\.bilibili\.com\/pgc\/view\/v2\/app\/season\? response-body-json-jq 'del(.data.payment)' enable={ENABLE_BILI}
+^https:\/\/api\.bilibili\.com\/pgc\/page\/channel\? response-body-json-jq '.data.modules |= map(select(.type != "TIP") | if .type == "BANNER" then .module_data.items |= map(select(.url | startswith("https://www.bilibili.com/blackboard/era/") | not)) else . end)' enable={ENABLE_BILI}
+^https:\/\/app\.bilibili\.com\/x\/v2\/feed\/index\/story\? response-body-json-jq 'if .data.items then .data.items |= map(select((.ad_info == null) and (.card_goto | IN("vertical_ad_av", "vertical_ad_live", "vertical_ad_picture") | not)) | del(.story_cart_icon, .free_flow_toast, .image_infos, .course_info, .game_info)) end' enable={ENABLE_BILI}
+^https:\/\/ap[ip]\.bilibili\.com\/x\/(resource\/(top\/activity|patch\/tab(\/v2)?)|v2\/search\/square|vip\/ads\/materials)\? mock-response-body data-type=text status-code=200 data="{"code":-404,"message":"-404","ttl":1,"data":null}" enable={ENABLE_BILI}
+^https:\/\/line3-h5-mobile-api\.biligame\.com\/game\/live\/large_card_material\? reject-dict enable={ENABLE_BILI}
+^https:\/\/api\.live\.bilibili\.com\/xlive\/e-commerce-interface\/v1\/ecommerce-user\/get_shopping_info\? reject-dict enable={ENABLE_BILI}
+^https:\/\/api\.live\.bilibili\.com\/xlive\/open-interface\/v2\/tracker\/conf\? response-body-json-jq '.data.domains=["wss://tracker.chat.bilibili.com"]' enable={ENABLE_BILI}
+^https:\/\/app\.bilibili\.com\/x\/resource\/show\/skin\? response-body-json-del data.common_equip enable={ENABLE_BILI}
+^https:\/\/app\.bilibili\.com\/x\/v2\/account\/myinfo\? response-body-json-jq '.data.vip |= if . != null and .status == 0 then . + { status: 1, type: 2, due_date: 9005270400000, role: 15 } else . end' enable={ENABLE_BILI}
+^https:\/\/grpc\.biliapi\.net\/bilibili\.app\.interface\.v1\.Teenagers\/ModeStatus$ mock-response-body data-type=text data="AAAAABMKEQgCEgl0ZWVuYWdlcnMgAioA" mock-data-is-base64=true enable={ENABLE_BILI}
+^https:\/\/grpc\.biliapi\.net\/bilibili\.app\.interface\.v1\.Search\/DefaultWords$ mock-response-body data-type=text data="AAAAACEaHeaQnOe0ouinhumikeOAgeeVquWJp+aIlnVw5Li7KAE=" mock-data-is-base64=true enable={ENABLE_BILI}
+^https:\/\/grpc\.biliapi\.net\/bilibili\.app\.(view\.v1\.View\/TFInfo|viewunite\.v1\.View\/(PlayPause|ViewEndPage))$ mock-response-body data-type=text data="AAAAAAA=" mock-data-is-base64=true enable={ENABLE_BILI}
+^https:\/\/grpc\.biliapi\.net\/bilibili\.app\.(interface\.v1\.(Teenagers\/ModeStatus|Search\/DefaultWords)|view\.v1\.View\/TFInfo|viewunite\.v1\.View\/(PlayPause|ViewEndPage))$ response-header-add grpc-status 0 enable={ENABLE_BILI}
+
 ^https?:\/\/app\.bilibili\.com\/(x\/)?(intl|dm|reply|history|v\d\/(fav|msgfeed)).+?(&s_locale=zh-Hans_[A-Z]{2})(.+?)(&sim_code=\d+)(.+) 302 $1$2$3$4$5&s_locale=zh-Hans_PH&sim_code=51503$7 enable={ENABLE_BILI}
 ^https?:\/\/passport\.bilibili\.com\/x\/intl\/passport-login\/.+(&s_locale=zh-Hans_[A-Z]{2})(.+)(&sim_code=\d+)(.+) 302 $1$2&s_locale=zh-Hans_PH&sim_code=51503$4 enable={ENABLE_BILI}
 
 [Rule]
 DOMAIN-SUFFIX, bilibili.com, DIRECT
+DOMAIN, bsbsb.top, PROXY,enable={ENABLE_BILI}
+DOMAIN, api.biliapi.com, REJECT,enable={ENABLE_BILI}
+DOMAIN, app.biliapi.com, REJECT,enable={ENABLE_BILI}
+DOMAIN, api.biliapi.net, REJECT,enable={ENABLE_BILI}
+DOMAIN, app.biliapi.net, REJECT,enable={ENABLE_BILI}
+AND, ((DOMAIN-SUFFIX, chat.bilibili.com), (OR, ((DOMAIN-KEYWORD, stun), (DOMAIN-KEYWORD, tracker), (DOMAIN-KEYWORD, p2p)))), REJECT,enable={ENABLE_BILI}
+
 DOMAIN-SUFFIX, bilivideo.com, DIRECT
 DOMAIN-SUFFIX, hdslb.com, DIRECT
 
 [MitM]
 # v8.2 (2026-08 审计): 移除 i0.hdslb.com (视频 CDN, 无任何规则消费 → 纯解密无收益)
-hostname = %APPEND% api.bilibili.com, mobi.bilibili.com, live.bilibili.com, app.bilibili.com, grpc.biliapi.net
+hostname = %APPEND% api.bilibili.com, mobi.bilibili.com, live.bilibili.com, app.bilibili.com, grpc.biliapi.net, api.bilibili.com, www.bilibili.com, line3-h5-mobile-api.biligame.com, api.live.bilibili.com

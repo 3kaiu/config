@@ -1,6 +1,6 @@
 #!name=腾讯视频 Pro v8.0
-#!desc=腾讯视频 — 开屏/首页/推荐/会员权益全流程净化 + 高清画质解锁
-#!version=8.0
+#!desc=腾讯视频 — 开屏/首页/推荐/会员权益全流程净化 + 高清画质解锁 (整合 kelee 规则)
+#!version=9.0
 #!author=3kaiu (参考 ddgksf2013/tencentvideo.js + app2smile)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/TencentVideo.png
@@ -62,9 +62,28 @@ http-response ^https?:\/\/sdk\.open\.tv\.qzone\.qq\.com reject-dict enable={ENAB
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────
+^https?:\/\/vv\.video\.qq\.com\/(diff|get)vmind reject-dict enable={ENABLE_TVP}
+
 
 [Rule]
 DOMAIN-SUFFIX, tencent.com, DIRECT
+DOMAIN, adsmind.gdtimg.com, REJECT,enable={ENABLE_TVP}
+DOMAIN, info4.video.qq.com, REJECT,enable={ENABLE_TVP}
+DOMAIN, info6.video.qq.com, REJECT,enable={ENABLE_TVP}
+DOMAIN, ios.video.mpush.qq.com, REJECT,enable={ENABLE_TVP}
+DOMAIN, otheve.beacon.qq.com, REJECT,enable={ENABLE_TVP}
+DOMAIN, pgdt.gtimg.cn, REJECT,enable={ENABLE_TVP}
+DOMAIN, tpns.qq.com, REJECT,enable={ENABLE_TVP}
+DOMAIN, vv6.video.qq.com, REJECT,enable={ENABLE_TVP}
+DOMAIN-SUFFIX, gdt.qq.com, REJECT,enable={ENABLE_TVP}
+DOMAIN-SUFFIX, l.qq.com, REJECT,enable={ENABLE_TVP}
+DOMAIN-KEYWORD, trace.qq.com, REJECT,enable={ENABLE_TVP}
+DOMAIN-KEYWORD, trace.video.qq.com, REJECT,enable={ENABLE_TVP}
+IP-CIDR, 47.110.187.87/32, REJECT, no-resolve,enable={ENABLE_TVP}
+URL-REGEX, "^http:\/\/[\d\.:]*\/?(defaultts\.tc|vmind\.qqvideo\.tc|finderpdd\.video)\.qq\.com\/\w+", REJECT,enable={ENABLE_TVP}
+URL-REGEX, "^http:\/\/apd-vlive\.apdcdn\.tc\.qq\.com\/vmind\.qqvideo\.tc\.qq\.com\/\w+", REJECT,enable={ENABLE_TVP}
+URL-REGEX, "^http:\/\/apd-\w+\.v\.smtcdns\.com\/(defaultts|omts|vmind\.qqvideo)\.tc\.qq\.com\/\w+", REJECT,enable={ENABLE_TVP}
+
 DOMAIN-SUFFIX, qq.com, DIRECT
 DOMAIN-SUFFIX, qcloud.com, DIRECT
 DOMAIN-SUFFIX, video.qq.com, DIRECT

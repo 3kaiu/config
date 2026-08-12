@@ -1,6 +1,6 @@
 #!name=滴滴出行 Pro v8.2
-#!desc=滴滴 — 开屏/首页/行程/乘车全流程净化 + 优惠券管理
-#!version=8.2
+#!desc=滴滴 — 开屏/首页/行程/乘车全流程净化 + 优惠券管理 (整合 kelee 规则)
+#!version=9.2
 #!author=3kaiu (参考 ddgksf2013/didi.js + app2smile)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/DiDi.png
@@ -63,11 +63,34 @@ http-response ^https?:\/\/log\.didiglobal\.com\/event reject-dict enable={ENABLE
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────
+^https:\/\/res\.xiaojukeji\.com\/resapi\/activity\/mget reject-dict enable={ENABLE_DIDI}
+^https:\/\/lion\.didialift\.com\/broker\/\? reject-dict enable={ENABLE_DIDI}
+^https:\/\/conf\.diditaxi\.com\.cn\/homepage\/v1\/other\/slow\? reject-dict enable={ENABLE_DIDI}
+^https:\/\/conf\.diditaxi\.com\.cn\/homepage\/v1\/core\? response-body-json-jq '.data.disorder_cards.bottom_nav_list.data |= map(select(.id == "home_page" or .id == "user_center")) | .data.order_cards.nav_list_card.data |= map(select(.nav_id == "dache_anycar" or .nav_id == "carmate" or .nav_id == "driverservice" or .nav_id == "zhandianbashi" or .nav_id == "yuancheng" or .nav_id == "pincheche" or .nav_id == "bike" or .nav_id == "special_ride" or .nav_id == "nav_more_v3"))' enable={ENABLE_DIDI}
+^https:\/\/conf\.diditaxi\.com\.cn\/homepage\/v1\/other\/fast\? response-body-json-del data.disorder_cards.communicate_card data.disorder_cards.not_login_bottom_bar data.disorder_cards.riding_code_card data.order_cards.car_owner_widget_card data.order_cards.marketing_card data.order_cards.super_banner_card data.disorder_cards.car_icon.data.icon_info_new_agreement enable={ENABLE_DIDI}
+^https:\/\/res\.xiaojukeji\.com\/resapi\/activity\/mget\? response-body-json-del data.mult_home_banner enable={ENABLE_DIDI}
+^https:\/\/common\.diditaxi\.com\.cn\/common\/v5\/usercenter\/layout$ response-body-json-jq '.data |= (.instances |= (to_entries | map(select(.key as $k | ["center_base_info_card", "center_tool_card", "center_wallet_finance_card", "center_order_related_card"] | index($k))) | from_entries)) | .data.instances.center_wallet_finance_card.data.view_info |= map(select(.title == "优惠卡券" or .title == "余额" or .title == "福利金"))' enable={ENABLE_DIDI}
+^https:\/\/ct\.xiaojukeji\.com\/agent\/v3\/feeds\? reject-dict enable={ENABLE_DIDI}
+^https:\/\/conf\.diditaxi\.com\.cn\/dynamic\/conf reject-dict enable={ENABLE_DIDI}
+^https:\/\/api\.udache\.com\/gulfstream\/porsche\/v1\/dache_homepage_layout\? response-body-json-jq '.data |= (.instances |= (to_entries | map(select(.key | test("feed_back_|dache_main_member|order_container_|dache_main_core_icon|dache_main_card_"))) | from_entries))' enable={ENABLE_DIDI}
+^https:\/\/api\.udache\.com\/gulfstream\/porsche\/v1\/pSFCHomePage\? response-body-json-jq '.data |= (if . == null then null else {hot_route_info, legal_info} end) | . as $root | .data.tab_list = ($root.data.tab_list | map(select(.tab_id == "passenger")))' enable={ENABLE_DIDI}
+^https:\/\/poi\.map\.xiaojukeji\.com\/mapapi\/recommend\? reject-dict enable={ENABLE_DIDI}
+^https:\/\/daijia\.kuaidadi\.com:443\/gateway\? response-body-json-del data.variantInfo enable={ENABLE_DIDI}
+^https:\/\/daijia\.kuaidadi\.com:443\/gateway\? response-body-json-jq '.data |= with_entries(select(.value.isAd != 1))' enable={ENABLE_DIDI}
+^https:\/\/api\.udache\.com\/intercity\/ticket\/api\/v1\/core\/getFullPageInfoLayout\? response-body-json-jq '.data.disorder_components |= (map(select(.name == "history_order_card" or .name == "inprogress_order_card" or .name == "station_calendar" or .name == "main_card_v2" or .name == "user_history_order")))' enable={ENABLE_DIDI}
+^https:\/\/htwkop\.xiaojukeji\.com:443\/gateway\? response-body-json-del data.didi-bike-homepage-popup data.variantInfo enable={ENABLE_DIDI}
+^https:\/\/as\.xiaojukeji\.com\/ep\/as\/toggles\? response-body-json-jq '.data |= map(if .name|IN("daijia_journey_new_tcp_switch","daijia_tcp_init","daijia_tcp_msg_encrypt","daijia_tcp_site_info","daijia_tcp_site_report")then.allow=false else. end)' enable={ENABLE_DIDI}
+
 
 [Rule]
 DOMAIN-SUFFIX, didiglobal.com, DIRECT
+DOMAIN, gwp.xiaojukeji.com, REJECT,enable={ENABLE_DIDI}
+AND, ((IP-ASN, 45090, no-resolve), (DEST-PORT, 25641), (PROTOCOL, TCP)), REJECT,enable={ENABLE_DIDI}
+AND, ((IP-ASN, 55990, no-resolve), (DEST-PORT, 25641), (PROTOCOL, TCP)), REJECT,enable={ENABLE_DIDI}
+AND, ((IP-ASN, 63646, no-resolve), (DEST-PORT, 25641), (PROTOCOL, TCP)), REJECT,enable={ENABLE_DIDI}
+
 DOMAIN-SUFFIX, didi.cn, DIRECT
 DOMAIN-SUFFIX, didi.com, DIRECT
 
 [MitM]
-hostname = %APPEND% ads.didiglobal.com, sdkopen.vip.didi.cn, mbs.didiglobal.com, api.didiglobal.com, portal.didiglobal.com, news.didiglobal.com, recommend.didi.cn, order.didi.cn, invoice.didiglobal.com, receipt.didi.cn, coupon.didi.cn, vouchers.didiglobal.com, ticket.didi.cn, points.didi.cn, member.didi.cn
+hostname = %APPEND% ads.didiglobal.com, sdkopen.vip.didi.cn, mbs.didiglobal.com, api.didiglobal.com, portal.didiglobal.com, news.didiglobal.com, recommend.didi.cn, order.didi.cn, invoice.didiglobal.com, receipt.didi.cn, coupon.didi.cn, vouchers.didiglobal.com, ticket.didi.cn, points.didi.cn, member.didi.cn, res.xiaojukeji.com, lion.didialift.com, conf.diditaxi.com.cn, common.diditaxi.com.cn, ct.xiaojukeji.com, api.udache.com, poi.map.xiaojukeji.com, daijia.kuaidadi.com, htwkop.xiaojukeji.com, as.xiaojukeji.com

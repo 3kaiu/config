@@ -1,6 +1,6 @@
 #!name=京东去广告 Pro v7.9
-#!desc=京东 — 商城/领券/商品页/比价净化（内联 jq，零脚本依赖）
-#!version=7.9
+#!desc=京东 — 商城/领券/商品页/比价净化（内联 jq，零脚本依赖） (整合 kelee 规则)
+#!version=8.9
 #!author=3kaiu (功能开关架构参考起点引擎模式)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/JD.png
@@ -36,7 +36,13 @@ http-response ^https?:\/\/p.360buy\.com\/price\/tower response-body-json-jq '.da
 
 [Rule]
 DOMAIN-SUFFIX,ad.jddg.com, DIRECT
+URL-REGEX, "^http:\/\/\w{32}\.jddebug\.com\/diagnose\?", REJECT,enable={ENABLE_JD}
+
 DOMAIN-SUFFIX,bjzhnl.jd.com, DIRECT
 
+[Rewrite]
+^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(searchBoxWord|stationPullService|uniformRecommend[06]) reject-dict enable={ENABLE_JD}
+^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=basicConfig response-body-json-replace data.JDMessage.socketmonitor.isSocketEstablishedAhead 0 data.JDMessage.socketmonitor.isSocketReport 0 data.JDHttpToolKit.httpdns.httpdns 0 enable={ENABLE_JD}
+
 [MitM]
-hostname = %APPEND% jd.com, 360buy.com, m.jd.com, app.jd.com
+hostname = %APPEND% jd.com, 360buy.com, m.jd.com, app.jd.com, api.m.jd.com

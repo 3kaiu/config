@@ -1,6 +1,6 @@
 #!name=小红书去广告 Pro v8.0
-#!desc=小红书 — 开屏/信息流/搜索/水印去除全流程净化 + 功能模块控制
-#!version=8.0
+#!desc=小红书 — 开屏/信息流/搜索/水印去除全流程净化 + 功能模块控制 (整合 kelee 规则)
+#!version=9.0
 #!author=3kaiu (参考 ddgksf2013/XiaoHongShuAds.conf + app2smile)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/XiaoHongShu.png
@@ -59,13 +59,25 @@ http-response ^https?:\/\/api\.xiaohongshu\.com\/api\/sns\/v\d\/ads\/search reje
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────
+^https:\/\/ci\.xiaohongshu\.com\/system_config\/watermark reject-img enable={ENABLE_XHS}
+^https:\/\/edith\.xiaohongshu\.com\/api\/sns\/v1\/surprisebox\/(?:get_style|open|submit_action) reject-dict enable={ENABLE_XHS}
+^https:\/\/www\.xiaohongshu\.com\/api\/marketing\/box\/trigger\? reject-dict enable={ENABLE_XHS}
+^https:\/\/edith\.xiaohongshu\.com\/api\/sns\/(?:v2\/guide\/user_banner|v3\/note\/guide) reject-dict enable={ENABLE_XHS}
+^https:\/\/www\.xiaohongshu\.com\/api\/sns\/(?:v1\/ads\/resource|v2\/hey\/\w+\/hey_gallery) reject-dict enable={ENABLE_XHS}
+^https:\/\/edith\.xiaohongshu\.com\/api\/sns\/v1\/search\/banner_list$ response-body-json-replace data {} enable={ENABLE_XHS}
+^https:\/\/edith\.xiaohongshu\.com\/api\/sns\/v1\/search\/hot_list$ response-body-json-replace data.items [] enable={ENABLE_XHS}
+^https:\/\/edith\.xiaohongshu\.com\/api\/sns\/v4\/search\/hint response-body-json-replace data.hint_words [] enable={ENABLE_XHS}
+^https:\/\/edith\.xiaohongshu\.com\/api\/sns\/v4\/search\/trending\? response-body-json-replace data.queries [] data.hint_word {} enable={ENABLE_XHS}
+
 
 # ── 特殊域名重定向 ──────────────────
 ^https?:\/\/xhslink\.com\/\?(https?)?(%3A|:)?(\/\/|%2F%2F)?(.*)$ 302 https://$4 enable={ENABLE_XHS}
 
 [Rule]
 DOMAIN-SUFFIX, xiaohongshu.com, DIRECT
+AND, ((PROTOCOL, QUIC), (DOMAIN-SUFFIX, xiaohongshu.com)), REJECT,enable={ENABLE_XHS}
+
 DOMAIN-SUFFIX, xhscdn.com, DIRECT
 
 [MitM]
-hostname = %APPEND% api.xiaohongshu.com, home-api.xiaohongshu.com, sns-img-bd.xhscdn.com, sns-video-bd.xhscdn.com, ci.xiaohongshu.com
+hostname = %APPEND% api.xiaohongshu.com, home-api.xiaohongshu.com, sns-img-bd.xhscdn.com, sns-video-bd.xhscdn.com, ci.xiaohongshu.com, edith.xiaohongshu.com, www.xiaohongshu.com

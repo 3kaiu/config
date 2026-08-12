@@ -1,6 +1,6 @@
 #!name=QQ音乐去广告
-#!desc=QQ音乐 — 广告域名/追踪/埋点 DNS 级 REJECT
-#!version=7.8
+#!desc=QQ音乐 — 广告域名/追踪/埋点 DNS 级 REJECT (整合 kelee 规则)
+#!version=8.8
 #!author=3kaiu (规则来源: 可莉🅥)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/QQMusic.png
@@ -12,6 +12,10 @@ QQMUSIC_ENABLE=switch,"true","false",tag=是否开启QQ音乐去广告,desc=开�
 
 [Rule]
 # 广告 + 追踪域名
+DOMAIN, mc.tencentmusic.com, REJECT,enable={QQMUSIC_ENABLE}
+DOMAIN, tmeadbak.y.qq.com, REJECT,enable={QQMUSIC_ENABLE}
+DOMAIN, tmeadquic.y.qq.com, REJECT,enable={QQMUSIC_ENABLE}
+
 DOMAIN,adstats.tencentmusic.com,REJECT-DROP,enable={QQMUSIC_ENABLE}
 DOMAIN,ad.tencentmusic.com,REJECT-DROP,enable={QQMUSIC_ENABLE}
 DOMAIN,adcdn.tencentmusic.com,REJECT-DROP,enable={QQMUSIC_ENABLE}

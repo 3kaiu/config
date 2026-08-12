@@ -1,6 +1,6 @@
 #!name=汽水音乐去广告
-#!desc=汽水音乐 — 视频/信息流/搜索推广/热门搜索/会员推广净化 (v7.6: qishui.js 上游已删除, 改用纯 Rewrite reject)
-#!version=7.8
+#!desc=汽水音乐 — 视频/信息流/搜索推广/热门搜索/会员推广净化 (v7.6: qishui.js 上游已删除, 改用纯 Rewrite reject) (整合 kelee 规则)
+#!version=8.8
 #!author=3kaiu (规则来源: ddgksf2013)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Qishui.png
@@ -12,6 +12,22 @@ QISHUI_ENABLE=switch,"true","false",tag=是否开启汽水音乐去广告,desc=�
 
 [Rewrite]
 # ── 视频广告 ──
+^https:\/\/(beta-luna\.douyin|api5-lq\.qishui)\.com\/luna\/commerce\/upsells_config\? reject-dict enable={QISHUI_ENABLE}
+^https:\/\/(api|api5-lq)\.qishui\.com\/luna\/ads\/ reject-dict enable={QISHUI_ENABLE}
+^https:\/\/(beta-luna\.douyin|api5-lq\.qishui)\.com\/luna\/ads\/ reject-dict enable={QISHUI_ENABLE}
+^https:\/\/webcast-open\.douyin\.com\/webcast\/openapi\/feed\/\? reject-dict enable={QISHUI_ENABLE}
+^https:\/\/(beta-luna\.douyin|api5-lq\.qishui)\.com\/luna\/treasure\/entrance\/config\? reject-dict enable={QISHUI_ENABLE}
+^https:\/\/(beta-luna\.douyin|api5-lq\.qishui)\.com\/luna\/me\? response-body-json-del reward_ad_banner enable={QISHUI_ENABLE}
+^https:\/\/(beta-luna\.douyin|api5-lq\.qishui)\.com\/luna\/activities\? reject-dict enable={QISHUI_ENABLE}
+^https:\/\/(beta-luna\.douyin|api5-lq\.qishui)\.com\/luna\/feed\/song-tab\? response-body-json-jq 'del(.items[] | select(.type == "video_track_mix"))' enable={QISHUI_ENABLE}
+^https:\/\/(beta-luna\.douyin|api5-lq\.qishui)\.com\/luna\/card\? response-body-json-del preview_guide enable={QISHUI_ENABLE}
+^https:\/\/(beta-luna\.douyin|api5-lq\.qishui)\.com\/luna\/card\? response-body-json-jq 'del(.card_items[] | select(has("priority_display")))' enable={QISHUI_ENABLE}
+^https:\/\/(beta-luna\.douyin|api5-lq\.qishui)\.com\/luna\/media_ads\? reject-dict enable={QISHUI_ENABLE}
+^https:\/\/(beta-luna\.douyin|api5-lq\.qishui)\.com\/luna\/more-panel\? response-body-json-jq '.blocks |= map(select(.type != "related_video"))' enable={QISHUI_ENABLE}
+^https:\/\/(beta-luna\.douyin|api5-lq\.qishui)\.com\/luna\/commerce\/upsells\? reject-dict enable={QISHUI_ENABLE}
+^https:\/\/(beta-luna\.douyin|api5-lq\.qishui)\.com\/luna\/commerce\/v2\/commerce_info\? reject-dict enable={QISHUI_ENABLE}
+^https:\/\/(beta-luna\.douyin|api5-lq\.qishui)\.com\/luna\/listen-video\/reminder\? reject-dict enable={QISHUI_ENABLE}
+
 ^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/media_ads reject-200
 # ── 通用广告 ──
 ^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/ads reject-200
@@ -35,4 +51,4 @@ QISHUI_ENABLE=switch,"true","false",tag=是否开启汽水音乐去广告,desc=�
 ^https:\/\/(beta-luna\.douyin\.com|api\.qishui\.com)\/luna\/feed\/song-tab(\?|$) reject-dict
 
 [MitM]
-hostname = %APPEND% beta-luna.douyin.com, api.qishui.com, tnc-alisg.zijieapi.com, tnc-zijieapi.zijieapi.com
+hostname = %APPEND% beta-luna.douyin.com, api.qishui.com, tnc-alisg.zijieapi.com, tnc-zijieapi.zijieapi.com, webcast-open.douyin.com

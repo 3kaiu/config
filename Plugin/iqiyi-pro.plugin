@@ -1,6 +1,6 @@
 #!name=爱奇艺 Pro v8.0
-#!desc=爱奇艺 — 开屏/首页/VIP 专属/播放体验全流程净化 + 高清画质解锁
-#!version=8.0
+#!desc=爱奇艺 — 开屏/首页/VIP 专属/播放体验全流程净化 + 高清画质解锁 (整合 kelee 规则)
+#!version=9.0
 #!author=3kaiu (参考 ddgksf2013/qiyi.js + app2smile)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/iQIYI.png
@@ -68,11 +68,41 @@ http-response ^https?:\/\/log\.snssdk\.com\/event reject-dict enable={ENABLE_IQI
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────
+^https:\/\/cards\.iqiyi\.com\/views_home\/3\.0\/qy_home\? response-body-json-del base.statistics enable={ENABLE_IQIYI}
+^https:\/\/cards\.iqiyi\.com\/views_home\/3\.0\/qy_home\? response-body-json-jq 'del(.cards[] | select(.alias_name == "focus" or .alias_name == "ad_mobile_flow" or .alias_name == "ad_trueview"))' enable={ENABLE_IQIYI}
+^https:\/\/cards\.iqiyi\.com\/views_category\/3\.0\/category_home\? response-body-json-jq 'del(.base.statistics | select(.ad_str)) | del(.cards[] | select(.alias_name == "entrence_focus" or .alias_name == "ad_trueview"))' enable={ENABLE_IQIYI}
+^https:\/\/cards\.iqiyi\.com\/waterfall(-plt)?\/3\.0\/feed\? response-body-json-jq 'del(.base.statistics | select(.ad_str)) | del(.. | select(.block_class?))' enable={ENABLE_IQIYI}
+^https:\/\/cards\.iqiyi\.com\/views_plt\/3\.0\/player_tabs_v2\? response-body-json-del kv_pair.activity_tab enable={ENABLE_IQIYI}
+^https:\/\/cards\.iqiyi\.com\/views_plt\/3\.0\/player_tabs_v2\? response-body-json-jq 'del(.cards[] | select(.alias_name == "play_vip_promotion" or .alias_name == "play_detail_tag" or .alias_name == "play_chat_entrance" or .alias_name == "play_ad_no_vip" or .alias_name == "play_vertical_short_video" or .alias_name == "play_rap_custom" or .alias_name == "play_topical_tab" or .alias_name == "play_vertical" or .alias_name == "play_water_fall_like")) | del(.. | select(.block_class?))' enable={ENABLE_IQIYI}
+^https:\/\/comment-card\.iqiyi\.com\/views_comment\/3\.0\/long_video_comments\? response-body-json-jq '' enable={ENABLE_IQIYI}
+^https:\/\/cards\.iqiyi\.com\/views_search\/3\.0\/hot_query_search\? response-body-json-jq '.cards |= map(select(.alias_name as $name | $name != "ad_trueview" and $name != "ad_mobile_flow" and $name != "search_mid_text_ad")) | if .base.statistics.ad_str? then del(.base.statistics) else . end' enable={ENABLE_IQIYI}
+^https?:\/\/iface2\.iqiyi\.com\/control\/3\.0\/init_proxy\? reject-dict enable={ENABLE_IQIYI}
+^https?:\/\/act\.vip\.iqiyi\.com\/interact\/api\/v2\/show\? reject-dict enable={ENABLE_IQIYI}
+^https?:\/\/iface2\.iqiyi\.com\/ivos\/interact\/video\/data\? reject-dict enable={ENABLE_IQIYI}
+^https?:\/\/iface2\.iqiyi\.com\/video\/3\.0\/v_interface_proxy\? reject-dict enable={ENABLE_IQIYI}
+^https?:\/\/iface2\.iqiyi\.com\/views_pop\/3\.0\/pop_control\? reject-dict enable={ENABLE_IQIYI}
+^https?:\/\/comment-card\.iqiyi\.com\/views_comment\/3\.0\/long_video_comments\? response-body-json-jq '.cards |= map(select(has("alias_name")))' enable={ENABLE_IQIYI}
+^https?:\/\/iface2\.iqiyi\.com\/views_menus\/3\.0\/bottom_theme\? response-body-json-del theme_list enable={ENABLE_IQIYI}
+^https?:\/\/iface2\.iqiyi\.com\/views_menus\/3\.0\/bottom_theme\? response-body-json-jq '.cards |= map(.items |= map(select(.other.bottom_tab_type == "rec" or .other.bottom_tab_type == "my")))' enable={ENABLE_IQIYI}
+^https?:\/\/iface2\.iqiyi\.com\/views_menus\/3\.0\/home_top_menu\? response-body-json-jq '.nav_group_data[].nav_list |= map(select(. == "0" or . == "2" or . == "1007" or . == "1" or . == "6" or . == "3"))' enable={ENABLE_IQIYI}
+^https?:\/\/iface2\.iqiyi\.com\/fusion\/3\.0\/common_switch\? response-body-json-del content.resource.cast_device_ad enable={ENABLE_IQIYI}
+^https?:\/\/iface2\.iqiyi\.com\/fusion\/3\.0\/common_switch\? response-body-json-replace content.switchs.app_ad.app_ad_enable 0 content.switchs.app_ad.app_ad_duration 0 content.switchs.ios_tech.kPreadAdHintSwitch 0 content.switchs.ios_tech.ad_download 0 content.switchs.m_qiyi_ios_tech.KFocusAdVideoPlayTimesIn4G 0 enable={ENABLE_IQIYI}
+^https?:\/\/(kjp|t7z)\.cupid\.iqiyi\.com\/mixer\? response-body-json-del adSlots enable={ENABLE_IQIYI}
+^https?:\/\/search\.video\.iqiyi\.com\/q\? response-body-json-del data enable={ENABLE_IQIYI}
+^https?:\/\/iface2\.iqiyi\.com\/aggregate\/3\.0\/getMyMenus\? response-body-json-jq '.data |= map(select(.statistic.block != "wd_liebiao_2") | select(all(.menuList[]?.statistic2.block; . != "wd_liebiao_3")))' enable={ENABLE_IQIYI}
+
 
 [Rule]
 DOMAIN-SUFFIX, iqiyi.com, DIRECT
+IP-CIDR, 103.44.59.54/32, REJECT, no-resolve,enable={ENABLE_IQIYI}
+IP-CIDR, 111.63.147.158/32, REJECT, no-resolve,enable={ENABLE_IQIYI}
+IP-CIDR, 116.211.198.237/32, REJECT, no-resolve,enable={ENABLE_IQIYI}
+DOMAIN-SUFFIX, cupid.iqiyi.com, DIRECT,enable={ENABLE_IQIYI}
+DOMAIN, api.iqiyi.com, REJECT,enable={ENABLE_IQIYI}
+DOMAIN, access.if.iqiyi.com, REJECT,enable={ENABLE_IQIYI}
+
 DOMAIN-SUFFIX, qiyi.com, DIRECT
 DOMAIN-SUFFIX, iqiyi.video, DIRECT
 
 [MitM]
-hostname = %APPEND% ads.api.iqiyi.com, mobile.ads.iqiyi.com, open.api.iqiyi.com, feed.pgc.iqiyi.com, hot.v.iqiyi.com, gateway.iqiyi.com, modules.iqiyi.com, player.api.iqiyi.com, stream.aqi.iqiyi.com
+hostname = %APPEND% ads.api.iqiyi.com, mobile.ads.iqiyi.com, open.api.iqiyi.com, feed.pgc.iqiyi.com, hot.v.iqiyi.com, gateway.iqiyi.com, modules.iqiyi.com, player.api.iqiyi.com, stream.aqi.iqiyi.com, cards.iqiyi.com, comment-card.iqiyi.com

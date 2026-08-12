@@ -1,6 +1,6 @@
 #!name=微博去广告 Pro v8.0
-#!desc=微博 — 开屏/信息流/热搜/评论区全流程净化 + 功能模块控制
-#!version=8.0
+#!desc=微博 — 开屏/信息流/热搜/评论区全流程净化 + 功能模块控制 (整合 kelee 规则)
+#!version=9.0
 #!author=3kaiu (参考 ddgksf2013/WeiboAds.conf + app2smile)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Weibo.png
@@ -59,13 +59,36 @@ http-response ^https?:\/\/api\.weibo\.cn\/2\/client\/ads reject-dict enable={ENA
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────
+^https:\/\/api\.weibo\.cn\/2\/(?:ug\/checkin\/list|push\/daily|push\/info) reject-dict enable={ENABLE_WEIBO}
+^https:\/\/api\.weibo\.cn\/2\/!\/live\/media_homelist\? reject-dict enable={ENABLE_WEIBO}
+^https:\/\/api\.weibo\.cn\/2\/comments\/bullet_screens\? reject-dict enable={ENABLE_WEIBO}
+^https:\/\/api\.weibo\.cn\/2\/photo\/info\? reject-dict enable={ENABLE_WEIBO}
+^https:\/\/api\.weibo\.cn\/2\/statuses\/(?:container_positive|push_info) reject-dict enable={ENABLE_WEIBO}
+^https:\/\/api\.weibo\.cn\/2\/vote\/get_vote_detail\? reject-dict enable={ENABLE_WEIBO}
+^https:\/\/api\.weibo\.cn\/2\/!\/chaohua\/discovery\/home_bottom\/switch\? reject-dict enable={ENABLE_WEIBO}
+^https:\/\/api\.weibo\.cn\/2\/!\/huati\/(?:discovery_home_bottom_getdotinfo|mobile_discovery_searchchange) reject-dict enable={ENABLE_WEIBO}
+^https:\/\/api\.weibo\.cn\/2\/!\/wbox\/\w+\/(?:home_bottom_modal|interest_category) reject-dict enable={ENABLE_WEIBO}
+^https:\/\/api\.weibo\.cn\/2\/search\/(?:container_discover|finder_nav_polling)\? reject-dict enable={ENABLE_WEIBO}
+^https:\/\/api\.weibo\.cn\/2\/hot\/hours_spotlight\? reject-dict enable={ENABLE_WEIBO}
+^https:\/\/api\.weibo\.cn\/2\/video\/redpacket\? reject-dict enable={ENABLE_WEIBO}
+^https:\/\/api\.weibo\.cn\/2\/!\/(?:search\/finder_nav_polling|sug\/list\/finderchange|was\/finder\/searchbarchange)\? reject-dict enable={ENABLE_WEIBO}
+^https:\/\/api\.weibo\.cn\/2\/video\/tiny_video_info_show\? reject-dict enable={ENABLE_WEIBO}
+^https:\/\/bootrealtime\.uve\.weibo\.com\/v[23]\/ad\/realtime reject-dict enable={ENABLE_WEIBO}
+^https:\/\/sdkapp\.uve\.weibo\.com\/interface\/sdk\/(?:get-lbs-cell-info\.php|sdkconfig\.php) reject-dict enable={ENABLE_WEIBO}
+^https:\/\/card\.weibo\.com\/article\/m\/aj\/(?:reward|uvead) reject-dict enable={ENABLE_WEIBO}
+^https:\/\/weibo\.com\/ttarticle\/x\/m\/aj\/(?:reward|uvead) reject-dict enable={ENABLE_WEIBO}
+
 
 # ── 特殊域名重定向 ──────────────────
 ^https?:\/\/t\.co\/\?(https?)?(%3A|:)?(\/\/|%2F%2F)?(.*)$ 302 https://$4 enable={ENABLE_WEIBO}
 
 [Rule]
 DOMAIN-SUFFIX, weibo.com, DIRECT
+DOMAIN-SUFFIX, uve.weibo.com, DIRECT,enable={ENABLE_WEIBO}
+DOMAIN, huodong.weibo.cn, REJECT,enable={ENABLE_WEIBO}
+DOMAIN-SUFFIX, biz.weibo.com, REJECT,enable={ENABLE_WEIBO}
+
 DOMAIN-SUFFIX, weibocdn.com, DIRECT
 
 [MitM]
-hostname = %APPEND% api.weibo.cn, api.weibo.com, ads.weibo.com, flash.weibo.com, top.weibo.com
+hostname = %APPEND% api.weibo.cn, api.weibo.com, ads.weibo.com, flash.weibo.com, top.weibo.com, api.weibo.cn, bootrealtime.uve.weibo.com, sdkapp.uve.weibo.com, card.weibo.com, weibo.com

@@ -1,6 +1,6 @@
 #!name=淘宝天猫 Pro v8.0
-#!desc=淘宝天猫 — 开屏/首页/搜索/购物车全流程净化 + 88VIP 权益增强
-#!version=8.0
+#!desc=淘宝天猫 — 开屏/首页/搜索/购物车全流程净化 + 88VIP 权益增强 (整合 kelee 规则)
+#!version=9.0
 #!author=3kaiu (参考 ddgksf2013/taobao.js + app2smile)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Taobao.png
@@ -62,12 +62,31 @@ http-response ^https?:\/\/log\.tmall\.com\/event reject-dict enable={ENABLE_TAOB
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.fliggy\.crm\.screen\.(allresource|predict) reject-dict enable={ENABLE_TAOBAO}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.alibaba\.advertisementservice\.getadv reject-dict enable={ENABLE_TAOBAO}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.alimama\.etao\.config\.query\/.+?etao_advertise reject-dict enable={ENABLE_TAOBAO}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.alimusic\.common\.mobileservice\.startinit reject-dict enable={ENABLE_TAOBAO}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.etao\.noah\.query\/.+tao_splash reject-dict enable={ENABLE_TAOBAO}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopadvertiseapi\.queryadvertise reject-dict enable={ENABLE_TAOBAO}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.o2o\.ad\.gateway\.get reject-dict enable={ENABLE_TAOBAO}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.taobao\.idle\.home\.welcome reject-dict enable={ENABLE_TAOBAO}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.trip\.activity\.querytmsresources reject-dict enable={ENABLE_TAOBAO}
+^https:\/\/(?:gw|heic)\.alicdn\.com\/imgextra\/i\d\/\d*\/?[\w!]+-\d-(?:octopus|tps)-(?:1080|1125)-\d{4}\.(?:jpg|png)_(?:1\d{3}|9\d{2})x(?:\d|1\d{3}|9\d{2})q[59]0 reject-dict enable={ENABLE_TAOBAO}
+^https:\/\/guide-acs\.m\.taobao\.com\/gw\/mtop\.taobao\.(volvo\.secondfloor\.getconfig|wireless\.home\.newface\.awesome\.get) reject-dict enable={ENABLE_TAOBAO}
+
 
 [Rule]
 DOMAIN-SUFFIX, taobao.com, DIRECT
+DOMAIN, adashx.m.taobao.com, REJECT,enable={ENABLE_TAOBAO}
+DOMAIN, ossgw.alicdn.com, REJECT,enable={ENABLE_TAOBAO}
+DOMAIN, ems.youku.com, REJECT,enable={ENABLE_TAOBAO}
+DOMAIN, hudong.alicdn.com, REJECT,enable={ENABLE_TAOBAO}
+DOMAIN, h-adashx.ut.taobao.com, REJECT,enable={ENABLE_TAOBAO}
+DOMAIN, ut.taobao.com, REJECT,enable={ENABLE_TAOBAO}
+
 DOMAIN-SUFFIX, tmall.com, DIRECT
 DOMAIN-SUFFIX, alibaba.com, DIRECT
 DOMAIN-SUFFIX, 1688.com, DIRECT
 
 [MitM]
-hostname = %APPEND% ads.api.taobao.com, flash.tmall.com, open.api.taobao.com, h5.msearch.taobao.com, api.taobao.com, gateway.tmall.com, mms.taobao.com, criteo.taobao.com, recengine.mobile.taobao.com, cart.taobao.com, promote.cart.taobao.com, vip.service.taobao.com
+hostname = %APPEND% ads.api.taobao.com, flash.tmall.com, open.api.taobao.com, h5.msearch.taobao.com, api.taobao.com, gateway.tmall.com, mms.taobao.com, criteo.taobao.com, recengine.mobile.taobao.com, cart.taobao.com, promote.cart.taobao.com, vip.service.taobao.com, acs.m.taobao.com, guide-acs.m.taobao.com

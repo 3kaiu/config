@@ -1,6 +1,6 @@
 #!name=微信 Pro v8.1
-#!desc=微信 — 朋友圈/公众号/视频号/小程序全流程净化 + 功能增强
-#!version=8.1
+#!desc=微信 — 朋友圈/公众号/视频号/小程序全流程净化 + 功能增强 (整合 kelee 规则)
+#!version=9.1
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/WeChat.png
@@ -56,8 +56,14 @@ http-response ^https?:\/\/ucmp\.sf-express\.com\/proxy\/operation-platform\/info
 
 [Rule]
 DOMAIN-SUFFIX, weixin.qq.com, DIRECT
+DOMAIN-SUFFIX, wxs.qq.com, REJECT,enable={ENABLE_WECHAT}
+
 DOMAIN-SUFFIX, weixin.com, DIRECT
 DOMAIN-SUFFIX, qq.com, DIRECT
+
+[Rewrite]
+^https:\/\/mp\.weixin\.qq\.com\/mp\/(cps_product_info|getappmsgad|jsmonitor|masonryfeed|relatedarticle)\? reject-dict enable={ENABLE_WECHAT}
+^https:\/\/mp\.weixin\.qq\.com\/mp\/relatedsearchword reject-dict enable={ENABLE_WECHAT}
 
 [MitM]
 hostname = %APPEND% api.weixin.qq.com, new.weixin.qq.com, file.weixin.qq.com, mp.weixin.qq.com, biz.weixin.qq.com, channels.video.qq.com, api.m.wechat.qq.com, pay.wechat.qq.com, cgi.wechat.qq.com, api.blibee.com, ucmp.sf-express.com

@@ -1,6 +1,6 @@
 #!name=百度网盘 Pro v8.0
-#!desc=百度网盘 — 开屏/信息流净化 + 倍速播放解锁 + 会员权益增强
-#!version=8.0
+#!desc=百度网盘 — 开屏/信息流净化 + 倍速播放解锁 + 会员权益增强 (整合 kelee 规则)
+#!version=9.0
 #!author=3kaiu (参考 ddgksf2013/bdpan.ads.js + bdpan.unlock.js)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/BaiduPan.png
@@ -60,6 +60,15 @@ http-response ^https?:\/\/api\.netdisk\.com\/api\/task\/list reject-dict enable=
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────
+^https:\/\/pan\.baidu\.com\/api\/getconfig\? reject-dict enable={ENABLE_BDPAN}
+^https:\/\/pan\.baidu\.com\/api\/getsyscfg\? reject-dict enable={ENABLE_BDPAN}
+^https:\/\/pan\.baidu\.com\/api\/taskscore\/tasklist\? reject-dict enable={ENABLE_BDPAN}
+^https:\/\/pan\.baidu\.com\/act\/api\/activityentry\? reject-dict enable={ENABLE_BDPAN}
+^https:\/\/pan\.baidu\.com\/rest\/\d\.\d\/pcs\/adv\? reject-dict enable={ENABLE_BDPAN}
+^https:\/\/pan\.baidu\.com\/api\/plugin\/get\? reject-dict enable={ENABLE_BDPAN}
+^https:\/\/pan\.baidu\.com\/recommend\/query\/list\? reject-dict enable={ENABLE_BDPAN}
+^https:\/\/pan\.baidu\.com\/feed\/kingkongdistrict\? response-body-json-jq '.data.data |= map(select(.type != "novel" and .type != "shortplay" and .type != "print" and .type != "job_hunt"))' enable={ENABLE_BDPAN}
+
 
 [Rule]
 DOMAIN-SUFFIX, baidu.com, DIRECT
@@ -67,4 +76,4 @@ DOMAIN-SUFFIX, baidupcs.com, DIRECT
 DOMAIN-SUFFIX, bcebos.com, DIRECT
 
 [MitM]
-hostname = %APPEND% api.netdisk.com, pcs.baidu.com, open.bce.baidupcs.com
+hostname = %APPEND% api.netdisk.com, pcs.baidu.com, open.bce.baidupcs.com, pan.baidu.com

@@ -1,6 +1,6 @@
 #!name=高德地图去广告
-#!desc=高德地图 — 导航/首页/我的/附近/打车/开屏 深度净化
-#!version=7.9
+#!desc=高德地图 — 导航/首页/我的/附近/打车/开屏 深度净化 (整合 kelee 规则)
+#!version=8.9
 #!author=3kaiu (规则来源: RuCu6/kokoryh)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Amap.png
@@ -12,11 +12,17 @@ AMAP_ENABLE=switch,"true","false",tag=是否开启高德地图去广告,desc=开
 
 [Rule]
 DOMAIN,amap-aos-info-nogw.amap.com,REJECT,enable={AMAP_ENABLE}
+DOMAIN-SUFFIX, v.smtcdns.com, REJECT,enable={AMAP_ENABLE}
+
 DOMAIN,awaken.amap.com,REJECT,enable={AMAP_ENABLE}
 DOMAIN,free-aos-cdn-image.amap.com,REJECT,enable={AMAP_ENABLE}
 
 [Rewrite]
 # ── 导航详情页 ──
+^https:\/\/oss\.amap\.com\/ws\/banner\/lists\/\? reject-dict enable={AMAP_ENABLE}
+^https:\/\/ai\.amap\.com\/v1\/ai_rec\/ reject-dict enable={AMAP_ENABLE}
+^https:\/\/sns\.amap\.com\/ws\/msgbox\/pull_mp\? reject-dict enable={AMAP_ENABLE}
+
 ^https:\/\/m5-zb\.amap\.com\/dsp\/card-service-(car-end|route-plan) reject-dict enable={AMAP_ENABLE}
 ^https:\/\/m5-zb\.amap\.com\/dsp\/new_hotword reject-dict enable={AMAP_ENABLE}
 ^https:\/\/m5-zb\.amap\.com\/dsp\/tips_adv reject-dict enable={AMAP_ENABLE}
@@ -47,4 +53,4 @@ DOMAIN,free-aos-cdn-image.amap.com,REJECT,enable={AMAP_ENABLE}
 
 [MitM]
 # ⚠️ 修复(v7.3): 移除 oss.amap.com 和 sns.amap.com (无对应Rule/Script, 冗余 MitM 解密开销)
-hostname = %APPEND% m5.amap.com, m5-zb.amap.com, amdc.m.taobao.com
+hostname = %APPEND% m5.amap.com, m5-zb.amap.com, amdc.m.taobao.com, oss.amap.com, ai.amap.com, sns.amap.com
