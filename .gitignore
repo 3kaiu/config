@@ -180,3 +180,6 @@ debug.log
 # Misc
 .eslintcache
 .stylelintcache
+
+# 临时目录
+scratch/
