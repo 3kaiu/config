@@ -18,7 +18,7 @@ DOMAIN-SUFFIX, roblox.com, Gaming
 # Electronic Arts
 DOMAIN-SUFFIX, ea.com, Gaming
 # Xbox / Microsoft Gaming
-DOMAIN-SUFFIX, xboxlive.com, Gaming
+# 注: xboxlive.com 已在主配置用 DOMAIN-KEYWORD DIRECT 处理 (主机直连, real-ip 含 *.xboxlive.com), 此处规则被遮蔽故移除
 DOMAIN-SUFFIX, xbox.com, Gaming
 # PlayStation
 DOMAIN-SUFFIX, playstation.com, Gaming

@@ -1,0 +1,19 @@
+#!name=值得买众测榜去广告
+#!desc=值得买众测榜 — 开屏/中间页广告净化 (iKeLee 2025-11-20 版转写, 旧语法兼容 Loon 3.5.0)
+#!version=1.1
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/smzdm.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+
+[Rewrite]
+# ── 中间页净化 (renderPopup → taskTagList) ──
+^https:\/\/cesm\.smzdm\.com\/v1\/renderPopup\? response-body-json-jq 'delpaths([["data","adList"]])'
+^https:\/\/cesm\.smzdm\.com\/v1\/taskTagList\? response-body-json-jq 'delpaths([["data","adList"]])'
+
+# ── 开屏 Mock ─────────────────────────
+^https:\/\/cesm\.smzdm\.com\/v1\/startup$ reject-dict
+
+[MitM]
+hostname = %APPEND% cesm.smzdm.com

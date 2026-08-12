@@ -1,28 +1,37 @@
 /**
- * Plugin [Rewrite] 旧语法 → 新语法（Loon 3.5.1 (978)+）批量迁移
+ * Plugin [Rewrite] 语法批量迁移
  *
- * 基于 nsloon.app 官方 Rewrite 转换器逻辑（rewriteConverter.mjs，已修复：
- * 1) 支持插件参数 enable={ARG}&{ARG2} 后缀 → ${ARG} == true 条件
- * 2) enable=!{ARG} → ${ARG} == false
- * 3) 修正连续 // 斜杠只转义一半的 bug）
+ * 默认模式（旧语法 → 新语法，Loon 3.5.1 (978)+）：
+ *   基于 nsloon.app 官方 Rewrite 转换器逻辑（rewriteConverter.mjs，已修复：
+ *   1) 支持插件参数 enable={ARG}&{ARG2} 后缀 → ${ARG} == true 条件
+ *   2) enable=!{ARG} → ${ARG} == false
+ *   3) 修正连续 // 斜杠只转义一半的 bug）
+ *   额外支持历史遗留的无效 action 别名：
+ *     "<url> url reject-200" / "<url> list reject-200" → reject-200
+ *   （Loon 旧语法不存在 url/list action，这些行长期未生效，意图为 reject-200）
  *
- * 额外支持历史遗留的无效 action 别名：
- *   "<url> url reject-200" / "<url> list reject-200" → reject-200
- * （Loon 旧语法不存在 url/list action，这些行长期未生效，意图为 reject-200）
+ * --revert 模式（新语法 → 旧语法，兼容 Loon 3.5.0 及以下）：
+ *   request if ${url} ~= /pat/i && ${ARG} == true then reject_dict(200)
+ *     → ^pat reject-dict enable={ARG}
+ *   同时将 #!loon_version = 3.5.1(978) 回退为 #!loon_version = 3.2.4(787)
  *
  * 用法：
  *   node tools/rewrite-migrate/index.mjs            # dry-run，仅报告
  *   node tools/rewrite-migrate/index.mjs --write    # 写回插件文件
+ *   node tools/rewrite-migrate/index.mjs --revert          # dry-run 回退
+ *   node tools/rewrite-migrate/index.mjs --revert --write  # 写回回退
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 import {convertLegacyRewrite} from './rewriteConverter.mjs';
+import {convertNewRewrite} from './revertConverter.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const pluginDir = path.join(root, 'Plugin');
 const write = process.argv.includes('--write');
+const revert = process.argv.includes('--revert');
 
 const LEGACY_ACTION_ALIASES = new Map([
   ['url', 'reject-200'],
@@ -49,7 +58,7 @@ function sectionRange(lines, name) {
 function normalizeLegacyLine(line) {
   let next = line;
   let changed = false;
-  const apply = (pattern, replacement, count = 1) => {
+  const apply = (pattern, replacement) => {
     const patched = next.replace(pattern, replacement);
     if (patched !== next) {
       next = patched;
@@ -67,22 +76,10 @@ function normalizeLegacyLine(line) {
   return changed ? next : line;
 }
 
-const files = fs
-  .readdirSync(pluginDir)
-  .filter((name) => name.endsWith('.plugin'))
-  .sort();
-
-let totalConverted = 0;
-let totalFailed = 0;
-let totalAliased = 0;
-const problems = [];
-
-for (const file of files) {
-  const filePath = path.join(pluginDir, file);
-  const lines = fs.readFileSync(filePath, 'utf8').split('\n');
+function migrateForward(file, filePath, lines) {
   const rewrite = sectionRange(lines, 'rewrite');
   if (!rewrite) {
-    continue;
+    return {converted: 0, failed: 0, aliased: 0, issues: [], changed: false};
   }
 
   const argument = sectionRange(lines, 'argument');
@@ -95,9 +92,8 @@ for (const file of files) {
   const normalized = rewriteLines.map((line) => {
     const trimmed = line.trim();
     if (trimmed.startsWith('^http') || trimmed.startsWith('http-')) {
-      const before = line;
       const after = normalizeLegacyLine(line);
-      if (after !== before) {
+      if (after !== line) {
         aliased += 1;
       }
       return after;
@@ -110,12 +106,11 @@ for (const file of files) {
     {includeSection: false},
   );
 
-  totalConverted += result.stats.converted;
-  totalFailed += result.stats.failed;
-  totalAliased += aliased;
-  for (const issue of result.issues) {
-    problems.push({file, line: rewrite.start + issue.line - argumentLines.length, message: issue.message});
-  }
+  const issues = result.issues.map((issue) => ({
+    file,
+    line: rewrite.start + issue.line - argumentLines.length,
+    message: issue.message,
+  }));
 
   const outputLines = result.output.split('\n');
   const migratedSection = outputLines.slice(
@@ -123,22 +118,112 @@ for (const file of files) {
     outputLines.length,
   );
 
+  let changed = false;
   if (write) {
     const next = [
       ...lines.slice(0, rewrite.start),
       ...migratedSection,
       ...lines.slice(rewrite.end),
     ];
-    fs.writeFileSync(filePath, next.join('\n'));
+    if (next.join('\n') !== lines.join('\n')) {
+      fs.writeFileSync(filePath, next.join('\n'));
+      changed = true;
+    }
   }
 
-  const status = result.stats.failed
-    ? `⚠ ${result.stats.failed} 行需检查`
-    : `✓ ${result.stats.converted} 行`;
-  console.log(`${status.padEnd(22)} ${file}${aliased ? `（别名 ${aliased}）` : ''}`);
+  return {
+    converted: result.stats.converted,
+    failed: result.stats.failed,
+    aliased,
+    issues,
+    changed,
+  };
 }
 
-console.log(`\n合计：转换 ${totalConverted} 行，别名 ${totalAliased} 行，待检查 ${totalFailed} 行`);
+function migrateBackward(file, filePath, lines) {
+  const rewrite = sectionRange(lines, 'rewrite');
+  const stats = {converted: 0, failed: 0, issues: [], headers: 0};
+
+  if (rewrite) {
+    const rewriteLines = lines.slice(rewrite.start, rewrite.end);
+    const result = convertNewRewrite(rewriteLines.join('\n'));
+    stats.converted += result.stats.converted;
+    stats.failed += result.stats.failed;
+    for (const issue of result.issues) {
+      stats.issues.push({
+        file,
+        line: rewrite.start + issue.line,
+        message: issue.message,
+      });
+    }
+    if (result.stats.converted > 0 && write) {
+      const migratedSection = result.output.split('\n');
+      const next = [
+        ...lines.slice(0, rewrite.start),
+        ...migratedSection,
+        ...lines.slice(rewrite.end),
+      ];
+      fs.writeFileSync(filePath, next.join('\n'));
+      lines = next;
+    }
+  }
+
+  const header = lines.findIndex(
+    (line) => line.trim() === '#!loon_version = 3.5.1(978)',
+  );
+  if (header !== -1) {
+    stats.headers += 1;
+    if (write) {
+      lines[header] = '#!loon_version = 3.2.4(787)';
+      fs.writeFileSync(filePath, lines.join('\n'));
+    }
+  }
+
+  return stats;
+}
+
+const files = fs
+  .readdirSync(pluginDir)
+  .filter((name) => name.endsWith('.plugin'))
+  .sort();
+
+const totals = {converted: 0, failed: 0, aliased: 0, headers: 0};
+const problems = [];
+
+for (const file of files) {
+  const filePath = path.join(pluginDir, file);
+  const lines = fs.readFileSync(filePath, 'utf8').split('\n');
+
+  if (revert) {
+    const stats = migrateBackward(file, filePath, lines);
+    totals.converted += stats.converted;
+    totals.failed += stats.failed;
+    totals.headers += stats.headers;
+    problems.push(...stats.issues);
+    const status = stats.failed
+      ? `⚠ ${stats.failed} 行需检查`
+      : stats.converted
+        ? `✓ ${stats.converted} 行`
+        : '—';
+    console.log(`${status.padEnd(22)} ${file}${stats.headers ? `（版本头 ${stats.headers}）` : ''}`);
+    continue;
+  }
+
+  const result = migrateForward(file, filePath, lines);
+  totals.converted += result.converted;
+  totals.failed += result.failed;
+  totals.aliased += result.aliased;
+  problems.push(...result.issues);
+  const status = result.failed
+    ? `⚠ ${result.failed} 行需检查`
+    : `✓ ${result.converted} 行`;
+  console.log(`${status.padEnd(22)} ${file}${result.aliased ? `（别名 ${result.aliased}）` : ''}`);
+}
+
+const summary = revert
+  ? `合计：回退 ${totals.converted} 行，版本头 ${totals.headers} 个，待检查 ${totals.failed} 行`
+  : `合计：转换 ${totals.converted} 行，别名 ${totals.aliased} 行，待检查 ${totals.failed} 行`;
+console.log(`\n${summary}`);
 for (const p of problems) {
   console.log(`  ✗ ${p.file}:${p.line} ${p.message}`);
 }

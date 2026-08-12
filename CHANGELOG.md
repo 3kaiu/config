@@ -6,6 +6,168 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [v8.8] — 2026-08-12
+
+### Changed (全面审计 — 构建链修复 + 纯 JS 净化脚本测试补全)
+
+- **构建链修复**: `npm install` 补齐缺失的 esbuild (node_modules 不完整导致 `npm run build` 长期不可用); build 重新可用, 产物与源码经测试验证功能等价 (仅 esbuild 版本格式差异)
+- **测试补全**: 新增 `test/cases/plain-js-purify.test.js` — 10 个无 TS 源码的手写净化脚本 (Meituan/Douyin/Kuaishou/Youku/Fanqie/Feishu/Dianping/WPS/Kugou/Kuwo) 首次获得回归测试 (13 用例), 覆盖核心净化 + $response 守卫 + 正常内容保留; 测试 55 → 68
+- **已知风险记录**: Kuwo 脚本将 `data` 对象整体清空 (`obj[k] = {}`) — 若 `rich.kuwo.cn` 的 data 含正常字段可能过度清理, 需实测确认 (未擅改脚本)
+
+### Notes
+
+- 全面审计确认无新缺口: src 脚本全部被插件引用 (零死代码); Scripts 产物与 src 时间戳差异仅为 git checkout 噪声; 测试覆盖完整 (文件名聚合但逐个覆盖)
+- 遗留: 83 个未提交改动 (自 v8.5 起各轮迭代) — 建议尽快 git commit 建立基线, 否则无法 bisect 定位回归
+- 纯 JS 净化脚本 (10 个) 未 TS 化 — 已知黑盒面, 本轮以测试补齐回归保护, TS 迁移列为后续项
+
+---
+
+## [v8.7] — 2026-08-12
+
+### Changed (模板↔产物双源漂移根治 — Architect 决策)
+
+- **根因定位**: surgio 生成依赖 `provider/` 目录 (仓库从未提交) → CI 的 surgio-build 从未成功 → Profile/ 实为手动维护, 模板与产物长期分叉
+- **新增 `tools/tpl-sync-check.mjs`** (双向一致性):
+  - 正向: 模板 (含 snippet include) 静态行必须完整存在于产物
+  - 反向: 产物静态段独有行报残留 (排除模板变量渲染值)
+  - Loon/QX 双端; 挂 CI (config-validate.yml step 5c) + npm `check:sync`
+- **新增 `provider/` 目录** (.gitkeep) — surgio 生成的硬性前置, 恢复生成链路
+- **消除既有漂移 (逐项仲裁取优)**:
+  - 产物补: STUN 通话白名单 5 条 (whatsapp/l.google/mozilla/twilio/zoom) + 误杀白名单 17 条 (umengcloud/kepler/suning/amap/pstatp/byteimg) + Kelee 4 插件行 — 模板有产物缺 (功能缺失)
+  - 模板补: `hijack-dns *:53 → *:0` (产物新)、httpdns 6 条 0.0.0.0 映射 (产物有模板缺)
+  - Gaming 组补 `Fallback` (模板新)
+  - 产物删: `DOMAIN-SUFFIX xboxlive.com Gaming` 死规则 (被 KEYWORD DIRECT 遮蔽)
+- **隐私安全面 (报告②) 复核**: stun 白名单先于泛拒绝 ✓; firebaseinstallations 保留 (FCM 依赖) ✓; PS/Nintendo/Xbox 不误杀 ✓ — 零改动
+
+### Notes
+
+- 网络性能 (报告①): tolerance=50 / interval=300 / Fallback 双节点容灾已是基准值, 不动作
+- npm scripts 新增: `check:sync` / `check:orphan`
+- eslint 范围已含 tools/ (上轮); 本轮新增工具均通过
+
+---
+
+## [v8.6] — 2026-08-12
+
+### Changed (网络底层能力审计 — MitM 最小范围)
+
+- **googlevideo 收窄**: MitM hostname 中 `*.googlevideo.com` 正包含 → `-*.googlevideo.com` 全排除 (Loon+QX 模板同步) — 视频流无任何 rewrite/script 规则消费, 解密纯属 CPU 开销; youtubei/www.youtube.com 净化不受影响 (规则层 DIRECT 放行不变)
+- **didi-pro v8.2**: 优惠券兜底规则 `^https?:` (全 URL 匹配, 会作用于其它插件域并掩盖孤儿判定) → 收窄为 `^https?:\/\/[^\/]*(didiglobal\.com|didi\.cn)`
+- **bilibili-pro v8.2**: 移除 `i0.hdslb.com` (视频 CDN, 无任何规则消费 → 纯解密无收益)
+- **新增 MitM 孤儿域校验器** `tools/mitm-orphan-check.mjs` + CI 挂载 (config-validate.yml step 5b):
+  - 判定: 方法 A (样本 URL 正则匹配) + 方法 B (注册根域对齐, 支持 com.cn 等二级 TLD)
+  - 本地模式严格阻断 (本地插件 + 主配置), 全量模式报告式 (镜像上游整包为上游既有设计)
+  - 豁免白名单: Qidian 黑盒 (\d 数字通配无法静态解析) / startup-adblock 通配 (ad.* splash.* flash.*) / iRingo bundle (gspe35-ssl.ls.apple.cn, *.smoot.apple.cn)
+  - 负面验证: 注入假孤儿域 → 退出码 1 正确阻断; 注入 `a-zzz.com` (真实广告域后缀) 不再误判
+- **eslint 范围扩展**: `tools/**/*.mjs` 纳入 lint (配置 node globals), package.json lint script 加 `tools/`
+
+### Notes
+
+- 全量模式仍报告上游 AllInOne/AdvertisingScript 的 ~160 个"白名单宽、规则窄"孤儿域 — 上游整包插件既有设计, 非本地治理范围, 维护镜像即可
+- DNS / GeoIP / ASN / IP 数据库层审计结论: 保持现状 (详见网络审计报告, 无需改动)
+
+---
+
+## [v8.5] — 2026-08-12
+
+### Changed (Rewrite & Script 四层资产专项审计 — 透明化/收敛化)
+
+- **jd-pro v7.9**: 4 条 `http-response` 脚本行 → 内联 `response-body-json-jq '.data = {}'` (与 JD.ts 行为等价, 去掉脚本运行时依赖); 移除**虚设 cron** (脚本无签到/领券/抽奖逻辑, 且 `{JD_CRON_EXP}` 未在 Argument 定义) 与 5 个死参数 (TIMEOUT/SIGNIN/LOTTERY/DEBUG/CRON_EXP)
+- **tieba-pro v7.9**: 移除虚设 cron 与 3 个虚设开关 (`TIEBA_HOME/POST/SEARCH_ENABLE` 无任何规则引用, 开关无效); JSON/Proto 净化脚本保留 (递归删除逻辑, jq 不可等价)
+- **死代码清理**: 删除 `src/JD.ts`、`src/Amap.ts`、`Scripts/JD.js` (jq 化后无引用); 测试 57 → 55 (移除 JD 用例)
+- **传递依赖收敛 (消除 gist/raw 单点)**: `loon-AllInOne.plugin` (22 条) + `loon-AdvertisingScript.plugin` (26 条) 的 `script-path` (startup.js / zheye.min.js) 全部重写指向 `ws.wenn.in/main/Mirror/scripts/`; 2 个脚本纳入每日镜像 (三重门禁 + PR 审核), 补丁固化进 `mirror-scripts.yml` (上游更新后强制重写, 自愈); MANIFEST 92 条目; 残留外部引用仅 2 处 `#!icon` (非功能性)
+- **注意**: 已安装的 Loon 端 AllInOne/AdvertisingScript 插件需重装才切换内嵌 script-path
+
+### Notes
+
+- 策略组主体 (`Proxy` url-test + `Fallback` 容灾 + 7 语义组) 经审计无需改动
+- 本地规则全量核查: 零重复、零遮蔽、无死规则 (脚本比对)
+- Privacy 列表 9 个泛 KEYWORD (`analytics.` 等) 误杀面已由本地规则覆盖主要场景, 维持现状
+- **v8.3 回退修复**: `revertConverter.mjs` 的 jq 映射漏输出 action 名, 导致 amap 3 条 `response-body-json-jq` 行缺失动作词 (无效行); 已修复转换器并补齐 3 行, 全量 rewrite 行合法性校验通过
+
+### Changed (分流架构优化: 最低延迟 / 最高命中 / 最低误杀)
+
+- **远端列表顺序重排** (Loon + QX 双端对齐): `China → Global → Advertising → Privacy → Hijacking → Epic` — 国际主流域 (Global 34,579 SUFFIX) 直接命中提前终止, 免于扫描广告/隐私/反劫持三列表 (约 4.2 万条规则); 已核实 Global 与广告/隐私/国内域交集为空, 广告拦截不受影响
+- **CI 纯净度检查**: `mirror-scripts.yml` 镜像后校验 Global 列表不含广告/隐私/国内域特征 — 上游若混入污染立即拦截, 保住远端顺序前提 (自愈)
+- **移除 `mtalk.google.com` 硬编码 IP** (Loon [Host] / QX [dns]): 国内无 GMS 推送场景, 且 Google IP 池会变, 硬编码迟早失效
+
+### Added
+
+- **README「节点与区域选择」**: 说明地区敏感服务 (流媒体/AI/游戏) 的手动切节点路径 + 可选区域 url-test 组模板 (机场订阅按地区拆分时启用)
+
+### Notes
+
+- 策略组主体 (`Proxy` url-test + `Fallback` 容灾 + 7 语义组) 经审计无需改动
+- 本地规则全量核查: 零重复、零遮蔽、无死规则 (脚本比对)
+- Privacy 列表 9 个泛 KEYWORD (`analytics.` 等) 误杀面已由本地规则覆盖主要场景, 维持现状
+- **v8.3 回退修复**: `revertConverter.mjs` 的 jq 映射漏输出 action 名, 导致 amap 3 条 `response-body-json-jq` 行缺失动作词 (无效行); 已修复转换器并补齐 3 行, 全量 rewrite 行合法性校验通过
+
+---
+
+## [v8.3] — 2026-08-11
+
+### Changed (Rewrite 新语法全量回退, 兼容 Loon 3.5.0)
+
+- **Rewrite 新语法 → 旧语法逆向迁移**: v8.0 迁移的 `request if`/`response if` 新语法行全量回退为旧语法, 适配已上线的 Loon 3.5.0 — 13 个插件共 147 行 (`^url reject-200` / `reject-dict` / `^url 302 $N` / `response-body-json-jq`), `Profile/Loon.lcf` 5 条 HTTPDNS reject 同步回退; 保留 v8.0 的 91 条无效规则修复与 bilibili/weibo/xhs 捕获组修复
+- **新增逆向转换工具** `tools/rewrite-migrate/revertConverter.mjs`: 与 `rewriteConverter.mjs` (旧→新) 互逆, `node tools/rewrite-migrate/index.mjs --revert` 一键回退; 待 Loon 3.5.1 (978) 发布后可用默认模式一键恢复
+- **51 个插件 `#!loon_version = 3.5.1(978)` → `3.2.4(787)`** (Loon 3.5.0 可解析的最小特性版本头, 覆盖 jq/正则捕获等全部在用特性)
+- **`loon.tpl`**: `hijack-dns = *:0` → `*:53` (v8.0 引入的全端口劫持为 3.5.1 特性, 3.5.0 回退为端口 53, 防 DNS 泄漏)
+- **测试修复**: 移除 `purify-scripts.test.js` 中对已删除 `Scripts/Amap.js` 的 3 个死用例 (amap 净化已由 `response-body-json-jq` 兜底, 57/57 通过)
+- **CI**: `config-validate.yml` HTTPDNS 双端对齐检查的 Loon 侧统计改为旧语法字面匹配 (`\/d reject-200`)
+
+### Notes
+
+- amap 保留 v7.9 起的 jq 兜底方案 (3 条 `response-body-json-jq` 替代原 13 条净化脚本), 未回滚为脚本方案
+- Mirror/ 目录为上游镜像, 保持原样; `Kelee/` 4 个自维护插件已是 3.2.4(787) 旧语法, 不受影响
+
+---
+
+## [v8.2] — 2026-08-11
+
+### Fixed (规则审计 2026-08: 最低延迟 / 最高命中 / 最低误杀)
+
+- **STUN 通话误杀根治** (`loon.tpl`)：泛 `DOMAIN-KEYWORD,stun,REJECT` 曾先于社交/流媒体规则命中，阻断 WhatsApp 通话 / Google Meet / 浏览器 WebRTC / Zoom。现于泛拒绝之前加入白名单：`stun.whatsapp.net→Social`、`stun.l.google.com→Streaming`、`stun.services.mozilla.com→Proxy`、`stun.twilio.com→Proxy`、`stun.zoom.us→Proxy`；泛 stun REJECT + DEST-PORT 3478 REJECT 保留为防泄漏兜底
+- **远端广告列表误杀白名单** (`loon.tpl` 新增 16 条本地规则，先于远端 REJECT 列表求值)：`msg.umengcloud.com`（友盟推送 MPS 网关，仅此域放行）、`kepler.jd.com`/`keplerapi.jd.com`/`mapi.m.jd.com`/`policy.jd.com`（京东购买页/开普勒 API）、`suning.com`（苏宁，覆盖 m.suning.com）、`apiinit.amap.com`（高德初始化）、`wixsite.com→Proxy`（Wix 建站）、pstatp/byteimg 内容图床 8 域（p3/s1/s2/s3/a3.pstatp.com、a3.bytecdn.cn、p3-pack/p6-pack.byteimg.com）；统计/广告域（ulogs.umeng.com、dm.pstatp.com 等）保持 REJECT
+- **`kelee.one` 插件拼写修正**：上游 blackmatrix7 AllInOne 的 `m\.meitun\.com` → `m\.meituan\.com`（Loon/QX 双端，rewrite 行 + MITM hostname 行）；补丁固化进 `mirror-scripts.yml`（每日镜像后强制修正，上游修复后自动 no-op 自愈）
+
+### Changed
+
+- **远端规则重排** (`loon.tpl`)：`loon-China.list` 提前至第一位 — 国内流量直接命中 DIRECT，不再扫描广告/隐私/反劫持三个 REJECT 列表
+- **`loon.tpl` 冗余清理**：移除 [Host] 段 6 条 httpdns 静态条目（与 `DOMAIN-KEYWORD,httpdns,REJECT` 重复）
+- **`gaming.tpl`**：移除被主配置 `DOMAIN-KEYWORD,xboxlive.com,DIRECT`（主机直连设计）遮蔽的死规则 `DOMAIN-SUFFIX,xboxlive.com,Gaming`
+- **`loon.tpl`**：Gaming 组补充 Fallback；Apple News 规则注明需美区节点（url-test 可能选到非美节点）
+- **`umetrip-remove-ads.plugin`**：移除 `msg.umengcloud.com` REJECT（设备级拒绝会误伤所有依赖友盟推送的 App，含航旅纵横自身），保留其余 9 个 SDK 跟踪域名
+
+### Notes
+
+- 本地规则(含插件)在 Loon 中先于远端规则求值，白名单得以覆盖远端列表的粗粒度 KEYWORD；远端镜像每日同步，若上游加回更粗的 KEYWORD 需复检本白名单
+- `Profile/Loon.lcf` 由 surgio-build CI（真实订阅）自动重新生成
+
+---
+
+## [v8.1] — 2026-08-11
+
+### Added
+
+- **App 清单驱动的缺口插件落实（4 个，iKeLee 转写）**：基于用户装机清单筛选，新增 4 个自托管净化插件至 `Kelee/`，其中 jq/规则类均为旧语法（`response-body-json-jq`/`reject-dict`），`#!loon_version = 3.2.4(787)`，兼容已上线的 Loon 3.5.0；因 3.5.1 (978) 尚未发布，未使用 3.5.1 新语法：
+  - **什么值得买去广告** (`Kelee/smzdm-remove-ads.plugin`) — iKeLee 2025-11-27 版转写，27 条 `response.json.jq` + 6 条 `response.body.mock` + 广告域名 REJECT，开屏/信息流/横幅/搜索/文章/红包弹窗全流程净化，无外部脚本依赖
+  - **盖得排行去广告** (`Kelee/guiderank-remove-ads.plugin`) — 11 条 jq 移除首页横幅/倒计时/团购/保险推广 + 8 条推广接口 mock，无外部脚本依赖
+  - **航旅纵横去广告（轻量版）** (`Kelee/umetrip-remove-ads.plugin`) — 开屏广告域名 REJECT（startup/discardrp.umetrip.com），首页信息流净化因上游脚本在 kelee.one 无法镜像而省略
+  - **12306去广告（轻量版）** (`Kelee/12306-remove-ads.plugin`) — ad.12306.cn 域名 REJECT 零 MitM 方案（原版依赖 kelee.one 外部脚本）
+
+### Changed
+
+- **loon.tpl**：新增 4 个插件引用（enabled=true），归入 `# — 🧹 iKeLee 转写新增 (2026-08) —` 分组
+- **sync-kelee.yml**：注明 4 个转写插件为自维护，不参与上游同步
+
+### Notes
+
+- 兼容性: 4 个新插件改为旧语法转写并经 `jq` 实跑验证，`#!loon_version = 3.2.4(787)`（可莉原插件同款声明），Loon 3.5.0 可直接加载；仓库其他插件仍为 3.5.1 (978) 新语法，需等待 3.5.1 正式发布
+- 测试: `wiring-check` 全绿；`npm test` 57/60 通过（3 失败为 Amap.js 构建产物缺失的环境性问题，与本次改动无关）
+- 未引入: 12306/航旅纵横完整版依赖的 kelee.one 外部 JS 无法镜像（Cloudflare 防护），保持纯域名/纯 jq 零外部依赖方案
+
+---
+
 ## [v8.0] — 2026-08-10
 
 ### Added

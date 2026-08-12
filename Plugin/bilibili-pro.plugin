@@ -1,11 +1,11 @@
-#!name=B 站去广告 Pro v7.9
+#!name=B 站去广告 Pro v8.2
 #!desc=B 站 — 首页/视频推荐/直播/动态全流程净化 + 高清画质解锁
-#!version=7.9
+#!version=8.2
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bilibili.png
 #!system = iOS,iPadOS,macOS
-#!loon_version = 3.5.1(978)
+#!loon_version = 3.2.4(787)
 
 [Argument]
 ENABLE_BILI=switch,"true","false",tag=总开关
@@ -49,8 +49,8 @@ cron {BILI_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/Bilibili.js, ti
 
 [Rewrite]
 # 港澳台地区解锁
-request if ${url} ~= /^https?:\/\/app\.bilibili\.com\/(x\/)?(intl|dm|reply|history|v\d\/(fav|msgfeed)).+?(&s_locale=zh-Hans_[A-Z]{2})(.+?)(&sim_code=\d+)(.+)/i as urlMatch && ${ENABLE_BILI} == true then redirect(302, "${urlMatch.1}${urlMatch.2}${urlMatch.3}${urlMatch.4}${urlMatch.5}&s_locale=zh-Hans_PH&sim_code=51503${urlMatch.7}")
-request if ${url} ~= /^https?:\/\/passport\.bilibili\.com\/x\/intl\/passport-login\/.+(&s_locale=zh-Hans_[A-Z]{2})(.+)(&sim_code=\d+)(.+)/i as urlMatch && ${ENABLE_BILI} == true then redirect(302, "${urlMatch.1}${urlMatch.2}&s_locale=zh-Hans_PH&sim_code=51503${urlMatch.4}")
+^https?:\/\/app\.bilibili\.com\/(x\/)?(intl|dm|reply|history|v\d\/(fav|msgfeed)).+?(&s_locale=zh-Hans_[A-Z]{2})(.+?)(&sim_code=\d+)(.+) 302 $1$2$3$4$5&s_locale=zh-Hans_PH&sim_code=51503$7 enable={ENABLE_BILI}
+^https?:\/\/passport\.bilibili\.com\/x\/intl\/passport-login\/.+(&s_locale=zh-Hans_[A-Z]{2})(.+)(&sim_code=\d+)(.+) 302 $1$2&s_locale=zh-Hans_PH&sim_code=51503$4 enable={ENABLE_BILI}
 
 [Rule]
 DOMAIN-SUFFIX, bilibili.com, DIRECT
@@ -58,4 +58,5 @@ DOMAIN-SUFFIX, bilivideo.com, DIRECT
 DOMAIN-SUFFIX, hdslb.com, DIRECT
 
 [MitM]
-hostname = %APPEND% api.bilibili.com, mobi.bilibili.com, live.bilibili.com, i0.hdslb.com, app.bilibili.com, grpc.biliapi.net
+# v8.2 (2026-08 审计): 移除 i0.hdslb.com (视频 CDN, 无任何规则消费 → 纯解密无收益)
+hostname = %APPEND% api.bilibili.com, mobi.bilibili.com, live.bilibili.com, app.bilibili.com, grpc.biliapi.net

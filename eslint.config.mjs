@@ -114,4 +114,17 @@ export default [
     },
     rules: { "no-unused-vars": "off" },
   },
+  {
+    files: ["tools/**/*.mjs"],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: "module",
+      globals: {
+        process: "readonly",
+        console: "readonly",
+        URL: "readonly",
+      },
+    },
+    rules: { "no-unused-vars": "off" },
+  },
 ];

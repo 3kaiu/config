@@ -151,12 +151,33 @@ jobs:
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
 
+      # ── 5b. MitM 孤儿域校验 (最小范围原则) ──
+      # 本地插件/主配置的正包含 hostname 须被至少一条 rewrite/script 规则消费,
+      # 无消费 = 纯解密无收益 (扩大证书暴露面)。bundle 型 (iRingo/DualSubs) 与
+      # 通配设计 (startup-adblock 的 ad.*/splash.*/flash.*) 已纳入豁免, 仅报告不阻断。
+      - name: MitM orphan hostname check (local)
+        run: |
+          echo "## MitM Orphan Hostname Check (Local)" >> $GITHUB_STEP_SUMMARY
+          node tools/mitm-orphan-check.mjs --local 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          # 本地模式严格阻断 (孤儿 = 解密面扩张), 但豁免已声明的 bundle/黑盒/通配域
+          exit ${PIPESTATUS[0]}
+
+      # ── 5c. 模板↔产物一致性 (防双源漂移) ──
+      # template/loon.tpl + snippet 的静态行必须完整存在于 Profile/Loon.lcf (反向同理)。
+      # 根因 (2026-08 审计): surgio 需 provider/ 目录 (本地/CI 无 → 生成失败),
+      # 产物实为手动维护 → 模板改动易遗忘同步。此检查保证任一方向改动都会在 CI 暴露。
+      - name: Template-product sync check
+        run: |
+          echo "## Template ↔ Product Sync" >> $GITHUB_STEP_SUMMARY
+          node tools/tpl-sync-check.mjs 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          exit ${PIPESTATUS[0]}
+
       # ── 6. HTTPDNS Rewrite 对齐检查 ──
       - name: HTTPDNS rewrite alignment check
         run: |
           echo "## HTTPDNS Rewrite Alignment" >> $GITHUB_STEP_SUMMARY
-          # 统计 Loon [Rewrite] 段中以 /d/ 结尾的 HTTPDNS reject 规则数 (Loon 3.5.1(978)+ 新语法)
-          loon_httpdns=$(grep -cE 'then reject\(200\)$' Profile/Loon.lcf || echo 0)
+          # 统计 Loon [Rewrite] 段中以 /d/ 结尾的 HTTPDNS reject 规则数 (旧语法, 字面匹配转义形式)
+          loon_httpdns=$(grep -Fc '\/d reject-200' Profile/Loon.lcf || echo 0)
           # 统计 QX [rewrite_local] 段中 url reject-200 且含 /d 的 HTTPDNS 规则数
           qx_httpdns=$(grep '/d url reject-200' Profile/QX.conf | wc -l || echo 0)
           echo "| Config | HTTPDNS rewrite count |" >> $GITHUB_STEP_SUMMARY

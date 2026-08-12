@@ -1,0 +1,19 @@
+#!name=航旅纵横去广告
+#!desc=航旅纵横 — 移除开屏广告/信息流广告 (原版仅 Loon 3.5.1, 精简版兼容 Loon 3.5.0)
+#!version=1.1
+#!author=3kaiu (原版 可莉 iKeLee, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/umetrip.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+
+[Rule]
+DOMAIN,aaid.uyunad.com,REJECT,extended-matching,pre-matching
+DOMAIN,acs4baichuan.m.taobao.com,REJECT,extended-matching,pre-matching
+DOMAIN,adashxgc.ut.taobao.com,REJECT,extended-matching,pre-matching
+DOMAIN,analytics-api.smzdm.com,REJECT,extended-matching,pre-matching
+DOMAIN,baichuan-sdk.alicdn.com,REJECT,extended-matching,pre-matching
+DOMAIN,dgstatic.jd.com,REJECT,extended-matching,pre-matching
+DOMAIN,sec.umeng.com,REJECT,extended-matching,pre-matching
+DOMAIN,ulogs.umeng.com,REJECT,extended-matching,pre-matching
+DOMAIN,ynuf.aliapp.org,REJECT,extended-matching,pre-matching

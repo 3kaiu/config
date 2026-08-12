@@ -37,6 +37,21 @@ Loon & Quantumult X 代理配置 — 高质量多引擎去广告 · Apple 原生
 - **安全分发**：每日镜像 + SHA256 校验 + 门禁拦截 + CDN 内容验证
 - **CI/CD**：配置验证（10 项检查）+ 上游健康探活 + 脚本测试
 
+## 节点与区域选择
+
+- **自动选点**：`Proxy` 组为 url-test 自动选择最低延迟节点（300s 检测，50ms 容差），默认所有流量共用该节点
+- **地区敏感服务**：流媒体（Netflix/Disney+ 等地区解锁）、AI（ChatGPT/Claude 等地区可用性）、游戏加速对出口地区敏感——自动选出的节点可能不满足。此时将 `Streaming` / `AI` / `Gaming` 组手动切换到对应地区节点即可（Loon App 内点击策略组选择）
+- **零代理姿态**：`Final` 组切 `DIRECT` 即全局直连（长尾域名本地解析 + 直连）
+- **区域分组模板**（可选）：若机场订阅按地区拆分多个 URL，可在 `surgio.conf.js` 增加 provider 并在 `loon.tpl` [Proxy Group] 启用区域 url-test 组：
+
+  ```ini
+  # 按节点名正则分组（如 "香港|HK|Hong Kong"），URL 用 proxy-test-url
+  HK = url-test, "香港|HK|Hong Kong", url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
+  JP = url-test, "日本|JP|Japan", url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
+  US = url-test, "美国|US|America", url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
+  # 随后把 Streaming / AI / Gaming 组的可选项改为 "select, HK, JP, US, Proxy, Fallback, DIRECT"
+  ```
+
 ## 文档
 
 - [分发基础设施台账](doc/infrastructure.md) — CDN 架构、容灾流程、DNS 隐私说明

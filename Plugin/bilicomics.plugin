@@ -6,49 +6,49 @@
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bilibili.png
 #!system = iOS,iPadOS,macOS
-#!loon_version = 3.5.1(978)
+#!loon_version = 3.2.4(787)
 
 [Rewrite]
 # 开屏 / 活动弹窗
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/ListFlash/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/ListFlash reject-200
 # 首页轮播 Banner
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/Banner/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/Banner reject-200
 # App 初始化 (开屏、运营位、商城入口、活动入口)
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/AppInit/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/AppInit reject-200
 # 首页推荐：去运营卡片
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Home\/HomeFeed/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Home\/HomeFeed reject-200
 # 首页 Tab 精简
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetClassPageAllTabs/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetClassPageAllTabs reject-200
 # 活动 Tab
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetActivityTab/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetActivityTab reject-200
 # 气泡
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetBubbles/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetBubbles reject-200
 # 福利横幅
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetWelfareBanner/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetWelfareBanner reject-200
 # 运营横幅
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetOperaterBanner/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetOperaterBanner reject-200
 # 通用横幅/畅读卡
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetCommonBanner/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetCommonBanner reject-200
 # Hook Banner
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetHookBanner/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/GetHookBanner reject-200
 # 我的页营销（只保留"我的已购"）
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/user\.v\d\.User\/UCenterConf/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/user\.v\d\.User\/UCenterConf reject-200
 # 营销中心入口
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/user\.v\d\.User\/GetMarketingCenterInfo/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/user\.v\d\.User\/GetMarketingCenterInfo reject-200
 # 搜索框填词
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/search\.v\d\.Search\/GetSearchBoxKeyword/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/search\.v\d\.Search\/GetSearchBoxKeyword reject-200
 # 搜索页展示
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/SearchDisplay/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/SearchDisplay reject-200
 # 搜索页 Banner
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/SearchBanner/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/SearchBanner reject-200
 # 搜索页猜你喜欢
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/search\.v\d\.Search\/GetGuessLabel/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/search\.v\d\.Search\/GetGuessLabel reject-200
 # 热搜
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/search\.v\d\.Search\/GetHotSearch/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/search\.v\d\.Search\/GetHotSearch reject-200
 # 红点
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/line\.v\d\.Line\/TabRedDot/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/line\.v\d\.Line\/TabRedDot reject-200
 # 推荐
-request if ${url} ~= /^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/Recommend/i then reject(200)
+^https:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/Recommend reject-200
 
 [MitM]
 hostname = %APPEND% manga.bilibili.com

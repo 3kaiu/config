@@ -49,7 +49,6 @@ server=/*.douyin.com/119.29.29.29
 server=/*.163.com/119.29.29.29
 server=/*.mi.com/223.5.5.5
 server=/*.icloud.com.cn/223.5.5.5
-address=/mtalk.google.com/108.177.125.188
 
 [policy]
 url-latency-benchmark=Proxy, server_regex=., check-interval=300, alive-checking=false, tolerance=50, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Proxy.png
@@ -70,12 +69,13 @@ static=Social, Proxy, Fallback, direct, img-url=https://raw.githubusercontent.co
 # 容灾: Proxy url-latency-benchmark (server_regex=.) 自动纳管新节点 — 订阅加第二节点即双节点容灾 (见 README 3.6)
 
 [filter_remote]
+# 排序与 Loon 侧对齐 (2026-08 审计): China 首位 — 国内流量先命中 direct; Global 次位 — 国际主流域提前终止, 避免扫描广告/隐私/反劫持列表
+https://ws.wenn.in/main/Mirror/rules/qx-China.list, tag=🇨🇳 国内域名, force-policy=direct, update-interval=86400, opt-parser=true, enabled=true
+https://ws.wenn.in/main/Mirror/rules/qx-Global.list, tag=🌍 国际域名, force-policy=Proxy, update-interval=86400, opt-parser=true, enabled=true
 https://ws.wenn.in/main/Mirror/rules/qx-Advertising.list, tag=🚫 广告域名, force-policy=reject, update-interval=86400, opt-parser=true, enabled=true
 https://ws.wenn.in/main/Mirror/rules/qx-Privacy.list, tag=🔒 隐私保护, force-policy=reject, update-interval=86400, opt-parser=true, enabled=true
 https://ws.wenn.in/main/Mirror/rules/qx-Hijacking.list, tag=🛡️ 反劫持, force-policy=reject, update-interval=86400, opt-parser=true, enabled=true
 https://ws.wenn.in/main/Mirror/rules/qx-Epic.list, tag=🎮 Epic Games, force-policy=Proxy, update-interval=86400, opt-parser=true, enabled=true
-https://ws.wenn.in/main/Mirror/rules/qx-China.list, tag=🇨🇳 国内域名, force-policy=direct, update-interval=86400, opt-parser=true, enabled=true
-https://ws.wenn.in/main/Mirror/rules/qx-Global.list, tag=🌍 国际域名, force-policy=Proxy, update-interval=86400, opt-parser=true, enabled=true
 
 [filter_local]
 dest-port, 5223, direct

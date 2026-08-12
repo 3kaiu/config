@@ -5,7 +5,7 @@
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Privacy.png
 #!system = iOS,iPadOS,macOS
-#!loon_version = 3.5.1(978)
+#!loon_version = 3.2.4(787)
 
 [Argument]
 PRIVACY_ENABLE=switch,"true","false",tag=隐私防护总开关,desc=开启后 REJECT 所有追踪与分析统计域名（纯 DNS 拦截，无需 MitM）

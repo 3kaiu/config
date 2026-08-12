@@ -1,6 +1,6 @@
 {
   "$comment": "镜像文件哈希清单 — 由 mirror-scripts.yml 维护; 变更会出现在镜像 PR 的 diff 中, 合并前请核对 source 变更是否符合预期",
-  "generated_at": "2026-07-30T03:29:55Z",
+  "generated_at": "2026-08-12T00:00:00Z",
   "files": {
     "netease.adblock.js": {
       "source_url": "https://gist.githubusercontent.com/ddgksf2013/4f53b7c6083678df25fecc8ff68b52c4/raw/netease.adblock.js",
@@ -541,6 +541,18 @@
       "sha256": "7a0d8e94993f48c622187029d8ddadd77005a422c54f7a0757906c80b22b466b",
       "bytes": 22764,
       "fetched_at": "2026-07-30T03:29:55Z"
+    },
+    "scripts/startup.js": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/startup/startup.js",
+      "sha256": "431801d369b495d34b7a1c1d6cc43abdb1d159dd0d82491ee756c0ae834b625c",
+      "bytes": 12208,
+      "fetched_at": "2026-08-12T00:00:00Z"
+    },
+    "scripts/zheye.min.js": {
+      "source_url": "https://gist.githubusercontent.com/blackmatrix7/f5f780d0f56b319b6ad9848fd080bb18/raw/zheye.min.js",
+      "sha256": "41863c4c0ce5eefbdda9a5a96d7605bde70a89a9cc24ee0875f3d751aed2f757",
+      "bytes": 32349,
+      "fetched_at": "2026-08-12T00:00:00Z"
     }
   }
 }

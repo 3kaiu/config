@@ -5,7 +5,7 @@
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Feishu.png
 #!system = iOS,iPadOS,macOS
-#!loon_version = 3.5.1(978)
+#!loon_version = 3.2.4(787)
 
 [Argument]
 FEISHU_ENABLE=switch,"true","false",tag=飞书去广告总开关,desc=开启后净化信息流推广与推荐位广告

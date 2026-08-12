@@ -1,0 +1,12 @@
+#!name=12306 出行去广告
+#!desc=12306 出行 — 移除开屏广告/广告位 (原版仅 Loon 3.5.1, 精简版兼容 Loon 3.5.0)
+#!version=1.1
+#!author=3kaiu (原版 可莉 iKeLee, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/12306.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+
+[Rule]
+DOMAIN,ad.12306.cn,REJECT,extended-matching,pre-matching
+DOMAIN,mapi.umengcloud.com,REJECT,extended-matching,pre-matching

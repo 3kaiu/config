@@ -108,6 +108,13 @@ jobs:
           mirror "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js" \
             "youtube.response.js" "Maasea / youtube.response.js"
 
+          # AllInOne 的传递性脚本依赖 (2026-08 审计): 消除 gist/raw 单点,
+          # 插件内 22 条 script-path 由下方补丁重写指向自建 CDN
+          mirror "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/startup/startup.js" \
+            "scripts/startup.js" "blackmatrix7 / startup.js"
+          mirror "https://gist.githubusercontent.com/blackmatrix7/f5f780d0f56b319b6ad9848fd080bb18/raw/zheye.min.js" \
+            "scripts/zheye.min.js" "blackmatrix7 gist / zheye.min.js"
+
           # ═══════════════ 解析器脚本 (订阅解析时执行, 可见全部节点凭据) ═══════════════
           mirror "https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/resource-parser.js" \
             "rules/qx-resource-parser.js" "KOP-XIAO / resource-parser.js"
@@ -129,6 +136,17 @@ jobs:
               "rules/loon-$n.list" "blackmatrix7 Loon / $n.list"
           done
 
+          # ── Global 列表纯净度检查 (2026-08 审计) ──
+          # 远端顺序已调整为 China → Global → Advertising → ... (国际流量提前终止),
+          # 前提是 Global 列表不含广告/隐私/国内域 — 上游更新若引入污染立即拦截 (fail)
+          GLOBAL_BAD='(doubleclick|googleadservices|googletagmanager|googlesyndication|google-analytics|app-measurement|crashlytics|appsflyer|mixpanel|segment\.io|amplitude|branch\.io|adjust\.com|kochava|sentry\.io|qq\.com|taobao|tmall|baidu\.com|163\.com|aliyun|jd\.com|bilibili|meituan|douyin)'
+          if grep -E "^(DOMAIN-SUFFIX|DOMAIN-KEYWORD|DOMAIN),.*${GLOBAL_BAD}" Mirror/rules/loon-Global.list Mirror/rules/qx-Global.list; then
+            echo "❌ Global 列表检测到广告/隐私/国内域污染 (见上) — 已拦截, 需复检远端顺序前提"
+            FAIL=$((FAIL+1))
+          else
+            echo "✅ Global 列表纯净度检查通过: 无广告/隐私/国内域"
+          fi
+
           # ═══════════════ QX rewrite 模块 ═══════════════
           mirror "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/QuantumultX/AllInOne/AllInOne.conf" \
             "rules/qx-AllInOne.conf" "blackmatrix7 / AllInOne.conf"
@@ -140,12 +158,24 @@ jobs:
             "rules/qx-bilibili.conf" "app2smile / bilibili-qx.conf"
 
           # ═══════════════ Loon rewrite 插件 ═══════════════
-          # 注: 这两个插件内部 script-path 仍指向 blackmatrix7 raw (传递性依赖),
-          # 镜像仅消除插件文件本身的单点, 传递引用风险见 doc/infrastructure.md
+          # 注: 插件内 script-path 传递性依赖已收敛 (2026-08), 见下方补丁;
+          # 镜像消除插件文件本身 + 22 条脚本引用的全部单点
           mirror "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AllInOne/AllInOne.plugin" \
             "rules/loon-AllInOne.plugin" "blackmatrix7 Loon / AllInOne.plugin"
           mirror "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AdvertisingScript/AdvertisingScript.plugin" \
             "rules/loon-AdvertisingScript.plugin" "blackmatrix7 Loon / AdvertisingScript.plugin"
+
+          # ── 本地补丁 (2026-08 审计): 上游拼写错误 m.meitun.com → m.meituan.com ──
+          # 覆盖 rewrite 行 (转义形式 m\.meitun\.com) 与 MITM hostname 行 (裸形式);
+          # 每日镜像后强制修正, 若上游已修复则为 no-op (自愈)
+          sed -i 's/m\\.meitun\\.com/m\\.meituan\\.com/g; s/m\.meitun\.com/m\.meituan\.com/g' \
+            Mirror/rules/loon-AllInOne.plugin Mirror/rules/qx-AllInOne.conf
+
+          # ── 本地补丁 (2026-08 审计): script-path 传递依赖收敛到自建 CDN ──
+          # AllInOne (22 条) / AdvertisingScript (26 条) 内部 script-path 原直连
+          # blackmatrix7 的 raw/gist (上游可删改, 单点); 改为镜像路径, 上游更新后强制重写 (自愈)
+          sed -i 's|https://gist.githubusercontent.com/blackmatrix7/f5f780d0f56b319b6ad9848fd080bb18/raw/zheye.min.js|https://ws.wenn.in/main/Mirror/scripts/zheye.min.js|g; s|https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/startup/startup.js|https://ws.wenn.in/main/Mirror/scripts/startup.js|g' \
+            Mirror/rules/loon-AllInOne.plugin Mirror/rules/loon-AdvertisingScript.plugin
 
           # ═══════════════ NSRingo bundle.js (版本固定 release 资产) ═══════════════
           # NSRingo .plugin 引用的 bundle.js; 若上游清理旧 release 会 404, 镜像消除单点

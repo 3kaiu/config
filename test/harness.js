@@ -4,7 +4,7 @@
  * 用法:
  *   const { createSandbox, runScript } = require("./harness");
  *   const sb = createSandbox({ mode: "loon", request: {...}, response: { body: "..." } });
- *   const state = await runScript("Scripts/Amap.js", sb);
+ *   const state = await runScript("Scripts/Zhihu.js", sb);
  *   // state.doneCalls / state.notifications / state.httpCalls / state.store / state.logs
  */
 "use strict";

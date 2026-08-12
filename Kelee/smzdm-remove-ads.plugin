@@ -1,0 +1,67 @@
+#!name=什么值得买去广告
+#!desc=什么值得买 — 开屏/信息流/横幅/搜索页/文章内广告净化 + 活动皮肤移除 + 我的页精简 (iKeLee 2025-11-27 版转写, 旧语法兼容 Loon 3.5.0)
+#!version=1.1
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/smzdm.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+
+[Rule]
+DOMAIN,adx-api.zdmimg.com,REJECT,extended-matching,pre-matching
+
+[Rewrite]
+# ── 红包/活动页 URL 拒绝 ─────────────────
+^https:\/\/h5\.smzdm\.com\/user\/coupon\/coupon_list\? reject
+
+# ── 全局配置净化 (util/update) ───────────
+^https:\/\/app-api\.smzdm\.com\/util\/update$ response-body-json-jq 'if (getpath(["data"]) | has("silence_local_push")) then (setpath(["data","silence_local_push"]; 0)) else . end'
+^https:\/\/app-api\.smzdm\.com\/util\/update$ response-body-json-jq 'if (getpath(["data"]) | has("baichuan_redirect_switch")) then (setpath(["data","baichuan_redirect_switch"]; 0)) else . end'
+^https:\/\/app-api\.smzdm\.com\/util\/update$ response-body-json-jq 'delpaths([["data","silence_local_push_msg"]])'
+^https:\/\/app-api\.smzdm\.com\/util\/update$ response-body-json-jq 'delpaths([["data","video_cache_num_configs"]])'
+^https:\/\/app-api\.smzdm\.com\/util\/update$ response-body-json-jq 'delpaths([["data","haojia_widget"]])'
+^https:\/\/app-api\.smzdm\.com\/util\/update$ response-body-json-jq 'delpaths([["data","widget"]])'
+^https:\/\/app-api\.smzdm\.com\/util\/update$ response-body-json-jq 'delpaths([["data","operation_float"]])'
+^https:\/\/app-api\.smzdm\.com\/util\/update$ response-body-json-jq 'def r: if type=="object" then if has("ad_campaign_name") and (.ad_campaign_name|type=="string") and (.ad_campaign_name|test("\\S")) then empty else . end elif type=="array" then map(r) else . end; .data.operation_float |= map(map(r))'
+
+# ── 首页信息流净化 (v3/home) ─────────────
+^https:\/\/homepage-api\.smzdm\.com\/v3\/home\? response-body-json-jq '.data.component |= map( if (.zz_content | type) == "array" then .zz_content |= map( select( ( (.ad_campaign_id? | type == "string" and length > 0)// false ) or ( (.tag? | type == "string" and length > 0)// false ) or ( (.model_type? == "ads" and (type == "string"))// false ) | not ) ) else . end ) | .data.component |= map( select(.zz_type == "circular_banner" or .zz_type == "filter" or .zz_type == "list") ) | .data.component |= map( .zz_content |= ( if type == "array" then map( if type == "object" and (.article_channel_type// "") == "questionnaire" then empty else . end ) else . end ) ) | del(.data.theme) | .data.component |= map( if .zz_content | type == "object" then .zz_content |= del(.circular_banner_option) else . end )'
+
+# ── 好价首页净化 ────────────────────────
+^https:\/\/haojia-api\.smzdm\.com\/home\/list\? response-body-json-jq 'delpaths([["data","header_operation","theme"]])'
+^https:\/\/haojia-api\.smzdm\.com\/home\/list\? response-body-json-jq '.data.rows |= map(select(.cell_type == "39001")) | .data.banner_v2 |= map(select(.cell_type == "21028"))'
+
+# ── 好价详情净化 ────────────────────────
+^https:\/\/haojia\.m\.smzdm\.com\/detail_modul\/user_related_modul\? response-body-json-jq 'delpaths([["data","super_coupon"]])'
+^https:\/\/haojia\.m\.smzdm\.com\/detail_modul\/other_modul\? response-body-json-jq 'delpaths([["data","banner"]])'
+^https:\/\/haojia-api\.smzdm\.com\/detail\/\d+\? response-body-json-jq 'delpaths([["data","quan_log"]])'
+^https:\/\/haojia-cdn\.smzdm\.com\/preload\/\d+\/fiphone\/v\d+_\d+_\d+\/wx\d+\/im\d+\/[0-9a-z]+\/[0-9a-z]+\.json$ response-body-json-jq 'delpaths([["data","quan_log"]])'
+
+# ── 我的页 VIP 净化 ─────────────────────
+^https:\/\/user-api\.smzdm\.com\/vip$ response-body-json-jq 'delpaths([["data","activity_entrance_info"]])'
+^https:\/\/user-api\.smzdm\.com\/vip$ response-body-json-jq 'delpaths([["data","big_banner"]])'
+^https:\/\/user-api\.smzdm\.com\/vip$ response-body-json-jq 'delpaths([["data","top_banner"]])'
+^https:\/\/user-api\.smzdm\.com\/vip$ response-body-json-jq 'delpaths([["data","banner_switch"]])'
+^https:\/\/user-api\.smzdm\.com\/vip$ response-body-json-jq 'delpaths([["data","yaoqingshaiwu"]])'
+
+# ── 搜索页净化 ──────────────────────────
+^https:\/\/s-api\.smzdm\.com\/sou\/list_v10\? response-body-json-jq '.data.rows |= map(select(.model_type != "ads")) | .data.top_aladdin |= map(select(has("ad") | not))'
+^https:\/\/s-api\.smzdm\.com\/sou\/filter\/tags\/hot_tags\? response-body-json-jq 'delpaths([["data","search_faxian"]])'
+^https:\/\/s-api\.smzdm\.com\/sou\/filter\/tags\/hot_tags\? response-body-json-jq 'delpaths([["data","tonglan"]])'
+^https:\/\/s-api\.smzdm\.com\/sou\/filter\/tags\/hot_tags\? response-body-json-jq 'delpaths([["data","hongbao"]])'
+^https:\/\/s-api\.smzdm\.com\/sou\/filter\/tags\/hot_tags\? response-body-json-jq '.data.search_hot.home |= map(select(.article_tag.article_title != "广告")) | .data.search_hot.home |= map(select(has("pos")))'
+
+# ── 文章页净化 ──────────────────────────
+^https:\/\/post\.m\.smzdm\.com\/ajax_app\/ajax_get_footer_list\? response-body-json-jq 'delpaths([["data","tuiguang_ad"]])'
+^https:\/\/post\.m\.smzdm\.com\/ajax_app\/ajax_get_footer_list\? response-body-json-jq 'delpaths([["data","activity_banner"]])'
+
+# ── 空响应 Mock (开屏/频道/气泡/搜索词/弹窗) ──
+^https:\/\/app-api\.smzdm\.com\/util\/loading\? reject-dict
+^https:\/\/app-api\.smzdm\.com\/mychannel\/list$ reject-dict
+^https:\/\/user-api\.smzdm\.com\/vip\/bottom_card_list\? reject-dict
+^https:\/\/article-api\.smzdm\.com\/publish\/get_bubble\? reject-dict
+^https:\/\/s-api\.smzdm\.com\/sou\/search_default_keyword\? reject-dict
+^https:\/\/s-api\.smzdm\.com\/sou\/popup_coupon\? reject-dict
+
+[MitM]
+hostname = %APPEND% app-api.smzdm.com, homepage-api.smzdm.com, h5.smzdm.com, haojia-api.smzdm.com, haojia.m.smzdm.com, user-api.smzdm.com, article-api.smzdm.com, s-api.smzdm.com, haojia-cdn.smzdm.com, post.m.smzdm.com, adx-api.zdmimg.com

@@ -5,7 +5,7 @@
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Kuwo_Music.png
 #!system = iOS,iPadOS,macOS
-#!loon_version = 3.5.1(978)
+#!loon_version = 3.2.4(787)
 
 [Argument]
 KUWO_ENABLE=switch,"true","false",tag=是否开启酷我音乐去广告,desc=开启后净化酷我音乐广告服务响应数据

@@ -6,7 +6,7 @@
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Goofish.png
 #!system = iOS,iPadOS,macOS
-#!loon_version = 3.5.1(978)
+#!loon_version = 3.2.4(787)
 
 [Rule]
 # 优酷推广域名
@@ -14,9 +14,9 @@ DOMAIN-SUFFIX,iyes.youku.com,REJECT
 
 [Rewrite]
 # 开屏广告
-request if ${url} ~= /^https?:\/\/(g-)?acs\.m\.goofish\.com\/gw\/mtop.*splash\.ads/i then reject(200)
+^https?:\/\/(g-)?acs\.m\.goofish\.com\/gw\/mtop.*splash\.ads reject-200
 # 广告曝光
-request if ${url} ~= /^https?:\/\/(g-)?acs\.m\.goofish\.com\/gw\/mtop\.idle\.ad\.expose/i then reject(200)
+^https?:\/\/(g-)?acs\.m\.goofish\.com\/gw\/mtop\.idle\.ad\.expose reject-200
 
 [Script]
 # ⚠️ 修复(v7.3): 迁移到 [Script] 段, 添加 requires-body + timeout

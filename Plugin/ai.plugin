@@ -5,7 +5,7 @@
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bot.png
 #!system = iOS,iPadOS,macOS
-#!loon_version = 3.5.1(978)
+#!loon_version = 3.2.4(787)
 
 [Argument]
 AI_Policy=select,"AI","Proxy","DIRECT",tag=AI分流策略组,desc=请选择或输入你的AI服务分流策略组名称

@@ -8,8 +8,10 @@
     "generate": "surgio generate",
     "preview": "surgio preview",
     "test": "node test/run-tests.js",
-    "lint": "eslint Scripts/ test/",
-    "postinstall": "patch-package"
+    "lint": "eslint Scripts/ test/ tools/",
+    "postinstall": "patch-package",
+    "check:sync": "node tools/tpl-sync-check.mjs && node tools/tpl-sync-check.mjs --qx",
+    "check:orphan": "node tools/mitm-orphan-check.mjs --local"
   },
   "dependencies": {
     "surgio": "^3.17.0"

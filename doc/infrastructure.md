@@ -29,7 +29,7 @@
 
 ## 3. 完整性保障
 
-- `mirror-scripts.yml`：每日 03:00 从上游拉取 **59 个资源**（脚本 7 + 解析器 6 + 双端规则列表 12 + QX rewrite 模块 18 + Loon rewrite 插件 2 + NSRingo bundle 8 + NSRingo Loon 插件 6），经三重门禁（`*.js` 语法 / 体积≥200B / 非 HTML）后写入 `Mirror/`，**走 PR 人工审核**合并（不再直推 main）。Profile 全部远程引用已收敛到 `ws.wenn.in/main/Mirror/`。
+- `mirror-scripts.yml`：每日 03:00 从上游拉取 **61 个资源**（脚本 9 + 解析器 6 + 双端规则列表 12 + QX rewrite 模块 18 + Loon rewrite 插件 2 + NSRingo bundle 8 + NSRingo Loon 插件 6），经三重门禁（`*.js` 语法 / 体积≥200B / 非 HTML）后写入 `Mirror/`，**走 PR 人工审核**合并（不再直推 main）。Profile 全部远程引用已收敛到 `ws.wenn.in/main/Mirror/`。
 - `Mirror/MANIFEST.json`：全部镜像文件的 source_url + sha256 清单，上游变更在 PR diff 中高亮。
 - `cdn-verify.yml`：每日 02:34 拉取 CDN 全量分发文件与仓库做 sha256 比对，不一致开 Issue（标签 `cdn-verify`），可选 Bark 告警（Secret `BARK_PUSH`）。
 - `upstream-health.yml`：上游源可达性探活（状态码级）。
@@ -37,7 +37,8 @@
 
 ## 3b. 残留风险（知情项）
 
-1. **blackmatrix7 Loon rewrite 插件的传递性引用**：`Mirror/rules/loon-AllInOne.plugin` 与 `loon-AdvertisingScript.plugin` 内部的 `script-path` 仍指向 blackmatrix7 的 raw 地址——镜像只消除了插件文件本身的单点，其内嵌脚本仍从上游直取。完全收敛需要同时镜像内嵌 JS 并重写引用，列为后续项。
+1. **kelee.one 7 个 `.lpx`**：Cloudflare Turnstile 阻挡自动抓取，无法镜像/校验，Loon 端直接从该站加载。介意者在 Loon 内停用对应插件。
+   - ~~blackmatrix7 Loon rewrite 插件的传递性引用~~：**已消除 (2026-08)** — `AllInOne.plugin` (22 条) 与 `AdvertisingScript.plugin` (26 条) 的 `script-path`（startup.js / zheye.min.js）已镜像至 `Mirror/scripts/` 并由 `mirror-scripts.yml` 补丁重写指向自建 CDN。已安装插件需重装（插件 URL 替换前缀）才生效。
 2. **kelee.one 7 个 `.lpx`**：Cloudflare Turnstile 阻挡自动抓取，无法镜像/校验，Loon 端直接从该站加载。介意者在 Loon 内停用对应插件。
 3. **GeoIP/ASN 库**（Loyalsoldier / P3TERX）：客户端直连上游，被篡改只会导致路由误判（非代码执行），风险低，暂不镜像。
 4. **NSRingo 版本升级流程**：Loon 插件与 QX bundle 均已钉死版本（WeatherKit v3.1.0 / Maps·GeoServices v4.6.1 / News v3.2.1 / Siri v4.2.7 / TestFlight v3.4.0）。上游发新版时：改 `mirror-scripts.yml` 中的版本号 + `template/loon.tpl` 引用，跑一次 mirror 工作流。`upstream-health.yml` 会探测已钉死 URL 的可用性，但**不会**提示有新版本（受管陈旧）。

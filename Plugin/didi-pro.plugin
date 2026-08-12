@@ -1,11 +1,11 @@
-#!name=滴滴出行 Pro v8.1
+#!name=滴滴出行 Pro v8.2
 #!desc=滴滴 — 开屏/首页/行程/乘车全流程净化 + 优惠券管理
-#!version=8.1
+#!version=8.2
 #!author=3kaiu (参考 ddgksf2013/didi.js + app2smile)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/DiDi.png
 #!system = iOS,iPadOS,macOS
-#!loon_version = 3.5.1(978)
+#!loon_version = 3.2.4(787)
 
 #!arguments-desc=\n- \{ENABLE_DIDI}: ["true","false"],tag=总开关，desc=开启后执行所有滴滴功能\n- \{DIDI_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,90,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{DIDI_SPLASH_ENABLE}: switch,"true","false",tag=开屏广告，desc=去除 APP 开屏广告\n- \{DIDI_HOME_ENABLE}: switch,"true","false",tag=首页净化，desc=去除首页推荐广告\n- \{DIDI_ORDER_ENABLE}: switch,"true","false",tag=订单净化，desc=去除订单页营销\n- \{DIDI_COUPON_ENABLE}: switch,"true","false",tag=优惠券管理，desc=优化优惠券展示\n- \{DIDI_VIP_ENABLE}: switch,"true","false",tag=D 豆会员，desc=D 豆权益增强\n- \{DIDI_DEBUG_ENABLE}: switch,"false","true",tag=调试模式，desc=输出详细执行日志
 
@@ -42,7 +42,8 @@ http-response ^https?:\/\/receipt\.didi\.cn\/discount reject-dict enable={ENABLE
 
 # ── 优惠券管理模块 ────────────────────
 http-response ^https?:\/\/coupon\.didi\.cn\/popup reject-dict enable={ENABLE_DIDI}&{DIDI_COUPON_ENABLE}
-http-response ^https?: reject-dict voucher-filter, enable={ENABLE_DIDI}&{DIDI_COUPON_ENABLE}
+# v8.2 (2026-08 审计): ^https?: 全局捕获会作用于其它插件域并掩盖 MitM 孤儿判定, 收窄到 didi 域名
+http-response ^https?:\/\/[^\/]*(didiglobal\.com|didi\.cn) reject-dict voucher-filter, enable={ENABLE_DIDI}&{DIDI_COUPON_ENABLE}
 http-response ^https?:\/\/ticket\.didi\.cn\/promotion reject-dict enable={ENABLE_DIDI}&{DIDI_COUPON_ENABLE}
 
 # ── D 豆会员增强模块 ──────────────────
