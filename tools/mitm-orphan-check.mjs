@@ -90,8 +90,8 @@ function collectPatterns(files) {
       if (!t || t.startsWith("#") || t.startsWith("!") || t.startsWith(";")) continue;
       const m = t.match(/^(?:http-request|http-response|request|response|script)\s+(\^[^ ,]+)/);
       if (m) { patterns.push(m[1]); continue; }
-      const m2 = t.match(/^(url\s+)?(\^[^ ,]+)/);
-      if (m2 && (t.startsWith("^") || t.startsWith("url ^"))) patterns.push(m2[2]);
+      const m2 = t.match(/^(?:url\s+|(?:URL|DOMAIN)-REGEX\s*,\s*)?(\^[^ ,]+)/);
+      if (m2 && (t.startsWith("^") || t.startsWith("url ^") || /^(URL|DOMAIN)-REGEX,/.test(t))) patterns.push(m2[2]);
     }
   }
   return patterns;
@@ -141,6 +141,13 @@ function skeletons(pattern) {
 
 function main() {
   const localFiles = readFiles(); // 本地模式: Plugin/Kelee+主配置; 全量: 含 Mirror
+  // 每个文件 [Rewrite] 段原文 (方法 C 用)
+  const rewriteText = new Map();
+  for (const f of localFiles) {
+    const txt = fs.readFileSync(f, "utf8");
+    const seg = txt.split(/\n\[Rewrite\]/)[1]?.split(/\n\[[A-Za-z ]+\]/)[0] || "";
+    rewriteText.set(f, seg.toLowerCase());
+  }
   const hostnames = collectHostnames(localFiles);
   // 规则消费池始终含 Mirror 上游 (bundle 插件的 script-path 也是消费方), 减少误报
   const patternFiles = LOCAL_ONLY
@@ -178,6 +185,18 @@ function main() {
     if (!consumed) {
       const hostRoot = rootOf(host.replace(/\*/g, "").toLowerCase());
       if (rootSet.has(hostRoot)) consumed = true;
+    }
+    // 方法 C: 来源插件自身 Rewrite 文本包含注册根域主标签 → 消费 (覆盖上游
+    // URL-REGEX 带分组/转义 (如 mobile\.api\.(mgtv|hunantv)\.com) 导致子串/骨架失败)
+    if (!consumed) {
+      const hostRoot = rootOf(host.replace(/\*/g, "").toLowerCase());
+      const label = hostRoot.split(".")[0];
+      if (label.length >= 4) {
+        for (const s of sources) {
+          const rt = rewriteText.get(s);
+          if (rt && rt.includes(label)) { consumed = true; break; }
+        }
+      }
     }
     if (!consumed) {
       orphans.push({ host, sources: [...sources] });
