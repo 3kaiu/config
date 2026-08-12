@@ -320,11 +320,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "无变更, 跳过 PR"
             echo "pr_action=none" >> $GITHUB_ENV
-            # 关掉等待中的 upstream-update Issue（文件已是最新）
-            STALE=$(gh issue list --label upstream-update --state open --json number --jq '.[0].number' 2>/dev/null)
-            if [ -n "$STALE" ]; then
-              gh issue close "$STALE" --comment "📦 镜像文件已是最新，无需更新，关闭此 Issue" 2>/dev/null || true
-            fi
             exit 0
           fi
           BRANCH="mirror/$(date +%Y-%m-%d)"
@@ -332,11 +327,7 @@ jobs:
           git commit -m "chore(mirror): 上游资源同步 ($(date +%Y-%m-%d)) — 待审核" || echo "commit skipped (no changes)"
           git push -f origin "$BRANCH" 2>&1 || echo "push skipped (branch exists or remote error)"
           CHANGED=$(git diff --name-only main...HEAD -- Mirror/ 2>/dev/null | grep -v MANIFEST.json | wc -l || echo 0)
-          # 查找待关闭的 upstream-update Issue
-          CLOSE_ISSUE=$(gh issue list --label upstream-update --state open --json number --jq '.[0].number' 2>/dev/null)
-          CLOSES=""
-          [ -n "$CLOSE_ISSUE" ] && CLOSES="Closes #$CLOSE_ISSUE"
-          BODY=$(printf '## 镜像同步 %s\n\n变更文件: %s 个 (不含 MANIFEST)\n\n```\n%s\n```\n\n### 审核清单\n- [ ] MANIFEST.json diff: 每个变更文件的 sha256 与 source_url 已核对\n- [ ] 上游变更符合预期 (非投毒/非破坏性更新)\n- [ ] CI 全绿\n\n> 门禁: *.js 过 node --check 语法 / 体积≥200B / 非 HTML 错误页; 未过门禁的文件保留旧版\n\n%s' "$(date +%Y-%m-%d)" "$CHANGED" "$(git diff --stat main...HEAD -- Mirror/ 2>/dev/null)" "$CLOSES")
+          BODY=$(printf '## 镜像同步 %s\n\n变更文件: %s 个 (不含 MANIFEST)\n\n```\n%s\n```\n\n### 审核清单\n- [ ] MANIFEST.json diff: 每个变更文件的 sha256 与 source_url 已核对\n- [ ] 上游变更符合预期 (非投毒/非破坏性更新)\n- [ ] CI 全绿\n\n> 门禁: *.js 过 node --check 语法 / 体积≥200B / 非 HTML 错误页; 未过门禁的文件保留旧版\n' "$(date +%Y-%m-%d)" "$CHANGED" "$(git diff --stat main...HEAD -- Mirror/ 2>/dev/null)")
           if gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' 2>/dev/null | grep -q .; then
             gh pr edit "$BRANCH" --add-reviewer "@copilot" --body "$BODY" 2>/dev/null || true
             echo "pr_action=updated" >> $GITHUB_ENV

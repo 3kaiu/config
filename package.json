@@ -4,7 +4,7 @@
   "private": true,
   "description": "3kaiu Loon config v8.5 — Surgio project with TypeScript foundation and optimized structure",
   "scripts": {
-    "build": "esbuild $(find src -name '*.ts' ! -name 'Qidian.ts' ! -name 'env.ts' ! -name 'loon.d.ts') --inject:src/env.ts --outdir=Scripts --minify --target=es2020",
+    "build": "esbuild $(find src -name '*.ts' ! -name 'env.ts' ! -name 'loon.d.ts') --inject:src/env.ts --outdir=Scripts --minify --target=es2020",
     "generate": "surgio generate",
     "preview": "surgio preview",
     "test": "node test/run-tests.js",

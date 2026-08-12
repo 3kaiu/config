@@ -46,10 +46,14 @@ jobs:
           # 自建 CDN
           check_url "ws.wenn.in CDN (Mirror)" "https://ws.wenn.in/main/Mirror/netease.adblock.js"
 
-          # 脚本级上游 (已 Mirror, 监控原站)
-          check_url "ddgksf2013 gist (netease)" "https://gist.githubusercontent.com/ddgksf2013/4f53b7c6083678df25fecc8ff68b52c4/raw/netease.adblock.js"
-          check_url "ddgksf2013/Scripts amdc.js" "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amdc.js"
-          check_url "ddgksf2013/Scripts applet.js" "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/applet.js"
+          # 脚本级上游 (已 Mirror, 监控原站 — 列表派生自 Mirror/MANIFEST.json, 勿重复维护)
+          node -e '
+            const fs = require("fs");
+            const m = JSON.parse(fs.readFileSync("Mirror/MANIFEST.json", "utf8"));
+            for (const [f, meta] of Object.entries(m.files)) {
+              console.log(f + "\t" + meta.source_url);
+            }
+          ' | while IFS=$'\t' read -r name url; do check_url "$name (mirrored)" "$url"; done
 
           # NSRingo Apple 增强
           # WeatherKit 自 v3.2.0 起不再发布 .plugin 资产 (仅 .lpx/.sgmodule/.snippet/.stoverride),

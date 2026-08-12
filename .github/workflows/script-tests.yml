@@ -1,5 +1,7 @@
 # 脚本回归测试 (中期演进 #1: 测试基建)
 # 零依赖, vm 沙箱模拟 Loon/QX 运行时, 覆盖净化类脚本与 Qidian 包装层核心逻辑
+# 含构建产物漂移门禁 (2026-08): src/*.ts 重新构建后必须与提交的 Scripts/*.js 一致,
+# 防止"改了 TS 但产物未提交/手动改产物"的静默漂移 (tpl-sync-check 的构建侧等价物)。
 name: Script Tests
 
 on:
@@ -33,6 +35,15 @@ jobs:
 
       - name: Build scripts
         run: npm run build
+
+      - name: Gate on build output drift
+        run: |
+          if git diff --exit-code -- Scripts/; then
+            echo "✅ Scripts/ 产物与 src/ 构建一致 (无漂移)"
+          else
+            echo "❌ Scripts/ 产物与 src/ 构建不一致 — 需提交重新构建的产物 (npm run build), 禁止手改产物"
+            exit 1
+          fi
 
       - name: Run script tests
         run: node test/run-tests.js
