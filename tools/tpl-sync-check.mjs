@@ -38,7 +38,11 @@ function readStaticLines(tplPath) {
     const line = raw.trim();
     if (/^\[Proxy\]$/.test(line)) { inProxy = true; continue; }
     if (inProxy && /^\[[A-Za-z]/.test(line)) inProxy = false;
-    if (inProxy) continue;
+    if (inProxy) {
+      // [Proxy] 主体由 surgio 动态注入, 但注释行是模板静态内容, 纳入比对
+      if (line.startsWith("#") && !out.includes(line)) out.push(line);
+      continue;
+    }
     if (!line || line.startsWith("#") || line.includes("{{")) continue;
     const incl = expandSnippet(line);
     if (incl) { for (const l of incl) { const t = l.trim(); if (t && !t.startsWith("#") && !t.includes("{{")) out.push(t); } continue; }
@@ -65,7 +69,14 @@ function readGeneratedStaticLines(outPath) {
       current = sec[1];
       continue;
     }
-    if (current === "Proxy") continue;
+    if (current === "Proxy") {
+      // [Proxy] 主体是 surgio 动态注入 (节点行), 但注释行属于模板静态内容,
+      // 残留/修改会漂移 — 参与反向比对
+      if (t.startsWith("#")) {
+        if (!tplSet.has(t)) extra.push(t);
+      }
+      continue;
+    }
     if (!t || t.startsWith("#") || t.includes("{{")) continue;
     if (!sections.has(`[${current}]`)) continue;
     if (RENDERED.test(t)) continue;

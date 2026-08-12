@@ -15,7 +15,6 @@
   "devDependencies": {
     "esbuild": "^0.28.2",
     "eslint": "^10.8.1",
-    "surgio": "^3.18.0",
-    "typescript": "^7.0.2"
+    "surgio": "^3.18.0"
   }
 }

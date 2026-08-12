@@ -87,6 +87,19 @@ jobs:
                 fi
                 ;;
             esac
+            # ── 门禁 4: .plugin 内 script-path URL 白名单 (防上游投毒) ──
+            # 上游被攻破时插件内 script-path 可指向任意恶意域; 白名单外一律拦截保留旧版
+            case "$dest" in
+              *.plugin)
+                if grep -oE 'script-path=https?://[^ ,")]*' "$tmpf" | sed 's/script-path=//' | grep -vqE '^https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one)/'; then
+                  echo "🚫 $name 门禁拦截: script-path 指向非白名单域 (疑似投毒), 保留旧版"
+                  grep -oE 'script-path=https?://[^ ,")]*' "$tmpf" | sed 's/script-path=//' | grep -vE '^https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one)/' | head -3
+                  GATED=$((GATED + 1)); FAIL=$((FAIL + 1))
+                  keep_old "$dest"
+                  rm -f "$tmpf"; return
+                fi
+                ;;
+            esac
             cp "$tmpf" "$path"
             rm -f "$tmpf"
             local sha; sha=$(sha256sum "$path" | awk '{print $1}')
