@@ -5,8 +5,10 @@
 const $ = new Env("酷狗音乐去广告");
 if (typeof $response === "undefined") { $.done(); return; }
 try {
+  const hostOf = (u) => { try { return new URL(u).hostname; } catch { return ""; } };
+  const isHost = (u, d) => { const h = hostOf(u); return h === d || h.endsWith("." + d); };
   const obj = JSON.parse($response.body);
-  if ($request.url.includes("gateway.kugou.com")) stripKeys(obj, ["banner", "promo"]);
+  if (isHost($request.url, "gateway.kugou.com")) stripKeys(obj, ["banner", "promo"]);
   else cleanAdArrays(obj);
   $.done({ body: JSON.stringify(obj) });
 } catch (e) { $.done(); }

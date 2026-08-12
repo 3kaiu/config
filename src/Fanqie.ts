@@ -5,8 +5,10 @@
  */
 const $ = new Env("番茄小说去广告");
 const url = $request.url;
+const hostOf = (u) => { try { return new URL(u).hostname; } catch { return ""; } };
+const isHost = (u, d) => { const h = hostOf(u); return h === d || h.endsWith("." + d); };
 if (typeof $response === "undefined" || !$response.body) { $.done(); return; }
-if (url.includes("log.snssdk.com")) { $.log("🚫 拦截追踪上报"); $.done({}); return; }
+if (isHost(url, "log.snssdk.com")) { $.log("🚫 拦截追踪上报"); $.done({}); return; }
 try {
   const body = JSON.parse($response.body);
   function clean(d) { // 递归清空 ad_data 对象

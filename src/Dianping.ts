@@ -9,8 +9,10 @@ const AD_KEYS = ["is_ad", "ad_id", "promotion"];
 try {
   const obj = JSON.parse($response.body);
   const u = $request.url;
-  if (u.includes("mapi.dianping.com")) $.log("首页信息流 - 过滤广告");
-  else if (u.includes("check.dianping.com")) $.log("推荐流 - 过滤广告");
+  const hostOf = (x) => { try { return new URL(x).hostname; } catch { return ""; } };
+  const isHost = (x, d) => { const h = hostOf(x); return h === d || h.endsWith("." + d); };
+  if (isHost(u, "mapi.dianping.com")) $.log("首页信息流 - 过滤广告");
+  else if (isHost(u, "check.dianping.com")) $.log("推荐流 - 过滤广告");
   clean(obj);
   $.done({ body: JSON.stringify(obj) });
 } catch (e) { $.log(`解析失败: ${e}`); $.done(); }

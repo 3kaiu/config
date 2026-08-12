@@ -42,7 +42,7 @@ t("health-notify: Bark 推送", async (assert) => {
     httpHandler: () => ({ err: new Error("timeout") }),
   });
   const state = await runScript("Scripts/health-notify.js", sb);
-  const bark = state.httpCalls.filter((c) => c.url.includes("api.day.app"));
+  const bark = state.httpCalls.filter((c) => c.url.startsWith("https://api.day.app/"));
   assert.ok(bark.length > 0, "应调用 Bark API");
   assert.equal(state.doneCalls.length, 1, "应调用 $done");
 });
@@ -54,7 +54,7 @@ t("health-notify: Telegram 推送", async (assert) => {
     httpHandler: () => ({ err: new Error("timeout") }),
   });
   const state = await runScript("Scripts/health-notify.js", sb);
-  const tg = state.httpCalls.filter((c) => c.url.includes("api.telegram.org"));
+  const tg = state.httpCalls.filter((c) => c.url.startsWith("https://api.telegram.org/"));
   assert.ok(tg.length > 0, "应调用 Telegram API");
 });
 

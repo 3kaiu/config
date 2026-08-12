@@ -13,11 +13,13 @@ const $ = new Env("优酷去广告");
 if (typeof $response === "undefined") { $.done(); return; }
 
 const url = $request.url;
+const hostOf = (u) => { try { return new URL(u).hostname; } catch { return ""; } };
+const isHost = (u, d) => { const h = hostOf(u); return h === d || h.endsWith("." + d); };
 try {
   const obj = JSON.parse($response.body);
-  if (url.includes("iyes.youku.com")) {
+  if (isHost(url, "iyes.youku.com")) {
     stripKeys(obj, ["banner", "promo"]);
-  } else if (url.includes("api.youku.com") || url.includes("vali.cp31.ott.cibntv.net")) {
+  } else if (isHost(url, "api.youku.com") || isHost(url, "vali.cp31.ott.cibntv.net")) {
     cleanAdArrays(obj);
   }
   $.done({ body: JSON.stringify(obj) });
