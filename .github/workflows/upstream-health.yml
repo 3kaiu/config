@@ -95,6 +95,15 @@ jobs:
           check_url "BiliUniverse ADBlock" "https://github.com/BiliUniverse/ADBlock/releases/latest/download/BiliBili.ADBlock.plugin"
           check_url "BiliUniverse Redirect" "https://github.com/BiliUniverse/Redirect/releases/latest/download/BiliBili.Redirect.plugin"
 
+          # kelee.one LPX (loon.tpl 直连的第三方配置, 非 CDN 链路)
+          check_url "kelee.one LPX Google" "https://kelee.one/Tool/Loon/Lpx/Google.lpx"
+          check_url "kelee.one LPX JD_Price" "https://kelee.one/Tool/Loon/Lpx/JD_Price.lpx"
+          check_url "kelee.one LPX Node_detection_tool" "https://kelee.one/Tool/Loon/Lpx/Node_detection_tool.lpx"
+          check_url "kelee.one LPX NodeLinkCheck" "https://kelee.one/Tool/Loon/Lpx/NodeLinkCheck.lpx"
+          check_url "kelee.one LPX Spotify_lyrics" "https://kelee.one/Tool/Loon/Lpx/Spotify_lyrics_translation.lpx"
+          check_url "kelee.one LPX VVebo_repair" "https://kelee.one/Tool/Loon/Lpx/VVebo_repair.lpx"
+          check_url "kelee.one LPX Weixin_links" "https://kelee.one/Tool/Loon/Lpx/Weixin_external_links_unlock.lpx"
+
           echo "all_ok=$ALL_OK" >> $GITHUB_ENV
           echo "results=$RESULTS" >> $GITHUB_ENV
 

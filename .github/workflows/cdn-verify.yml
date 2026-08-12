@@ -9,7 +9,7 @@ name: CDN Content Verify
 
 on:
   schedule:
-    - cron: '34 2 * * *'   # 02:34, 错开 mirror(03:00)/kelee(02:00)/health(02:17)
+    - cron: '34 2 * * *'   # 02:34, 错开 mirror(03:00)/health(02:17)
   workflow_dispatch:
 
 permissions:
