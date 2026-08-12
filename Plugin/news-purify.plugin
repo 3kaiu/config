@@ -1,0 +1,102 @@
+#!name=资讯阅读净化
+#!desc=聚合: 36氪/财新/彩云/豆瓣/豆瓣阅读/虎嗅/IT之家/墨迹/网易新闻/雪球/值得买/什么值得买 — 单插件统一总开关, 各 App 独立子开关
+#!version=1.0
+#!author=3kaiu (聚合器生成)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/News.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+#!tag=📰 资讯阅读净化
+
+[Argument]
+NEWS_PURIFY_ENABLE=switch,"true","false",tag=总开关,desc=关闭后整组净化全部停用
+36KR_ENABLE=switch,"true","false",tag=是否开启36氪净化,desc=36氪去广告
+CAIXINMEDIA_ENABLE=switch,"true","false",tag=是否开启财新净化,desc=财新去广告
+COLORFULCLOUDS_ENABLE=switch,"true","false",tag=是否开启彩云天气净化,desc=彩云天气去广告
+DOUBAN_ENABLE=switch,"true","false",tag=是否开启豆瓣净化,desc=豆瓣去广告
+DOUBANREAD_ENABLE=switch,"true","false",tag=是否开启豆瓣阅读净化,desc=豆瓣阅读去广告
+HUXIU_ENABLE=switch,"true","false",tag=是否开启虎嗅净化,desc=虎嗅去广告
+ITHOME_ENABLE=switch,"true","false",tag=是否开启IT之家净化,desc=IT之家去广告
+MOJIWEATHER_ENABLE=switch,"true","false",tag=是否开启墨迹天气净化,desc=墨迹天气去广告
+NETEASENEWS_ENABLE=switch,"true","false",tag=是否开启网易新闻净化,desc=网易新闻去广告
+SNOWBALL_ENABLE=switch,"true","false",tag=是否开启雪球净化,desc=雪球去广告
+
+[Rewrite]
+^https:\/\/gateway\.36kr\.com\/api\/mis\/sys\/config\? response-body-json-del data.contentConfig data.positionConfigList data.switchConfig.ios.sunrise_sign data.switchConfig.ios.sunrise_sunit_task data.switchConfig.ios.sunrise_sunit_mall data.switchConfig.ios.sunrise_distribution_icon data.secondFloorConfig enable={NEWS_PURIFY_ENABLE&{36KR_ENABLE}}
+^https:\/\/36kr\.com\/global\/sensors\/config\/iOS\.conf\? response-body-json-replace configs.disableSDK true enable={NEWS_PURIFY_ENABLE&{36KR_ENABLE}}
+^https:\/\/gateway\.36kr\.com\/api\/mis\/nav\? response-body-json-jq '.data.navList |= [ .[] | select(.navNick == "home" or .navNick == "newsflash" or .navNick == "me") ]' enable={NEWS_PURIFY_ENABLE&{36KR_ENABLE}}
+^https:\/\/gateway\.36kr\.com\/api\/mis\/nav\/me\/recom\? reject-dict enable={NEWS_PURIFY_ENABLE&{36KR_ENABLE}}
+^https:\/\/gateway\.36kr\.com\/api\/mis\/nav\/search\/hotword\? reject-dict enable={NEWS_PURIFY_ENABLE&{36KR_ENABLE}}
+^https:\/\/gateway\.36kr\.com\/api\/mis\/nav\/search\/topicListV2\? reject-dict enable={NEWS_PURIFY_ENABLE&{36KR_ENABLE}}
+^https:\/\/gateway\.36kr\.com\/api\/mis\/nav\/home\/subnav\/recom\? response-body-json-jq '.data.bannerList |= map(select(.itemType != 0))' enable={NEWS_PURIFY_ENABLE&{36KR_ENABLE}}
+^https:\/\/gateway\.36kr\.com\/api\/mis\/nav\/home\/subnav\/flow\/ response-body-json-del data.adItemList enable={NEWS_PURIFY_ENABLE&{36KR_ENABLE}}
+^https:\/\/gateway\.36kr\.com\/api\/adx\/ reject-dict enable={NEWS_PURIFY_ENABLE&{36KR_ENABLE}}
+^https:\/\/gateway\.36kr\.com\/api\/mis\/page\/article\/recom\? reject-dict enable={NEWS_PURIFY_ENABLE&{36KR_ENABLE}}
+^https:\/\/gateway\.36kr\.com\/api\/mis\/page\/newsflash\/recom\? reject-dict enable={NEWS_PURIFY_ENABLE&{36KR_ENABLE}}
+^https:\/\/gateway\.36kr\.com\/api\/mis\/sys\/skin\/ reject-dict enable={NEWS_PURIFY_ENABLE&{36KR_ENABLE}}
+^https:\/\/entities\.caixin\.com\/api\/(dataplus\/promotionHints|public\/push\/appIndex|public\/recommendNews) reject-dict enable={NEWS_PURIFY_ENABLE&{CAIXINMEDIA_ENABLE}}
+^https:\/\/gateway\.caixin\.com\/api\/app-api\/cxAdInfo\/selectIndexAdInfo reject-dict enable={NEWS_PURIFY_ENABLE&{CAIXINMEDIA_ENABLE}}
+^https:\/\/mappsv5\.caixin\.com\/channelv5\/article_ad_ios_info\.json reject-dict enable={NEWS_PURIFY_ENABLE&{CAIXINMEDIA_ENABLE}}
+^https:\/\/gg\.caixin\.com\/s\?z=caixin&slot=\d+ reject-dict enable={NEWS_PURIFY_ENABLE&{CAIXINMEDIA_ENABLE}}
+^https:\/\/msgapi\.caixin\.com\/msg_api\/annmsg\/annlist reject-dict enable={NEWS_PURIFY_ENABLE&{CAIXINMEDIA_ENABLE}}
+^https:\/\/biz\.cyapi\.cn\/(p\/v1\/entries|p\/v1\/trial_card\/info|v2\/product) reject-dict enable={NEWS_PURIFY_ENABLE&{COLORFULCLOUDS_ENABLE}}
+^https:\/\/starplucker\.cyapi\.cn\/v3\/(config\/cypage\/\w+\/conditions|notification\/message_center|operation\/homefeatures) reject-dict enable={NEWS_PURIFY_ENABLE&{COLORFULCLOUDS_ENABLE}}
+^https:\/\/api\.douban\.com\/v\d\/app_ads\/splash reject-dict enable={NEWS_PURIFY_ENABLE&{DOUBAN_ENABLE}}
+^https:\/\/frodo\.douban\.com\/api\/v\d\/erebor\/feed_ad reject-dict enable={NEWS_PURIFY_ENABLE&{DOUBAN_ENABLE}}
+^https:\/\/m\.douban\.com\/rexxar\/api\/v\d\/market\/products\/ reject-dict enable={NEWS_PURIFY_ENABLE&{DOUBAN_ENABLE}}
+^https:\/\/frodo\.douban\.com\/api\/v\d\/movie\/ad reject-dict enable={NEWS_PURIFY_ENABLE&{DOUBAN_ENABLE}}
+^https:\/\/frodo\.douban\.com\/api\/v\d\/home_banner reject-dict enable={NEWS_PURIFY_ENABLE&{DOUBAN_ENABLE}}
+^https:\/\/frodo\.douban\.com\/api\/v\d\/search\/found_words reject-dict enable={NEWS_PURIFY_ENABLE&{DOUBAN_ENABLE}}
+^https:\/\/read\.douban\.com\/api\/v2\/ads\/ reject-dict enable={NEWS_PURIFY_ENABLE&{DOUBANREAD_ENABLE}}
+^https:\/\/read\.douban\.com\/api\/v2\/popup$ reject-dict enable={NEWS_PURIFY_ENABLE&{DOUBANREAD_ENABLE}}
+^https:\/\/read\.douban\.com\/api\/v2\/search\/hot_words$ reject-dict enable={NEWS_PURIFY_ENABLE&{DOUBANREAD_ENABLE}}
+^https:\/\/read\.douban\.com\/api\/v2\/search\/hot_charts$ reject-dict enable={NEWS_PURIFY_ENABLE&{DOUBANREAD_ENABLE}}
+^https:\/\/read\.douban\.com\/api\/v2\/search\/rec_urls$ reject-dict enable={NEWS_PURIFY_ENABLE&{DOUBANREAD_ENABLE}}
+^https:\/\/api-ms-config\.huxiu\.com\/v1\/adConfig$ reject-dict enable={NEWS_PURIFY_ENABLE&{HUXIU_ENABLE}}
+^https:\/\/api-web-feed\.huxiu\.com\/v1\/index\/recommendContentsNew$ reject-dict enable={NEWS_PURIFY_ENABLE&{HUXIU_ENABLE}}
+^https:\/\/api-ms-feed\.huxiu\.com\/v1\/media\/recommend$ response-body-json-del data.live enable={NEWS_PURIFY_ENABLE&{HUXIU_ENABLE}}
+^https:\/\/api-search\.huxiu\.com\/api\/searchIndex$ reject-dict enable={NEWS_PURIFY_ENABLE&{HUXIU_ENABLE}}
+^https:\/\/api-article\.huxiu\.com\/v2\/article\/getTextArticleRelated$ reject-dict enable={NEWS_PURIFY_ENABLE&{HUXIU_ENABLE}}
+^https:\/\/api-web-moment\.huxiu\.com\/v3\/moment\/getDetailRecdArticle$ reject-dict enable={NEWS_PURIFY_ENABLE&{HUXIU_ENABLE}}
+^https?:\/\/dat\.ruanmei\.com\/ithome\/money\/acd\.json$ reject enable={NEWS_PURIFY_ENABLE&{ITHOME_ENABLE}}
+^https:\/\/fcard\.api\.moji\.com\/flycard\/flyCard\? reject enable={NEWS_PURIFY_ENABLE&{MOJIWEATHER_ENABLE}}
+^https:\/\/vdo\.api\.moji\.com\/shortvideo\/card\/subscribe$ reject-dict enable={NEWS_PURIFY_ENABLE&{MOJIWEATHER_ENABLE}}
+^https:\/\/vdo\.api\.moji\.com\/shortvideo\/video\/index_flow\? reject-dict enable={NEWS_PURIFY_ENABLE&{MOJIWEATHER_ENABLE}}
+^https:\/\/vdo\.api\.moji\.com\/shortvideo\/video_user\/hotGuyRcm\? reject-dict enable={NEWS_PURIFY_ENABLE&{MOJIWEATHER_ENABLE}}
+^https:\/\/vdo\.api\.moji\.com\/shortvideo\/zone\/follow_src_zone\? reject-dict enable={NEWS_PURIFY_ENABLE&{MOJIWEATHER_ENABLE}}
+^https:\/\/sns\.api\.moji\.com\/user\/dynamic_v9\/json\/someone_interest\? reject-dict enable={NEWS_PURIFY_ENABLE&{MOJIWEATHER_ENABLE}}
+^https:\/\/mme\.api\.moji\.com\/json\/entrance\/list$ response-body-json-jq 'del(.entrance_region_res_list[] | select(.region_name == "皇冠区域" or .region_name == "banner区")) | .entrance_region_res_list[].entrance_res_list |= if . then map(select(.entrance_name | . != "墨迹钱包" and . != "墨圈")) else . end' enable={NEWS_PURIFY_ENABLE&{MOJIWEATHER_ENABLE}}
+^https?:\/\/interface\.music\.163\.com\/eapi\/ad reject enable={NEWS_PURIFY_ENABLE&{NETEASENEWS_ENABLE}}
+^https?:\/\/c\.m\.163\.com\/nc\/gl\/ reject enable={NEWS_PURIFY_ENABLE&{NETEASENEWS_ENABLE}}
+^https?:\/\/client\.mail\.163\.com\/apptrack\/confinfo\/searchMultiAds reject enable={NEWS_PURIFY_ENABLE&{NETEASENEWS_ENABLE}}
+^https?:\/\/g1\.163\.com\/madfeedback reject enable={NEWS_PURIFY_ENABLE&{NETEASENEWS_ENABLE}}
+^https?:\/\/interface\.music\.163\.com\/eapi\/ad\/ reject enable={NEWS_PURIFY_ENABLE&{NETEASENEWS_ENABLE}}
+^https?:\/\/support\.you\.163\.com\/xhr\/boot\/getBootMedia\.json reject enable={NEWS_PURIFY_ENABLE&{NETEASENEWS_ENABLE}}
+^https?:\/\/interface3?\.music\.163\.com/eapi/(ad|abtest|sp|hot|store|search/(specialkeyword|defaultkeyword|hot)) reject enable={NEWS_PURIFY_ENABLE&{NETEASENEWS_ENABLE}}
+^https:\/\/api\.xueqiu\.com\/snowpard\/launch_strategy\/query\.json\? reject-dict enable={NEWS_PURIFY_ENABLE&{SNOWBALL_ENABLE}}
+^https:\/\/open\.xueqiu\.com\/mpaas\/config\/content\?.+home_visitor_relation_config reject-dict enable={NEWS_PURIFY_ENABLE&{SNOWBALL_ENABLE}}
+^https:\/\/api\.xueqiu\.com\/ucprofile\/api\/user\/batchGetUserBasicInfo\.json reject-dict enable={NEWS_PURIFY_ENABLE&{SNOWBALL_ENABLE}}
+^https:\/\/api\.xueqiu\.com\/lightsnow\/launch\/plan\/bee\/query\.json\? reject-dict enable={NEWS_PURIFY_ENABLE&{SNOWBALL_ENABLE}}
+^https:\/\/api\.xueqiu\.com\/lightsnow\/optional\/banner\/query\.json reject-dict enable={NEWS_PURIFY_ENABLE&{SNOWBALL_ENABLE}}
+^https:\/\/api\.xueqiu\.com\/snowflake-theme\/query\/v1\/hot_event\/rich_tag_new\.json\? reject-dict enable={NEWS_PURIFY_ENABLE&{SNOWBALL_ENABLE}}
+^https:\/\/api\.xueqiu\.com\/query\/v1\/hot_event\/tag\.json\? reject-dict enable={NEWS_PURIFY_ENABLE&{SNOWBALL_ENABLE}}
+^https:\/\/open\.xueqiu\.com\/mpaas\/config\/content\?.+cube_detail_bottom_operation_trade_button reject-dict enable={NEWS_PURIFY_ENABLE&{SNOWBALL_ENABLE}}
+^https:\/\/api\.xueqiu\.com\/recommend-proxy\/card\/zj_card\.json\?feed_id=207 reject-dict enable={NEWS_PURIFY_ENABLE&{SNOWBALL_ENABLE}}
+^https:\/\/api\.xueqiu\.com\/recommend-proxy\/card\/portfolio_tab_symbol\.json reject-dict enable={NEWS_PURIFY_ENABLE&{SNOWBALL_ENABLE}}
+^https:\/\/stock\.xueqiu\.com\/v5\/stock\/group\/recommend\/default\/list\.json reject-dict enable={NEWS_PURIFY_ENABLE&{SNOWBALL_ENABLE}}
+^https:\/\/api\.xueqiu\.com\/livestream\/structure\/live\/hotCard\.json reject-dict enable={NEWS_PURIFY_ENABLE&{SNOWBALL_ENABLE}}
+^https:\/\/open\.xueqiu\.com\/mpaas\/config\/content\?.*timeline_tab_name response-body-json-del data.im_notice_show data.request_notice_show data.timeline_tab_name data.profileMenuConfig_anonymous_V12 data.trade_open_account_promotion_url data.trade_unify_open_account_list data.community_ad_download_msg data.home_tab_dynamic data.home_tab_dynamic_before data.home_tab_dynamic_after data. isitor_page_login_config data.open_wechat_mini_app_config data.user_guide_contact_config data.brokers_router_config data.my_page_right_items enable={NEWS_PURIFY_ENABLE&{SNOWBALL_ENABLE}}
+^https:\/\/fund\.xueqiu\.com\/fundx\/activity\/x\/web\/c\/index\/dataByCode\? reject-dict enable={NEWS_PURIFY_ENABLE&{SNOWBALL_ENABLE}}
+
+[Rule]
+DOMAIN, adx.36kr.com, REJECT,enable={NEWS_PURIFY_ENABLE&{36KR_ENABLE}}
+DOMAIN, ad.jiemian.com, REJECT,enable={NEWS_PURIFY_ENABLE&{36KR_ENABLE}}
+DOMAIN, abyss.cyapi.cn, REJECT,enable={NEWS_PURIFY_ENABLE&{COLORFULCLOUDS_ENABLE}}
+DOMAIN, ad.cyapi.cn, REJECT,enable={NEWS_PURIFY_ENABLE&{COLORFULCLOUDS_ENABLE}}
+DOMAIN, gather.colorfulclouds.net, REJECT,enable={NEWS_PURIFY_ENABLE&{COLORFULCLOUDS_ENABLE}}
+DOMAIN, api-ad-product.huxiu.com, REJECT,enable={NEWS_PURIFY_ENABLE&{HUXIU_ENABLE}}
+DOMAIN, nex.163.com, DIRECT,enable={NEWS_PURIFY_ENABLE&{NETEASENEWS_ENABLE}}
+DOMAIN, gw.m.163.com, DIRECT,enable={NEWS_PURIFY_ENABLE&{NETEASENEWS_ENABLE}}
+
+[MitM]
+hostname = %APPEND% hostname=gateway.36kr.com, 36kr.com, hostname=e*.caixin.com, g*.caixin.com, m*.caixin.com, hostname=biz.cyapi.cn, starplucker.cyapi.cn, hostname=api.douban.com, frodo.douban.com, m.douban.com, hostname=read.douban.com, hostname=api-ms-config.huxiu.com, api-web-feed.huxiu.com, api-search.huxiu.com, api-article.huxiu.com, api-web-moment.huxiu.com, api-ms-feed.huxiu.com, hostname=napi.ithome.com, dat.ruanmei.com, hostname=fcard.api.moji.com, vdo.api.moji.com, sns.api.moji.com, mme.api.moji.com, psnlz.api.moji.com, hostname=nex.163.com, interface.music.163.com, c.m.163.com, client.mail.163.com, g1.163.com, support.you.163.com, interface3?.music.163.com, gw.m.163.com, hostname=api.xueqiu.com, open.xueqiu.com, stock.xueqiu.com, fund.xueqiu.com

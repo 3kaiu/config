@@ -9,6 +9,14 @@
 #!tag=🎬 视频社区净化
 
 [Argument]
+555DY_ENABLE=switch,"true","false",tag=是否开启555电影净化,desc=555电影去广告
+CCLIVE_ENABLE=switch,"true","false",tag=是否开启CC直播净化,desc=CC直播去广告
+DOUYU_ENABLE=switch,"true","false",tag=是否开启斗鱼净化,desc=斗鱼去广告
+MANGOTV_ENABLE=switch,"true","false",tag=是否开启芒果TV净化,desc=芒果TV去广告
+MOEGIRLWIKI_ENABLE=switch,"true","false",tag=是否开启萌娘百科净化,desc=萌娘百科去广告
+XUNLEI_ENABLE=switch,"true","false",tag=是否开启迅雷净化,desc=迅雷去广告
+YY_VOICE_ENABLE=switch,"true","false",tag=是否开启YY净化,desc=YY去广告
+YYVOICETOOL_ENABLE=switch,"true","false",tag=是否开启YY语音净化,desc=YY语音去广告
 VIDEO_ENABLE=switch,"true","false",tag=总开关,desc=关闭后整组净化全部停用
 DOUYIN_ENABLE=switch,"true","false",tag=总开关，desc=开启后执行所有抖音净化功能
 KUAISHOU_ENABLE=switch,"true","false",tag=是否开启快手去广告,desc=开启后净化快手信息流及广告
@@ -18,6 +26,74 @@ appOpenAdsSwitch=switch,"true","false",tag=开屏广告屏蔽,desc=开启后将�
 bannerAdsSwitch=switch,"true","false",tag=Banner广告屏蔽,desc=开启后将屏蔽App内的Banner横幅广告
 adWhitelistSwitch=switch,"true","false",tag=广告白名单屏蔽,desc=开启后将屏蔽App的广告白名单接口 (adWhitelist/showAds)
 activityAdsSwitch=switch,"true","false",tag=活动广告位屏蔽,desc=开启后将屏蔽活动广告位与点击上报 (clickPic/clickPicMore/platformPic)
+
+[Rewrite]
+^https:\/\/(app-v1\.ecoliving168\.com|852b95d36\.xwlpk\.cn)\/api\/v1\/movie\/index_recommend\? response-body-json-jq '.data[].list |= map(select(.type != 3)) | .data |= map(select(.layout != "advert_self"))' enable={VIDEO_ENABLE&{555DY_ENABLE}}
+^https:\/\/api\.cc\.163\.com\/v\d\/mgamenavigation\/navigation_list\? response-body-json-jq '.data.info_list |= map(select(.name == "关注" or .name == "推荐" or .name == "视频" or .name == "全部"))' enable={VIDEO_ENABLE&{CCLIVE_ENABLE}}
+^https:\/\/api\.cc\.163\.com\/v\d\/mgamerecpage\/recommend_page\? response-body-json-jq '.data.plugins|=map(select(.module_type!="banner"))|.data.plugins|=map(select(.module_type!="show_list"))|.data.plugins|=map(select(.title!="推荐品类"))' enable={VIDEO_ENABLE&{CCLIVE_ENABLE}}
+^https:\/\/api\.cc\.163\.com\/v\d\/entpage\/live_navbar_mobile\/ios\? response-body-json-jq '.data.top_nav |= map(select(.cn_name == "推荐" or .cn_name == "星秀" or .cn_name == "心动交友"))' enable={VIDEO_ENABLE&{CCLIVE_ENABLE}}
+^https:\/\/cc\.163\.com\/act\/m\/daily\/ad_ reject enable={VIDEO_ENABLE&{CCLIVE_ENABLE}}
+^http:\/\/mshare\.cc\.163\.com\/mshare\/startadv_mobile_v\d\? reject-dict enable={VIDEO_ENABLE&{CCLIVE_ENABLE}}
+^https:\/\/appapi\.cc\.163\.com\/v\d\/mixfloatingwindow\/floating_windows\? reject-dict enable={VIDEO_ENABLE&{CCLIVE_ENABLE}}
+^http:\/\/api\.cc\.163\.com\/v1\/mpopuprecommend\/exit_room_conf$ reject-dict enable={VIDEO_ENABLE&{CCLIVE_ENABLE}}
+^https:\/\/rtbapi\.douyucdn\.cn\/japi\/sign\/app\/getinfo reject-dict enable={VIDEO_ENABLE&{DOUYU_ENABLE}}
+^https:\/\/apiv2\.douyucdn\.cn\/japi\/entrance\/roomRes\/nc\/m\/list response-body-json-del data.pendant_a data.entrance_d enable={VIDEO_ENABLE&{DOUYU_ENABLE}}
+^https:\/\/venus\.douyucdn\.cn\/venus\/config\/static\/update.+keyCodeSet=flow_config response-body-json-replace greatGodGameSitterSwitch 0 followMoreAnchorEntrance 0 sdklivebanner 0 homeActFloatSwitch 0 bringGoodsSwitch 0 qqGameSwitch 0 enable={VIDEO_ENABLE&{DOUYU_ENABLE}}
+^https:\/\/dc\.bz\.mgtv\.com\/dynamic\/v\d\/skin\/config\? reject-dict enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+^https:\/\/dc\.bz\.mgtv\.com\/dynamic\/v\d\/channel\/ads\? reject-dict enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+^http:\/\/mobileso\.bz\.mgtv\.com\/spotlight\/search\/v\d\? reject-dict enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+^https:\/\/damang\.api\.mgtv\.com\/station\/album\/red\/dot\? reject-dict enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+^https:\/\/hb-boom\.api\.mgtv\.com\/release\/pullReleaseInfo$ reject-dict enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+^https:\/\/mobile\.api\.mgtv\.com\/v\d\/mobile\/checkUpdate\? reject-dict enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+^https?:\/\/mobile\.api\.(mgtv|hunantv)\.com\/mobile\/config\? response-body-json-replace data.dc_adConfig 0 data.XmsellSwitch 0 data.screenshot_share_switch 0 data.playerUseHttpDNS 0 data.damang_tab 0 data.relative_ads 0 data.second_floor_guide_switch 0 data.progress_bar_ad_switch 0 data.XmVideoB 0 data.damang_duanju_tab 0 data.playview_box_ad_switch 0 data.topBarSwitch 0 data.VIPSDKB2 0 enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+^https:\/\/me\.bz\.mgtv\.com\/v3\/module\/list\? response-body-json-jq '.data.list |= map(select(.id | IN(1, 2, 4, 7))) | .data.list |= map(if .moduleType == 2 then .data |= map(select(.moduleType == 11)) elif .moduleType == 4 then .data |= map(select(.moduleType == 14 or .moduleType == 23)) elif .moduleType == 7 then .data |= map(select(.moduleType == 16 and .title != "音乐广场")) else . end)' enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+^https:\/\/me\.bz\.mgtv\.com\/v4\/module\/list\? response-body-json-jq '.data.list |= (map(select(.id != 3 and .id != 7))|map(if .id==2 then .data|=map(select(.id!=65))elif .id==4 then .data|=map(select(.title!="追更banner" and .id!=57))elif .id==5 then .data|=(map(select(.id==9 or .id==13))|map(if .id==9 then .list|=map(select(.id==20 or .id==60 or .id==18)) else . end))elif .id==6 then .data|=map(select(.id==15)) else . end))' enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+^https?:\/\/dc\d?\.bz\.mgtv\.com\/dynamic\/v\d\/channel\/index\/\w response-body-json-del adInfo enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+^https?:\/\/dc\d?\.bz\.mgtv\.com\/dynamic\/v\d\/channel\/index\/\w response-body-json-jq '.data |= map(select(.moduleEntityId != "10579" and .moduleEntityId != "9686")) | .moduleIDS |= map(select(.moduleEntityId != "10579" and .moduleEntityId != "9686"))' enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+^https:\/\/mobile-thor\.api\.mgtv\.com\/v\d+\/vod\/info\? response-body-json-del data.config.ad data.config.vipNav data.template.skinList data.template.theme enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+^https:\/\/mobile-thor\.api\.mgtv\.com\/v\d+\/vod\/info\? response-body-json-jq '.data.tabs |= map(select(.name == "视频" or .name == "讨论")) | .data.template.modules |= map(if .clipInfo.ext?.ipPublishEntrance then .clipInfo |= del(.ext) else . end) | .data.template.modules |= map(select(.dataType == 101 or .dataType == 201)) | .data.template.modules |= map(.media.list |= (if type == "array" then map(select(.type != 0)) else . end))' enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+^https:\/\/comment\.mgtv\.com\/v\d\/comment\/getCommentList\? response-body-json-jq '.data.list |= map(select(.type == 0))' enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+^https?:\/\/mobileso\.bz\.mgtv\.com\/mobile\/recommend\/v\d\? reject-dict enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+^https:\/\/grpc\.moegirl\.org\.cn\/moegirl\.moepad\.MoepadAppMetaService\/GetAppInitialInfo$ reject enable={VIDEO_ENABLE&{MOEGIRLWIKI_ENABLE}}
+^https:\/\/grpc\.moegirl\.org\.cn\/moegirl\.moepad\.MoepadService\/GetLaunchAdPage$ reject enable={VIDEO_ENABLE&{MOEGIRLWIKI_ENABLE}}
+^https:\/\/grpc\.moegirl\.org\.cn\/moegirl\.moepad\.MoepadService\/GetFeedAdProbability$ reject enable={VIDEO_ENABLE&{MOEGIRLWIKI_ENABLE}}
+^https:\/\/conf-m-ssl\.xunlei\.com\/external\/ response-body-json-del values.me_config.entrance_list_vertical_enable values.me_config.common_service_list values.me_config.banner_service_list enable={VIDEO_ENABLE&{XUNLEI_ENABLE}}
+^https:\/\/api-shoulei-ssl\.xunlei\.com\/flowhub\/v1\/slots:batchGet$ response-body-json-jq '.slots |= map(select(.id == "xl_ios_mytab_vipicon" or (.native.assets.title.text.value? and (.native.assets.title.text.value | . == "清理助手" or . == "云盘容量" or . == "远程设备"))))' enable={VIDEO_ENABLE&{XUNLEI_ENABLE}}
+^https:\/\/yyapp-fastnet\.yy\.com\/dispatch\? reject-dict enable={VIDEO_ENABLE&{YY_VOICE_ENABLE}}
+^https:\/\/data\.3g\.yy\.com\/popup\/topLiveCardPopup\? reject-dict enable={VIDEO_ENABLE&{YY_VOICE_ENABLE}}
+^https:\/\/yyapp-act-entrance\.yy\.com\/entrance\/list\? reject-dict enable={VIDEO_ENABLE&{YY_VOICE_ENABLE}}
+^https:\/\/yyapp-idx\.yy\.com\/mobyy\/nav\/index\/idx\? response-body-json-jq '.data[].modules |= map(select(.name != "新版本滚动条" and .name != "通栏轮播" and .name != "新静默位"))' enable={VIDEO_ENABLE&{YY_VOICE_ENABLE}}
+^https:\/\/tab\.yy\.com\/tabs\? response-body-json-del data.tabsForSelect enable={VIDEO_ENABLE&{YY_VOICE_ENABLE}}
+^https:\/\/tab\.yy\.com\/tabs\? response-body-json-jq '.data.tabs |= map(select(.alias == "follow" or .alias == "im" or .alias == "me"))' enable={VIDEO_ENABLE&{YY_VOICE_ENABLE}}
+^https:\/\/personal-center\.yy\.com\/personalCenter\/list\? response-body-json-jq '.data.modules |= map(select(.moduleName != "Banner轮播")) | .data.modules |= map(if has("entrances") then .entrances |= map(select(.bizCode|IN("jishijiedaikuan","duxiaoman2","chongzhi","freeData")|not)) else . end)' enable={VIDEO_ENABLE&{YY_VOICE_ENABLE}}
+^https:\/\/yuyin-api\.baizhanlive\.com\/homepage\/flashscreen\/get\? reject-dict enable={VIDEO_ENABLE&{YYVOICETOOL_ENABLE}}
+^https:\/\/yuyin-api\.baizhanlive\.com\/homepage\/homepage\/banner\? reject-dict enable={VIDEO_ENABLE&{YYVOICETOOL_ENABLE}}
+^https:\/\/web\.yy\.com\/yyvoice_task_sys\/bar\.html\? reject enable={VIDEO_ENABLE&{YYVOICETOOL_ENABLE}}
+^https:\/\/yuyin-api\.baizhanlive\.com\/postsquare\/college\/page\/tabsV3\? response-body-json-jq '.data.tabList |= map(select(.code == "post" or .code == "teamup" or .code == "college" or .code == "aiSecretRoom"))' enable={VIDEO_ENABLE&{YYVOICETOOL_ENABLE}}
+^https:\/\/yuyin-api\.baizhanlive\.com\/search\/search\/hotword\? reject-dict enable={VIDEO_ENABLE&{YYVOICETOOL_ENABLE}}
+
+^(http://)((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/(hlsh5p1.douyucdn2.cn)(.*) 307 $1$5$6 enable={VIDEO_ENABLE&{DOUYU_ENABLE}}
+[Rule]
+URL-REGEX, "^http:\/\/linkmicschedule\.douyucdn\.cn\/im_schedule\/im_gate_list", REJECT,enable={VIDEO_ENABLE&{DOUYU_ENABLE}}
+AND, ((DEST-PORT, 18000), (PROTOCOL, STUN)), REJECT,enable={VIDEO_ENABLE&{DOUYU_ENABLE}}
+DOMAIN, stun1.douyucdn.cn, REJECT,enable={VIDEO_ENABLE&{DOUYU_ENABLE}}
+DOMAIN, stun1.qvb.qcloud.com, REJECT,enable={VIDEO_ENABLE&{DOUYU_ENABLE}}
+DOMAIN, credits.bz.mgtv.com, REJECT,enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+DOMAIN, credits2.bz.mgtv.com, REJECT,enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+DOMAIN, credits3.bz.mgtv.com, REJECT,enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+DOMAIN, dflow.bz.mgtv.com, REJECT,enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+DOMAIN, encounter.bz.mgtv.com, REJECT,enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+DOMAIN, floor.bz.mgtv.com, REJECT,enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+DOMAIN, layer.bz.mgtv.com, REJECT,enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+DOMAIN, mob.bz.mgtv.com, REJECT,enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+DOMAIN, rc-topic-api.bz.mgtv.com, REJECT,enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+DOMAIN, rprain.bz.mgtv.com, REJECT,enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+DOMAIN, rprain.log.mgtv.com, REJECT,enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+DOMAIN, vip.bz.mgtv.com, REJECT,enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+DOMAIN-SUFFIX, da.mgtv.com, REJECT,enable={VIDEO_ENABLE&{MANGOTV_ENABLE}}
+DOMAIN, splash.yy.com, REJECT,enable={VIDEO_ENABLE&{YY_VOICE_ENABLE}}
+DOMAIN, dsp-ad.yy.com, REJECT,enable={VIDEO_ENABLE&{YY_VOICE_ENABLE}}
+DOMAIN, ysad.yy.com, REJECT,enable={VIDEO_ENABLE&{YY_VOICE_ENABLE}}
 
 [Script]
 http-response ^https?://(api|aweme)\.amemv\.com\/aweme\/v[12]\/ script-path=https://ws.wenn.in/main/Scripts/Douyin.js, requires-body=true, timeout=10, tag=抖音信息流净化, enable={VIDEO_ENABLE}&{DOUYIN_ENABLE}
@@ -34,4 +110,4 @@ http-response ^https?:\/\/api\.zhihuifangdong\.net\/core\/adWhitelist\/showAds s
 http-response ^https?:\/\/api\.zhihuifangdong\.net\/core\/app\/activity\/(clickPicMore|platformPic|clickPic) script-path=https://ws.wenn.in/main/Scripts/Zhihuifangdong.js, requires-body=true, timeout=10, tag=活动广告位屏蔽, argument=activityAds, enable={VIDEO_ENABLE}&{activityAdsSwitch}
 
 [MitM]
-hostname = %APPEND% api.amemv.com, api.zhihuifangdong.net, api2.kuaishou.com, api5-normal-dsa.amemv.com, aweme.snssdk.com, gql-fed.reddit.com, gql.reddit.com, graphql.kuaishou.com, internal-api.feishu.cn, log.snssdk.com, open.feishu.cn
+hostname = %APPEND% api.amemv.com, api.zhihuifangdong.net, api2.kuaishou.com, api5-normal-dsa.amemv.com, aweme.snssdk.com, gql-fed.reddit.com, gql.reddit.com, graphql.kuaishou.com, internal-api.feishu.cn, log.snssdk.com, open.feishu.cn, hostname=app-v1.ecoliving168.com, 852b95d36.xwlpk.cn, hostname=api.cc.163.com, cc.163.com, mshare.cc.163.com, appapi.cc.163.com, hostname=rtbapi.douyucdn.cn, apiv2.douyucdn.cn, venus.douyucdn.cn, hostname=dc?.bz.mgtv.com, mobileso.bz.mgtv.com, damang.api.mgtv.com, hb-boom.api.mgtv.com, mobile.api.mgtv.com, mobile.api.hunantv.com, me.bz.mgtv.com, mobile-thor.api.mgtv.com, hostname=grpc.moegirl.org.cn, hostname=conf-m-ssl.xunlei.com, api-shoulei-ssl.xunlei.com, hostname=yyapp-act-entrance.yy.com, yyapp-fastnet.yy.com, personal-center.yy.com, tab.yy.com, data.3g.yy.com, yyapp-idx.yy.com, hostname=yuyin-api.baizhanlive.com, web.yy.com

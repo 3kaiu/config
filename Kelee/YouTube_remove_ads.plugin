@@ -30,5 +30,5 @@ http-request ^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/log_event scrip
 # ======= YouTube 响应处理 (去广告 + PiP画中画 + 后台熄屏播放 + 自动翻译字幕) =======
 http-response ^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch|log_event|config) script-path=https://ws.wenn.in/main/Mirror/youtube.response.js, requires-body=true, binary-body-mode=true, max-size=-1, argument={"captionLang":"{{{字幕翻译语言}}}","blockUpload":{{{屏蔽上传按钮}}},"blockImmersive":{{{屏蔽选段按钮}}},"blockShorts":{{{屏蔽Shorts按钮}}},"debug":{{{启用调试模式}}}}, tag=YouTube响应
 
-[Mitm]
+[MitM]
 hostname = -redirector*.googlevideo.com, *.googlevideo.com, www.youtube.com, s.youtube.com, youtubei.googleapis.com

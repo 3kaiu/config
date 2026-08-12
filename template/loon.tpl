@@ -387,6 +387,9 @@ https://ws.wenn.in/main/Plugin/bilibili-pro.plugin, enabled=true, tag=B站去广
 https://ws.wenn.in/main/Plugin/shopping-purify.plugin, enabled=true, tag=🛍 购物生活净化 Pro
 https://ws.wenn.in/main/Plugin/video-community-purify.plugin, enabled=true, tag=🎬 视频社区净化
 https://ws.wenn.in/main/Plugin/media-reading-purify.plugin, enabled=true, tag=🎵 影音阅读净化
+https://ws.wenn.in/main/Plugin/transport-purify.plugin, enabled=false, tag=🚕 出行外卖净化 (默认关, 按需开)
+https://ws.wenn.in/main/Plugin/news-purify.plugin, enabled=false, tag=📰 资讯阅读净化 (默认关, 按需开)
+https://ws.wenn.in/main/Plugin/social-netdisk-purify.plugin, enabled=false, tag=⚙️ 社交网盘工具净化 (默认关, 按需开)
 https://ws.wenn.in/main/Plugin/bilicomics.plugin, enabled=true, tag=B站漫画去广告
 https://ws.wenn.in/main/Plugin/netease-pro.plugin, enabled=true, tag=网易云音乐净化 Pro
 https://ws.wenn.in/main/Plugin/qishui.plugin, enabled=true, tag=汽水音乐净化
