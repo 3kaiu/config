@@ -46,6 +46,14 @@ jobs:
           echo "## Script-Path URL Check" >> $GITHUB_STEP_SUMMARY
           grep -rh 'script-path=' Plugin/*.plugin Kelee/*.plugin 2>/dev/null | \
             grep -oP 'https?://[^"'\'',]+' | sort -u > /tmp/urls.txt
+          # 域白名单检查: script-path 只允许指向受信分发域 (防本地壳投毒, 与 mirror 门禁 4 对齐)
+          BAD=$(grep -vE '^(https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one|jsdelivr\.net|unpkg\.com)/)' /tmp/urls.txt || true)
+          if [ -n "$BAD" ]; then
+            echo "❌ 白名单外 script-path 域:"
+            echo "$BAD"
+            echo "Failures: 99" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
           FAIL=0
           while IFS= read -r url; do
             [ -z "$url" ] && continue

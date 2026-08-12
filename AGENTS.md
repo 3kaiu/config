@@ -16,8 +16,9 @@ Loon 配置仓库:单入口 `Profile/Loon.lcf`,由 `surgio` 从 `template/` + `s
 |---|---|---|
 | `src/*.ts` | 唯一源码(JS 语法,esbuild 直编) | 可改;git rm 过的 tsconfig/loon.d.ts 是死配置 |
 | `Scripts/` | build 产物 + `lib/notify.js` + `Qidian.js`(手工轨 602KB,无源,rc4) | 不手改;Qidian.js 改动须同步 `Scripts/ENGINE-MANIFEST.json` 哈希 |
-| `Mirror/MANIFEST.json` | 35 条镜像清单,CDN 分发 | mirror-scripts 每日重写;与磁盘/yml 三方一致 |
-| `Mirror/Plugin/Kelee/` | 插件外壳(CDN 缓存 CDN),内部 script-path 直连上游 GitHub | 上游被攻破由 mirror 门禁 4 白名单拦截 |
+| `Plugin/*.plugin` | 净化器插件外壳(仓库静态资产,script-path 直连 CDN 的 Scripts/) | 改后须核对 triger 与 script-path |
+| `Kelee/*.plugin` | keele 上游插件外壳(12306/guiderank/smzdm/umetrip/YouTube),上游在 kelee.one | 与 Plugin/ 同规则,config-validate 覆盖 |
+| `Mirror/` | 上游镜像:auraflare/biliuniverse/dualsubs/iringo/rules/scripts + 独立 js | mirror-scripts 每日重写 `Mirror/MANIFEST.json`(dict: $comment/generated_at/files) |
 | `template/loon.tpl` / `surgio.conf.js` | Loon 配置构建输入 | 改模板后须 regenerate + check:sync |
 | `Profile/Loon.lcf` | 发布入口唯一文件 | 不动;生成物 |
 | `tools/*.mjs` | tpl-sync / 验证脚本 | 改动后跑 check:sync |
