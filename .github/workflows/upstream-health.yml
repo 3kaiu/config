@@ -43,6 +43,10 @@ jobs:
           check_url "app2smile/rules (Bilibili)" "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js"
           check_url "blackmatrix7 AllInOne" "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AllInOne/AllInOne.plugin"
 
+          # Loon.lcf [General] 直连源 (客户端侧拉取, 挂了会报 DNS/geoip 错误)
+          check_url "Loyalsoldier GeoIP mmdb" "https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb"
+          check_url "P3TERX GeoLite2-ASN mmdb" "https://raw.githubusercontent.com/P3TERX/GeoLite.mmdb/download/GeoLite2-ASN.mmdb"
+
           # 自建 CDN
           check_url "ws.wenn.in CDN (Mirror)" "https://ws.wenn.in/main/Mirror/netease.adblock.js"
 

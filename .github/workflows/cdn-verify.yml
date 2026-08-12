@@ -85,6 +85,32 @@ jobs:
             exit 1
           fi
 
+      # GitHub Pages 兜底链路 (3kaiu.github.io/config) 可达性 — 非阻断
+      # 仅汇总到 step summary: Pages 是 ws.wenn.in 故障时的备用分发, 主链路告警不混淆
+      - name: GitHub Pages fallback parity (non-blocking)
+        run: |
+          PAGES_BASE="https://3kaiu.github.io/config"
+          if ! curl -fsSL -m 30 -o /dev/null "$PAGES_BASE/Mirror/MANIFEST.json" 2>/dev/null; then
+            echo "⚠️ GitHub Pages 未启用或未部署, 跳过 parity 检查 (启用方法见 pages-deploy.yml 头注)"
+            echo "### GitHub Pages Fallback Parity" >> $GITHUB_STEP_SUMMARY
+            echo "**未启用/未部署 — 跳过**" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+          OK=0; FAIL=0
+          while read -r f; do
+            if curl -fsSL -m 30 -o /dev/null "$PAGES_BASE/$f" 2>/dev/null; then
+              OK=$((OK+1))
+            else
+              FAIL=$((FAIL+1)); echo "⚠️ pages fetch failed: $f"
+            fi
+          done <<< "$(git ls-files 'Mirror' 'Scripts/*.js' 'Plugin/*.plugin' 'Kelee/*.plugin' 'Profile/Loon.lcf')"
+          echo "### GitHub Pages Fallback Parity" >> $GITHUB_STEP_SUMMARY
+          echo "| Result | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| ✅ 可达 | $OK |" >> $GITHUB_STEP_SUMMARY
+          echo "| ⚠️ 拉取失败 | $FAIL |" >> $GITHUB_STEP_SUMMARY
+          echo "pages_ok=$OK pages_fail=$FAIL" >> $GITHUB_OUTPUT
+
       # Bark 告警 (可选: 仓库 Secrets 配置 BARK_PUSH 后启用)
       - name: Bark alert
         if: failure() && env.BARK_PUSH != ''
