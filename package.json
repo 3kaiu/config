@@ -10,16 +10,14 @@
     "test": "node test/run-tests.js",
     "lint": "eslint Scripts/ test/ tools/",
     "postinstall": "patch-package",
-    "check:sync": "node tools/tpl-sync-check.mjs && node tools/tpl-sync-check.mjs --qx",
+    "check:sync": "node tools/tpl-sync-check.mjs",
     "check:orphan": "node tools/mitm-orphan-check.mjs --local"
   },
-  "dependencies": {
-    "surgio": "^3.17.0"
-  },
   "devDependencies": {
-    "esbuild": "^0.28.1",
-    "eslint": "^10.8.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.8.1",
     "patch-package": "^8.0.1",
+    "surgio": "^3.18.0",
     "typescript": "^7.0.2"
   }
 }
