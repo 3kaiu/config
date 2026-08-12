@@ -71,6 +71,36 @@ DOMAIN, fockrt.yuewen.com, REJECT, enable={PRIVACY_ENABLE}
 DOMAIN, connect.yuewen.com, REJECT, enable={PRIVACY_ENABLE}
 DOMAIN, upushv6.qidian.com, REJECT, enable={PRIVACY_ENABLE}
 
+# 第二轮 (2026-08-12 HAR 审计): 纯日志/埋点/APM 接口 + 穿山甲统计接口, 无功能依赖
+DOMAIN, api-access.pangolin-sdk-toutiao.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, api-access.pangolin-sdk-toutiao1.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, log-api.pangolin-sdk-toutiao.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, gromore.pangolin-sdk-toutiao.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, adkwai.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, datagw-edge.alipay.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, loggw-ex.alipay.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, mdap.alipay.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, mobads.baidu.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, mobads-logs.baidu.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, sensors.umetrip.com.cn, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, rmonitor.qq.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, unitelogreport.reader.qq.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, ywab.reader.qq.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, h-adashx.ut.dingtalk.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, adashbc.ut.taobao.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, statistical-report.djiservice.org, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, analytics-api-01.smzdm.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, sdk.adx.adwangmai.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, mores.toponad.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, jp.ad.gameley.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, logapi-ios.zhipin.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, apm-ios.zhipin.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, apmplus.ap-southeast-1.volces.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, mssdk-bu.bytedance.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, catdot.dianping.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, data-sdk-uuid-log.d.meituan.net, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, qt-api.delicloud.com, REJECT, enable={PRIVACY_ENABLE}
+
 # 纯 DNS 级 REJECT，无需 MitM
 [MitM]
 # 无 MitM 域名 - 隐私防护全部走 DNS REJECT

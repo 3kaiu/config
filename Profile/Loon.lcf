@@ -542,6 +542,14 @@ DOMAIN-SUFFIX, ggpht.com, Proxy
 DOMAIN-SUFFIX, withgoogle.com, Proxy
 DOMAIN, g.co, Proxy
 
+# 穿山甲统计/请求/聚合接口 (2026-08-12 HAR 审计第二轮)
+# 起点秒播脚本 (src/Qidian.ts) 仅依赖 gdtimg.com/gtimg.cn 视频域, 不依赖穿山甲,
+# 故 api-access/log-api/gromore 三个接口域可安全拦截 (必须先于下方 SUFFIX DIRECT)
+DOMAIN, api-access.pangolin-sdk-toutiao.com, REJECT
+DOMAIN, api-access.pangolin-sdk-toutiao1.com, REJECT
+DOMAIN, log-api.pangolin-sdk-toutiao.com, REJECT
+DOMAIN, gromore.pangolin-sdk-toutiao.com, REJECT
+
 # GDT 广告 SDK 白名单
 DOMAIN, mi.gdt.qq.com, DIRECT
 DOMAIN, ii.gdt.qq.com, DIRECT
@@ -646,7 +654,8 @@ DOMAIN, p6-pack.byteimg.com, DIRECT
 # api.getui.com (个推推送) — 全拦 SUFFIX 会断推送
 # ⚠️ GDT/穿山甲兼容: 上方 "GDT 广告 SDK 白名单" (mi/ii/c.gdt.qq.com, adsmind.gdtimg/ugdtimg,
 # pgdt.gtimg.cn, pangolin-sdk-toutiao) 是起点秒播/视频替换脚本的依赖, 保持 DIRECT,
-# 故此处仅以 SUFFIX 覆盖 pgdt.ugdtimg.com 等未列入白名单的素材域 (白名单在前, 优先命中)
+# 故此处仅以 SUFFIX 覆盖 pgdt.ugdtimg.com 等未列入白名单的素材域 (白名单在前, 优先命中);
+# 穿山甲统计/请求接口已在白名单区前置 REJECT (见上)
 DOMAIN-SUFFIX, beizi.biz, REJECT
 DOMAIN-SUFFIX, stats.jpush.cn, REJECT
 DOMAIN-SUFFIX, gd-stats.jpush.cn, REJECT
@@ -666,6 +675,40 @@ DOMAIN, ataru.qidian.com, REJECT
 DOMAIN, fockrt.yuewen.com, REJECT
 DOMAIN, connect.yuewen.com, REJECT
 DOMAIN, upushv6.qidian.com, REJECT
+
+# ── 国内广告/追踪 SDK 硬拦截 · 第二轮 (2026-08-12 HAR 审计) ──────
+# 来源: 同一 HAR 继续挖掘 — 纯日志/埋点/APM 接口, 无功能依赖 (均实测 200 穿透):
+#   穿山甲 (api-access/log-api/gromore, 已前置), adkwai.com (快手广告: p66-ad/p4-lm),
+#   支付宝日志网关 (datagw-edge/loggw-ex/mdap, 纯 logUpload), mobads.baidu.com (百度广告),
+#   sensors.umetrip.com.cn (航旅纵横神策), rmonitor.qq.com, QQ阅读 (unitelogreport/ywab),
+#   UT 埋点 (h-adashx.ut.dingtalk, adashbc.ut.taobao), djiservice.org (大疆),
+#   analytics-api-01.smzdm.com, adwangmai/toponad/gameley (小广告网),
+#   zhipin (logapi-ios/apm-ios), volces APM / bytedance mssdk, 点评/美团埋点, delicloud
+# 放弃项: proj-xtrace-*.log.aliyuncs.com / ce3e75d5.jpush.cn (哈希前缀轮换, 无法精确)
+DOMAIN-SUFFIX, adkwai.com, REJECT
+DOMAIN, datagw-edge.alipay.com, REJECT
+DOMAIN, loggw-ex.alipay.com, REJECT
+DOMAIN, mdap.alipay.com, REJECT
+DOMAIN, mobads.baidu.com, REJECT
+DOMAIN, mobads-logs.baidu.com, REJECT
+DOMAIN, sensors.umetrip.com.cn, REJECT
+DOMAIN, rmonitor.qq.com, REJECT
+DOMAIN, unitelogreport.reader.qq.com, REJECT
+DOMAIN, ywab.reader.qq.com, REJECT
+DOMAIN, h-adashx.ut.dingtalk.com, REJECT
+DOMAIN, adashbc.ut.taobao.com, REJECT
+DOMAIN, statistical-report.djiservice.org, REJECT
+DOMAIN, analytics-api-01.smzdm.com, REJECT
+DOMAIN, sdk.adx.adwangmai.com, REJECT
+DOMAIN, mores.toponad.com, REJECT
+DOMAIN, jp.ad.gameley.com, REJECT
+DOMAIN, logapi-ios.zhipin.com, REJECT
+DOMAIN, apm-ios.zhipin.com, REJECT
+DOMAIN, apmplus.ap-southeast-1.volces.com, REJECT
+DOMAIN, mssdk-bu.bytedance.com, REJECT
+DOMAIN, catdot.dianping.com, REJECT
+DOMAIN, data-sdk-uuid-log.d.meituan.net, REJECT
+DOMAIN, qt-api.delicloud.com, REJECT
 
 # DNS 隐私语义 (Loon): 命中域名类规则的代理流量由代理远端解析, 不产生本地 DNS 查询;
 # 本地解析 (国内 DoH, 解析器侧有记录) 仅发生在: ①走到下面 GEOIP 规则的域名

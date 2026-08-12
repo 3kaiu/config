@@ -158,6 +158,10 @@ host-suffix, weixin.qq.com, direct
 host-suffix, wx.qq.com, direct
 host-suffix, qpic.cn, direct
 
+host, api-access.pangolin-sdk-toutiao.com, reject
+host, api-access.pangolin-sdk-toutiao1.com, reject
+host, log-api.pangolin-sdk-toutiao.com, reject
+host, gromore.pangolin-sdk-toutiao.com, reject
 host, mi.gdt.qq.com, direct
 host, ii.gdt.qq.com, direct
 host, c.gdt.qq.com, direct
@@ -248,6 +252,33 @@ host, ataru.qidian.com, reject
 host, fockrt.yuewen.com, reject
 host, connect.yuewen.com, reject
 host, upushv6.qidian.com, reject
+
+# ── 国内广告/追踪 SDK 硬拦截 · 第二轮 (2026-08-12 HAR 审计) ──────
+# 与 Loon 模板对齐: 纯日志/埋点/APM 接口, 无功能依赖; 穿山甲三接口已在白名单区前置 reject
+host-suffix, adkwai.com, reject
+host, datagw-edge.alipay.com, reject
+host, loggw-ex.alipay.com, reject
+host, mdap.alipay.com, reject
+host, mobads.baidu.com, reject
+host, mobads-logs.baidu.com, reject
+host, sensors.umetrip.com.cn, reject
+host, rmonitor.qq.com, reject
+host, unitelogreport.reader.qq.com, reject
+host, ywab.reader.qq.com, reject
+host, h-adashx.ut.dingtalk.com, reject
+host, adashbc.ut.taobao.com, reject
+host, statistical-report.djiservice.org, reject
+host, analytics-api-01.smzdm.com, reject
+host, sdk.adx.adwangmai.com, reject
+host, mores.toponad.com, reject
+host, jp.ad.gameley.com, reject
+host, logapi-ios.zhipin.com, reject
+host, apm-ios.zhipin.com, reject
+host, apmplus.ap-southeast-1.volces.com, reject
+host, mssdk-bu.bytedance.com, reject
+host, catdot.dianping.com, reject
+host, data-sdk-uuid-log.d.meituan.net, reject
+host, qt-api.delicloud.com, reject
 
 # DNS 隐私语义 (QX): 命中域名类规则的代理流量由代理远端解析, 不产生本地 DNS 查询;
 # 本地解析 (国内 DoH, 解析器侧有记录) 仅发生在: ①走到下面 geoip 规则的域名
