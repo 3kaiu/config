@@ -6,6 +6,7 @@ on:
     paths:
       - 'surgio.conf.js'
       - 'template/**'
+      - 'provider/**'
       - 'package.json'
   workflow_dispatch:
 
