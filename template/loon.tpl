@@ -182,15 +182,18 @@ DOMAIN, api-access.pangolin-sdk-toutiao1.com, REJECT
 DOMAIN, log-api.pangolin-sdk-toutiao.com, REJECT
 DOMAIN, gromore.pangolin-sdk-toutiao.com, REJECT
 
-# GDT 广告 SDK 白名单
-DOMAIN, mi.gdt.qq.com, DIRECT
-DOMAIN, ii.gdt.qq.com, DIRECT
-DOMAIN, c.gdt.qq.com, DIRECT
-DOMAIN, adsmind.gdtimg.com, DIRECT
-DOMAIN, adsmind.ugdtimg.com, DIRECT
-DOMAIN, pgdt.gtimg.cn, DIRECT
-DOMAIN-SUFFIX, pangolin-sdk-toutiao.com, DIRECT
-DOMAIN-SUFFIX, pangle.io, DIRECT
+# ⚠️ 广点通/穿山甲全链拦截 (2026-08-12 用户决策): 原白名单是起点秒播脚本
+# (src/Qidian.ts 视频替换) 的依赖, 但 adsmind.ugdtimg.com 素材同时是智慧房东
+# 开屏广告直投链路 (310_HAR: GDTMobSDK 206 穿透)。用户要求开屏广告彻底消失,
+# 接受起点秒播失效 — 请求/渲染/素材全链 REJECT, 秒播 [Script] 匹配不到即停用
+DOMAIN, mi.gdt.qq.com, REJECT
+DOMAIN, ii.gdt.qq.com, REJECT
+DOMAIN, c.gdt.qq.com, REJECT
+DOMAIN, adsmind.gdtimg.com, REJECT
+DOMAIN, adsmind.ugdtimg.com, REJECT
+DOMAIN, pgdt.gtimg.cn, REJECT
+DOMAIN-SUFFIX, pangolin-sdk-toutiao.com, REJECT
+DOMAIN-SUFFIX, pangle.io, REJECT
 
 # 淘宝
 DOMAIN, heic.alicdn.com, REJECT
@@ -284,10 +287,20 @@ DOMAIN, p6-pack.byteimg.com, DIRECT
 # 插件 [Rule] 与 Remote Rule 均无法拦截国内域 (已验证 ataru/qreport 穿透)
 # ⚠️ 推送保活: 仅拦统计子域, 保留 config.jpush.cn / user.jpush.cn (极光推送) 与
 # api.getui.com (个推推送) — 全拦 SUFFIX 会断推送
-# ⚠️ GDT/穿山甲兼容: 上方 "GDT 广告 SDK 白名单" (mi/ii/c.gdt.qq.com, adsmind.gdtimg/ugdtimg,
-# pgdt.gtimg.cn, pangolin-sdk-toutiao) 是起点秒播/视频替换脚本的依赖, 保持 DIRECT,
-# 故此处仅以 SUFFIX 覆盖 pgdt.ugdtimg.com 等未列入白名单的素材域 (白名单在前, 优先命中);
-# 穿山甲统计/请求接口已在白名单区前置 REJECT (见上)
+# ⚠️ GDT/穿山甲已全链 REJECT (见白名单区, 2026-08-12): 起点秒播视频替换
+# 依赖的域已随"开屏广告必除"决策一并拦截 — 秒播脚本 [Script] 匹配不到即停用,
+# 此处 SUFFIX 兜底覆盖 pgdt.ugdtimg.com 等素材子域; 统计/接口域已前置 REJECT
+# ⚠️ 广告 SDK 下发/上报接口拦截 (2026-08-12 310_HAR 审计): 智慧房东开屏广告残留
+# = 第三方 SDK 直投 (广点通素材/快手联盟/穿山甲/Sigmob)。广点通请求/素材域已全链
+# REJECT (见白名单区); 此处拦截快手联盟 (gdfp.gifshow.com 下发 + open.e.kuaishou.com
+# 配置/广告请求), 穿山甲请求接口 (tnc3-alisc1.zijieapi.com), Sigmob (sigmob.cn 全家),
+# 优量汇展示上报 (v.gdt.qq.com / win.gdt.qq.com)
+DOMAIN, v.gdt.qq.com, REJECT
+DOMAIN, win.gdt.qq.com, REJECT
+DOMAIN-SUFFIX, sigmob.cn, REJECT
+DOMAIN, open.e.kuaishou.com, REJECT
+DOMAIN-SUFFIX, gdfp.gifshow.com, REJECT
+DOMAIN-SUFFIX, alisc1.zijieapi.com, REJECT
 DOMAIN-SUFFIX, beizi.biz, REJECT
 DOMAIN-SUFFIX, stats.jpush.cn, REJECT
 DOMAIN-SUFFIX, gd-stats.jpush.cn, REJECT

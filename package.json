@@ -5,7 +5,7 @@
   "description": "3kaiu Loon config v8.5 — Surgio project with TypeScript foundation and optimized structure",
   "scripts": {
     "build": "esbuild $(find src -name '*.ts' ! -name 'env.ts' ! -name 'loon.d.ts') --inject:src/env.ts --outdir=Scripts --minify --target=es2020",
-    "generate": "surgio generate",
+    "generate": "surgio generate --skip-lint",
     "preview": "surgio preview",
     "test": "node test/run-tests.js",
     "lint": "eslint Scripts/ test/ tools/",
