@@ -177,6 +177,61 @@ jobs:
           sed -i 's|https://gist.githubusercontent.com/blackmatrix7/f5f780d0f56b319b6ad9848fd080bb18/raw/zheye.min.js|https://ws.wenn.in/main/Mirror/scripts/zheye.min.js|g; s|https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/startup/startup.js|https://ws.wenn.in/main/Mirror/scripts/startup.js|g' \
             Mirror/rules/loon-AllInOne.plugin Mirror/rules/loon-AdvertisingScript.plugin
 
+          # ── 本地补丁 (2026-08-12): 国内广告 SDK 域名追加 ──
+          # 上游 blackmatrix7 Loon 版 Advertising 列表仅 278 KEYWORD + 486 IP-CIDR + 14 URL-REGEX,
+          # 不含国内广告 SDK (beizi/jpush统计/mmstat/ugdtimg/1rtb/66mobi/cloooud/hubcloud 等);
+          # Loon 主配置 [Rule] (template/loon.tpl) 已硬拦截 (GEOIP 之前, 本地规则优先),
+          # 此处同步追加列表兜底 (双端格式不同: Loon DOMAIN-*, QX HOST-*)。
+          # 幂等: 先删除旧追加块再追加; 推送保活: 仅统计子域, 保留 config.jpush.cn/user.jpush.cn (极光推送) 与 api.getui.com (个推推送)
+          sed -i '/# === BEGIN 3kaiu 国内广告 SDK 追加 ===/,/# === END 3kaiu 国内广告 SDK 追加 ===/d' \
+            Mirror/rules/loon-Advertising.list Mirror/rules/qx-Advertising.list
+          cat >> Mirror/rules/loon-Advertising.list <<'EOF'
+          # === BEGIN 3kaiu 国内广告 SDK 追加 ===
+          DOMAIN-SUFFIX,beizi.biz
+          DOMAIN-SUFFIX,stats.jpush.cn
+          DOMAIN-SUFFIX,gd-stats.jpush.cn
+          DOMAIN-SUFFIX,mmstat.com
+          DOMAIN-SUFFIX,ugdtimg.com
+          DOMAIN-SUFFIX,1rtb.net
+          DOMAIN-SUFFIX,66mobi.com
+          DOMAIN-SUFFIX,cloooud.com
+          DOMAIN-SUFFIX,hubcloud.com.cn
+          DOMAIN,sdk-open-phone.getui.com
+          DOMAIN,snssdk-eu.ninebot.com
+          DOMAIN,snssdk-us.ninebot.com
+          DOMAIN,toblog.ctobsnssdk.com
+          DOMAIN,sentry-monitor-new.zdmimg.com
+          DOMAIN,path.book.qq.com
+          DOMAIN,ataru.qidian.com
+          DOMAIN,fockrt.yuewen.com
+          DOMAIN,connect.yuewen.com
+          DOMAIN,upushv6.qidian.com
+          # === END 3kaiu 国内广告 SDK 追加 ===
+          EOF
+          cat >> Mirror/rules/qx-Advertising.list <<'EOF'
+          # === BEGIN 3kaiu 国内广告 SDK 追加 ===
+          HOST-SUFFIX,beizi.biz,Advertising
+          HOST-SUFFIX,stats.jpush.cn,Advertising
+          HOST-SUFFIX,gd-stats.jpush.cn,Advertising
+          HOST-SUFFIX,mmstat.com,Advertising
+          HOST-SUFFIX,ugdtimg.com,Advertising
+          HOST-SUFFIX,1rtb.net,Advertising
+          HOST-SUFFIX,66mobi.com,Advertising
+          HOST-SUFFIX,cloooud.com,Advertising
+          HOST-SUFFIX,hubcloud.com.cn,Advertising
+          HOST,sdk-open-phone.getui.com,Advertising
+          HOST,snssdk-eu.ninebot.com,Advertising
+          HOST,snssdk-us.ninebot.com,Advertising
+          HOST,toblog.ctobsnssdk.com,Advertising
+          HOST,sentry-monitor-new.zdmimg.com,Advertising
+          HOST,path.book.qq.com,Advertising
+          HOST,ataru.qidian.com,Advertising
+          HOST,fockrt.yuewen.com,Advertising
+          HOST,connect.yuewen.com,Advertising
+          HOST,upushv6.qidian.com,Advertising
+          # === END 3kaiu 国内广告 SDK 追加 ===
+          EOF
+
           # ═══════════════ NSRingo bundle.js (版本固定 release 资产) ═══════════════
           # NSRingo .plugin 引用的 bundle.js; 若上游清理旧 release 会 404, 镜像消除单点
           mirror "https://github.com/NSRingo/WeatherKit/releases/download/v3.1.0/response.bundle.js" \

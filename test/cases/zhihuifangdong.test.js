@@ -36,6 +36,46 @@ exports.tests = {
     const s = await h.runScript("Scripts/Zhihuifangdong.js", sb);
     a.equal(JSON.parse(s.doneCalls[0].body).data, {}, "URL 回退应命中 banner 分支");
   },
+  "loon: $argument=showAds → data 置 null (广告白名单)": async (a, h) => {
+    const sb = h.createSandbox({
+      mode: "loon",
+      argument: "showAds",
+      request: { url: "https://api.zhihuifangdong.net/core/adWhitelist/showAds" },
+      response: RESP({ code: 0, data: true }),
+    });
+    const s = await h.runScript("Scripts/Zhihuifangdong.js", sb);
+    a.equal(JSON.parse(s.doneCalls[0].body).data, null, "广告白名单 data 应为 null");
+  },
+  "loon: $argument=activityAds + URL clickPicMore → data 清空为对象": async (a, h) => {
+    const sb = h.createSandbox({
+      mode: "loon",
+      argument: "activityAds",
+      request: { url: "https://api.zhihuifangdong.net/core/app/activity/clickPicMore" },
+      response: RESP({ code: 0, data: { pic: "ad" } }),
+    });
+    const s = await h.runScript("Scripts/Zhihuifangdong.js", sb);
+    a.equal(JSON.parse(s.doneCalls[0].body).data, {}, "clickPicMore data 应为空对象");
+  },
+  "loon: $argument=activityAds + URL platformPic → data 清空为对象": async (a, h) => {
+    const sb = h.createSandbox({
+      mode: "loon",
+      argument: "activityAds",
+      request: { url: "https://api.zhihuifangdong.net/core/app/activity/platformPic" },
+      response: RESP({ code: 0, data: { pic: "ad" } }),
+    });
+    const s = await h.runScript("Scripts/Zhihuifangdong.js", sb);
+    a.equal(JSON.parse(s.doneCalls[0].body).data, {}, "platformPic data 应为空对象");
+  },
+  "loon: $argument=activityAds + URL clickPic → data 清空为对象": async (a, h) => {
+    const sb = h.createSandbox({
+      mode: "loon",
+      argument: "activityAds",
+      request: { url: "https://api.zhihuifangdong.net/core/app/activity/clickPic" },
+      response: RESP({ code: 0, data: { pic: "ad" } }),
+    });
+    const s = await h.runScript("Scripts/Zhihuifangdong.js", sb);
+    a.equal(JSON.parse(s.doneCalls[0].body).data, {}, "clickPic data 应为空对象");
+  },
   "守卫: 无 $response 直接放行": async (a, h) => {
     const sb = h.createSandbox({ mode: "loon", argument: "appOpenAds", request: { url: "https://api.zhihuifangdong.net/core/app/activity/appOpenAds" } });
     const s = await h.runScript("Scripts/Zhihuifangdong.js", sb);

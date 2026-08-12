@@ -47,6 +47,30 @@ DOMAIN-SUFFIX, talkingdata.com, REJECT, enable={PRIVACY_ENABLE}
 DOMAIN-SUFFIX, growingio.com, REJECT, enable={PRIVACY_ENABLE}
 DOMAIN-SUFFIX, mta.qq.com, REJECT, enable={PRIVACY_ENABLE}
 
+# 国内广告 SDK 硬拦截 (2026-08-12 HAR 审计)
+# ⚠️ 注: Loon 中插件 [Rule] 优先级低于主配置 [Rule], 国内域会被 GEOIP,CN,DIRECT 截胡,
+# 本段为兜底 — 主配置 (template/loon.tpl / quantumultx.tpl) 已硬拦截, 双端保持一致。
+# ⚠️ 推送保活: 仅拦统计子域, 保留 config.jpush.cn / user.jpush.cn (极光推送) 与 api.getui.com (个推推送)
+DOMAIN-SUFFIX, beizi.biz, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, stats.jpush.cn, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, gd-stats.jpush.cn, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, mmstat.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, ugdtimg.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, 1rtb.net, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, 66mobi.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, cloooud.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, hubcloud.com.cn, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, sdk-open-phone.getui.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, snssdk-eu.ninebot.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, snssdk-us.ninebot.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, toblog.ctobsnssdk.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, sentry-monitor-new.zdmimg.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, path.book.qq.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, ataru.qidian.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, fockrt.yuewen.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, connect.yuewen.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN, upushv6.qidian.com, REJECT, enable={PRIVACY_ENABLE}
+
 # 纯 DNS 级 REJECT，无需 MitM
 [MitM]
 # 无 MitM 域名 - 隐私防护全部走 DNS REJECT

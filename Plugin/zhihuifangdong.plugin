@@ -1,6 +1,6 @@
 #!name=智慧房东广告屏蔽
-#!desc=屏蔽开屏广告 + Banner 广告，支持独立开关控制
-#!version=7.8
+#!desc=屏蔽开屏广告 + Banner 广告 + 广告白名单/广告位, 支持独立开关控制
+#!version=7.9
 #!author=Ethan / 3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse.png
@@ -10,6 +10,8 @@
 [Argument]
 appOpenAdsSwitch=switch,"true","false",tag=开屏广告屏蔽,desc=开启后将屏蔽App启动时的开屏广告
 bannerAdsSwitch=switch,"true","false",tag=Banner广告屏蔽,desc=开启后将屏蔽App内的Banner横幅广告
+adWhitelistSwitch=switch,"true","false",tag=广告白名单屏蔽,desc=开启后将屏蔽App的广告白名单接口 (adWhitelist/showAds)
+activityAdsSwitch=switch,"true","false",tag=活动广告位屏蔽,desc=开启后将屏蔽活动广告位与点击上报 (clickPic/clickPicMore/platformPic)
 
 [Script]
 # 开屏广告屏蔽
@@ -17,6 +19,12 @@ http-response ^https?:\/\/api\.zhihuifangdong\.net\/core\/app\/activity\/appOpen
 
 # Banner广告屏蔽
 http-response ^https?:\/\/api\.zhihuifangdong\.net\/core\/app\/activity\/bannerPicMore script-path=https://ws.wenn.in/main/Scripts/Zhihuifangdong.js, requires-body=true, timeout=10, tag=Banner广告屏蔽, argument=bannerPicMore, enable={bannerAdsSwitch}
+
+# 广告白名单屏蔽 (2026-08-12 HAR 审计: data:true 穿透)
+http-response ^https?:\/\/api\.zhihuifangdong\.net\/core\/adWhitelist\/showAds script-path=https://ws.wenn.in/main/Scripts/Zhihuifangdong.js, requires-body=true, timeout=10, tag=广告白名单屏蔽, argument=showAds, enable={adWhitelistSwitch}
+
+# 活动广告位/点击上报屏蔽 (2026-08-12 HAR 审计)
+http-response ^https?:\/\/api\.zhihuifangdong\.net\/core\/app\/activity\/(clickPicMore|platformPic|clickPic) script-path=https://ws.wenn.in/main/Scripts/Zhihuifangdong.js, requires-body=true, timeout=10, tag=活动广告位屏蔽, argument=activityAds, enable={activityAdsSwitch}
 
 [MitM]
 hostname = %APPEND% api.zhihuifangdong.net

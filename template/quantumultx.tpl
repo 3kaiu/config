@@ -185,6 +185,7 @@ host, tmead.y.qq.com, reject-no-drop
 host, oth.str.mdt.qq.com, reject
 host, h.trace.qq.com, reject
 host, sdk.e.qq.com, reject
+host, sdkreport.e.qq.com, reject
 host, p.l.qq.com, reject
 host, us.l.qq.com, reject
 host-suffix, imtmp.net, reject
@@ -224,6 +225,29 @@ host-suffix, gstatic.com, Streaming
 host-suffix, googleapis.com, Streaming
 host-suffix, google.com, Streaming
 host-suffix, google.co.jp, Streaming
+
+# ── 国内广告 SDK 硬拦截 (2026-08-12 HAR 审计) ─────────────────────
+# 与 Loon 模板对齐: 必须在 geoip, cn, direct 之前, 否则国内域被直连截胡;
+# 仅拦统计子域, 保留 config.jpush.cn / user.jpush.cn (极光推送) 与 api.getui.com (个推推送)
+host-suffix, beizi.biz, reject
+host-suffix, stats.jpush.cn, reject
+host-suffix, gd-stats.jpush.cn, reject
+host-suffix, mmstat.com, reject
+host-suffix, ugdtimg.com, reject
+host-suffix, 1rtb.net, reject
+host-suffix, 66mobi.com, reject
+host-suffix, cloooud.com, reject
+host-suffix, hubcloud.com.cn, reject
+host, sdk-open-phone.getui.com, reject
+host, snssdk-eu.ninebot.com, reject
+host, snssdk-us.ninebot.com, reject
+host, toblog.ctobsnssdk.com, reject
+host, sentry-monitor-new.zdmimg.com, reject
+host, path.book.qq.com, reject
+host, ataru.qidian.com, reject
+host, fockrt.yuewen.com, reject
+host, connect.yuewen.com, reject
+host, upushv6.qidian.com, reject
 
 # DNS 隐私语义 (QX): 命中域名类规则的代理流量由代理远端解析, 不产生本地 DNS 查询;
 # 本地解析 (国内 DoH, 解析器侧有记录) 仅发生在: ①走到下面 geoip 规则的域名

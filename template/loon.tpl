@@ -203,6 +203,7 @@ DOMAIN, tmead.y.qq.com, REJECT
 DOMAIN, oth.str.mdt.qq.com, REJECT
 DOMAIN, h.trace.qq.com, REJECT
 DOMAIN, sdk.e.qq.com, REJECT
+DOMAIN, sdkreport.e.qq.com, REJECT
 DOMAIN, p.l.qq.com, REJECT
 DOMAIN, us.l.qq.com, REJECT
 DOMAIN-SUFFIX, imtmp.net, REJECT
@@ -262,6 +263,41 @@ DOMAIN, a3.pstatp.com, DIRECT
 DOMAIN, a3.bytecdn.cn, DIRECT
 DOMAIN, p3-pack.byteimg.com, DIRECT
 DOMAIN, p6-pack.byteimg.com, DIRECT
+
+# ── 国内广告 SDK 硬拦截 (2026-08-12 HAR 审计) ─────────────────────
+# 来源: 2026-08-12 抓包 (4602 条) — 以下 SDK 域名全部 200 穿透:
+#   beizi.biz (贝兹广告: 什么值得买/西塞网等), stats.jpush.cn (极光统计: WPS/QQ阅读/米家),
+#   mmstat.com (阿里 arms), ugdtimg.com (优量汇视频素材), 1rtb.net / 66mobi.com (移动广告),
+#   cloooud.com / hubcloud.com.cn (广告聚合), sdk-open-phone.getui.com (个推统计),
+#   snssdk-eu/-us.ninebot.com (九号出行字节日志), toblog.ctobsnssdk.com (字节日志),
+#   sentry-monitor-new.zdmimg.com (smzdm 自建崩溃监控), path.book.qq.com (QQ阅读埋点),
+#   ataru/fockrt/connect.yuewen.com + upushv6.qidian.com (阅文/起点追踪)
+# ⚠️ 必须在 GEOIP,CN,DIRECT 之前: 本地规则优先, 国内域会被 GEOIP 直连截胡,
+# 插件 [Rule] 与 Remote Rule 均无法拦截国内域 (已验证 ataru/qreport 穿透)
+# ⚠️ 推送保活: 仅拦统计子域, 保留 config.jpush.cn / user.jpush.cn (极光推送) 与
+# api.getui.com (个推推送) — 全拦 SUFFIX 会断推送
+# ⚠️ GDT/穿山甲兼容: 上方 "GDT 广告 SDK 白名单" (mi/ii/c.gdt.qq.com, adsmind.gdtimg/ugdtimg,
+# pgdt.gtimg.cn, pangolin-sdk-toutiao) 是起点秒播/视频替换脚本的依赖, 保持 DIRECT,
+# 故此处仅以 SUFFIX 覆盖 pgdt.ugdtimg.com 等未列入白名单的素材域 (白名单在前, 优先命中)
+DOMAIN-SUFFIX, beizi.biz, REJECT
+DOMAIN-SUFFIX, stats.jpush.cn, REJECT
+DOMAIN-SUFFIX, gd-stats.jpush.cn, REJECT
+DOMAIN-SUFFIX, mmstat.com, REJECT
+DOMAIN-SUFFIX, ugdtimg.com, REJECT
+DOMAIN-SUFFIX, 1rtb.net, REJECT
+DOMAIN-SUFFIX, 66mobi.com, REJECT
+DOMAIN-SUFFIX, cloooud.com, REJECT
+DOMAIN-SUFFIX, hubcloud.com.cn, REJECT
+DOMAIN, sdk-open-phone.getui.com, REJECT
+DOMAIN, snssdk-eu.ninebot.com, REJECT
+DOMAIN, snssdk-us.ninebot.com, REJECT
+DOMAIN, toblog.ctobsnssdk.com, REJECT
+DOMAIN, sentry-monitor-new.zdmimg.com, REJECT
+DOMAIN, path.book.qq.com, REJECT
+DOMAIN, ataru.qidian.com, REJECT
+DOMAIN, fockrt.yuewen.com, REJECT
+DOMAIN, connect.yuewen.com, REJECT
+DOMAIN, upushv6.qidian.com, REJECT
 
 # DNS 隐私语义 (Loon): 命中域名类规则的代理流量由代理远端解析, 不产生本地 DNS 查询;
 # 本地解析 (国内 DoH, 解析器侧有记录) 仅发生在: ①走到下面 GEOIP 规则的域名
