@@ -10,7 +10,8 @@
     "test": "node test/run-tests.js",
     "lint": "eslint Scripts/ test/ tools/",
     "check:sync": "node tools/tpl-sync-check.mjs",
-    "check:orphan": "node tools/mitm-orphan-check.mjs --local"
+    "check:orphan": "node tools/mitm-orphan-check.mjs --local",
+    "check:plugin": "node tools/plugin-lint-check.mjs"
   },
   "devDependencies": {
     "esbuild": "0.28.2",

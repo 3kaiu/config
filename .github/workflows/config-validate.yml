@@ -131,7 +131,16 @@ jobs:
           # 本地模式严格阻断 (孤儿 = 解密面扩张), 但豁免已声明的 bundle/黑盒/通配域
           exit ${PIPESTATUS[0]}
 
-      # ── 5c. 模板↔产物一致性 (防双源漂移) ──
+      # ── 5c. 插件段结构与规则语法检查 (2026-08 新增) ──
+      # 防合并/批量生成引入坏规则 (段错 / Rule 类型错 / Rewrite 动作缺失):
+      # 校验 Plugin/ 与 Kelee/ 全部 .plugin, 合法重定向/条件式已豁免。
+      - name: Plugin lint check
+        run: |
+          echo "## Plugin Lint Check" >> $GITHUB_STEP_SUMMARY
+          node tools/plugin-lint-check.mjs 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          exit ${PIPESTATUS[0]}
+
+      # ── 5d. 模板↔产物一致性 (防双源漂移) ──
       # template/loon.tpl + snippet 的静态行必须完整存在于 Profile/Loon.lcf (反向同理)。
       # 根因 (2026-08 审计): surgio 需 provider/ 目录 (本地/CI 无 → 生成失败),
       # 产物实为手动维护 → 模板改动易遗忘同步。此检查保证任一方向改动都会在 CI 暴露。
