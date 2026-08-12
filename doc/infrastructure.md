@@ -79,6 +79,6 @@
 ## 6. 变更 checklist（动 CDN/域名前过一遍）
 
 - [ ] `cdn-verify.yml` 手动触发一次全绿
-- [ ] 变更窗口避开 02:00-03:10（mirror/kelee/health/cdn-verify 定时任务集中段）
+- [ ] 变更窗口避开 02:00-03:10（mirror/health/cdn-verify 定时任务集中段）
 - [ ] 变更后手动触发 `cdn-verify.yml` 复核
-- [ ] 如更换域名：同步更新 README 导入链接、本文件、并在仓库保留旧域名 301 至少一个月
+- [ ] 如更换域名：同步更新本文件、并保留旧域名 301 至少一个月（客户端导入链接在 surgio 输出物中, 由 tpl 管理）
