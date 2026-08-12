@@ -88,10 +88,17 @@ function collectPatterns(files) {
     for (const line of txt.split("\n")) {
       const t = line.trim();
       if (!t || t.startsWith("#") || t.startsWith("!") || t.startsWith(";")) continue;
-      const m = t.match(/^(?:http-request|http-response|request|response|script)\s+(\^[^ ,]+)/);
-      if (m) { patterns.push(m[1]); continue; }
-      const m2 = t.match(/^(?:url\s+|(?:URL|DOMAIN)-REGEX\s*,\s*)?(\^[^ ,]+)/);
-      if (m2 && (t.startsWith("^") || t.startsWith("url ^") || /^(URL|DOMAIN)-REGEX,/.test(t))) patterns.push(m2[2]);
+      const m1 = t.match(/^(?:http-request|http-response|request|response|script)\s+(\^[^ ,]+)/);
+      if (m1) { patterns.push(m1[1]); continue; }
+      const m1b = t.match(/^(?:request|response|script)\s+if\s+\$\{url\}\s*~=\s*\/(.*)$/);
+      if (m1b) {
+        const pat = m1b[1].replace(/\s+as\s+.+$/, "").replace(/\/\s*$/, "");
+        patterns.push(pat);
+        continue;
+      }
+      const t2 = /^(URL|DOMAIN)-REGEX,\s*"/.test(t) ? t.replace(/^((?:URL|DOMAIN)-REGEX,\s*)"/, "$1") : t;
+      const m2 = t2.match(/^(?:url\s+|(?:URL|DOMAIN)-REGEX\s*,\s*)?(\^[^ ,]+)/);
+      if (m2 && (t2.startsWith("^") || t2.startsWith("url ^") || /^(URL|DOMAIN)-REGEX,/.test(t2))) patterns.push(m2[1]);
     }
   }
   return patterns;

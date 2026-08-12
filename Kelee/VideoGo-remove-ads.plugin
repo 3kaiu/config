@@ -1,0 +1,17 @@
+#!name=萤石云视频去广告
+#!desc=移除开屏广告、首页推广、我的页面推广。 (规则版: 已去除原版外部脚本, 自维护)
+#!version=1.0
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/VideoGo.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+[Rewrite]
+^https:\/\/api\.ys7\.com\/api\/ads reject
+^https:\/\/i\.ys7\.com\/api\/user\/tabList reject-dict
+^https:\/\/api\.ys7\.com\/v3\/config\/service\/entrance\/bannerInfo reject-dict
+^https:\/\/api\.ys7\.com\/v3\/intelligent-app\/apps\/linkage reject-dict
+^https:\/\/api\.ys7\.com\/v3\/configurations\/gray\/info\?grayTypes=185 reject-dict
+^https:\/\/api\.ys7\.com\/v3\/videoclips\/square\/video\/query reject-dict
+[MitM]
+hostname=api.ys7.com, i.ys7.com

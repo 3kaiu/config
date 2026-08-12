@@ -9,4 +9,4 @@
 [Rewrite]
 ^https?:\/\/dat\.ruanmei\.com\/ithome\/money\/acd\.json$ reject
 [MitM]
-hostname=napi.ithome.com, api.zuihuimai.com, dat.ruanmei.com
+hostname=napi.ithome.com, dat.ruanmei.com

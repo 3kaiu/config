@@ -30,4 +30,4 @@ AND, ((IP-ASN, 63646, no-resolve), (DEST-PORT, 25641), (PROTOCOL, TCP)), REJECT
 ^https:\/\/htwkop\.xiaojukeji\.com:443\/gateway\? response-body-json-del data.didi-bike-homepage-popup data.variantInfo
 ^https:\/\/as\.xiaojukeji\.com\/ep\/as\/toggles\? response-body-json-jq '.data |= map(if .name|IN("daijia_journey_new_tcp_switch","daijia_tcp_init","daijia_tcp_msg_encrypt","daijia_tcp_site_info","daijia_tcp_site_report")then.allow=false else. end)'
 [MitM]
-hostname=as.xiaojukeji.com, common.diditaxi.com.cn, conf.diditaxi.com.cn, lion.didialift.com, api.udache.com, ct.xiaojukeji.com, res.xiaojukeji.com, 112.53.55.225, 139.199.240.84, 113.46.225.*, 162.14.157.*, 123.207.209.*, 120.241.142.*,120.241.143.*, 116.85.*
+hostname=as.xiaojukeji.com, common.diditaxi.com.cn, conf.diditaxi.com.cn, lion.didialift.com, api.udache.com, ct.xiaojukeji.com, res.xiaojukeji.com

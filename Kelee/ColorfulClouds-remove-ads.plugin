@@ -14,4 +14,4 @@ DOMAIN, gather.colorfulclouds.net, REJECT
 ^https:\/\/biz\.cyapi\.cn\/(p\/v1\/entries|p\/v1\/trial_card\/info|v2\/product) reject-dict
 ^https:\/\/starplucker\.cyapi\.cn\/v3\/(config\/cypage\/\w+\/conditions|notification\/message_center|operation\/homefeatures) reject-dict
 [MitM]
-hostname=biz.cyapi.cn, starplucker.cyapi.cn, api.caiyunapp.com, cdn-w.caiyunapp.com
+hostname=biz.cyapi.cn, starplucker.cyapi.cn

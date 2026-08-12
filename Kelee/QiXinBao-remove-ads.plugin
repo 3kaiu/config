@@ -1,0 +1,21 @@
+#!name=启信宝去广告
+#!desc=移除开屏广告、应用内弹窗、首页轮播图、悬浮部件和个性化推荐信息流。 (规则版: 已去除原版外部脚本, 自维护)
+#!version=1.0
+#!author=3kaiu (基于可莉 iKeLee 插件转写, CC BY-NC-SA)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/QiXinBao.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+[Rewrite]
+^https:\/\/appc\.qixin\.com\/v4\/general\/getSearchPlaceholderRedirect$ reject-dict
+^https:\/\/appc-v6\.qixin\.com\/v4\/general\/getAppFloatAd$ reject-dict
+^https:\/\/appc-v6\.qixin\.com\/v4\/general\/getAppBanners$ reject-dict
+^https:\/\/appc-v6\.qixin\.com\/v4\/user\/getUserActivitys$ reject-dict
+^https:\/\/appc-v6\.qixin\.com\/v4\/enterprise\/homePageRecommend\/recommendCard\d+ reject-dict
+^https:\/\/appc-v6\.qixin\.com\/v4\/user\/getRecommendPersons$ reject-dict
+^https:\/\/appc-v6\.qixin\.com\/v4\/enterprise\/getRecommendEnts$ reject-dict
+^https:\/\/appc-v6\.qixin\.com\/v4\/enterprise\/getRecommendation$ reject-dict
+^https:\/\/appc-v6\.qixin\.com\/v4\/general\/getAppBottomBanners$ reject-dict
+^https:\/\/qxb-minicode-pic-osscache\.qixin\.com\/web\/ reject
+[MitM]
+hostname=appc.qixin.com, appc-v6.qixin.com, qxb-minicode-pic-osscache.qixin.com
