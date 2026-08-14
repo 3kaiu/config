@@ -63,7 +63,7 @@ httpdns.c.cdnhwc2.com = 0.0.0.0
 # 容灾: Proxy url-test 组 (".*") 自动纳管新节点 — 订阅中加入第二节点即双节点容灾
 
 [Proxy Group]
-Proxy = url-test, ".*", url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
+Proxy = url-test, ".*", 东京, url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
 Fallback = fallback, ".*", url=http://cp.cloudflare.com/generate_204, interval=600, timeout=10
 Apple = select, DIRECT, Proxy
 Final = select, Proxy, Fallback, DIRECT
