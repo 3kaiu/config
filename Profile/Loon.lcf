@@ -62,6 +62,9 @@ httpdns.c.cdnhwc2.com = 0.0.0.0
 # 通过 SURGIO_SUBSCRIPTION_URL (机场订阅) 或 Secrets (HY2_HOST 等) 传入
 # 容灾: Proxy url-test 组 (".*") 自动纳管新节点 — 订阅中加入第二节点即双节点容灾
 
+# Oxylabs 住宅代理 (IPProvider 专用, 密码在 Loon 内修改)
+Oxylabs = http, dc.oxylabs.io, 8000, username="customer-seeeu_iTbtz", password="PASSWORD"
+
 [Proxy Group]
 Proxy = url-test, ".*", url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
 Fallback = fallback, ".*", url=http://cp.cloudflare.com/generate_204, interval=600, timeout=10
@@ -72,7 +75,7 @@ AI = select, Proxy, Fallback, DIRECT, tag=AI服务
 Developer = select, Proxy, Fallback, DIRECT, tag=开发者
 Gaming = select, Proxy, Fallback, DIRECT, tag=游戏平台
 Social = select, Proxy, Fallback, DIRECT, tag=社交平台
-IPProvider = select, DIRECT, tag=IP代理
+IPProvider = select, Proxy, DIRECT, tag=IP代理
 OpenCode = select, IPProvider, Proxy, DIRECT, tag=OpenCode.ai
 
 [Rule]
