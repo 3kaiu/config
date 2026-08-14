@@ -10,7 +10,9 @@ DOMAIN-SUFFIX, t.co, Social
 DOMAIN-SUFFIX, twittercdn.com, Social
 # Facebook / Meta
 DOMAIN-SUFFIX, facebook.com, Social
+DOMAIN-SUFFIX, fb.com, Social
 DOMAIN-SUFFIX, fbcdn.net, Social
+DOMAIN-SUFFIX, messenger.com, Social
 # Telegram
 DOMAIN-SUFFIX, telegram.org, Social
 DOMAIN-SUFFIX, t.me, Social
@@ -66,7 +68,7 @@ DOMAIN-SUFFIX, hostloc.com, Social
 DOMAIN-SUFFIX, 1024.com, Social
 # 中文内容/社区 (需代理访问)
 DOMAIN-SUFFIX, matters.news, Social
-DOMAIN, lihkg.com, Social
+DOMAIN-SUFFIX, lihkg.com, Social
 DOMAIN-SUFFIX, dcard.tw, Social
 DOMAIN-SUFFIX, dcard.cc, Social
 # 小说/文学站 (需代理访问)
@@ -79,3 +81,5 @@ DOMAIN-SUFFIX, biquge.com, Social
 DOMAIN-SUFFIX, pianbai.com, Social
 DOMAIN-SUFFIX, 23wx.com, Social
 DOMAIN-SUFFIX, wdhl.com, Social
+# 通讯/会议
+DOMAIN-SUFFIX, zoom.us, Social

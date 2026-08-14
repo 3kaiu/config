@@ -5,17 +5,23 @@
 DOMAIN-SUFFIX, github.com, Developer
 DOMAIN-SUFFIX, githubusercontent.com, Developer
 DOMAIN-SUFFIX, githubassets.com, Developer
+DOMAIN-SUFFIX, github.io, Developer
+DOMAIN-SUFFIX, ghcr.io, Developer
+# OSS CDN (开源静态资源)
+DOMAIN-SUFFIX, jsdelivr.net, Developer
 # Microsoft
 DOMAIN-SUFFIX, microsoft.com, Developer
 DOMAIN-SUFFIX, microsoftonline.com, Developer
 DOMAIN-SUFFIX, onedrive.com, Developer
 DOMAIN-SUFFIX, onedrive.live.com, Developer
 DOMAIN-SUFFIX, office365.com, Developer
+DOMAIN-SUFFIX, sharepoint.com, Developer
 DOMAIN-SUFFIX, live.com, Developer
 # Microsoft 开发者
 DOMAIN-SUFFIX, visualstudio.com, Developer
 DOMAIN-SUFFIX, azure.com, Developer
 DOMAIN-SUFFIX, azure-devices.com, Developer
+DOMAIN-SUFFIX, azurewebsites.net, Developer
 DOMAIN-SUFFIX, nuget.org, Developer
 DOMAIN-SUFFIX, msdn.com, Developer
 # Google 开发者
@@ -37,10 +43,12 @@ DOMAIN-SUFFIX, digitalocean.com, Developer
 DOMAIN-SUFFIX, herokuapp.com, Developer
 # 部署/托管平台
 DOMAIN-SUFFIX, vercel.com, Developer
+DOMAIN-SUFFIX, vercel.app, Developer
 DOMAIN-SUFFIX, netlify.com, Developer
 DOMAIN-SUFFIX, netlify.app, Developer
 DOMAIN-SUFFIX, cloudflare.com, Developer
 DOMAIN-SUFFIX, workers.dev, Developer
+DOMAIN-SUFFIX, pages.dev, Developer
 # 设计工具
 DOMAIN-SUFFIX, figma.com, Developer
 # Stack Exchange
@@ -50,6 +58,7 @@ DOMAIN-SUFFIX, serverfault.com, Developer
 DOMAIN-SUFFIX, superuser.com, Developer
 # 容器/包管理器
 DOMAIN-SUFFIX, docker.com, Developer
+DOMAIN-SUFFIX, docker.io, Developer
 DOMAIN-SUFFIX, npmjs.com, Developer
 DOMAIN-SUFFIX, npmjs.org, Developer
 DOMAIN-SUFFIX, pypi.org, Developer

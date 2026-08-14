@@ -1,5 +1,6 @@
 # 流媒体路由 (Loon 格式)
 DOMAIN-SUFFIX, youtube.com, Streaming
+DOMAIN-SUFFIX, youtu.be, Streaming
 DOMAIN-SUFFIX, googlevideo.com, Streaming
 DOMAIN-SUFFIX, ytimg.com, Streaming
 DOMAIN-SUFFIX, netflix.com, Streaming
@@ -78,4 +79,7 @@ DOMAIN-SUFFIX, hotstar.com, Streaming
 DOMAIN-SUFFIX, viu.com, Streaming
 DOMAIN-SUFFIX, wetv.vip, Streaming
 DOMAIN-SUFFIX, iq.com, Streaming
+# Gmail / Vimeo
+DOMAIN-SUFFIX, gmail.com, Streaming
+DOMAIN-SUFFIX, vimeo.com, Streaming
 # Google 通配域名已移至 loon.tpl 主配置中 Analytics/Ad REJECT 之后 (避免截胡 crashlytics.googleapis.com / firebase.googleapis.com)

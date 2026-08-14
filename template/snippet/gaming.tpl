@@ -17,6 +17,9 @@ DOMAIN-SUFFIX, pvp.net, Gaming
 DOMAIN-SUFFIX, roblox.com, Gaming
 # Electronic Arts
 DOMAIN-SUFFIX, ea.com, Gaming
+# Minecraft
+DOMAIN-SUFFIX, minecraft.net, Gaming
+DOMAIN-SUFFIX, mojang.com, Gaming
 # Xbox / Microsoft Gaming
 # 注: xboxlive.com 已在主配置用 DOMAIN-KEYWORD DIRECT 处理 (主机直连, real-ip 含 *.xboxlive.com), 此处规则被遮蔽故移除
 DOMAIN-SUFFIX, xbox.com, Gaming
@@ -33,3 +36,6 @@ DOMAIN-SUFFIX, mihoyo.com, Gaming
 # Battle.net / Blizzard
 DOMAIN-SUFFIX, battle.net, Gaming
 DOMAIN-SUFFIX, blizzard.com, Gaming
+# 其他平台
+DOMAIN-SUFFIX, ubisoft.com, Gaming
+DOMAIN-SUFFIX, gog.com, Gaming

@@ -27,6 +27,7 @@ DOMAIN-SUFFIX, deepmind.com, AI
 DOMAIN-SUFFIX, deepseek.com, AI
 # Grok (xAI)
 DOMAIN-SUFFIX, x.ai, AI
+DOMAIN-SUFFIX, grok.com, AI
 # AI 图像/视频
 DOMAIN-SUFFIX, midjourney.com, AI
 DOMAIN-SUFFIX, runwayml.com, AI
@@ -37,6 +38,8 @@ DOMAIN-SUFFIX, elevenlabs.io, AI
 DOMAIN-SUFFIX, elevenlabs.com, AI
 # AI 搜索/问答
 DOMAIN-SUFFIX, perplexity.ai, AI
+DOMAIN-SUFFIX, openrouter.ai, AI
+DOMAIN-SUFFIX, poe.com, AI
 # AI 基础设施
 DOMAIN-SUFFIX, groq.com, AI
 DOMAIN-SUFFIX, huggingface.co, AI

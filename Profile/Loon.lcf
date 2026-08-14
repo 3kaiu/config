@@ -62,9 +62,6 @@ httpdns.c.cdnhwc2.com = 0.0.0.0
 # 通过 SURGIO_SUBSCRIPTION_URL (机场订阅) 或 Secrets (HY2_HOST 等) 传入
 # 容灾: Proxy url-test 组 (".*") 自动纳管新节点 — 订阅中加入第二节点即双节点容灾
 
-# Oxylabs 住宅代理 (IPProvider 专用, 密码在 Loon 内修改)
-Oxylabs = http, dc.oxylabs.io, 8000, username="customer-seeeu_iTbtz", password="PASSWORD"
-
 [Proxy Group]
 Proxy = url-test, ".*", url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
 Fallback = fallback, ".*", url=http://cp.cloudflare.com/generate_204, interval=600, timeout=10
@@ -75,8 +72,7 @@ AI = select, Proxy, Fallback, DIRECT, tag=AI服务
 Developer = select, Proxy, Fallback, DIRECT, tag=开发者
 Gaming = select, Proxy, Fallback, DIRECT, tag=游戏平台
 Social = select, Proxy, Fallback, DIRECT, tag=社交平台
-IPProvider = select, Proxy, DIRECT, tag=IP代理
-OpenCode = select, IPProvider, Proxy, DIRECT, tag=OpenCode.ai
+OpenCode = select, Proxy, DIRECT, tag=OpenCode.ai
 
 [Rule]
 DEST-PORT, 5223, DIRECT
@@ -183,7 +179,7 @@ DOMAIN-SUFFIX, qpic.cn, DIRECT
 DOMAIN-SUFFIX, weixin.qq.com, DIRECT
 DOMAIN-SUFFIX, wx.qq.com, DIRECT
 
-# OpenCode.ai (仅 /zen/v1/ 路径走 IP 代理)
+# OpenCode.ai (仅 /zen/v1/ 路径走代理)
 URL-REGEX, ^https://opencode\.ai/zen/v1/, OpenCode
 
 # AI 服务分流
@@ -215,6 +211,7 @@ DOMAIN-SUFFIX, deepmind.com, AI
 DOMAIN-SUFFIX, deepseek.com, AI
 # Grok (xAI)
 DOMAIN-SUFFIX, x.ai, AI
+DOMAIN-SUFFIX, grok.com, AI
 # AI 图像/视频
 DOMAIN-SUFFIX, midjourney.com, AI
 DOMAIN-SUFFIX, runwayml.com, AI
@@ -225,6 +222,8 @@ DOMAIN-SUFFIX, elevenlabs.io, AI
 DOMAIN-SUFFIX, elevenlabs.com, AI
 # AI 搜索/问答
 DOMAIN-SUFFIX, perplexity.ai, AI
+DOMAIN-SUFFIX, openrouter.ai, AI
+DOMAIN-SUFFIX, poe.com, AI
 # AI 基础设施
 DOMAIN-SUFFIX, groq.com, AI
 DOMAIN-SUFFIX, huggingface.co, AI
@@ -254,6 +253,7 @@ DOMAIN, labs.google.com, AI
 
 # 流媒体路由 (Loon 格式)
 DOMAIN-SUFFIX, youtube.com, Streaming
+DOMAIN-SUFFIX, youtu.be, Streaming
 DOMAIN-SUFFIX, googlevideo.com, Streaming
 DOMAIN-SUFFIX, ytimg.com, Streaming
 DOMAIN-SUFFIX, netflix.com, Streaming
@@ -332,6 +332,9 @@ DOMAIN-SUFFIX, hotstar.com, Streaming
 DOMAIN-SUFFIX, viu.com, Streaming
 DOMAIN-SUFFIX, wetv.vip, Streaming
 DOMAIN-SUFFIX, iq.com, Streaming
+# Gmail / Vimeo
+DOMAIN-SUFFIX, gmail.com, Streaming
+DOMAIN-SUFFIX, vimeo.com, Streaming
 # Google 通配域名已移至 loon.tpl 主配置中 Analytics/Ad REJECT 之后 (避免截胡 crashlytics.googleapis.com / firebase.googleapis.com)
 
 # 社交平台路由 (Loon 格式)
@@ -346,7 +349,9 @@ DOMAIN-SUFFIX, t.co, Social
 DOMAIN-SUFFIX, twittercdn.com, Social
 # Facebook / Meta
 DOMAIN-SUFFIX, facebook.com, Social
+DOMAIN-SUFFIX, fb.com, Social
 DOMAIN-SUFFIX, fbcdn.net, Social
+DOMAIN-SUFFIX, messenger.com, Social
 # Telegram
 DOMAIN-SUFFIX, telegram.org, Social
 DOMAIN-SUFFIX, t.me, Social
@@ -402,7 +407,7 @@ DOMAIN-SUFFIX, hostloc.com, Social
 DOMAIN-SUFFIX, 1024.com, Social
 # 中文内容/社区 (需代理访问)
 DOMAIN-SUFFIX, matters.news, Social
-DOMAIN, lihkg.com, Social
+DOMAIN-SUFFIX, lihkg.com, Social
 DOMAIN-SUFFIX, dcard.tw, Social
 DOMAIN-SUFFIX, dcard.cc, Social
 # 小说/文学站 (需代理访问)
@@ -415,6 +420,8 @@ DOMAIN-SUFFIX, biquge.com, Social
 DOMAIN-SUFFIX, pianbai.com, Social
 DOMAIN-SUFFIX, 23wx.com, Social
 DOMAIN-SUFFIX, wdhl.com, Social
+# 通讯/会议
+DOMAIN-SUFFIX, zoom.us, Social
 
 # 开发者平台路由 (Loon 格式)
 # GitHub / Microsoft / Wikipedia / 文档与开发工具 (v7.8)
@@ -423,17 +430,23 @@ DOMAIN-SUFFIX, wdhl.com, Social
 DOMAIN-SUFFIX, github.com, Developer
 DOMAIN-SUFFIX, githubusercontent.com, Developer
 DOMAIN-SUFFIX, githubassets.com, Developer
+DOMAIN-SUFFIX, github.io, Developer
+DOMAIN-SUFFIX, ghcr.io, Developer
+# OSS CDN (开源静态资源)
+DOMAIN-SUFFIX, jsdelivr.net, Developer
 # Microsoft
 DOMAIN-SUFFIX, microsoft.com, Developer
 DOMAIN-SUFFIX, microsoftonline.com, Developer
 DOMAIN-SUFFIX, onedrive.com, Developer
 DOMAIN-SUFFIX, onedrive.live.com, Developer
 DOMAIN-SUFFIX, office365.com, Developer
+DOMAIN-SUFFIX, sharepoint.com, Developer
 DOMAIN-SUFFIX, live.com, Developer
 # Microsoft 开发者
 DOMAIN-SUFFIX, visualstudio.com, Developer
 DOMAIN-SUFFIX, azure.com, Developer
 DOMAIN-SUFFIX, azure-devices.com, Developer
+DOMAIN-SUFFIX, azurewebsites.net, Developer
 DOMAIN-SUFFIX, nuget.org, Developer
 DOMAIN-SUFFIX, msdn.com, Developer
 # Google 开发者
@@ -455,10 +468,12 @@ DOMAIN-SUFFIX, digitalocean.com, Developer
 DOMAIN-SUFFIX, herokuapp.com, Developer
 # 部署/托管平台
 DOMAIN-SUFFIX, vercel.com, Developer
+DOMAIN-SUFFIX, vercel.app, Developer
 DOMAIN-SUFFIX, netlify.com, Developer
 DOMAIN-SUFFIX, netlify.app, Developer
 DOMAIN-SUFFIX, cloudflare.com, Developer
 DOMAIN-SUFFIX, workers.dev, Developer
+DOMAIN-SUFFIX, pages.dev, Developer
 # 设计工具
 DOMAIN-SUFFIX, figma.com, Developer
 # Stack Exchange
@@ -468,6 +483,7 @@ DOMAIN-SUFFIX, serverfault.com, Developer
 DOMAIN-SUFFIX, superuser.com, Developer
 # 容器/包管理器
 DOMAIN-SUFFIX, docker.com, Developer
+DOMAIN-SUFFIX, docker.io, Developer
 DOMAIN-SUFFIX, npmjs.com, Developer
 DOMAIN-SUFFIX, npmjs.org, Developer
 DOMAIN-SUFFIX, pypi.org, Developer
@@ -526,6 +542,9 @@ DOMAIN-SUFFIX, pvp.net, Gaming
 DOMAIN-SUFFIX, roblox.com, Gaming
 # Electronic Arts
 DOMAIN-SUFFIX, ea.com, Gaming
+# Minecraft
+DOMAIN-SUFFIX, minecraft.net, Gaming
+DOMAIN-SUFFIX, mojang.com, Gaming
 # Xbox / Microsoft Gaming
 # 注: xboxlive.com 已在主配置用 DOMAIN-KEYWORD DIRECT 处理 (主机直连, real-ip 含 *.xboxlive.com), 此处规则被遮蔽故移除
 DOMAIN-SUFFIX, xbox.com, Gaming
@@ -542,6 +561,9 @@ DOMAIN-SUFFIX, mihoyo.com, Gaming
 # Battle.net / Blizzard
 DOMAIN-SUFFIX, battle.net, Gaming
 DOMAIN-SUFFIX, blizzard.com, Gaming
+# 其他平台
+DOMAIN-SUFFIX, ubisoft.com, Gaming
+DOMAIN-SUFFIX, gog.com, Gaming
 
 
 # Google 全家桶
