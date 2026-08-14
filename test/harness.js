@@ -1,9 +1,9 @@
 /**
- * 代理脚本测试 harness — 用 vm 沙箱模拟 Loon / QX 运行时
+ * 代理脚本测试 harness — 用 vm 沙箱模拟 Loon 运行时
  *
  * 用法:
  *   const { createSandbox, runScript } = require("./harness");
- *   const sb = createSandbox({ mode: "loon", request: {...}, response: { body: "..." } });
+ *   const sb = createSandbox({ request: {...}, response: { body: "..." } });
  *   const state = await runScript("Scripts/Zhihu.js", sb);
  *   // state.doneCalls / state.notifications / state.httpCalls / state.store / state.logs
  */
@@ -15,7 +15,6 @@ const path = require("path");
 
 function createSandbox(opts = {}) {
   const {
-    mode = "loon",
     request,
     response,
     argument,
@@ -48,36 +47,20 @@ function createSandbox(opts = {}) {
   if (response !== undefined) ctx.$response = response;
   if (argument !== undefined) ctx.$argument = argument;
 
-  if (mode === "loon") {
-    ctx.$loon = { version: "3.3.9" };
-    ctx.$environment = { surgeVersion: "Loon 3.3.9" };
-    ctx.$notification = { post: (t, s, b) => state.notifications.push({ title: t, subtitle: s, body: b }) };
-    ctx.$persistentStore = {
-      read: (k) => (k in state.store ? state.store[k] : null),
-      write: (v, k) => { state.store[k] = String(v); return true; },
-    };
-    const makeHttp = (method) => (o, cb) => {
-      state.httpCalls.push({ method, url: o.url, body: o.body, headers: o.headers });
-      let out = { err: null, res: { status: 200 }, body: "{}" };
-      if (httpHandler) out = Object.assign(out, httpHandler({ method, ...o }));
-      setImmediate(() => cb(out.err, out.res, out.body));
-    };
-    ctx.$httpClient = { get: makeHttp("GET"), post: makeHttp("POST"), put: makeHttp("PUT"), head: makeHttp("HEAD"), delete: makeHttp("DELETE") };
-  } else {
-    ctx.$task = {
-      fetch: async (o) => {
-        state.httpCalls.push({ method: o.method || "GET", url: o.url, body: o.body, headers: o.headers });
-        let out = { res: { status: 200 }, body: "{}" };
-        if (httpHandler) out = Object.assign(out, httpHandler(o));
-        return { statusCode: out.res.status, status: out.res.status, body: out.body, headers: {} };
-      },
-    };
-    ctx.$prefs = {
-      valueForKey: (k) => (k in state.store ? state.store[k] : null),
-      setValueForKey: (v, k) => { state.store[k] = String(v); return true; },
-    };
-    ctx.$notify = (t, s, b) => state.notifications.push({ title: t, subtitle: s, body: b });
-  }
+  ctx.$loon = { version: "3.3.9" };
+  ctx.$environment = { surgeVersion: "Loon 3.3.9" };
+  ctx.$notification = { post: (t, s, b) => state.notifications.push({ title: t, subtitle: s, body: b }) };
+  ctx.$persistentStore = {
+    read: (k) => (k in state.store ? state.store[k] : null),
+    write: (v, k) => { state.store[k] = String(v); return true; },
+  };
+  const makeHttp = (method) => (o, cb) => {
+    state.httpCalls.push({ method, url: o.url, body: o.body, headers: o.headers });
+    let out = { err: null, res: { status: 200 }, body: "{}" };
+    if (httpHandler) out = Object.assign(out, httpHandler({ method, ...o }));
+    setImmediate(() => cb(out.err, out.res, out.body));
+  };
+  ctx.$httpClient = { get: makeHttp("GET"), post: makeHttp("POST"), put: makeHttp("PUT"), head: makeHttp("HEAD"), delete: makeHttp("DELETE") };
 
   ctx.globalThis = ctx;
   return { context: vm.createContext(ctx), state, ctx };

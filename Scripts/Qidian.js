@@ -449,13 +449,11 @@ async function handleReplay(request) {
   const match = Object.keys(CONFIG.TaskMapping).find(id => body.includes(id));
   if (!match) { $.done(); return; }
   const task = CONFIG.TaskMapping[match];
-  // ⚠️ 修复(v5.9): QX rewrite 默认10s超时, 9次重放约需80s必然超时
-  // QX 下减少重放次数为3次(约6s内完成), Loon 下保持原次数(timeout=120s足够)
-  const isQX = typeof $task !== "undefined" && typeof $loon === "undefined";
-  const replayCount = isQX ? Math.min(task.count - 1, 3) : task.count - 1;
+  // ⚠️ 修复(v5.9): Loon 下保持原次数(timeout=120s足够)
+  const replayCount = task.count - 1;
   if (replayCount <= 0) { $.done(); return; }
 
-  $.log(`🚀 识别任务: ${task.name}, 重放 ${replayCount} 次${isQX ? " (QX精简模式)" : ""}`);
+  $.log(`🚀 识别任务: ${task.name}, 重放 ${replayCount} 次`);
   const headers = normalizeHeaders(request.headers || {});
   const tasks = Array.from({ length: replayCount }, async (_, i) => {
     await $.wait((i + 1) * 2000);
@@ -762,40 +760,36 @@ function safeJsonParse(body) {
 }
 
 // ==========================================
-// 🌍 Env 兼容层 (Loon / Quantumult X)
+// 🌍 Env 兼容层 (Loon)
 // ==========================================
 function Env(n) {
   this.name = n;
   this.isL = typeof $loon !== "undefined";
-  this.isQ = typeof $task !== "undefined";
   this.log = (...a) => console.log(`[${this.name}] ` + a.join(" "));
   this.wait = (m) => new Promise(r => setTimeout(r, m));
   this.done = (o = {}) => $done(o);
   this.get = (k) => {
-    let v = this.isL ? $persistentStore.read(k) : $prefs.valueForKey(k);
+    let v = $persistentStore.read(k);
     try { return JSON.parse(v); } catch (e) { return v; }
   };
   this.set = (v, k) => {
     let s = typeof v === "object" ? JSON.stringify(v) : v;
-    this.isL ? $persistentStore.write(s, k) : $prefs.setValueForKey(s, k);
+    $persistentStore.write(s, k);
   };
   this.fetch = async (o) => new Promise((r, e) => {
-    if (this.isQ) $task.fetch(o).then(r, e);
-    else {
-      let m = (o.method || "GET").toLowerCase();
-      $httpClient[m](o, (err, res, b) => {
-        if (err) e(err);
-        else {
-          res.body = b;
-          // ⚠️ 修复: Loon 的 response 字段名在不同版本可能是 status 或 statusCode
-          // 不能用 || 200 兜底，否则 4xx/5xx 也会被误判为成功
-          if (res.statusCode === undefined) {
-            res.statusCode = res.status !== undefined ? res.status : (res.response ? res.response.statusCode : 200);
-          }
-          r(res);
+    let m = (o.method || "GET").toLowerCase();
+    $httpClient[m](o, (err, res, b) => {
+      if (err) e(err);
+      else {
+        res.body = b;
+        // ⚠️ 修复: Loon 的 response 字段名在不同版本可能是 status 或 statusCode
+        // 不能用 || 200 兜底，否则 4xx/5xx 也会被误判为成功
+        if (res.statusCode === undefined) {
+          res.statusCode = res.status !== undefined ? res.status : (res.response ? res.response.statusCode : 200);
         }
-      });
-    }
+        r(res);
+      }
+    });
   });
   this.notify = (t, s, b) => {
     const maskToken = (str) => {
@@ -806,8 +800,7 @@ function Env(n) {
     t = maskToken(t); s = maskToken(s); b = maskToken(b);
 
     // 1. 本地通知
-    if (this.isL) $notification.post(t, s, b);
-    else $notify(t, s, b);
+    $notification.post(t, s, b);
 
     // 2. 远程推送 (Bark, Telegram, PushPlus)
     // 返回 Promise — 响应阶段调用方必须 await 后再 $done(),
@@ -862,8 +855,8 @@ function Env(n) {
 //   - 已修复: notify 函数已添加 token 打码
 // ==========================================
 function runQdreaderEngine() {
-  // ⚠️ 修复: 确保 $argument 在 QX 下也能经 globalThis 访问
-  // QX 脚本上下文中 globalThis 可能不是顶层作用域，导致引擎内 globalThis['$argument'] 返回 undefined
+  // ⚠️ 修复: 确保 $argument 经 globalThis 可访问
+  // 脚本上下文中 globalThis 可能不是顶层作用域，导致引擎内 globalThis['$argument'] 返回 undefined
   // 显式将 $argument 挂载到 globalThis，确保引擎能读取到插件传入的开关参数
   try {
     if (typeof $argument !== "undefined" && typeof globalThis !== "undefined") {

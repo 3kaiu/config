@@ -1,23 +1,16 @@
-const isQX = typeof $task !== 'undefined';
-
 function read(key: string): string | undefined {
-  return isQX ? $prefs.valueForKey(key) : $persistentStore.read(key);
+  return $persistentStore.read(key);
 }
 
 function notify(title: string, sub: string, body: string): void {
-  if (isQX) $notify(title, sub, body);
-  else $notification.post(title, sub, body);
+  $notification.post(title, sub, body);
 }
 
 function httpGet(url: string): Promise<void> {
-  if (isQX) return $task.fetch({ url, method: 'GET' }).then(() => {});
   return new Promise<void>((resolve) => $httpClient.get({ url, timeout: 10000 }, () => resolve()));
 }
 
 function httpPost(url: string, body: string): Promise<void> {
-  if (isQX) {
-    return $task.fetch({ url, method: 'POST', body, headers: { 'Content-Type': 'application/json' } }).then(() => {});
-  }
   return new Promise<void>((resolve) => $httpClient.post({ url, timeout: 10000, body, headers: { 'Content-Type': 'application/json' } }, () => resolve()));
 }
 

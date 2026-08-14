@@ -1,5 +1,5 @@
 /**
- * Zhihuifangdong — argument 分流 + URL 回退 + 双端兼容回归测试
+ * Zhihuifangdong — argument 分流 + URL 回退回归测试
  */
 "use strict";
 
@@ -8,7 +8,6 @@ const RESP = (o) => ({ status: 200, body: JSON.stringify(o) });
 exports.tests = {
   "loon: $argument=appOpenAds → data 清空为数组": async (a, h) => {
     const sb = h.createSandbox({
-      mode: "loon",
       argument: "appOpenAds",
       request: { url: "https://api.zhihuifangdong.net/core/app/activity/appOpenAds" },
       response: RESP({ code: 0, data: [{ ad: 1 }] }),
@@ -19,7 +18,6 @@ exports.tests = {
   },
   "loon: $argument=bannerPicMore → data 清空为对象": async (a, h) => {
     const sb = h.createSandbox({
-      mode: "loon",
       argument: "bannerPicMore",
       request: { url: "https://api.zhihuifangdong.net/core/app/activity/bannerPicMore" },
       response: RESP({ code: 0, data: { banner: "x" } }),
@@ -27,9 +25,8 @@ exports.tests = {
     const s = await h.runScript("Scripts/Zhihuifangdong.js", sb);
     a.equal(JSON.parse(s.doneCalls[0].body).data, {}, "banner data 应为空对象");
   },
-  "qx: 无 $argument 时按 URL 回退分流 (QX 不支持 argument)": async (a, h) => {
+  "loon: 无 $argument 时按 URL 回退分流": async (a, h) => {
     const sb = h.createSandbox({
-      mode: "qx",
       request: { url: "https://api.zhihuifangdong.net/core/app/activity/bannerPicMore?v=2" },
       response: RESP({ code: 0, data: { banner: "x" } }),
     });
@@ -38,7 +35,6 @@ exports.tests = {
   },
   "loon: $argument=showAds → data 置 null (广告白名单)": async (a, h) => {
     const sb = h.createSandbox({
-      mode: "loon",
       argument: "showAds",
       request: { url: "https://api.zhihuifangdong.net/core/adWhitelist/showAds" },
       response: RESP({ code: 0, data: true }),
@@ -48,7 +44,6 @@ exports.tests = {
   },
   "loon: $argument=activityAds + URL clickPicMore → data 清空为对象": async (a, h) => {
     const sb = h.createSandbox({
-      mode: "loon",
       argument: "activityAds",
       request: { url: "https://api.zhihuifangdong.net/core/app/activity/clickPicMore" },
       response: RESP({ code: 0, data: { pic: "ad" } }),
@@ -58,7 +53,6 @@ exports.tests = {
   },
   "loon: $argument=activityAds + URL platformPic → data 清空为对象": async (a, h) => {
     const sb = h.createSandbox({
-      mode: "loon",
       argument: "activityAds",
       request: { url: "https://api.zhihuifangdong.net/core/app/activity/platformPic" },
       response: RESP({ code: 0, data: { pic: "ad" } }),
@@ -68,7 +62,6 @@ exports.tests = {
   },
   "loon: $argument=activityAds + URL clickPic → data 清空为对象": async (a, h) => {
     const sb = h.createSandbox({
-      mode: "loon",
       argument: "activityAds",
       request: { url: "https://api.zhihuifangdong.net/core/app/activity/clickPic" },
       response: RESP({ code: 0, data: { pic: "ad" } }),
@@ -77,14 +70,14 @@ exports.tests = {
     a.equal(JSON.parse(s.doneCalls[0].body).data, {}, "clickPic data 应为空对象");
   },
   "守卫: 无 $response 直接放行": async (a, h) => {
-    const sb = h.createSandbox({ mode: "loon", argument: "appOpenAds", request: { url: "https://api.zhihuifangdong.net/core/app/activity/appOpenAds" } });
+    const sb = h.createSandbox({ argument: "appOpenAds", request: { url: "https://api.zhihuifangdong.net/core/app/activity/appOpenAds" } });
     const s = await h.runScript("Scripts/Zhihuifangdong.js", sb);
     a.equal(s.doneCalls.length, 1);
     a.equal(s.doneCalls[0].body, undefined);
   },
   "非法 JSON 走异常分支且 done 无 body": async (a, h) => {
     const sb = h.createSandbox({
-      mode: "loon", argument: "appOpenAds",
+      argument: "appOpenAds",
       request: { url: "https://api.zhihuifangdong.net/core/app/activity/appOpenAds" },
       response: { status: 200, body: "<html>" },
     });

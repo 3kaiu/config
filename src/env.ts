@@ -1,49 +1,44 @@
 export interface EnvInstance {
   name: string
   isL: boolean
-  isQ: boolean
   log(...args: unknown[]): void
   wait(ms: number): Promise<void>
   done(result?: { body?: string; headers?: Record<string, string>; status?: number }): void
   get(key: string): string | undefined
   set(value: string | Record<string, unknown>, key: string): void
   fetch(options: { url: string; method?: string; headers?: Record<string, string>; body?: string; timeout?: number }): Promise<{ statusCode?: number; status?: number; headers?: Record<string, string>; body?: string }>
-  notify(title: string, subtitle: string, body: string): Promise<PromiseSettledResult<unknown>[]>
+  notify(title: string, subtitle: string, body: string): void
   barkPush(title: string, body: string): Promise<void>
   telegramPush(title: string, body: string): Promise<void>
-  doNotify(title: string, body: string): Promise<PromiseSettledResult<void>[]>
+  doNotify(title: string, body: string): Promise<PromiseSettledResult<unknown>[]>
 }
 
 export function Env(this: EnvInstance, n: string) {
   this.name = n;
   this.isL = typeof $loon !== "undefined";
-  this.isQ = typeof $task !== "undefined";
   this.log = (...a: unknown[]) => console.log(`[${this.name}] ` + a.join(" "));
   this.wait = (m: number) => new Promise(r => setTimeout(r, m));
   this.done = (o = {}) => $done(o);
   this.get = (k: string) => {
-    const v = this.isL ? $persistentStore.read(k) : $prefs.valueForKey(k);
+    const v = $persistentStore.read(k);
     try { return v === undefined ? undefined : JSON.parse(v); } catch { return v; }
   };
   this.set = (v: string | Record<string, unknown>, k: string) => {
     const s = typeof v === "object" ? JSON.stringify(v) : v;
-    this.isL ? $persistentStore.write(s, k) : $prefs.setValueForKey(s, k);
+    $persistentStore.write(s, k);
   };
   this.fetch = async (o) => new Promise((resolve, reject) => {
-    if (this.isQ) $task.fetch(o).then(resolve, reject);
-    else {
-      const m = (o.method || "GET").toLowerCase();
-      $httpClient[m](o, (err, res, b) => {
-        if (err) reject(err);
-        else {
-          res.body = b;
-          if (res.statusCode === undefined) {
-            res.statusCode = res.status !== undefined ? res.status : (res.response ? res.response.statusCode : 200);
-          }
-          resolve(res);
+    const m = (o.method || "GET").toLowerCase();
+    $httpClient[m](o, (err, res, b) => {
+      if (err) reject(err);
+      else {
+        res.body = b;
+        if (res.statusCode === undefined) {
+          res.statusCode = res.status !== undefined ? res.status : (res.response ? res.response.statusCode : 200);
         }
-      });
-    }
+        resolve(res);
+      }
+    });
   });
   this.barkPush = (title: string, body: string) => {
     const key = this.get("Bark_Key") || this.get("barkKey");
@@ -65,8 +60,7 @@ export function Env(this: EnvInstance, n: string) {
     }).then(() => {}).catch(() => {});
   };
   this.notify = (t: string, s: string, b: string) => {
-    if (this.isL) $notification.post(t, s, b);
-    else $notify(t, s, b);
+    $notification.post(t, s, b);
   };
   this.doNotify = (title: string, body: string) => {
     this.notify(title, "", body);

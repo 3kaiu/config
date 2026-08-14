@@ -1,25 +1,16 @@
-const isQX = typeof $task !== 'undefined';
-
 function read(key: string): string | undefined {
-  return isQX ? $prefs.valueForKey(key) : $persistentStore.read(key);
+  return $persistentStore.read(key);
 }
 
 function notify(title: string, sub: string, body: string): void {
-  if (isQX) $notify(title, sub, body);
-  else $notification.post(title, sub, body);
+  $notification.post(title, sub, body);
 }
 
 function httpGet(url: string): Promise<void> {
-  if (isQX) {
-    return $task.fetch({ url, method: 'GET' }).then(() => {});
-  }
   return new Promise<void>((resolve) => $httpClient.get({ url, timeout: 10000 }, () => resolve()));
 }
 
 function httpPost(url: string, body: string): Promise<void> {
-  if (isQX) {
-    return $task.fetch({ url, method: 'POST', body, headers: { 'Content-Type': 'application/json' } }).then(() => {});
-  }
   return new Promise<void>((resolve) => $httpClient.post({ url, timeout: 10000, body, headers: { 'Content-Type': 'application/json' } }, () => resolve()));
 }
 
@@ -47,11 +38,8 @@ function doNotify(title: string, body: string): Promise<PromiseSettledResult<voi
   return Promise.allSettled([barkPush(title, body), telegramPush(title, body)]);
 }
 
-// QX cron: $task.fetch 发起检测
 const start = Date.now();
-const req = isQX
-  ? $task.fetch({ url: TEST_URL }).then((r: { statusCode: number }) => ({ status: r.statusCode }))
-  : new Promise<{ status?: number }>((resolve) => $httpClient.get({ url: TEST_URL, timeout: TIMEOUT_MS }, (_e: Error | null, r: $httpClientResponse | null) => resolve(r || {})));
+const req = new Promise<{ status?: number }>((resolve) => $httpClient.get({ url: TEST_URL, timeout: TIMEOUT_MS }, (_e: Error | null, r: $httpClientResponse | null) => resolve(r || {})));
 
 req.then((response: { status?: number }) => {
   const elapsed = Date.now() - start;
