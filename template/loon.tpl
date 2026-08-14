@@ -163,8 +163,8 @@ DOMAIN-SUFFIX, qpic.cn, DIRECT
 DOMAIN-SUFFIX, weixin.qq.com, DIRECT
 DOMAIN-SUFFIX, wx.qq.com, DIRECT
 
-# OpenCode.ai (仅 /zen/v1/ 路径走代理)
-URL-REGEX, ^https://opencode\.ai/zen/v1/, OpenCode
+# OpenCode.ai
+DOMAIN-SUFFIX, opencode.ai, OpenCode
 
 {% include "./snippet/ai-services.tpl" %}
 {% include "./snippet/streaming.tpl" %}
