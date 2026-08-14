@@ -72,6 +72,8 @@ AI = select, Proxy, Fallback, DIRECT, tag=AI服务
 Developer = select, Proxy, Fallback, DIRECT, tag=开发者
 Gaming = select, Proxy, Fallback, DIRECT, tag=游戏平台
 Social = select, Proxy, Fallback, DIRECT, tag=社交平台
+IPProvider = select, DIRECT, tag=IP代理
+OpenCode = select, IPProvider, Proxy, DIRECT, tag=OpenCode.ai
 
 [Rule]
 DEST-PORT, 5223, DIRECT
@@ -161,6 +163,9 @@ DOMAIN-SUFFIX, wechat.com, DIRECT
 DOMAIN-SUFFIX, qpic.cn, DIRECT
 DOMAIN-SUFFIX, weixin.qq.com, DIRECT
 DOMAIN-SUFFIX, wx.qq.com, DIRECT
+
+# OpenCode.ai (仅 /zen/v1/ 路径走 IP 代理)
+URL-REGEX, ^https://opencode\.ai/zen/v1/, OpenCode
 
 {% include "./snippet/ai-services.tpl" %}
 {% include "./snippet/streaming.tpl" %}
