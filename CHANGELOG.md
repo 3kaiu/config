@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [v8.9] — 2026-08-15
+
+### Added (免费代理订阅 ×2 — 每日动态同步, 归属 OpenCode 策略组)
+
+- **新增 `tools/geonode-sync.mjs`**: 拉取 proxylist.geonode.com API (默认响应时间升序前 500), 过滤 Loon 原生协议 (http/https/socks5)、非透明代理、非 CN、IPv4, 去重并限量 (默认 120), 转换为 Loon 官方节点文本写入 `Profile/geonode.loon.txt`; 门禁 (HTTP/HTML/JSON/节点数/行格式) 任一失败 exit 1 保留旧文件; 节点集无变化不重写 (幂等)
+- **新增 `tools/edu-proxy-sync.mjs`**: 拉取 GitHub 社区开放代理列表, 去重限量 (默认 120) 写入 `Profile/edu-proxy.loon.txt`; 聚合主源 `hproxy-com/free-proxy-list` (all.json 结构化, 28000+ 条含 protocols/uptime_pct, 按可用率降序取池) + `iplocate/free-proxy-list` (Verified, 30min 更新) + 备用 `TheSpeedX/PROXY-List` http/socks5 + `roosterkid/openproxylist` (同 topic:proxies-socks5 生态); 单源失败不阻断 (需至少一源成功), 幂等
+- **新增 `proxy-sync.yml`** (合并 cron): 每日 03:40 UTC 运行两同步脚本, 有变更直推 main (数据刷新非 PR 制); 全部源失败才报错, 部分失败保留旧文件
+- **模板接线**: `[Remote Proxy] Geonode = .../geonode.loon.txt` + `EduProxy = .../edu-proxy.loon.txt` (Loon 原生格式, 无需解析器); `OpenCode = select, Proxy, DIRECT, Geonode, EduProxy` — 两个免费代理池均归属 OpenCode 组
+- **主池隔离**: `[Remote Filter] MainNodes = NameRegex (?!.*(?:geonode|edu))` 替代 `Proxy`/`Fallback` 组的 `".*"` — 免费代理不进主容灾池, 防 url-test 自动选路到不可用节点; config-validate 断言同步更新
+- **探活**: upstream-health 增加 geonode API、GitHub 源列表与 CDN 订阅文件探测
+
+### Notes
+
+- Loon 订阅别名可直接被策略组引用 (官方 `[Remote Proxy] Subs = URL` + `PROXY = select,...,Subs` 模式); geonode 协议与 Loon 原生支持 (HTTP/HTTPS/SOCKS5) 完全对齐, 无需 Sub-Store 解析器
+- 事实澄清 (2026-08-15 更正): 初版核实误判 "iplocate/free-proxy-list 不存在" — 实际该仓库存在且每 30 分钟更新 (首次仅探测了猜测的 raw 路径未查仓库本体); 已接入为主源。但需注意其 README 性质为公网开放代理聚合 ("Educational purpose" 为免责声明), 未标注任何大学 .edu 网段, "100% 穿透" 无依据; 免费代理勿用于登录敏感账号
+- 免费代理稳定性差, 仅作 OpenCode 组手动选择兜底, 不参与主线路容灾
+
+### Changed (NSRingo 去版本固定 — 跟随 latest)
+
+- **NSRingo bundle.js 跟随 latest**: 镜像源从固定版本 release 改为 `releases/latest/download/`, 路径结构 `iringo/{Repo}/{bundle.js}`; 每日镜像自动跟随上游最新版本
+- **NSRingo .plugin script-path 重写**: 镜像后 sed 补丁将插件内固定版本 bundle.js URL 重写为自建 CDN latest 路径 (`ws.wenn.in/main/Mirror/iringo/{Repo}/`), 消除上游删旧 release 导致的功能失效
+- **upstream-health**: bundle.js 健康探活改为 latest; 移除 NSRingo 版本陈旧检查 (不再固定版本)
+
+---
+
 ## [v8.8] — 2026-08-12
 
 ### Changed (全面审计 — 构建链修复 + 纯 JS 净化脚本测试补全)

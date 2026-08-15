@@ -21,6 +21,8 @@ Loon 配置仓库:单入口 `Profile/Loon.lcf`,由 `surgio` 从 `template/` + `s
 | `Mirror/` | 上游镜像:auraflare/biliuniverse/dualsubs/iringo/rules/scripts + 独立 js | mirror-scripts 每日重写 `Mirror/MANIFEST.json`(dict: $comment/generated_at/files) |
 | `template/loon.tpl` / `surgio.conf.js` | Loon 配置构建输入 | 改模板后须 regenerate + check:sync |
 | `Profile/Loon.lcf` | 发布入口唯一文件 | 不动;生成物 |
+| `Profile/geonode.loon.txt` | proxy-sync 生成物 (Loon [Remote Proxy] Geonode 订阅源, 幂等) | 不动;生成物 |
+| `Profile/edu-proxy.loon.txt` | proxy-sync 生成物 (Loon [Remote Proxy] EduProxy 订阅源, 幂等) | 不动;生成物 |
 | `tools/*.mjs` | tpl-sync / 验证脚本 | 改动后跑 check:sync |
 | `test/cases/*.test.js` | 72 用例 | 新增/改脚本须补用例 |
 
@@ -30,6 +32,7 @@ Loon 配置仓库:单入口 `Profile/Loon.lcf`,由 `surgio` 从 `template/` + `s
 - config-validate:净化器断言 + mitm-orphan + ENGINE-MANIFEST 哈希
 - mirror-scripts:镜像 fetch/结构/投毒门禁 + MANIFEST 重写,失败 keep_old
 - upstream-health:探测列表 = MANIFEST 派生镜像 + 硬编码上游(含 kelee.one LPX、NSRingo latest),失败开 issue
+- proxy-sync:每日 03:40 UTC 拉取免费代理源 → 转换写入 Profile/geonode.loon.txt + Profile/edu-proxy.loon.txt (Loon [Remote Proxy] Geonode/EduProxy 订阅, 仅 OpenCode 组引用), 有变更直推 main(非 PR 制 — 数据刷新, 免费代理无投毒面);源失败保留旧文件, 全部源失败才报错
 - cdn-verify:CDN 与仓库哈希比对 + Pages 兜底 parity(Pages 未启用时跳过)
 - surgio-build:仅在 surgio.conf.js/template/**/package.json 变更时构建并 auto-PR
 

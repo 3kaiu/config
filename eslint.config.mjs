@@ -123,6 +123,8 @@ export default [
         process: "readonly",
         console: "readonly",
         URL: "readonly",
+        fetch: "readonly",
+        AbortSignal: "readonly",
       },
     },
     rules: { "no-unused-vars": "off" },

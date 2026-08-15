@@ -50,6 +50,17 @@ jobs:
           # 自建 CDN
           check_url "ws.wenn.in CDN (Mirror)" "https://ws.wenn.in/main/Mirror/netease.adblock.js"
 
+          # 免费代理源 (proxy-sync 每日拉取 → Profile/*.loon.txt, Loon [Remote Proxy] 引用)
+          check_url "proxylist.geonode.com API" "https://proxylist.geonode.com/api/proxy-list?page=1&limit=1&sort_by=responseTime&sort_type=asc"
+          check_url "iplocate/free-proxy-list http" "https://raw.githubusercontent.com/iplocate/free-proxy-list/main/protocols/http.txt"
+          check_url "iplocate/free-proxy-list socks5" "https://raw.githubusercontent.com/iplocate/free-proxy-list/main/protocols/socks5.txt"
+          check_url "hproxy-com/free-proxy-list all.json" "https://raw.githubusercontent.com/hproxy-com/free-proxy-list/main/all.json"
+          check_url "TheSpeedX/PROXY-List http" "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt"
+          check_url "TheSpeedX/PROXY-List socks5" "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt"
+          check_url "roosterkid/openproxylist https" "https://raw.githubusercontent.com/roosterkid/openproxylist/main/HTTPS_RAW.txt"
+          check_url "ws.wenn.in CDN (Geonode 订阅)" "https://ws.wenn.in/main/Profile/geonode.loon.txt"
+          check_url "ws.wenn.in CDN (Edu 订阅)" "https://ws.wenn.in/main/Profile/edu-proxy.loon.txt"
+
           # 脚本级上游 (已 Mirror, 监控原站 — 列表派生自 Mirror/MANIFEST.json, 勿重复维护)
           node -e '
             const fs = require("fs");
@@ -70,19 +81,21 @@ jobs:
           check_url "NSRingo TV" "https://github.com/NSRingo/TV/releases/latest/download/iRingo.TV.plugin"
           check_url "NSRingo LocationServices" "https://github.com/NSRingo/LocationServices/releases/latest/download/iRingo.LocationService.plugin"
 
-          # NSRingo bundle.js (version-pinned)
-          check_url "NSRingo bundle WeatherKit" "https://github.com/NSRingo/WeatherKit/releases/download/v3.1.0/response.bundle.js"
-          check_url "NSRingo bundle GeoServices req" "https://github.com/NSRingo/GeoServices/releases/download/v4.6.1/request.bundle.js"
-          check_url "NSRingo bundle GeoServices res" "https://github.com/NSRingo/GeoServices/releases/download/v4.6.1/response.bundle.js"
-          check_url "NSRingo bundle News" "https://github.com/NSRingo/News/releases/download/v3.2.1/request.bundle.js"
-          check_url "NSRingo bundle Siri req" "https://github.com/NSRingo/Siri/releases/download/v4.2.7/request.bundle.js"
-          check_url "NSRingo bundle Siri res" "https://github.com/NSRingo/Siri/releases/download/v4.2.7/response.bundle.js"
-          check_url "NSRingo bundle TestFlight req" "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/request.bundle.js"
-          check_url "NSRingo bundle TestFlight res" "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/response.bundle.js"
-          check_url "NSRingo bundle TV req" "https://github.com/NSRingo/TV/releases/download/v3.4.4/request.bundle.js"
-          check_url "NSRingo bundle TV res" "https://github.com/NSRingo/TV/releases/download/v3.4.4/response.bundle.js"
-          check_url "NSRingo bundle LocationServices req" "https://github.com/NSRingo/LocationServices/releases/download/v1.0.1/request.bundle.js"
-          check_url "NSRingo bundle LocationServices res" "https://github.com/NSRingo/LocationServices/releases/download/v1.0.1/response.bundle.js"
+          # NSRingo bundle.js (latest, 跟随上游最新版本)
+          check_url "NSRingo bundle WeatherKit req" "https://github.com/NSRingo/WeatherKit/releases/latest/download/request.bundle.js"
+          check_url "NSRingo bundle WeatherKit res" "https://github.com/NSRingo/WeatherKit/releases/latest/download/response.bundle.js"
+          check_url "NSRingo bundle GeoServices req" "https://github.com/NSRingo/GeoServices/releases/latest/download/request.bundle.js"
+          check_url "NSRingo bundle GeoServices res" "https://github.com/NSRingo/GeoServices/releases/latest/download/response.bundle.js"
+          check_url "NSRingo bundle News req" "https://github.com/NSRingo/News/releases/latest/download/request.bundle.js"
+          check_url "NSRingo bundle News res" "https://github.com/NSRingo/News/releases/latest/download/response.bundle.js"
+          check_url "NSRingo bundle Siri req" "https://github.com/NSRingo/Siri/releases/latest/download/request.bundle.js"
+          check_url "NSRingo bundle Siri res" "https://github.com/NSRingo/Siri/releases/latest/download/response.bundle.js"
+          check_url "NSRingo bundle TestFlight req" "https://github.com/NSRingo/TestFlight/releases/latest/download/request.bundle.js"
+          check_url "NSRingo bundle TestFlight res" "https://github.com/NSRingo/TestFlight/releases/latest/download/response.bundle.js"
+          check_url "NSRingo bundle TV req" "https://github.com/NSRingo/TV/releases/latest/download/request.bundle.js"
+          check_url "NSRingo bundle TV res" "https://github.com/NSRingo/TV/releases/latest/download/response.bundle.js"
+          check_url "NSRingo bundle LocationServices req" "https://github.com/NSRingo/LocationServices/releases/latest/download/request.bundle.js"
+          check_url "NSRingo bundle LocationServices res" "https://github.com/NSRingo/LocationServices/releases/latest/download/response.bundle.js"
 
           # DualSubs (双语字幕)
           check_url "DualSubs Universal" "https://github.com/DualSubs/Universal/releases/latest/download/DualSubs.Universal.plugin"
@@ -110,35 +123,6 @@ jobs:
 
           echo "all_ok=$ALL_OK" >> $GITHUB_ENV
           echo "results=$RESULTS" >> $GITHUB_ENV
-
-      - name: NSRingo version staleness check
-        run: |
-          echo "### NSRingo Version Staleness" >> $GITHUB_STEP_SUMMARY
-          echo "| Module | Pinned | Latest Release | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|--------|----------------|--------|" >> $GITHUB_STEP_SUMMARY
-
-          check_nsringo() {
-            local name="$1" pinned="$2" repo="$3"
-            local latest_tag
-            latest_tag=$(curl -fsSL -m 15 -o /dev/null -w "%{redirect_url}" \
-              "https://github.com/$repo/releases/latest" 2>/dev/null | sed 's#.*/v\?##' || echo "unknown")
-            if [ "$latest_tag" = "unknown" ]; then
-              echo "| $name | $pinned | fetch failed | ⚠️ |" >> $GITHUB_STEP_SUMMARY
-            elif [ "$latest_tag" = "$pinned" ]; then
-              echo "| $name | $pinned | $latest_tag | ✅ |" >> $GITHUB_STEP_SUMMARY
-            else
-              echo "| $name | $pinned | **$latest_tag** | 🆕 update |" >> $GITHUB_STEP_SUMMARY
-            fi
-          }
-
-          check_nsringo "WeatherKit" "v3.1.0" "NSRingo/WeatherKit"
-          check_nsringo "GeoServices" "v4.6.1" "NSRingo/GeoServices"
-          check_nsringo "News" "v3.2.1" "NSRingo/News"
-          check_nsringo "Siri" "v4.2.7" "NSRingo/Siri"
-          check_nsringo "TestFlight" "v3.4.0" "NSRingo/TestFlight"
-          check_nsringo "TV" "v3.4.4" "NSRingo/TV"
-          check_nsringo "LocationServices" "v1.0.1" "NSRingo/LocationServices"
-          echo "" >> $GITHUB_STEP_SUMMARY
 
       - name: Report results
         env:

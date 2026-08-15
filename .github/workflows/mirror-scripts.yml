@@ -25,7 +25,7 @@ jobs:
       # 1. 写入前门禁: *.js 过 node --check 语法 / 体积≥200B / 非 HTML 错误页 — 任一不过保留旧文件
       # 2. MANIFEST.json: 每个镜像文件记录 source_url + sha256 + 抓取时间, 变更在 PR diff 中高亮
       # 3. PR 制: 不再直推 main — 推送到 mirror/<date> 分支并开/更新 PR, 人工审 diff 后合并
-      # 4. 覆盖范围: 脚本 + 规则列表 + rewrite 模块 + NSRingo 插件 (版本固定),
+      # 4. 覆盖范围: 脚本 + 规则列表 + rewrite 模块 + NSRingo 插件 (跟随 latest),
       #    Profile 全部远程引用收敛到自建 CDN (ws.wenn.in/main/Mirror/...)
       - name: Mirror upstream resources (with gates)
         run: |
@@ -204,26 +204,69 @@ jobs:
           # === END 3kaiu 国内广告 SDK 追加 ===
           EOF
 
-          # ═══════════════ NSRingo bundle.js (版本固定 release 资产) ═══════════════
-          # NSRingo .plugin 引用的 bundle.js; 若上游清理旧 release 会 404, 镜像消除单点
+          # ═══════════════ NSRingo bundle.js (跟随 latest, 镜像消除单点) ═══════════════
+          # NSRingo .plugin 引用的 bundle.js; 跟随 latest 版本, 镜像到 CDN 消除上游删 release 的单点
+          # 路径结构: iringo/{Repo}/{bundle.js} — 与上方 sed 补丁的 CDN URL 对应
+          mirror "https://github.com/NSRingo/WeatherKit/releases/latest/download/request.bundle.js" \
+            "iringo/WeatherKit/request.bundle.js" "NSRingo / WeatherKit request.bundle.js latest"
+          mirror "https://github.com/NSRingo/WeatherKit/releases/latest/download/response.bundle.js" \
+            "iringo/WeatherKit/response.bundle.js" "NSRingo / WeatherKit response.bundle.js latest"
+          mirror "https://github.com/NSRingo/GeoServices/releases/latest/download/request.bundle.js" \
+            "iringo/GeoServices/request.bundle.js" "NSRingo / GeoServices request.bundle.js latest"
+          mirror "https://github.com/NSRingo/GeoServices/releases/latest/download/response.bundle.js" \
+            "iringo/GeoServices/response.bundle.js" "NSRingo / GeoServices response.bundle.js latest"
+          mirror "https://github.com/NSRingo/News/releases/latest/download/request.bundle.js" \
+            "iringo/News/request.bundle.js" "NSRingo / News request.bundle.js latest"
+          mirror "https://github.com/NSRingo/News/releases/latest/download/response.bundle.js" \
+            "iringo/News/response.bundle.js" "NSRingo / News response.bundle.js latest"
+          mirror "https://github.com/NSRingo/Siri/releases/latest/download/request.bundle.js" \
+            "iringo/Siri/request.bundle.js" "NSRingo / Siri request.bundle.js latest"
+          mirror "https://github.com/NSRingo/Siri/releases/latest/download/response.bundle.js" \
+            "iringo/Siri/response.bundle.js" "NSRingo / Siri response.bundle.js latest"
+          mirror "https://github.com/NSRingo/TestFlight/releases/latest/download/request.bundle.js" \
+            "iringo/TestFlight/request.bundle.js" "NSRingo / TestFlight request.bundle.js latest"
+          mirror "https://github.com/NSRingo/TestFlight/releases/latest/download/response.bundle.js" \
+            "iringo/TestFlight/response.bundle.js" "NSRingo / TestFlight response.bundle.js latest"
+          mirror "https://github.com/NSRingo/TV/releases/latest/download/request.bundle.js" \
+            "iringo/TV/request.bundle.js" "NSRingo / TV request.bundle.js latest"
+          mirror "https://github.com/NSRingo/TV/releases/latest/download/response.bundle.js" \
+            "iringo/TV/response.bundle.js" "NSRingo / TV response.bundle.js latest"
+          mirror "https://github.com/NSRingo/LocationServices/releases/latest/download/request.bundle.js" \
+            "iringo/LocationServices/request.bundle.js" "NSRingo / LocationServices request.bundle.js latest"
+          mirror "https://github.com/NSRingo/LocationServices/releases/latest/download/response.bundle.js" \
+            "iringo/LocationServices/response.bundle.js" "NSRingo / LocationServices response.bundle.js latest"
 
-          # ═══════════════ NSRingo Loon 插件 (版本固定, 替代 releases/latest) ═══════════════
-          mirror "https://github.com/NSRingo/WeatherKit/releases/download/v3.1.0/iRingo.WeatherKit.plugin" \
-            "iringo/iRingo.WeatherKit.plugin" "NSRingo / iRingo.WeatherKit.plugin v3.1.0"
-          mirror "https://github.com/NSRingo/MapKit/releases/download/v4.6.1/iRingo.Maps.plugin" \
-            "iringo/iRingo.Maps.plugin" "NSRingo / iRingo.Maps.plugin v4.6.1"
-          mirror "https://github.com/NSRingo/News/releases/download/v3.2.1/iRingo.News.plugin" \
-            "iringo/iRingo.News.plugin" "NSRingo / iRingo.News.plugin v3.2.1"
-          mirror "https://github.com/NSRingo/Siri/releases/download/v4.2.7/iRingo.Siri.plugin" \
-            "iringo/iRingo.Siri.plugin" "NSRingo / iRingo.Siri.plugin v4.2.7"
-          mirror "https://github.com/NSRingo/Siri/releases/download/v4.2.7/iRingo.Search.plugin" \
-            "iringo/iRingo.Search.plugin" "NSRingo / iRingo.Search.plugin v4.2.7"
-          mirror "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/iRingo.TestFlight.plugin" \
-            "iringo/iRingo.TestFlight.plugin" "NSRingo / iRingo.TestFlight.plugin v3.4.0"
-          mirror "https://github.com/NSRingo/TV/releases/download/v3.4.4/iRingo.TV.plugin" \
-            "iringo/iRingo.TV.plugin" "NSRingo / iRingo.TV.plugin v3.4.4"
-          mirror "https://github.com/NSRingo/LocationServices/releases/download/v1.0.1/iRingo.LocationService.plugin" \
-            "iringo/iRingo.LocationService.plugin" "NSRingo / iRingo.LocationService.plugin v1.0.1"
+          # ═══════════════ NSRingo Loon 插件 (跟随 latest, 不固定版本) ═══════════════
+          mirror "https://github.com/NSRingo/WeatherKit/releases/latest/download/iRingo.WeatherKit.plugin" \
+            "iringo/iRingo.WeatherKit.plugin" "NSRingo / iRingo.WeatherKit.plugin latest"
+          mirror "https://github.com/NSRingo/MapKit/releases/latest/download/iRingo.Maps.plugin" \
+            "iringo/iRingo.Maps.plugin" "NSRingo / iRingo.Maps.plugin latest"
+          mirror "https://github.com/NSRingo/News/releases/latest/download/iRingo.News.plugin" \
+            "iringo/iRingo.News.plugin" "NSRingo / iRingo.News.plugin latest"
+          mirror "https://github.com/NSRingo/Siri/releases/latest/download/iRingo.Siri.plugin" \
+            "iringo/iRingo.Siri.plugin" "NSRingo / iRingo.Siri.plugin latest"
+          mirror "https://github.com/NSRingo/Siri/releases/latest/download/iRingo.Search.plugin" \
+            "iringo/iRingo.Search.plugin" "NSRingo / iRingo.Search.plugin latest"
+          mirror "https://github.com/NSRingo/TestFlight/releases/latest/download/iRingo.TestFlight.plugin" \
+            "iringo/iRingo.TestFlight.plugin" "NSRingo / iRingo.TestFlight.plugin latest"
+          mirror "https://github.com/NSRingo/TV/releases/latest/download/iRingo.TV.plugin" \
+            "iringo/iRingo.TV.plugin" "NSRingo / iRingo.TV.plugin latest"
+          mirror "https://github.com/NSRingo/LocationServices/releases/latest/download/iRingo.LocationService.plugin" \
+            "iringo/iRingo.LocationService.plugin" "NSRingo / iRingo.LocationService.plugin latest"
+
+          # ── 本地补丁: NSRingo .plugin script-path 去版本固定, 指向 CDN latest ──
+          # 上游 .plugin 内 script-path 指向固定版本 bundle.js (如 v3.1.0/v4.2.7),
+          # 重写为自建 CDN 路径, 自动跟随上游最新版本更新 (每日镜像自愈)
+          # 注意: 不同仓库 bundle.js 同名但版本不同, 须按插件精确映射
+          CDN="https://ws.wenn.in/main/Mirror/iringo"
+          sed -i "s|https://github.com/NSRingo/WeatherKit/releases/download/[^\"]*/|${CDN}/WeatherKit/|g" Mirror/iringo/iRingo.WeatherKit.plugin
+          sed -i "s|https://github.com/NSRingo/GeoServices/releases/download/[^\"]*/|${CDN}/GeoServices/|g" Mirror/iringo/iRingo.Maps.plugin
+          sed -i "s|https://github.com/NSRingo/News/releases/download/[^\"]*/|${CDN}/News/|g" Mirror/iringo/iRingo.News.plugin
+          sed -i "s|https://github.com/NSRingo/Siri/releases/download/[^\"]*/|${CDN}/Siri/|g" Mirror/iringo/iRingo.Siri.plugin
+          sed -i "s|https://github.com/NSRingo/Siri/releases/download/[^\"]*/|${CDN}/Siri/|g" Mirror/iringo/iRingo.Search.plugin
+          sed -i "s|https://github.com/NSRingo/TestFlight/releases/download/[^\"]*/|${CDN}/TestFlight/|g" Mirror/iringo/iRingo.TestFlight.plugin
+          sed -i "s|https://github.com/NSRingo/TV/releases/download/[^\"]*/|${CDN}/TV/|g" Mirror/iringo/iRingo.TV.plugin
+          sed -i "s|https://github.com/NSRingo/LocationServices/releases/download/[^\"]*/|${CDN}/LocationServices/|g" Mirror/iringo/iRingo.LocationService.plugin
 
           # ═══════════════ DualSubs (双语字幕) ═══════════════
           mirror "https://github.com/DualSubs/Universal/releases/download/v1.7.5/DualSubs.Universal.plugin" \

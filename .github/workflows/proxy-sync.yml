@@ -1,0 +1,73 @@
+name: Proxy List Sync
+
+on:
+  schedule:
+    - cron: '40 3 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/geonode-sync.mjs'
+      - 'tools/edu-proxy-sync.mjs'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      # 各源独立失败: continue-on-error 保证互不阻断, 全部失败时由下方门禁兜底
+      - name: Sync geonode proxies
+        id: geonode
+        continue-on-error: true
+        run: node tools/geonode-sync.mjs
+
+      - name: Sync GitHub open proxies
+        id: edu
+        continue-on-error: true
+        run: node tools/edu-proxy-sync.mjs
+
+      - name: Fail if all sources failed
+        if: steps.geonode.outcome == 'failure' && steps.edu.outcome == 'failure'
+        run: |
+          echo "❌ geonode 与 edu 源全部同步失败, 保留旧文件" >> $GITHUB_STEP_SUMMARY
+          exit 1
+
+      - name: Commit if changed
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add Profile/geonode.loon.txt Profile/edu-proxy.loon.txt
+          if git diff --cached --quiet; then
+            echo "无变更, 跳过提交"
+            echo "synced=false" >> $GITHUB_ENV
+            exit 0
+          fi
+          git commit -m "chore(proxy): 免费代理列表同步 ($(date +%Y-%m-%d))"
+          git push origin main
+          echo "synced=true" >> $GITHUB_ENV
+
+      - name: Report summary
+        if: always()
+        run: |
+          echo "### Proxy List Sync Report" >> $GITHUB_STEP_SUMMARY
+          echo "| Date | Geonode | Edu | Synced |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|---------|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| $(date +%Y-%m-%d) | ${GEO_ICON:-✅} | ${EDU_ICON:-✅} | ${synced:-false} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Report failure details
+        if: steps.geonode.outcome == 'failure' || steps.edu.outcome == 'failure'
+        run: |
+          echo "### ⚠️ 部分源同步失败" >> $GITHUB_STEP_SUMMARY
+          [ "${{ steps.geonode.outcome }}" = "failure" ] && echo "- geonode 失败 (保留旧文件)" >> $GITHUB_STEP_SUMMARY
+          [ "${{ steps.edu.outcome }}" = "failure" ] && echo "- edu 失败 (保留旧文件)" >> $GITHUB_STEP_SUMMARY

@@ -60,11 +60,12 @@ httpdns.c.cdnhwc2.com = 0.0.0.0
 [Proxy]
 # Surgio 自动生成节点: npx surgio generate
 # 通过 SURGIO_SUBSCRIPTION_URL (机场订阅) 或 Secrets (HY2_HOST 等) 传入
-# 容灾: Proxy url-test 组 (".*") 自动纳管新节点 — 订阅中加入第二节点即双节点容灾
+# 容灾: Proxy url-test 组 (MainNodes 过滤) 自动纳管新节点 — 订阅中加入第二节点即双节点容灾
+# 隔离: geonode-*/edu-* 免费代理被 MainNodes 排除, 仅 OpenCode 组引用 (见 [Remote Filter]/[Remote Proxy])
 
 [Proxy Group]
-Proxy = url-test, ".*", 东京, url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
-Fallback = fallback, ".*", url=http://cp.cloudflare.com/generate_204, interval=600, timeout=10
+Proxy = url-test, MainNodes, 东京, url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
+Fallback = fallback, MainNodes, url=http://cp.cloudflare.com/generate_204, interval=600, timeout=10
 Apple = select, DIRECT, Proxy
 Final = select, Proxy, Fallback, DIRECT
 Streaming = select, Proxy, Fallback, DIRECT, tag=流媒体
@@ -72,7 +73,19 @@ AI = select, Proxy, Fallback, DIRECT, tag=AI服务
 Developer = select, Proxy, Fallback, DIRECT, tag=开发者
 Gaming = select, Proxy, Fallback, DIRECT, tag=游戏平台
 Social = select, Proxy, Fallback, DIRECT, tag=社交平台
-OpenCode = select, Proxy, DIRECT, tag=OpenCode.ai
+OpenCode = select, Proxy, DIRECT, Geonode, EduProxy, tag=OpenCode.ai
+
+[Remote Filter]
+# 主节点池: 排除 geonode-*/edu-* 免费代理 (免费代理稳定性差, 防 url-test 自动选路到不可用节点)
+MainNodes = NameRegex, FilterKey = "^(?!.*(?:geonode|edu)).*$"
+
+[Remote Proxy]
+# Geonode 免费代理订阅 — 每日由 proxy-sync workflow 从 proxylist.geonode.com 拉取转换
+# (Profile/geonode.loon.txt, Loon 官方节点文本格式, 无需解析器)
+Geonode = https://ws.wenn.in/main/Profile/geonode.loon.txt,enabled=true
+# GitHub 开放代理订阅 (TheSpeedX/PROXY-List + roosterkid/openproxylist) — 每日由 proxy-sync workflow 拉取转换
+# 注意: 非大学 edu 网段, README "Educational purpose" 仅为免责声明; 免费代理勿用于登录敏感账号
+EduProxy = https://ws.wenn.in/main/Profile/edu-proxy.loon.txt,enabled=true
 
 [Rule]
 DEST-PORT, 5223, DIRECT
