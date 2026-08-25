@@ -64,15 +64,13 @@ jobs:
           if gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' 2>/dev/null | grep -q .; then
             PR_NUM=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
             gh pr edit "$PR_NUM" --body "$BODY" 2>/dev/null || true
-            gh pr merge --auto --squash "$PR_NUM" 2>/dev/null || true
-            echo "PR updated, auto-merge enabled"
+            echo "PR updated, 留待人工审核合并"
           else
             PR_URL=$(gh pr create --base main --head "$BRANCH" \
               --title "chore(surgio): auto-update generated configs ($(date +%Y-%m-%d))" \
               --body "$BODY" 2>/dev/null || echo "")
             if [ -n "$PR_URL" ]; then
-              gh pr merge --auto --squash "$PR_URL" 2>/dev/null || true
-              echo "PR created, auto-merge enabled"
+              echo "PR created, 留待人工审核合并"
             else
               echo "PR creation skipped"
             fi

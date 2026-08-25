@@ -7,6 +7,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# 只读校验: 显式声明最小权限, 不依赖仓库默认 token 权限
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest

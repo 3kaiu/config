@@ -20,6 +20,12 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write
+    # BARK_PUSH 须定义在 job 级: step 级 if 读不到本 step 自己的 env 块
+    env:
+      BARK_PUSH: ${{ secrets.BARK_PUSH }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -114,8 +120,6 @@ jobs:
       # Bark 告警 (可选: 仓库 Secrets 配置 BARK_PUSH 后启用)
       - name: Bark alert
         if: failure() && env.BARK_PUSH != ''
-        env:
-          BARK_PUSH: ${{ secrets.BARK_PUSH }}
         run: |
           curl -fsSL -m 15 -o /dev/null \
             "$BARK_PUSH/CDN校验失败/mismatch=${{ steps.check.outputs.mismatch_count }}%20fetchfail=${{ steps.check.outputs.fetchfail_count }}?group=config&icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Back.png" \

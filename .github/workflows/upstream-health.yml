@@ -7,12 +7,18 @@ on:
 
 permissions:
   issues: write
+  # checkout 需要: MANIFEST 派生探活读取仓库文件
+  contents: read
 
 jobs:
   check-upstreams:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      # MANIFEST 派生检查依赖仓库文件; 缺 checkout 会 ENOENT 静默跳过全部镜像探活
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
       - name: Check all upstream URLs
         id: check
         run: |
@@ -22,7 +28,9 @@ jobs:
           check_url() {
             local name="$1" url="$2"
             local status
-            status=$(curl -fsSL -m 30 -o /dev/null -w "%{http_code}" "$url" || echo "000")
+            # 不用 -f: 失败状态码 (403/404) 也要拿到真实数字; 网络层异常时才记 000
+            status=$(curl -sSL -m 30 -o /dev/null -w "%{http_code}" "$url" || true)
+            [ -z "$status" ] && status="000"
             echo "::group::$name"
             echo "URL: $url"
             echo "Status: $status"
@@ -87,7 +95,7 @@ jobs:
           check_url "NSRingo bundle GeoServices req" "https://github.com/NSRingo/GeoServices/releases/latest/download/request.bundle.js"
           check_url "NSRingo bundle GeoServices res" "https://github.com/NSRingo/GeoServices/releases/latest/download/response.bundle.js"
           check_url "NSRingo bundle News req" "https://github.com/NSRingo/News/releases/latest/download/request.bundle.js"
-          check_url "NSRingo bundle News res" "https://github.com/NSRingo/News/releases/latest/download/response.bundle.js"
+          # News response.bundle.js 探活已移除: 上游 v3.2.1 起不再发布该文件 (永久 404 误报)
           check_url "NSRingo bundle Siri req" "https://github.com/NSRingo/Siri/releases/latest/download/request.bundle.js"
           check_url "NSRingo bundle Siri res" "https://github.com/NSRingo/Siri/releases/latest/download/response.bundle.js"
           check_url "NSRingo bundle TestFlight req" "https://github.com/NSRingo/TestFlight/releases/latest/download/request.bundle.js"

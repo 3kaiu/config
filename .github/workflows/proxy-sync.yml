@@ -60,6 +60,9 @@ jobs:
       - name: Report summary
         if: always()
         run: |
+          GEO_ICON=✅; EDU_ICON=✅
+          [ "${{ steps.geonode.outcome }}" = "failure" ] && GEO_ICON=❌
+          [ "${{ steps.edu.outcome }}" = "failure" ] && EDU_ICON=❌
           echo "### Proxy List Sync Report" >> $GITHUB_STEP_SUMMARY
           echo "| Date | Geonode | Edu | Synced |" >> $GITHUB_STEP_SUMMARY
           echo "|------|---------|-----|--------|" >> $GITHUB_STEP_SUMMARY
