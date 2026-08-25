@@ -1,0 +1,27 @@
+# 版本化发布: 推送 v* tag 时将 Profile/Loon.lcf 快照发布到 GitHub Releases
+# 用途: 用户可锁定版本回滚, 不必追 main 滚动更新; 资产同步进 Pages 兜底通道
+# 用法: git tag v8.9.1 && git push origin v8.9.1
+name: Release Profile
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Publish Loon.lcf snapshot
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" --verify-tag --generate-notes \
+            "Profile/Loon.lcf#Loon.lcf (完整配置)"

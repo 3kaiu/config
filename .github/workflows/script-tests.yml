@@ -13,6 +13,8 @@ on:
 
 permissions:
   contents: read
+  id-token: write
+  attestations: write
 
 jobs:
   test:
@@ -26,6 +28,7 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 22
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
@@ -35,6 +38,15 @@ jobs:
 
       - name: Build scripts
         run: npm run build
+
+      # 构建产物签名 (供应链信任): 为 Scripts/*.js 生成可验证的构建出处证明
+      # 验证: gh attestation verify Scripts/<file>.js -R 3kaiu/config
+      # fork PR 无 id-token, 自动跳过
+      - name: Attest build provenance
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: Scripts/*.js
 
       - name: Gate on build output drift
         run: |
