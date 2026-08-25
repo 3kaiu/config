@@ -217,8 +217,8 @@ jobs:
             "iringo/GeoServices/response.bundle.js" "NSRingo / GeoServices response.bundle.js latest"
           mirror "https://github.com/NSRingo/News/releases/latest/download/request.bundle.js" \
             "iringo/News/request.bundle.js" "NSRingo / News request.bundle.js latest"
-          mirror "https://github.com/NSRingo/News/releases/latest/download/response.bundle.js" \
-            "iringo/News/response.bundle.js" "NSRingo / News response.bundle.js latest"
+          # News response.bundle.js 已移除: 上游 v3.2.1 起不再发布该文件
+          # (iRingo.News.plugin v3.2.1 仅引用 request.bundle.js, 本地无任何引用)
           mirror "https://github.com/NSRingo/Siri/releases/latest/download/request.bundle.js" \
             "iringo/Siri/request.bundle.js" "NSRingo / Siri request.bundle.js latest"
           mirror "https://github.com/NSRingo/Siri/releases/latest/download/response.bundle.js" \
