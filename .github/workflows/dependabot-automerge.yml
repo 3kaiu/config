@@ -50,6 +50,15 @@ jobs:
             pending=$(echo "$rollup" | jq '[.statusCheckRollup[] | select(.name != "automerge") | select(.status != "COMPLETED")] | length')
             failed=$(echo "$rollup" | jq '[.statusCheckRollup[] | select(.name != "automerge") | select(.status == "COMPLETED") | select(.conclusion == "FAILURE" or .conclusion == "TIMED_OUT" or .conclusion == "ACTION_REQUIRED" or .conclusion == "STARTUP_FAILURE")] | length')
             total=$(echo "$rollup" | jq '[.statusCheckRollup[] | select(.name != "automerge")] | length')
+            # mergeable 由 GitHub 异步计算, 常态返回 UNKNOWN: 短重试等待计算完成;
+            # 仍 UNKNOWN 时放行 (checks 全绿 + 非 DIRTY 即安全, 真冲突时 gh pr merge 会安全失败)
+            for t in 1 2 3; do
+              [ "$mergeable" != "UNKNOWN" ] && break
+              sleep 10
+              rollup=$(gh pr view "$n" --json statusCheckRollup,mergeable,mergeStateStatus)
+              mergeable=$(echo "$rollup" | jq -r .mergeable)
+              state=$(echo "$rollup" | jq -r .mergeStateStatus)
+            done
             echo "mergeable=$mergeable state=$state checks=$total pending=$pending failed=$failed"
             if [ "$failed" -gt 0 ]; then
               echo "❌ 存在失败 check, 跳过 (等 Dependabot 自行处理)"
@@ -59,8 +68,8 @@ jobs:
               echo "⏳ CI 未完成, 下轮再试"
               continue
             fi
-            if [ "$mergeable" != "MERGEABLE" ]; then
-              echo "⚠️ 不可合并 (冲突/状态=$state), 跳过"
+            if [ "$state" = "DIRTY" ]; then
+              echo "⚠️ 与 main 冲突 (DIRTY), 跳过"
               continue
             fi
             title=$(gh pr view "$n" --json title -q .title)
