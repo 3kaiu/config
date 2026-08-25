@@ -1,69 +1,74 @@
 name: Dependabot Automerge
 
-# Dependabot 依赖升级 PR 的自动合并。
-# 注意: main 无分支保护 (proxy-sync 需直推), 因此不能用 `gh pr merge --auto` —
-# 无 required checks 时 auto-merge 会立即合并并绕过全部 CI。
-# 此 workflow 自行轮询 head SHA 上的 check-runs, 全部通过后才 squash 合并。
+# Dependabot 依赖升级 PR 的自动合并 (定时清扫器架构, v2 — 2026-08-25 重构)。
+#
+# 为什么不用 pull_request_target 内轮询:
+#   1. 该 job 自身的 check 会挂到 PR head SHA 上, 轮询时必须排除自身 —
+#      已实测两种自引用故障 (PR#32 死锁 / PR#33 原因不明挂起, 运行中日志不可读无法定位)
+#   2. 运行中的 job 日志 API 长时间拿不到, 可观测性差
+# 清扫器 (schedule) 的 check 不挂在任何 PR 上, 无自引用, 每次 run 日志完整可查。
+#
+# 注意: main 无分支保护, 不能用 `gh pr merge --auto` (无 required checks 时立即合并绕过 CI),
+# 因此由本工作流校验全部 check 通过后才合并。
+#
+# surgio-build 等非 Dependabot PR 不在处理范围 (人工审核)。
 
 on:
-  pull_request_target:
-    types: [opened, reopened, synchronize]
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
   pull-requests: write
   checks: read
 
-concurrency:
-  group: dependabot-automerge-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
-
 jobs:
-  automerge:
-    if: github.actor == 'dependabot[bot]'
+  sweep:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 10
     steps:
-      # 不 checkout PR 代码 — 只调用 API, 不执行任何来自 PR 的内容
-      - name: Wait for CI then merge
+      - name: Merge green dependabot PRs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          NUMBER: ${{ github.event.pull_request.number }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          set -x
-          echo "PR #$NUMBER ($HEAD_SHA): 等待 CI..."
-          for i in $(seq 1 90); do
-            # 每个外部调用包 timeout, 防 gh 偶发挂起拖满整个 job
-            summary=$(timeout 60 gh api "repos/$GH_REPO/commits/$HEAD_SHA/check-runs?per_page=100")
-            api_rc=$?
-            if [ "$api_rc" -ne 0 ] || [ -z "$summary" ]; then
-              echo "[$i] ⚠️ check-runs API 调用失败 (rc=$api_rc), 重试"
-              sleep 30; continue
-            fi
-            # 排除自身 (本 job 的 check 挂在同一 head SHA 上, 运行期间永远 IN_PROGRESS,
-            # 不排除会自我等待直到超时 — 2026-08-25 PR#32 实测死锁)
-            total=$(echo "$summary" | jq '[.check_runs[] | select(.name != "automerge")] | length')
-            pending=$(echo "$summary" | jq '[.check_runs[] | select(.name != "automerge") | select(.status != "COMPLETED")] | length')
-            failed=$(echo "$summary" | jq '[.check_runs[] | select(.name != "automerge") | select(.status == "COMPLETED") | select(.conclusion != "SUCCESS" and .conclusion != "NEUTRAL" and .conclusion != "SKIPPED")] | length')
-            echo "[$i] checks=$total pending=$pending failed=$failed"
+          mapfile -t PRS < <(gh pr list --author "dependabot[bot]" --state open --json number \
+            --jq '.[].number')
+          if [ "${#PRS[@]}" -eq 0 ]; then
+            echo "无待处理的 Dependabot PR"
+            exit 0
+          fi
+          rc_overall=0
+          for n in "${PRS[@]}"; do
+            echo "── PR #$n ──"
+            rollup=$(gh pr view "$n" --json statusCheckRollup,mergeable,mergeStateStatus)
+            mergeable=$(echo "$rollup" | jq -r .mergeable)
+            state=$(echo "$rollup" | jq -r .mergeStateStatus)
+            # 排除名为 automerge 的历史遗留 check (v1 轮询架构残留, 与本清扫器无关);
+            # cancelled 视为中性 (陈旧 run 被 concurrency 取消属常态, 非 CI 失败信号)
+            pending=$(echo "$rollup" | jq '[.statusCheckRollup[] | select(.name != "automerge") | select(.status != "COMPLETED")] | length')
+            failed=$(echo "$rollup" | jq '[.statusCheckRollup[] | select(.name != "automerge") | select(.status == "COMPLETED") | select(.conclusion == "FAILURE" or .conclusion == "TIMED_OUT" or .conclusion == "ACTION_REQUIRED" or .conclusion == "STARTUP_FAILURE")] | length')
+            total=$(echo "$rollup" | jq '[.statusCheckRollup[] | select(.name != "automerge")] | length')
+            echo "mergeable=$mergeable state=$state checks=$total pending=$pending failed=$failed"
             if [ "$failed" -gt 0 ]; then
-              echo "❌ 存在失败的 check, 放弃自动合并"
-              exit 1
+              echo "❌ 存在失败 check, 跳过 (等 Dependabot 自行处理)"
+              continue
             fi
-            if [ "$total" -gt 0 ] && [ "$pending" -eq 0 ]; then
-              echo "✅ 全部 check 通过, squash 合并"
-              TITLE=$(gh pr view "$NUMBER" --json title -q .title)
-              # 显式 subject/body: 杜绝非 TTY 下 gh 的任何交互可能
-              timeout 120 gh pr merge "$NUMBER" --squash \
-                --subject "${TITLE} (#$NUMBER)" \
-                --body ""
-              merge_rc=$?
-              echo "gh pr merge rc=$merge_rc"
-              exit "$merge_rc"
+            if [ "$pending" -gt 0 ] || [ "$total" -eq 0 ]; then
+              echo "⏳ CI 未完成, 下轮再试"
+              continue
             fi
-            sleep 30
+            if [ "$mergeable" != "MERGEABLE" ]; then
+              echo "⚠️ 不可合并 (冲突/状态=$state), 跳过"
+              continue
+            fi
+            title=$(gh pr view "$n" --json title -q .title)
+            if gh pr merge "$n" --squash --subject "${title} (#$n)" --body ""; then
+              echo "✅ PR #$n 已 squash 合并"
+            else
+              echo "❌ PR #$n 合并命令失败"
+              rc_overall=1
+            fi
           done
-          echo "⏱️ 45 分钟内 CI 未完成, 放弃自动合并"
-          exit 1
+          exit "$rc_overall"
