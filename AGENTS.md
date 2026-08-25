@@ -5,7 +5,7 @@ Loon 配置仓库:单入口 `Profile/Loon.lcf`,由 `surgio` 从 `template/` + `s
 ## 命令
 
 - `npm run build` — esbuild 注入 `src/env.ts` 编译 `src/*.ts` 到 `Scripts/`(minify)。改 src 后必须 build
-- `npm test` — 72 个行为级用例,引用全部 22 个 Scripts 产物
+- `npm test` — 70 个行为级用例,引用全部 22 个 Scripts 产物
 - `npm run lint` — eslint(flat config)
 - `npm run generate` — surgio 构建 `Profile/Loon.lcf`(surgio 3.18,内联 providers,无 patch)
 - `npm run check:sync` — tpl-sync-check 正反向比对 template ↔ Loon.lcf
@@ -24,7 +24,7 @@ Loon 配置仓库:单入口 `Profile/Loon.lcf`,由 `surgio` 从 `template/` + `s
 | `Profile/geonode.loon.txt` | proxy-sync 生成物 (Loon [Remote Proxy] Geonode 订阅源, 幂等) | 不动;生成物 |
 | `Profile/edu-proxy.loon.txt` | proxy-sync 生成物 (Loon [Remote Proxy] EduProxy 订阅源, 幂等) | 不动;生成物 |
 | `tools/*.mjs` | tpl-sync / 验证脚本 | 改动后跑 check:sync |
-| `test/cases/*.test.js` | 72 用例 | 新增/改脚本须补用例 |
+| `test/cases/*.test.js` | 70 用例 | 新增/改脚本须补用例 |
 
 ## 门禁(全部在 `.github/workflows/`,push 前本地自测)
 
@@ -41,9 +41,11 @@ Loon 配置仓库:单入口 `Profile/Loon.lcf`,由 `surgio` 从 `template/` + `s
 - 不提交 Secrets;workflow secrets 仅 BARK_PUSH(可选)
 - 发布面 = 公开 GitHub + ws.wenn.in CDN(Cloudflare,max-age=3600)+ GitHub Pages(未启用)
 - QX 已彻底移除,任何涉及 QX 的改动/引用皆为回归
-- 依赖仅 4 个(esbuild/eslint/surgio/无 typescript);升级须过 build+72 测试
+- 依赖仅 4 个(esbuild/eslint/surgio/无 typescript);升级须过 build+70 测试
 
 ## 架构已知问题(勿重改)
 
 - `Scripts/Qidian.js` 无源码(上游 qidian 引擎,密文打包)
 - [Rule] 456 行 0 冗余(已证);GEOIP 顺序已修;AdBlock 域 28 个硬拦截已覆盖规则
+- Dependabot 漏洞告警 ~39 个为**构建期已知风险,勿 force 修**(2026-08 审计):全部来自 surgio@3.19 → @oclif/plugin-plugins@3.x 内嵌 npm@9 的传递依赖(tar/sigstore/js-yaml 等),仅本地/CI 执行 `surgio generate` 时存在,不进任何分发产物;上游 surgio 未跟进 oclif v5(npm@11)前无解,`audit fix --force` 会破坏 semver。surgio 升级时自然消解
+- kelee.one 全局 403 (2026-08-25 起,含浏览器 UA):upstream-health issue #27 对应;Kelee/*.plugin 外壳与 loon.tpl LPX 直连引用在解封前不可用,属上游封锁非本仓库可修
