@@ -45,17 +45,14 @@ jobs:
             fi
           }
 
-          # 核心上游
-          check_url "ddgksf2013/Rewrite" "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/KeepAds.conf"
-          check_url "Maasea/sgmodule (YouTube)" "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js"
-          check_url "app2smile/rules (Bilibili)" "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js"
-          check_url "blackmatrix7 AllInOne" "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AllInOne/AllInOne.plugin"
+          # 镜像上游探活全部由下方 MANIFEST 派生循环覆盖 (35 条, 单一权威清单);
+          # 此处仅保留"未被镜像"的直连依赖 — 硬编码块勿新增镜像内条目 (2026-08 审计去重)
 
-          # Loon.lcf [General] 直连源 (客户端侧拉取, 挂了会报 DNS/geoip 错误)
+          # 客户端直连源 (未镜像, Loon [General] 拉取, 挂了报 DNS/geoip 错误)
           check_url "Loyalsoldier GeoIP mmdb" "https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb"
           check_url "P3TERX GeoLite2-ASN mmdb" "https://raw.githubusercontent.com/P3TERX/GeoLite.mmdb/download/GeoLite2-ASN.mmdb"
 
-          # 自建 CDN
+          # 自建 CDN 可用性 (内容哈希校验在 cdn-verify.yml, 这里只探活)
           check_url "ws.wenn.in CDN (Mirror)" "https://ws.wenn.in/main/Mirror/netease.adblock.js"
 
           # 免费代理源 (proxy-sync 每日拉取 → Profile/*.loon.txt, Loon [Remote Proxy] 引用)
@@ -69,58 +66,7 @@ jobs:
           check_url "ws.wenn.in CDN (Geonode 订阅)" "https://ws.wenn.in/main/Profile/geonode.loon.txt"
           check_url "ws.wenn.in CDN (Edu 订阅)" "https://ws.wenn.in/main/Profile/edu-proxy.loon.txt"
 
-          # 脚本级上游 (已 Mirror, 监控原站 — 列表派生自 Mirror/MANIFEST.json, 勿重复维护)
-          node -e '
-            const fs = require("fs");
-            const m = JSON.parse(fs.readFileSync("Mirror/MANIFEST.json", "utf8"));
-            for (const [f, meta] of Object.entries(m.files)) {
-              console.log(f + "\t" + meta.source_url);
-            }
-          ' | while IFS=$'\t' read -r name url; do check_url "$name (mirrored)" "$url"; done
-
-          # NSRingo Apple 增强
-          # WeatherKit 自 v3.2.0 起不再发布 .plugin 资产 (仅 .lpx/.sgmodule/.snippet/.stoverride),
-          # 健康探活改查 bundle.js, 避免误报 404
-          check_url "NSRingo WeatherKit" "https://github.com/NSRingo/WeatherKit/releases/latest/download/response.bundle.js"
-          check_url "NSRingo MapKit" "https://github.com/NSRingo/MapKit/releases/latest/download/iRingo.Maps.plugin"
-          check_url "NSRingo News" "https://github.com/NSRingo/News/releases/latest/download/iRingo.News.plugin"
-          check_url "NSRingo Siri" "https://github.com/NSRingo/Siri/releases/latest/download/iRingo.Siri.plugin"
-          check_url "NSRingo TestFlight" "https://github.com/NSRingo/TestFlight/releases/latest/download/iRingo.TestFlight.plugin"
-          check_url "NSRingo TV" "https://github.com/NSRingo/TV/releases/latest/download/iRingo.TV.plugin"
-          check_url "NSRingo LocationServices" "https://github.com/NSRingo/LocationServices/releases/latest/download/iRingo.LocationService.plugin"
-
-          # NSRingo bundle.js (latest, 跟随上游最新版本)
-          check_url "NSRingo bundle WeatherKit req" "https://github.com/NSRingo/WeatherKit/releases/latest/download/request.bundle.js"
-          check_url "NSRingo bundle WeatherKit res" "https://github.com/NSRingo/WeatherKit/releases/latest/download/response.bundle.js"
-          check_url "NSRingo bundle GeoServices req" "https://github.com/NSRingo/GeoServices/releases/latest/download/request.bundle.js"
-          check_url "NSRingo bundle GeoServices res" "https://github.com/NSRingo/GeoServices/releases/latest/download/response.bundle.js"
-          check_url "NSRingo bundle News req" "https://github.com/NSRingo/News/releases/latest/download/request.bundle.js"
-          # News response.bundle.js 探活已移除: 上游 v3.2.1 起不再发布该文件 (永久 404 误报)
-          check_url "NSRingo bundle Siri req" "https://github.com/NSRingo/Siri/releases/latest/download/request.bundle.js"
-          check_url "NSRingo bundle Siri res" "https://github.com/NSRingo/Siri/releases/latest/download/response.bundle.js"
-          check_url "NSRingo bundle TestFlight req" "https://github.com/NSRingo/TestFlight/releases/latest/download/request.bundle.js"
-          check_url "NSRingo bundle TestFlight res" "https://github.com/NSRingo/TestFlight/releases/latest/download/response.bundle.js"
-          check_url "NSRingo bundle TV req" "https://github.com/NSRingo/TV/releases/latest/download/request.bundle.js"
-          check_url "NSRingo bundle TV res" "https://github.com/NSRingo/TV/releases/latest/download/response.bundle.js"
-          check_url "NSRingo bundle LocationServices req" "https://github.com/NSRingo/LocationServices/releases/latest/download/request.bundle.js"
-          check_url "NSRingo bundle LocationServices res" "https://github.com/NSRingo/LocationServices/releases/latest/download/response.bundle.js"
-
-          # DualSubs (双语字幕)
-          check_url "DualSubs Universal" "https://github.com/DualSubs/Universal/releases/latest/download/DualSubs.Universal.plugin"
-          check_url "DualSubs YouTube" "https://github.com/DualSubs/YouTube/releases/latest/download/DualSubs.YouTube.plugin"
-          check_url "DualSubs Netflix" "https://github.com/DualSubs/Netflix/releases/latest/download/DualSubs.Netflix.plugin"
-
-          # Auraflare (Cloudflare 资源集成)
-          check_url "Auraflare 1.1.1.1" "https://raw.githubusercontent.com/Auraflare/1.1.1.1/main/modules/Cloudflare.1.1.1.1.plugin"
-          check_url "Auraflare DNS" "https://github.com/Auraflare/DNS/releases/latest/download/Cloudflare.DNS.plugin"
-
-          # BiliUniverse (哔哩哔哩增强)
-          check_url "BiliUniverse Enhanced" "https://github.com/BiliUniverse/Enhanced/releases/latest/download/BiliBili.Enhanced.plugin"
-          check_url "BiliUniverse Global" "https://github.com/BiliUniverse/Global/releases/latest/download/BiliBili.Global.plugin"
-          check_url "BiliUniverse ADBlock" "https://github.com/BiliUniverse/ADBlock/releases/latest/download/BiliBili.ADBlock.plugin"
-          check_url "BiliUniverse Redirect" "https://github.com/BiliUniverse/Redirect/releases/latest/download/BiliBili.Redirect.plugin"
-
-          # kelee.one LPX (loon.tpl 直连的第三方配置, 非 CDN 链路)
+          # kelee.one LPX (loon.tpl 直连的第三方配置, 未镜像; 2026-08 起全局 403 见 issue #27)
           check_url "kelee.one LPX Google" "https://kelee.one/Tool/Loon/Lpx/Google.lpx"
           check_url "kelee.one LPX JD_Price" "https://kelee.one/Tool/Loon/Lpx/JD_Price.lpx"
           check_url "kelee.one LPX Node_detection_tool" "https://kelee.one/Tool/Loon/Lpx/Node_detection_tool.lpx"
@@ -128,6 +74,15 @@ jobs:
           check_url "kelee.one LPX Spotify_lyrics" "https://kelee.one/Tool/Loon/Lpx/Spotify_lyrics_translation.lpx"
           check_url "kelee.one LPX VVebo_repair" "https://kelee.one/Tool/Loon/Lpx/VVebo_repair.lpx"
           check_url "kelee.one LPX Weixin_links" "https://kelee.one/Tool/Loon/Lpx/Weixin_external_links_unlock.lpx"
+
+          # 镜像上游 (单一权威清单: Mirror/MANIFEST.json — 新增镜像自动纳入, 勿在此重复硬编码)
+          node -e '
+            const fs = require("fs");
+            const m = JSON.parse(fs.readFileSync("Mirror/MANIFEST.json", "utf8"));
+            for (const [f, meta] of Object.entries(m.files)) {
+              console.log(f + "\t" + meta.source_url);
+            }
+          ' | while IFS=$'\t' read -r name url; do check_url "$name (mirrored)" "$url"; done
 
           echo "all_ok=$ALL_OK" >> $GITHUB_ENV
           echo "results=$RESULTS" >> $GITHUB_ENV
