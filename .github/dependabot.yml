@@ -17,6 +17,22 @@ updates:
           - "surgio*"
       dev-deps:
         dependency-type: "development"
+    # 以下全部是 surgio@3.19 → @oclif/plugin-plugins@3.x 内嵌 npm@9 的传递依赖,
+    # semver 锁死无法在范围内修复 (Dependabot 每次尝试开安全 PR 都会引擎失败刷红 Actions)。
+    # 判定: 构建期已知风险, 不进分发产物 — 详见 AGENTS.md「架构已知问题」。
+    # surgio 升级到跟进 oclif v5 的版本后, 删除此 ignore 块。
+    ignore:
+      - dependency-name: "tar"
+      - dependency-name: "sigstore"
+      - dependency-name: "js-yaml"
+      - dependency-name: "minimatch"
+      - dependency-name: "brace-expansion"
+      - dependency-name: "glob"
+      - dependency-name: "ip"
+      - dependency-name: "got"
+      - dependency-name: "@tootallnate/once"
+      - dependency-name: "cross-spawn"
+      - dependency-name: "diff"
 
   - package-ecosystem: "github-actions"
     directory: "/"
