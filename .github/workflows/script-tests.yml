@@ -44,7 +44,7 @@ jobs:
       # fork PR 无 id-token, 自动跳过
       - name: Attest build provenance
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: Scripts/*.js
 
