@@ -32,9 +32,16 @@ jobs:
           NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
+          set -x
           echo "PR #$NUMBER ($HEAD_SHA): 等待 CI..."
           for i in $(seq 1 90); do
-            summary=$(gh api "repos/$GH_REPO/commits/$HEAD_SHA/check-runs?per_page=100")
+            # 每个外部调用包 timeout, 防 gh 偶发挂起拖满整个 job
+            summary=$(timeout 60 gh api "repos/$GH_REPO/commits/$HEAD_SHA/check-runs?per_page=100")
+            api_rc=$?
+            if [ "$api_rc" -ne 0 ] || [ -z "$summary" ]; then
+              echo "[$i] ⚠️ check-runs API 调用失败 (rc=$api_rc), 重试"
+              sleep 30; continue
+            fi
             # 排除自身 (本 job 的 check 挂在同一 head SHA 上, 运行期间永远 IN_PROGRESS,
             # 不排除会自我等待直到超时 — 2026-08-25 PR#32 实测死锁)
             total=$(echo "$summary" | jq '[.check_runs[] | select(.name != "automerge")] | length')
@@ -47,8 +54,14 @@ jobs:
             fi
             if [ "$total" -gt 0 ] && [ "$pending" -eq 0 ]; then
               echo "✅ 全部 check 通过, squash 合并"
-              gh pr merge "$NUMBER" --squash
-              exit 0
+              TITLE=$(gh pr view "$NUMBER" --json title -q .title)
+              # 显式 subject/body: 杜绝非 TTY 下 gh 的任何交互可能
+              timeout 120 gh pr merge "$NUMBER" --squash \
+                --subject "${TITLE} (#$NUMBER)" \
+                --body ""
+              merge_rc=$?
+              echo "gh pr merge rc=$merge_rc"
+              exit "$merge_rc"
             fi
             sleep 30
           done
