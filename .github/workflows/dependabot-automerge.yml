@@ -1,0 +1,54 @@
+name: Dependabot Automerge
+
+# Dependabot 依赖升级 PR 的自动合并。
+# 注意: main 无分支保护 (proxy-sync 需直推), 因此不能用 `gh pr merge --auto` —
+# 无 required checks 时 auto-merge 会立即合并并绕过全部 CI。
+# 此 workflow 自行轮询 head SHA 上的 check-runs, 全部通过后才 squash 合并。
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+
+concurrency:
+  group: dependabot-automerge-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  automerge:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      # 不 checkout PR 代码 — 只调用 API, 不执行任何来自 PR 的内容
+      - name: Wait for CI then merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          echo "PR #$NUMBER ($HEAD_SHA): 等待 CI..."
+          for i in $(seq 1 90); do
+            summary=$(gh api "repos/$GH_REPO/commits/$HEAD_SHA/check-runs")
+            total=$(echo "$summary" | jq '.check_runs | length')
+            pending=$(echo "$summary" | jq '[.check_runs[] | select(.status != "COMPLETED")] | length')
+            failed=$(echo "$summary" | jq '[.check_runs[] | select(.status == "COMPLETED") | select(.conclusion != "SUCCESS" and .conclusion != "NEUTRAL" and .conclusion != "SKIPPED")] | length')
+            echo "[$i] checks=$total pending=$pending failed=$failed"
+            if [ "$failed" -gt 0 ]; then
+              echo "❌ 存在失败的 check, 放弃自动合并"
+              exit 1
+            fi
+            if [ "$total" -gt 0 ] && [ "$pending" -eq 0 ]; then
+              echo "✅ 全部 check 通过, squash 合并"
+              gh pr merge "$NUMBER" --squash
+              exit 0
+            fi
+            sleep 30
+          done
+          echo "⏱️ 45 分钟内 CI 未完成, 放弃自动合并"
+          exit 1
