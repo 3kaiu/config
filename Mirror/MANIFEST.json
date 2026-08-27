@@ -1,102 +1,138 @@
 {
   "$comment": "镜像文件哈希清单 — 由 mirror-scripts.yml 维护; 变更会出现在镜像 PR 的 diff 中, 合并前请核对 source 变更是否符合预期",
-  "generated_at": "2026-08-12T00:00:00Z",
+  "generated_at": "2026-08-27T14:00:10Z",
   "files": {
-    "netease.adblock.js": {
-      "source_url": "https://gist.githubusercontent.com/ddgksf2013/4f53b7c6083678df25fecc8ff68b52c4/raw/netease.adblock.js",
-      "sha256": "6ba468eb994e3843d69563f8f3b31c2d63a62a68d60fc3a1fd61947c1546936f",
-      "bytes": 122922,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
-    },
     "amdc.js": {
       "source_url": "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amdc.js",
       "sha256": "8217f2150f8d12ae04d2c49b5da0a838e83f4de68b34df71c2da16cc1267898f",
       "bytes": 633,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+      "fetched_at": "2026-08-27T13:59:51Z"
     },
     "applet.js": {
       "source_url": "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/applet.js",
       "sha256": "0e2ffdd010b7f1ee38c526af5b7842f8fe3af89bf7ccd298596025baa4471855",
       "bytes": 793,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+      "fetched_at": "2026-08-27T13:59:51Z"
+    },
+    "auraflare/Cloudflare.1.1.1.1.plugin": {
+      "source_url": "https://raw.githubusercontent.com/Auraflare/1.1.1.1/main/modules/Cloudflare.1.1.1.1.plugin",
+      "sha256": "73c2c6599425b37f914ef0ea7f8c588a2bae2405e9c5a1c06fb5c0abe0bd1f55",
+      "bytes": 2086,
+      "fetched_at": "2026-08-27T14:00:07Z"
+    },
+    "auraflare/Cloudflare.DNS.plugin": {
+      "source_url": "https://github.com/Auraflare/DNS/releases/download/v2.6.3/Cloudflare.DNS.plugin",
+      "sha256": "717e1c62d491a803179d3e4d876e205f58bd61c883fcd3007e579dc835a652ae",
+      "bytes": 2389,
+      "fetched_at": "2026-08-27T14:00:08Z"
     },
     "bilibili-json.js": {
       "source_url": "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js",
       "sha256": "748ad16a92532bde2c439a8b9975f465381d20e24328cf2a58ff3a2a27328d84",
       "bytes": 4959,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+      "fetched_at": "2026-08-27T13:59:51Z"
     },
     "bilibili-proto.js": {
       "source_url": "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-proto.js",
       "sha256": "70fa7cf0e3390da24db93bcfbf0c81c2af17b16f99012b483783f046f62c476e",
       "bytes": 106934,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+      "fetched_at": "2026-08-27T13:59:52Z"
     },
-    "youtube.request.js": {
-      "source_url": "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.request.js",
-      "sha256": "3ecca15e06e76a31720092c581180f648ef2c45e494644941ba985c878efbb26",
-      "bytes": 44024,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    "biliuniverse/BiliBili.ADBlock.plugin": {
+      "source_url": "https://github.com/BiliUniverse/ADBlock/releases/download/v0.6.24/BiliBili.ADBlock.plugin",
+      "sha256": "5a6be286a5ef251525222672457b957afe78f309fb50b0a1388510232ce7e9da",
+      "bytes": 11422,
+      "fetched_at": "2026-08-27T14:00:09Z"
     },
-    "youtube.response.js": {
-      "source_url": "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js",
-      "sha256": "f98483d5f5017514f82502253c0db5ce2d4ffb7839887aa2cadc22666f5a7f12",
-      "bytes": 132973,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    "biliuniverse/BiliBili.Enhanced.plugin": {
+      "source_url": "https://github.com/BiliUniverse/Enhanced/releases/download/v0.5.13/BiliBili.Enhanced.plugin",
+      "sha256": "e0eca33cd58a765283e863924030187448665e39397b1231e0dcc3db60429f52",
+      "bytes": 4088,
+      "fetched_at": "2026-08-27T14:00:08Z"
     },
-    "rules/loon-sub-store-parser.js": {
-      "source_url": "https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store-parser.loon.min.js",
-      "sha256": "b06d43cef4b73ac7a5ca53296006b7e1aaabd1c7d32f063513b16b192675a124",
-      "bytes": 1268479,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    "biliuniverse/BiliBili.Global.plugin": {
+      "source_url": "https://github.com/BiliUniverse/Global/releases/download/v0.8.21/BiliBili.Global.plugin",
+      "sha256": "e88304d315e68f45c44b4fba8f69d05dcc3fe9ef9f96ec9612eb3960fc6c3a81",
+      "bytes": 8311,
+      "fetched_at": "2026-08-27T14:00:09Z"
     },
-    "rules/loon-Advertising.list": {
-      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Advertising/Advertising.list",
-      "sha256": "79df0c977a5ac0b0fa2f7c0e2a3d4e0366b992ce859156a022292be8b703e9d5",
-      "bytes": 26870,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    "biliuniverse/BiliBili.Redirect.plugin": {
+      "source_url": "https://github.com/BiliUniverse/Redirect/releases/download/v0.2.20/BiliBili.Redirect.plugin",
+      "sha256": "73d93fc98e4d450fe760fbc03fd9bbfd2b66ba51b27a908d56fac60edb18005d",
+      "bytes": 4442,
+      "fetched_at": "2026-08-27T14:00:09Z"
     },
-    "rules/loon-Privacy.list": {
-      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Privacy/Privacy.list",
-      "sha256": "24b048634166c810833c424455586e57d0db6991ed1bab2adafa09603b4f4c22",
-      "bytes": 821,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    "dualsubs/DualSubs.Netflix.plugin": {
+      "source_url": "https://github.com/DualSubs/Netflix/releases/download/v0.5.7/DualSubs.Netflix.plugin",
+      "sha256": "cbd0288582e23259cd9e01e9d935f0af2ce8e6396e235ed33738e58407e1e083",
+      "bytes": 2084,
+      "fetched_at": "2026-08-27T14:00:07Z"
     },
-    "rules/loon-Hijacking.list": {
-      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Hijacking/Hijacking.list",
-      "sha256": "47bffe4e8d4f56e736e43f1ed5f639f0b909591de09c5908df6cddad4b9e4e5b",
-      "bytes": 6734,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    "dualsubs/DualSubs.Universal.plugin": {
+      "source_url": "https://github.com/DualSubs/Universal/releases/download/v1.7.5/DualSubs.Universal.plugin",
+      "sha256": "5d15c171c214d8fb020b9b44c0934310769fb6080032ec7616787209ee8c59b3",
+      "bytes": 53037,
+      "fetched_at": "2026-08-27T14:00:06Z"
     },
-    "rules/loon-Epic.list": {
-      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Epic/Epic.list",
-      "sha256": "8f5fcadadd967023aa81273803de80beb2ceadd9af4e9352b565b3b00ccf464d",
-      "bytes": 588,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    "dualsubs/DualSubs.YouTube.plugin": {
+      "source_url": "https://github.com/DualSubs/YouTube/releases/download/v1.5.11/DualSubs.YouTube.plugin",
+      "sha256": "850c58a1ec7b068b00e551f7f99e87f384f35ff421e11cb235063bd0b1e4bd2b",
+      "bytes": 5847,
+      "fetched_at": "2026-08-27T14:00:07Z"
     },
-    "rules/loon-China.list": {
-      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/China/China.list",
-      "sha256": "f47b46695d6c4cb6d4c0a878ae00bb4842dd7f60c180ac1023e476bab1426f31",
-      "bytes": 2056,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    "iringo/GeoServices/request.bundle.js": {
+      "source_url": "https://github.com/NSRingo/GeoServices/releases/latest/download/request.bundle.js",
+      "sha256": "4483623a4b6b9cbef897b25e7881a03143461055696fc5a750af518165b96dc2",
+      "bytes": 151666,
+      "fetched_at": "2026-08-27T13:59:56Z"
     },
-    "rules/loon-Global.list": {
-      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Global/Global.list",
-      "sha256": "0f96875a01211b7cb4e1f97a0509df1a05dad3194ceef189863b6b9222eaf922",
-      "bytes": 6115,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    "iringo/GeoServices/response.bundle.js": {
+      "source_url": "https://github.com/NSRingo/GeoServices/releases/latest/download/response.bundle.js",
+      "sha256": "4d6c18dca53c4ae85ac836a2d3d19f7be1a7fc32e2c74af5783ec6a62cb75fd0",
+      "bytes": 155957,
+      "fetched_at": "2026-08-27T13:59:57Z"
     },
-    "rules/loon-AllInOne.plugin": {
-      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AllInOne/AllInOne.plugin",
-      "sha256": "040e068462e5d6afbc29c4afb6626787bcf485b53c0cd06debded5c00cb5270f",
-      "bytes": 73348,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    "iringo/iRingo.LocationService.plugin": {
+      "source_url": "https://github.com/NSRingo/LocationServices/releases/latest/download/iRingo.LocationService.plugin",
+      "sha256": "21b3e2e2fac7ed5b7e8d9d54f7ff4b30892e8df9b3cee1b5b06f5d25e5dee66e",
+      "bytes": 2317,
+      "fetched_at": "2026-08-27T14:00:06Z"
     },
-    "rules/loon-AdvertisingScript.plugin": {
-      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AdvertisingScript/AdvertisingScript.plugin",
-      "sha256": "ab24b736480daee9cab99968e905cdf86f8f632a6b67b227eafaa92210811c48",
-      "bytes": 8741,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    "iringo/iRingo.Maps.plugin": {
+      "source_url": "https://github.com/NSRingo/MapKit/releases/latest/download/iRingo.Maps.plugin",
+      "sha256": "345552f14fa2ac9755e3fcbc69ac073ba65430810fe6bbc73799c542836985fc",
+      "bytes": 5556,
+      "fetched_at": "2026-08-27T14:00:02Z"
+    },
+    "iringo/iRingo.News.plugin": {
+      "source_url": "https://github.com/NSRingo/News/releases/latest/download/iRingo.News.plugin",
+      "sha256": "7678fe8ef5f9613be4bd79afd3be2331bb4986c19a9c3f30a4c3e745388cc85b",
+      "bytes": 2391,
+      "fetched_at": "2026-08-27T14:00:03Z"
+    },
+    "iringo/iRingo.Search.plugin": {
+      "source_url": "https://github.com/NSRingo/Siri/releases/latest/download/iRingo.Search.plugin",
+      "sha256": "9fe744d8d4045edc8b2555ad3bbe569c44f5fb9cf73d9fad994e189440dddab5",
+      "bytes": 2904,
+      "fetched_at": "2026-08-27T14:00:04Z"
+    },
+    "iringo/iRingo.Siri.plugin": {
+      "source_url": "https://github.com/NSRingo/Siri/releases/latest/download/iRingo.Siri.plugin",
+      "sha256": "cd7286bae8b2e6717d40caf315f013dfe91a7232fe3e0d0084626533ca92cc63",
+      "bytes": 4185,
+      "fetched_at": "2026-08-27T14:00:03Z"
+    },
+    "iringo/iRingo.TestFlight.plugin": {
+      "source_url": "https://github.com/NSRingo/TestFlight/releases/latest/download/iRingo.TestFlight.plugin",
+      "sha256": "d227651085bce0280e3e2a3bac0aca913b9b0cbcc318f732811d7d95890a47ae",
+      "bytes": 2272,
+      "fetched_at": "2026-08-27T14:00:05Z"
+    },
+    "iringo/iRingo.TV.plugin": {
+      "source_url": "https://github.com/NSRingo/TV/releases/latest/download/iRingo.TV.plugin",
+      "sha256": "fbd04f3be3dedba1b7038eb274c32c885ba8103be336429479df9565c8b14425",
+      "bytes": 2141,
+      "fetched_at": "2026-08-27T14:00:05Z"
     },
     "iringo/iRingo.WeatherKit.plugin": {
       "source_url": "https://github.com/NSRingo/WeatherKit/releases/download/v3.1.0/iRingo.WeatherKit.plugin",
@@ -104,113 +140,155 @@
       "bytes": 3299,
       "fetched_at": "2026-07-25T00:00:00Z (baseline)"
     },
-    "iringo/iRingo.Maps.plugin": {
-      "source_url": "https://github.com/NSRingo/Maps/releases/download/v4.6.1/iRingo.Maps.plugin",
-      "sha256": "345552f14fa2ac9755e3fcbc69ac073ba65430810fe6bbc73799c542836985fc",
-      "bytes": 5556,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    "iringo/LocationServices/request.bundle.js": {
+      "source_url": "https://github.com/NSRingo/LocationServices/releases/latest/download/request.bundle.js",
+      "sha256": "7d5485f6420b8505e7636423a04bfd75bdded10e37b9f667cf958b6f5711658d",
+      "bytes": 459760,
+      "fetched_at": "2026-08-27T14:00:01Z"
     },
-    "iringo/iRingo.News.plugin": {
-      "source_url": "https://github.com/NSRingo/News/releases/download/v3.2.1/iRingo.News.plugin",
-      "sha256": "7678fe8ef5f9613be4bd79afd3be2331bb4986c19a9c3f30a4c3e745388cc85b",
-      "bytes": 2391,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    "iringo/LocationServices/response.bundle.js": {
+      "source_url": "https://github.com/NSRingo/LocationServices/releases/latest/download/response.bundle.js",
+      "sha256": "c3cbe06b7dc684d35c69018c732abd5ed67e4c63a31badeb7fa63fd81dd42284",
+      "bytes": 461792,
+      "fetched_at": "2026-08-27T14:00:01Z"
     },
-    "iringo/iRingo.Siri.plugin": {
-      "source_url": "https://github.com/NSRingo/Siri/releases/download/v4.2.7/iRingo.Siri.plugin",
-      "sha256": "cd7286bae8b2e6717d40caf315f013dfe91a7232fe3e0d0084626533ca92cc63",
-      "bytes": 4185,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    "iringo/News/request.bundle.js": {
+      "source_url": "https://github.com/NSRingo/News/releases/latest/download/request.bundle.js",
+      "sha256": "04702194e559f448b78b169fa266719898ece4da725e49d89dd730df844703fc",
+      "bytes": 64150,
+      "fetched_at": "2026-08-27T13:59:58Z"
     },
-    "iringo/iRingo.Search.plugin": {
-      "source_url": "https://github.com/NSRingo/Siri/releases/download/v4.2.7/iRingo.Search.plugin",
-      "sha256": "9fe744d8d4045edc8b2555ad3bbe569c44f5fb9cf73d9fad994e189440dddab5",
-      "bytes": 2904,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    "iringo/Siri/request.bundle.js": {
+      "source_url": "https://github.com/NSRingo/Siri/releases/latest/download/request.bundle.js",
+      "sha256": "0725d734f78195438e7cc87e4d3e8464b3a237a6cb83514e60750cfd78b2f8ef",
+      "bytes": 145455,
+      "fetched_at": "2026-08-27T13:59:58Z"
     },
-    "iringo/iRingo.TestFlight.plugin": {
-      "source_url": "https://github.com/NSRingo/TestFlight/releases/download/v3.4.0/iRingo.TestFlight.plugin",
-      "sha256": "d227651085bce0280e3e2a3bac0aca913b9b0cbcc318f732811d7d95890a47ae",
-      "bytes": 2272,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    "iringo/Siri/response.bundle.js": {
+      "source_url": "https://github.com/NSRingo/Siri/releases/latest/download/response.bundle.js",
+      "sha256": "42401aa3ea5b8bd784ec3cf3f9070e237291f975e395a068b938cc27672cc38b",
+      "bytes": 65085,
+      "fetched_at": "2026-08-27T13:59:58Z"
     },
-    "iringo/iRingo.TV.plugin": {
-      "source_url": "https://github.com/NSRingo/TV/releases/download/v3.4.4/iRingo.TV.plugin",
-      "sha256": "fbd04f3be3dedba1b7038eb274c32c885ba8103be336429479df9565c8b14425",
-      "bytes": 2141,
-      "fetched_at": "2026-07-30T03:29:55Z"
+    "iringo/TestFlight/request.bundle.js": {
+      "source_url": "https://github.com/NSRingo/TestFlight/releases/latest/download/request.bundle.js",
+      "sha256": "a03f141a5a715e00fc97a07d17d41607b9acec0e68953b0caa7ec5c185965ea9",
+      "bytes": 25108,
+      "fetched_at": "2026-08-27T13:59:59Z"
     },
-    "iringo/iRingo.LocationService.plugin": {
-      "source_url": "https://github.com/NSRingo/LocationServices/releases/download/v1.0.1/iRingo.LocationService.plugin",
-      "sha256": "21b3e2e2fac7ed5b7e8d9d54f7ff4b30892e8df9b3cee1b5b06f5d25e5dee66e",
-      "bytes": 2317,
-      "fetched_at": "2026-07-30T03:29:55Z"
+    "iringo/TestFlight/response.bundle.js": {
+      "source_url": "https://github.com/NSRingo/TestFlight/releases/latest/download/response.bundle.js",
+      "sha256": "af148b947a0340427ba2df7ad5775b3fe7233462790c66a9096140bb97fe4406",
+      "bytes": 24225,
+      "fetched_at": "2026-08-27T13:59:59Z"
     },
-    "dualsubs/DualSubs.Universal.plugin": {
-      "source_url": "https://github.com/DualSubs/Universal/releases/download/v1.7.5/DualSubs.Universal.plugin",
-      "sha256": "5d15c171c214d8fb020b9b44c0934310769fb6080032ec7616787209ee8c59b3",
-      "bytes": 53037,
-      "fetched_at": "2026-07-30T03:29:55Z"
+    "iringo/TV/request.bundle.js": {
+      "source_url": "https://github.com/NSRingo/TV/releases/latest/download/request.bundle.js",
+      "sha256": "5e4a3339d51f01e92059055de07a76bfd4f072ae57e3073059c1a04a3f490f9a",
+      "bytes": 52816,
+      "fetched_at": "2026-08-27T14:00:00Z"
     },
-    "dualsubs/DualSubs.YouTube.plugin": {
-      "source_url": "https://github.com/DualSubs/YouTube/releases/download/v1.5.11/DualSubs.YouTube.plugin",
-      "sha256": "850c58a1ec7b068b00e551f7f99e87f384f35ff421e11cb235063bd0b1e4bd2b",
-      "bytes": 5847,
-      "fetched_at": "2026-07-30T03:29:55Z"
+    "iringo/TV/response.bundle.js": {
+      "source_url": "https://github.com/NSRingo/TV/releases/latest/download/response.bundle.js",
+      "sha256": "35567e0bc825ee19a5a543edc85495cdf6cea9616c43e2d7e9dbf15c42a51302",
+      "bytes": 50532,
+      "fetched_at": "2026-08-27T14:00:01Z"
     },
-    "dualsubs/DualSubs.Netflix.plugin": {
-      "source_url": "https://github.com/DualSubs/Netflix/releases/download/v0.5.7/DualSubs.Netflix.plugin",
-      "sha256": "cbd0288582e23259cd9e01e9d935f0af2ce8e6396e235ed33738e58407e1e083",
-      "bytes": 2084,
-      "fetched_at": "2026-07-30T03:29:55Z"
+    "iringo/WeatherKit/request.bundle.js": {
+      "source_url": "https://github.com/NSRingo/WeatherKit/releases/latest/download/request.bundle.js",
+      "sha256": "8c1b1acbbb03c816152784b3d570a850c12e613cc00ab891aafd88237cabac84",
+      "bytes": 180134,
+      "fetched_at": "2026-08-27T13:59:55Z"
     },
-    "auraflare/Cloudflare.1.1.1.1.plugin": {
-      "source_url": "https://raw.githubusercontent.com/Auraflare/1.1.1.1/main/modules/Cloudflare.1.1.1.1.plugin",
-      "sha256": "73c2c6599425b37f914ef0ea7f8c588a2bae2405e9c5a1c06fb5c0abe0bd1f55",
-      "bytes": 2086,
-      "fetched_at": "2026-07-30T03:29:55Z"
+    "iringo/WeatherKit/response.bundle.js": {
+      "source_url": "https://github.com/NSRingo/WeatherKit/releases/latest/download/response.bundle.js",
+      "sha256": "689b99b245ea5b224eec297b26997057aa7473709662caa22b47aab689e549e4",
+      "bytes": 289628,
+      "fetched_at": "2026-08-27T13:59:56Z"
     },
-    "auraflare/Cloudflare.DNS.plugin": {
-      "source_url": "https://github.com/Auraflare/DNS/releases/download/v2.6.3/Cloudflare.DNS.plugin",
-      "sha256": "717e1c62d491a803179d3e4d876e205f58bd61c883fcd3007e579dc835a652ae",
-      "bytes": 2389,
-      "fetched_at": "2026-07-30T03:29:55Z"
+    "netease.adblock.js": {
+      "source_url": "https://gist.githubusercontent.com/ddgksf2013/4f53b7c6083678df25fecc8ff68b52c4/raw/netease.adblock.js",
+      "sha256": "6ba468eb994e3843d69563f8f3b31c2d63a62a68d60fc3a1fd61947c1546936f",
+      "bytes": 122922,
+      "fetched_at": "2026-08-27T13:59:51Z"
     },
-    "biliuniverse/BiliBili.Enhanced.plugin": {
-      "source_url": "https://github.com/BiliUniverse/Enhanced/releases/download/v0.5.13/BiliBili.Enhanced.plugin",
-      "sha256": "e0eca33cd58a765283e863924030187448665e39397b1231e0dcc3db60429f52",
-      "bytes": 4088,
-      "fetched_at": "2026-07-30T03:29:55Z"
+    "rules/loon-Advertising.list": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Advertising/Advertising.list",
+      "sha256": "f5a7e7de600d8ed82b729769f7de22f7fa5b993e5b0d8c7e3aaf43ac9e1d3bc4",
+      "bytes": 26870,
+      "fetched_at": "2026-08-27T13:59:53Z"
     },
-    "biliuniverse/BiliBili.Global.plugin": {
-      "source_url": "https://github.com/BiliUniverse/Global/releases/download/v0.8.21/BiliBili.Global.plugin",
-      "sha256": "e88304d315e68f45c44b4fba8f69d05dcc3fe9ef9f96ec9612eb3960fc6c3a81",
-      "bytes": 8311,
-      "fetched_at": "2026-07-30T03:29:55Z"
+    "rules/loon-AdvertisingScript.plugin": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AdvertisingScript/AdvertisingScript.plugin",
+      "sha256": "ab24b736480daee9cab99968e905cdf86f8f632a6b67b227eafaa92210811c48",
+      "bytes": 8741,
+      "fetched_at": "2026-08-27T13:59:55Z"
     },
-    "biliuniverse/BiliBili.ADBlock.plugin": {
-      "source_url": "https://github.com/BiliUniverse/ADBlock/releases/download/v0.6.24/BiliBili.ADBlock.plugin",
-      "sha256": "5a6be286a5ef251525222672457b957afe78f309fb50b0a1388510232ce7e9da",
-      "bytes": 11422,
-      "fetched_at": "2026-07-30T03:29:55Z"
+    "rules/loon-AllInOne.plugin": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AllInOne/AllInOne.plugin",
+      "sha256": "040e068462e5d6afbc29c4afb6626787bcf485b53c0cd06debded5c00cb5270f",
+      "bytes": 73348,
+      "fetched_at": "2026-08-27T13:59:54Z"
     },
-    "biliuniverse/BiliBili.Redirect.plugin": {
-      "source_url": "https://github.com/BiliUniverse/Redirect/releases/download/v0.2.20/BiliBili.Redirect.plugin",
-      "sha256": "73d93fc98e4d450fe760fbc03fd9bbfd2b66ba51b27a908d56fac60edb18005d",
-      "bytes": 4442,
-      "fetched_at": "2026-07-30T03:29:55Z"
+    "rules/loon-China.list": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/China/China.list",
+      "sha256": "f47b46695d6c4cb6d4c0a878ae00bb4842dd7f60c180ac1023e476bab1426f31",
+      "bytes": 2056,
+      "fetched_at": "2026-08-27T13:59:54Z"
+    },
+    "rules/loon-Epic.list": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Epic/Epic.list",
+      "sha256": "8f5fcadadd967023aa81273803de80beb2ceadd9af4e9352b565b3b00ccf464d",
+      "bytes": 588,
+      "fetched_at": "2026-08-27T13:59:54Z"
+    },
+    "rules/loon-Global.list": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Global/Global.list",
+      "sha256": "4e9c876a1f4fa75e277a199c8e392569466d054a87bf7f76722a87506b25c007",
+      "bytes": 6115,
+      "fetched_at": "2026-08-27T13:59:54Z"
+    },
+    "rules/loon-Hijacking.list": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Hijacking/Hijacking.list",
+      "sha256": "47bffe4e8d4f56e736e43f1ed5f639f0b909591de09c5908df6cddad4b9e4e5b",
+      "bytes": 6734,
+      "fetched_at": "2026-08-27T13:59:54Z"
+    },
+    "rules/loon-Privacy.list": {
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Privacy/Privacy.list",
+      "sha256": "24b048634166c810833c424455586e57d0db6991ed1bab2adafa09603b4f4c22",
+      "bytes": 821,
+      "fetched_at": "2026-08-27T13:59:53Z"
+    },
+    "rules/loon-sub-store-parser.js": {
+      "source_url": "https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store-parser.loon.min.js",
+      "sha256": "e5fb2ea990bc8700d24ab272a65366482adda57dc5dfe2dff78daeb5ddce27b7",
+      "bytes": 1269853,
+      "fetched_at": "2026-08-27T13:59:53Z"
     },
     "scripts/startup.js": {
       "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/startup/startup.js",
       "sha256": "431801d369b495d34b7a1c1d6cc43abdb1d159dd0d82491ee756c0ae834b625c",
       "bytes": 12208,
-      "fetched_at": "2026-08-12T00:00:00Z"
+      "fetched_at": "2026-08-27T13:59:52Z"
     },
     "scripts/zheye.min.js": {
       "source_url": "https://gist.githubusercontent.com/blackmatrix7/f5f780d0f56b319b6ad9848fd080bb18/raw/zheye.min.js",
       "sha256": "41863c4c0ce5eefbdda9a5a96d7605bde70a89a9cc24ee0875f3d751aed2f757",
       "bytes": 32349,
-      "fetched_at": "2026-08-12T00:00:00Z"
+      "fetched_at": "2026-08-27T13:59:52Z"
+    },
+    "youtube.request.js": {
+      "source_url": "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.request.js",
+      "sha256": "3ecca15e06e76a31720092c581180f648ef2c45e494644941ba985c878efbb26",
+      "bytes": 44024,
+      "fetched_at": "2026-08-27T13:59:52Z"
+    },
+    "youtube.response.js": {
+      "source_url": "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js",
+      "sha256": "f98483d5f5017514f82502253c0db5ce2d4ffb7839887aa2cadc22666f5a7f12",
+      "bytes": 132973,
+      "fetched_at": "2026-08-27T13:59:52Z"
     }
   }
 }
