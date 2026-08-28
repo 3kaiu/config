@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       # 安全改造 (2026-07 审计):
       # 1. 写入前门禁: *.js 过 node --check 语法 / 体积≥200B / 非 HTML 错误页 — 任一不过保留旧文件
@@ -139,6 +139,8 @@ jobs:
             mirror "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/$n/$n.list" \
               "rules/loon-$n.list" "blackmatrix7 Loon / $n.list"
           done
+          mirror "https://raw.githubusercontent.com/8680/GOODBYEADS/master/data/rules/qx.list" \
+            "rules/goodbyeads-qx.list" "GOODBYEADS / qx.list"
 
           # ── Global 列表纯净度检查 (2026-08 审计) ──
           # 远端顺序已调整为 China → Global → Advertising → ... (国际流量提前终止),

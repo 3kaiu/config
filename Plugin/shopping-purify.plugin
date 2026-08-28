@@ -37,11 +37,11 @@ ENABLE_TIEBA=switch,"true","false",tag=总开关，desc=开启后执行所有贴
 DOMAIN-SUFFIX,iyes.youku.com,REJECT
 AND,((USER-AGENT,Cainiao4iPhone*), (DOMAIN,amdc.m.taobao.com)), REJECT, enable={SHOPPING_ENABLE}&{CAINIAO_ENABLE}
 IP-CIDR,180.76.76.200/32,REJECT,no-resolve,enable={SHOPPING_ENABLE}&{ENABLE_TIEBA}
-DOMAIN, trackercollect.ddxq.mobi, REJECT,enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-DOMAIN, ddfs-public.ddimg.mobi, REJECT,enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-DOMAIN, rttrack.ddxq.mobi, REJECT,enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-DOMAIN, adash-evone.echargenet.com, REJECT,enable={SHOPPING_ENABLE&{EASYCHARGE_ENABLE}}
-DOMAIN, advert.mafengwo.cn, REJECT,enable={SHOPPING_ENABLE&{MAFENGWO_ENABLE}}
+DOMAIN, trackercollect.ddxq.mobi, REJECT,enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+DOMAIN, ddfs-public.ddimg.mobi, REJECT,enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+DOMAIN, rttrack.ddxq.mobi, REJECT,enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+DOMAIN, adash-evone.echargenet.com, REJECT,enable={SHOPPING_ENABLE}&{EASYCHARGE_ENABLE}
+DOMAIN, advert.mafengwo.cn, REJECT,enable={SHOPPING_ENABLE}&{MAFENGWO_ENABLE}
 
 [Rewrite]
 ^https?:\/\/(g-)?acs\.m\.goofish\.com\/gw\/mtop.*splash\.ads reject-200
@@ -50,128 +50,128 @@ DOMAIN, advert.mafengwo.cn, REJECT,enable={SHOPPING_ENABLE&{MAFENGWO_ENABLE}}
 ^https:\/\/netflow-mtop\.cainiao\.com\/gw\/mtop\.cainiao\.guoguo\.nbnetflow\.ads\.index reject enable={SHOPPING_ENABLE}&{CAINIAO_ENABLE}
 ^https:\/\/cn-acs\.m\.cainiao\.com\/gw\/mtop\.cainiao\.adkeyword\.get\.cn reject enable={SHOPPING_ENABLE}&{CAINIAO_ENABLE}
 ^https:\/\/cn-acs\.m\.cainiao\.com\/gw\/mtop\.cainiao\.guoguo\.nbnetflow\.ads\.m?show reject enable={SHOPPING_ENABLE}&{CAINIAO_ENABLE}
-^https:\/\/apps\.api\.ke\.com\/platform\/shellapp\/homepage\/initData\/mini\? response-body-json-del data.bootpage data.bottom_bar_activity enable={SHOPPING_ENABLE&{BEIKE_ENABLE}}
-^https:\/\/apps\.api\.ke\.com\/config\/config\/bootpage\? reject-dict enable={SHOPPING_ENABLE&{BEIKE_ENABLE}}
-^https:\/\/apps\.api\.ke\.com\/platform\/shellapp\/userCenter\/feed\? reject-dict enable={SHOPPING_ENABLE&{BEIKE_ENABLE}}
-^https:\/\/apps\.api\.ke\.com\/platform\/shellapp\/userCenter\/info\? response-body-json-del data.islandModule enable={SHOPPING_ENABLE&{BEIKE_ENABLE}}
-^https:\/\/apps\.api\.ke\.com\/platform\/shellapp\/userCenter\/info\? response-body-json-jq 'del(.data.mainIcons.list[] | select(.indexKey == "coupon"))' enable={SHOPPING_ENABLE&{BEIKE_ENABLE}}
-^https:\/\/apps\.api\.ke\.com\/platform\/shellapp\/myhome\/pagedetail\? response-body-json-jq '.data.moduleList |= map(select(.tab != "myHomeDecorV4"))' enable={SHOPPING_ENABLE&{BEIKE_ENABLE}}
-^https:\/\/apps\.api\.ke\.com\/config\/config\/getactivityconfig\? reject-dict enable={SHOPPING_ENABLE&{BEIKE_ENABLE}}
-^https:\/\/apps\.api\.ke\.com\/platform\/shellapp\/homepage\/feed\? response-body-json-jq '.data.list |= map(select(.cardType == "houseContainer" or .cardType == "houseV2" or .cardType == "houseV3" or .cardType == "rentHouseDiscount" or .cardType == "decorationCase"))' enable={SHOPPING_ENABLE&{BEIKE_ENABLE}}
-^https:\/\/api\.boohee\.com\/meta-interface\/v2\/index\? response-body-json-del data.recom_cards data.recom_btns enable={SHOPPING_ENABLE&{BOOHEE_ENABLE}}
-^https:\/\/api\.boohee\.com\/meta-interface\/v1\/index\/page_float_bubbles\? reject-dict enable={SHOPPING_ENABLE&{BOOHEE_ENABLE}}
-^https:\/\/api\.boohee\.com\/meta-interface\/v1\/index\/tool_buttons\? reject-dict enable={SHOPPING_ENABLE&{BOOHEE_ENABLE}}
-^https:\/\/api\.boohee\.com\/app-interface\/v1\/search\/search\? reject-dict enable={SHOPPING_ENABLE&{BOOHEE_ENABLE}}
-^https:\/\/status\.boohee\.com\/api\/v1\/merged_messages$ reject-dict enable={SHOPPING_ENABLE&{BOOHEE_ENABLE}}
-^https:\/\/bohe\.sfo-tx-shanghai-01\.saas\.sensorsdata\.cn\/api\/v2\/sfo\/user_popup_configs\? reject-dict enable={SHOPPING_ENABLE&{BOOHEE_ENABLE}}
-^https:\/\/api\.boohee\.com\/meta-interface\/v1\/index\/plaza\? response-body-json-del data.tabs[1].badge data.recommend_ads enable={SHOPPING_ENABLE&{BOOHEE_ENABLE}}
-^https:\/\/api\.boohee\.com\/open-interface\/v1\/string\/market_page\?title=metabolism_config$ response-body-json-del top_banner diagnos_config partner_hospital question_answer product brand_story enable={SHOPPING_ENABLE&{BOOHEE_ENABLE}}
-^https:\/\/api\.boohee\.com\/meta-interface\/v1\/index\/sensor-banners\? reject-dict enable={SHOPPING_ENABLE&{BOOHEE_ENABLE}}
-^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.damai\.wireless\.home\.welcome\/ reject-dict enable={SHOPPING_ENABLE&{DAMAI_ENABLE}}
-^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.damai\.mec\.popup\.get\/ reject-dict enable={SHOPPING_ENABLE&{DAMAI_ENABLE}}
-^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.damai\.wireless\.user\.my\.content\.get\/ response-body-json-del data.banner data.performFilmVip.userProfitList enable={SHOPPING_ENABLE&{DAMAI_ENABLE}}
-^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.damai\.wireless\.mypage\.feed\/ response-body-json-del data.feedCard enable={SHOPPING_ENABLE&{DAMAI_ENABLE}}
-^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.damai\.mec\.aristotle\.get\/ response-body-json-del data.data.top.keywords enable={SHOPPING_ENABLE&{DAMAI_ENABLE}}
-^https?:\/\/119\.29\.29\.\d+\/d reject-200 enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-^https?:\/\/maicai\.api\.ddxq\.mobi\/advert\/ reject enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-^https?:\/\/maicai\.api\.ddxq\.mobi\/homeApi\/getHomeAdPop reject enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-^https:\/\/maicai\.api\.ddxq\.mobi\/vip\/getVipAd\/\? reject-dict enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-^https:\/\/maicai\.api\.ddxq\.mobi\/homeApi\/marketingNotice\? reject-dict enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-^https:\/\/maicai\.api\.ddxq\.mobi\/search\/rollHotKeyword\? reject-dict enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-^https:\/\/maicai\.api\.ddxq\.mobi\/search\/rankingList\? reject-dict enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-^https:\/\/maicai\.api\.ddxq\.mobi\/search\/hotKeyword\? reject-dict enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-^https:\/\/maicai\.api\.ddxq\.mobi\/order\/getRecommend$ reject-dict enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-^https:\/\/maicai\.api\.ddxq\.mobi\/homeApi\/userLike\? reject-dict enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-^https:\/\/user\.api\.ddxq\.mobi\/userportal-service\/api\/v1\/user\/queryMyPage\/\? reject-dict enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-^https:\/\/maicai\.api\.ddxq\.mobi\/homeApi\/categoriesNewDetail\? response-body-json-del data.ad_info enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-^https:\/\/maicai\.api\.ddxq\.mobi\/tool\/getConfig\? response-body-json-del data.ai_enter_config enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-^https:\/\/maicai\.api\.ddxq\.mobi\/guide-service\/userLike\/flowData$ reject-dict enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-^https?:\/\/maicai\.api\.ddxq\.mobi\/homeApi\/newDetails\? response-body-json-del data.top_advert_data data.suspension enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-^https?:\/\/maicai\.api\.ddxq\.mobi\/homeApi\/newDetails\? response-body-json-jq '.data.list |= map(select(has("capsule_freedom_zone") | not))' enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-^https:\/\/maicai\.api\.ddxq\.mobi\/guide-service\/productApi\/productDetail\/info\? response-body-json-del data.detail.chatEntry enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-^https?:\/\/maicai\.api\.ddxq\.mobi\/homeApi\/bottomNavi response-body-json-jq 'del(.data.adId?) | if (.data.bottom_list? | length > 0) then .data.bottom_list |= map(select(.type != "eatwhat")) else . end' enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-^https?:\/\/maicai\.api\.ddxq\.mobi\/homeApi\/homeFlowDetail response-body-json-jq 'walk(if type == "object" and has("list") then .list |= map(if type == "object" and has("multi_advertise_data_list") then del(.multi_advertise_data_list) else . end) else . end)' enable={SHOPPING_ENABLE&{DINGDONGMAICAI_ENABLE}}
-^https:\/\/aserver-evone\.echargenet\.com\/orange\/datacenter\/snapshot-meta\? reject-dict enable={SHOPPING_ENABLE&{EASYCHARGE_ENABLE}}
-^https:\/\/api-evone\.echargenet\.com\/gw\/evone\.echargeapi\.open\.ad\.getadmaterials\/ reject-dict enable={SHOPPING_ENABLE&{EASYCHARGE_ENABLE}}
-^https:\/\/api-evone\.echargenet\.com\/gw\/evone\.appsns\.open\.efriend\.topic\.listrecommenttopic\/ reject-dict enable={SHOPPING_ENABLE&{EASYCHARGE_ENABLE}}
-^https:\/\/api-evone\.echargenet\.com\/gw\/evone\.appsns\.open\.efriend\.post\.listapppost\/ reject-dict enable={SHOPPING_ENABLE&{EASYCHARGE_ENABLE}}
-^https:\/\/api-evone\.echargenet\.com\/gw\/evone\.appsns\.open\.merchant\.merchant\.list\/ reject-dict enable={SHOPPING_ENABLE&{EASYCHARGE_ENABLE}}
-^https:\/\/api-evone\.echargenet\.com\/gw\/evone\.appsns\.open\.merchant\.news\.pagelistapp\/ reject-dict enable={SHOPPING_ENABLE&{EASYCHARGE_ENABLE}}
-^https:\/\/consumer\.fcbox\.com\/fcboxactivityweb\/api\/v\d\/clientPage\/modulesAggregated\? reject-dict enable={SHOPPING_ENABLE&{FC_BOX_ENABLE}}
-^https:\/\/consumer\.fcbox\.com\/fcboxactivityweb\/api\/v\d\/clientPage\/jinGangFirst\? reject-dict enable={SHOPPING_ENABLE&{FC_BOX_ENABLE}}
-^https:\/\/consumer\.fcbox\.com\/v2\/home\/mallInfo$ reject-dict enable={SHOPPING_ENABLE&{FC_BOX_ENABLE}}
-^https:\/\/dsp\.fcbox\.com\/adSearch\/ reject-dict enable={SHOPPING_ENABLE&{FC_BOX_ENABLE}}
-^https:\/\/consumer\.fcbox\.com\/hs-portal\/app\/config\/page\/home\/v2\? reject-dict enable={SHOPPING_ENABLE&{FC_BOX_ENABLE}}
-^https:\/\/consumer\.fcbox\.com\/post\/suggestion\/query$ reject-dict enable={SHOPPING_ENABLE&{FC_BOX_ENABLE}}
-^https:\/\/consumer\.fcbox\.com\/v1\/dynamicConfig\/findTabbarConfig\/mainPage$ response-body-json-del data.lifeService data.mall data.wash enable={SHOPPING_ENABLE&{FC_BOX_ENABLE}}
-^https:\/\/consumer\.fcbox\.com\/fcboxactivityweb\/marketingEntrance\/retentionPopup$ reject-dict enable={SHOPPING_ENABLE&{FC_BOX_ENABLE}}
-^https:\/\/consumer\.fcbox\.com\/fcboxactivityweb\/api\/clientPopup\/v\d\/queryPopupWithPriority$ reject-dict enable={SHOPPING_ENABLE&{FC_BOX_ENABLE}}
-^https:\/\/consumer\.fcbox\.com\/fcboxactivityweb\/api\/guidePopup\/popup$ reject-dict enable={SHOPPING_ENABLE&{FC_BOX_ENABLE}}
-^https:\/\/www\.flyert\.com\.cn\/api\/mobile\/index\.php\?module=advis reject enable={SHOPPING_ENABLE&{FLYERTEA_ENABLE}}
-^https:\/\/www\.flyert\.com\.cn\/api\/mobile\/index\.php\?module=vip_coupon reject-dict enable={SHOPPING_ENABLE&{FLYERTEA_ENABLE}}
-^https:\/\/ptf\.flyertrip\.com\/static\/img\/common\/ic_plate_mine_button\.png reject-img enable={SHOPPING_ENABLE&{FLYERTEA_ENABLE}}
-^https:\/\/www\.flyert\.com\.cn\/api\/mobile\/index\.php\?module=getdata reject-dict enable={SHOPPING_ENABLE&{FLYERTEA_ENABLE}}
-^https:\/\/hweb-manager\.huazhu\.com\/notice\/getAppPopupNotifyAlert$ reject-dict enable={SHOPPING_ENABLE&{HANTINGHOTELS_ENABLE}}
-^https:\/\/hweb-hotel\.huazhu\.com\/home\/getHomeLoinBanner$ reject-dict enable={SHOPPING_ENABLE&{HANTINGHOTELS_ENABLE}}
-^https:\/\/hweb-hotel\.huazhu\.com\/\/home\/querySelectHotel$ reject-dict enable={SHOPPING_ENABLE&{HANTINGHOTELS_ENABLE}}
-^https:\/\/hweb-hotel\.huazhu\.com\/home\/queryHotelBrand$ reject-dict enable={SHOPPING_ENABLE&{HANTINGHOTELS_ENABLE}}
-^https:\/\/hweb-manager\.huazhu\.com\/hotels\/ad\/getHotelListNoticeMerge$ reject-dict enable={SHOPPING_ENABLE&{HANTINGHOTELS_ENABLE}}
-^https:\/\/res-pub\.huazhu\.com\/frontconf\/homeconfig_45\/\w+\.json$ response-body-json-jq 'if has("content") and (.content | type) == "object" then .content |= with_entries(select(.key == "topBanner" or .key == "topBannerImages")) else . end' enable={SHOPPING_ENABLE&{HANTINGHOTELS_ENABLE}}
-^https:\/\/res-pub\.huazhu\.com\/frontconf\/tabbarconfig_45\/\w+\.json$ response-body-json-jq '.content.tabbar |= map(select(.attributes.tabName == "首页" or .attributes.tabName == "服务" or .attributes.tabName == "我的"))' enable={SHOPPING_ENABLE&{HANTINGHOTELS_ENABLE}}
-^https:\/\/color\.jddj\.com\/client\.action\?functionId=hours_home$ response-body-json-jq 'del(.result.config.searchFloor.data[].searchWords) | .result.data |= map(if .tnConfigVO?.businessCode == "nearby_HourlyGo_Operation_Tags" then empty else . end)' enable={SHOPPING_ENABLE&{JDWAIMAI_ENABLE}}
-^https:\/\/color\.jddj\.com\/client\.action\?functionId=uniformRecommend reject-dict enable={SHOPPING_ENABLE&{JDWAIMAI_ENABLE}}
-^https:\/\/color\.jddj\.com\/client\.action\?functionId=wmHome$ response-body-json-jq '(.floors |= map(del(.data.tnData.newsInfo?))) | .floors |= (map(select(.mId != "newWalletIdFloor" and .mId != "recommendfloor"))) | .floors |= (map(.data |= (if .tnData? then del(.tnData.cardList, .tnData.cardListStatic, .tnData.walletList) else . end)))' enable={SHOPPING_ENABLE&{JDWAIMAI_ENABLE}}
-^https:\/\/api\.m\.jd\.com\/client\.action$ response-body-json-del data.searchDTO.searchWords data.wishlistDTO.bubbleTip enable={SHOPPING_ENABLE&{JDWAIMAI_ENABLE}}
-^https:\/\/api\.m\.jd\.com\/client\.action$ response-body-json-jq '.data.tabList |= (map(select(.code == "recommendation" or .code == "find_food")) | map(if .code == "recommendation" then .dpHomeFeedTabResultDTOList = .dpHomeFeedTabResultDTOList[0:2] else . end | .dpHomeBannerResultDTOList = []))' enable={SHOPPING_ENABLE&{JDWAIMAI_ENABLE}}
-^https:\/\/color\.jddj\.com\/client\.action\?functionId=search_recommendRanking$ reject-dict enable={SHOPPING_ENABLE&{JDWAIMAI_ENABLE}}
-^https?:\/\/p\.kuaidi100\.com\/mobile\/mobileapi\.do$ response-body-json-del adsplash adIsConsumable adProductId nologin_tips index_banner me_banner index_banner_shadow adshongbao adsapp_homepage_ticket_pop adsoptimizationsend adsapp_activity_ad_array adbanner adposition adShowAgainTime enable={SHOPPING_ENABLE&{KUAIDI100_ENABLE}}
-^https?:\/\/p\.kuaidi100\.com\/apicenter\/xcx\.dox response-body-json-del data.secondMenuList enable={SHOPPING_ENABLE&{KUAIDI100_ENABLE}}
-^https?:\/\/p\.kuaidi100\.com\/advertisement\/ reject-dict enable={SHOPPING_ENABLE&{KUAIDI100_ENABLE}}
-^https?:\/\/p\.kuaidi100\.com\/e-commerce\/act\/actInfo\? reject-dict enable={SHOPPING_ENABLE&{KUAIDI100_ENABLE}}
-^https?:\/\/p\.kuaidi100\.com\/apicenter\/card\.dox reject-dict enable={SHOPPING_ENABLE&{KUAIDI100_ENABLE}}
-^https:\/\/capi\.lkcoffee\.com\/resource\/m\/growUp\/calendarList reject enable={SHOPPING_ENABLE&{LUCKINCOFFEE_ENABLE}}
-^https:\/\/capi\.lkcoffee\.com\/resource\/m\/promotion\/giftCard\/topPage reject enable={SHOPPING_ENABLE&{LUCKINCOFFEE_ENABLE}}
-^https:\/\/capi\.lkcoffee\.com\/resource\/m\/sys\/base\/myLittleLuck reject enable={SHOPPING_ENABLE&{LUCKINCOFFEE_ENABLE}}
-^https:\/\/capi\.lkcoffee\.com\/resource\/core\/v2\/menu\/ordinaryUserLayeredArea reject enable={SHOPPING_ENABLE&{LUCKINCOFFEE_ENABLE}}
-^https:\/\/capi\.lkcoffee\.com\/resource\/m\/sys\/common\/modules reject enable={SHOPPING_ENABLE&{LUCKINCOFFEE_ENABLE}}
-^https:\/\/capi\.lkcoffee\.com\/resource\/core\/v2\/homepage\/homePageCoffeeList reject enable={SHOPPING_ENABLE&{LUCKINCOFFEE_ENABLE}}
-^https:\/\/capi\.lkcoffee\.com\/resource\/m\/eorder\/product\/popAppTagProductList reject enable={SHOPPING_ENABLE&{LUCKINCOFFEE_ENABLE}}
-^https:\/\/capi\.lkcoffee\.com\/resource\/m\/sys\/app\/adposNew reject enable={SHOPPING_ENABLE&{LUCKINCOFFEE_ENABLE}}
-^https:\/\/mapi\.mafengwo\.cn\/discovery\/get_index\/v7\? response-body-json-jq '.data.list |= map(select(.data.business_type != "gdcpm"))' enable={SHOPPING_ENABLE&{MAFENGWO_ENABLE}}
-^https:\/\/mapi\.mafengwo\.cn\/sales\/home\/get_header\/v3\? response-body-json-jq '.data.list[] |= ( .data |= del(.banners) )' enable={SHOPPING_ENABLE&{MAFENGWO_ENABLE}}
-^https:\/\/mapi\.mafengwo\.cn\/user\/growth\/get_growth_tip\/v1\? reject-dict enable={SHOPPING_ENABLE&{MAFENGWO_ENABLE}}
-^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.render\.querysinglepage\/ reject-dict enable={SHOPPING_ENABLE&{MRHEMA_ENABLE}}
-^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.sg\.queryinnerpage\/ reject-dict enable={SHOPPING_ENABLE&{MRHEMA_ENABLE}}
-^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.lbs\.address\.getshopinfolist\/ reject-dict enable={SHOPPING_ENABLE&{MRHEMA_ENABLE}}
-^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.render\.queryindexpage\/ response-body-json-jq 'if .data.pageType == "1" then .data.scenes |= map(select(.bizCode == "three_row_circle")) else . end' enable={SHOPPING_ENABLE&{MRHEMA_ENABLE}}
-^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.render\.querytabfeedstream\/ response-body-json-jq 'if .data.pageType == "5" then .data.scenes |= map(select(.sceneType == "100028")) else . end' enable={SHOPPING_ENABLE&{MRHEMA_ENABLE}}
-^https:\/\/acs-m\.freshippo\.com\/gw\/(mtop\.wdk\.render\.querychannelpage|mtop\.wdk\.render\.querysinglepage)\/ response-body-json-jq 'if .data.pageType == "216" then .data.scenes |= map(select(.bizCode == "shop_walk_top_picture" or .bizCode == "shop_walk_shop_util" or .bizCode == "shop_walk_bistro")) else . end' enable={SHOPPING_ENABLE&{MRHEMA_ENABLE}}
-^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.render\.querysearchpage\/ reject-dict enable={SHOPPING_ENABLE&{MRHEMA_ENABLE}}
-^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.sg\.querysinglescene\/ reject-dict enable={SHOPPING_ENABLE&{MRHEMA_ENABLE}}
-^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.melon\.collocation\/ reject-dict enable={SHOPPING_ENABLE&{MRHEMA_ENABLE}}
-^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.fc\.recommend\.feedscommondservice\/ reject-dict enable={SHOPPING_ENABLE&{MRHEMA_ENABLE}}
-^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.render\.querymypage\/ response-body-json-jq '.data.scenes |= map(select(.sceneType | IN("400029", "400005", "400010", "400002", "400004", "400015")))' enable={SHOPPING_ENABLE&{MRHEMA_ENABLE}}
-^https:\/\/acs-m\.freshippo\.com\/gw\/(mtop\.wdk\.lbs\.location\.shopdecideapi\.decideformain|mtop\.wdk\.lbs\.location\.shopdecideapi\.decidebygeocode)\/ response-body-json-jq '.data.groupList |= map(.ext.tabConfig |= (.normalTabList = (.normalTabList | map(select(.code as $c | ["HOME", "CLASSIFY", "CART", "MY"] | any(. == $c)))) | .normalTabListB = (.normalTabListB | map(select(.code as $c | ["HOME", "CLASSIFY", "CART", "MY"] | any(. == $c))))))' enable={SHOPPING_ENABLE&{MRHEMA_ENABLE}}
-^https:\/\/j1\.pupuapi\.com\/client\/account\/discount\/order reject enable={SHOPPING_ENABLE&{PUPUMALL_ENABLE}}
-^https:\/\/j1\.pupuapi\.com\/client\/marketing\/banner\/v7\?position_types=100 reject enable={SHOPPING_ENABLE&{PUPUMALL_ENABLE}}
-^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.fliggy\.crm\.screen\.allresource\/ reject-dict enable={SHOPPING_ENABLE&{TAOBAOTRAVEL_ENABLE}}
-^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.fliggy\.crm\.screen\.predict\/ reject-dict enable={SHOPPING_ENABLE&{TAOBAOTRAVEL_ENABLE}}
-^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.fliggy\.tripzoo\.new\.couponlist\/ reject-dict enable={SHOPPING_ENABLE&{TAOBAOTRAVEL_ENABLE}}
-^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.trip\.my\.recommendcard\/ reject-dict enable={SHOPPING_ENABLE&{TAOBAOTRAVEL_ENABLE}}
-^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.fliggy\.recommend\.common\.guess\.tab\.feeds\/ reject-dict enable={SHOPPING_ENABLE&{TAOBAOTRAVEL_ENABLE}}
-^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.tmall\.campus\.guide\.advertising\.config\.list\/ reject-dict enable={SHOPPING_ENABLE&{TMALLCAMPUS_ENABLE}}
-^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.tmall\.campus\.ai\.agent\.assistant\.settings\.get\/ reject-dict enable={SHOPPING_ENABLE&{TMALLCAMPUS_ENABLE}}
-^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.tmall\.campus\.guide\.delivering\.recall\.general\.data\.query\/ reject-dict enable={SHOPPING_ENABLE&{TMALLCAMPUS_ENABLE}}
-^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.tmall\.campus\.guide\.app\.home\.pop\.get\/ reject-dict enable={SHOPPING_ENABLE&{TMALLCAMPUS_ENABLE}}
-^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.tmall\.kangaroo\.core\.service\.route\.fixrespagerecommend\/ response-body-json-del data.resultValue.data.normal-banner-resource-code data.resultValue.data.feeds-channel-code enable={SHOPPING_ENABLE&{TMALLCAMPUS_ENABLE}}
-^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.tmall\.campus\.guide\.app\.userprofile\.framework\.v\d\/ response-body-json-jq 'del(.data.memberBenefit, .data.memberBenefitNew) | .data.moduleSorts |= map(select(. != "memberBenefit" and . != "memberBenefitNew"))' enable={SHOPPING_ENABLE&{TMALLCAMPUS_ENABLE}}
-^https:\/\/mall\.meituan\.com\/api\/c\/homepage\/splash reject-dict enable={SHOPPING_ENABLE&{IMAICAI_ENABLE}}
-^https:\/\/mall\.meituan\.com\/api\/c\/homepage\/bubble\/operate\/info reject-dict enable={SHOPPING_ENABLE&{IMAICAI_ENABLE}}
-^https:\/\/mall\.meituan\.com\/api\/c\/jigsaw\/code\/category-banner-\d+\/ reject-dict enable={SHOPPING_ENABLE&{IMAICAI_ENABLE}}
-^https:\/\/mall\.meituan\.com\/api\/c\/poi\/\d+\/order\/recommend\/v\d reject-dict enable={SHOPPING_ENABLE&{IMAICAI_ENABLE}}
-^https:\/\/mall\.meituan\.com\/api\/c\/banner\/ reject-dict enable={SHOPPING_ENABLE&{IMAICAI_ENABLE}}
-^https:\/\/mall\.meituan\.com\/api\/c\/poi\/\d+\/personal\/recommend reject-dict enable={SHOPPING_ENABLE&{IMAICAI_ENABLE}}
-^https:\/\/businessapi\.ksedt\.com\/signupindex\/jxlist reject-dict enable={SHOPPING_ENABLE&{IMAICAI_ENABLE}}
+^https:\/\/apps\.api\.ke\.com\/platform\/shellapp\/homepage\/initData\/mini\? response-body-json-del data.bootpage data.bottom_bar_activity enable={SHOPPING_ENABLE}&{BEIKE_ENABLE}
+^https:\/\/apps\.api\.ke\.com\/config\/config\/bootpage\? reject-dict enable={SHOPPING_ENABLE}&{BEIKE_ENABLE}
+^https:\/\/apps\.api\.ke\.com\/platform\/shellapp\/userCenter\/feed\? reject-dict enable={SHOPPING_ENABLE}&{BEIKE_ENABLE}
+^https:\/\/apps\.api\.ke\.com\/platform\/shellapp\/userCenter\/info\? response-body-json-del data.islandModule enable={SHOPPING_ENABLE}&{BEIKE_ENABLE}
+^https:\/\/apps\.api\.ke\.com\/platform\/shellapp\/userCenter\/info\? response-body-json-jq 'del(.data.mainIcons.list[] | select(.indexKey == "coupon"))' enable={SHOPPING_ENABLE}&{BEIKE_ENABLE}
+^https:\/\/apps\.api\.ke\.com\/platform\/shellapp\/myhome\/pagedetail\? response-body-json-jq '.data.moduleList |= map(select(.tab != "myHomeDecorV4"))' enable={SHOPPING_ENABLE}&{BEIKE_ENABLE}
+^https:\/\/apps\.api\.ke\.com\/config\/config\/getactivityconfig\? reject-dict enable={SHOPPING_ENABLE}&{BEIKE_ENABLE}
+^https:\/\/apps\.api\.ke\.com\/platform\/shellapp\/homepage\/feed\? response-body-json-jq '.data.list |= map(select(.cardType == "houseContainer" or .cardType == "houseV2" or .cardType == "houseV3" or .cardType == "rentHouseDiscount" or .cardType == "decorationCase"))' enable={SHOPPING_ENABLE}&{BEIKE_ENABLE}
+^https:\/\/api\.boohee\.com\/meta-interface\/v2\/index\? response-body-json-del data.recom_cards data.recom_btns enable={SHOPPING_ENABLE}&{BOOHEE_ENABLE}
+^https:\/\/api\.boohee\.com\/meta-interface\/v1\/index\/page_float_bubbles\? reject-dict enable={SHOPPING_ENABLE}&{BOOHEE_ENABLE}
+^https:\/\/api\.boohee\.com\/meta-interface\/v1\/index\/tool_buttons\? reject-dict enable={SHOPPING_ENABLE}&{BOOHEE_ENABLE}
+^https:\/\/api\.boohee\.com\/app-interface\/v1\/search\/search\? reject-dict enable={SHOPPING_ENABLE}&{BOOHEE_ENABLE}
+^https:\/\/status\.boohee\.com\/api\/v1\/merged_messages$ reject-dict enable={SHOPPING_ENABLE}&{BOOHEE_ENABLE}
+^https:\/\/bohe\.sfo-tx-shanghai-01\.saas\.sensorsdata\.cn\/api\/v2\/sfo\/user_popup_configs\? reject-dict enable={SHOPPING_ENABLE}&{BOOHEE_ENABLE}
+^https:\/\/api\.boohee\.com\/meta-interface\/v1\/index\/plaza\? response-body-json-del data.tabs[1].badge data.recommend_ads enable={SHOPPING_ENABLE}&{BOOHEE_ENABLE}
+^https:\/\/api\.boohee\.com\/open-interface\/v1\/string\/market_page\?title=metabolism_config$ response-body-json-del top_banner diagnos_config partner_hospital question_answer product brand_story enable={SHOPPING_ENABLE}&{BOOHEE_ENABLE}
+^https:\/\/api\.boohee\.com\/meta-interface\/v1\/index\/sensor-banners\? reject-dict enable={SHOPPING_ENABLE}&{BOOHEE_ENABLE}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.damai\.wireless\.home\.welcome\/ reject-dict enable={SHOPPING_ENABLE}&{DAMAI_ENABLE}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.damai\.mec\.popup\.get\/ reject-dict enable={SHOPPING_ENABLE}&{DAMAI_ENABLE}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.damai\.wireless\.user\.my\.content\.get\/ response-body-json-del data.banner data.performFilmVip.userProfitList enable={SHOPPING_ENABLE}&{DAMAI_ENABLE}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.damai\.wireless\.mypage\.feed\/ response-body-json-del data.feedCard enable={SHOPPING_ENABLE}&{DAMAI_ENABLE}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.damai\.mec\.aristotle\.get\/ response-body-json-del data.data.top.keywords enable={SHOPPING_ENABLE}&{DAMAI_ENABLE}
+^https?:\/\/119\.29\.29\.\d+\/d reject-200 enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+^https?:\/\/maicai\.api\.ddxq\.mobi\/advert\/ reject enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+^https?:\/\/maicai\.api\.ddxq\.mobi\/homeApi\/getHomeAdPop reject enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+^https:\/\/maicai\.api\.ddxq\.mobi\/vip\/getVipAd\/\? reject-dict enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+^https:\/\/maicai\.api\.ddxq\.mobi\/homeApi\/marketingNotice\? reject-dict enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+^https:\/\/maicai\.api\.ddxq\.mobi\/search\/rollHotKeyword\? reject-dict enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+^https:\/\/maicai\.api\.ddxq\.mobi\/search\/rankingList\? reject-dict enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+^https:\/\/maicai\.api\.ddxq\.mobi\/search\/hotKeyword\? reject-dict enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+^https:\/\/maicai\.api\.ddxq\.mobi\/order\/getRecommend$ reject-dict enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+^https:\/\/maicai\.api\.ddxq\.mobi\/homeApi\/userLike\? reject-dict enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+^https:\/\/user\.api\.ddxq\.mobi\/userportal-service\/api\/v1\/user\/queryMyPage\/\? reject-dict enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+^https:\/\/maicai\.api\.ddxq\.mobi\/homeApi\/categoriesNewDetail\? response-body-json-del data.ad_info enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+^https:\/\/maicai\.api\.ddxq\.mobi\/tool\/getConfig\? response-body-json-del data.ai_enter_config enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+^https:\/\/maicai\.api\.ddxq\.mobi\/guide-service\/userLike\/flowData$ reject-dict enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+^https?:\/\/maicai\.api\.ddxq\.mobi\/homeApi\/newDetails\? response-body-json-del data.top_advert_data data.suspension enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+^https?:\/\/maicai\.api\.ddxq\.mobi\/homeApi\/newDetails\? response-body-json-jq '.data.list |= map(select(has("capsule_freedom_zone") | not))' enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+^https:\/\/maicai\.api\.ddxq\.mobi\/guide-service\/productApi\/productDetail\/info\? response-body-json-del data.detail.chatEntry enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+^https?:\/\/maicai\.api\.ddxq\.mobi\/homeApi\/bottomNavi response-body-json-jq 'del(.data.adId?) | if (.data.bottom_list? | length > 0) then .data.bottom_list |= map(select(.type != "eatwhat")) else . end' enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+^https?:\/\/maicai\.api\.ddxq\.mobi\/homeApi\/homeFlowDetail response-body-json-jq 'walk(if type == "object" and has("list") then .list |= map(if type == "object" and has("multi_advertise_data_list") then del(.multi_advertise_data_list) else . end) else . end)' enable={SHOPPING_ENABLE}&{DINGDONGMAICAI_ENABLE}
+^https:\/\/aserver-evone\.echargenet\.com\/orange\/datacenter\/snapshot-meta\? reject-dict enable={SHOPPING_ENABLE}&{EASYCHARGE_ENABLE}
+^https:\/\/api-evone\.echargenet\.com\/gw\/evone\.echargeapi\.open\.ad\.getadmaterials\/ reject-dict enable={SHOPPING_ENABLE}&{EASYCHARGE_ENABLE}
+^https:\/\/api-evone\.echargenet\.com\/gw\/evone\.appsns\.open\.efriend\.topic\.listrecommenttopic\/ reject-dict enable={SHOPPING_ENABLE}&{EASYCHARGE_ENABLE}
+^https:\/\/api-evone\.echargenet\.com\/gw\/evone\.appsns\.open\.efriend\.post\.listapppost\/ reject-dict enable={SHOPPING_ENABLE}&{EASYCHARGE_ENABLE}
+^https:\/\/api-evone\.echargenet\.com\/gw\/evone\.appsns\.open\.merchant\.merchant\.list\/ reject-dict enable={SHOPPING_ENABLE}&{EASYCHARGE_ENABLE}
+^https:\/\/api-evone\.echargenet\.com\/gw\/evone\.appsns\.open\.merchant\.news\.pagelistapp\/ reject-dict enable={SHOPPING_ENABLE}&{EASYCHARGE_ENABLE}
+^https:\/\/consumer\.fcbox\.com\/fcboxactivityweb\/api\/v\d\/clientPage\/modulesAggregated\? reject-dict enable={SHOPPING_ENABLE}&{FC_BOX_ENABLE}
+^https:\/\/consumer\.fcbox\.com\/fcboxactivityweb\/api\/v\d\/clientPage\/jinGangFirst\? reject-dict enable={SHOPPING_ENABLE}&{FC_BOX_ENABLE}
+^https:\/\/consumer\.fcbox\.com\/v2\/home\/mallInfo$ reject-dict enable={SHOPPING_ENABLE}&{FC_BOX_ENABLE}
+^https:\/\/dsp\.fcbox\.com\/adSearch\/ reject-dict enable={SHOPPING_ENABLE}&{FC_BOX_ENABLE}
+^https:\/\/consumer\.fcbox\.com\/hs-portal\/app\/config\/page\/home\/v2\? reject-dict enable={SHOPPING_ENABLE}&{FC_BOX_ENABLE}
+^https:\/\/consumer\.fcbox\.com\/post\/suggestion\/query$ reject-dict enable={SHOPPING_ENABLE}&{FC_BOX_ENABLE}
+^https:\/\/consumer\.fcbox\.com\/v1\/dynamicConfig\/findTabbarConfig\/mainPage$ response-body-json-del data.lifeService data.mall data.wash enable={SHOPPING_ENABLE}&{FC_BOX_ENABLE}
+^https:\/\/consumer\.fcbox\.com\/fcboxactivityweb\/marketingEntrance\/retentionPopup$ reject-dict enable={SHOPPING_ENABLE}&{FC_BOX_ENABLE}
+^https:\/\/consumer\.fcbox\.com\/fcboxactivityweb\/api\/clientPopup\/v\d\/queryPopupWithPriority$ reject-dict enable={SHOPPING_ENABLE}&{FC_BOX_ENABLE}
+^https:\/\/consumer\.fcbox\.com\/fcboxactivityweb\/api\/guidePopup\/popup$ reject-dict enable={SHOPPING_ENABLE}&{FC_BOX_ENABLE}
+^https:\/\/www\.flyert\.com\.cn\/api\/mobile\/index\.php\?module=advis reject enable={SHOPPING_ENABLE}&{FLYERTEA_ENABLE}
+^https:\/\/www\.flyert\.com\.cn\/api\/mobile\/index\.php\?module=vip_coupon reject-dict enable={SHOPPING_ENABLE}&{FLYERTEA_ENABLE}
+^https:\/\/ptf\.flyertrip\.com\/static\/img\/common\/ic_plate_mine_button\.png reject-img enable={SHOPPING_ENABLE}&{FLYERTEA_ENABLE}
+^https:\/\/www\.flyert\.com\.cn\/api\/mobile\/index\.php\?module=getdata reject-dict enable={SHOPPING_ENABLE}&{FLYERTEA_ENABLE}
+^https:\/\/hweb-manager\.huazhu\.com\/notice\/getAppPopupNotifyAlert$ reject-dict enable={SHOPPING_ENABLE}&{HANTINGHOTELS_ENABLE}
+^https:\/\/hweb-hotel\.huazhu\.com\/home\/getHomeLoinBanner$ reject-dict enable={SHOPPING_ENABLE}&{HANTINGHOTELS_ENABLE}
+^https:\/\/hweb-hotel\.huazhu\.com\/\/home\/querySelectHotel$ reject-dict enable={SHOPPING_ENABLE}&{HANTINGHOTELS_ENABLE}
+^https:\/\/hweb-hotel\.huazhu\.com\/home\/queryHotelBrand$ reject-dict enable={SHOPPING_ENABLE}&{HANTINGHOTELS_ENABLE}
+^https:\/\/hweb-manager\.huazhu\.com\/hotels\/ad\/getHotelListNoticeMerge$ reject-dict enable={SHOPPING_ENABLE}&{HANTINGHOTELS_ENABLE}
+^https:\/\/res-pub\.huazhu\.com\/frontconf\/homeconfig_45\/\w+\.json$ response-body-json-jq 'if has("content") and (.content | type) == "object" then .content |= with_entries(select(.key == "topBanner" or .key == "topBannerImages")) else . end' enable={SHOPPING_ENABLE}&{HANTINGHOTELS_ENABLE}
+^https:\/\/res-pub\.huazhu\.com\/frontconf\/tabbarconfig_45\/\w+\.json$ response-body-json-jq '.content.tabbar |= map(select(.attributes.tabName == "首页" or .attributes.tabName == "服务" or .attributes.tabName == "我的"))' enable={SHOPPING_ENABLE}&{HANTINGHOTELS_ENABLE}
+^https:\/\/color\.jddj\.com\/client\.action\?functionId=hours_home$ response-body-json-jq 'del(.result.config.searchFloor.data[].searchWords) | .result.data |= map(if .tnConfigVO?.businessCode == "nearby_HourlyGo_Operation_Tags" then empty else . end)' enable={SHOPPING_ENABLE}&{JDWAIMAI_ENABLE}
+^https:\/\/color\.jddj\.com\/client\.action\?functionId=uniformRecommend reject-dict enable={SHOPPING_ENABLE}&{JDWAIMAI_ENABLE}
+^https:\/\/color\.jddj\.com\/client\.action\?functionId=wmHome$ response-body-json-jq '(.floors |= map(del(.data.tnData.newsInfo?))) | .floors |= (map(select(.mId != "newWalletIdFloor" and .mId != "recommendfloor"))) | .floors |= (map(.data |= (if .tnData? then del(.tnData.cardList, .tnData.cardListStatic, .tnData.walletList) else . end)))' enable={SHOPPING_ENABLE}&{JDWAIMAI_ENABLE}
+^https:\/\/api\.m\.jd\.com\/client\.action$ response-body-json-del data.searchDTO.searchWords data.wishlistDTO.bubbleTip enable={SHOPPING_ENABLE}&{JDWAIMAI_ENABLE}
+^https:\/\/api\.m\.jd\.com\/client\.action$ response-body-json-jq '.data.tabList |= (map(select(.code == "recommendation" or .code == "find_food")) | map(if .code == "recommendation" then .dpHomeFeedTabResultDTOList = .dpHomeFeedTabResultDTOList[0:2] else . end | .dpHomeBannerResultDTOList = []))' enable={SHOPPING_ENABLE}&{JDWAIMAI_ENABLE}
+^https:\/\/color\.jddj\.com\/client\.action\?functionId=search_recommendRanking$ reject-dict enable={SHOPPING_ENABLE}&{JDWAIMAI_ENABLE}
+^https?:\/\/p\.kuaidi100\.com\/mobile\/mobileapi\.do$ response-body-json-del adsplash adIsConsumable adProductId nologin_tips index_banner me_banner index_banner_shadow adshongbao adsapp_homepage_ticket_pop adsoptimizationsend adsapp_activity_ad_array adbanner adposition adShowAgainTime enable={SHOPPING_ENABLE}&{KUAIDI100_ENABLE}
+^https?:\/\/p\.kuaidi100\.com\/apicenter\/xcx\.dox response-body-json-del data.secondMenuList enable={SHOPPING_ENABLE}&{KUAIDI100_ENABLE}
+^https?:\/\/p\.kuaidi100\.com\/advertisement\/ reject-dict enable={SHOPPING_ENABLE}&{KUAIDI100_ENABLE}
+^https?:\/\/p\.kuaidi100\.com\/e-commerce\/act\/actInfo\? reject-dict enable={SHOPPING_ENABLE}&{KUAIDI100_ENABLE}
+^https?:\/\/p\.kuaidi100\.com\/apicenter\/card\.dox reject-dict enable={SHOPPING_ENABLE}&{KUAIDI100_ENABLE}
+^https:\/\/capi\.lkcoffee\.com\/resource\/m\/growUp\/calendarList reject enable={SHOPPING_ENABLE}&{LUCKINCOFFEE_ENABLE}
+^https:\/\/capi\.lkcoffee\.com\/resource\/m\/promotion\/giftCard\/topPage reject enable={SHOPPING_ENABLE}&{LUCKINCOFFEE_ENABLE}
+^https:\/\/capi\.lkcoffee\.com\/resource\/m\/sys\/base\/myLittleLuck reject enable={SHOPPING_ENABLE}&{LUCKINCOFFEE_ENABLE}
+^https:\/\/capi\.lkcoffee\.com\/resource\/core\/v2\/menu\/ordinaryUserLayeredArea reject enable={SHOPPING_ENABLE}&{LUCKINCOFFEE_ENABLE}
+^https:\/\/capi\.lkcoffee\.com\/resource\/m\/sys\/common\/modules reject enable={SHOPPING_ENABLE}&{LUCKINCOFFEE_ENABLE}
+^https:\/\/capi\.lkcoffee\.com\/resource\/core\/v2\/homepage\/homePageCoffeeList reject enable={SHOPPING_ENABLE}&{LUCKINCOFFEE_ENABLE}
+^https:\/\/capi\.lkcoffee\.com\/resource\/m\/eorder\/product\/popAppTagProductList reject enable={SHOPPING_ENABLE}&{LUCKINCOFFEE_ENABLE}
+^https:\/\/capi\.lkcoffee\.com\/resource\/m\/sys\/app\/adposNew reject enable={SHOPPING_ENABLE}&{LUCKINCOFFEE_ENABLE}
+^https:\/\/mapi\.mafengwo\.cn\/discovery\/get_index\/v7\? response-body-json-jq '.data.list |= map(select(.data.business_type != "gdcpm"))' enable={SHOPPING_ENABLE}&{MAFENGWO_ENABLE}
+^https:\/\/mapi\.mafengwo\.cn\/sales\/home\/get_header\/v3\? response-body-json-jq '.data.list[] |= ( .data |= del(.banners) )' enable={SHOPPING_ENABLE}&{MAFENGWO_ENABLE}
+^https:\/\/mapi\.mafengwo\.cn\/user\/growth\/get_growth_tip\/v1\? reject-dict enable={SHOPPING_ENABLE}&{MAFENGWO_ENABLE}
+^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.render\.querysinglepage\/ reject-dict enable={SHOPPING_ENABLE}&{MRHEMA_ENABLE}
+^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.sg\.queryinnerpage\/ reject-dict enable={SHOPPING_ENABLE}&{MRHEMA_ENABLE}
+^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.lbs\.address\.getshopinfolist\/ reject-dict enable={SHOPPING_ENABLE}&{MRHEMA_ENABLE}
+^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.render\.queryindexpage\/ response-body-json-jq 'if .data.pageType == "1" then .data.scenes |= map(select(.bizCode == "three_row_circle")) else . end' enable={SHOPPING_ENABLE}&{MRHEMA_ENABLE}
+^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.render\.querytabfeedstream\/ response-body-json-jq 'if .data.pageType == "5" then .data.scenes |= map(select(.sceneType == "100028")) else . end' enable={SHOPPING_ENABLE}&{MRHEMA_ENABLE}
+^https:\/\/acs-m\.freshippo\.com\/gw\/(mtop\.wdk\.render\.querychannelpage|mtop\.wdk\.render\.querysinglepage)\/ response-body-json-jq 'if .data.pageType == "216" then .data.scenes |= map(select(.bizCode == "shop_walk_top_picture" or .bizCode == "shop_walk_shop_util" or .bizCode == "shop_walk_bistro")) else . end' enable={SHOPPING_ENABLE}&{MRHEMA_ENABLE}
+^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.render\.querysearchpage\/ reject-dict enable={SHOPPING_ENABLE}&{MRHEMA_ENABLE}
+^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.sg\.querysinglescene\/ reject-dict enable={SHOPPING_ENABLE}&{MRHEMA_ENABLE}
+^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.melon\.collocation\/ reject-dict enable={SHOPPING_ENABLE}&{MRHEMA_ENABLE}
+^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.fc\.recommend\.feedscommondservice\/ reject-dict enable={SHOPPING_ENABLE}&{MRHEMA_ENABLE}
+^https:\/\/acs-m\.freshippo\.com\/gw\/mtop\.wdk\.render\.querymypage\/ response-body-json-jq '.data.scenes |= map(select(.sceneType | IN("400029", "400005", "400010", "400002", "400004", "400015")))' enable={SHOPPING_ENABLE}&{MRHEMA_ENABLE}
+^https:\/\/acs-m\.freshippo\.com\/gw\/(mtop\.wdk\.lbs\.location\.shopdecideapi\.decideformain|mtop\.wdk\.lbs\.location\.shopdecideapi\.decidebygeocode)\/ response-body-json-jq '.data.groupList |= map(.ext.tabConfig |= (.normalTabList = (.normalTabList | map(select(.code as $c | ["HOME", "CLASSIFY", "CART", "MY"] | any(. == $c)))) | .normalTabListB = (.normalTabListB | map(select(.code as $c | ["HOME", "CLASSIFY", "CART", "MY"] | any(. == $c))))))' enable={SHOPPING_ENABLE}&{MRHEMA_ENABLE}
+^https:\/\/j1\.pupuapi\.com\/client\/account\/discount\/order reject enable={SHOPPING_ENABLE}&{PUPUMALL_ENABLE}
+^https:\/\/j1\.pupuapi\.com\/client\/marketing\/banner\/v7\?position_types=100 reject enable={SHOPPING_ENABLE}&{PUPUMALL_ENABLE}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.fliggy\.crm\.screen\.allresource\/ reject-dict enable={SHOPPING_ENABLE}&{TAOBAOTRAVEL_ENABLE}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.fliggy\.crm\.screen\.predict\/ reject-dict enable={SHOPPING_ENABLE}&{TAOBAOTRAVEL_ENABLE}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.fliggy\.tripzoo\.new\.couponlist\/ reject-dict enable={SHOPPING_ENABLE}&{TAOBAOTRAVEL_ENABLE}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.trip\.my\.recommendcard\/ reject-dict enable={SHOPPING_ENABLE}&{TAOBAOTRAVEL_ENABLE}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.fliggy\.recommend\.common\.guess\.tab\.feeds\/ reject-dict enable={SHOPPING_ENABLE}&{TAOBAOTRAVEL_ENABLE}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.tmall\.campus\.guide\.advertising\.config\.list\/ reject-dict enable={SHOPPING_ENABLE}&{TMALLCAMPUS_ENABLE}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.tmall\.campus\.ai\.agent\.assistant\.settings\.get\/ reject-dict enable={SHOPPING_ENABLE}&{TMALLCAMPUS_ENABLE}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.tmall\.campus\.guide\.delivering\.recall\.general\.data\.query\/ reject-dict enable={SHOPPING_ENABLE}&{TMALLCAMPUS_ENABLE}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.tmall\.campus\.guide\.app\.home\.pop\.get\/ reject-dict enable={SHOPPING_ENABLE}&{TMALLCAMPUS_ENABLE}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.tmall\.kangaroo\.core\.service\.route\.fixrespagerecommend\/ response-body-json-del data.resultValue.data.normal-banner-resource-code data.resultValue.data.feeds-channel-code enable={SHOPPING_ENABLE}&{TMALLCAMPUS_ENABLE}
+^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.tmall\.campus\.guide\.app\.userprofile\.framework\.v\d\/ response-body-json-jq 'del(.data.memberBenefit, .data.memberBenefitNew) | .data.moduleSorts |= map(select(. != "memberBenefit" and . != "memberBenefitNew"))' enable={SHOPPING_ENABLE}&{TMALLCAMPUS_ENABLE}
+^https:\/\/mall\.meituan\.com\/api\/c\/homepage\/splash reject-dict enable={SHOPPING_ENABLE}&{IMAICAI_ENABLE}
+^https:\/\/mall\.meituan\.com\/api\/c\/homepage\/bubble\/operate\/info reject-dict enable={SHOPPING_ENABLE}&{IMAICAI_ENABLE}
+^https:\/\/mall\.meituan\.com\/api\/c\/jigsaw\/code\/category-banner-\d+\/ reject-dict enable={SHOPPING_ENABLE}&{IMAICAI_ENABLE}
+^https:\/\/mall\.meituan\.com\/api\/c\/poi\/\d+\/order\/recommend\/v\d reject-dict enable={SHOPPING_ENABLE}&{IMAICAI_ENABLE}
+^https:\/\/mall\.meituan\.com\/api\/c\/banner\/ reject-dict enable={SHOPPING_ENABLE}&{IMAICAI_ENABLE}
+^https:\/\/mall\.meituan\.com\/api\/c\/poi\/\d+\/personal\/recommend reject-dict enable={SHOPPING_ENABLE}&{IMAICAI_ENABLE}
+^https:\/\/businessapi\.ksedt\.com\/signupindex\/jxlist reject-dict enable={SHOPPING_ENABLE}&{IMAICAI_ENABLE}
 
 [Script]
 http-response ^https?:\/\/mapi\.dianping\.com script-path=https://ws.wenn.in/main/Scripts/Dianping.js, requires-body=true, timeout=10, tag=点评首页净化, enable={SHOPPING_ENABLE}&{DIANPING_ENABLE}
@@ -190,4 +190,4 @@ http-response ^https?:\/\/(tiebac|tieba|tiebaapi)\.baidu\.com script-path=https:
 http-response ^https?:\/\/(tiebac|tieba|tiebaapi)\.baidu\.com.*\?cmd script-path=https://ws.wenn.in/main/Scripts/Tieba.js, binary-body-mode=true, requires-body=true, timeout=10, tag=贴吧_Proto 净化，enable={SHOPPING_ENABLE}&{ENABLE_TIEBA}
 
 [MitM]
-hostname = %APPEND% acs.m.goofish.com, adservice.wps.cn, amdc.m.taobao.com, api.meituan.com, check.dianping.com, cn-acs.m.cainiao.com, docer.wps.cn, e2e-mtop.cainiao.com, g-acs.m.goofish.com, i.waimai.meituan.com, longquan-mtop.cainiao.com, mapi.dianping.com, nbcps-mtop.cainiao.com, netflow-mtop.cainiao.com, papi.meituan.com, tieba.baidu.com, tiebaapi.baidu.com, tiebac.baidu.com, hostname=apps.api.ke.com, hostname=api.boohee.com, bohe.sfo-tx-shanghai-01.saas.sensorsdata.cn, lego.boohee.com, status.boohee.com, hostname=acs.m.taobao.com, hostname= maicai.api.ddxq.mobi, user.api.ddxq.mobi, hostname=aserver-evone.echargenet.com, api-evone.echargenet.com, hostname=consumer.fcbox.com, dsp.fcbox.com, hostname=www.flyert.com.cn, ptf.flyertrip.com, hostname=hweb-manager.huazhu.com, hweb-hotel.huazhu.com, res-pub.huazhu.com, hostname=color.jddj.com, api.m.jd.com, hostname=p.kuaidi100.com, hostname=capi.lkcoffee.com, hostname=mapi.mafengwo.cn, hostname=acs-m.freshippo.com, hostname=j1.pupuapi.com, hostname=portal-portm.meituan.com, mall.meituan.com, businessapi.ksedt.com
+hostname = %APPEND% acs.m.goofish.com, adservice.wps.cn, amdc.m.taobao.com, api.meituan.com, check.dianping.com, cn-acs.m.cainiao.com, docer.wps.cn, e2e-mtop.cainiao.com, g-acs.m.goofish.com, i.waimai.meituan.com, longquan-mtop.cainiao.com, mapi.dianping.com, nbcps-mtop.cainiao.com, netflow-mtop.cainiao.com, papi.meituan.com, tieba.baidu.com, tiebaapi.baidu.com, tiebac.baidu.com, apps.api.ke.com, api.boohee.com, bohe.sfo-tx-shanghai-01.saas.sensorsdata.cn, lego.boohee.com, status.boohee.com, acs.m.taobao.com, maicai.api.ddxq.mobi, user.api.ddxq.mobi, aserver-evone.echargenet.com, api-evone.echargenet.com, consumer.fcbox.com, dsp.fcbox.com, www.flyert.com.cn, ptf.flyertrip.com, hweb-manager.huazhu.com, hweb-hotel.huazhu.com, res-pub.huazhu.com, color.jddj.com, api.m.jd.com, p.kuaidi100.com, capi.lkcoffee.com, mapi.mafengwo.cn, acs-m.freshippo.com, j1.pupuapi.com, portal-portm.meituan.com, mall.meituan.com, businessapi.ksedt.com

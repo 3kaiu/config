@@ -6,6 +6,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [v8.10] — 2026-08-28
+
+### Removed (EduProxy 免费代理订阅下线 — 回归 Geonode 单源)
+
+- **移除 EduProxy 订阅**: `template/loon.tpl` 中 `OpenCode = select, Proxy, DIRECT, Geonode` (去掉 EduProxy); `[Remote Proxy]` 的 EduProxy 订阅块整段删除; `Profile/edu-proxy.loon.txt` 与 `tools/edu-proxy-sync.mjs` 删除
+- **MainNodes FilterKey 简化**: `^(?!.*(?:geonode|edu)).*$` → `^(?!.*geonode).*$` — edu-* 节点名前缀仅来自 edu-proxy 订阅, 移除后无需再排除; config-validate 断言同步更新
+- **proxy-sync.yml**: 移除 edu 同步 step、"全部源失败" 兜底门禁与报告中的 edu 列; 单源后失败由 step 自身报错
+- **upstream-health.yml**: 移除 edu 专属探测 (iplocate/hproxy-com/TheSpeedX/roosterkid 源列表 + Edu CDN 订阅), 保留 geonode API 与 Geonode CDN 订阅探活
+
+### Changed (Geonode 订阅节点写入前做连通性探测)
+
+- **`tools/geonode-sync.mjs` 新增探测层**: 候选节点经 `curl` 并发 CONNECT 到 `GEONODE_PROBE_URL` (默认 `https://opencode.ai/`, 该订阅唯一服务的站点), 仅保留返回 2xx/3xx 且耗时 ≤ `GEONODE_PROBE_MAX_TIME` (默认 6s) 的节点, 按耗时升序截断到 `GEONODE_MAX_NODES` (默认 60)
+- **实测依据 (2026-08-28)**: 254 个候选中仅 ~2.4% 可真实连通; 31 个 http 代理全部不支持 CONNECT 隧道 (Loon 代理 https 站点必然不可用), socks5 可用率最高; 故探测目标必须是 https 站点
+- **新增门禁**: 探测后可用节点 < 3 则 exit 1 保留旧文件 — 上游整体失活时不覆盖一份更好的旧清单; `GEONODE_NO_PROBE=1` 可应急跳过探测
+- **可配参数**: `GEONODE_PROBE_URL` / `GEONODE_PROBE_TIMEOUT`(8s) / `GEONODE_PROBE_CONCURRENCY`(15) / `GEONODE_PROBE_MAX_TIME`(6s) / `GEONODE_PROBE_MAX_CANDIDATES`(250) / `GEONODE_PROBE_RETRIES`(1); https 代理自动回退 TLS CONNECT (`--proxy-insecure`)
+- **`proxy-sync.yml`**: timeout 15→10 分钟 (上游 30s + 探测 ~90s); 补回 SHA pin (此前 restore 回退遗漏); 移除 edu 触发路径
+- **`upstream-health.yml`** / **`template/loon.tpl`** / **`AGENTS.md`**: 探测目标与订阅用途的注释同步更新
+
+### Fixed (聚合插件批量格式损坏 + CI action pin SHA)
+
+- **6 个聚合 purify 插件**: `enable={X&{Y}}` 缺右括号共 635 处 → `enable={X}&{Y}`; `[MitM] hostname` 列表混入 mid-line `hostname=` 字面量 66 处 (含 1 处行首 `%APPEND% hostname=`, 6 文件全覆盖) — 两类损坏叠加使约 69 个主机不被解密, 对应 rewrite/script 规则静默失效 (36kr/alipan/boohee/斗鱼/芒果 TV/Spotify/酷我等)
+- **`tools/plugin-lint-check.mjs`**: 新增两类断言防回归 (`[enable括号]` / `[MitM拼接]`)
+- **12 个 workflow 的 25 处 `uses:` 全部 pin 到 commit SHA** (`@<sha> # <原tag>` 格式), 保留原 tag 注释便于 dependabot 更新; 9 个 SHA 已核对 GitHub API 与 tag 当前指向一致 — 此前 `proxy-sync`/`mirror-scripts` 持 `contents: write` 直推分发产物, 上游 action 被投毒即可篡改 Loon 配置
+- **`codeql.yml`**: 版本 tag `v4.37.8` 同样 pin 为 commit SHA
+
+### Notes
+
+- Geonode 订阅保留, 仍归属 OpenCode 策略组; 主池隔离语义不变
+- 免费代理衰减极快 (10 分钟内 8/8 → 6/8 → 0/8 复测), 探测只能过滤"生成时刻"的可用节点, 不能保证存活; 每日 03:40 UTC 刷新是唯一保障
+- 已验证过的 6 节点中 4 个在写入后数分钟内仍 200; 剩余 2 个立即复查即死 — 属免费代理固有状态, 非探测缺陷
+
+---
+
 ## [v8.9] — 2026-08-15
 
 ### Added (免费代理订阅 ×2 — 每日动态同步, 归属 OpenCode 策略组)

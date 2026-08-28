@@ -5,7 +5,8 @@
 # ═══════════════════════════════════════════════════════════
 
 [General]
-ip-mode = ipv4-only
+ip-mode = fake-ip
+fake-ip-filter = *.lan, *.local, *.home.arpa, time.*.com, *.msftconnecttest.com, *.msftncsi.com, localhost, captive.apple.com
 interface-mode = Performance
 dns-server = 180.184.11.11, 180.184.22.22, 119.29.29.29, 223.5.5.5
 doh-server = https://dns.alidns.com/dns-query, https://doh.pub/dns-query
@@ -61,31 +62,29 @@ httpdns.c.cdnhwc2.com = 0.0.0.0
 # Surgio 自动生成节点: npx surgio generate
 # 通过 SURGIO_SUBSCRIPTION_URL (机场订阅) 或 Secrets (HY2_HOST 等) 传入
 # 容灾: Proxy url-test 组 (MainNodes 过滤) 自动纳管新节点 — 订阅中加入第二节点即双节点容灾
-# 隔离: geonode-*/edu-* 免费代理被 MainNodes 排除, 仅 OpenCode 组引用 (见 [Remote Filter]/[Remote Proxy])
+# 隔离: geonode-* 免费代理被 MainNodes 排除, 仅 OpenCode 组引用 (见 [Remote Filter]/[Remote Proxy])
 
 [Proxy Group]
 Proxy = url-test, MainNodes, 东京, url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
 Fallback = fallback, MainNodes, url=http://cp.cloudflare.com/generate_204, interval=600, timeout=10
 Apple = select, DIRECT, Proxy
 Final = select, Proxy, Fallback, DIRECT
-Streaming = select, Proxy, Fallback, DIRECT, tag=流媒体
-AI = select, Proxy, Fallback, DIRECT, tag=AI服务
+Streaming = select, vless-reality-JP, Proxy, Fallback, DIRECT, tag=流媒体
+AI = select, vless-reality-JP, Proxy, Fallback, DIRECT, tag=AI服务
 Developer = select, Proxy, Fallback, DIRECT, tag=开发者
 Gaming = select, Proxy, Fallback, DIRECT, tag=游戏平台
 Social = select, Proxy, Fallback, DIRECT, tag=社交平台
-OpenCode = select, Proxy, DIRECT, Geonode, EduProxy, tag=OpenCode.ai
+OpenCode = select, Proxy, DIRECT, Geonode, tag=OpenCode.ai
 
 [Remote Filter]
-# 主节点池: 排除 geonode-*/edu-* 免费代理 (免费代理稳定性差, 防 url-test 自动选路到不可用节点)
-MainNodes = NameRegex, FilterKey = "^(?!.*(?:geonode|edu)).*$"
+# 主节点池: 排除 geonode-* 免费代理 (免费代理稳定性差, 防 url-test 自动选路到不可用节点)
+MainNodes = NameRegex, FilterKey = "^(?!.*geonode).*$"
 
 [Remote Proxy]
-# Geonode 免费代理订阅 — 每日由 proxy-sync workflow 从 proxylist.geonode.com 拉取转换
+# Geonode 免费代理订阅 — 每日由 proxy-sync workflow 从 proxylist.geonode.com 拉取,
+# 候选节点先经连通性探测 (仅写入可用节点, 见 tools/geonode-sync.mjs)
 # (Profile/geonode.loon.txt, Loon 官方节点文本格式, 无需解析器)
 Geonode = https://ws.wenn.in/main/Profile/geonode.loon.txt,enabled=true
-# GitHub 开放代理订阅 (TheSpeedX/PROXY-List + roosterkid/openproxylist) — 每日由 proxy-sync workflow 拉取转换
-# 注意: 非大学 edu 网段, README "Educational purpose" 仅为免责声明; 免费代理勿用于登录敏感账号
-EduProxy = https://ws.wenn.in/main/Profile/edu-proxy.loon.txt,enabled=true
 
 [Rule]
 DEST-PORT, 5223, DIRECT
@@ -783,6 +782,7 @@ https://ws.wenn.in/main/Mirror/rules/loon-Global.list, policy=Proxy, tag=🌍 �
 https://ws.wenn.in/main/Mirror/rules/loon-Advertising.list, policy=REJECT, tag=🚫 广告域名, enabled=true
 https://ws.wenn.in/main/Mirror/rules/loon-Privacy.list, policy=REJECT, tag=🔒 隐私保护, enabled=true
 https://ws.wenn.in/main/Mirror/rules/loon-Hijacking.list, policy=REJECT, tag=🛡️ 反劫持, enabled=true
+https://3kaiu-mirror-1787937996.s3.amazonaws.com/rules/goodbyeads-qx.list, tag=GOODBYEADS, policy=REJECT, enabled=true
 https://ws.wenn.in/main/Mirror/rules/loon-Epic.list, policy=Proxy, tag=🎮 Epic Games, enabled=true
 
 [Plugin]

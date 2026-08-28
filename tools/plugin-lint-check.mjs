@@ -51,6 +51,16 @@ function check(dir) {
           if (!quiet) console.log(`[Rewrite动作] ${dir}/${f}:${i + 1} → ${t.slice(0, 80)}`);
         }
       }
+      // enable={X}&{Y} 大括号配对(导入损坏形态: enable={X&{Y}})
+      if (/enable=\{[^}&\s]*&\{[^}]*\}\}/.test(t)) {
+        errs++;
+        if (!quiet) console.log(`[enable括号] ${dir}/${f}:${i + 1} → ${t.slice(0, 80)}`);
+      }
+      // [MitM] hostname 行内混入字面量 hostname=(多行拼接污染)
+      if (seg === "MitM" && /(^|\s)%APPEND%\s*hostname=|,\s*hostname=/.test(t)) {
+        errs++;
+        if (!quiet) console.log(`[MitM拼接] ${dir}/${f}:${i + 1} → ${t.slice(0, 80)}`);
+      }
       if (seg === "Rule") {
         if (!RULE_PREFIX.test(t)) {
           errs++;

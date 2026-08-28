@@ -8,7 +8,6 @@ on:
     branches: [main]
     paths:
       - 'tools/geonode-sync.mjs'
-      - 'tools/edu-proxy-sync.mjs'
 
 permissions:
   contents: write
@@ -16,38 +15,34 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # 超时预算: 上游拉取 30s + 探测 200 候选 × 8s / 并发 15 ≈ 90s, 余量给 git push
+    timeout-minutes: 10
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: '22'
 
-      # 各源独立失败: continue-on-error 保证互不阻断, 全部失败时由下方门禁兜底
       - name: Sync geonode proxies
         id: geonode
         continue-on-error: true
         run: node tools/geonode-sync.mjs
 
-      - name: Sync GitHub open proxies
-        id: edu
-        continue-on-error: true
-        run: node tools/edu-proxy-sync.mjs
-
-      - name: Fail if all sources failed
-        if: steps.geonode.outcome == 'failure' && steps.edu.outcome == 'failure'
+      # 单源: 失败即整体失败 — geonode-sync 自身会保留旧文件并 exit 1, 这里不再兜底
+      - name: Fail if sync failed
+        if: steps.geonode.outcome == 'failure'
         run: |
-          echo "❌ geonode 与 edu 源全部同步失败, 保留旧文件" >> $GITHUB_STEP_SUMMARY
+          echo "❌ geonode 同步失败, 保留旧文件" >> $GITHUB_STEP_SUMMARY
           exit 1
 
       - name: Commit if changed
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add Profile/geonode.loon.txt Profile/edu-proxy.loon.txt
+          git add Profile/geonode.loon.txt
           if git diff --cached --quiet; then
             echo "无变更, 跳过提交"
             echo "synced=false" >> $GITHUB_ENV
@@ -60,17 +55,9 @@ jobs:
       - name: Report summary
         if: always()
         run: |
-          GEO_ICON=✅; EDU_ICON=✅
+          GEO_ICON=✅
           [ "${{ steps.geonode.outcome }}" = "failure" ] && GEO_ICON=❌
-          [ "${{ steps.edu.outcome }}" = "failure" ] && EDU_ICON=❌
           echo "### Proxy List Sync Report" >> $GITHUB_STEP_SUMMARY
-          echo "| Date | Geonode | Edu | Synced |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|---------|-----|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| $(date +%Y-%m-%d) | ${GEO_ICON:-✅} | ${EDU_ICON:-✅} | ${synced:-false} |" >> $GITHUB_STEP_SUMMARY
-
-      - name: Report failure details
-        if: steps.geonode.outcome == 'failure' || steps.edu.outcome == 'failure'
-        run: |
-          echo "### ⚠️ 部分源同步失败" >> $GITHUB_STEP_SUMMARY
-          [ "${{ steps.geonode.outcome }}" = "failure" ] && echo "- geonode 失败 (保留旧文件)" >> $GITHUB_STEP_SUMMARY
-          [ "${{ steps.edu.outcome }}" = "failure" ] && echo "- edu 失败 (保留旧文件)" >> $GITHUB_STEP_SUMMARY
+          echo "| Date | Geonode | Synced |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| $(date +%Y-%m-%d) | ${GEO_ICON:-✅} | ${synced:-false} |" >> $GITHUB_STEP_SUMMARY

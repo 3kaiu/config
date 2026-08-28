@@ -1,6 +1,6 @@
 {
   "$comment": "镜像文件哈希清单 — 由 mirror-scripts.yml 维护; 变更会出现在镜像 PR 的 diff 中, 合并前请核对 source 变更是否符合预期",
-  "generated_at": "2026-08-12T00:00:00Z",
+  "generated_at": "2026-08-28T14:29:20Z",
   "files": {
     "netease.adblock.js": {
       "source_url": "https://gist.githubusercontent.com/ddgksf2013/4f53b7c6083678df25fecc8ff68b52c4/raw/netease.adblock.js",
@@ -52,39 +52,39 @@
     },
     "rules/loon-Advertising.list": {
       "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Advertising/Advertising.list",
-      "sha256": "79df0c977a5ac0b0fa2f7c0e2a3d4e0366b992ce859156a022292be8b703e9d5",
-      "bytes": 26870,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+      "sha256": "fb4fa449385391bd4e71e7ae8292495c9302af57327ccbe78aece441ea1c6546",
+      "bytes": 27481,
+      "fetched_at": "2026-08-28T14:22:46Z"
     },
     "rules/loon-Privacy.list": {
       "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Privacy/Privacy.list",
       "sha256": "24b048634166c810833c424455586e57d0db6991ed1bab2adafa09603b4f4c22",
       "bytes": 821,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+      "fetched_at": "2026-08-28T14:22:46Z"
     },
     "rules/loon-Hijacking.list": {
       "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Hijacking/Hijacking.list",
       "sha256": "47bffe4e8d4f56e736e43f1ed5f639f0b909591de09c5908df6cddad4b9e4e5b",
       "bytes": 6734,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+      "fetched_at": "2026-08-28T14:22:46Z"
     },
     "rules/loon-Epic.list": {
       "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Epic/Epic.list",
       "sha256": "8f5fcadadd967023aa81273803de80beb2ceadd9af4e9352b565b3b00ccf464d",
       "bytes": 588,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+      "fetched_at": "2026-08-28T14:22:46Z"
     },
     "rules/loon-China.list": {
       "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/China/China.list",
       "sha256": "f47b46695d6c4cb6d4c0a878ae00bb4842dd7f60c180ac1023e476bab1426f31",
       "bytes": 2056,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+      "fetched_at": "2026-08-28T14:22:46Z"
     },
     "rules/loon-Global.list": {
       "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Global/Global.list",
-      "sha256": "0f96875a01211b7cb4e1f97a0509df1a05dad3194ceef189863b6b9222eaf922",
+      "sha256": "16d8657d971a2a0c749ecb52f2a53f2a8b29cd6e5d3d13faceec220971800b53",
       "bytes": 6115,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+      "fetched_at": "2026-08-28T14:22:46Z"
     },
     "rules/loon-AllInOne.plugin": {
       "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Loon/AllInOne/AllInOne.plugin",
@@ -211,6 +211,12 @@
       "sha256": "41863c4c0ce5eefbdda9a5a96d7605bde70a89a9cc24ee0875f3d751aed2f757",
       "bytes": 32349,
       "fetched_at": "2026-08-12T00:00:00Z"
+    },
+    "rules/goodbyeads-qx.list": {
+      "source_url": "https://raw.githubusercontent.com/8680/GOODBYEADS/master/data/rules/qx.list",
+      "sha256": "fe6a469affc6dab45a284b675931cd38916f67bf0994afb36c61697fc9395dec",
+      "bytes": 3949215,
+      "fetched_at": "2026-08-28T14:29:20Z"
     }
   }
 }

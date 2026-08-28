@@ -1,4 +1,5 @@
 # Geonode 免费代理订阅 — 由 tools/geonode-sync.mjs 生成, 勿手改
+<<<<<<< HEAD
 # 上游: proxylist.geonode.com (每日 03:40 UTC 由 geonode-sync workflow 刷新)
 # 生成时间: 2026-08-28T15:37:31.688Z
 # 节点数: 120 (协议 http/https/socks5, 非透明, 非 CN)
@@ -123,3 +124,15 @@ geonode-socks5-US-98.181.137.80-4145 = socks5,98.181.137.80,4145
 geonode-socks5-KH-202.79.27.12-1080 = socks5,202.79.27.12,1080
 geonode-socks5-US-199.116.114.11-4145 = socks5,199.116.114.11,4145
 geonode-socks5-RU-212.220.84.69-1080 = socks5,212.220.84.69,1080
+=======
+# 上游: proxylist.geonode.com (每日 03:40 UTC 由 proxy-sync workflow 刷新)
+# 生成时间: 2026-08-28T14:38:49.401Z
+# 节点数: 6 (连通性已验证: https://opencode.ai/, 耗时 ≤6s)
+
+geonode-socks5-HK-45.194.33.12-30001 = socks5,45.194.33.12,30001
+geonode-socks5-FR-45.95.233.128-1082 = socks5,45.95.233.128,1082
+geonode-socks5-JP-103.75.118.84-1080 = socks5,103.75.118.84,1080
+geonode-socks5-RU-82.114.228.35-1080 = socks5,82.114.228.35,1080
+geonode-socks5-TH-43.164.3.124-1080 = socks5,43.164.3.124,1080
+geonode-socks5-DE-49.13.22.249-10811 = socks5,49.13.22.249,10811
+>>>>>>> 7bf7c73 (feat(config): GOODBYEADS 镜像 + FakeIP + AI/Streaming 锁 vless-reality)

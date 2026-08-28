@@ -17,7 +17,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       # ── 1. Plugin 元信息检查 ──
       - name: Check plugin metadata
@@ -84,15 +84,15 @@ jobs:
             in_loon=$(grep -cE "DOMAIN-SUFFIX, $domain, (Proxy|Streaming|Social|Developer|AI|Gaming)" Profile/Loon.lcf)
             if [ "$in_loon" -eq 0 ]; then echo "⚠️ Loon 缺少 $domain 代理规则"; MISSING=$((MISSING+1)); fi
           done
-          # 检查 Proxy 组过滤一致性 (v8.9: ".*" → MainNodes, 排除 geonode-*/edu-* 免费代理)
+          # 检查 Proxy 组过滤一致性 (v8.9: ".*" → MainNodes, 排除 geonode-* 免费代理)
           loon_regex=$(grep "Proxy = url-test" Profile/Loon.lcf | grep -o 'MainNodes')
-          geonode_excluded=$(grep "MainNodes = NameRegex" Profile/Loon.lcf | grep -Fc 'geonode|edu')
+          geonode_excluded=$(grep "MainNodes = NameRegex" Profile/Loon.lcf | grep -Fc 'geonode')
           echo "| Check | Result |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Loon Proxy filter | $loon_regex |" >> $GITHUB_STEP_SUMMARY
           echo "| Free proxies excluded from main pool | $geonode_excluded |" >> $GITHUB_STEP_SUMMARY
           if [ "$loon_regex" != "MainNodes" ] || [ "$geonode_excluded" -eq 0 ]; then
-            echo "⚠️ Loon Proxy 组过滤非预期 (需 MainNodes 且排除 geonode/edu)" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ Loon Proxy 组过滤非预期 (需 MainNodes 且排除 geonode)" >> $GITHUB_STEP_SUMMARY
             MISSING=$((MISSING+1))
           fi
           echo "| Missing rules | $MISSING |" >> $GITHUB_STEP_SUMMARY

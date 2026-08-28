@@ -17,7 +17,7 @@ jobs:
     steps:
       # MANIFEST 派生检查依赖仓库文件; 缺 checkout 会 ENOENT 静默跳过全部镜像探活
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Check all upstream URLs
         id: check
@@ -31,6 +31,10 @@ jobs:
             # 不用 -f: 失败状态码 (403/404) 也要拿到真实数字; 网络层异常时才记 000
             status=$(curl -sSL -m 30 -o /dev/null -w "%{http_code}" "$url" || true)
             [ -z "$status" ] && status="000"
+            # kelee.one 全局 403 是 Turnstile 保护，Loon 客户端可拉取，CI 视作健康
+            if [[ "$name" == *"kelee.one"* && "$status" == "403" ]]; then
+              status="200 (kelee 403→Loon OK)"
+            fi
             echo "::group::$name"
             echo "URL: $url"
             echo "Status: $status"
@@ -40,7 +44,7 @@ jobs:
               r.push({name: '$name', status: '$status', url: '$url'});
               console.log(JSON.stringify(r));
             ")
-            if [ "$status" != "200" ] && [ "$status" != "302" ] && [ "$status" != "301" ]; then
+            if [ "$status" != "200" ] && [ "$status" != "200 (kelee 403→Loon OK)" ] && [ "$status" != "302" ] && [ "$status" != "301" ]; then
               ALL_OK=false
             fi
           }
@@ -55,18 +59,11 @@ jobs:
           # 自建 CDN 可用性 (内容哈希校验在 cdn-verify.yml, 这里只探活)
           check_url "ws.wenn.in CDN (Mirror)" "https://ws.wenn.in/main/Mirror/netease.adblock.js"
 
-          # 免费代理源 (proxy-sync 每日拉取 → Profile/*.loon.txt, Loon [Remote Proxy] 引用)
+          # 免费代理源 (proxy-sync 每日拉取 → Profile/geonode.loon.txt, Loon [Remote Proxy] 引用)
           check_url "proxylist.geonode.com API" "https://proxylist.geonode.com/api/proxy-list?page=1&limit=1&sort_by=responseTime&sort_type=asc"
-          check_url "iplocate/free-proxy-list http" "https://raw.githubusercontent.com/iplocate/free-proxy-list/main/protocols/http.txt"
-          check_url "iplocate/free-proxy-list socks5" "https://raw.githubusercontent.com/iplocate/free-proxy-list/main/protocols/socks5.txt"
-          check_url "hproxy-com/free-proxy-list all.json" "https://raw.githubusercontent.com/hproxy-com/free-proxy-list/main/all.json"
-          check_url "TheSpeedX/PROXY-List http" "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt"
-          check_url "TheSpeedX/PROXY-List socks5" "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt"
-          check_url "roosterkid/openproxylist https" "https://raw.githubusercontent.com/roosterkid/openproxylist/main/HTTPS_RAW.txt"
           check_url "ws.wenn.in CDN (Geonode 订阅)" "https://ws.wenn.in/main/Profile/geonode.loon.txt"
-          check_url "ws.wenn.in CDN (Edu 订阅)" "https://ws.wenn.in/main/Profile/edu-proxy.loon.txt"
 
-          # kelee.one LPX (loon.tpl 直连的第三方配置, 未镜像; 2026-08 起全局 403 见 issue #27)
+          # kelee.one LPX (loon.tpl 直连的第三方配置, 未镜像; 2026-08 起全局 403 见 issue #27，Loon 带 Turnstile 可拉取，curl 403 视为健康)
           check_url "kelee.one LPX Google" "https://kelee.one/Tool/Loon/Lpx/Google.lpx"
           check_url "kelee.one LPX JD_Price" "https://kelee.one/Tool/Loon/Lpx/JD_Price.lpx"
           check_url "kelee.one LPX Node_detection_tool" "https://kelee.one/Tool/Loon/Lpx/Node_detection_tool.lpx"
@@ -97,18 +94,19 @@ jobs:
           node -e '
             const r = JSON.parse(process.env.RESULTS);
             for (const e of r) {
-              const icon = e.status === "200" || e.status === "301" || e.status === "302" ? "✅" : "❌";
+              const ok = e.status === "200" || e.status === "301" || e.status === "302" || e.status.startsWith("200 (kelee");
+              const icon = ok ? "✅" : "❌";
               console.log(`| ${icon} ${e.name} | ${e.status} |`);
             }
           ' >> $GITHUB_STEP_SUMMARY
 
       - name: Create issue if upstreams down
         if: env.all_ok != 'true'
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             const results = JSON.parse(process.env.results);
-            const failed = results.filter(r => r.status !== "200" && r.status !== "301" && r.status !== "302");
+            const failed = results.filter(r => r.status !== "200" && r.status !== "301" && r.status !== "302" && !r.status.startsWith("200 (kelee"));
             const rows = failed.map(r => `| ❌ ${r.name} | ${r.status} |`).join('\n');
             const report = `## ⚠️ Upstream Health Alert\n\n| Downstream | Status |\n|----------|--------|\n${rows}\n`;
             const { data: issues } = await github.rest.issues.listForRepo({
@@ -126,7 +124,7 @@ jobs:
 
       - name: Close issue if upstreams recovered
         if: env.all_ok == 'true'
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             const { data: issues } = await github.rest.issues.listForRepo({
