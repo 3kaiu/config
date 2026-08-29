@@ -90,9 +90,10 @@ jobs:
             # 上游被攻破时插件内 script-path 可指向任意恶意域; 白名单外一律拦截保留旧版
             case "$dest" in
               *.plugin)
-                if grep -oE 'script-path=https?://[^ ,")]*' "$tmpf" | sed 's/script-path=//' | grep -vqE '^https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one)/'; then
+                # 兼容 `script-path = URL` 带空格写法 (2026-08-29 修复: 空格写法曾逃逸白名单)
+                if grep -oE 'script-path *= *https?://[^ ,")]*' "$tmpf" | sed 's/script-path *= *//' | grep -vqE '^https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one)/'; then
                   echo "🚫 $name 门禁拦截: script-path 指向非白名单域 (疑似投毒), 保留旧版"
-                  grep -oE 'script-path=https?://[^ ,")]*' "$tmpf" | sed 's/script-path=//' | grep -vE '^https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one)/' | head -3
+                  grep -oE 'script-path *= *https?://[^ ,")]*' "$tmpf" | sed 's/script-path *= *//' | grep -vE '^https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one)/' | head -3
                   GATED=$((GATED + 1)); FAIL=$((FAIL + 1))
                   keep_old "$dest"
                   rm -f "$tmpf"; return
@@ -326,20 +327,26 @@ jobs:
             echo "pr_action=none" >> $GITHUB_ENV
             exit 0
           fi
-          BRANCH="mirror/$(date +%Y-%m-%d)"
+          # 2026-08-29 修复: 原按日期建分支 + `gh pr create 2>/dev/null || echo skipped` 静默吞错,
+          # 导致连续 17 天 0 个镜像 PR 创建成功 (分支都在推, 审核门禁全停摆), 且错误日志不可见。
+          # 现改为固定分支 mirror/sync + rebase 最新 origin/main + 失败即红。
+          BRANCH="mirror/sync"
           git checkout -B "$BRANCH"
-          git commit -m "chore(mirror): 上游资源同步 ($(date +%Y-%m-%d)) — 待审核" || echo "commit skipped (no changes)"
-          git push -f origin "$BRANCH" 2>&1 || echo "push skipped (branch exists or remote error)"
-          CHANGED=$(git diff --name-only main...HEAD -- Mirror/ 2>/dev/null | grep -v MANIFEST.json | wc -l || echo 0)
-          BODY=$(printf '## 镜像同步 %s\n\n变更文件: %s 个 (不含 MANIFEST)\n\n```\n%s\n```\n\n### 审核清单\n- [ ] MANIFEST.json diff: 每个变更文件的 sha256 与 source_url 已核对\n- [ ] 上游变更符合预期 (非投毒/非破坏性更新)\n- [ ] CI 全绿\n\n> 门禁: *.js 过 node --check 语法 / 体积≥200B / 非 HTML 错误页; 未过门禁的文件保留旧版\n' "$(date +%Y-%m-%d)" "$CHANGED" "$(git diff --stat main...HEAD -- Mirror/ 2>/dev/null)")
-          if gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' 2>/dev/null | grep -q .; then
-            gh pr edit "$BRANCH" --add-reviewer "@copilot" --body "$BODY" 2>/dev/null || true
-            echo "pr_action=updated" >> $GITHUB_ENV
+          git commit -m "chore(mirror): 上游资源同步 ($(date +%Y-%m-%d)) — 待审核" || { echo "::error::commit failed"; exit 1; }
+          git fetch origin main --quiet
+          git rebase origin/main || { echo "::error::rebase onto origin/main failed"; exit 1; }
+          git push -f origin "$BRANCH" || { echo "::error::push failed"; exit 1; }
+          CHANGED=$(git diff --name-only origin/main...HEAD -- Mirror/ | grep -v MANIFEST.json | wc -l)
+          BODY=$(printf '## 镜像同步 %s\n\n变更文件: %s 个 (不含 MANIFEST)\n\n```\n%s\n```\n\n### 审核清单\n- [ ] MANIFEST.json diff: 每个变更文件的 sha256 与 source_url 已核对\n- [ ] 上游变更符合预期 (非投毒/非破坏性更新)\n- [ ] CI 全绿\n\n> 门禁: *.js 过 node --check 语法 / 体积≥200B / 非 HTML 错误页; 未过门禁的文件保留旧版\n' "$(date +%Y-%m-%d)" "$CHANGED" "$(git diff --stat origin/main...HEAD -- Mirror/)")
+          EXISTING=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' || true)
+          if [ -n "$EXISTING" ]; then
+            if gh pr edit "$EXISTING" --body "$BODY"; then echo "pr_action=updated#"$EXISTING >> $GITHUB_ENV
+            else echo "::error::镜像 PR #$EXISTING 更新失败 (审核门禁失效)"; exit 1; fi
           else
-            gh pr create --base main --head "$BRANCH" --reviewer "@copilot" \
-              --title "chore(mirror): 上游资源同步 ($(date +%Y-%m-%d))" \
-              --body "$BODY" 2>/dev/null || echo "pr creation skipped"
-            echo "pr_action=created" >> $GITHUB_ENV
+            if gh pr create --base main --head "$BRANCH" \
+                --title "chore(mirror): 上游资源同步 ($(date +%Y-%m-%d))" \
+                --body "$BODY"; then echo "pr_action=created" >> $GITHUB_ENV
+            else echo "::error::镜像 PR 创建失败 (审核门禁失效, 上游变更无法审核合并)"; exit 1; fi
           fi
 
       - name: Report summary
