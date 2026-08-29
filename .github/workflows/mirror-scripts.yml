@@ -250,8 +250,12 @@ jobs:
             "iringo/LocationServices/response.bundle.js" "NSRingo / LocationServices response.bundle.js latest"
 
           # ═══════════════ NSRingo Loon 插件 (跟随 latest, 不固定版本) ═══════════════
-          mirror "https://github.com/NSRingo/WeatherKit/releases/latest/download/iRingo.WeatherKit.plugin" \
-            "iringo/iRingo.WeatherKit.plugin" "NSRingo / iRingo.WeatherKit.plugin latest"
+          # 上游 v3.2.0 (2026-08) 起移除 .plugin asset, 格式迁移为 .lpx;
+          # latest 已指向 v3.3.1, 拉取必 404 → 失败即红并阻塞 PR (见 audit 记录)。
+          # 锁定 v3.1.0 (最后一个提供 .plugin 的版本); 生产插件改走 .lpx 需先验证
+          # boxjs 兼容, 不在镜像 PR 内做未验证的格式切换。
+          mirror "https://github.com/NSRingo/WeatherKit/releases/download/v3.1.0/iRingo.WeatherKit.plugin" \
+            "iringo/iRingo.WeatherKit.plugin" "NSRingo / iRingo.WeatherKit.plugin v3.1.0 (latest 已无 .plugin)"
           mirror "https://github.com/NSRingo/MapKit/releases/latest/download/iRingo.Maps.plugin" \
             "iringo/iRingo.Maps.plugin" "NSRingo / iRingo.Maps.plugin latest"
           mirror "https://github.com/NSRingo/News/releases/latest/download/iRingo.News.plugin" \
