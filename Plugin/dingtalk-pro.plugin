@@ -3,7 +3,7 @@
 #!version=8.1
 #!author=3kaiu (参考 ddgksf2013/dingtalk.js + app2smile)
 #!homepage=https://github.com/3kaiu/config
-#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/DingTalk.png
+#!icon=https://icons.duckduckgo.com/ip3/api.dingtalk.com.ico
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.2.4(787)
 

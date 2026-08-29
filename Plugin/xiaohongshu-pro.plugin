@@ -3,7 +3,7 @@
 #!version=9.0
 #!author=3kaiu (参考 ddgksf2013/XiaoHongShuAds.conf + app2smile)
 #!homepage=https://github.com/3kaiu/config
-#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/XiaoHongShu.png
+#!icon=https://icons.duckduckgo.com/ip3/api.xiaohongshu.com.ico
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.2.4(787)
 

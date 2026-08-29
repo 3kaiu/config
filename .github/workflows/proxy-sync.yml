@@ -9,6 +9,11 @@ on:
     paths:
       - 'tools/geonode-sync.mjs'
 
+# 2026-08-29 审计: 直推 main, 并发时非 fast-forward 直接 job 红。
+concurrency:
+  group: proxy-sync
+  cancel-in-progress: false
+
 permissions:
   contents: write
 

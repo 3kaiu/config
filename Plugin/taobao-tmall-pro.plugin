@@ -3,7 +3,7 @@
 #!version=9.0
 #!author=3kaiu (参考 ddgksf2013/taobao.js + app2smile)
 #!homepage=https://github.com/3kaiu/config
-#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Taobao.png
+#!icon=https://icons.duckduckgo.com/ip3/ads.api.taobao.com.ico
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.2.4(787)
 
@@ -89,4 +89,4 @@ DOMAIN-SUFFIX, alibaba.com, DIRECT
 DOMAIN-SUFFIX, 1688.com, DIRECT
 
 [MitM]
-hostname = %APPEND% ads.api.taobao.com, flash.tmall.com, open.api.taobao.com, h5.msearch.taobao.com, api.taobao.com, gateway.tmall.com, mms.taobao.com, criteo.taobao.com, recengine.mobile.taobao.com, cart.taobao.com, promote.cart.taobao.com, vip.service.taobao.com, acs.m.taobao.com, guide-acs.m.taobao.com
+hostname = %APPEND% gw.alicdn.com, heic.alicdn.com, ads.api.taobao.com, flash.tmall.com, open.api.taobao.com, h5.msearch.taobao.com, api.taobao.com, gateway.tmall.com, mms.taobao.com, criteo.taobao.com, recengine.mobile.taobao.com, cart.taobao.com, promote.cart.taobao.com, vip.service.taobao.com, acs.m.taobao.com, guide-acs.m.taobao.com

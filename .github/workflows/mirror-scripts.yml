@@ -7,6 +7,11 @@ on:
   repository_dispatch:
     types: [mirror]
 
+# 2026-08-29 审计: workflow_dispatch 手动连点或与 schedule 撞车时,
+# 两个 run 会对同一天分支互相 force-push / 重复开 PR。串行化 (不取消在跑的: 镜像需要完整跑完)。
+concurrency:
+  group: mirror
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -90,10 +95,16 @@ jobs:
             # 上游被攻破时插件内 script-path 可指向任意恶意域; 白名单外一律拦截保留旧版
             case "$dest" in
               *.plugin)
-                # 兼容 `script-path = URL` 带空格写法 (2026-08-29 修复: 空格写法曾逃逸白名单)
-                if grep -oE 'script-path *= *https?://[^ ,")]*' "$tmpf" | sed 's/script-path *= *//' | grep -vqE '^https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one)/'; then
+                # 2026-08-29 审计修复 (三处绕过面):
+                # 1) tab 写法 `script-path\t=\tURL` — 原 `*= *` 只认空格
+                # 2) scheme 大小写 HTTPS://evil.com — 原正则大小写敏感, 整行不进入提取集合
+                # 3) 提取为空时显式判定 (纯 rewrite/mock 插件无 script-path), 不再依赖 grep -vq 隐式返回码
+                local urls
+                urls=$(grep -oiE 'script-path[[:space:]]*=[[:space:]]*https?://[^ ,")]*' "$tmpf" \
+                  | sed 's/script-path[[:space:]]*=[[:space:]]*//' | tr '[:upper:]' '[:lower:]')
+                if [ -n "$urls" ] && printf '%s\n' "$urls" | grep -vqE '^https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one)/'; then
                   echo "🚫 $name 门禁拦截: script-path 指向非白名单域 (疑似投毒), 保留旧版"
-                  grep -oE 'script-path *= *https?://[^ ,")]*' "$tmpf" | sed 's/script-path *= *//' | grep -vE '^https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one)/' | head -3
+                  printf '%s\n' "$urls" | grep -vE '^https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one)/' | head -3
                   GATED=$((GATED + 1)); FAIL=$((FAIL + 1))
                   keep_old "$dest"
                   rm -f "$tmpf"; return
@@ -295,11 +306,35 @@ jobs:
             "biliuniverse/BiliBili.Redirect.plugin" "BiliUniverse Redirect / .plugin v0.2.20"
 
           # ── 写出新清单 (按文件名排序) ──
+          # 2026-08-29 修复 (审计 P1): sha256 在此处从磁盘重算, 不再信任 mirror() 在 cp 后立即算的值。
+          # 旧时序下 sed 补丁 (AllInOne/AdvertisingScript/NSRingo) 在 mirror() 之后改写文件,
+          # MANIFEST 记的是补丁前哈希 → 每个周期必然漂移 4 处 (已实测复现)。
+          # 另加孤儿删除守卫: 旧清单有、本轮 ENTRIES 无、且文件仍在仓库 → 保留并标记,
+          # 防工作流清单漏项时静默删除仓库镜像文件 (GOODBYEADS 曾被镜像分支误删)。
           node -e '
+            const fs = require("fs");
+            const crypto = require("crypto");
             const entries = process.argv.slice(1).map(s => { const i = s.indexOf(":"); return [s.slice(1, i-1).trim().replace(/^"|"$/g,""), s.slice(i+1).trim()]; });
             entries.sort((a,b) => a[0].localeCompare(b[0]));
             const files = {};
             for (const [k, v] of entries) files[k] = JSON.parse(v);
+            const oldPath = "Mirror/MANIFEST.json";
+            if (fs.existsSync(oldPath)) {
+              const oldFiles = (JSON.parse(fs.readFileSync(oldPath, "utf8")).files) || {};
+              for (const [k, v] of Object.entries(oldFiles)) {
+                if (files[k] || !fs.existsSync("Mirror/" + k)) continue;
+                files[k] = v;
+                files[k]._preserved = "not-in-workflow-coverage but file still tracked — kept to avoid silent deletion";
+                console.log(`⚠️ 孤儿保留: Mirror/${k} (不在 workflow 清单但文件仍在仓库, 已保留)`);
+              }
+            }
+            for (const [k, v] of Object.entries(files)) {
+              if (fs.existsSync("Mirror/" + k)) {
+                const buf = fs.readFileSync("Mirror/" + k);
+                v.sha256 = crypto.createHash("sha256").update(buf).digest("hex");
+                v.bytes = buf.length;
+              }
+            }
             const manifest = {
               "$comment": "镜像文件哈希清单 — 由 mirror-scripts.yml 维护; 变更会出现在镜像 PR 的 diff 中, 合并前请核对 source 变更是否符合预期",
               generated_at: new Date().toISOString().replace(/\.\d+Z$/, "Z"),

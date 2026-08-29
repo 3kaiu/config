@@ -31,9 +31,20 @@ jobs:
         run: npm ci
 
       - name: Generate configs with Surgio
+        # 2026-08-29 审计修复 (P0 条件性): 此前把 SURGIO_SUBSCRIPTION_URL secret 注入,
+        # surgio 会把订阅解析出的节点 (含 password/uuid) 写进 Profile/Loon.lcf,
+        # 再由本工作流 auto-PR 提交进公开仓库并分发到 CDN — 凭据外泄路径已通。
+        # 该 secret 当前未配置 (gh secret list 为空), 但管线是通的, 故移除注入。
         run: npx surgio generate --skip-lint
-        env:
-          SURGIO_SUBSCRIPTION_URL: ${{ secrets.SURGIO_SUBSCRIPTION_URL || '' }}
+
+      - name: Assert no credentials in generated config
+        run: |
+          # 公开分发产物不得含订阅凭据; 任一凭据模式命中即失败, 阻断 auto-PR
+          if grep -nE '(^|,)(password|uuid|bob|encryption)=' Profile/Loon.lcf; then
+            echo "::error::Loon.lcf 含订阅凭据 — 禁止提交公开产物"
+            exit 1
+          fi
+          echo "✅ Loon.lcf 无订阅凭据"
 
       - name: Check for changes
         id: check
@@ -53,25 +64,30 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          BRANCH="surgio-auto/$(date +%Y-%m-%d)"
+          BRANCH="surgio-auto"
           git checkout -B "$BRANCH"
           git add Profile/Loon.lcf
           git commit -m "chore(surgio): auto-update generated configs ($(date +%Y-%m-%d))"
-          git push -f origin "$BRANCH" 2>&1 || echo "push skipped"
+          # 2026-08-29 审计修复: push / gh pr 的 `2>/dev/null || echo skipped` 改为失败即红
+          # (同 mirror-scripts 批)。此前静默失败让 auto-PR 门禁失效且日志不可见。
+          # 日期分支改固定分支: 与 mirror-scripts 一致, 避免 PR 卡住无法复用、分支堆积。
+          git push -f origin "$BRANCH" || { echo "::error::push failed"; exit 1; }
 
           BODY="## Surgio 自动配置更新\n\nSurgio 配置模板变更触发生成，Profile/ 文件已自动更新。\n\n### 审核清单\n- [ ] Loon.lcf 变更符合预期\n- [ ] CI 全绿"
 
-          if gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' 2>/dev/null | grep -q .; then
-            PR_NUM=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
-            gh pr edit "$PR_NUM" --body "$BODY" 2>/dev/null || true
-            echo "PR updated, 留待人工审核合并"
+          EXISTING=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' || true)
+          if [ -n "$EXISTING" ]; then
+            if gh pr edit "$EXISTING" --body "$BODY"; then
+              echo "PR #$EXISTING 已更新, 留待人工审核合并"
+            else
+              echo "::error::surgio PR #$EXISTING 更新失败 (auto-PR 门禁失效)"; exit 1
+            fi
           else
-            PR_URL=$(gh pr create --base main --head "$BRANCH" \
+            if gh pr create --base main --head "$BRANCH" \
               --title "chore(surgio): auto-update generated configs ($(date +%Y-%m-%d))" \
-              --body "$BODY" 2>/dev/null || echo "")
-            if [ -n "$PR_URL" ]; then
+              --body "$BODY"; then
               echo "PR created, 留待人工审核合并"
             else
-              echo "PR creation skipped"
+              echo "::error::surgio PR 创建失败 (auto-PR 门禁失效)"; exit 1
             fi
           fi

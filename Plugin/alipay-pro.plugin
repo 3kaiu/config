@@ -3,7 +3,7 @@
 #!version=8.1
 #!author=3kaiu (参考 ddgksf2013/alipay.js + app2smile)
 #!homepage=https://github.com/3kaiu/config
-#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Alipay.png
+#!icon=https://icons.duckduckgo.com/ip3/sdkopen.vip.alipay.com.ico
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.2.4(787)
 

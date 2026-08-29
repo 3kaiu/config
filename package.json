@@ -7,7 +7,7 @@
     "build": "esbuild $(find src -name '*.ts' ! -name 'env.ts' ! -name 'loon.d.ts') --inject:src/env.ts --outdir=Scripts --minify --target=es2020",
     "generate": "surgio generate --skip-lint",
     "preview": "surgio preview",
-    "test": "node test/run-tests.js",
+    "test": "node test/run-tests.js && node test/rule-order-check.js",
     "lint": "eslint Scripts/ test/ tools/",
     "check:sync": "node tools/tpl-sync-check.mjs",
     "check:orphan": "node tools/mitm-orphan-check.mjs --local",

@@ -69,8 +69,8 @@ Proxy = url-test, MainNodes, 东京, url=http://cp.cloudflare.com/generate_204, 
 Fallback = fallback, MainNodes, url=http://cp.cloudflare.com/generate_204, interval=600, timeout=10
 Apple = select, DIRECT, Proxy
 Final = select, Proxy, Fallback, DIRECT
-Streaming = select, vless-reality-JP, Proxy, Fallback, DIRECT, tag=流媒体
-AI = select, vless-reality-JP, Proxy, Fallback, DIRECT, tag=AI服务
+Streaming = select, VLESS, Proxy, Fallback, DIRECT, tag=流媒体
+AI = select, VLESS, Proxy, Fallback, DIRECT, tag=AI服务
 Developer = select, Proxy, Fallback, DIRECT, tag=开发者
 Gaming = select, Proxy, Fallback, DIRECT, tag=游戏平台
 Social = select, Proxy, Fallback, DIRECT, tag=社交平台
@@ -79,6 +79,10 @@ OpenCode = select, Proxy, DIRECT, Geonode, tag=OpenCode.ai
 [Remote Filter]
 # 主节点池: 排除 geonode-* 免费代理 (免费代理稳定性差, 防 url-test 自动选路到不可用节点)
 MainNodes = NameRegex, FilterKey = "^(?!.*geonode).*$"
+VLESS = NameRegex, FilterKey = "(?i)^(?=.*vless)(?!.*geonode).*$"
+#   含 geonode 负向前瞻 (2026-08-29 审计修复): 与 MainNodes 同一隔离基线。此前 "(?i)vless"
+#   无排除, 一旦 geonode 订阅出现 vless 协议免费节点, Streaming/AI 组会把免费代理当首选
+#   — 正是 MainNodes 正则要防的静默选路。(?i) 使两个条件均大小写不敏感。
 
 [Remote Proxy]
 # Geonode 免费代理订阅 — 每日由 proxy-sync workflow 从 proxylist.geonode.com 拉取,
@@ -388,7 +392,7 @@ https://ws.wenn.in/main/Mirror/rules/loon-Global.list, policy=Proxy, tag=🌍 �
 https://ws.wenn.in/main/Mirror/rules/loon-Advertising.list, policy=REJECT, tag=🚫 广告域名, enabled=true
 https://ws.wenn.in/main/Mirror/rules/loon-Privacy.list, policy=REJECT, tag=🔒 隐私保护, enabled=true
 https://ws.wenn.in/main/Mirror/rules/loon-Hijacking.list, policy=REJECT, tag=🛡️ 反劫持, enabled=true
-https://3kaiu-mirror-1787937996.s3.amazonaws.com/rules/goodbyeads-qx.list, tag=GOODBYEADS, policy=REJECT, enabled=true
+https://3kaiu-mirror-1787937996.s3-ap-northeast-1.amazonaws.com/rules/goodbyeads-qx.list, tag=GOODBYEADS, policy=REJECT, enabled=true
 https://ws.wenn.in/main/Mirror/rules/loon-Epic.list, policy=Proxy, tag=🎮 Epic Games, enabled=true
 
 [Plugin]
@@ -404,9 +408,10 @@ https://ws.wenn.in/main/Plugin/bilibili-pro.plugin, enabled=true, tag=B站去广
 https://ws.wenn.in/main/Plugin/shopping-purify.plugin, enabled=true, tag=🛍 购物生活净化 Pro
 https://ws.wenn.in/main/Plugin/video-community-purify.plugin, enabled=true, tag=🎬 视频社区净化
 https://ws.wenn.in/main/Plugin/media-reading-purify.plugin, enabled=true, tag=🎵 影音阅读净化
-https://ws.wenn.in/main/Plugin/transport-purify.plugin, enabled=false, tag=🚕 出行外卖净化 (默认关, 按需开)
-https://ws.wenn.in/main/Plugin/news-purify.plugin, enabled=false, tag=📰 资讯阅读净化 (默认关, 按需开)
-https://ws.wenn.in/main/Plugin/social-netdisk-purify.plugin, enabled=false, tag=⚙️ 社交网盘工具净化 (默认关, 按需开)
+https://ws.wenn.in/main/Plugin/transport-purify.plugin, enabled=true, tag=🚕 出行外卖净化
+https://ws.wenn.in/main/Plugin/news-purify.plugin, enabled=true, tag=📰 资讯阅读净化
+https://ws.wenn.in/main/Plugin/social-netdisk-purify.plugin, enabled=true, tag=⚙️ 社交网盘工具净化
+
 https://ws.wenn.in/main/Plugin/bilicomics.plugin, enabled=true, tag=B站漫画去广告
 https://ws.wenn.in/main/Plugin/netease-pro.plugin, enabled=true, tag=网易云音乐净化 Pro
 https://ws.wenn.in/main/Plugin/qishui.plugin, enabled=true, tag=汽水音乐净化
@@ -469,7 +474,7 @@ https://kelee.one/Tool/Loon/Lpx/Google.lpx, enabled=true, tag=🔍 Google搜索�
 https://kelee.one/Tool/Loon/Lpx/Spotify_lyrics_translation.lpx, enabled=true, tag=🎵 Spotify歌词翻译
 https://kelee.one/Tool/Loon/Lpx/Weixin_external_links_unlock.lpx, enabled=true, tag=💬 微信外部链接解锁
 https://kelee.one/Tool/Loon/Lpx/JD_Price.lpx, enabled=true, tag=📦 京东比价
-https://kelee.one/Tool/Loon/Lpx/VVebo_repair.lpx, enabled=false, tag=📋 VVebo时间线修复
+
 https://kelee.one/Tool/Loon/Lpx/Node_detection_tool.lpx, enabled=true, tag=🌐 节点检测工具
 https://kelee.one/Tool/Loon/Lpx/NodeLinkCheck.lpx, enabled=true, tag=🔗 代理链路检测
 

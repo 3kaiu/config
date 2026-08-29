@@ -59,6 +59,9 @@ jobs:
           # 自建 CDN 可用性 (内容哈希校验在 cdn-verify.yml, 这里只探活)
           check_url "ws.wenn.in CDN (Mirror)" "https://ws.wenn.in/main/Mirror/netease.adblock.js"
 
+          # S3 镜像 (GOODBYEADS 客户端直连, loon.tpl [Remote Rule] 引用; 上传为带外手工同步, 无其他巡检覆盖)
+          check_url "S3 GOODBYEADS (Remote Rule)" "https://3kaiu-mirror-1787937996.s3-ap-northeast-1.amazonaws.com/rules/goodbyeads-qx.list"
+
           # 免费代理源 (proxy-sync 每日拉取 → Profile/geonode.loon.txt, Loon [Remote Proxy] 引用)
           check_url "proxylist.geonode.com API" "https://proxylist.geonode.com/api/proxy-list?page=1&limit=1&sort_by=responseTime&sort_type=asc"
           check_url "ws.wenn.in CDN (Geonode 订阅)" "https://ws.wenn.in/main/Profile/geonode.loon.txt"
@@ -79,7 +82,12 @@ jobs:
             for (const [f, meta] of Object.entries(m.files)) {
               console.log(f + "\t" + meta.source_url);
             }
-          ' | while IFS=$'\t' read -r name url; do check_url "$name (mirrored)" "$url"; done
+          ' > /tmp/mirrors.tsv
+          # 2026-08-29 修复 (审计 P0): 原用管道 `node ... | while read` — bash 中管道右侧 while
+          # 跑在子 shell, check_url 内 ALL_OK / RESULTS 的赋值在循环结束后全部丢失。
+          # 后果: 全部 MANIFEST 派生探活 (~34 条) 不写 summary、不影响 all_ok、永不触发 issue,
+          # 等于硬编码之外的上游探活全是死代码。改用 /tmp 文件中转让 while 留在当前 shell。
+          while IFS=$'\t' read -r name url; do check_url "$name (mirrored)" "$url"; done < /tmp/mirrors.tsv
 
           echo "all_ok=$ALL_OK" >> $GITHUB_ENV
           echo "results=$RESULTS" >> $GITHUB_ENV

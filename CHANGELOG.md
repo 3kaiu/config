@@ -6,6 +6,53 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [v8.11] — 2026-08-29
+
+### Fixed (script-path 白名单洞 + S3 巡检盲区)
+
+- **白名单提取洞根治** (`config-validate.yml` step 2 / `mirror-scripts.yml` 门禁 4)：URL 提取原用 `script-path=` 紧挨等号匹配，`Plugin/sub-store.plugin` 的 `script-path = URL` 带空格写法**整体逃逸**白名单与可达性检查 — 任何带空格写法的恶意 script-path 域均可绕过门禁。现改为 `script-path[[:space:]]*=` / `script-path *= *` 兼容两种写法；本地复跑 32 条 URL 全部白名单内且可达，恶意域用例验证拦截生效
+- **Sub-Store 源迁移** (`Plugin/sub-store.plugin` v7.8→v7.9)：gitlab.com/sub-store/Sub-Store 仓库已 403 (根域 200，仓库/ releases 均 403, 疑迁移或封禁)，3 条 script-path 全部失效 — 迁往官方新址 `github.com/sub-store-org/Sub-Store` `releases/latest/download/` (sub-store-0/1.min.js + cron-sync-artifacts.min.js，实测 200)；github.com 本在白名单内，gitlab.com 无需加入
+- **S3 GOODBYEADS 巡检盲区** (`upstream-health.yml`)：`3kaiu-mirror-1787937996.s3-ap-northeast-1.amazonaws.com/rules/goodbyeads-qx.list` 是 loon.tpl [Remote Rule] 客户端直连 URL，但 S3 上传为带外手工同步，MANIFEST 派生探活与 cdn-verify 均不覆盖 — 新增每日探活 (实测 200)
+
+### Fixed (全量审计第 II 轮: CI 门禁失效 + 模板产物脱节)
+
+**CI 静默失效类 (P0/P1)** — 这批问题的共性是"门禁显示绿灯但实际未生效"，与上轮白名单洞同型:
+
+- **mirror 审核 PR 从未成功创建 17 天** (`mirror-scripts.yml`)：`gh pr create` 的 stderr 被 `2>/dev/null` 吞掉、失败后 `|| echo "pr creation skipped"` 返回 0、PR 段仍以"更新 PR"为结论 — 三重静默使每日镜像跑完即结束，**门禁 4 投毒白名单 + MANIFEST 哈希核对 + 人工审核全部停摆 17 天** (分支每天在推, 但审核从未发生)。现改为 `|| { ::error::; exit 1; }` 三处失败即红, 日期分支改固定分支 `mirror/sync` (27 个 `mirror/<date>` 堆积), 审核清单保留
+- **MANIFEST sha256 必然漂移** (`mirror-scripts.yml`): sha 在 `cp` 后立即算并写入 ENTRIES, 但 AllInOne/AdvertisingScript/NSRingo 的 sed 补丁在其后改写文件 → MANIFEST 记的是补丁前哈希。已实测复现 4 处漂移 (`netease.adblock.js`/`bilibili-proto.js`/`rules/loon-AllInOne.plugin`/`rules/loon-AdvertisingScript.plugin`), PR 审核清单的"sha 已核对"项必然对不上。现改为写出清单时**从磁盘重算**
+- **MANIFEST 孤儿删除守卫** (`mirror-scripts.yml`): 清单只从 workflow 自身硬编码构建, 无孤儿清理逻辑 — 工作流清单漏项时会静默删除仓库镜像文件 (2026-08 GOODBYEADS 曾被镜像分支误删)。现对"旧清单有 / 本轮 ENTRIES 无 / 文件仍在仓库"的条目予以保留并标记 `_preserved`
+- **upstream-health MANIFEST 派生探活整体失效** (`upstream-health.yml`): `node -e ... | while read; do check_url; done` — bash 中管道右侧 `while` 跑在**子 shell**, `check_url` 内 `ALL_OK=false` 与 `RESULTS` 的赋值在循环结束后全部丢失 (本地 `A=true` 实测复现)。约 35 条镜像上游探活不写 summary、不影响 all_ok、**永不触发 issue**, 即除硬编码外的全部上游探活是死代码。改 `/tmp` 文件中转让 while 留在当前 shell
+- **surgio-build 订阅凭据外泄路径** (`surgio-build.yml`): 此前注入 `SURGIO_SUBSCRIPTION_URL` secret, surgio 会把订阅解析出的节点 (含 password/uuid) 写进 `Profile/Loon.lcf`, 再由本工作流 auto-PR 提交进公开仓库并分发到 CDN — 管线是通的。该 secret 当前未配置 (`gh secret list` 为空), 故无实际泄漏, 但已移除注入并新增"Loon.lcf 凭据断言" step (命中 `password=`/`uuid=`/`bob=`/`encryption=` 即失败), 另把 PR 段同样的吞错模式一并修掉
+- **script-tests OIDC 拆 job** (`script-tests.yml`): 原同一 job 先 `npm ci` (执行第三方依赖 install 脚本) 后 `attestation`, 且 job 级持 `id-token: write` — 恶意/被劫持依赖可在 install 阶段取用 OIDC token 伪造构建出处证明, attest 的供应链价值归零。现 attest 独立 job (`needs: test`, 自身不跑 npm ci), test job 收敛为只读
+
+**白名单绕过补漏** (`config-validate.yml` / `mirror-scripts.yml`)：
+- **scheme 大小写**: 提取正则大小写敏感, `HTTPS://evil.com/x.js` 整行**不进入提取集合**即逃逸白名单 (URL scheme 大小写不敏感, Loon 正常加载)。现 `-i` 提取 + `tr` 归一化
+- **mirror 门禁 tab 变体**: 修复后仍只认空格, `script-path\t=\tURL` 逃逸。改 `[[:space:]]*`
+- **空提取判定**: `grep -vq` 在提取为空时返回 1, 门禁静默放行。改显式 `[ -n "$urls" ]` 判定 + `printf` 重放
+- 已验证其他绕过面安全: userinfo `@`、子域前缀、点号后缀均因要求白名单域后紧跟 `/` 而被拦截
+
+**模板/产物脱节**:
+- **VLESS filter 排除免费代理** (`template/loon.tpl`): `"(?i)vless"` 无 `geonode` 排除 — 一旦 geonode 订阅出现 vless 协议免费节点, Streaming/AI 组会把免费代理当首选, 正是 `MainNodes` 正则 `^(?!.*geonode).*$` 要防的静默选路。改 `"(?i)^(?=.*vless)(?!.*geonode).*$"`, 与 MainNodes 同一隔离基线
+- **sub-store.plugin 接线恢复** (`template/loon.tpl`): 从 `[Plugin]` 段删除后 wiring-check 报孤儿, 而 CHANGELOG 未记录下线 — 保留功能, 恢复引用 (若确认要下线则删文件与引用两处)
+- **taobao alicdn 死规则** (`Plugin/taobao-tmall-pro.plugin`): `gw|heic.alicdn.com` 的 `reject-dict` 规则依赖 HTTPS 解密匹配 URL 路径, 但同文件 `[MitM] hostname` 无 alicdn → 规则永不触发。hostname 补 `gw.alicdn.com, heic.alicdn.com`
+- **`test/rule-order-check.js` 重写并接入 CI**: 原两项锚点已失效 (`pangolin-sdk-toutiao.com, DIRECT` / `adsmind.ugdtimg.com, DIRECT` 均已于 2026-08-12 改为 REJECT), 且该文件**既不在 `npm test` 也不在任何 workflow** — 一个永远红又无人执行的守卫比没有守卫更糟, 它制造"有防护"的错觉。现按现行拓扑重写 6 项 (广告 SDK 先于 GEOIP / 穿山甲+优量汇精确先于 SUFFIX / STUN 白名单先于泛 REJECT / FINAL 紧随 GEOIP 且相邻收尾), 接入 `config-validate.yml` step 11 与 `npm test`
+- `Profile/Loon.lcf` regenerate 同步模板
+
+### Changed (文档漂移修正)
+
+- **`doc/infrastructure.md` 应急切换纠偏**: 第 5 节原写"启用 Pages 备分发 (`pages-deploy.yml` 绿灯)", 但该 workflow 已删除。实测 `https://3kaiu.github.io/config/Profile/Loon.lcf` 返回 **200 但 sha256 与仓库当前产物不同** — Pages 在服务 2026-08-29 前的**冻结内容**。切成 Pages 得到陈旧配置 (降级但非投毒), 不能宣传为"等价通道"。通道表改标"冻结(可访问但陈旧)", 应急步骤改为**先比对 sha256 再决定**, 并留 TODO: 重新引入极简 `pages-deploy.yml` 使 Pages 跟随 main
+- **`AGENTS.md` 数字修正**: devDependencies 4→**3** (实际 esbuild/eslint/surgio, 无运行时依赖); `[Rule]` 456→**483** 行; Kelee 清单补全为 **15 个**; 删除已不存在的 `Scripts/lib/notify.js` 引用; surgio 3.18→**3.19**; 发布面删除 GitHub Pages 兜底表述; mirror-scripts 门禁描述补"sha 从磁盘重算 + 孤儿保留"
+- **`doc/infrastructure.md`**: 镜像资源 35→**36** 个 (规则列表 6→7); 补充"仓库/CDN/Pages 三者新鲜度不等"警示
+- `package.json` version 仍为 8.5.0 (自 v8.6 起未 bump, 与 CHANGELOG 脱节 — 留待下次发版统一)
+
+### Notes
+
+- 本轮未 push, 所有修复在工作树待确认。`mirror/2026-08-27..29` 三个历史分支 + 诊断用 PR 需在确认后清理
+- `surgio-build` 的凭据断言当前对 `Loon.lcf` **无命中** (已实测), 新增即生效不引入假阳性
+- 依赖台账: S3 (`3kaiu-mirror-1787937996.s3-ap-northeast-1.amazonaws.com`) 与探测目标 `opencode.ai` 均未在 `doc/infrastructure.md` 登记, 本轮已在探活中覆盖但台账登记仍未补 — 后续项
+
+---
+
 ## [v8.10] — 2026-08-28
 
 ### Removed (EduProxy 免费代理订阅下线 — 回归 Geonode 单源)

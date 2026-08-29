@@ -3,7 +3,7 @@
 #!version=7.9
 #!author=3kaiu (基于 app2smile + ddgksf2013 融合增强)
 #!homepage=https://github.com/3kaiu/config
-#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Zhihu.png
+#!icon=https://icons.duckduckgo.com/ip3/api.zhihu.com.ico
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.2.4(787)
 

@@ -8,10 +8,13 @@
 | 通道 | 地址 | 状态 | 说明 |
 |------|------|------|------|
 | 主 CDN | `https://ws.wenn.in/main/<仓库路径>` | 生产 | 仓库 main 分支的 CDN 化代理；内容控制权 = 仓库写权限 |
-| 备分发 | `https://3kaiu.github.io/config/<仓库路径>` | 待启用 | GitHub Pages，由 `pages-deploy.yml` 自动发布；需在仓库 Settings → Pages → Source 选 "GitHub Actions" 后生效 |
+| 备分发 | `https://3kaiu.github.io/config/<仓库路径>` | 冻结(可访问但陈旧) | GitHub Pages 站点在服务 2026-08-29 前的旧内容；`pages-deploy.yml` 已删除, 仓库内无工作流可触发新部署 — 见第 5 节 |
 | 源头 | `github.com/3kaiu/config` main 分支 | 生产 | 唯一事实来源 |
 
 路径映射为恒等映射：`ws.wenn.in/main/Scripts/Qidian.js` ↔ 仓库 `Scripts/Qidian.js` ↔ Pages `/config/Scripts/Qidian.js`。
+
+> ⚠️ 三者的**新鲜度不等**：仓库/CDN 每日刷新, Pages 自 2026-08-29 起冻结。
+> 使用前必须比对 sha256, 不要假设 Pages 与仓库一致。
 
 ## 2. 域名台账（wenn.in）
 
@@ -29,9 +32,9 @@
 
 ## 3. 完整性保障
 
-- `mirror-scripts.yml`：每日 03:00 从上游拉取 **35 个资源**（脚本 9 + 解析器 1 + Loon 规则列表 6 + rewrite 插件 2 + Loon 插件 17），经三重门禁（`*.js` 语法 / 体积≥200B / 非 HTML）后写入 `Mirror/`，**走 PR 人工审核**合并（不再直推 main）。插件外壳远程引用已收敛到 `ws.wenn.in/main/Mirror/`（插件内部 bundle 引用仍直连上游，见 3b）。
+- `mirror-scripts.yml`：每日 03:00 从上游拉取 **36 个资源**（脚本 9 + 解析器 1 + Loon 规则列表 7 + rewrite 插件 2 + Loon 插件 17；2026-08-29 实测, 与 MANIFEST 条目数一致），经三重门禁（`*.js` 语法 / 体积≥200B / 非 HTML）后写入 `Mirror/`，**走 PR 人工审核**合并（不再直推 main）。插件外壳远程引用已收敛到 `ws.wenn.in/main/Mirror/`（插件内部 bundle 引用仍直连上游，见 3b）。
 - `Mirror/MANIFEST.json`：全部镜像文件的 source_url + sha256 清单，上游变更在 PR diff 中高亮。
-- `cdn-verify.yml`：每日 02:34 拉取 CDN 全量分发文件与仓库做 sha256 比对，不一致开 Issue（标签 `cdn-verify`），可选 Bark 告警（Secret `BARK_PUSH`）；同时做 GitHub Pages 兜底链路（3kaiu.github.io/config）可达性抽查（非阻断）。
+- `cdn-verify.yml`：每日 02:34 拉取 CDN 全量分发文件与仓库做 sha256 比对，不一致开 Issue（标签 `cdn-verify`），可选 Bark 告警（Secret `BARK_PUSH`）；同时做 GitHub Pages 链路（3kaiu.github.io/config）可达性抽查（非阻断，且 Pages 内容已冻结 — 见第 5 节）。
 - `upstream-health.yml`：上游源可达性探活（状态码级），探测列表镜像部分派生自 `Mirror/MANIFEST.json`。
 - `Scripts/ENGINE-MANIFEST.json`：Qidian 内嵌引擎哈希清单，`config-validate.yml` step 8 强制校验。
 
@@ -66,7 +69,19 @@
 4. 排查 CDN 配置与域名账户安全，复盘后再恢复。
 
 **不可用（域名/CDN 故障）**：
-1. 启用 GitHub Pages 备分发（确认 Settings → Pages 已启用，`pages-deploy.yml` 绿灯）；
+
+> ⚠️ **2026-08-29 审计纠正**：本节原写"启用 Pages 备分发（pages-deploy.yml 绿灯）"，
+> 但 `pages-deploy.yml` 已删除。Pages 站点本身仍在服务（实测 200），却是**冻结的旧内容**：
+> 2026-08-29 前后仓库无任何工作流可触发新部署, 实测 `3kaiu.github.io/config/Profile/Loon.lcf`
+> 的 sha256 与仓库当前产物不同。切成 Pages 得到的是陈旧配置 —— 功能降级但不算投毒,
+> 属于"可接受的应急"而非"等价通道"。
+
+1. **先评估陈旧度**，决定是否值得切：
+   ```sh
+   curl -s https://3kaiu.github.io/config/Profile/Loon.lcf | shasum -a 256
+   ```
+   与仓库当前 `Profile/Loon.lcf` 比对。若差异可接受（仅是新增插件/规则），可继续；
+   若冻结版本过旧导致关键插件 script-path 已变更，**优先修 CDN 而不是切 Pages**。
 2. 批量替换已导出配置中的 URL（Loon 示例，导出配置文本后执行）：
    ```sh
    sed -i '' 's#https://ws.wenn.in/main/#https://3kaiu.github.io/config/#g' 导出的配置.conf
@@ -74,6 +89,9 @@
    或直接用 Pages 地址重新导入 Profile：
    `https://3kaiu.github.io/config/Profile/Loon.lcf`。
 3. 注意：Loon 已安装插件内嵌的 script-path 不会自动切换，需重装插件（插件 URL 同样替换前缀即可）。
+4. **恢复 Pages 为可用兜底**（后续 TODO）：重新引入一个极简 `pages-deploy.yml`
+   （build_type=workflow, 推 main 时上传仓库根目录到 Pages），使 Pages 重新跟随 main。
+   在未完成前，Pages 只能当"降级兜底"用, 不能当"等价通道"宣传。
 
 ## 6. 变更 checklist（动 CDN/域名前过一遍）
 

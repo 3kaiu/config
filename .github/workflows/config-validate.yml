@@ -48,8 +48,11 @@ jobs:
       - name: Check script-path URLs (lightweight)
         run: |
           echo "## Script-Path URL Check" >> $GITHUB_STEP_SUMMARY
-          grep -rh 'script-path=' Plugin/*.plugin Kelee/*.plugin 2>/dev/null | \
-            grep -oP 'https?://[^"'\'',]+' | sort -u > /tmp/urls.txt
+          # 2026-08-29 审计修复 (两处绕过面):
+          # 1) `script-path = URL` 带空格写法曾整体逃逸检查 (sub-store.plugin 即此写法)
+          # 2) -i + 小写归一: 原正则大小写敏感, HTTPS://evil.com 整行不进入提取集合即逃逸白名单
+          grep -rhE 'script-path[[:space:]]*=' Plugin/*.plugin Kelee/*.plugin 2>/dev/null | \
+            grep -oiP 'https?://[^"'\'',]+' | tr '[:upper:]' '[:lower:]' | sort -u > /tmp/urls.txt
           # 域白名单检查: script-path 只允许指向受信分发域 (防本地壳投毒, 与 mirror 门禁 4 对齐)
           BAD=$(grep -vE '^(https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one|jsdelivr\.net|unpkg\.com)/)' /tmp/urls.txt || true)
           if [ -n "$BAD" ]; then
@@ -247,6 +250,12 @@ jobs:
       # 防"写了插件/脚本但没接线"的死代码回归:
       #   每个 Plugin/*.plugin 必须被 loon.tpl 引用; 每个 Scripts/*.js 必须被引用;
       #   反向引用 (模板/插件引用的文件必须存在) 一并校验
+      # ── 11. 规则顺序守卫 (2026-08-29 审计修复: 原 test/rule-order-check.js 不在 CI 也不在 npm test,
+      # 且锚点已失效 → 永远失败又无人执行。现重写为守护现行拓扑, 并接入本门禁) ──
+      - name: Loon rule-order guard (test/rule-order-check.js)
+        run: node test/rule-order-check.js 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+
+
       - name: Wiring integrity check (no dead code)
         run: |
           echo "## Wiring Integrity Check" >> $GITHUB_STEP_SUMMARY

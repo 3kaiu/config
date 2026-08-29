@@ -13,13 +13,13 @@ on:
 
 permissions:
   contents: read
-  id-token: write
-  attestations: write
 
 jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -39,15 +39,6 @@ jobs:
       - name: Build scripts
         run: npm run build
 
-      # 构建产物签名 (供应链信任): 为 Scripts/*.js 生成可验证的构建出处证明
-      # 验证: gh attestation verify Scripts/<file>.js -R 3kaiu/config
-      # fork PR 无 id-token, 自动跳过
-      - name: Attest build provenance
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
-        with:
-          subject-path: Scripts/*.js
-
       - name: Gate on build output drift
         run: |
           if git diff --exit-code -- Scripts/; then
@@ -59,3 +50,28 @@ jobs:
 
       - name: Run script tests
         run: node test/run-tests.js
+
+  # 2026-08-29 审计修复 (P1): attestation 从 test job 拆出。
+  # 原同 job 先 `npm ci` (执行第三方依赖 install 脚本) 再 attestation, 且 job 级持 id-token: write —
+  # 恶意/被劫持依赖可在 install 阶段取用 OIDC token 伪造构建出处证明, attest 的供应链价值归零。
+  # 现 attest 独立 job: 只在 test 全绿 (含漂移门禁) 后执行, 自身不跑 npm ci。
+  attest:
+    name: Attest build provenance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: test
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      # 构建产物签名 (供应链信任): 为 Scripts/*.js 生成可验证的构建出处证明
+      # 验证: gh attestation verify Scripts/<file>.js -R 3kaiu/config
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
+        with:
+          subject-path: Scripts/*.js
