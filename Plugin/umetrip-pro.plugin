@@ -1,0 +1,15 @@
+#!name=航旅纵横去广告 Pro v1.0
+#!desc=航旅纵横 — protobuf 报文字节级净化: 首页/瀑布流/行程 banner/家庭守护/历史/我的/航班, 按 rpid 分发
+#!version=1.0
+#!author=3kaiu (基于 ddgksf2013 移植)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/umetrip.png
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+
+[Script]
+# ── native 网关响应净化 ($response.bodyBytes, protobuf wire 级改写) ──
+http-response ^https:\/\/(?:sns|appmsg|umehome|opactivity|activity|umerp|umeflightstatus|umestartup)\.umetrip\.com\/gateway\/api\/umetrip\/native$ script-path=https://ws.wenn.in/main/Scripts/Umetrip.js, requires-body=true, timeout=10, tag=航旅纵横_净化
+
+[MitM]
+hostname = %APPEND% sns.umetrip.com, appmsg.umetrip.com, umehome.umetrip.com, opactivity.umetrip.com, activity.umetrip.com, umerp.umetrip.com, umeflightstatus.umetrip.com, umestartup.umetrip.com, oss.umetrip.com

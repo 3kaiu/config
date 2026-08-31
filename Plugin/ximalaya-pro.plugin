@@ -1,0 +1,36 @@
+#!name=喜马拉雅去广告 Pro v1.0
+#!desc=喜马拉雅 — 去广告/直播/红包/GIF弹窗/开屏/版本更新净化
+#!version=1.0
+#!author=3kaiu (基于 ddgksf2013 移植)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://icons.duckduckgo.com/ip3/www.ximalaya.com.ico
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+
+[Rewrite]
+# ── 直播/红包/GIF弹窗/开屏/版本更新 ──
+^https?:\/\/.*xima.*\.com\/.*live.* reject-200
+^https?:\/\/.*xima.*\.com\/.*redpack.* reject-200
+^https?:\/\/.*xima.*\.com\/.*gif.*popup.* reject-200
+^https?:\/\/.*xima.*\.com\/.*gslb.* reject-200
+^https?:\/\/.*xima.*\.com\/.*version.* reject-200
+^https?:\/\/.*xima.*\.com\/.*splash.* reject-200
+^https?:\/\/.*xmcdn\.com\/.*splash.* reject-200
+^https?:\/\/.*xima.*\.com\/.*ad.* reject-200
+^https?:\/\/.*xima.*\.com\/.*promotion.* reject-200
+^https?:\/\/.*xima.*\.com\/.*activity.* reject-200
+^https?:\/\/.*xima.*\.com\/.*banner.* reject-200
+^https?:\/\/.*xima.*\.com\/.*popup.* reject-200
+^https?:\/\/.*xima.*\.com\/.*update.* reject-200
+^https?:\/\/.*xmcdn\.com\/.*ad.* reject-200
+
+[Script]
+# ── 响应体净化 ──
+http-response ^https?:\/\/.*xima.*\.com\/.*discovery-category\/customCategories.* script-path=https://ws.wenn.in/main/Scripts/Ximalaya.js, requires-body=true, timeout=10, tag=喜马拉雅_分类
+http-response ^https?:\/\/.*xima.*\.com\/.*discovery-category\/v\d\/category.* script-path=https://ws.wenn.in/main/Scripts/Ximalaya.js, requires-body=true, timeout=10, tag=喜马拉雅_分类详情
+http-response ^https?:\/\/.*xima.*\.com\/.*focus-mobile\/focusPic.* script-path=https://ws.wenn.in/main/Scripts/Ximalaya.js, requires-body=true, timeout=10, tag=喜马拉雅_焦点图
+http-response ^https?:\/\/.*xima.*\.com\/.*discovery-feed\/v\d\/mix.* script-path=https://ws.wenn.in/main/Scripts/Ximalaya.js, requires-body=true, timeout=10, tag=喜马拉雅_Feed
+http-response ^https?:\/\/.*xima.*\.com\/.*mobile-user\/v\d\/homePage.* script-path=https://ws.wenn.in/main/Scripts/Ximalaya.js, requires-body=true, timeout=10, tag=喜马拉雅_个人页
+
+[MitM]
+hostname = %APPEND% *.xima*.com, *.xima*.cn, *.xmcdn.com, *.xmcdn.cn

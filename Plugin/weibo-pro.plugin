@@ -1,7 +1,7 @@
-#!name=微博去广告 Pro v8.0
-#!desc=微博 — 开屏/信息流/热搜/评论区全流程净化 + 功能模块控制 (整合 kelee 规则)
-#!version=9.0
-#!author=3kaiu (参考 ddgksf2013/WeiboAds.conf + app2smile)
+#!name=微博去广告 Pro v9.0
+#!desc=微博 — 开屏/信息流/热搜/评论区全流程净化 + 功能模块控制 (整合 kelee 规则 + 墨鱼脚本)
+#!version=10.0
+#!author=3kaiu (参考 ddgksf2013/WeiboAds.conf + app2smile + zmqcherish)
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://icons.duckduckgo.com/ip3/api.weibo.cn.ico
 #!system = iOS,iPadOS,macOS
@@ -54,8 +54,51 @@ http-response ^https?:\/\/api\.weibo\.cn\/2\/profile\/info reject-dict enable={E
 http-response ^https?:\/\/api\.weibo\.cn\/2\/client\/ads reject-dict enable={ENABLE_WEIBO}
 
 # ════════════════════════════════════════
-# ⏰ Cron 定时任务（可选功能）
+# 📝 墨鱼脚本净化 (响应体 JSON 清洗)
 # ════════════════════════════════════════
+
+# ── 信息流 (removeTimeLine) ──
+http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/friends\/timeline script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_信息流
+http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses_unread_hot_timeline script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_热门时间线
+http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/unread_friends_timeline script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_好友时间线
+http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/unread_hot_timeline script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_热门时间线2
+http-response ^https?:\/\/api\.weibo\.cn\/2\/groups\/timeline script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_分组时间线
+http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/friends_timeline script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_好友时间线2
+
+# ── 卡片列表 (removeCards) ──
+http-response ^https?:\/\/api\.weibo\.cn\/2\/cardlist script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_卡片列表
+http-response ^https?:\/\/api\.weibo\.cn\/2\/video\/community_tab script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_视频社区
+http-response ^https?:\/\/api\.weibo\.cn\/2\/searchall script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_搜索全部
+
+# ── 个人页/详情/搜索/超话 ──
+http-response ^https?:\/\/api\.weibo\.cn\/2\/profile\/me script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_个人页
+http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/extend script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_详情
+http-response ^https?:\/\/api\.weibo\.cn\/2\/search\/finder script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_搜索主页
+http-response ^https?:\/\/api\.weibo\.cn\/2\/search\/container_timeline script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_搜索时间线
+http-response ^https?:\/\/api\.weibo\.cn\/2\/search\/container_discover script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_搜索发现
+http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/unread_topic_timeline script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_超话时间线
+http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/container_timeline_topic script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_超话容器
+http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/container_timeline script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_容器时间线
+
+# ── 开屏广告 ──
+http-response ^https?:\/\/sdkapp\.uve\.weibo\.com\/interface\/sdk\/sdkad\.php script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_开屏SDK
+http-response ^https?:\/\/api\.weibo\.cn\/2\/ad\/preload script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_广告预加载
+http-response ^https?:\/\/bootrealtime\.uve\.weibo\.com\/v[23]\/ad\/realtime script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_实时广告
+
+# ── 其他功能模块 ──
+http-response ^https?:\/\/api\.weibo\.cn\/2\/video\/remind_info script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_视频提醒
+http-response ^https?:\/\/api\.weibo\.cn\/2\/checkin\/show script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_签到
+http-response ^https?:\/\/api\.weibo\.cn\/2\/live\/media_homelist script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_直播
+http-response ^https?:\/\/api\.weibo\.cn\/2\/container_detail script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_容器详情
+http-response ^https?:\/\/api\.weibo\.cn\/2\/container\/get_item script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_容器项
+http-response ^https?:\/\/api\.weibo\.cn\/2\/profile\/container_timeline script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_用户时间线
+http-response ^https?:\/\/api\.weibo\.cn\/2\/video\/tiny_stream_video_list script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_视频列表
+http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/video_mixtimeline script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_视频混合
+http-response ^https?:\/\/api\.weibo\.cn\/2\/flowpage script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_消息流
+http-response ^https?:\/\/api\.weibo\.cn\/2\/page script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_页面
+http-response ^https?:\/\/api\.weibo\.cn\/square.*&pageDataType script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_广场
+http-response ^https?:\/\/api\.weibo\.cn\/2\/!\/client\/light_skin script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_主题皮肤
+http-response ^https?:\/\/api\.weibo\.cn\/2\/littleskin\/preview script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, timeout=10, tag=微博_皮肤预览
 
 [Rewrite]
 # ── 白名单配置 ────────────────────────
@@ -91,4 +134,4 @@ DOMAIN-SUFFIX, biz.weibo.com, REJECT,enable={ENABLE_WEIBO}
 DOMAIN-SUFFIX, weibocdn.com, DIRECT
 
 [MitM]
-hostname = %APPEND% api.weibo.cn, api.weibo.com, ads.weibo.com, flash.weibo.com, top.weibo.com, api.weibo.cn, bootrealtime.uve.weibo.com, sdkapp.uve.weibo.com, card.weibo.com, weibo.com
+hostname = %APPEND% api.weibo.cn, api.weibo.com, ads.weibo.com, flash.weibo.com, top.weibo.com, mapi.weibo.com, mapi.weibo.cn, new.vip.weibo.cn, boot.biz.weibo.com, bootrealtime.uve.weibo.com, sdkapp.uve.weibo.com, card.weibo.com, weibo.com

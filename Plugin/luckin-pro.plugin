@@ -1,0 +1,19 @@
+#!name=瑞幸咖啡去广告 Pro v1.0
+#!desc=瑞幸咖啡 — AES 加密报文净化: 首页运营位/弹窗/轮播/AI 入口/秒杀 AR 活动/我的页面招商位
+#!version=1.0
+#!author=3kaiu (基于 ddgksf2013 移植)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://icons.duckduckgo.com/ip3/capi.lkcoffee.com.ico
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+
+[Rewrite]
+# ── HTTPDNS 拦截 (腾讯 DNSPod HTTPDNS 直连 IP, 主配置 DOMAIN-KEYWORD httpdns 不覆盖字面 IP) ──
+^https:\/\/119\.29\.29\.87\/d reject-200
+
+[Script]
+# ── 加密响应体净化 (AES-128-ECB 解密 → 清洗 → 重加密) ──
+http-response ^https:\/\/capi\.lkcoffee\.com\/resource\/(?:m\/(?:sys\/(?:config\/value|common\/modules|homePage\/(?:common|contactor)\/modules|base\/myPageSectionShow\/newUI|app\/(?:adposNew|carousel)|visual\/effect\/modules)|aigc\/showAIButton)|seckill\/ar\/campaignBaseInfo) script-path=https://ws.wenn.in/main/Scripts/Luckin.js, requires-body=true, timeout=10, tag=瑞幸咖啡_净化
+
+[MitM]
+hostname = %APPEND% capi.lkcoffee.com

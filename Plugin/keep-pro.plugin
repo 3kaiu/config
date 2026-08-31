@@ -1,0 +1,36 @@
+#!name=Keep 去广告 Pro v1.0
+#!desc=Keep — 去广告/开屏/推荐/直播/会员入口净化
+#!version=1.0
+#!author=3kaiu (基于 ddgksf2013 移植)
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://icons.duckduckgo.com/ip3/api.gotokeep.com.ico
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+
+[Rewrite]
+# ── 弹窗/开屏/热词/广告预加载/更新检查 ──
+^https?:\/\/hc-ssp\.sm\.cn\/.* reject-200
+^https?:\/\/api\.gotokeep\.com\/search\/v\d\/hotword reject-200
+^https?:\/\/api\.gotokeep\.com\/search\/v\d\/hotwords reject-200
+^https?:\/\/api\.gotokeep\.com\/opengateway\/v\d\/popup\/info reject-200
+^https?:\/\/api\.gotokeep\.com\/opengateway\/v\d\/popup\/get reject-200
+^https?:\/\/api\.gotokeep\.com\/opengateway\/v\d\/popup\/report reject-200
+^https?:\/\/api\.gotokeep\.com\/opengateway\/v\d\/splash\/preload reject-200
+^https?:\/\/api\.gotokeep\.com\/opengateway\/v\d\/splash\/report reject-200
+^https?:\/\/api\.gotokeep\.com\/opengateway\/v\d\/splash\/show reject-200
+^https?:\/\/api\.gotokeep\.com\/opengateway\/v\d\/splash\/click reject-200
+^https?:\/\/api\.gotokeep\.com\/opengateway\/v\d\/splash\/close reject-200
+^https?:\/\/api\.gotokeep\.com\/opengateway\/v\d\/splash\/skip reject-200
+^https?:\/\/api\.gotokeep\.com\/opengateway\/v\d\/check\/update reject-200
+^https?:\/\/42\.187\.199\.248\/.* reject-200
+
+[Script]
+# ── 响应体净化 ──
+http-response ^https?:\/\/api\.gotokeep\.com\/.*people\/my.* script-path=https://ws.wenn.in/main/Scripts/Keep.js, requires-body=true, timeout=10, tag=Keep_我的页面
+http-response ^https?:\/\/api\.gotokeep\.com\/.*start.* script-path=https://ws.wenn.in/main/Scripts/Keep.js, requires-body=true, timeout=10, tag=Keep_开屏跳过
+http-response ^https?:\/\/api\.gotokeep\.com\/.*preview.* script-path=https://ws.wenn.in/main/Scripts/Keep.js, requires-body=true, timeout=10, tag=Keep_预览净化
+http-response ^https?:\/\/api\.gotokeep\.com\/.*twins\/v4\/feed\/course.* script-path=https://ws.wenn.in/main/Scripts/Keep.js, requires-body=true, timeout=10, tag=Keep_课程Feed
+http-response ^https?:\/\/api\.gotokeep\.com\/.*config\/v3\/basic.* script-path=https://ws.wenn.in/main/Scripts/Keep.js, requires-body=true, timeout=10, tag=Keep_基础配置
+
+[MitM]
+hostname = %APPEND% hc-ssp.sm.cn, api.gotokeep.com, 42.187.199.248, kad.gotokeep.com

@@ -126,6 +126,14 @@ jobs:
             "amdc.js" "ddgksf2013/Scripts / amdc.js"
           mirror "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/applet.js" \
             "applet.js" "ddgksf2013/Scripts / applet.js"
+          mirror "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/weibo_json.js" \
+            "weibo_json.js" "ddgksf2013/Scripts / weibo_json.js"
+          mirror "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/ximalaya_json.js" \
+            "ximalaya_json.js" "ddgksf2013/Scripts / ximalaya_json.js"
+          mirror "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/keepStyle.js" \
+            "keepStyle.js" "ddgksf2013/Scripts / keepStyle.js"
+          mirror "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/smzdm_json.js" \
+            "smzdm_json.js" "ddgksf2013/Scripts / smzdm_json.js"
           mirror "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js" \
             "bilibili-json.js" "app2smile / bilibili-json.js"
           mirror "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-proto.js" \
@@ -153,6 +161,14 @@ jobs:
           done
           mirror "https://raw.githubusercontent.com/8680/GOODBYEADS/master/data/rules/qx.list" \
             "rules/goodbyeads-qx.list" "GOODBYEADS / qx.list"
+
+          # ═══════════════ ddgksf2013 开屏广告数据源 (2026-08-31 数据化) ═══════════════
+          # 上游源头 ddgksf2013.top/rewrite/StartUpAds.conf 已转向 HTML 索引页,
+          # 采用 ifflagged/Romeo 的每日镜像; QX reject 规则由生成器转为 Loon [Rewrite]
+          # 段注入 Plugin/startup-adblock-pro.plugin (Loon 插件不支持远程 list, 见工具注释)
+          mirror "https://raw.githubusercontent.com/ifflagged/Romeo/main/Modules/Others/ddgksf2013/Official/StartUpAds.conf" \
+            "rules/ddgksf-StartUpAds.conf" "ddgksf2013 StartUpAds.conf (ifflagged 镜像)"
+          node tools/build-startup-plugin.mjs
 
           # ── Global 列表纯净度检查 (2026-08 审计) ──
           # 远端顺序已调整为 China → Global → Advertising → ... (国际流量提前终止),
@@ -360,7 +376,7 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add Mirror/
+          git add Mirror/ Plugin/startup-adblock-pro.plugin
           if git diff --cached --quiet; then
             echo "无变更, 跳过 PR"
             echo "pr_action=none" >> $GITHUB_ENV

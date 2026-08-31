@@ -59,6 +59,9 @@ const PROXY_GLOBALS = {
   self: "readonly",
   window: "readonly",
   globalThis: "readonly",
+  // 双入口脚本 (module.exports 供 Node 测试 / Loon 运行时分支) 与文本解码内建
+  module: "writable",
+  TextDecoder: "readonly",
   NaN: "readonly",
   Infinity: "readonly",
   undefined: "readonly",

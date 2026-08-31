@@ -443,6 +443,10 @@ https://ws.wenn.in/main/Plugin/qidian.plugin, enabled=true, tag=起点全能助�
 https://ws.wenn.in/main/Plugin/bank.plugin, enabled=true, tag=银行及云闪付去广告
 https://ws.wenn.in/main/Plugin/ai.plugin, enabled=true, tag=AI 服务分流
 https://ws.wenn.in/main/Plugin/wechat-read.plugin, enabled=true, tag=微信读书去广告
+https://ws.wenn.in/main/Plugin/luckin-pro.plugin, enabled=true, tag=瑞幸咖啡去广告 Pro
+https://ws.wenn.in/main/Plugin/umetrip-pro.plugin, enabled=true, tag=航旅纵横去广告 Pro
+https://ws.wenn.in/main/Plugin/keep-pro.plugin, enabled=true, tag=Keep 去广告 Pro
+https://ws.wenn.in/main/Plugin/ximalaya-pro.plugin, enabled=true, tag=喜马拉雅去广告 Pro
 https://ws.wenn.in/main/Kelee/YouTube_remove_ads.plugin, enabled=true, tag=YouTube去广告
 # — 🧹 iKeLee 转写新增 (2026-08) —
 https://ws.wenn.in/main/Kelee/smzdm-remove-ads.plugin, enabled=true, tag=什么值得买去广告
@@ -469,14 +473,11 @@ https://ws.wenn.in/main/Mirror/biliuniverse/BiliBili.Enhanced.plugin, enabled=tr
 https://ws.wenn.in/main/Mirror/biliuniverse/BiliBili.Global.plugin, enabled=true, tag=📺 B站全球模式
 https://ws.wenn.in/main/Mirror/biliuniverse/BiliBili.ADBlock.plugin, enabled=true, tag=📺 B站去广告
 https://ws.wenn.in/main/Mirror/biliuniverse/BiliBili.Redirect.plugin, enabled=true, tag=📺 B站CDN重定向
-# — Kelee 功能增强插件 (远程引用, Loon App 内通过 Cloudflare Turnstile) —
-https://kelee.one/Tool/Loon/Lpx/Google.lpx, enabled=true, tag=🔍 Google搜索重定向
-https://kelee.one/Tool/Loon/Lpx/Spotify_lyrics_translation.lpx, enabled=true, tag=🎵 Spotify歌词翻译
-https://kelee.one/Tool/Loon/Lpx/Weixin_external_links_unlock.lpx, enabled=true, tag=💬 微信外部链接解锁
-https://kelee.one/Tool/Loon/Lpx/JD_Price.lpx, enabled=true, tag=📦 京东比价
-
-https://kelee.one/Tool/Loon/Lpx/Node_detection_tool.lpx, enabled=true, tag=🌐 节点检测工具
-https://kelee.one/Tool/Loon/Lpx/NodeLinkCheck.lpx, enabled=true, tag=🔗 代理链路检测
+# — 功能增强插件 (本地替代 kelee.one LPX, 2026-08-25 起 kelee.one 全局 403) —
+# Google 重定向: 本地 Kelee/Google.plugin 替代原 kelee.one/Google.lpx
+https://ws.wenn.in/main/Kelee/Google.plugin, enabled=true, tag=🔍 Google搜索重定向
+# Spotify 歌词翻译 / 微信外链解锁 / 京东比价 / 节点检测 / 链路检测: 无本地替代, 已移除
+# 参见 AGENTS.md 架构已知问题: kelee.one 全局 403 (issue #27)
 
 [Rewrite]
 ^https?:\/\/119\.29\.29\.29\/d reject-200
