@@ -1,16 +1,24 @@
 # Geonode 免费代理订阅 — 由 tools/geonode-sync.mjs 生成, 勿手改
 # 上游: proxylist.geonode.com (每日 03:40 UTC 由 proxy-sync workflow 刷新)
-# 生成时间: 2026-08-31T10:04:21.931Z
-# 节点数: 11 (连通性已验证: https://opencode.ai/, 耗时 ≤6s)
+# 生成时间: 2026-09-01T08:54:01.951Z
+# 节点数: 19 (连通性已验证: https://opencode.ai/, 耗时 ≤6s)
 
-geonode-socks5-US-67.207.92.87-1088 = socks5,67.207.92.87,1088
-geonode-socks5-RW-193.25.215.182-22222 = socks5,193.25.215.182,22222
-geonode-socks5-DE-185.128.104.152-8443 = socks5,185.128.104.152,8443
+geonode-https-US-69.87.216.54-7989 = https,69.87.216.54,7989
+geonode-socks5-NL-95.81.103.220-1080 = socks5,95.81.103.220,1080
 geonode-socks5-HK-45.194.33.12-30001 = socks5,45.194.33.12,30001
+geonode-socks5-DE-5.75.133.113-10809 = socks5,5.75.133.113,10809
+geonode-socks5-NL-154.83.140.161-1080 = socks5,154.83.140.161,1080
 geonode-socks5-FR-51.178.49.241-1088 = socks5,51.178.49.241,1088
+geonode-socks5-NL-91.84.98.74-12546 = socks5,91.84.98.74,12546
 geonode-https-VN-14.251.13.20-8080 = https,14.251.13.20,8080
+geonode-socks5-ID-49.0.0.175-1080 = socks5,49.0.0.175,1080
+geonode-socks5-DE-167.86.79.35-1080 = socks5,167.86.79.35,1080
+geonode-socks5-ZA-168.253.92.93-10808 = socks5,168.253.92.93,10808
 geonode-socks5-UA-178.150.77.204-10801 = socks5,178.150.77.204,10801
-geonode-https-TH-47.81.56.193-8888 = https,47.81.56.193,8888
-geonode-http-US-96.3.50.180-80 = http,96.3.50.180,80
+geonode-socks5-ID-202.43.165.140-10802 = socks5,202.43.165.140,10802
+geonode-http-ID-103.125.17.99-8080 = http,103.125.17.99,8080
+geonode-socks5-ID-223.25.110.37-8199 = socks5,223.25.110.37,8199
+geonode-socks5-NL-5.255.123.162-1080 = socks5,5.255.123.162,1080
+geonode-socks5-RU-188.191.164.55-4890 = socks5,188.191.164.55,4890
 geonode-socks5-KH-202.79.27.12-1080 = socks5,202.79.27.12,1080
-geonode-https-ID-182.253.21.26-46977 = https,182.253.21.26,46977
+geonode-socks5-US-45.79.203.254-48388 = socks5,45.79.203.254,48388
