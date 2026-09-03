@@ -33,6 +33,10 @@ updates:
       - dependency-name: "@tootallnate/once"
       - dependency-name: "cross-spawn"
       - dependency-name: "diff"
+      # 2026-09-04: decode-uri-component 经 surgio@3.19 → query-string@7.1.3 锁死 ^0.2.2,
+      # 修复版 0.5.0 不兼容, Dependabot 安全 PR 必然 security_update_not_possible (run 33474329435)。
+      # 同上, surgio 升级后删除。
+      - dependency-name: "decode-uri-component"
 
   - package-ecosystem: "github-actions"
     directory: "/"
