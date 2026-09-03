@@ -1,20 +1,18 @@
 # Geonode 免费代理订阅 — 由 tools/geonode-sync.mjs 生成, 勿手改
 # 上游: proxylist.geonode.com (每日 03:40 UTC 由 proxy-sync workflow 刷新)
-# 生成时间: 2026-09-02T08:07:35.642Z
-# 节点数: 15 (连通性已验证: https://opencode.ai/, 耗时 ≤6s)
+# 生成时间: 2026-09-03T08:17:01.752Z
+# 节点数: 13 (连通性已验证: https://opencode.ai/, 耗时 ≤6s)
 
-geonode-https-US-69.87.216.54-7989 = https,69.87.216.54,7989
-geonode-https-US-154.21.92.198-3038 = https,154.21.92.198,3038
-geonode-socks5-NL-5.255.123.162-1080 = socks5,5.255.123.162,1080
-geonode-socks5-NL-5.255.113.177-1080 = socks5,5.255.113.177,1080
-geonode-socks5-UA-93.123.118.15-1080 = socks5,93.123.118.15,1080
-geonode-socks5-RS-93.87.38.20-1090 = socks5,93.87.38.20,1090
-geonode-socks5-DE-185.128.104.152-8443 = socks5,185.128.104.152,8443
-geonode-socks5-HK-45.194.33.12-30001 = socks5,45.194.33.12,30001
-geonode-https-VN-14.251.13.20-8080 = https,14.251.13.20,8080
-geonode-https-US-47.81.56.193-8888 = https,47.81.56.193,8888
 geonode-socks5-US-45.79.203.254-48388 = socks5,45.79.203.254,48388
-geonode-socks5-DE-185.133.239.244-16299 = socks5,185.133.239.244,16299
-geonode-socks5-US-149.248.21.106-8080 = socks5,149.248.21.106,8080
-geonode-socks5-DE-5.75.133.113-10811 = socks5,5.75.133.113,10811
-geonode-socks5-VN-160.250.54.7-9000 = socks5,160.250.54.7,9000
+geonode-socks5-NL-185.200.177.138-445 = socks5,185.200.177.138,445
+geonode-socks5-UA-93.123.118.15-1080 = socks5,93.123.118.15,1080
+geonode-socks5-DE-5.75.133.113-10801 = socks5,5.75.133.113,10801
+geonode-socks5-FI-65.21.252.66-10811 = socks5,65.21.252.66,10811
+geonode-https-TH-47.81.56.193-8888 = https,47.81.56.193,8888
+geonode-https-VN-14.251.13.20-8080 = https,14.251.13.20,8080
+geonode-socks5-RU-195.91.129.101-1337 = socks5,195.91.129.101,1337
+geonode-socks5-NL-5.255.113.177-1080 = socks5,5.255.113.177,1080
+geonode-https-VN-103.82.20.76-8080 = https,103.82.20.76,8080
+geonode-socks5-BD-103.118.85.75-1080 = socks5,103.118.85.75,1080
+geonode-http-ZA-165.0.136.30-8080 = http,165.0.136.30,8080
+geonode-socks5-RS-93.87.38.20-1090 = socks5,93.87.38.20,1090
