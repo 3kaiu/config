@@ -253,7 +253,9 @@ jobs:
       # ── 11. 规则顺序守卫 (2026-08-29 审计修复: 原 test/rule-order-check.js 不在 CI 也不在 npm test,
       # 且锚点已失效 → 永远失败又无人执行。现重写为守护现行拓扑, 并接入本门禁) ──
       - name: Loon rule-order guard (test/rule-order-check.js)
-        run: node test/rule-order-check.js 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+        run: |
+          node test/rule-order-check.js 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          exit ${PIPESTATUS[0]}
 
 
       - name: Wiring integrity check (no dead code)

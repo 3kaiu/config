@@ -154,7 +154,7 @@
     },
     "rules/loon-Advertising.list": {
       "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Advertising/Advertising.list",
-      "sha256": "6729ea988d721a77e634a1004d568e4ec3e2a371b90de7e8acf913df036e2ccc",
+      "sha256": "a3507a8446eeadd8f4929b3de00da74dc45e1c8dbcce06fa2640b298508be92f",
       "bytes": 32842,
       "fetched_at": "2026-08-28T14:22:46Z"
     },

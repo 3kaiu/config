@@ -813,7 +813,7 @@ DOMAIN,connect.yuewen.com
 DOMAIN,upushv6.qidian.com
 # === END 3kaiu 国内广告 SDK 追加 ===
 # === BEGIN 3kaiu 666OS交叉补齐 batch1 (2026-09-04) ===
-# 来源: 666OS/rules Advertising.txt (713域) vs 本地三库全量diff, 去重/去KEYWORD已覆盖/去导购短链内容类, 余178域+2IP
+# 来源: 666OS/rules Advertising.txt (713域) vs 本地三库全量diff, 去重/去KEYWORD已覆盖/去导购短链内容类, 余179域+2IP
 # hoisin双域上游为KEYWORD, 本地收敛为SUFFIX (覆盖等价更窄); taptapnetworks疑似TapTap仿冒广告欺诈域
 DOMAIN-SUFFIX,1phads.com
 DOMAIN-SUFFIX,4mads.com
