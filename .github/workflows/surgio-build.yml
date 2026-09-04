@@ -40,7 +40,8 @@ jobs:
       - name: Assert no credentials in generated config
         run: |
           # 公开分发产物不得含订阅凭据; 任一凭据模式命中即失败, 阻断 auto-PR
-          if grep -nE '(^|,)(password|uuid|bob|encryption)=' Profile/Loon.lcf; then
+          # -i + 允许等号旁空格: `Password=` / `password =` 曾可逃逸精确匹配 (2026-09-04 对抗审计实证)
+          if grep -niE '(^|,) *(password|uuid|bob|encryption) *=' Profile/Loon.lcf; then
             echo "::error::Loon.lcf 含订阅凭据 — 禁止提交公开产物"
             exit 1
           fi

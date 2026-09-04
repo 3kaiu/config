@@ -100,8 +100,8 @@ jobs:
                 # 2) scheme 大小写 HTTPS://evil.com — 原正则大小写敏感, 整行不进入提取集合
                 # 3) 提取为空时显式判定 (纯 rewrite/mock 插件无 script-path), 不再依赖 grep -vq 隐式返回码
                 local urls
-                urls=$(grep -oiE 'script-path[[:space:]]*=[[:space:]]*https?://[^ ,")]*' "$tmpf" \
-                  | sed 's/script-path[[:space:]]*=[[:space:]]*//' | tr '[:upper:]' '[:lower:]')
+                 urls=$(grep -oiE 'script-path[[:space:]]*=[[:space:]]*https?://[^ ,")]*' "$tmpf" \
+                   | sed 's/script-path[[:space:]]*=[[:space:]]*//I' | tr '[:upper:]' '[:lower:]')
                 if [ -n "$urls" ] && printf '%s\n' "$urls" | grep -vqE '^https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one)/'; then
                   echo "🚫 $name 门禁拦截: script-path 指向非白名单域 (疑似投毒), 保留旧版"
                   printf '%s\n' "$urls" | grep -vE '^https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one)/' | head -3

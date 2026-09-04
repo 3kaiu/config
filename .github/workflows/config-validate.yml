@@ -51,7 +51,9 @@ jobs:
           # 2026-08-29 审计修复 (两处绕过面):
           # 1) `script-path = URL` 带空格写法曾整体逃逸检查 (sub-store.plugin 即此写法)
           # 2) -i + 小写归一: 原正则大小写敏感, HTTPS://evil.com 整行不进入提取集合即逃逸白名单
-          grep -rhE 'script-path[[:space:]]*=' Plugin/*.plugin Kelee/*.plugin 2>/dev/null | \
+          # 3) -i: `SCRIPT-PATH=` 大写 key 曾整体逃逸提取 (2026-09-04 对抗审计实证);
+          #    Loon key 大小写语义未定, 按 fail-closed 宁可误杀注释行
+          grep -rhiE 'script-path[[:space:]]*=' Plugin/*.plugin Kelee/*.plugin 2>/dev/null | \
             grep -oiP 'https?://[^"'\'',]+' | tr '[:upper:]' '[:lower:]' | sort -u > /tmp/urls.txt
           # 域白名单检查: script-path 只允许指向受信分发域 (防本地壳投毒, 与 mirror 门禁 4 对齐)
           BAD=$(grep -vE '^(https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one|jsdelivr\.net|unpkg\.com)/)' /tmp/urls.txt || true)
@@ -213,6 +215,30 @@ jobs:
               process.exit(1);
             }
             console.log("✅ 引擎 blob 与清单一致 (upstream " + manifest.engine.upstream_commit_at_embed.slice(0, 10) + ")");
+          ' 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          exit ${PIPESTATUS[0]}
+
+      # ── 8b. Mirror 清单一致性校验 (2026-09-04 对抗审计新增) ──
+      # 防"改镜像文件忘同步 MANIFEST"(漂移) 与清单/磁盘分叉；
+      # 注: 挡不住"文件+清单一起改"的恶意提交 — 那道防线是 mirror PR 人审。
+      - name: Mirror manifest consistency check
+        run: |
+          echo "## Mirror Manifest Consistency" >> $GITHUB_STEP_SUMMARY
+          node -e '
+            const fs = require("fs"), crypto = require("crypto");
+            const m = JSON.parse(fs.readFileSync("Mirror/MANIFEST.json", "utf8"));
+            let bad = 0, n = 0;
+            for (const [k, v] of Object.entries(m.files)) {
+              n++;
+              const p = "Mirror/" + k;
+              if (!fs.existsSync(p)) { console.log("❌ 清单有记录但文件缺失: " + p); bad++; continue; }
+              const buf = fs.readFileSync(p);
+              const h = crypto.createHash("sha256").update(buf).digest("hex");
+              if (h !== v.sha256 || buf.length !== v.bytes) { console.log("❌ 哈希漂移: " + p); bad++; }
+            }
+            console.log("MANIFEST 条目: " + n + ", 异常: " + bad);
+            if (bad) { console.log("❌ 先同步 MANIFEST (sha256/bytes 从磁盘重算) 再提交"); process.exit(1); }
+            console.log("✅ 清单与磁盘一致");
           ' 2>&1 | tee -a $GITHUB_STEP_SUMMARY
           exit ${PIPESTATUS[0]}
 
