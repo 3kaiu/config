@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] (2026-09-04 对抗审计)
+
+### Added (门禁硬化)
+- `config-validate` 新增 Mirror 清单一致性校验 (8b)：41 条目 sha256/bytes 与磁盘逐项比对，漂移即红
+- `build-startup-plugin` 新增 host 合法性过滤（拦截日期当 host 类上游转换垃圾）+ 规则下限门禁（<50 条保留旧插件并 fail-red）+ OUT 缺失守卫
+- `tpl-sync-check` 正向改精确行集合比对，反向 extra 由警告升级为失败
+- 白名单提取双管线加固：`config-validate` 补 `-i`（`SCRIPT-PATH` 大写 key 曾整体逃逸）；mirror 侧 sed 补 `I` 标志
+
+### Fixed
+- `config-validate` 规则顺序守卫补 `exit ${PIPESTATUS[0]}`（曾永不红）
+- `release.yml` 去 `--verify-tag`（仓库零 tag 历史，首发必红）
+- `kelee-import` 路径穿越白名单 + 头注入清洗 + 停发 Stash 系选项；3 个已生成文件同步清洗
+- `geonode-sync` 重试参数透传（`PROBE_RETRIES` 死代码复活）
+- `surgio-build` 凭据断言大小写/空格加固
+- 版本号收敛：template 去版本头，包版本 8.11.0 对齐 CHANGELOG
+- 吸纳 666OS Advertising batch1（179 域 + 2 IP，详见 commit）
+- dependabot 忽略 `decode-uri-component`（surgio 锁死无解；注：仅防 PR 不止红，见 issue 讨论）
+
 ## [v8.11] — 2026-08-29
 
 ### Fixed (script-path 白名单洞 + S3 巡检盲区)

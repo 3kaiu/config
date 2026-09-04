@@ -60,7 +60,8 @@ httpdns.c.cdnhwc2.com = 0.0.0.0
 
 [Proxy]
 # Surgio 自动生成节点: npx surgio generate
-# 通过 SURGIO_SUBSCRIPTION_URL (机场订阅) 或 Secrets (HY2_HOST 等) 传入
+# 通过 SURGIO_SUBSCRIPTION_URL (机场订阅) 传入; 为空时 Provider 为空节点
+# (凭据永不进仓: surgio-build 有 Loon.lcf 凭据断言, 仓库零 Secrets)
 # 容灾: Proxy url-test 组 (MainNodes 过滤) 自动纳管新节点 — 订阅中加入第二节点即双节点容灾
 # 隔离: geonode-* 免费代理被 MainNodes 排除, 仅 OpenCode 组引用 (见 [Remote Filter]/[Remote Proxy])
 
