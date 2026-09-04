@@ -19,7 +19,10 @@ const TPL = `#!name={NAME}
 `;
 
 function toPluginName(f) {
-  return f.replace(/\.lpx$/, '').replace(/_/g, '-') + '.plugin';
+  // 文件名白名单: 阻断 argv `../x` 经 join(DST) 写仓外 (路径穿越)
+  const base = f.replace(/\.lpx$/, '');
+  if (!/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(base)) throw new Error(`非法文件名: ${f}`);
+  return base.replace(/_/g, '-') + '.plugin';
 }
 
 function transform(lines) {
@@ -36,14 +39,8 @@ function transform(lines) {
     }
     if (!cur || cur === 'SKIP' || !line.trim() || line.startsWith('#')) continue;
     if (cur === 'Rule') {
-      const rm = line.match(/^(DOMAIN-KEYWORD|DOMAIN-SUFFIX|DOMAIN),([^,]+),(REJECT|DIRECT|Proxy)/);
-      if (rm && rm[3] === 'REJECT') {
-        out.push(`DOMAIN,${rm[2]},REJECT,extended-matching,pre-matching`);
-      } else if (rm) {
-        out.push(line);
-      } else {
-        out.push(line);
-      }
+      // Stash 系选项 (extended-matching/pre-matching) Loon 不认, 不再追加 — 保持 Loon-clean
+      out.push(line);
     } else if (cur === 'Rewrite') {
       out.push(line);
     } else if (cur === 'MitM') {
@@ -61,6 +58,8 @@ const files = (want.length ? want.filter(a => !a.startsWith('--')) : readdirSync
 
 let made = 0, skipped = 0, skippedScript = 0, failed = [];
 for (const f of files) {
+  // 文件名白名单 (读/写双路径): 阻断 argv `../x` 经 join() 逃逸目录 (路径穿越)
+  if (!/^[A-Za-z0-9][A-Za-z0-9_.-]*\.lpx$/.test(f)) { failed.push(`${f}: 非法文件名, 跳过`); continue; }
   const src = join(SRC, f);
   if (!existsSync(src)) { failed.push(`${f} 不存在`); continue; }
   const text = readFileSync(src, 'utf8');
@@ -75,13 +74,16 @@ for (const f of files) {
   const dst = join(DST, name);
   if (existsSync(dst)) { skipped++; continue; }
   const body = transform(lines);
-  const desc = (hdr.desc || '').replace(/\n/g, ' ').slice(0, 100);
+  // 头字段去换行/截断: 防上游 header 注入多行污染插件头
+  const cleanName = ((hdr.name || '').replace(/\s+/g, ' ').slice(0, 60) || name);
+  const desc = (hdr.desc || '').replace(/\s+/g, ' ').slice(0, 100);
+  const icon = (hdr.icon || '').split(/\s/)[0].slice(0, 200);
   const suffix = hasScript ? ' (规则版: 已去除原版外部脚本, 自维护)' : '';
   const plugin = TPL
-    .replace('{NAME}', hdr.name || name)
+    .replace('{NAME}', cleanName)
     .replace('{DESC}', desc ? `${desc}${suffix}` : '')
-    .replace('{ICON}', hdr.icon || '')
-    .replace('{NAME}', hdr.name || name)
+    .replace('{ICON}', icon)
+    .replace('{NAME}', cleanName)
     + body.join('\n') + '\n';
   writeFileSync(dst, plugin);
   made++;

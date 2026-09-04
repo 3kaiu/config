@@ -8,7 +8,7 @@
 #!loon_version = 3.2.4(787)
 
 [Rule]
-DOMAIN,adx-api.zdmimg.com,REJECT,extended-matching,pre-matching
+DOMAIN,adx-api.zdmimg.com,REJECT
 
 [Rewrite]
 # ── 红包/活动页 URL 拒绝 ─────────────────

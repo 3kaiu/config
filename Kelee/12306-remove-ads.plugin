@@ -8,5 +8,5 @@
 #!loon_version = 3.2.4(787)
 
 [Rule]
-DOMAIN,ad.12306.cn,REJECT,extended-matching,pre-matching
-DOMAIN,mapi.umengcloud.com,REJECT,extended-matching,pre-matching
+DOMAIN,ad.12306.cn,REJECT
+DOMAIN,mapi.umengcloud.com,REJECT
