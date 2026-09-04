@@ -23,5 +23,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ github.ref_name }}
         run: |
-          gh release create "$TAG" --verify-tag --generate-notes \
+          # 无签名 tag 流程 (git tag vX.Y.Z && git push): 内部快照分发, 不校验签名
+          gh release create "$TAG" --generate-notes \
             "Profile/Loon.lcf#Loon.lcf (完整配置)"
