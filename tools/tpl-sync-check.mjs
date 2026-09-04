@@ -89,10 +89,12 @@ function main() {
   const tplLines = readStaticLines(TPL);
   const outText = fs.readFileSync(OUT, "utf8");
 
+  // 精确行集合比对 (旧 includes 子串匹配会被 LCF 注释行蒙混)
+  const outSet = new Set(outText.split("\n").map((l) => l.trim()));
   const missing = [];
   for (const line of tplLines) {
     if (!line) continue;
-    if (!outText.includes(line)) missing.push(line);
+    if (!outSet.has(line)) missing.push(line);
   }
 
   if (missing.length > 0) {
@@ -104,9 +106,11 @@ function main() {
 
   const extra = readGeneratedStaticLines(OUT);
   if (extra.length > 0) {
-    console.log(`⚠ 产物 ${path.basename(OUT)} 有 ${extra.length} 条静态行不在模板中 (可能为本地维护或残留):`);
+    console.log(`✗ 产物 ${path.basename(OUT)} 有 ${extra.length} 条静态行不在模板中 (手改产物/生成器漂移):`);
     for (const l of extra.slice(0, 20)) console.log(`  + ${l.slice(0, 100)}`);
     if (extra.length > 20) console.log(`  ... 其余 ${extra.length - 20} 条`);
+    console.log("  提示: 产物行必须先进入模板 (或 snippet), 再 npm run generate。");
+    return 1;
   }
 
   console.log(`✅ 模板↔产物一致性检查通过: ${tplLines.length} 条静态行全部存在于 ${path.basename(OUT)}`);

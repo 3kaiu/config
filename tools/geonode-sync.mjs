@@ -197,6 +197,7 @@ async function main() {
       timeoutSec: PROBE_TIMEOUT,
       concurrency: PROBE_CONCURRENCY,
       maxTime: PROBE_MAX_TIME,
+      retries: PROBE_RETRIES,
     });
     console.log(`   通过 ${nodes.length} / ${candidates.length} (${(nodes.length / candidates.length * 100).toFixed(1)}%)`);
   }
