@@ -1,6 +1,6 @@
 {
   "name": "3kaiu-config",
-  "version": "8.5.0",
+  "version": "8.11.0",
   "private": true,
   "description": "3kaiu Loon config v8.5 — Surgio project with TypeScript foundation and optimized structure",
   "scripts": {

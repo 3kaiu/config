@@ -20,19 +20,19 @@
 
 | 项 | 值 |
 |----|----|
-| 注册商 | TODO: 填写（如 Cloudflare / Namecheap） |
-| 到期日 | TODO: 填写 |
-| 自动续费 | TODO: 是/否 |
-| 注册邮箱 | TODO: 填写（确保可收回） |
-| CDN 实现 | TODO: 填写（Cloudflare Pages/Workers/Nginx 回源等） |
-| TLS 证书 | TODO: 自动续期/到期日 |
+| 注册商 | Hosting Concepts B.V. dba Openprovider（whois 实测 2026-09-04） |
+| 到期日 | 2033-08-14（余约 7 年）+ clientTransferProhibited 锁定中 |
+| 自动续费 | 未知（whois 不可见，需登录 Openprovider 确认开启） |
+| 注册邮箱 | 隐私保护不可见（确保可收回，需自查） |
+| CDN 实现 | 未知（待确认：Cloudflare/Workers/Nginx 回源等） |
+| TLS 证书 | 未知（待确认自动续期/到期日） |
 
 > ⚠️ 域名过期被抢注 = 全量 script-path 可被第三方投毒（15 个插件 + 3 份 Profile 同时受影响）。
 > 建议：开启自动续费 + 注册商到期邮件 + 日历提醒（到期前 30 天）。
 
 ## 3. 完整性保障
 
-- `mirror-scripts.yml`：每日 03:00 从上游拉取 **36 个资源**（脚本 9 + 解析器 1 + Loon 规则列表 7 + rewrite 插件 2 + Loon 插件 17；2026-08-29 实测, 与 MANIFEST 条目数一致），经三重门禁（`*.js` 语法 / 体积≥200B / 非 HTML）后写入 `Mirror/`，**走 PR 人工审核**合并（不再直推 main）。插件外壳远程引用已收敛到 `ws.wenn.in/main/Mirror/`（插件内部 bundle 引用仍直连上游，见 3b）。
+- `mirror-scripts.yml`：每日 03:00 从上游抓取约 60 项（MANIFEST 41 条目 + startup 插件等非清单产物；2026-09 实测单次成功 54+），经三重门禁（`*.js` 语法 / 体积≥200B / 非 HTML）后写入 `Mirror/`，**走 PR 人工审核**合并（不再直推 main）。插件外壳远程引用已收敛到 `ws.wenn.in/main/Mirror/`（插件内部 bundle 引用仍直连上游，见 3b）。
 - `Mirror/MANIFEST.json`：全部镜像文件的 source_url + sha256 清单，上游变更在 PR diff 中高亮。
 - `cdn-verify.yml`：每日 02:34 拉取 CDN 全量分发文件与仓库做 sha256 比对，不一致开 Issue（标签 `cdn-verify`），可选 Bark 告警（Secret `BARK_PUSH`）；同时做 GitHub Pages 链路（3kaiu.github.io/config）可达性抽查（非阻断，且 Pages 内容已冻结 — 见第 5 节）。
 - `upstream-health.yml`：上游源可达性探活（状态码级），探测列表镜像部分派生自 `Mirror/MANIFEST.json`。
@@ -43,7 +43,7 @@
 1. **kelee.one 7 个 `.lpx`**：Cloudflare Turnstile 阻挡自动抓取，无法镜像/校验，Loon 端直接从该站加载。介意者在 Loon 内停用对应插件。
 2. **插件内部 bundle 引用直连上游**：NSRingo / DualSubs / Auraflare / BiliUniverse 插件的 `script-path` 指向上游 GitHub release（版本钉死），不走自建 CDN。上游清理旧 release 会导致对应功能失效；`upstream-health.yml` 持续探测这些 URL 兜底。
 3. **GeoIP/ASN 库**（Loyalsoldier / P3TERX）：客户端直连上游，被篡改只会导致路由误判（非代码执行），风险低，暂不镜像。
-4. **NSRingo 版本升级流程**：插件版本钉死（WeatherKit v3.1.0 / Maps·GeoServices v4.6.1 / News v3.2.1 / Siri v4.2.7 / TestFlight v3.4.0）。上游发新版时：改 `mirror-scripts.yml` 中的版本号 + `template/loon.tpl` 引用，跑一次 mirror 工作流。`upstream-health.yml` 会探测已钉死 URL 的可用性，但**不会**提示有新版本（受管陈旧）。
+4. **NSRingo 版本策略**：仅 WeatherKit 钉死 v3.1.0（上游 v3.2.0 起移除 `.plugin` asset）；其余（Maps/News/Siri/TestFlight/TV/LocationService）跟随 latest，bundle.js 镜像到 CDN。上游发新版时：改 `mirror-scripts.yml` 中的版本号 + `template/loon.tpl` 引用，跑一次 mirror 工作流。`upstream-health.yml` 会探测已钉死 URL 的可用性，但**不会**提示有新版本（受管陈旧）。
 
 ## 4. DNS 隐私（泄漏面精确说明）
 
