@@ -45,9 +45,33 @@ for (const raw of conf.split("\n")) {
   if (mh) mitmBody = mh[1];
 }
 
-// 去重 (上游存在同 regex 重复行)
+// 去重 (上游存在同 regex 重复行) + host 合法性过滤
 const seen = new Set();
-const rules = rejects.filter((r) => !seen.has(r.regex) && seen.add(r.regex));
+function hostOf(regex) {
+  const m = regex.replace(/^\^/, "").match(/^https?\??:\\?\/\\?\/([^/]+)/);
+  if (!m) return "";
+  return m[1].replace(/\\\./g, ".").replace(/\\+$/, ""); // 去转义 + 吞掉 `\.` 切分残留的尾反斜杠
+}
+function validHost(h) {
+  if (!h) return false;
+  if (/[[(*+\\]/.test(h)) return true; // 上游通配写法 (字符类/分组), 保留
+  if (!h.includes(".")) return false;
+  if (/^\d{4}\.\d{2}\.\d{2}$/.test(h)) return false; // 日期当 host (上游转换垃圾)
+  if (/^[0-9.]+$/.test(h)) return /^\d{1,3}(\.\d{1,3}){3}$/.test(h); // 纯数字仅保留合法 IPv4 字面量
+  return true;
+}
+let droppedGarbage = 0;
+const rules = rejects.filter((r) => !seen.has(r.regex) && seen.add(r.regex)).filter((r) => {
+  if (validHost(hostOf(r.regex))) return true;
+  droppedGarbage++;
+  return false;
+});
+// 下限门禁: 上游被清空/截断时保留旧插件并 fail-red (与 geonode MIN_NODES 同哲学;
+// mirror 整步失败, 次日上游恢复后自愈; 勿改 exit 0, 否则空插件静默上线)
+if (rules.length < 50) {
+  console.error(`::error::reject 规则仅 ${rules.length} 条 (<50), 上游疑似被清空 — 保留旧插件`);
+  process.exit(1);
+}
 
 // ── MitM hostname 最小化: 仅保留被 reject 规则消费的域 ──
 // 与 mitm-orphan-check.mjs 方法 B/C 对齐: 根域对齐 或 主标签(≥4)出现在规则文本中
@@ -111,8 +135,9 @@ if (fs.existsSync(OUT)) {
   const i = cur.indexOf(BEGIN_MANUAL), j = cur.indexOf(END_MANUAL);
   if (i >= 0 && j > i) manualBlock = cur.slice(i + BEGIN_MANUAL.length, j).replace(/^\n+|\n+$/g, "");
 }
-if (!manualBlock) {
+if (!manualBlock && fs.existsSync(OUT)) {
   // 首次迁移: 提取旧插件 [Rewrite] 段的全部手写规则 (reject 行及其注释分组)
+  // (OUT 不存在时跳过 — 旧逻辑二次 readFileSync 必抛 ENOENT)
   const cur = fs.readFileSync(OUT, "utf8");
   const seg = (cur.split(/\n\[Rewrite\]/)[1] || "").split(/\n\[[A-Za-z ]+\]/)[0] || "";
   manualBlock = seg.replace(/^\n+|\n+$/g, "").replace(/^# ──.*$/gm, "").replace(/\n{3,}/g, "\n\n");
@@ -138,21 +163,21 @@ ${END_MANUAL}
 
 ${BEGIN_GEN}
 # 来源: https://ddgksf2013.top/rewrite/StartUpAds.conf (镜像 ifflagged/Romeo, @UpdateTime ${updateTime})
-# 转换: QX url reject[-xxx] → Loon rewrite, 共 ${rules.length} 条 (上游 ${rejects.length} 行, 去重 ${rejects.length - rules.length} 条)
+# 转换: QX url reject[-xxx] → Loon rewrite, 共 ${rules.length} 条 (上游 ${rejects.length} 行, 去重 ${rejects.length - seen.size} 条, 垃圾host ${droppedGarbage} 条)
 # 未纳入: ${scripts.length} 条 script 型 + ${hostRules} 条 host 型 (见工具脚本注释)
 ${genLines.join("\n")}
 ${END_GEN}
 
 [MitM]
 # ⚠️ 注意：部分 App 禁用了 MITM，无法拦截其开屏广告
-# 通配兜底 (手写补充层) + 上游 hostname 最小化子集 (${keptHosts.length}/${upstreamHosts.length} 条, 仅被 reject 规则消费的域)
-hostname = %APPEND% splash.*, ad.*, flash.*, ${keptHosts.join(", ")}
+# 上游 hostname 最小化子集 (${keptHosts.length}/${upstreamHosts.length} 条, 仅被 reject 规则消费的域)
+hostname = %APPEND% ${keptHosts.join(", ")}
 `;
 
 fs.writeFileSync(OUT, out);
 
 console.log(`✅ ${path.relative(ROOT, OUT)} 已生成 (上游 @UpdateTime ${updateTime})`);
-console.log(`   reject 规则: ${rules.length} 条 (上游 ${rejects.length} 行, 去重 ${rejects.length - rules.length})`);
+console.log(`   reject 规则: ${rules.length} 条 (上游 ${rejects.length} 行, 去重 ${rejects.length - seen.size} 条, 垃圾host ${droppedGarbage} 条)`);
 console.log(`   未纳入 script 型: ${scripts.length} 条 / host 型: ${hostRules} 条`);
 console.log(`   MitM hostname: 保留 ${keptHosts.length} / 上游 ${upstreamHosts.length} (剔除未被消费 ${droppedHosts.length})`);
 console.log("\n── 未纳入的 script 型条目 (供后续决策) ──");
