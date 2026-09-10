@@ -21,10 +21,15 @@ updates:
     # semver 锁死无法在范围内修复 (Dependabot 每次尝试开安全 PR 都会引擎失败刷红 Actions)。
     # 判定: 构建期已知风险, 不进分发产物 — 详见 AGENTS.md「架构已知问题」。
     # surgio 升级到跟进 oclif v5 的版本后, 删除此 ignore 块。
+    #
+    # 2026-09-11: js-yaml 已移出此块 — 它不属于上面这类。补丁版 3.15.2 / 4.3.2 都落在
+    # 现有 semver 范围内 (^3.14.1 / ^4.3.0), 可正常修复; 而裸 dependency-name 不写 versions
+    # 会被解释为 ">= 0", 对 security update 同样生效, 结果是告警永远关不掉, 且每次安全更新
+    # 任务都以 all_versions_ignored + exit 1 收场, 反而成为 Actions 刷红源。
+    # 如需再加 ignore, 必须写 versions 限定范围。
     ignore:
       - dependency-name: "tar"
       - dependency-name: "sigstore"
-      - dependency-name: "js-yaml"
       - dependency-name: "minimatch"
       - dependency-name: "brace-expansion"
       - dependency-name: "glob"
