@@ -24,6 +24,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # 见 "Open or update mirror PR" 步骤的说明:必须用非 GITHUB_TOKEN 凭据, 否则本工作流
+          # 开出的 PR 其 pull_request run 会停在 action_required。persist-credentials 默认 true,
+          # 该 token 会被写进 .git/config, 供后续 git fetch/push 使用。
+          token: ${{ secrets.MIRROR_TOKEN || github.token }}
 
       # 安全改造 (2026-07 审计):
       # 1. 写入前门禁: *.js 过 node --check 语法 / 体积下限 (绝对 200B + 相对上次 50%) /
@@ -649,8 +654,24 @@ jobs:
       # PR 制: 变更推送到 mirror/<date> 分支并开/更新 PR, 不再直推 main
       - name: Open or update mirror PR
         env:
-          GH_TOKEN: ${{ github.token }}
+          # 2026-09-11 修复: 原先只设 GH_TOKEN=github.token, 于是 PR 由 GITHUB_TOKEN 创建。
+          # 官方文档 (triggering-a-workflow): 用 GITHUB_TOKEN 创建/更新的 PR, 其 pull_request
+          # (opened/synchronize/reopened) 事件产生的 run 会进入 **approval-required** 状态,
+          # 需人工点 "Approve workflows to run" 才执行。
+          # 实测后果: mirror/sync 上 Script Tests / Config Validation 连续 6 天共 16 个 run
+          # 全部停在 conclusion=action_required 且 jobs=0(从未启动); 而镜像 PR 的审核清单却
+          # 要求 "CI 全绿" —— 该项因此永远无法满足, PR 长期显示 UNSTABLE。
+          # 修法: 改用 PAT / GitHub App token 代替 GITHUB_TOKEN, pull_request run 即自动执行。
+          MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
+          GH_TOKEN: ${{ secrets.MIRROR_TOKEN || github.token }}
         run: |
+          # 未配置 MIRROR_TOKEN 时显式告警, 而非静默降级 —— 静默降级正是本缺陷长期未被发现的根因。
+          if [ -z "${MIRROR_TOKEN:-}" ]; then
+            echo "::warning::secrets.MIRROR_TOKEN 未配置, 本次回退 GITHUB_TOKEN; 镜像 PR 的 CI 仍会停在 action_required 等人工批准。"
+            echo "ci_token=github-token (降级)" >> $GITHUB_ENV
+          else
+            echo "ci_token=mirror-token" >> $GITHUB_ENV
+          fi
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add Mirror/ Plugin/startup-adblock-pro.plugin
@@ -697,9 +718,9 @@ jobs:
         if: always()
         run: |
           echo "### Mirror Scripts Report" >> $GITHUB_STEP_SUMMARY
-          echo "| Date | Succeeded | Failed | Gated | PR |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|-----------|--------|-------|----|" >> $GITHUB_STEP_SUMMARY
-          echo "| $(date +%Y-%m-%d) | ${success:-0} | ${fail:-0} | ${gated:-0} | ${pr_action:-none} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Date | Succeeded | Failed | Gated | PR | CI token |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-----------|--------|-------|----|----------|" >> $GITHUB_STEP_SUMMARY
+          echo "| $(date +%Y-%m-%d) | ${success:-0} | ${fail:-0} | ${gated:-0} | ${pr_action:-none} | ${ci_token:-n/a} |" >> $GITHUB_STEP_SUMMARY
           if (( ${fail:-0} > 0 )); then
             echo "### ⚠️ Some mirrors failed or were gated" >> $GITHUB_STEP_SUMMARY
             echo "Check run logs for details. 被门禁拦截的文件保留旧版, 不影响分发。" >> $GITHUB_STEP_SUMMARY

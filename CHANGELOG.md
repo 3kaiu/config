@@ -93,6 +93,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - 版本号收敛：template 去版本头，包版本 8.11.0 对齐 CHANGELOG
 - 吸纳 666OS Advertising batch1（179 域 + 2 IP，详见 commit）
 - dependabot 忽略 `decode-uri-component`（surgio 锁死无解；注：仅防 PR 不止红，见 issue 讨论）
+- `mirror-scripts` 改用 `secrets.MIRROR_TOKEN`（PAT / GitHub App token）开/更新 PR —— 由 `GITHUB_TOKEN` 创建或更新的 PR，其 `pull_request` run 会进入 approval-required 状态停在 `action_required` 等人工批准，导致镜像 PR 的 "CI 全绿" 审核项**永远无法满足**（实测 `mirror/sync` 连续 6 天共 16 个 run 全部 `jobs=0` 从未启动，而 PR 长期显示 `UNSTABLE`）。未配置该 secret 时显式 `::warning::` 并回退 `GITHUB_TOKEN`，不再静默降级
 
 ## [v8.11] — 2026-08-29
 
