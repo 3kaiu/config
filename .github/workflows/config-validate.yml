@@ -90,7 +90,7 @@ jobs:
             if [ "$in_loon" -eq 0 ]; then echo "⚠️ Loon 缺少 $domain 代理规则"; MISSING=$((MISSING+1)); fi
           done
           # 检查 Proxy 组过滤一致性 (v8.9: ".*" → MainNodes, 排除 geonode-* 免费代理)
-          loon_regex=$(grep "Proxy = url-test" Profile/Loon.lcf | grep -o 'MainNodes')
+          loon_regex=$(grep "^Proxy = url-test" Profile/Loon.lcf | grep -o 'MainNodes')
           geonode_excluded=$(grep "MainNodes = NameRegex" Profile/Loon.lcf | grep -Fc 'geonode')
           echo "| Check | Result |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
