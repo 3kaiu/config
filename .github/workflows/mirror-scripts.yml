@@ -666,6 +666,14 @@ jobs:
           git checkout -B "$BRANCH"
           git commit -m "chore(mirror): 上游资源同步 ($(date +%Y-%m-%d)) — 待审核" || { echo "::error::commit failed"; exit 1; }
           git fetch origin main --quiet
+          # 已知脆弱点 (2026-09-11 实测, run 34527227034): 若 origin/main 在本 run 期间前移,
+          # rebase 需要 checkout 该文件时会以 "local changes would be overwritten" 中止。
+          # 根因: Mirror/iringo/iRingo.News.plugin 在 main 上的 blob 是 CRLF, 违反
+          # .gitattributes 的 `* text=auto eol=lf`; 镜像步骤写回的工作区副本同样是 CRLF,
+          # git 便认定有本地修改 (注意 `git status` 反而报 clean, 极具误导性)。
+          # 已验证**无效**的加固, 勿重试: git checkout -- / checkout-index -f -a /
+          # stash push+pop / rebase --autostash / -c merge.renormalize=true / 手工 strip CR。
+          # 唯一解是把该文件在 main 上的 blob 归一化为 LF —— 镜像 PR 合并后自然完成。
           git rebase origin/main || { echo "::error::rebase onto origin/main failed"; exit 1; }
           git push -f origin "$BRANCH" || { echo "::error::push failed"; exit 1; }
           CHANGED=$(git diff --name-only origin/main...HEAD -- Mirror/ | grep -v MANIFEST.json | wc -l)
