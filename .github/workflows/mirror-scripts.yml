@@ -602,10 +602,50 @@ jobs:
           mirror "https://github.com/BiliUniverse/Redirect/releases/download/v0.2.20/BiliBili.Redirect.plugin" \
             "biliuniverse/BiliBili.Redirect.plugin" "BiliUniverse Redirect / .plugin v0.2.20"
 
+          # ── 行尾归一化: 哈希前把镜像文本文件统一为 LF ──
+          # 根因 (2026-09-11 实测, Config Validation run 34527842350 红于 step 8b
+          # "Mirror manifest consistency check"): .gitattributes 声明 `* text=auto eol=lf`
+          # + `*.plugin text`, 故 `git add` 会把 CRLF 归一化为 LF 再写入 blob; 而下方清单是
+          # **从磁盘原始字节**哈希的。上游 iRingo.News.plugin 本身是 CRLF, sed 补丁不改行尾
+          # → 清单记 2349B/CRLF, committed blob 却是 2317B/LF → CI checkout 后重算必然漂移
+          # (53 条里 1 条异常)。归一化后 disk == index == blob, 清单哈希恒等于 blob 哈希。
+          # 附带收益: main 上该文件 blob 长期为 CRLF (违反 .gitattributes), 会让下方
+          # `git rebase origin/main` 以 "local changes would be overwritten" 中止, 而
+          # `git status` 因 stat 缓存反而报 clean (极具误导性) — 归一化同时消除该脆弱点。
+          # 扩展名白名单须与 .gitattributes 的 text 声明一致; 白名单同时保证二进制镜像
+          # (未来若加入 .png/.mmdb 等) 不会被误改 —— 新增非文本镜像时不要加入此列表。
+          EOL_NORMALIZED=0
+          while IFS= read -r -d '' f; do
+            before=$(wc -c < "$f")
+            perl -pi -e 's/\r\n/\n/g' "$f"
+            after=$(wc -c < "$f")
+            if [ "$before" != "$after" ]; then
+              EOL_NORMALIZED=$((EOL_NORMALIZED + 1))
+              echo "🔧 行尾归一化 CRLF→LF: $f (${before}B → ${after}B)"
+            fi
+          done < <(find Mirror -type f \
+                    \( -name '*.js' -o -name '*.plugin' -o -name '*.list' -o -name '*.conf' -o -name '*.json' \) \
+                    ! -name 'MANIFEST.json' -print0)
+          # Plugin/startup-adblock-pro.plugin 同样被 git add (见下方 "Open or update mirror PR"),
+          # 且属 `*.plugin text`, 一并归一化以免重演同一类漂移。
+          for f in Plugin/startup-adblock-pro.plugin; do
+            [ -f "$f" ] || continue
+            before=$(wc -c < "$f")
+            perl -pi -e 's/\r\n/\n/g' "$f"
+            after=$(wc -c < "$f")
+            if [ "$before" != "$after" ]; then
+              EOL_NORMALIZED=$((EOL_NORMALIZED + 1))
+              echo "🔧 行尾归一化 CRLF→LF: $f (${before}B → ${after}B)"
+            fi
+          done
+          echo "行尾归一化: $EOL_NORMALIZED 个文件由 CRLF 转为 LF"
+
           # ── 写出新清单 (按文件名排序) ──
           # 2026-08-29 修复 (审计 P1): sha256 在此处从磁盘重算, 不再信任 mirror() 在 cp 后立即算的值。
           # 旧时序下 sed 补丁 (AllInOne/AdvertisingScript/NSRingo) 在 mirror() 之后改写文件,
           # MANIFEST 记的是补丁前哈希 → 每个周期必然漂移 4 处 (已实测复现)。
+          # 2026-09-11 补: 重算必须在**行尾归一化之后** —— 否则清单记的是 CRLF 形态而 blob 是
+          # LF 形态, 同一类漂移会以 "53 条里 1 条异常" 的形式复现 (上方归一化块即为此而设)。
           # 另加孤儿删除守卫: 旧清单有、本轮 ENTRIES 无、且文件仍在仓库 → 保留并标记,
           # 防工作流清单漏项时静默删除仓库镜像文件 (GOODBYEADS 曾被镜像分支误删)。
           node -e '
@@ -666,14 +706,13 @@ jobs:
           git checkout -B "$BRANCH"
           git commit -m "chore(mirror): 上游资源同步 ($(date +%Y-%m-%d)) — 待审核" || { echo "::error::commit failed"; exit 1; }
           git fetch origin main --quiet
-          # 已知脆弱点 (2026-09-11 实测, run 34527227034): 若 origin/main 在本 run 期间前移,
-          # rebase 需要 checkout 该文件时会以 "local changes would be overwritten" 中止。
-          # 根因: Mirror/iringo/iRingo.News.plugin 在 main 上的 blob 是 CRLF, 违反
-          # .gitattributes 的 `* text=auto eol=lf`; 镜像步骤写回的工作区副本同样是 CRLF,
-          # git 便认定有本地修改 (注意 `git status` 反而报 clean, 极具误导性)。
-          # 已验证**无效**的加固, 勿重试: git checkout -- / checkout-index -f -a /
-          # stash push+pop / rebase --autostash / -c merge.renormalize=true / 手工 strip CR。
-          # 唯一解是把该文件在 main 上的 blob 归一化为 LF —— 镜像 PR 合并后自然完成。
+          # 2026-09-11: 行尾归一化 (见上方 "行尾归一化" 块) 已消除本段原先记录的脆弱点 —
+          # main 上 Mirror/iringo/iRingo.News.plugin 的 blob 曾是 CRLF (违反 .gitattributes),
+          # 使本 rebase 以 "local changes would be overwritten" 中止, 而 `git status` 因 stat
+          # 缓存反而报 clean。归一化后工作区与 index 逐字节一致, 该场景不再出现。
+          # 历史: run 34527227034 曾命中。已验证**无效**的加固, 勿重试:
+          # git checkout -- / checkout-index -f -a / stash push+pop / rebase --autostash /
+          # -c merge.renormalize=true / 手工 strip CR。
           git rebase origin/main || { echo "::error::rebase onto origin/main failed"; exit 1; }
           git push -f origin "$BRANCH" || { echo "::error::push failed"; exit 1; }
           CHANGED=$(git diff --name-only origin/main...HEAD -- Mirror/ | grep -v MANIFEST.json | wc -l)
