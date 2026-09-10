@@ -49,7 +49,7 @@ jobs:
         run: |
           echo "## Script-Path URL Check" >> $GITHUB_STEP_SUMMARY
           # 2026-08-29 审计修复 (两处绕过面):
-          # 1) `script-path = URL` 带空格写法曾整体逃逸检查 (sub-store.plugin 即此写法)
+          # 1) `script-path = URL` 带空格写法曾整体逃逸检查 (已移除的第三方订阅管理器插件即此写法)
           # 2) -i + 小写归一: 原正则大小写敏感, HTTPS://evil.com 整行不进入提取集合即逃逸白名单
           # 3) -i: `SCRIPT-PATH=` 大写 key 曾整体逃逸提取 (2026-09-04 对抗审计实证);
           #    Loon key 大小写语义未定, 按 fail-closed 宁可误杀注释行
@@ -105,27 +105,102 @@ jobs:
           exit $MISSING
 
       # ── 4. 银行域名 MitM 冲突检测 ──
+      # 2026-09-11 审计 (CI-02): 原实现**永不失败**, 有三个独立缺陷:
+      #   1) 只有 print 没有断言 — 排除清单被清空也照样输出 ✅;
+      #   2) `echo "$x" | wc -l` 在 $x 为空时返回 1 (echo 仍吐出一个换行),
+      #      故 loon_count 恒 ≥1, 计数本身无法暴露"清单为空";
+      #   3) 用 `grep -oP` (GNU PCRE) + BRE 的 '\|' 交替 — BSD/macOS grep 均不支持,
+      #      该检查在本地无法复现 (与 mirror 门禁 2 同一类可移植性缺陷)。
+      #   并且步骤名为 "conflict detection" 却从不检测任何冲突。
+      # 现改为 POSIX 提取 + 三重断言: 清单规模下限 / 关键银行在场 / 正负向无重叠。
       - name: Bank MitM conflict detection
         run: |
           echo "## Bank MitM Conflict Check" >> $GITHUB_STEP_SUMMARY
-          # 提取银行负向排除域名列表
-          loon_banks=$(grep -oP '(?<=, )-\*\.\w+\.(com|cn)' Profile/Loon.lcf | grep -v 'apple\|icloud' | sed 's/-\*\.//' | sort)
-          # 对比配置数量
-          loon_count=$(echo "$loon_banks" | wc -l)
-          echo "| Config | Bank excludes |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|---------------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Loon | $loon_count |" >> $GITHUB_STEP_SUMMARY
-          echo "✅ 银行域名排除清单已就绪 ($loon_count 个)" >> $GITHUB_STEP_SUMMARY
+          export LC_ALL=C   # 固定 collation, 保证 sort 与 comm 的序一致
+          FAIL=0
+
+          HOSTNAME_LINE=$(grep '^hostname = ' Profile/Loon.lcf || true)
+          if [ -z "$HOSTNAME_LINE" ]; then
+            echo "❌ 未找到 hostname 行 — 提取前提不成立, 本检查无法成立 (fail-closed)" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+          # 负向排除 (以 - 开头) → 归一化域名。apple/icloud 属另一类豁免, 不计入银行/支付面。
+          printf '%s\n' "$HOSTNAME_LINE" | sed 's/^hostname = //' | tr ',' '\n' \
+            | sed 's/^[[:space:]]*//' | grep '^-' | sed 's/^-\*\.//; s/^-//' \
+            | grep -v -e apple -e icloud | grep -v '^$' | sort -u > /tmp/bank_excludes.txt
+          # 正向包含 (不以 - 开头) → 归一化域名, 用于冲突检测。
+          printf '%s\n' "$HOSTNAME_LINE" | sed 's/^hostname = //' | tr ',' '\n' \
+            | sed 's/^[[:space:]]*//' | grep -v '^-' | grep -v '^$' \
+            | sed 's/^\*\.//' | sort -u > /tmp/pos_hostnames.txt
+
+          BANK_COUNT=$(wc -l < /tmp/bank_excludes.txt)
+          POS_COUNT=$(wc -l < /tmp/pos_hostnames.txt)
+
+          # 断言 1: 清单规模下限 (2026-09-11 实测 47 条)。阈值 40 留出合理增删余量,
+          # 但能拦住"清单被整体删除/生成物覆盖成空"这类静默回归。
+          BANK_FLOOR=40
+          if [ "$BANK_COUNT" -lt "$BANK_FLOOR" ]; then
+            echo "❌ 银行/支付排除清单规模异常: $BANK_COUNT 条 (下限 $BANK_FLOOR)" >> $GITHUB_STEP_SUMMARY
+            FAIL=1
+          fi
+
+          # 断言 2: 关键银行必须在场 (逐个点名, 不依赖总数 — 总数正常但漏掉某家同样致命)
+          CRITICAL="icbc.com.cn ccb.com abchina.com bankofchina.com boc.cn bankcomm.com
+                    psbc.com cmbchina.com spdb.com.cn citicbank.com cebbank.com cmbc.com.cn
+                    cib.com.cn cgbchina.com.cn hxb.com.cn pingan.com unionpay.com tenpay.com
+                    95516.com bankofbeijing.com.cn"
+          MISSING=""
+          for d in $CRITICAL; do
+            grep -qxF "$d" /tmp/bank_excludes.txt || MISSING="$MISSING $d"
+          done
+          if [ -n "$MISSING" ]; then
+            echo "❌ 关键银行未在 MitM 排除清单中:$MISSING" >> $GITHUB_STEP_SUMMARY
+            FAIL=1
+          fi
+
+          # 断言 3: 正/负向不得重叠 — 这才是步骤名所指的"冲突检测"。
+          # 同一域既正包含又负排除, 语义依赖客户端实现细节, 应直接删掉正包含。
+          CONFLICT=$(comm -12 /tmp/pos_hostnames.txt /tmp/bank_excludes.txt)
+          if [ -n "$CONFLICT" ]; then
+            echo "❌ 同一域既在 MitM 正包含又在负排除 (语义冲突):" >> $GITHUB_STEP_SUMMARY
+            printf '%s\n' "$CONFLICT" | sed 's/^/  - /' >> $GITHUB_STEP_SUMMARY
+            FAIL=1
+          fi
+
+          echo "| Check | Value | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Bank/payment MitM excludes | $BANK_COUNT | $([ "$BANK_COUNT" -ge "$BANK_FLOOR" ] && echo OK || echo FAIL) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Positive hostnames | $POS_COUNT | OK |" >> $GITHUB_STEP_SUMMARY
+          echo "| Critical banks missing | ${MISSING:-none} | $([ -z "$MISSING" ] && echo OK || echo FAIL) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Positive/negative conflicts | $(printf '%s' "$CONFLICT" | grep -c . ) | $([ -z "$CONFLICT" ] && echo OK || echo FAIL) |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "$FAIL" -eq 0 ]; then
+            echo "✅ 银行排除清单就绪 ($BANK_COUNT 条), 关键银行齐全, 无正负向冲突" >> $GITHUB_STEP_SUMMARY
+          fi
+          exit $FAIL
 
       # ── 5. MitM hostname 正包含统计 ──
+      # 2026-09-11 审计: 本步原先同样"只打印不断言" — hostname 行被改名/删除时,
+      # 原实现静默打印 "Loon | 0" 并放行, 看起来像检查通过。
+      # 此处刻意**不加数量下限**: MitM 正包含变少是安全方向 (证书暴露面收缩),
+      # 设下限会与合理收敛对抗。故只断言**解析活性** (行存在 + 解析出 ≥1 条)。
       - name: MitM hostname inventory
         run: |
           echo "## MitM Hostname Inventory" >> $GITHUB_STEP_SUMMARY
           # 提取 Loon.lcf 的 hostname 行中所有正向域名（非 - 开头）
-          loon_hostname_line=$(grep '^hostname = ' Profile/Loon.lcf)
+          loon_hostname_line=$(grep '^hostname = ' Profile/Loon.lcf || true)
+          if [ -z "$loon_hostname_line" ]; then
+            echo "❌ 未找到 hostname 行 — MitM 清单解析前提不成立 (fail-closed)" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
           # 提取正向域名（逗号分隔，去除前导空格，过滤 - 开头的负向排除）
-          echo "$loon_hostname_line" | sed 's/^hostname = //' | tr ',' '\n' | sed 's/^ //' | grep -v '^-' | sort -u > /tmp/loon_hostnames.txt
+          echo "$loon_hostname_line" | sed 's/^hostname = //' | tr ',' '\n' | sed 's/^[[:space:]]*//' | grep -v '^-' | grep -v '^$' | sort -u > /tmp/loon_hostnames.txt
           loon_count=$(wc -l < /tmp/loon_hostnames.txt)
+          if [ "$loon_count" -lt 1 ]; then
+            echo "❌ hostname 行存在但未解析出任何正包含 — 解析逻辑已失效" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
           echo "| Config | Positive hostnames |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|-------------------|" >> $GITHUB_STEP_SUMMARY
           echo "| Loon | $loon_count |" >> $GITHUB_STEP_SUMMARY
@@ -151,10 +226,25 @@ jobs:
           node tools/plugin-lint-check.mjs 2>&1 | tee -a $GITHUB_STEP_SUMMARY
           exit ${PIPESTATUS[0]}
 
+      # ── 5c-bis. workflow 内嵌 bash 语法检查 (2026-09-11 审计新增) ──
+      # workflow 里的 bash 只有在 CI 执行到那一步时才暴露语法错误; mirror-scripts 与
+      # upstream-health 都是每日定时任务, 坏掉可能数天后才被发现, 期间门禁形同虚设。
+      # 本步把校验提前到 PR 阶段。零依赖 (node 内置 + 系统 bash)。
+      # 边界: 只校验 bash 语法 — run 块内嵌的 node/python 代码错误与逻辑错误不在此列。
+      - name: Workflow bash syntax check
+        run: |
+          echo "## Workflow Bash Syntax Check" >> $GITHUB_STEP_SUMMARY
+          node tools/workflow-bash-check.mjs 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          exit ${PIPESTATUS[0]}
+
       # ── 5d. 模板↔产物一致性 (防双源漂移) ──
       # template/loon.tpl + snippet 的静态行必须完整存在于 Profile/Loon.lcf (反向同理)。
-      # 根因 (2026-08 审计): surgio 需 provider/ 目录 (本地/CI 无 → 生成失败),
-      # 产物实为手动维护 → 模板改动易遗忘同步。此检查保证任一方向改动都会在 CI 暴露。
+      # 这是"集合比对", 保证模板的每一行都进了产物; 它**挡不住**产物里出现模板之外的
+      # 内容 (例如手改 Loon.lcf 加一行)。后者由下方 artifact-idempotency job 兜底。
+      # 更正 (2026-09-11 审计): 原注释称"surgio 需 provider/ 目录 (本地/CI 无 → 生成失败),
+      # 产物实为手动维护" — 该前提不成立。provider/tokyo.js 随仓库提交, 本地
+      # `npx surgio generate --skip-lint` 实测成功且逐字节确定 (连续两次 md5 相同)。
+      # 产物此前确实是手改的, 但那是流程问题而非能力限制。
       - name: Template-product sync check
         run: |
           echo "## Template ↔ Product Sync" >> $GITHUB_STEP_SUMMARY
@@ -289,3 +379,51 @@ jobs:
           echo "## Wiring Integrity Check" >> $GITHUB_STEP_SUMMARY
           node test/wiring-check.js 2>&1 | tee -a $GITHUB_STEP_SUMMARY
           exit ${PIPESTATUS[0]}
+
+  # ── 产物可再生成性门禁 (2026-09-11 审计新增, ARCH-01) ──
+  # 上方 validate job 全部是纯文本/grep 检查, 刻意不装依赖 (装不上也不影响它们)。
+  # 本 job 需要 surgio, 故独立出来并行跑, 不拖慢快速门禁。
+  #
+  # 为什么需要它: tpl-sync-check 是"模板静态行 ⊆ 产物"的集合比对, 能挡住"改模板忘
+  # 同步产物", 但**挡不住产物里多出模板没有的内容** (手改 Loon.lcf 加规则/改策略)。
+  # 直接重新生成并断言零漂移, 是唯一能证明"产物 = f(模板)"的检查。
+  #
+  # 前提已实测 (2026-09-11): provider/tokyo.js 随仓库提交; SURGIO_SUBSCRIPTION_URL
+  # 未配置时 provider 降级为 custom/nodeList:[]; generate 成功且逐字节确定
+  # (连续两次 generate 的 md5 相同, git diff 为空)。
+  #
+  # 注: surgio 升级若改变输出格式, 本步会红 — 这是期望行为 (提示同步提交产物)。
+  artifact-idempotency:
+    name: Artifact regeneration idempotency
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Regenerate and assert zero drift
+        run: |
+          echo "## Artifact Regeneration Idempotency" >> $GITHUB_STEP_SUMMARY
+          # 与 npm run generate 等价 (package.json: surgio generate --skip-lint)
+          npx surgio generate --skip-lint
+          if git diff --exit-code -- Profile/Loon.lcf; then
+            echo "✅ Profile/Loon.lcf 可由 template/ 逐字节再生成 (无漂移)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Profile/Loon.lcf 与 template/ 重新生成的结果不一致" >> $GITHUB_STEP_SUMMARY
+            echo "→ 本地执行 \`npm run generate\` 并提交产物; 禁止手改 Profile/Loon.lcf" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "--- 漂移内容 ---" >> $GITHUB_STEP_SUMMARY
+            git diff -- Profile/Loon.lcf >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi

@@ -158,3 +158,6 @@ debug.log
 # 临时目录
 scratch/
 
+
+# WorkBuddy AI project data
+.workbuddy-ai/

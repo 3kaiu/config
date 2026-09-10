@@ -13,8 +13,8 @@ const $ = new Env("优酷去广告");
 if (typeof $response === "undefined") { $.done(); return; }
 
 const url = $request.url;
-const hostOf = (u) => { try { return new URL(u).hostname; } catch { return ""; } };
-const isHost = (u, d) => { const h = hostOf(u); return h === d || h.endsWith("." + d); };
+// hostOf / isHost → src/lib/net.ts; isAdKey / cleanAdArrays / stripKeys → src/lib/ad.ts
+// (均由 esbuild --inject 注入, 原为跨脚本重复副本)
 try {
   const obj = JSON.parse($response.body);
   if (isHost(url, "iyes.youku.com")) {
@@ -24,20 +24,3 @@ try {
   }
   $.done({ body: JSON.stringify(obj) });
 } catch (e) { $.done(); }
-
-// 递归清空名称含 "ad" 的数组字段
-function cleanAdArrays(o) {
-  if (!o || typeof o !== "object") return;
-  for (const k of Object.keys(o)) {
-    if (Array.isArray(o[k]) && /ad/i.test(k)) o[k] = [];
-    else if (typeof o[k] === "object") cleanAdArrays(o[k]);
-  }
-}
-// 递归删除指定键 (banner/promo)
-function stripKeys(o, keys) {
-  if (!o || typeof o !== "object") return;
-  for (const k of Object.keys(o)) {
-    if (keys.includes(k)) delete o[k];
-    else if (typeof o[k] === "object") stripKeys(o[k], keys);
-  }
-}

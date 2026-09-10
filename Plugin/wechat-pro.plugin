@@ -9,14 +9,12 @@
 
 [Argument]
 ENABLE_WECHAT=switch,"true","false",tag=总开关
-TIMEOUT=input,120,tag=超时时间 (秒)
 WECHAT_FRIEND_ENABLE=switch,"true","false",tag=朋友圈净化
 WECHAT_MP_ENABLE=switch,"true","false",tag=公众号净化
 WECHAT_VIDEO_ENABLE=switch,"true","false",tag=视频号净化
 WECHAT_MINI_ENABLE=switch,"true","false",tag=小程序净化
 WECHAT_SEARCH_ENABLE=switch,"true","false",tag=搜索净化
 WECHAT_UNBLOCK_ENABLE=switch,"true","false",tag=外链解锁
-WECHAT_DEBUG_ENABLE=switch,"false","true",tag=调试模式
 
 [Script]
 # 朋友圈广告

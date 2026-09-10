@@ -9,7 +9,7 @@
 #!tag=🎬 视频社区净化
 
 [Argument]
-555DY_ENABLE=switch,"true","false",tag=是否开启555电影净化,desc=555电影去广告
+APP_555DY_ENABLE=switch,"true","false",tag=是否开启555电影净化,desc=555电影去广告
 CCLIVE_ENABLE=switch,"true","false",tag=是否开启CC直播净化,desc=CC直播去广告
 DOUYU_ENABLE=switch,"true","false",tag=是否开启斗鱼净化,desc=斗鱼去广告
 MANGOTV_ENABLE=switch,"true","false",tag=是否开启芒果TV净化,desc=芒果TV去广告
@@ -28,7 +28,7 @@ adWhitelistSwitch=switch,"true","false",tag=广告白名单屏蔽,desc=开启后
 activityAdsSwitch=switch,"true","false",tag=活动广告位屏蔽,desc=开启后将屏蔽活动广告位与点击上报 (clickPic/clickPicMore/platformPic)
 
 [Rewrite]
-^https:\/\/(app-v1\.ecoliving168\.com|852b95d36\.xwlpk\.cn)\/api\/v1\/movie\/index_recommend\? response-body-json-jq '.data[].list |= map(select(.type != 3)) | .data |= map(select(.layout != "advert_self"))' enable={VIDEO_ENABLE}&{555DY_ENABLE}
+^https:\/\/(app-v1\.ecoliving168\.com|852b95d36\.xwlpk\.cn)\/api\/v1\/movie\/index_recommend\? response-body-json-jq '.data[].list |= map(select(.type != 3)) | .data |= map(select(.layout != "advert_self"))' enable={VIDEO_ENABLE}&{APP_555DY_ENABLE}
 ^https:\/\/api\.cc\.163\.com\/v\d\/mgamenavigation\/navigation_list\? response-body-json-jq '.data.info_list |= map(select(.name == "关注" or .name == "推荐" or .name == "视频" or .name == "全部"))' enable={VIDEO_ENABLE}&{CCLIVE_ENABLE}
 ^https:\/\/api\.cc\.163\.com\/v\d\/mgamerecpage\/recommend_page\? response-body-json-jq '.data.plugins|=map(select(.module_type!="banner"))|.data.plugins|=map(select(.module_type!="show_list"))|.data.plugins|=map(select(.title!="推荐品类"))' enable={VIDEO_ENABLE}&{CCLIVE_ENABLE}
 ^https:\/\/api\.cc\.163\.com\/v\d\/entpage\/live_navbar_mobile\/ios\? response-body-json-jq '.data.top_nav |= map(select(.cn_name == "推荐" or .cn_name == "星秀" or .cn_name == "心动交友"))' enable={VIDEO_ENABLE}&{CCLIVE_ENABLE}

@@ -1,19 +1,14 @@
 #!name=银行应用去广告
-#!desc=交通银行·农业银行·中国银行·云闪付 — 开屏/弹窗/推广净化，支持独立开关。
-#!version=7.8
+#!desc=交通银行·农业银行·中国银行·云闪付 — 开屏/弹窗/推广净化。规则由主配置 [Rule] 段统一管理，本插件为占位符（无独立开关）。
+#!version=7.9
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://icons.duckduckgo.com/ip3/bank.ico
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.2.4(787)
 
-[Argument]
-UNIONPAY_ENABLE=switch,"true","false",tag=是否开启云闪付去广告,desc=开启后将拦截云闪付开屏、弹窗与理财页等推广
-BOCOM_ENABLE=switch,"true","false",tag=是否开启交通银行去广告,desc=开启后将拦截买单吧(交通银行)App开屏及广告图片
-ABC_ENABLE=switch,"true","false",tag=是否开启农业银行去广告,desc=开启后将拦截农业银行App开屏、推广及代理检测
-BOC_ENABLE=switch,"true","false",tag=是否开启中国银行去广告,desc=开启后将拦截中国银行App开屏、广告与主题静态资源
-
 # ⚠️ 银行广告 CDN REJECT 规则已在主配置 Loon.lcf [Rule] 段实现 (DNS 级，无需 MitM)。
 # SSL Pinning 接口 (creditcardapp.bankcomm.com/openapi.boc.cn/wallet.95516.com) 默认注释，
 # 需越狱+SSL Kill Switch 才能启用。
-# v7.3: 本插件仅提供开关 UI，实际规则由主配置统一管理。
+# v7.9 (2026-09-11 分模块审计 MOD-04): 移除 4 个惰性开关。此前开关声明后零引用，
+# 用户拨动无任何效果，造成"可控粒度"的假象。规则常驻由主配置管理。

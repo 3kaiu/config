@@ -23,7 +23,13 @@ jobs:
         id: check
         run: |
           ALL_OK=true
-          RESULTS="[]"
+          # 2026-09-11 审计 (CI-03): 原实现把 $name/$status/$url 直接插值进 node 源码
+          # (`r.push({name: '$name', …})`)。值中出现单引号 / 反斜杠即破坏该 node 脚本 —
+          # 上游 URL 或探活名称一旦含引号, JSON 累积链就此断裂 (静默的部分失败: 之后
+          # 每条探活都报错, 而 --fail 未开, 只是结果缺失)。这既是注入面也是可靠性缺陷。
+          # 另: 原实现每个 URL 起一个 node 进程 (~50 次/轮) 只为 append 一个数组元素。
+          # 现改为: TSV 累积 → 循环结束后单次转换; 数据经 stdin 传递, 不经源码插值。
+          RESULTS_TSV=""
 
           check_url() {
             local name="$1" url="$2"
@@ -39,11 +45,13 @@ jobs:
             echo "URL: $url"
             echo "Status: $status"
             echo "::endgroup::"
-            RESULTS=$(echo "$RESULTS" | node -e "
-              const r = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
-              r.push({name: '$name', status: '$status', url: '$url'});
-              console.log(JSON.stringify(r));
-            ")
+            # TSV 累积。name/status/url 三者均不含制表符 (name 来自 MANIFEST 键或本文件
+            # 字面量; status 来自 %{http_code} 或固定串), 故制表符是安全分隔符。
+            # 万一上游清单里出现制表符, 显式失败而不是静默错位写出坏 JSON。
+            case "${name}${status}${url}" in
+              *$'\t'*) echo "::error::探活字段含制表符, 无法序列化: $name"; exit 1 ;;
+            esac
+            RESULTS_TSV+="${name}"$'\t'"${status}"$'\t'"${url}"$'\n'
             if [ "$status" != "200" ] && [ "$status" != "200 (kelee 403→Loon OK)" ] && [ "$status" != "302" ] && [ "$status" != "301" ]; then
               ALL_OK=false
             fi
@@ -59,8 +67,11 @@ jobs:
           # 自建 CDN 可用性 (内容哈希校验在 cdn-verify.yml, 这里只探活)
           check_url "ws.wenn.in CDN (Mirror)" "https://ws.wenn.in/main/Mirror/netease.adblock.js"
 
-          # S3 镜像 (GOODBYEADS 客户端直连, loon.tpl [Remote Rule] 引用; 上传为带外手工同步, 无其他巡检覆盖)
-          check_url "S3 GOODBYEADS (Remote Rule)" "https://3kaiu-mirror-1787937996.s3-ap-northeast-1.amazonaws.com/rules/goodbyeads-qx.list"
+          # GOODBYEADS 客户端直连 URL (loon.tpl [Remote Rule], 3.9MB 大文件单独探活)
+          # 2026-09-11 审计 (DATA-01): 原探的是 S3 带外手工上传副本。该副本与仓库内
+          # Mirror/rules/goodbyeads-qx.list 同源双份、无哈希门禁且靠人工上传, 已把
+          # loon.tpl 收敛到 CDN 路径 — 故探活目标随之改为客户端实际拉取的 URL。
+          check_url "GOODBYEADS (Remote Rule via CDN)" "https://ws.wenn.in/main/Mirror/rules/goodbyeads-qx.list"
 
           # 免费代理源 (proxy-sync 每日拉取 → Profile/geonode.loon.txt, Loon [Remote Proxy] 引用)
           check_url "proxylist.geonode.com API" "https://proxylist.geonode.com/api/proxy-list?page=1&limit=1&sort_by=responseTime&sort_type=asc"
@@ -88,6 +99,18 @@ jobs:
           # 后果: 全部 MANIFEST 派生探活 (~34 条) 不写 summary、不影响 all_ok、永不触发 issue,
           # 等于硬编码之外的上游探活全是死代码。改用 /tmp 文件中转让 while 留在当前 shell。
           while IFS=$'\t' read -r name url; do check_url "$name (mirrored)" "$url"; done < /tmp/mirrors.tsv
+
+          # 单次转换 TSV → JSON (数据走 stdin, 不经 node 源码插值)。
+          # 用 indexOf 而非 split("\t"): url 若含制表符也不会被截断 (末段整体保留)。
+          RESULTS=$(printf '%s' "$RESULTS_TSV" | node -e '
+            const r = [];
+            for (const line of require("fs").readFileSync(0, "utf8").split("\n")) {
+              if (!line) continue;
+              const i = line.indexOf("\t"), j = line.indexOf("\t", i + 1);
+              r.push({ name: line.slice(0, i), status: line.slice(i + 1, j), url: line.slice(j + 1) });
+            }
+            console.log(JSON.stringify(r));
+          ')
 
           echo "all_ok=$ALL_OK" >> $GITHUB_ENV
           echo "results=$RESULTS" >> $GITHUB_ENV

@@ -24,14 +24,72 @@
 // ════════════════════════════════════════
 // ⚙️ 配置
 // ════════════════════════════════════════
-const mainConfig: any = {
-  isDebug: false, author: "ddgksf2013",
+/**
+ * 主配置 — 显式类型 (2026-09-11 审计, CODE-03)
+ *
+ * 原声明为 `const mainConfig: any = {...}`, 掩盖了一个真实缺陷: 代码里有 3 个
+ * 字段**从未在配置里定义** —
+ *   · `blockIds`            → `mainConfig.blockIds || []` 恒为 [], isBlocked() 永远返回 false
+ *   · `removeUnfollowTopic` → 经 `(mainConfig as any)` 读取, 恒为 undefined
+ *   · `removeUnusedPart`    → 同上
+ * 后两个使 `topicHandler()` 的超话净化分支**整段不可达** (条件恒假)。`as any`
+ * 转型正是"我知道这字段不存在但让它编过"的味道。
+ *
+ * 现改为显式接口 + 补全字段。新补的 3 个字段默认值**保持既有行为不变**:
+ *   · `blockIds: []`      — 空列表, isBlocked() 仍恒 false (但现在是**有意为之**的空列表, 填入 ID 即可生效)
+ *   · `removeUnfollowTopic/removeUnusedPart: false` — 维持超话分支不生效;
+ *     置 true 可启用超话净化 (移除未关注话题/无用板块)。默认 false 与本文件
+ *     对"较激进/小众"开关的既有约定一致 (cf. removeInterestTopic: false)。
+ *     ⚠️ 置 true 属行为变更, 会实际移除超话页卡片, 请自行确认后再开。
+ */
+interface MainConfig {
+  isDebug: boolean;
+  author: string;
+  /** 个人页: 去 VIP 图标 / 创作者任务 */
+  removeHomeVip: boolean;
+  removeHomeCreatorTask: boolean;
+  /** 详情页: 去相关推荐 / 好物种草 / 关注卡片 / 打赏 */
+  removeRelate: boolean;
+  removeGood: boolean;
+  removeFollow: boolean;
+  removeRewardItem: boolean;
+  /** 详情页菜单裁剪 */
+  modifyMenus: boolean;
+  /** 推荐/直播/置顶/热搜等流内净化 */
+  removeRecommendItem: boolean;
+  removeLiveMedia: boolean;
+  removePinedTrending: boolean;
+  removeSearchWindow: boolean;
+  removeLvZhou: boolean;
+  /** 话题/兴趣类 (默认关闭) */
+  removeInterestFriendInTopic: boolean;
+  removeInterestTopic: boolean;
+  removeInterestUser: boolean;
+  /** 超话净化 (默认关闭 — 置 true 会移除未关注话题/无用板块) */
+  removeUnfollowTopic: boolean;
+  removeUnusedPart: boolean;
+  /** 按 ID 屏蔽指定卡片; 填入 ID 即生效 */
+  blockIds: (string | number)[];
+  /** 以下为上游保留项, 当前代码未读取 (保留配置面, 勿删) */
+  removeRelateItem: boolean;
+  removeNextVideo: boolean;
+  profileSkin1: string | null;
+  profileSkin2: string | null;
+  tabIconVersion: number;
+  tabIconPath: string;
+}
+
+const mainConfig: MainConfig = {
+  // (2026-09-11 分模块审计 MOD-03) 原为硬编码 false — log() 依赖它, 故
+  // WEIBO_DEBUG_ENABLE 开关此前完全无效。现接线到插件参数。
+  isDebug: readFlag("WEIBO_DEBUG_ENABLE"), author: "ddgksf2013",
   removeHomeVip: true, removeHomeCreatorTask: true,
   removeRelate: true, removeGood: true, removeFollow: true, modifyMenus: true,
   removeRelateItem: false, removeRecommendItem: true, removeRewardItem: true,
   removeLiveMedia: true, removeNextVideo: false, removePinedTrending: true,
   removeInterestFriendInTopic: false, removeInterestTopic: false,
   removeInterestUser: true, removeLvZhou: true, removeSearchWindow: true,
+  removeUnfollowTopic: false, removeUnusedPart: false, blockIds: [],
   profileSkin1: null, profileSkin2: null, tabIconVersion: 0, tabIconPath: "",
 };
 
@@ -119,7 +177,7 @@ function log(msg: string): void {
 }
 
 function isBlock(obj: any): boolean {
-  const blockIds: any[] = mainConfig.blockIds || [];
+  const blockIds = mainConfig.blockIds;
   if (blockIds.length === 0) return false;
   const id = obj.user.id;
   for (const bid of blockIds) if (bid == id) return true;
@@ -317,9 +375,13 @@ function removeCards(data: any): void {
   if (data.cards) {
     const kept: any[] = [];
     for (const card of data.cards) {
-      if (data.cardlistInfo?.containerid === "232082type=1" && card.card_type !== 17 && card.card_type !== 58 && card.card_type !== 11) {
-        // pass through
-      }
+      // (2026-09-11 审计, CODE-03) 此处原为一个**空 if 块**:
+      //   if (containerid === "232082type=1" && card_type ∉ {17,58,11}) { /* pass through */ }
+      // 它求值后不做任何事 — 纯死代码, 且注释 "pass through" 暗示原意应是 `continue`
+      // (即该容器下这些卡片跳过过滤、原样保留)。改成 `continue` 会**改变行为**
+      // (这些卡片将不再被过滤), 无法从代码判断哪个才是本意, 故此处按"移除死代码、
+      // 保持现有行为"处理, 并把意图存疑点交给维护者: 若确应 pass through, 把下面
+      // 注释换成 `continue;` 即可。
       const cardGroup = card.card_group;
       if (cardGroup && cardGroup.length > 0) {
         const items: any[] = [];
@@ -380,15 +442,15 @@ function itemExtendHandler(data: any): void {
 // ── 超话 ──
 function topicHandler(data: any): any {
   const cards = data.cards;
-  if (cards && ((mainConfig as any).removeUnfollowTopic || (mainConfig as any).removeUnusedPart)) {
+  if (cards && (mainConfig.removeUnfollowTopic || mainConfig.removeUnusedPart)) {
     const kept: any[] = [];
     for (const card of cards) {
       let keep = true;
       if (card.mblog) {
         const buttons = card.mblog.buttons;
-        if ((mainConfig as any).removeUnfollowTopic && buttons && buttons[0].type === "follow") keep = false;
+        if (mainConfig.removeUnfollowTopic && buttons && buttons[0].type === "follow") keep = false;
       } else {
-        if (!(mainConfig as any).removeUnusedPart) continue;
+        if (!mainConfig.removeUnusedPart) continue;
         if (card.itemid === "bottom_mix_activity") keep = false;
         else if (card.top?.title === "正在活跃") keep = false;
         else if (card.card_type === 200 && card.group) keep = false;

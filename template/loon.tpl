@@ -22,7 +22,12 @@ dns-reject-mode = LOOPBACKIP
 disconnect-on-policy-change = false
 geoip-url = https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb
 ipasn-url = https://raw.githubusercontent.com/P3TERX/GeoLite.mmdb/download/GeoLite2-ASN.mmdb
-resource-parser = https://ws.wenn.in/main/Mirror/rules/loon-sub-store-parser.js
+# resource-parser: 已移除 (2026-09-11 供应链审计)
+#   原值指向 Sub-Store 的 1.27MB 解析器 bundle (上游 releases/latest 浮动)。
+#   移除理由: 该 bundle 在订阅解析上下文中执行, 可见全部节点凭据; 哈希门禁只能证明
+#   "与上游发布一致", 无法证明上游可信 — 与移除 Sub-Store 插件同一信任前提, 故一并移除。
+#   影响: Loon 回退内置解析器 (原生 ss/ssr/vm 等链接格式与 Clash 配置均可解析)。
+#   如需恢复 Clash YAML 等扩展格式: 自行指定 resource-parser, 并锁定具体版本而非 latest。
 allow-wifi-access = false
 wifi-access-http-port = 7222
 wifi-access-socks5-port = 6225
@@ -66,7 +71,13 @@ httpdns.c.cdnhwc2.com = 0.0.0.0
 # 隔离: geonode-* 免费代理被 MainNodes 排除, 仅 OpenCode 组引用 (见 [Remote Filter]/[Remote Proxy])
 
 [Proxy Group]
-Proxy = url-test, MainNodes, 东京, url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
+# 2026-09-11 审计 (CFG-01): 原为 `Proxy = url-test, MainNodes, 东京, url=...`, 其中 `东京`
+# 是**悬空字面量** — [Proxy] 段设计上只有注释、无任何节点定义 (凭据永不进仓), 全仓无
+# `东京 = <proto>,...` 定义, 该成员永远解析不到。且 MainNodes 的 FilterKey 为
+# `^(?!.*geonode).*$` (匹配除 geonode-* 外的**全部**节点), 任何名为 东京 的节点本就被
+# MainNodes 覆盖 → 该字面量对作者冗余、对使用者悬空。url-test 组按延迟择优, 成员顺序
+# 亦无优先级语义, 故删除是零行为变更。
+Proxy = url-test, MainNodes, url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
 Fallback = fallback, MainNodes, url=http://cp.cloudflare.com/generate_204, interval=600, timeout=10
 Apple = select, DIRECT, Proxy
 Final = select, Proxy, Fallback, DIRECT
@@ -393,14 +404,20 @@ https://ws.wenn.in/main/Mirror/rules/loon-Global.list, policy=Proxy, tag=🌍 �
 https://ws.wenn.in/main/Mirror/rules/loon-Advertising.list, policy=REJECT, tag=🚫 广告域名, enabled=true
 https://ws.wenn.in/main/Mirror/rules/loon-Privacy.list, policy=REJECT, tag=🔒 隐私保护, enabled=true
 https://ws.wenn.in/main/Mirror/rules/loon-Hijacking.list, policy=REJECT, tag=🛡️ 反劫持, enabled=true
-https://3kaiu-mirror-1787937996.s3-ap-northeast-1.amazonaws.com/rules/goodbyeads-qx.list, tag=GOODBYEADS, policy=REJECT, enabled=true
+# GOODBYEADS (2026-09-11 审计: 收敛为单一分发路径)
+#   原值指向 S3 带外手工上传副本 (3kaiu-mirror-*.s3-ap-northeast-1.amazonaws.com/rules/goodbyeads-qx.list),
+#   与仓库内的 Mirror/rules/goodbyeads-qx.list 构成**双份同源数据**: S3 副本无哈希门禁、
+#   不随 mirror-scripts 每日刷新 (靠人工上传, 天然易过期且无法被 CI 验证)。
+#   现改用与其余列表完全一致的 CDN 路径 — 该文件已在 Mirror/MANIFEST.json 内,
+#   受 sha256 门禁 + 每日镜像 + cdn-verify parity 三重覆盖。
+#   实测切换时三份副本 sha256 一致 (fe6a469a…), 故为纯结构性收敛, 无规则变化。
+https://ws.wenn.in/main/Mirror/rules/goodbyeads-qx.list, tag=GOODBYEADS, policy=REJECT, enabled=true
 https://ws.wenn.in/main/Mirror/rules/loon-Epic.list, policy=Proxy, tag=🎮 Epic Games, enabled=true
 
 [Plugin]
 # 注: DNS leak 规则已直接内置在 [Rule] 段, 不再需要独立插件
 https://ws.wenn.in/main/Mirror/rules/loon-AllInOne.plugin, enabled=true, tag=通用广告域名层
 https://ws.wenn.in/main/Mirror/rules/loon-AdvertisingScript.plugin, enabled=true, tag=广告脚本增强
-https://ws.wenn.in/main/Plugin/sub-store.plugin, enabled=true, tag=Sub-Store 订阅管理
 https://ws.wenn.in/main/Plugin/quicksearch.plugin, enabled=true, tag=快捷搜索
 https://ws.wenn.in/main/Plugin/notify.plugin, enabled=true, tag=🔔 定时通知
 https://ws.wenn.in/main/Plugin/privacy-shield.plugin, enabled=true, tag=🔒 隐私防护 (SDK 追踪全拦截)

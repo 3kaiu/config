@@ -17,7 +17,7 @@ interface AdItem {
   is_promote?: boolean;
 }
 
-const CONFIG: { routes: RouteConfig; adKeywords: string[]; debug: boolean } = {
+const CONFIG: { routes: RouteConfig; debug: boolean } = {
   routes: {
     splash: /gw\/open\.ap.*splash|alipaysplash/,
     homefeed: /(gateway|mapi.*home|life.*newsfeed)/,
@@ -26,25 +26,55 @@ const CONFIG: { routes: RouteConfig; adKeywords: string[]; debug: boolean } = {
     payment: /(traffix|success|payment)/,
     general: /microapp|recommend|openapi/
   },
-  adKeywords: [
-    'ad', 'ads', 'promo', 'promotion', 'promotions',
-    'recommend', 'recommends', 'rec_', 'adv_data',
-    'adData', 'adlist', 'banner_list', 'carousel'
-  ],
-  debug: typeof $argument !== 'undefined' && $argument.includes('DEBUG_MODE=true')
+  // (2026-09-11 分模块审计 MOD-02) 原为 `$argument.includes('DEBUG_MODE=true')` —
+  // 键名 DEBUG_MODE 与插件声明的 DEBUG_ENABLE 不符, 且插件传的是动作名, 故永不可达。
+  debug: readFlag('DEBUG_ENABLE')
 };
+
+/** 冗长诊断日志 — 仅 CONFIG.debug 打开时输出 (2026-09-11 分模块审计 MOD-02: 此前 debug 只读不用) */
+function log(...a: unknown[]): void { if (CONFIG.debug) console.log(...a); }
+
+/**
+ * 广告字段名判定 — 按标识符分段整段匹配 (2026-09-11 审计修复)
+ *
+ * 原实现 `CONFIG.adKeywords.some(k => key.toLowerCase().includes(k))` 是**子串**
+ * 匹配, 'ad' 会命中 header (he-ad-er)、loading (lo-ad-ing)、upload、badge、
+ * shadow、read 等大量正常字段并被清空 (实证: header/loading 被置空)。
+ *
+ * 现按 snake_case / kebab-case / camelCase 拆词段后匹配:
+ *   EXACT  — 段必须完全等于该词
+ *   PREFIX — 段以该词开头 (仅限明确需要前缀语义、且不可能是普通词前缀的词)
+ * 结果: ad/ads/ad_list/adData/rec_list/banner_list/recommendations 命中,
+ *       header/loading/address/adaptive/badge/record 不再命中。
+ */
+const AD_FIELD_EXACT: ReadonlySet<string> = new Set([
+  'ad', 'ads', 'adv', 'rec', 'adlist', 'banner', 'carousel',
+  'promo', 'promotion', 'promotions', 'recommend', 'recommends',
+]);
+const AD_FIELD_PREFIX: readonly string[] = ['advert', 'promo', 'recommend'];
+
+function isAdFieldKey(key: string): boolean {
+  const segs = String(key)
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')   // camelCase → 词段
+    .split(/[^A-Za-z0-9]+/)                    // snake/kebab/点号 → 词段
+    .filter(Boolean);
+  return segs.some(seg => {
+    const w = seg.toLowerCase();
+    return AD_FIELD_EXACT.has(w) || AD_FIELD_PREFIX.some(p => w.startsWith(p));
+  });
+}
 
 !(async () => {
   const { url } = $request!;
 
   if (typeof $response === 'undefined') {
-    console.log('[支付宝小程序] Request 阶段 - 跳过');
+    log('[支付宝小程序] Request 阶段 - 跳过');
     $done();
     return;
   }
 
   if (!$response.body) {
-    console.log('[支付宝小程序] 无响应体 - 跳过');
+    log('[支付宝小程序] 无响应体 - 跳过');
     $done();
     return;
   }
@@ -54,7 +84,7 @@ const CONFIG: { routes: RouteConfig; adKeywords: string[]; debug: boolean } = {
 
     for (const [routeName, pattern] of Object.entries(CONFIG.routes)) {
       if (pattern.test(url)) {
-        console.log(`[支付宝小程序] 检测到 ${routeName} 请求`);
+        log(`[支付宝小程序] 检测到 ${routeName} 请求`);
 
         switch (routeName) {
           case 'splash': handleSplash(bodyObj); break;
@@ -65,14 +95,14 @@ const CONFIG: { routes: RouteConfig; adKeywords: string[]; debug: boolean } = {
           default: handleGeneral(bodyObj);
         }
 
-        console.log('[支付宝小程序] 处理完成');
+        log('[支付宝小程序] 处理完成');
         $done({ body: JSON.stringify(bodyObj) });
         return;
       }
     }
 
     handleGeneral(bodyObj);
-    console.log('[支付宝小程序] 通用净化完成');
+    log('[支付宝小程序] 通用净化完成');
     $done({ body: JSON.stringify(bodyObj) });
 
   } catch (error) {
@@ -93,7 +123,7 @@ function handleSplash(obj: Record<string, unknown>): void {
   const data = obj.data as Record<string, unknown>;
   removeFields.forEach(field => {
     if (data[field]) {
-      console.log(`[开屏] 移除字段：${field}`);
+      log(`[开屏] 移除字段：${field}`);
       delete data[field];
     }
   });
@@ -109,7 +139,7 @@ function handleHomeFeed(obj: Record<string, unknown>): void {
       if (item.content && typeof item.content === 'object') return !isAdContent(item.content);
       return true;
     });
-    console.log(`[信息流] 过滤 ${beforeCount - data.length} 条广告，剩余 ${data.length} 条`);
+    log(`[信息流] 过滤 ${beforeCount - data.length} 条广告，剩余 ${data.length} 条`);
     return data;
   };
   if (obj.dataList) obj.dataList = processList(obj.dataList as AdItem[]);
@@ -136,7 +166,7 @@ function handleSearch(obj: Record<string, unknown>): void {
   if (result && result.items) {
     const beforeCount = result.items.length;
     result.items = result.items.filter((item: AdItem) => !(item.source === 'tencent' || item.is_promote));
-    console.log(`[搜索] 过滤 ${beforeCount - result.items.length} 条推广`);
+    log(`[搜索] 过滤 ${beforeCount - result.items.length} 条推广`);
   }
 }
 
@@ -153,7 +183,7 @@ function cleanObject(obj: unknown, depth: number = 0): void {
   if (!obj || typeof obj !== 'object') return;
   if (depth > 10) return;
   for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
-    const isAdField = CONFIG.adKeywords.some(keyword => key.toLowerCase().includes(keyword));
+    const isAdField = isAdFieldKey(key);
     if (isAdField) {
       if (Array.isArray(value)) {
         (obj as Record<string, unknown>)[key] = [];

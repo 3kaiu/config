@@ -7,11 +7,10 @@
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.2.4(787)
 
-#!arguments-desc=\n- \{ENABLE_OVERSEAS}: ["true","false"],tag=总开关，desc=开启后执行所有海外社交平台净化\n- \{OVERSEAS_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,90,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{INSTAGRAM_ENABLE}: switch,"true","false",tag=Instagram 净化，desc=去除推荐/广告/追踪\n- \{FACEBOOK_ENABLE}: switch,"true","false",tag=Facebook 净化，desc=去除 News Feed 广告/赞助内容\n- \{TWITTER_X_ENABLE}: switch,"true","false",tag Twitter/X 净化，desc=去除推广推文/趋势话题广告\n- \{LINKEDIN_ENABLE}: switch,"true","false",tag LinkedIn 净化，desc=去除 sponsored posts/招聘推荐\n- \{PRIVACY_ENABLE}: switch,"true","false",tag隐私防护，desc=拦截第三方追踪器和数据收集\n- \{DEBUG_ENABLE}: switch,"false","true",tag调试模式，desc=输出详细执行日志
+#!arguments-desc=\n- \{ENABLE_OVERSEAS}: switch,"true","false",tag=总开关，desc=开启后执行所有海外社交平台净化\n- \{INSTAGRAM_ENABLE}: switch,"true","false",tag Instagram 净化，desc=去除推荐/广告/追踪\n- \{FACEBOOK_ENABLE}: switch,"true","false",tag Facebook 净化，desc=去除 News Feed 广告/赞助内容\n- \{TWITTER_X_ENABLE}: switch,"true","false",tag Twitter/X 净化，desc=去除推广推文/趋势话题广告\n- \{LINKEDIN_ENABLE}: switch,"true","false",tag LinkedIn 净化，desc=去除 sponsored posts/招聘推荐\n- \{PRIVACY_ENABLE}: switch,"true","false",tag 隐私防护，desc=拦截第三方追踪器和数据收集\n- \{DEBUG_ENABLE}: switch,"false","true",tag 调试模式，desc=输出详细执行日志
 
 [Argument]
 ENABLE_OVERSEAS=switch,"true","false",tag=总开关，desc=开启后执行所有海外社交平台净化
-TIMEOUT=input,90,tag=超时时间 (秒), desc=脚本最大执行时长
 INSTAGRAM_ENABLE=switch,"true","false",tag Instagram 净化，desc=去除推荐/广告/追踪
 FACEBOOK_ENABLE=switch,"true","false",tag Facebook 净化，desc=去除 News Feed 广告/赞助内容
 TWITTER_X_ENABLE=switch,"true","false",tag Twitter/X 净化，desc=去除推广推文/趋势话题广告
@@ -69,32 +68,32 @@ http-response ^https?:\/\/watch\.facebook\.com reject-dict enable={ENABLE_OVERSE
 # ═══════════════════════════════════════===
 
 # ── Timeline 净化 ──────────────────────
-http-response ^https?:\/\/api\.twitter\.com timeline clean script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=X Timeline 清理，enable={TWITTER_X_ENABLE}
-http-response ^https?:\/\/tweetdeck\.twitter\.com promoted-tweet-blocker script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=推广推文阻止，enable={TWITTER_X_ENABLE}
+http-response ^https?:\/\/api\.twitter\.com script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, argument=[{DEBUG_ENABLE}], tag=X Timeline 清理，enable={TWITTER_X_ENABLE}
+http-response ^https?:\/\/tweetdeck\.twitter\.com script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, argument=[{DEBUG_ENABLE}], tag=推广推文阻止，enable={TWITTER_X_ENABLE}
 
 # ── Trends 趋势净化 ───────────────────
-http-response ^https?:\/\/api\.twitter\.com trends clean script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=Trends 清理，enable={TWITTER_X_ENABLE}
-http-response ^https?:\/\/syndication\.twitter\.com trend-ad-filter script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=趋势广告过滤，enable={TWITTER_X_ENABLE}
+http-response ^https?:\/\/api\.twitter\.com script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, argument=[{DEBUG_ENABLE}], tag=Trends 清理，enable={TWITTER_X_ENABLE}
+http-response ^https?:\/\/syndication\.twitter\.com script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, argument=[{DEBUG_ENABLE}], tag=趋势广告过滤，enable={TWITTER_X_ENABLE}
 
 # ── Recommendations 净化 ───────────────
-http-response ^https?:\/\/api\.twitter\.com for-you clean script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=为你推荐清理，enable={TWITTER_X_ENABLE}
-http-response ^https?:\/\/rest\.api\.twitter\.com recommend-user-blocker script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, tag=推荐用户阻止，enable={TWITTER_X_ENABLE}
+http-response ^https?:\/\/api\.twitter\.com script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, argument=[{DEBUG_ENABLE}], tag=为你推荐清理，enable={TWITTER_X_ENABLE}
+http-response ^https?:\/\/rest\.api\.twitter\.com script-path=https://ws.wenn.in/main/Scripts/Twitter.js, timeout=60, requires-body=true, argument=[{DEBUG_ENABLE}], tag=推荐用户阻止，enable={TWITTER_X_ENABLE}
 
 # ════════════════════════════════════════
 # 💼 LinkedIn 净化规则
 # ═══════════════════════════════════════===
 
 # ── Home Feed 净化 ─────────────────────
-http-response ^https?:\/\/www\.linkedin\.com feed clean script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=Home Feed 清理，enable={LINKEDIN_ENABLE}
-http-response ^https?:\/\/api\.linkedin\.com sponsored-post-blocker script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=Sponsored Posts 阻止，enable={LINKEDIN_ENABLE}
+http-response ^https?:\/\/www\.linkedin\.com script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, argument=[{DEBUG_ENABLE}], tag=Home Feed 清理，enable={LINKEDIN_ENABLE}
+http-response ^https?:\/\/api\.linkedin\.com script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, argument=[{DEBUG_ENABLE}], tag=Sponsored Posts 阻止，enable={LINKEDIN_ENABLE}
 
 # ── Job Recommendations 净化 ───────────
-http-response ^https?:\/\/www\.linkedin\.com job-ads-clean script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=招聘广告清理，enable={LINKEDIN_ENABLE}
-http-response ^https?:\/\/api\.linkedin\.com job-recommendation-filter script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=职位推荐过滤，enable={LINKEDIN_ENABLE}
+http-response ^https?:\/\/www\.linkedin\.com script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, argument=[{DEBUG_ENABLE}], tag=招聘广告清理，enable={LINKEDIN_ENABLE}
+http-response ^https?:\/\/api\.linkedin\.com script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, argument=[{DEBUG_ENABLE}], tag=职位推荐过滤，enable={LINKEDIN_ENABLE}
 
 # ── Learning & Ads 净化 ────────────────
-http-response ^https?:\/\/www\.linkedin\.com learning-promo-clean script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=学习推广清理，enable={LINKEDIN_ENABLE}
-http-response ^https?:\/\/adserver\.linkedin\.com ad-blocker script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, tag=平台广告阻止，enable={LINKEDIN_ENABLE}
+http-response ^https?:\/\/www\.linkedin\.com script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, argument=[{DEBUG_ENABLE}], tag=学习推广清理，enable={LINKEDIN_ENABLE}
+http-response ^https?:\/\/adserver\.linkedin\.com script-path=https://ws.wenn.in/main/Scripts/LinkedIn.js, timeout=60, requires-body=true, argument=[{DEBUG_ENABLE}], tag=平台广告阻止，enable={LINKEDIN_ENABLE}
 
 # ════════════════════════════════════════
 # 🔒 通用隐私防护

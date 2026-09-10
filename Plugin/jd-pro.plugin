@@ -7,7 +7,7 @@
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.2.4(787)
 
-#!arguments-desc=\n- \{ENABLE_JD}: ["true","false"],tag=总开关, desc=开启后执行所有京东功能\n- \{JD_MALL_ENABLE}: switch,"true","false",tag=逛商城，desc=净化商城推荐流\n- \{JD_COUPON_ENABLE}: switch,"true","false",tag=领券中心，desc=领取可用优惠券\n- \{JD_PRICE_ENABLE}: switch,"true","false",tag=比价工具，desc=价格监控与历史对比
+#!arguments-desc=\n- \{ENABLE_JD}: switch,"true","false",tag=总开关，desc=开启后执行所有京东功能\n- \{JD_MALL_ENABLE}: switch,"true","false",tag=逛商城，desc=净化商城推荐流\n- \{JD_COUPON_ENABLE}: switch,"true","false",tag=领券中心，desc=领取可用优惠券\n- \{JD_PRICE_ENABLE}: switch,"true","false",tag=比价工具，desc=价格监控与历史对比
 
 [Argument]
 ENABLE_JD=switch,"true","false",tag=总开关，desc=开启后执行所有京东功能

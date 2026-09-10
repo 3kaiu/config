@@ -26,7 +26,8 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       # 安全改造 (2026-07 审计):
-      # 1. 写入前门禁: *.js 过 node --check 语法 / 体积≥200B / 非 HTML 错误页 — 任一不过保留旧文件
+      # 1. 写入前门禁: *.js 过 node --check 语法 / 体积下限 (绝对 200B + 相对上次 50%) /
+      #    非 HTML 错误页 / .plugin 内 script-path 域白名单 — 任一不过保留旧文件
       # 2. MANIFEST.json: 每个镜像文件记录 source_url + sha256 + 抓取时间, 变更在 PR diff 中高亮
       # 3. PR 制: 不再直推 main — 推送到 mirror/<date> 分支并开/更新 PR, 人工审 diff 后合并
       # 4. 覆盖范围: 脚本 + 规则列表 + rewrite 模块 + NSRingo 插件 (跟随 latest),
@@ -37,6 +38,41 @@ jobs:
           FAIL=0
           GATED=0
           OLD_MANIFEST="Mirror/MANIFEST.json"
+
+          # ── 旧清单体积索引 (key → upstream_bytes), 一次性导出 ──
+          # 2026-09-11 审计 (CI-01): 门禁 1 的相对下限需要"上次成功抓取的**原始**体积"。
+          # 必须用 upstream_bytes 而非磁盘 bytes: Advertising/AllInOne 等文件在抓取后被
+          # 本地 sed 补丁撑大 (实测 loon-Advertising.list 磁盘 32842B / 上游原始 26870B,
+          # 比值 0.818), 拿磁盘体积作基准会让这些文件每轮都误报。
+          # 一次性导出为 TSV 是为了避免每个文件起一个 node 进程 (约 50 个文件)。
+          # 兼容: 旧清单尚无 upstream_bytes 字段时回退到 bytes — 实测最坏情况
+          # (Advertising.list) 比值 0.818, 距 0.5 阈值仍有 0.318 余量, 不会误杀;
+          # 本轮之后 upstream_bytes 写入清单, 后续周期均为精确基准。
+          # 注: 模板的 X 放在末尾 (无后缀) — GNU mktemp 接受 X 后带后缀, BSD/macOS mktemp 只认
+          # 末尾的 X, 会把 'prev-sizes.XXXXXXXX.tsv' 当字面名并在第二次调用时报 File exists。
+          # 本门禁必须本地可复现才能被验证, 故用两边都成立的写法。
+          PREV_SIZES=$(mktemp /tmp/prev-sizes.XXXXXX)
+          # 注意: node -e 是脚本求值, **顶层 `return` 非法** (SyntaxError: Illegal return
+          # statement) — 必须用 if 包裹而不是提前 return。此处曾因该语法错误 + 重定向吞掉
+          # stderr, 导致索引静默为空、相对下限永不生效 (门禁看起来存在实际不存在)。
+          node -e '
+            const fs = require("fs");
+            const p = process.argv[1];
+            if (fs.existsSync(p)) {
+              const m = JSON.parse(fs.readFileSync(p, "utf8"));
+              for (const [k, v] of Object.entries(m.files || {})) {
+                const b = typeof v.upstream_bytes === "number" ? v.upstream_bytes
+                        : typeof v.bytes === "number" ? v.bytes : null;
+                if (b !== null) console.log(k + "\t" + b);
+              }
+            }
+          ' "$OLD_MANIFEST" > "$PREV_SIZES"
+          # 活性断言: 清单存在却导出 0 条 → 索引脚本坏了, 门禁 1 的相对下限会静默失效。
+          # 宁可红, 也不要"看起来有门禁其实没有"。(首次运行无清单时跳过)
+          if [ -f "$OLD_MANIFEST" ] && [ ! -s "$PREV_SIZES" ]; then
+            echo "❌ 旧清单体积索引为空 (清单存在) — 门禁 1 相对下限将失效, 中止"
+            exit 1
+          fi
 
           # 读取旧清单中某文件的记录 (用于抓取失败时保留旧 sha)
           old_entry() {
@@ -65,16 +101,37 @@ jobs:
               keep_old "$dest"
               rm -f "$tmpf"; return
             fi
-            # ── 门禁 1: 体积下限 (防 200 状态码的 HTML 错误页/半截传输) ──
+            # ── 门禁 1: 体积下限 (绝对 200B + 相对上次抓取 50%) ──
+            # 2026-09-11 审计 (CI-01): 原为统一 200B 绝对下限。对 .js/.plugin 尚可, 但对规则
+            # 列表形同虚设 — 仓库内 .list 实测 588B (loon-Epic) 至 3.9MB (goodbyeads-qx),
+            # 跨度 4 个数量级, 200B 阈值下"上游返回一小段非 HTML 的占位正文"可静默通过并
+            # 进入分发链 (CDN 随后分发给所有客户端)。
+            # 单纯抬高绝对阈值不可行: 任何统一值要么放过小列表, 要么误杀 Epic/Privacy 这类
+            # 天然很小的列表。故改为**相对下限** — 新抓取体积须 ≥ 上次成功抓取原始体积的 50%,
+            # 阈值自校准到每个文件自身的量级, 对"上游被换成小体积占位内容"与"传输被截断"都成立。
+            # 绝对下限始终保留 (相对下限只会上调它, 不会下调), 覆盖"新增镜像/无旧记录"的情形。
             local size; size=$(wc -c < "$tmpf")
-            if [ "$size" -lt 200 ]; then
-              echo "🚫 $name 门禁拦截: 体积过小 (${size}B), 保留旧版"
+            local min_bytes=200
+            local prev_bytes
+            prev_bytes=$(awk -F'\t' -v k="$dest" '$1 == k { print $2; exit }' "$PREV_SIZES")
+            if [ -n "$prev_bytes" ] && [ "$prev_bytes" -gt 0 ]; then
+              local rel=$(( prev_bytes / 2 ))
+              [ "$rel" -gt "$min_bytes" ] && min_bytes=$rel
+            fi
+            if [ "$size" -lt "$min_bytes" ]; then
+              if [ -n "$prev_bytes" ] && [ "$min_bytes" -gt 200 ]; then
+                echo "🚫 $name 门禁拦截: 体积相对骤降 (${size}B < 上次 ${prev_bytes}B 的 50%), 保留旧版"
+              else
+                echo "🚫 $name 门禁拦截: 体积过小 (${size}B < ${min_bytes}B), 保留旧版"
+              fi
               GATED=$((GATED + 1)); FAIL=$((FAIL + 1))
               keep_old "$dest"
               rm -f "$tmpf"; return
             fi
             # ── 门禁 2: 非 HTML ──
-            if head -c 200 "$tmpf" | grep -qi '<!doctype\|<html'; then
+            # 注: 用 -E 而非 BRE 的 '\|' — GNU grep 认 '\|' 为交替, BSD/macOS grep 视作
+            # 字面量 (整个模式永不匹配)。CI 跑在 ubuntu, 但门禁必须本地可复现才能被验证。
+            if head -c 200 "$tmpf" | grep -qiE '<!doctype|<html'; then
               echo "🚫 $name 门禁拦截: 内容为 HTML 错误页, 保留旧版"
               GATED=$((GATED + 1)); FAIL=$((FAIL + 1))
               keep_old "$dest"
@@ -116,7 +173,10 @@ jobs:
             local sha; sha=$(sha256sum "$path" | awk '{print $1}')
             echo "✅ $name → $path (sha256:${sha:0:12}…, ${size}B)"
             SUCCESS=$((SUCCESS + 1))
-            ENTRIES+=("\"$dest\": {\"source_url\": \"$url\", \"sha256\": \"$sha\", \"bytes\": $size, \"fetched_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}")
+            # upstream_bytes = 原始抓取体积 (本地 sed 补丁之前), 供下轮门禁 1 的相对下限使用。
+            # 末尾的清单重写只从磁盘重算 sha256/bytes (含补丁后的真实值), 不动本字段 —
+            # 故本字段恒为"上游原始体积"语义。
+            ENTRIES+=("\"$dest\": {\"source_url\": \"$url\", \"sha256\": \"$sha\", \"bytes\": $size, \"upstream_bytes\": $size, \"fetched_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}")
           }
 
           # ═══════════════ 脚本 (执行于 MitM 上下文, 最高敏感) ═══════════════
@@ -150,9 +210,12 @@ jobs:
           mirror "https://gist.githubusercontent.com/blackmatrix7/f5f780d0f56b319b6ad9848fd080bb18/raw/zheye.min.js" \
             "scripts/zheye.min.js" "blackmatrix7 gist / zheye.min.js"
 
-          # ═══════════════ 解析器脚本 (订阅解析时执行, 可见全部节点凭据) ═══════════════
-          mirror "https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store-parser.loon.min.js" \
-            "rules/loon-sub-store-parser.js" "Sub-Store / sub-store-parser.loon.min.js"
+          # ═══════════════ 解析器脚本 ═══════════════
+          # Sub-Store 解析器 (sub-store-parser.loon.min.js, 1.27MB) 已于 2026-09-11 移除:
+          #   该 bundle 在订阅解析上下文执行 (可见全部节点凭据), 且上游为 releases/latest 浮动发布。
+          #   哈希门禁仅能证明"与上游发布一致", 不能证明上游可信 — 与 Sub-Store 插件同一信任前提。
+          #   连带移除: template/loon.tpl 的 [General] resource-parser 与 [Plugin] sub-store 条目。
+          #   如需恢复: 锁定具体版本号 (非 latest) 并在此处重新 mirror。
 
           # ═══════════════ 规则列表 (blackmatrix7, Loon 格式) ═══════════════
           for n in Advertising Privacy Hijacking Epic China Global; do
@@ -464,7 +527,9 @@ jobs:
           # boxjs 兼容, 不在镜像 PR 内做未验证的格式切换。
           mirror "https://github.com/NSRingo/WeatherKit/releases/download/v3.1.0/iRingo.WeatherKit.plugin" \
             "iringo/iRingo.WeatherKit.plugin" "NSRingo / iRingo.WeatherKit.plugin v3.1.0 (latest 已无 .plugin)"
-          mirror "https://github.com/NSRingo/MapKit/releases/latest/download/iRingo.Maps.plugin" \
+          # (2026-09-11 分模块审计 MOD-09) 上游仓库已从 MapKit 改名为 Maps;
+          # GitHub 重定向仍工作, 但直接写 Maps 避免对重定向的依赖。
+          mirror "https://github.com/NSRingo/Maps/releases/latest/download/iRingo.Maps.plugin" \
             "iringo/iRingo.Maps.plugin" "NSRingo / iRingo.Maps.plugin latest"
           mirror "https://github.com/NSRingo/News/releases/latest/download/iRingo.News.plugin" \
             "iringo/iRingo.News.plugin" "NSRingo / iRingo.News.plugin latest"
@@ -500,6 +565,26 @@ jobs:
             "dualsubs/DualSubs.YouTube.plugin" "DualSubs YouTube / .plugin v1.5.11"
           mirror "https://github.com/DualSubs/Netflix/releases/download/v0.5.7/DualSubs.Netflix.plugin" \
             "dualsubs/DualSubs.Netflix.plugin" "DualSubs Netflix / .plugin v0.5.7"
+
+          # ── 本地补丁 (2026-09-11 审计, SEC-02): DualSubs 浮动 latest → 锁定具体版本 ──
+          # 上游 DualSubs.YouTube / DualSubs.Netflix 两个插件内嵌的 script-path 指向
+          # releases/latest (共 5 处), 属**浮动引用**: 无法锁定版本、无法验证内容,
+          # 上游任一时刻替换产物即静默进入分发链。
+          # 同仓库的 DualSubs.Universal.plugin 已固定 v1.7.5, 且实测 latest 与 v1.7.5
+          # 逐字节相同 (Translate / Composite.Subtitles 两个 bundle sha256 一致),
+          # 故锁到同一版本为**零行为变更**, 仅去掉浮动性。
+          # 每日镜像后强制重写 → 上游若改回 latest 会被再次修正 (自愈)。
+          # 注: 这三个 dualsubs 插件当前**未接线** (template/loon.tpl 无引用), 属镜像
+          # 储备内容; 本补丁确保其一旦被启用也不会带入浮动引用。
+          # 升级版本时: 同步改下方 DS_VER 与本段上方 DualSubs.Universal 的 mirror 版本。
+          DS_VER="v1.7.5"
+          sed -i "s|https://github.com/DualSubs/Universal/releases/latest/download/|https://github.com/DualSubs/Universal/releases/download/${DS_VER}/|g" \
+            Mirror/dualsubs/DualSubs.YouTube.plugin Mirror/dualsubs/DualSubs.Netflix.plugin
+          # 断言: 补丁后不应再有任何浮动引用。上游若新增产物或改回 latest, 在此暴露。
+          if grep -n -e "DualSubs/Universal/releases/latest" Mirror/dualsubs/*.plugin; then
+            echo "🚫 DualSubs 补丁后仍存在 releases/latest 浮动引用 (上游可能新增了产物), 请人工核对并锁定版本"
+            FAIL=$((FAIL + 1))
+          fi
 
           # ═══════════════ Auraflare (Cloudflare 资源集成) ═══════════════
           mirror "https://raw.githubusercontent.com/Auraflare/1.1.1.1/main/modules/Cloudflare.1.1.1.1.plugin" \
@@ -584,7 +669,7 @@ jobs:
           git rebase origin/main || { echo "::error::rebase onto origin/main failed"; exit 1; }
           git push -f origin "$BRANCH" || { echo "::error::push failed"; exit 1; }
           CHANGED=$(git diff --name-only origin/main...HEAD -- Mirror/ | grep -v MANIFEST.json | wc -l)
-          BODY=$(printf '## 镜像同步 %s\n\n变更文件: %s 个 (不含 MANIFEST)\n\n```\n%s\n```\n\n### 审核清单\n- [ ] MANIFEST.json diff: 每个变更文件的 sha256 与 source_url 已核对\n- [ ] 上游变更符合预期 (非投毒/非破坏性更新)\n- [ ] CI 全绿\n\n> 门禁: *.js 过 node --check 语法 / 体积≥200B / 非 HTML 错误页; 未过门禁的文件保留旧版\n' "$(date +%Y-%m-%d)" "$CHANGED" "$(git diff --stat origin/main...HEAD -- Mirror/)")
+          BODY=$(printf '## 镜像同步 %s\n\n变更文件: %s 个 (不含 MANIFEST)\n\n```\n%s\n```\n\n### 审核清单\n- [ ] MANIFEST.json diff: 每个变更文件的 sha256 与 source_url 已核对\n- [ ] 上游变更符合预期 (非投毒/非破坏性更新)\n- [ ] CI 全绿\n\n> 门禁: *.js 过 node --check 语法 / 体积下限 (绝对 200B + 相对上次抓取 50%) / 非 HTML 错误页 / .plugin script-path 域白名单; 未过门禁的文件保留旧版\n' "$(date +%Y-%m-%d)" "$CHANGED" "$(git diff --stat origin/main...HEAD -- Mirror/)")
           EXISTING=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' || true)
           if [ -n "$EXISTING" ]; then
             if gh pr edit "$EXISTING" --body "$BODY"; then echo "pr_action=updated#"$EXISTING >> $GITHUB_ENV

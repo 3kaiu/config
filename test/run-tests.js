@@ -27,6 +27,37 @@ function makeAssert() {
       const h = typeof haystack === "string" ? haystack : JSON.stringify(haystack);
       if (h.includes(needle)) fails.push(`${msg || "notIncludes"}: ${JSON.stringify(needle)} 不应出现`);
     },
+    /**
+     * 断言脚本未在顶层抛错 (2026-09-11 审计新增)。
+     * 代理脚本抛错 → Loon 收不到 $done → 请求挂死; 此前 harness 静默吞错,
+     * 这类缺陷在绿灯用例下不可见。
+     */
+    noScriptError(state, msg) {
+      if (state && state.scriptError) {
+        fails.push(`${msg || "noScriptError"}: 脚本顶层抛出 ${state.scriptError.name || "Error"}: ${state.scriptError.message}`);
+      }
+    },
+    /**
+     * 断言脚本恰好/至少调用了 $done 且未抛错 — 响应类脚本的核心契约。
+     * 用法: a.doneCalled(s) 或 a.doneCalled(s, "应放行")
+     */
+    doneCalled(state, msg) {
+      if (!state) { fails.push(`${msg || "doneCalled"}: state 缺失`); return; }
+      if (state.scriptError) {
+        fails.push(`${msg || "doneCalled"}: 脚本抛出 ${state.scriptError.name || "Error"}: ${state.scriptError.message} (导致 $done 未调用, Loon 侧请求挂死)`);
+        return;
+      }
+      if (!state.doneCalls || state.doneCalls.length === 0) {
+        fails.push(`${msg || "doneCalled"}: $done 从未被调用 (Loon 侧请求挂死)`);
+      }
+    },
+    /** 断言 $done 恰好被调用 n 次 (默认 1) — 防止多路分支重复 $done */
+    doneCalledTimes(state, n = 1, msg) {
+      this.doneCalled(state, msg);
+      if (state && state.doneCalls && state.doneCalls.length !== n) {
+        fails.push(`${msg || "doneCalledTimes"}: 期望 $done ${n} 次, 实际 ${state.doneCalls.length} 次`);
+      }
+    },
   };
 }
 

@@ -1,15 +1,12 @@
 const { defineSurgioConfig } = require('surgio');
 
-const tokyoProvider = (() => {
-  const url = process.env.SURGIO_SUBSCRIPTION_URL;
-  return url
-    ? { type: 'shadowsocks_subscription', url }
-    : { type: 'custom', nodeList: [] };
-})();
+// 注意: provider 由 surgio 按约定加载 provider/<name>.js (artifact.js 内
+// path.resolve(providerDir, `${name}.js`)), 本文件不再重复定义 provider 对象。
+// 因此 tokyo provider 的唯一来源是 provider/tokyo.js — 改节点来源请改那个文件。
+// (历史: 此处曾有一份内联 tokyoProvider 定义, 经实测为死代码 — surgio 从不读取
+//  config.providers, 且 SurgioConfigValidator 无该字段。已于 2026-09-11 移除。)
 
 module.exports = defineSurgioConfig({
-  providers: [{ name: 'tokyo', ...tokyoProvider }],
-
   artifacts: [
     {
       name: 'Loon.lcf',
@@ -39,7 +36,7 @@ module.exports = defineSurgioConfig({
     doh3_primary: 'h3://dns.alidns.com/dns-query',
     doh3_fallback: 'h3://doh.pub/dns-query',
     doq_server: 'quic://dns.alidns.com:853',
-    // Surge 节点 policy-path (Sub-Store 集合的 Surge 节点列表 URL); 留空时 Proxy 组降级为 select DIRECT
-    surge_node_policy_path: '',
+    // (已移除) surge_node_policy_path: 死参数, 模板从未引用; 原注释指向 Sub-Store
+    // 集合的 Surge 节点列表 URL, 随 Sub-Store 一并移除 (2026-09-11)。
   },
 });

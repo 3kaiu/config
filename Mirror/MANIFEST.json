@@ -64,7 +64,7 @@
     },
     "dualsubs/DualSubs.Netflix.plugin": {
       "source_url": "https://github.com/DualSubs/Netflix/releases/download/v0.5.7/DualSubs.Netflix.plugin",
-      "sha256": "cbd0288582e23259cd9e01e9d935f0af2ce8e6396e235ed33738e58407e1e083",
+      "sha256": "16e86e6952126df3296a0852ef58a7e7eea1883ce0c62834f98c327c8de6237d",
       "bytes": 2084,
       "fetched_at": "2026-07-30T03:29:55Z"
     },
@@ -76,7 +76,7 @@
     },
     "dualsubs/DualSubs.YouTube.plugin": {
       "source_url": "https://github.com/DualSubs/YouTube/releases/download/v1.5.11/DualSubs.YouTube.plugin",
-      "sha256": "850c58a1ec7b068b00e551f7f99e87f384f35ff421e11cb235063bd0b1e4bd2b",
+      "sha256": "ae837fa14da0fa73314cbcea4337326c78ca9528e7867986265fcf906ce4c1de",
       "bytes": 5847,
       "fetched_at": "2026-07-30T03:29:55Z"
     },
@@ -199,12 +199,6 @@
       "sha256": "24b048634166c810833c424455586e57d0db6991ed1bab2adafa09603b4f4c22",
       "bytes": 821,
       "fetched_at": "2026-08-28T14:22:46Z"
-    },
-    "rules/loon-sub-store-parser.js": {
-      "source_url": "https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store-parser.loon.min.js",
-      "sha256": "b06d43cef4b73ac7a5ca53296006b7e1aaabd1c7d32f063513b16b192675a124",
-      "bytes": 1268479,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
     },
     "scripts/startup.js": {
       "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/startup/startup.js",

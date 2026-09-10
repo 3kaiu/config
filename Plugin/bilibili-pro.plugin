@@ -45,7 +45,7 @@ http-response ^https?:\/\/api\.bilibili\.com\/x\/interface\/wbi url reject-dict,
 http-response ^https?:\/\/api\.bilibili\.com\/pgc/player/web/playurl url reject-dict, enable={ENABLE_BILI}&{BILI_1080P_ENABLE}
 
 # 定时任务
-cron {BILI_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/Bilibili.js, timeout={TIMEOUT}, tag=B 站定时任务, enable={ENABLE_BILI}
+cron {BILI_CRON_EXP} script-path=https://ws.wenn.in/main/Scripts/Bilibili.js, timeout={TIMEOUT}, argument=[{BILI_DEBUG_ENABLE}], tag=B 站定时任务, enable={ENABLE_BILI}
 
 [Rewrite]
 # 港澳台地区解锁
@@ -85,4 +85,4 @@ DOMAIN-SUFFIX, hdslb.com, DIRECT
 
 [MitM]
 # v8.2 (2026-08 审计): 移除 i0.hdslb.com (视频 CDN, 无任何规则消费 → 纯解密无收益)
-hostname = %APPEND% api.bilibili.com, mobi.bilibili.com, live.bilibili.com, app.bilibili.com, grpc.biliapi.net, api.bilibili.com, www.bilibili.com, line3-h5-mobile-api.biligame.com, api.live.bilibili.com
+hostname = %APPEND% api.bilibili.com, mobi.bilibili.com, live.bilibili.com, app.bilibili.com, grpc.biliapi.net, www.bilibili.com, line3-h5-mobile-api.biligame.com, api.live.bilibili.com

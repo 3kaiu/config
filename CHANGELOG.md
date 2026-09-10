@@ -8,6 +8,76 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased] (2026-09-04 对抗审计)
 
+### Fixed (2026-09-11 审计 P1: 3 个实证缺陷 + 3 个门禁缺口)
+
+**缺陷类 — 全部先用探针复现、再修、再回归**
+
+- **ROB-01 知乎脚本抛错 → 请求挂死** (`src/Zhihu.ts`)：顶层 `try/catch` 只包住 `JSON.parse`，之后 135 行 if/else 链**完全裸奔**。任一分支遇到非预期字段形状即抛错 → 末尾 `$done` 永不执行 → Loon 侧收不到响应，请求挂死。探针实证 4 条挂死路径：`questions` 响应无 `data`（`body.data.ad_info` 读 undefined）、`data` 为 null、`topstory/recommend` 的 `data` 非数组（`.filter` 不存在）、`app_float_layer` 响应体为标量（`'feed_egg' in 123`）。修法：把分发链收进 `dispatch()`，调用处 `try/catch` 兜底（异常一律原样放行并通知），另加 `isObj` 收敛标量响应体、`Array.isArray` 守卫、`extractVideoIDFromRawBody()` 类型守卫。6 条探针全部转为 `$done` 恰好一次
+- **BUG-01 广告字段名子串匹配误伤正常字段** (`src/Kugou.ts` / `src/Youku.ts` / `src/AlipayMini.ts`)：`/ad/i.test(k)` 与 `key.toLowerCase().includes(keyword)` 都是**子串**匹配 — 任何含 "ad" 子串的字段都被判为广告并清空。实证误伤 `header`(he-**ad**-er)、`loading`(lo-**ad**-ing)、`upload`、`badge`、`thread`、`shadow`、`read`、`road`；Kugou 响应被改成 `{"header":[],"ads":[],"loading":[]}`。修法：按 snake_case / kebab-case / camelCase 拆词段后匹配 — `ad`/`ads` 整段命中、`advert*` 明确词干命中，`ad_list`/`adData`/`banner_list`/`recommendations` 仍命中而 `header`/`loading`/`address`/`adaptive`/`badge`/`record` 不再命中
+- **BUG-02 广告类型 `\b` 词首边界误伤** (`src/Feishu.ts`)：`/\b(ad|promot|sponsor|banner)/i` 的 `\b` 是**词首**边界而非词尾锚定 — "adaptive" 的 "ad" 前正是词首边界，于是正常类型 `adaptive` 被整项删除（实证：内容被删成 `{"items":[]}`），`address`/`admin` 同理。改为首尾锚定 `^(ad|ads|advert\w*|promot\w*|sponsor\w*|banner\w*|recommend\w*)$`
+
+**门禁类 — "绿灯但未生效"同型问题**
+
+- **TEST-01 测试基建看不见这三类缺陷** (`test/harness.js` / `test/run-tests.js`)，三个独立根因：
+  1. `runScript` 用 `.catch(() => {})` **静默吞掉**脚本顶层异常 → 新增 `state.scriptError` 记录，并新增断言助手 `assert.doneCalled(state)` / `doneCalledTimes(state,n)` / `noScriptError(state)`（失败信息直接带出真实异常，如 `TypeError: Cannot read properties of undefined (reading 'ad_info')`）
+  2. mock `$httpClient` 用 `setImmediate` 投递响应，与 `fastTimers` 映射的超时**同队列且排在其后** → 脚本"先 `setTimeout` 再发请求"时超时永远先触发，mock 响应永不投递（实证 Bilibili `httpGet` 恒得 `请求失败: timeout`，即该脚本的 HTTP 分支从未被测试真正执行；现有用例靠**同步覆写** `$httpClient` 绕过才得以通过）。改为**微任务**投递（微任务先于宏任务排空），并支持 `httpHandler` 返回 `{ hang: true }` 以显式测超时分支
+  3. `runScript` 末尾固定 `setTimeout(30ms)` 等待 → 改为轮询排空队列（更快，且去掉"30ms 内必须跑完"的时序脆弱性）
+- **ARCH-01 产物可再生成性无门禁** (`config-validate.yml` + `template` 注释)：`tpl-sync-check` 是"模板静态行 ⊆ 产物"的**集合比对**，能挡"改模板忘同步产物"，但**挡不住产物里多出模板没有的内容**（手改 `Loon.lcf`）。新增独立 job `artifact-idempotency`：`npx surgio generate --skip-lint` 后断言 `git diff --exit-code Profile/Loon.lcf`。**同时更正一条错误注释** — 原注称"surgio 需 provider/ 目录（本地/CI 无 → 生成失败），产物实为手动维护"，实测**前提不成立**：`provider/tokyo.js` 随仓库提交，`npx surgio generate --skip-lint` 成功且逐字节确定（连续两次 md5 相同、diff 为空）。产物此前确是手改，但那是流程问题而非能力限制
+- **DATA-01 GOODBYEADS 同源双份分发** (`template/loon.tpl` + `upstream-health.yml`)：`[Remote Rule]` 里唯一一条不走自建 CDN 的引用，指向 S3 带外**手工上传**副本，与仓库内 `Mirror/rules/goodbyeads-qx.list` 构成双份同源数据 — S3 副本无哈希门禁、不随每日镜像刷新、CI 无法验证（MANIFEST 派生探活与 cdn-verify 都不覆盖它）。已收敛为与其余列表一致的 CDN 路径（该文件本就在 MANIFEST 内，受 sha256 + 每日镜像 + cdn-verify parity 三重覆盖）。切换前实测三份副本 sha256 一致（`fe6a469a…`），纯结构性收敛、无规则变化；探活目标随之改为客户端实际拉取的 URL
+- **SEC-02 DualSubs 浮动 `latest` 引用** (`mirror-scripts.yml`)：`Mirror/dualsubs/DualSubs.YouTube.plugin`(4 处) 与 `DualSubs.Netflix.plugin`(1 处) 内嵌 script-path 指向 `releases/latest` — 浮动引用，无法锁定亦无法验证。新增自愈 sed 补丁锁定到 `v1.7.5`（与同仓库 `DualSubs.Universal.plugin` 已用版本一致；实测 `latest` 与 `v1.7.5` 的 `Translate`/`Composite.Subtitles` 两个 bundle **逐字节相同**，故为零行为变更），并加**断言**：补丁后若仍有 `releases/latest` 即判红（上游新增产物时在此暴露）。注：这三个 dualsubs 插件当前**未接线**（`template/loon.tpl` 无引用），属镜像储备内容 — 补丁确保其一旦被启用也不会带入浮动引用
+
+**回归覆盖**：新增 `test/cases/audit-regressions.test.js`（12 例），含 harness 契约自检 3 例。用例数 108 → 120。
+**fail-before 已实证**：对 HEAD 旧产物运行新用例 → 恰好 8 例判红且报错直指根因（`Cannot read properties of undefined (reading 'ad_info')` / `期望 [1,2,3], 实际 [3]` 等），harness 契约 3 例正确保持绿。
+
+### Fixed (2026-09-11 审计 P2/P3: 门禁强度 + 重复代码收敛 + 文档漂移)
+
+**门禁强度（CI-01/02/03）— 三个"看起来有门禁其实没有"的缺陷**
+
+- **CI-01 mirror 体积门禁对规则列表形同虚设**（`mirror-scripts.yml`）：原为统一 200B **绝对**下限。仓库内 `.list` 实测 588B（`loon-Epic`）至 3.9MB（`goodbyeads-qx`），跨度 4 个数量级 — 任何统一阈值要么放过小列表、要么误杀天然很小的列表。改为**相对下限**：新抓取体积须 ≥ 上次成功抓取**原始**体积的 50%（绝对 200B 始终保留且只被上调）。基准取新增的 `upstream_bytes` 字段（原始抓取体积），**不能**取磁盘 `bytes` — Advertising/AllInOne 等文件抓取后被本地 sed 补丁撑大（实测 32842B vs 原始 26870B，比值 0.818），拿磁盘体积作基准会每轮误报。**实证**：`mirror()` 抽出后以 stub curl 驱动 10 例 — 旧门禁放行 32842B→1026B 的截断（CI-01 缺陷复现），新门禁拦截，且 30KB 正常漂移不误报
+- **CI-02 银行 MitM 检查永不失败**（`config-validate.yml`）：三个独立缺陷 —（1）只有 print 没有断言，清单被清空也输出 ✅；（2）`echo "$x" | wc -l` 在 `$x` 为空时返回 **1**（echo 仍吐一个换行），故计数恒 ≥1，本身无法暴露"清单为空"；（3）`grep -oP`（GNU PCRE）在 macOS/BSD grep 下直接 `invalid option -- P`，该检查本地无法复现。且步骤名为 "conflict detection" 却从不检测冲突。改为 POSIX 提取 + **三重断言**（规模下限 40 / 20 家关键银行逐个点名在场 / 正负向无重叠）。**实证**：4 种变异体（清空、缺 icbc、制造冲突、低于下限）全部判红，基线绿；旧逻辑对照在清单清空时仍报 `✅ … 已就绪 (1 个)`
+- **CI-03 探活字段插值进 node 源码**（`upstream-health.yml`）：`r.push({name: '$name', …})` 把值直接拼进 node 源码，值中出现单引号/反斜杠即破坏脚本 → JSON 累积链断裂（静默的部分失败）。改为 TSV 累积 + 循环结束后**单次**转换、数据走 stdin 不经源码插值；并加制表符守卫（显式报错而非静默错位）。附带性能收益：原实现每个 URL 起一个 node 进程（约 50 次/轮）仅为 append 一个数组元素。**实证**：10 组敌意值（单引号/双引号/反斜杠/反引号/`$(cmd)`/unicode/空串）新实现全部无损，旧实现在单引号处语法断裂
+- **新增 `tools/workflow-bash-check.mjs` + `config-validate.yml` step 5c-bis + `npm run check:workflows`**：workflow 内嵌 bash 只在 CI 执行到那一步时才暴露语法错误，而 `mirror-scripts`/`upstream-health` 都是每日定时任务 — 坏掉可能数天后才发现，期间门禁形同虚设。该步把校验提前到 PR 阶段（零依赖，41 个 run 块）。**边界已注明**：只校验 bash 语法，run 块内嵌的 node/python 代码错误与逻辑错误不在其范围
+- **门禁 2 可移植性**（`mirror-scripts.yml`）：`grep -qi '<!doctype\|<html'` 的 `\|` 是 GNU 扩展，BSD/macOS grep 视作**字面量**（整个模式永不匹配）→ 本地无法复现该门禁。改 `-qiE`，两边语义一致
+
+**重复代码收敛（CODE-01）**
+
+- 6 份 `hostOf`/`isHost` 副本（Kugou/Youku/Fanqie/Douyin/Meituan/Dianping）+ 2+2+3 份 ad/notify 副本收敛为 `src/lib/{net,ad,notify}.ts`，经 esbuild `--inject` 注入（无 import 语句，不改变产物结构）。24 个 `Scripts/` 产物的改动已证实**纯属标识符重命名**（`Keep.js` 长度与去标识符骨架完全一致），且构建**逐字节确定**（连续两次聚合 sha256 相同）
+
+**文档漂移与兼容性（DOC-01 / DEP-01 / DEP-02 / ENV-01 / CFG-01）**
+
+- **CFG-01 产物含悬空节点引用**（`template/loon.tpl`）：`Proxy = url-test, MainNodes, 东京, …` 中的 `东京` 是悬空字面量 — `[Proxy]` 段设计上只有注释、无任何节点定义（凭据永不进仓），全仓无 `东京 = <proto>,…`。且 `MainNodes` 的 FilterKey 为 `^(?!.*geonode).*$`（匹配除 geonode-* 外的**全部**节点），任何名为 `东京` 的节点本就被覆盖 → 对作者冗余、对使用者悬空；url-test 组按延迟择优，成员顺序亦无优先级语义。故删除为**零行为变更**
+- **DOC-01 CHANGELOG 自相矛盾**：`v8.11` 段内 "`package.json` version 仍为 8.5.0" 与同文件 Unreleased 段 "包版本 8.11.0 对齐 CHANGELOG" 冲突（实际为 8.11.0）。保留原始记录并补注"已解决"，避免后人据旧文误判
+- **`package.json` description 版本号漂移**：`3kaiu Loon config v8.5` → 去掉硬编码版本（`version` 字段已是 8.11.0）
+- **DEP-02**：补 `engines: { "node": ">=22" }`（CI 用 22；此前无声明，node 版本不满足时静默失败而非提示）
+- **ENV-01**：补 `npm run audit:ci`（默认镜像 `registry.npmmirror.com` 未实现 `/-/npm/v1/security/*` 端点，`npm audit` 本地不可用；脚本固定 `--registry=https://registry.npmjs.org`）
+- **DEP-01 复核结论更正**：实测 43 个漏洞（原文档记 ~39）**并非全部**来自 surgio 内嵌 npm@9 — 按路径归类为 surgio 子树 32 项 + surgio 自身依赖（`got`/`qs`/`query-string`/`update-notifier`→`latest-version`→`package-json`/`decode-uri-component`）与 **eslint 子树**（`js-yaml` 经 `@eslint/eslintrc`）。共同点是**全部属构建期工具链**、均不进入任何分发产物；但修复路径不同（surgio 侧待上游跟进 oclif v5，eslint 侧随 eslint 升级消解），原文"上游未跟进前无解"仅覆盖前者
+
+### Removed (Sub-Store 供应链下线 — 2026-09-11 供应链审计)
+
+对上轮 `v8.11` 那条 "**sub-store.plugin 接线恢复** … 若确认要下线则删文件与引用两处" 的落地：确认下线，两处均已删。
+
+**移除对象与理由**
+
+- `Plugin/sub-store.plugin` — 3 条 `script-path` 全部指向 `github.com/sub-store-org/Sub-Store/releases/latest/download/*`。`releases/latest` 是**浮动引用**：无法锁定版本、无法验证内容，上游任一时刻替换产物即静默进入分发链。该插件在订阅管理上下文中执行，可见**全部节点凭据**
+- `Mirror/rules/loon-sub-store-parser.js` (1,268,479 B) + `template/loon.tpl` 的 `[General] resource-parser` 行 — 同一信任前提。该 bundle 在**订阅解析上下文**执行，同样可见全部节点凭据；`mirror-scripts` 的 sha256 门禁只能证明"与上游当前发布一致"，**不能证明上游可信**。故与插件一并移除，而非镜像到自建 CDN
+- 影响：Loon 回退内置解析器（原生 ss/ssr/vm 等链接格式与 Clash 配置均可解析）。如需 Clash YAML 等扩展格式，自行指定 `resource-parser` 并**锁定具体版本**
+
+**同步改动**
+
+- `.github/workflows/mirror-scripts.yml` — 移除 parser 的 `mirror` 调用及其段头，替换为记录移除理由与安全恢复方式的注释块
+- `Mirror/MANIFEST.json` — 删 `rules/loon-sub-store-parser.js` 条目（41 → 40），其余 40 条逐项对磁盘复验 sha256/bytes，0 异常
+- `.github/workflows/config-validate.yml` — 修掉指向已删文件的悬空文件名注释
+- `.github/copilot-instructions.md` — 可信上游清单去掉 "Sub-Store 官方"，并新增"新增上游须锁定具体版本/commit，禁止 `releases/latest` 等浮动引用"条目
+- `Profile/Loon.lcf` — regenerate（`resource-parser` 行与 `[Plugin]` 引用各去 1）
+
+**附带修正（原审计判断有误，经实测推翻）**
+
+- `surgio.conf.js` — 原审计记为"内联 provider 与 `provider/tokyo.js` 重复定义"。实测结论**相反**：surgio 的 provider 只按约定从 `provider/<name>.js` 加载（`build/generator/artifact.js:164` `path.resolve(providerDir, \`${name}.js\`)`，文件不存在即抛错），而 `defineSurgioConfig` 是恒等函数、`SurgioConfigValidator` **无 `providers` 字段**、`.providers` 在整个 surgio build 中**零读取**。故 `provider/tokyo.js` 是唯一活来源，`surgio.conf.js` 内联的 `tokyoProvider` IIFE 与 `providers` 数组**均为死代码**，已删并留注释防复加。同处一并删死参数 `surge_node_policy_path`（模板从未引用，原注释指向 Sub-Store）
+
+**已知副作用（非回归）**
+
+- `upstream-health` 的 MANIFEST 派生探活少 1 条（该清单是探活的唯一权威来源）—— 属预期，无需补硬编码
+
 ### Added (门禁硬化)
 - `config-validate` 新增 Mirror 清单一致性校验 (8b)：41 条目 sha256/bytes 与磁盘逐项比对，漂移即红
 - `build-startup-plugin` 新增 host 合法性过滤（拦截日期当 host 类上游转换垃圾）+ 规则下限门禁（<50 条保留旧插件并 fail-red）+ OUT 缺失守卫
@@ -62,6 +132,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **`AGENTS.md` 数字修正**: devDependencies 4→**3** (实际 esbuild/eslint/surgio, 无运行时依赖); `[Rule]` 456→**483** 行; Kelee 清单补全为 **15 个**; 删除已不存在的 `Scripts/lib/notify.js` 引用; surgio 3.18→**3.19**; 发布面删除 GitHub Pages 兜底表述; mirror-scripts 门禁描述补"sha 从磁盘重算 + 孤儿保留"
 - **`doc/infrastructure.md`**: 镜像资源 35→**36** 个 (规则列表 6→7); 补充"仓库/CDN/Pages 三者新鲜度不等"警示
 - `package.json` version 仍为 8.5.0 (自 v8.6 起未 bump, 与 CHANGELOG 脱节 — 留待下次发版统一)
+  - **已解决 (2026-09-04)**：见上方 Unreleased「版本号收敛」— `package.json` 现为 `8.11.0`，与 CHANGELOG 对齐。此处保留原始记录（当时确实为 8.5.0），2026-09-11 审计补注以免与上文自相矛盾（DOC-01）
 
 ### Notes
 

@@ -13,8 +13,7 @@
 
 const $ = new Env("抖音去广告");
 const url = $request.url;
-const hostOf = (u) => { try { return new URL(u).hostname; } catch { return ""; } };
-const isHost = (u, d) => { const h = hostOf(u); return h === d || h.endsWith("." + d); };
+// hostOf / isHost 由 src/lib/net.ts 经 esbuild --inject 注入 (原为 6 份重复副本)
 
 // $response 守卫 - 防止 AllInOne 全局 MitM 误触 request 阶段
 if (typeof $response === "undefined" || !$response.body) { $.done(); return; }

@@ -2,16 +2,22 @@
   "name": "3kaiu-config",
   "version": "8.11.0",
   "private": true,
-  "description": "3kaiu Loon config v8.5 — Surgio project with TypeScript foundation and optimized structure",
+  "description": "3kaiu Loon config — Surgio project with TypeScript foundation and optimized structure",
   "scripts": {
-    "build": "esbuild $(find src -name '*.ts' ! -name 'env.ts' ! -name 'loon.d.ts') --inject:src/env.ts --outdir=Scripts --minify --target=es2020",
+    "build": "esbuild $(find src -name '*.ts' ! -name 'env.ts' ! -name 'loon.d.ts' ! -path 'src/lib/*') --inject:src/env.ts --inject:src/lib/net.ts --inject:src/lib/ad.ts --inject:src/lib/notify.ts --inject:src/lib/argument.ts --outdir=Scripts --minify --target=es2020",
     "generate": "surgio generate --skip-lint",
     "preview": "surgio preview",
     "test": "node test/run-tests.js && node test/rule-order-check.js",
     "lint": "eslint Scripts/ test/ tools/",
     "check:sync": "node tools/tpl-sync-check.mjs",
     "check:orphan": "node tools/mitm-orphan-check.mjs --local",
-    "check:plugin": "node tools/plugin-lint-check.mjs"
+    "check:plugin": "node tools/plugin-lint-check.mjs",
+    "check:contract": "node tools/argument-contract-check.mjs",
+    "check:workflows": "node tools/workflow-bash-check.mjs",
+    "audit:ci": "npm audit --registry=https://registry.npmjs.org"
+  },
+  "engines": {
+    "node": ">=22"
   },
   "devDependencies": {
     "esbuild": "0.28.2",

@@ -16,8 +16,7 @@ const AD_KEYS = ["is_ad", "ad_id", "promotion"];
 try {
   const obj = JSON.parse($response.body);
   const u = $request.url;
-  const hostOf = (x) => { try { return new URL(x).hostname; } catch { return ""; } };
-  const isHost = (x, d) => { const h = hostOf(x); return h === d || h.endsWith("." + d); };
+  // hostOf / isHost 由 src/lib/net.ts 经 esbuild --inject 注入 (原为 6 份重复副本)
   if (isHost(u, "api.meituan.com")) $.log("首页信息流 - 过滤广告");
   else if (isHost(u, "i.waimai.meituan.com")) $.log("外卖 - 过滤广告");
   else if (isHost(u, "papi.meituan.com")) $.log("推荐流 - 过滤广告");

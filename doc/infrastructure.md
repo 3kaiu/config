@@ -32,8 +32,8 @@
 
 ## 3. 完整性保障
 
-- `mirror-scripts.yml`：每日 03:00 从上游抓取约 60 项（MANIFEST 41 条目 + startup 插件等非清单产物；2026-09 实测单次成功 54+），经三重门禁（`*.js` 语法 / 体积≥200B / 非 HTML）后写入 `Mirror/`，**走 PR 人工审核**合并（不再直推 main）。插件外壳远程引用已收敛到 `ws.wenn.in/main/Mirror/`（插件内部 bundle 引用仍直连上游，见 3b）。
-- `Mirror/MANIFEST.json`：全部镜像文件的 source_url + sha256 清单，上游变更在 PR diff 中高亮。
+- `mirror-scripts.yml`：每日 03:00 从上游抓取约 60 项（MANIFEST 40 条目 + startup 插件等非清单产物；2026-09 实测单次成功 54+），经四重门禁（`*.js` 语法 / 体积下限 = 绝对 200B **+ 相对上次原始抓取 50%** / 非 HTML / `.plugin` script-path 域白名单）后写入 `Mirror/`，**走 PR 人工审核**合并（不再直推 main）。插件外壳远程引用已收敛到 `ws.wenn.in/main/Mirror/`（插件内部 bundle 引用仍直连上游，见 3b）。
+- `Mirror/MANIFEST.json`：全部镜像文件的 source_url + sha256 + `upstream_bytes`（原始抓取体积，供体积门禁做相对比较）清单，上游变更在 PR diff 中高亮。
 - `cdn-verify.yml`：每日 02:34 拉取 CDN 全量分发文件与仓库做 sha256 比对，不一致开 Issue（标签 `cdn-verify`），可选 Bark 告警（Secret `BARK_PUSH`）；同时做 GitHub Pages 链路（3kaiu.github.io/config）可达性抽查（非阻断，且 Pages 内容已冻结 — 见第 5 节）。
 - `upstream-health.yml`：上游源可达性探活（状态码级），探测列表镜像部分派生自 `Mirror/MANIFEST.json`。
 - `Scripts/ENGINE-MANIFEST.json`：Qidian 内嵌引擎哈希清单，`config-validate.yml` step 8 强制校验。
@@ -43,7 +43,14 @@
 1. **kelee.one 7 个 `.lpx`**：Cloudflare Turnstile 阻挡自动抓取，无法镜像/校验，Loon 端直接从该站加载。介意者在 Loon 内停用对应插件。
 2. **插件内部 bundle 引用直连上游**：NSRingo / DualSubs / Auraflare / BiliUniverse 插件的 `script-path` 指向上游 GitHub release（版本钉死），不走自建 CDN。上游清理旧 release 会导致对应功能失效；`upstream-health.yml` 持续探测这些 URL 兜底。
 3. **GeoIP/ASN 库**（Loyalsoldier / P3TERX）：客户端直连上游，被篡改只会导致路由误判（非代码执行），风险低，暂不镜像。
-4. **NSRingo 版本策略**：仅 WeatherKit 钉死 v3.1.0（上游 v3.2.0 起移除 `.plugin` asset）；其余（Maps/News/Siri/TestFlight/TV/LocationService）跟随 latest，bundle.js 镜像到 CDN。上游发新版时：改 `mirror-scripts.yml` 中的版本号 + `template/loon.tpl` 引用，跑一次 mirror 工作流。`upstream-health.yml` 会探测已钉死 URL 的可用性，但**不会**提示有新版本（受管陈旧）。
+4. **NSRingo 版本策略（2026-09-11 分模块审计 MOD-09 修正）**：
+   - WeatherKit 钉死 v3.1.0（上游 v3.2.0 起移除 `.plugin` asset）。
+   - **其余 6 个（Maps/News/Siri/TestFlight/TV/LocationService）workflow 声明 `releases/latest/download/…`，但实测 MANIFEST 中记录的是固定旧版本**（v4.6.1/v3.2.1/v4.2.7 等），原因是上游 fetch 失败后 `keep_old` 静默保留了陈旧条目。`upstream-health.yml` 只探测 URL 是否 200，**不会**提示"声明 latest 但实际停在旧版"。
+   - `iringo/iRingo.Maps.plugin` 上游仓库已从 `MapKit` 改名为 `Maps`，workflow 声明的 `NSRingo/MapKit/releases/latest/…` 已 404，该条目为 keep_old 残留（v4.6.1）。
+   - 13 个 `bundle.js` 声明（`releases/latest/download/…bundle.js`）从未成功抓取，磁盘与 MANIFEST 均无记录。
+   - 上游发新版时：需同时改 `mirror-scripts.yml` 中的版本号 **并** 验证 MANIFEST 是否实际更新；仅改 workflow 声明不能保证产物跟进。
+5. **Release tag 未签名 —— 不构成供应链信任锚**（2026-09-11 审计 SEC-04）：`release.yml` 用 `gh release create --generate-notes` 发布，**无 tag 签名校验**（仓库零签名 tag 历史，属有意取舍；`--verify-tag` 已于 2026-09-04 移除，因首发必红）。因此 **Release 页面只应视为"内部快照分发"，不能当作可验证产物**。
+   - 真正的信任锚是 `script-tests.yml` 为 `Scripts/*.js` 生成的 **attestation**（可用 `gh attestation verify` 校验构建出处）。两者不要混为一谈 —— 需要"可验证"时用 attestation，不要用 Release tag。
 
 ## 4. DNS 隐私（泄漏面精确说明）
 

@@ -69,4 +69,4 @@ http-response ^https?:\/\/ada\.fqnovel\.com script-path=https://ws.wenn.in/main/
 http-response ^https?:\/\/log\.snssdk\.com url reject-200, enable={MEDIA_ENABLE}&{FANQIE_ENABLE}
 
 [MitM]
-hostname = %APPEND% ada.fqnovel.com, ads.kugou.com, api.youku.com, api5-normal-snkmer.fqnovel.com, gateway.kugou.com, iyes.youku.com, log.snssdk.com, mobilead.kugou.com, mobilead.kuwo.cn, rich.kuwo.cn, vali.cp31.ott.cibntv.net, bd-api.kuwo.cn, gateway.kugou.com, *-spclient.spotify.com, spclient.wg.spotify.com
+hostname = %APPEND% ada.fqnovel.com, ads.kugou.com, api.youku.com, api5-normal-snkmer.fqnovel.com, gateway.kugou.com, iyes.youku.com, log.snssdk.com, mobilead.kugou.com, mobilead.kuwo.cn, rich.kuwo.cn, vali.cp31.ott.cibntv.net, bd-api.kuwo.cn, *-spclient.spotify.com, spclient.wg.spotify.com

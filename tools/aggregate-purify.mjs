@@ -54,7 +54,11 @@ const MAIN_SWITCH = {
 };
 
 function slugOf(name) {
-  return name.toUpperCase().replace(/[^A-Z0-9]+/g, "_");
+  const raw = name.toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "");
+  // (2026-09-11 分模块审计 MOD-07) 数字开头的参数名在部分解析器下可能非法,
+  // 前置 "APP_" 保证首字符为字母。现有 3 个 (36KR/2BULU/555DY) 因风险未确认保留,
+  // 但生成器不再产出新的数字开头键。
+  return /^\d/.test(raw) ? "APP_" + raw : raw;
 }
 function readPlugin(name) {
   const src = path.join(ROOT, "Kelee", `${name}.plugin`);

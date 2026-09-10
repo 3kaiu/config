@@ -6,7 +6,7 @@
 #!icon=https://icons.duckduckgo.com/ip3/h5.if.qidian.com.ico
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.2.4(787)
-#!arguments-desc=- 是否开启抓取重写: ["true","false"] \n\n- CRONEXP: 默认每天2点11分执行, 建议自行配置。\n\n- 是否开启调试模式: ["true","false"]\n\n - TIMEOUT: 脚本执行超时时间, 默认60秒。\n\n- 激励任务: ["true","false"]\n\n- 每日任务: ["true","false"]\n\n- 每日抽奖: ["true","false"]\n\n- 每周兑换: ["true","false"]\n\n- 章节卡片: ["true","false"]\n\n- 大咖荐书: ["true","false"]
+#!arguments-desc=\n- \{CAPTURE_ENABLE}: switch,"true","false",tag=是否开启抓取重写, desc=是否开启抓取重写以捕获 Cookie\n- \{CRONEXP}: input,"11 2 * * *",tag=CRONEXP, desc=默认每天2点11分执行, 建议自行配置。\n- \{QDREADER_DEBUG}: switch,"false","true",tag=是否开启调试模式, desc=是否开启调试模式\n- \{TIMEOUT}: input,420,tag=脚本执行超时时间, 默认420秒(高阶任务全量需3-4分钟), desc=TIMEOUT\n- \{QDREADER_ADV_JOB_ENABLE}: switch,"true","false",tag=激励任务, desc=开启后执行激励碎片任务\n- \{QDREADER_EXTRA_ADV_JOB_ENABLE}: switch,"true","false",tag=每日任务, desc=开启后执行每日广告任务\n- \{QDREADER_LOTTERY_ENABLE}: switch,"true","false",tag=每日抽奖, desc=开启后执行每日抽奖\n- \{QDREADER_WEEKLY_EXCHANGE_ENABLE}: switch,"true","false",tag=每周兑换, desc=开启后周日自动兑换章节卡\n- \{QDREADER_CHAPTER_CARD_ENABLE}: switch,"true","false",tag=章节卡片, desc=开启后查询章节卡信息\n- \{QDREADER_MESSAGE_BOX_ENABLE}: switch,"true","false",tag=大咖荐书, desc=开启后处理大咖荐书消息
 
 [Argument]
 CAPTURE_ENABLE=switch,"true","false",tag=是否开启抓取重写, desc=是否开启抓取重写以捕获 Cookie

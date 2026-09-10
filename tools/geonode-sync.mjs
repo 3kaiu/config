@@ -32,7 +32,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..");
@@ -61,8 +61,11 @@ export const OK_STATUS = new Set([
   301, 302, 307, 308,
 ]);
 
-// Loon 原生支持的节点协议优先级 (geonode protocols 数组取首个可映射项)
-const PROTO_PRIORITY = ["http", "https", "socks5"];
+// Loon 原生支持的节点协议**白名单** (非优先级)。
+// 语义: 从上游条目的 protocols 数组中取**首个**落在此白名单内的项, 即尊重上游给出的顺序。
+// 命名更正 (2026-09-11): 原名 PROTO_PRIORITY 暗示"按优先级挑最优", 实际是按上游数组顺序
+// 取首个受支持项 — 该误导性命名直接导致本轮审计中写出了一个错误断言。
+const SUPPORTED_PROTOS = ["http", "https", "socks5"];
 const NODE_LINE_RE = /^[\w.-]+ = (http|https|socks5),\d{1,3}(\.\d{1,3}){3},\d{2,5}$/;
 
 export function toNodeLines(entries) {
@@ -71,7 +74,15 @@ export function toNodeLines(entries) {
   for (const e of entries || []) {
     if (typeof e !== "object" || e === null) continue;
     if (e.anonymityLevel === "transparent") continue;
-    const cc = String(e.country || "XX").toUpperCase();
+    // 国家码校验 (2026-09-11 审计, SEC-03): 上游字段不可信, 只接受严格 2 位大写字母
+    // (ISO 3166-1 alpha-2 形状), 其余一律归一为 XX。
+    // 该值会进入节点名 `geonode-<proto>-<cc>-<ip>-<port>`。此前唯一的兜底是下游
+    // NODE_LINE_RE 对**整行 compose 之后**的结果做形状检查, 有两个问题:
+    //   1) 报错语义是"生成行格式异常", 掩盖真实原因 (上游 cc 字段非法);
+    //   2) 一旦该正则被放宽 (例如为容纳新协议), cc 的约束就静默消失。
+    // 在源头校验与下游正则形成纵深, 且不依赖后者的严格程度。
+    const ccRaw = String(e.country || "").toUpperCase();
+    const cc = /^[A-Z]{2}$/.test(ccRaw) ? ccRaw : "XX";
     if (EXCLUDE_COUNTRY.has(cc)) continue;
     const ip = String(e.ip || "");
     if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)) continue;
@@ -79,7 +90,7 @@ export function toNodeLines(entries) {
     if (!/^\d{2,5}$/.test(port)) continue;
     const key = `${ip}:${port}`;
     if (seen.has(key)) continue;
-    const proto = (Array.isArray(e.protocols) ? e.protocols : []).find((p) => PROTO_PRIORITY.includes(p));
+    const proto = (Array.isArray(e.protocols) ? e.protocols : []).find((p) => SUPPORTED_PROTOS.includes(p));
     if (!proto) continue;
     seen.add(key);
     lines.push({ proto, cc, ip, port: parseInt(port, 10) });
@@ -233,7 +244,17 @@ async function main() {
   console.log(`✅ 已写入 ${path.relative(ROOT, OUT)} (${lines.length} 节点, 探测可用率 ${nodes.length}/${candidates.length})`);
 }
 
-main().catch((e) => {
-  console.error(`❌ geonode-sync 失败: ${e.message}`);
-  process.exit(1);
-});
+// 入口守卫 (2026-09-11 审计): 仅在作为入口脚本执行时跑 main()。
+// 此前 main() 在模块顶层无条件调用 — 任何 import/require 本模块的行为都会触发
+// 真实网络探测 (实测: require 后立即并发探测 234 个候选) 并可能改写 Profile 产物。
+// 这使 toNodeLines/nodeLine 等纯函数无法被单测引用 (test/cases 需要 require 本文件)。
+// workflow 以 `node tools/geonode-sync.mjs` 调用 → 仍是入口 → 行为不变。
+const isEntryPoint =
+  !!process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isEntryPoint) {
+  main().catch((e) => {
+    console.error(`❌ geonode-sync 失败: ${e.message}`);
+    process.exit(1);
+  });
+}

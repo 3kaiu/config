@@ -10,7 +10,7 @@
 
 [Argument]
 NEWS_PURIFY_ENABLE=switch,"true","false",tag=总开关,desc=关闭后整组净化全部停用
-36KR_ENABLE=switch,"true","false",tag=是否开启36氪净化,desc=36氪去广告
+APP_36KR_ENABLE=switch,"true","false",tag=是否开启36氪净化,desc=36氪去广告
 CAIXINMEDIA_ENABLE=switch,"true","false",tag=是否开启财新净化,desc=财新去广告
 COLORFULCLOUDS_ENABLE=switch,"true","false",tag=是否开启彩云天气净化,desc=彩云天气去广告
 DOUBAN_ENABLE=switch,"true","false",tag=是否开启豆瓣净化,desc=豆瓣去广告
@@ -22,18 +22,18 @@ NETEASENEWS_ENABLE=switch,"true","false",tag=是否开启网易新闻净化,desc
 SNOWBALL_ENABLE=switch,"true","false",tag=是否开启雪球净化,desc=雪球去广告
 
 [Rewrite]
-^https:\/\/gateway\.36kr\.com\/api\/mis\/sys\/config\? response-body-json-del data.contentConfig data.positionConfigList data.switchConfig.ios.sunrise_sign data.switchConfig.ios.sunrise_sunit_task data.switchConfig.ios.sunrise_sunit_mall data.switchConfig.ios.sunrise_distribution_icon data.secondFloorConfig enable={NEWS_PURIFY_ENABLE}&{36KR_ENABLE}
-^https:\/\/36kr\.com\/global\/sensors\/config\/iOS\.conf\? response-body-json-replace configs.disableSDK true enable={NEWS_PURIFY_ENABLE}&{36KR_ENABLE}
-^https:\/\/gateway\.36kr\.com\/api\/mis\/nav\? response-body-json-jq '.data.navList |= [ .[] | select(.navNick == "home" or .navNick == "newsflash" or .navNick == "me") ]' enable={NEWS_PURIFY_ENABLE}&{36KR_ENABLE}
-^https:\/\/gateway\.36kr\.com\/api\/mis\/nav\/me\/recom\? reject-dict enable={NEWS_PURIFY_ENABLE}&{36KR_ENABLE}
-^https:\/\/gateway\.36kr\.com\/api\/mis\/nav\/search\/hotword\? reject-dict enable={NEWS_PURIFY_ENABLE}&{36KR_ENABLE}
-^https:\/\/gateway\.36kr\.com\/api\/mis\/nav\/search\/topicListV2\? reject-dict enable={NEWS_PURIFY_ENABLE}&{36KR_ENABLE}
-^https:\/\/gateway\.36kr\.com\/api\/mis\/nav\/home\/subnav\/recom\? response-body-json-jq '.data.bannerList |= map(select(.itemType != 0))' enable={NEWS_PURIFY_ENABLE}&{36KR_ENABLE}
-^https:\/\/gateway\.36kr\.com\/api\/mis\/nav\/home\/subnav\/flow\/ response-body-json-del data.adItemList enable={NEWS_PURIFY_ENABLE}&{36KR_ENABLE}
-^https:\/\/gateway\.36kr\.com\/api\/adx\/ reject-dict enable={NEWS_PURIFY_ENABLE}&{36KR_ENABLE}
-^https:\/\/gateway\.36kr\.com\/api\/mis\/page\/article\/recom\? reject-dict enable={NEWS_PURIFY_ENABLE}&{36KR_ENABLE}
-^https:\/\/gateway\.36kr\.com\/api\/mis\/page\/newsflash\/recom\? reject-dict enable={NEWS_PURIFY_ENABLE}&{36KR_ENABLE}
-^https:\/\/gateway\.36kr\.com\/api\/mis\/sys\/skin\/ reject-dict enable={NEWS_PURIFY_ENABLE}&{36KR_ENABLE}
+^https:\/\/gateway\.36kr\.com\/api\/mis\/sys\/config\? response-body-json-del data.contentConfig data.positionConfigList data.switchConfig.ios.sunrise_sign data.switchConfig.ios.sunrise_sunit_task data.switchConfig.ios.sunrise_sunit_mall data.switchConfig.ios.sunrise_distribution_icon data.secondFloorConfig enable={NEWS_PURIFY_ENABLE}&{APP_36KR_ENABLE}
+^https:\/\/36kr\.com\/global\/sensors\/config\/iOS\.conf\? response-body-json-replace configs.disableSDK true enable={NEWS_PURIFY_ENABLE}&{APP_36KR_ENABLE}
+^https:\/\/gateway\.36kr\.com\/api\/mis\/nav\? response-body-json-jq '.data.navList |= [ .[] | select(.navNick == "home" or .navNick == "newsflash" or .navNick == "me") ]' enable={NEWS_PURIFY_ENABLE}&{APP_36KR_ENABLE}
+^https:\/\/gateway\.36kr\.com\/api\/mis\/nav\/me\/recom\? reject-dict enable={NEWS_PURIFY_ENABLE}&{APP_36KR_ENABLE}
+^https:\/\/gateway\.36kr\.com\/api\/mis\/nav\/search\/hotword\? reject-dict enable={NEWS_PURIFY_ENABLE}&{APP_36KR_ENABLE}
+^https:\/\/gateway\.36kr\.com\/api\/mis\/nav\/search\/topicListV2\? reject-dict enable={NEWS_PURIFY_ENABLE}&{APP_36KR_ENABLE}
+^https:\/\/gateway\.36kr\.com\/api\/mis\/nav\/home\/subnav\/recom\? response-body-json-jq '.data.bannerList |= map(select(.itemType != 0))' enable={NEWS_PURIFY_ENABLE}&{APP_36KR_ENABLE}
+^https:\/\/gateway\.36kr\.com\/api\/mis\/nav\/home\/subnav\/flow\/ response-body-json-del data.adItemList enable={NEWS_PURIFY_ENABLE}&{APP_36KR_ENABLE}
+^https:\/\/gateway\.36kr\.com\/api\/adx\/ reject-dict enable={NEWS_PURIFY_ENABLE}&{APP_36KR_ENABLE}
+^https:\/\/gateway\.36kr\.com\/api\/mis\/page\/article\/recom\? reject-dict enable={NEWS_PURIFY_ENABLE}&{APP_36KR_ENABLE}
+^https:\/\/gateway\.36kr\.com\/api\/mis\/page\/newsflash\/recom\? reject-dict enable={NEWS_PURIFY_ENABLE}&{APP_36KR_ENABLE}
+^https:\/\/gateway\.36kr\.com\/api\/mis\/sys\/skin\/ reject-dict enable={NEWS_PURIFY_ENABLE}&{APP_36KR_ENABLE}
 ^https:\/\/entities\.caixin\.com\/api\/(dataplus\/promotionHints|public\/push\/appIndex|public\/recommendNews) reject-dict enable={NEWS_PURIFY_ENABLE}&{CAIXINMEDIA_ENABLE}
 ^https:\/\/gateway\.caixin\.com\/api\/app-api\/cxAdInfo\/selectIndexAdInfo reject-dict enable={NEWS_PURIFY_ENABLE}&{CAIXINMEDIA_ENABLE}
 ^https:\/\/mappsv5\.caixin\.com\/channelv5\/article_ad_ios_info\.json reject-dict enable={NEWS_PURIFY_ENABLE}&{CAIXINMEDIA_ENABLE}
@@ -89,8 +89,8 @@ SNOWBALL_ENABLE=switch,"true","false",tag=是否开启雪球净化,desc=雪球�
 ^https:\/\/fund\.xueqiu\.com\/fundx\/activity\/x\/web\/c\/index\/dataByCode\? reject-dict enable={NEWS_PURIFY_ENABLE}&{SNOWBALL_ENABLE}
 
 [Rule]
-DOMAIN, adx.36kr.com, REJECT,enable={NEWS_PURIFY_ENABLE}&{36KR_ENABLE}
-DOMAIN, ad.jiemian.com, REJECT,enable={NEWS_PURIFY_ENABLE}&{36KR_ENABLE}
+DOMAIN, adx.36kr.com, REJECT,enable={NEWS_PURIFY_ENABLE}&{APP_36KR_ENABLE}
+DOMAIN, ad.jiemian.com, REJECT,enable={NEWS_PURIFY_ENABLE}&{APP_36KR_ENABLE}
 DOMAIN, abyss.cyapi.cn, REJECT,enable={NEWS_PURIFY_ENABLE}&{COLORFULCLOUDS_ENABLE}
 DOMAIN, ad.cyapi.cn, REJECT,enable={NEWS_PURIFY_ENABLE}&{COLORFULCLOUDS_ENABLE}
 DOMAIN, gather.colorfulclouds.net, REJECT,enable={NEWS_PURIFY_ENABLE}&{COLORFULCLOUDS_ENABLE}

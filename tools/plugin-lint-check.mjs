@@ -56,6 +56,11 @@ function check(dir) {
         errs++;
         if (!quiet) console.log(`[enable括号] ${dir}/${f}:${i + 1} → ${t.slice(0, 80)}`);
       }
+      // [Argument] 参数名以数字开头 — 解析器兼容性风险 (MOD-07)
+      if (seg === "Argument" && /^\d/.test(t)) {
+        errs++;
+        if (!quiet) console.log(`[Argument数字开头] ${dir}/${f}:${i + 1} → ${t.slice(0, 80)}`);
+      }
       // [MitM] hostname 行内混入字面量 hostname=(多行拼接污染)
       if (seg === "MitM" && /(^|\s)%APPEND%\s*hostname=|,\s*hostname=/.test(t)) {
         errs++;

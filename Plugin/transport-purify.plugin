@@ -10,7 +10,7 @@
 
 [Argument]
 TRANSPORT_PURIFY_ENABLE=switch,"true","false",tag=总开关,desc=关闭后整组净化全部停用
-2BULU_ENABLE=switch,"true","false",tag=是否开启两步路户外助手净化,desc=两步路户外助手去广告
+APP_2BULU_ENABLE=switch,"true","false",tag=是否开启两步路户外助手净化,desc=两步路户外助手去广告
 CHELAILE_ENABLE=switch,"true","false",tag=是否开启车来了净化,desc=车来了去广告
 ONTHEWAY_ENABLE=switch,"true","false",tag=是否开启行者户外净化,desc=行者户外去广告
 ORAYSUNLOGIN_ENABLE=switch,"true","false",tag=是否开启向日葵净化,desc=向日葵去广告
@@ -19,10 +19,10 @@ SF_EXPRESS_ENABLE=switch,"true","false",tag=是否开启顺丰速运净化,desc=
 XIAOJUKEJICHARGE_ENABLE=switch,"true","false",tag=是否开启小桔充电净化,desc=小桔充电去广告
 
 [Rewrite]
-^https:\/\/helper\.2bulu\.com\/getAppEntranceConfig\? response-body-json-jq '.configData=(.configData|fromjson|del(.adPlatform,.adIntertitialShowType,.adsConfig,.adIntertitialDisplayedLimit,.adSplashShowTypeWhenHotStart,.adIntertitialDayDisplayedMaxCount,.od_adsType,.showMeBaiHeAdView)|tojson)' enable={TRANSPORT_PURIFY_ENABLE}&{2BULU_ENABLE}
-^https:\/\/helper\.2bulu\.com\/search\/searchHotKeyList\? reject-dict enable={TRANSPORT_PURIFY_ENABLE}&{2BULU_ENABLE}
-^https:\/\/helper\.2bulu\.com\/promote\/getAppUserModule\? reject-dict enable={TRANSPORT_PURIFY_ENABLE}&{2BULU_ENABLE}
-^https:\/\/helper\.2bulu\.com\/proSpecial\/allData\? reject-dict enable={TRANSPORT_PURIFY_ENABLE}&{2BULU_ENABLE}
+^https:\/\/helper\.2bulu\.com\/getAppEntranceConfig\? response-body-json-jq '.configData=(.configData|fromjson|del(.adPlatform,.adIntertitialShowType,.adsConfig,.adIntertitialDisplayedLimit,.adSplashShowTypeWhenHotStart,.adIntertitialDayDisplayedMaxCount,.od_adsType,.showMeBaiHeAdView)|tojson)' enable={TRANSPORT_PURIFY_ENABLE}&{APP_2BULU_ENABLE}
+^https:\/\/helper\.2bulu\.com\/search\/searchHotKeyList\? reject-dict enable={TRANSPORT_PURIFY_ENABLE}&{APP_2BULU_ENABLE}
+^https:\/\/helper\.2bulu\.com\/promote\/getAppUserModule\? reject-dict enable={TRANSPORT_PURIFY_ENABLE}&{APP_2BULU_ENABLE}
+^https:\/\/helper\.2bulu\.com\/proSpecial\/allData\? reject-dict enable={TRANSPORT_PURIFY_ENABLE}&{APP_2BULU_ENABLE}
 ^https:\/\/api\.chelaile\.net\.cn\/goocity\/flowPos\/home\? mock-response-body data-type=json data="**YGKJ{"jsonr":{"status":"00","data":{"advertList":[{"id":106,"title":"站点地图","iconUrl":"https://image3.chelaile.net.cn/89iIqxaM.png","linkUrl":"","adType":5,"showRedDot":0,"updateTime":0,"appId":"","appPath":"","bubbleOrder":0,"h5Type":0},{"id":1,"title":"地铁","iconUrl":"https://image3.chelaile.net.cn/rewrLCWY.png","linkUrl":"https://web.chelaile.net.cn/metro/index.html?h5_stats_referer=icon","adType":2,"showRedDot":0,"updateTime":0,"appId":"","appPath":"","bubbleOrder":0,"h5Type":0}]}}}YGKJ##" status-code=200 enable={TRANSPORT_PURIFY_ENABLE}&{CHELAILE_ENABLE}
 ^https:\/\/api\.chelaile\.net\.cn\/goocity\/flowPos\/listByPos\? mock-response-body data-type=json data="**YGKJ{}YGKJ##" status-code=200 enable={TRANSPORT_PURIFY_ENABLE}&{CHELAILE_ENABLE}
 ^https:\/\/web\.chelaile\.net\.cn\/api\/operative_position\/infoflow\/getInfo\? mock-response-body data-type=json data="**YGKJ{}YGKJ##" status-code=200 enable={TRANSPORT_PURIFY_ENABLE}&{CHELAILE_ENABLE}

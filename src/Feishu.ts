@@ -9,10 +9,24 @@ const AD_KEYS = ["is_ad", "is_promoted", "ad_type", "promoted"];
 try { let removed = 0;
   if (!$response.body) { $.done(); return; }
   const obj = JSON.parse($response.body);
+  /**
+   * 类型名判定 — 整词/明确词干匹配 (2026-09-11 审计修复)
+   *
+   * 原实现 `/\b(ad|promot|sponsor|banner)/i.test(item.type)` 的 `\b` 是**词首边界**
+   * 而非词尾锚定: "adaptive" 的 "ad" 前面正是词首边界, 于是正常类型 adaptive 被
+   * 判为广告并整项删除 (审计探针实证: 内容被删成 {"items":[]})。
+   * "address"/"admin"/"advisory" 同理。
+   *
+   * 现改为首尾锚定: 整词 (ad/ads) 或明确词干 (advert… / promot… / sponsor… / banner…)。
+   */
+  function isAdType(t: unknown): boolean {
+    if (typeof t !== "string") return false;
+    return /^(ad|ads|advert\w*|promot\w*|sponsor\w*|banner\w*|recommend\w*)$/.test(t.toLowerCase());
+  }
   function isAd(item) {
     if (!item || typeof item !== "object") return false;
     for (const k of AD_KEYS) { const v = item[k]; if (v != null && v !== 0 && v !== "0" && v !== false && v !== "") return true; }
-    return typeof item.type === "string" && /\b(ad|promot|sponsor|banner)/i.test(item.type);
+    return isAdType(item.type);
   }
   function clean(data) {
     if (!data || typeof data !== "object") return;
