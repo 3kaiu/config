@@ -8,7 +8,10 @@ try {
     if (!obj || typeof obj !== "object") return;
     if (depth > 10) return;
     for (const key of Object.keys(obj as Record<string, unknown>)) {
-      if (/^(?:ad|sponsor|promot|recommend)/i.test(key)) {
+      // 2026-09-11 深度审计 NEW-06: 原为未锚定前缀正则 /^(?:ad|sponsor|promot|recommend)/i,
+      // 会整键删除 address / adaptive / admin / advance 等正常字段。
+      // 改用词段匹配 (isSocialAdKey, 见 src/lib/ad.ts), 删除面不变而消除误伤。
+      if (isSocialAdKey(key)) {
         if (DEBUG) console.log(`[LinkedIn] 清理键: ${key} (depth=${depth})`);
         delete (obj as Record<string, unknown>)[key];
       } else {

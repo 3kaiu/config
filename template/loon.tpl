@@ -256,6 +256,14 @@ DOMAIN-KEYWORD, qreport, REJECT
 DOMAIN, aegis.cdn-go.cn, REJECT
 
 # Google 分析与广告
+# ⚠️ `DOMAIN-KEYWORD, googleads` 必须留在本地 [Rule] 段 (即早于 [Remote Rule] 的 Global):
+#    Global 是 Proxy 列表且含宽匹配 `DOMAIN-KEYWORD,google`, 又排在 Advertising 之前,
+#    于是 googleads.* 会被 Global 抢先代理, Advertising 的 `DOMAIN-KEYWORD,googleads` 永不生效。
+#    2026-09-11 深度审计 NEW-05 实测: 这是 Global 的 36 个关键词对 Advertising(981)
+#    + Privacy(20) + Hijacking(228) 的**唯一**遮蔽实例 (1/1229), 故用一条本地精确 REJECT
+#    兜住, 而不把整个 Advertising 列表提到 Global 之前 (Global 前置能让国际主流域免扫
+#    1229 条规则; 重排的代价大于这一条遮蔽的收益)。`npm run check:shadow` 持续断言该覆盖。
+DOMAIN-KEYWORD, googleads, REJECT
 DOMAIN-SUFFIX, googleadservices.com, REJECT
 DOMAIN-SUFFIX, doubleclick.net, REJECT
 DOMAIN-SUFFIX, googlesyndication.com, REJECT
@@ -397,8 +405,20 @@ FINAL, Final
 
 [Remote Rule]
 # 排序 (2026-08): China 提前 — 国内流量先命中 DIRECT, 不必扫描广告/隐私/反劫持列表
-# Global 次位 — 国际主流域 (34,579 SUFFIX) 直接命中 Proxy 提前终止, 避免扫描广告/隐私/反劫持三列表 (2026-08 审计)
-#   前提: Global 列表与广告/隐私/国内域交集为空 (CI 纯净度检查兜底); 广告域仍由 Advertising REJECT 拦截
+# Global 次位 — 国际主流域小列表 (198 条: 36 DOMAIN-KEYWORD + 46 USER-AGENT + 112 IP-CIDR
+#   + 4 IP-CIDR6, **0 条 DOMAIN-SUFFIX**) 命中 Proxy 即提前终止后续列表扫描。
+#   ⚠️ 2026-09-11 深度审计 NEW-04 更正: 此处原写"国际主流域 (34,579 SUFFIX)" —— 该数字
+#   系误引上游文件**头注释** (`# DOMAIN-SUFFIX: 34743` / `# TOTAL: 35069`), 而该头描述的是
+#   blackmatrix7 的完整规则集, 与 Loon 格式文件正文 (209 行 / 198 条) 并不相符
+#   (实测 body 直方图: 112 IP-CIDR / 46 USER-AGENT / 36 DOMAIN-KEYWORD / 4 IP-CIDR6;
+#    正文里 `DOMAIN-SUFFIX` 仅出现 1 次, 就是头注释那一行)。
+#   故"提前终止 3.5 万条扫描"的收益被高估约 175 倍。保留 Global 前置的真实理由仅为:
+#   命中后免于扫描 Advertising(981)+Privacy(20)+Hijacking(228) 共 1229 条, 且只对这
+#   198 条覆盖的域名成立。**上游文件头不可当作规则计数使用** (见 tools/rule-shadow-check.mjs)。
+#   前提: Global 的 36 个 DOMAIN-KEYWORD 是**宽匹配**, 会遮蔽后续 REJECT 规则 ——
+#   实测遮蔽面 1/1229 (Advertising 的 DOMAIN-KEYWORD,googleads 被 Global 的 google 抢先),
+#   已由 [Rule] 段的本地 `DOMAIN-KEYWORD, googleads, REJECT` 兜住。
+#   `npm run check:shadow` 对 Global ↔ 三个 REJECT 列表做实际集合交集断言 (CI 同步执行)。
 https://ws.wenn.in/main/Mirror/rules/loon-China.list, policy=DIRECT, tag=🇨🇳 国内域名, enabled=true
 https://ws.wenn.in/main/Mirror/rules/loon-Global.list, policy=Proxy, tag=🌍 国际域名, enabled=true
 https://ws.wenn.in/main/Mirror/rules/loon-Advertising.list, policy=REJECT, tag=🚫 广告域名, enabled=true

@@ -9,28 +9,30 @@
 
 [Rewrite]
 # ── 直播/红包/GIF弹窗/开屏/版本更新 ──
-^https?:\/\/.*xima.*\.com\/.*live.* reject-200
-^https?:\/\/.*xima.*\.com\/.*redpack.* reject-200
-^https?:\/\/.*xima.*\.com\/.*gif.*popup.* reject-200
-^https?:\/\/.*xima.*\.com\/.*gslb.* reject-200
-^https?:\/\/.*xima.*\.com\/.*version.* reject-200
-^https?:\/\/.*xima.*\.com\/.*splash.* reject-200
+^https?:\/\/.*ximalaya\.com\/.*live.* reject-200
+^https?:\/\/.*ximalaya\.com\/.*redpack.* reject-200
+^https?:\/\/.*ximalaya\.com\/.*gif.*popup.* reject-200
+^https?:\/\/.*ximalaya\.com\/.*gslb.* reject-200
+^https?:\/\/.*ximalaya\.com\/.*version.* reject-200
+^https?:\/\/.*ximalaya\.com\/.*splash.* reject-200
 ^https?:\/\/.*xmcdn\.com\/.*splash.* reject-200
-^https?:\/\/.*xima.*\.com\/.*ad.* reject-200
-^https?:\/\/.*xima.*\.com\/.*promotion.* reject-200
-^https?:\/\/.*xima.*\.com\/.*activity.* reject-200
-^https?:\/\/.*xima.*\.com\/.*banner.* reject-200
-^https?:\/\/.*xima.*\.com\/.*popup.* reject-200
-^https?:\/\/.*xima.*\.com\/.*update.* reject-200
+^https?:\/\/.*ximalaya\.com\/.*ad.* reject-200
+^https?:\/\/.*ximalaya\.com\/.*promotion.* reject-200
+^https?:\/\/.*ximalaya\.com\/.*activity.* reject-200
+^https?:\/\/.*ximalaya\.com\/.*banner.* reject-200
+^https?:\/\/.*ximalaya\.com\/.*popup.* reject-200
+^https?:\/\/.*ximalaya\.com\/.*update.* reject-200
 ^https?:\/\/.*xmcdn\.com\/.*ad.* reject-200
 
 [Script]
 # ── 响应体净化 ──
-http-response ^https?:\/\/.*xima.*\.com\/.*discovery-category\/customCategories.* script-path=https://ws.wenn.in/main/Scripts/Ximalaya.js, requires-body=true, timeout=10, tag=喜马拉雅_分类
-http-response ^https?:\/\/.*xima.*\.com\/.*discovery-category\/v\d\/category.* script-path=https://ws.wenn.in/main/Scripts/Ximalaya.js, requires-body=true, timeout=10, tag=喜马拉雅_分类详情
-http-response ^https?:\/\/.*xima.*\.com\/.*focus-mobile\/focusPic.* script-path=https://ws.wenn.in/main/Scripts/Ximalaya.js, requires-body=true, timeout=10, tag=喜马拉雅_焦点图
-http-response ^https?:\/\/.*xima.*\.com\/.*discovery-feed\/v\d\/mix.* script-path=https://ws.wenn.in/main/Scripts/Ximalaya.js, requires-body=true, timeout=10, tag=喜马拉雅_Feed
-http-response ^https?:\/\/.*xima.*\.com\/.*mobile-user\/v\d\/homePage.* script-path=https://ws.wenn.in/main/Scripts/Ximalaya.js, requires-body=true, timeout=10, tag=喜马拉雅_个人页
+http-response ^https?:\/\/.*ximalaya\.com\/.*discovery-category\/customCategories.* script-path=https://ws.wenn.in/main/Scripts/Ximalaya.js, requires-body=true, timeout=10, tag=喜马拉雅_分类
+http-response ^https?:\/\/.*ximalaya\.com\/.*discovery-category\/v\d\/category.* script-path=https://ws.wenn.in/main/Scripts/Ximalaya.js, requires-body=true, timeout=10, tag=喜马拉雅_分类详情
+http-response ^https?:\/\/.*ximalaya\.com\/.*focus-mobile\/focusPic.* script-path=https://ws.wenn.in/main/Scripts/Ximalaya.js, requires-body=true, timeout=10, tag=喜马拉雅_焦点图
+http-response ^https?:\/\/.*ximalaya\.com\/.*discovery-feed\/v\d\/mix.* script-path=https://ws.wenn.in/main/Scripts/Ximalaya.js, requires-body=true, timeout=10, tag=喜马拉雅_Feed
+http-response ^https?:\/\/.*ximalaya\.com\/.*mobile-user\/v\d\/homePage.* script-path=https://ws.wenn.in/main/Scripts/Ximalaya.js, requires-body=true, timeout=10, tag=喜马拉雅_个人页
 
 [MitM]
-hostname = %APPEND% *.xima*.com, *.xima*.cn, *.xmcdn.com, *.xmcdn.cn
+# 2026-09-11 深度审计 NEW-09: 原 `*.xima*.com` / `*.xima*.cn` 的通配落在二级域上
+# (`xima*` 可匹配 ximaevil.com 等非预期注册域), 收敛为具体域并补裸域形态。
+hostname = %APPEND% ximalaya.com, *.ximalaya.com, ximalaya.com.cn, *.ximalaya.com.cn, xmcdn.com, *.xmcdn.com, xmcdn.cn, *.xmcdn.cn

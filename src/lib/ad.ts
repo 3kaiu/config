@@ -11,6 +11,25 @@
  */
 
 /**
+ * 标识符 → 词段 (2026-09-11 深度审计 NEW-06 抽出, 供 isAdKey / isSocialAdKey 共用)
+ *
+ * camelCase → 拆词, snake_case / kebab-case / 点号 → 拆词, 统一小写。
+ *   adInbox → ["ad","inbox"]   ad_list → ["ad","list"]   sponsoredContent → ["sponsored","content"]
+ */
+export function splitKeySegments(k: unknown): string[] {
+  return String(k)
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")   // camelCase → 词段
+    .split(/[^A-Za-z0-9]+/)                    // snake/kebab/点号 → 词段
+    .filter(Boolean)
+    .map(s => s.toLowerCase());
+}
+
+/** 词段级匹配: 任一词段满足 pred 即命中 */
+export function hasKeySegment(k: unknown, pred: (seg: string) => boolean): boolean {
+  return splitKeySegments(k).some(pred);
+}
+
+/**
  * 广告字段名判定 — 按标识符分段整段匹配 (2026-09-11 审计修复)
  *
  * 原实现 `Array.isArray(o[k]) && /ad/i.test(k)` 是**子串**匹配, 任何含 "ad" 子串的
@@ -25,14 +44,32 @@
  *   header / loading / address / adaptive / badge → 不再命中
  */
 export function isAdKey(k: unknown): boolean {
-  const segs = String(k)
-    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")   // camelCase → 词段
-    .split(/[^A-Za-z0-9]+/)                    // snake/kebab/点号 → 词段
-    .filter(Boolean);
-  return segs.some(s => {
-    const w = s.toLowerCase();
-    return w === "ad" || w === "ads" || w.startsWith("advert");
-  });
+  return hasKeySegment(k, w => w === "ad" || w === "ads" || w.startsWith("advert"));
+}
+
+/**
+ * 社交类脚本 (LinkedIn / Twitter) 的广告键判定 — 2026-09-11 深度审计 NEW-06
+ *
+ * 这两处是 BUG-01/BUG-02 的**漏网同类**: 原实现
+ *   `/^(?:ad|sponsor|promot|recommend)/i`   (Twitter 另有 trend)
+ * 是**未锚定的前缀**匹配 —— 只约束了开头, 结尾不限, 于是
+ *   address / adaptive / admin / advance / additional / adult
+ * 全部被判为广告键并**整个删除**。Kugou/Youku/Feishu 已修, 这两处未修。
+ *
+ * 改为词段级匹配, 并区分两类词干:
+ *   - 整段命中 (`ad` / `ads`): 前缀扩展会撞上 address/adaptive, 必须整段相等
+ *   - 词干命中 (advert/sponsor/promot/recommend/trend): 这些词干本身不可能是
+ *     普通词前缀, 允许 sponsored / promoted / recommendation / trending 等派生形
+ * 删除面与原实现保持一致 (sponsor 系 / promot 系 / recommend 系 / trend 系仍被删), 只消除误伤。
+ */
+const SOCIAL_AD_EXACT = ["ad", "ads"];
+const SOCIAL_AD_STEMS = ["advert", "sponsor", "promot", "recommend", "trend"];
+
+export function isSocialAdKey(k: unknown): boolean {
+  return hasKeySegment(
+    k,
+    w => SOCIAL_AD_EXACT.indexOf(w) !== -1 || SOCIAL_AD_STEMS.some(s => w.startsWith(s))
+  );
 }
 
 /** 递归把广告数组字段清空为空数组 (保留字段本身, 避免客户端读 undefined) */

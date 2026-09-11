@@ -226,6 +226,30 @@ jobs:
           node tools/plugin-lint-check.mjs 2>&1 | tee -a $GITHUB_STEP_SUMMARY
           exit ${PIPESTATUS[0]}
 
+      # ── 参数契约检查 (MOD-13 工具, 2026-09-11 深度审计 NEW-10 补接线) ──
+      # `#!arguments-desc` / `[Argument]` / 规则占位符三方配对 + 死开关检测。
+      # MOD-13 已写好该门禁并加了 npm script, 但**从未接入任何 workflow** —— 与 NEW-10
+      # 同型的"看起来有门禁其实没有" (本轮由 tools/ 接线扫描发现)。同时已把该扫描固化进
+      # test/wiring-check.js, 防止再出现第 5 个。
+      - name: Argument contract check (tools/argument-contract-check.mjs)
+        run: |
+          echo "## Argument Contract Check" >> $GITHUB_STEP_SUMMARY
+          node tools/argument-contract-check.mjs 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          exit ${PIPESTATUS[0]}
+
+      # ── src/ 反模式扫描 (2026-09-11 深度审计 NEW-12) ──
+      # src/*.ts 是唯一可编辑面, 却不受任何静态检查: esbuild 只转译不校验类型,
+      # 仓库刻意不引入 typescript, eslint 的 espree 又无法解析 src 里的真实 TS 语法
+      # (interface/type)。故把**可机械判定**的一类缺陷 (起点锚定 + 交替组即整个模式 =
+      # 裸前缀匹配, 会误伤 address/adaptive) 固化成本步。
+      # 该缺陷在 src/ 里反复出现 4 次 (Kugou/Youku/AlipayMini/Feishu/LinkedIn/Twitter),
+      # 每次靠人工审计发现。本步此前只有单测覆盖, 现提升为一等门禁 (PR 页面可见)。
+      - name: Source antipattern check (tools/src-antipattern-check.mjs)
+        run: |
+          echo "## Source Antipattern Check" >> $GITHUB_STEP_SUMMARY
+          node tools/src-antipattern-check.mjs 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          exit ${PIPESTATUS[0]}
+
       # ── 5c-bis. workflow 内嵌 bash 语法检查 (2026-09-11 审计新增) ──
       # workflow 里的 bash 只有在 CI 执行到那一步时才暴露语法错误; mirror-scripts 与
       # upstream-health 都是每日定时任务, 坏掉可能数天后才被发现, 期间门禁形同虚设。
@@ -361,6 +385,30 @@ jobs:
             echo "✅ 顺序正确: Google 通配位于所有 Reject 锚点之后" >> $GITHUB_STEP_SUMMARY
           fi
           exit $FAIL
+
+      # ── 9b. 规则顺序遮蔽检查 (2026-09-11 深度审计 NEW-05) ──
+      # 取代 mirror-scripts 里那段硬编码 20 个关键词、且**方向反了**的 grep。
+      # 对 [Remote Rule] 的**实际列表内容**求集合交集: 靠前的 Proxy 列表关键词若抢先
+      # 命中靠后的 REJECT 条目, 该条目必须有本地 [Rule] REJECT 兜底, 否则判红。
+      # 放在本 job (而非只在 mirror-scripts): 该检查只读 template/ + Mirror/, PR 阶段即可发现。
+      # 同一步骤也在 mirror-scripts.yml 中执行, 以捕捉上游列表更新引入的新遮蔽。
+      - name: Rule shadow check (tools/rule-shadow-check.mjs)
+        run: |
+          echo "## Rule Shadow Check" >> $GITHUB_STEP_SUMMARY
+          node tools/rule-shadow-check.mjs 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          exit ${PIPESTATUS[0]}
+
+      # ── 9c. 镜像声明漂移检查 (2026-09-11 深度审计 NEW-10) ──
+      # MOD-09 盲区: mirror-scripts 声明 `releases/latest/…` 而 keep_old 在 fetch 失败时
+      # 静默保留旧版 → MANIFEST 记的是固定旧版本, 与声明不再一致; 只有比对"workflow 声明 URL"
+      # 与 "MANIFEST source_url" 才能发现。此前 tools/mirror-drift-check.mjs 零接线 (= 无门禁),
+      # 现以 --strict 接入: 出现**未登记**的漂移/从未抓取即判红 (登记表见该工具 ACCEPTED_* 表)。
+      # 纯静态 (workflow 文件 + MANIFEST.json, 无网络), 故放 PR 阶段。
+      - name: Mirror declaration drift check (tools/mirror-drift-check.mjs --strict)
+        run: |
+          echo "## Mirror Drift Check" >> $GITHUB_STEP_SUMMARY
+          node tools/mirror-drift-check.mjs --strict 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          exit ${PIPESTATUS[0]}
 
       # ── 10. 接线完整性检查 (审计修复 2026-08) ──
       # 防"写了插件/脚本但没接线"的死代码回归:

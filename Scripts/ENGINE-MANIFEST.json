@@ -18,7 +18,7 @@
   "obfuscation": "三层: base64(RC4(字节码)) → utf8 → javascript-obfuscator(2177 条字符串表, 旋转偏移 k=130, 内层偏移 438)",
   "known_risks": [
     "引擎为加密+双层混淆代码，静态不可审计，等价于信任一个不公布源码的第三方；拥有 $httpClient 网络能力与全部持久化读写权限",
-    "引擎在 Cookie 新增/更新时调用 notify，正文包含完整 cmfuToken（锁屏通知可见），并写入 Loon 调试日志；该行为不受 QDREADER_DEBUG 开关控制（已反混淆验证）",
+    "引擎在 Cookie 新增/更新时**自行**调用 notify，正文包含完整 cmfuToken（锁屏通知可见），并写入 Loon 调试日志；该行为不受 QDREADER_DEBUG 开关控制（已反混淆验证）。**已于 2026-09-11 缓解**：包装层在引擎执行前从**宿主出口侧**安装掩码（包住 $notification.post 与 console.log/warn/error，见 Qidian.js 的 installGlobalSecretMask），故引擎经宿主全局发出的通知/日志同样被掩码 —— 此前包装层的打码只覆盖 $.notify/$.log，对绕开包装层的引擎无效。残余面：若引擎自带非 console 的日志通道（静态不可审计，未能证实）则仍可能落盘。掩码改动位于 blob 之外，不改变 blob 哈希",
     "每次 cron 签到与每次 getlogininfo 抓包都会执行引擎 eval"
   ],
   "update_procedure": [

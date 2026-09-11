@@ -32,6 +32,65 @@
  *  6. 每日阅读积分 — readtime/readpage 将 TodayReadTime 改写为满值，TaskList 全部标记完成
  *  7. getconf response — 独立入口确保 BookShelfBottomIcons 等悬浮广告字段被删除
  */
+
+// ==========================================
+// 🔒 全局凭据掩码 (2026-09-11 深度审计 NEW-03)
+// ==========================================
+// 背景: 本脚本注入的 qdreader 引擎 (见文末 runQdreaderEngine / ENGINE-MANIFEST.json)
+// 是 RC4 + 双层混淆的第三方代码, 静态不可审计。清单 known_risks 自述:
+//   引擎在 Cookie 新增/更新时**自行**调用 notify, 正文含完整 cmfuToken(锁屏通知可见),
+//   并写入 Loon 调试日志, 且该行为**不受 QDREADER_DEBUG 开关控制**(已反混淆验证)。
+// 包装层此前的 token 打码只覆盖 $.notify / $.log —— 引擎绕开包装层直接使用宿主全局,
+// 故打码对引擎无效。这是"包装层以为修了、实际没修"的典型。
+// 修法: 在引擎执行前从**宿主全局侧**安装掩码 —— 包住 $notification.post 与 console.*,
+// 使出口无论被包装层还是被引擎调用, 一律先过掩码。
+// 注: 本改动位于 blob 之外, 不影响 ENGINE-MANIFEST.json 的 embedded_blob_sha256。
+const SECRET_MASK_RULES = [
+  [/cmfuToken[=:]\s*([A-Za-z0-9_-]{8,})/gi, "cmfuToken=***MASKED***"],
+  [/(token|cookie|key|secret)[=:]\s*([A-Za-z0-9_+/=-]{16,})/gi, "$1=***MASKED***"],
+];
+
+// 掩码策略: 只重写"看起来像凭据赋值"的片段, 非字符串原样返回。
+// 采用**整段替换**而非"前4后4部分保留" —— 部分保留仍会泄漏 token 的一半,
+// 而锁屏通知/调试日志都没有需要看 token 前缀的正当场景。
+function maskSecrets(str) {
+  if (typeof str !== "string") return str;
+  let out = str;
+  for (const [re, rep] of SECRET_MASK_RULES) out = out.replace(re, rep);
+  return out;
+}
+
+// 幂等: 同一 JS 上下文内只包一次 (Loon 每次执行脚本都是新上下文, 故正常也只包一次)。
+// 用 __qidianMasked 标记而非外部布尔量, 避免与引擎可能定义的全局名冲突。
+function installGlobalSecretMask() {
+  try {
+    if (typeof $notification !== "undefined" && $notification &&
+        typeof $notification.post === "function" && !$notification.post.__qidianMasked) {
+      const origPost = $notification.post;
+      const maskedPost = function (t, s, b) {
+        return origPost.call($notification, maskSecrets(t), maskSecrets(s), maskSecrets(b));
+      };
+      maskedPost.__qidianMasked = true;
+      $notification.post = maskedPost;
+    }
+  } catch (e) { /* 掩码安装失败不应影响主流程 */ }
+  try {
+    if (typeof console !== "undefined" && console) {
+      // warn 在部分运行时不存在, 逐个探测而非假定
+      for (const m of ["log", "warn", "error"]) {
+        if (typeof console[m] === "function" && !console[m].__qidianMasked) {
+          const orig = console[m];
+          const masked = function (...a) { return orig.apply(console, a.map((x) => maskSecrets(x))); };
+          masked.__qidianMasked = true;
+          console[m] = masked;
+        }
+      }
+    }
+  } catch (e) { /* 同上 */ }
+}
+
+installGlobalSecretMask();
+
 const $ = new Env("起点助手");
 
 const CONFIG = {
@@ -792,12 +851,10 @@ function Env(n) {
     });
   });
   this.notify = (t, s, b) => {
-    const maskToken = (str) => {
-      if (typeof str !== "string") return str;
-      return str.replace(/cmfuToken[=:]\s*([A-Za-z0-9_-]{8,})/gi, "cmfuToken=***MASKED***")
-                .replace(/(token|cookie|key|secret)[=:]\s*([A-Za-z0-9_+/=-]{16,})/gi, "$1=***MASKED***");
-    };
-    t = maskToken(t); s = maskToken(s); b = maskToken(b);
+    // 掩码统一到模块级 maskSecrets (与全局出口掩码共用一份规则, 避免两处模式漂移)。
+    // 此处仍需显式调用: **远程推送** (Bark/TG/PushPlus) 不走 $notification.post,
+    // 不会被全局出口掩码覆盖。
+    t = maskSecrets(t); s = maskSecrets(s); b = maskSecrets(b);
 
     // 1. 本地通知
     $notification.post(t, s, b);

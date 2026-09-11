@@ -55,25 +55,31 @@ exports.tests = {
   },
 
   // ── LinkedIn ──
-  "linkedin: 删除 ad/sponsor/promot/recommend 前缀字段, 保留误匹配": async (a, h) => {
-    // admin/address 也以 ad 开头 → 新旧正则都会删, 这是预期行为
-    // 修复重点: some_sponsor 在新正则下不再匹配(旧正则无 ^ 锚定 sponsor)
+  "linkedin: 词段级广告键删除 (address/adaptive/admin 不再误删)": async (a, h) => {
+    // 2026-09-11 深度审计 NEW-06 修正本用例的旧期望:
+    // 原用例锁的是 `/^(?:ad|sponsor|promot|recommend)/i` 的**未锚定前缀**语义
+    // (some_sponsor 存活), 并把"删掉 address/admin"写成"预期行为" —— 但审计判定
+    // 那正是缺陷 (address/adaptive/admin 是正常字段, 整键删除 = 数据丢失)。
+    // 现改为与 src/lib/ad.ts 的 isAdKey 同一口径 (词段匹配), 删除面按"广告词段"重定义:
+    //   命中: 段级 ad/ads 整段, 或 advert|sponsor|promot|recommend|trend 词干
+    //   不再命中: address / adaptive / admin / advance / badge
     const body = {
       data: {
         ad: {}, sponsor: {}, promoted: {}, recommend: {},
-        some_sponsor: "old-regex-false-positive", // 旧正则匹配, 新正则不匹配
+        sponsoredContent: {}, adData: {},
+        address: "keep", adaptive: "keep", admin: "keep", advance: "keep", badge: "keep",
         normal: "keep"
       }
     };
     const sb = h.createSandbox({ response: RESP(body), request: { url: "https://www.linkedin.com/feed" } });
     const s = await h.runScript("Scripts/LinkedIn.js", sb);
     const out = JSON.parse(s.doneCalls[0].body).data;
-    a.ok("some_sponsor" in out, "some_sponsor 应保留 (旧正则误删, 新正则修复)");
-    a.ok("normal" in out, "normal 保留");
-    a.ok(!("ad" in out), "ad 应删");
-    a.ok(!("sponsor" in out), "sponsor 应删");
-    a.ok(!("promoted" in out), "promoted 应删");
-    a.ok(!("recommend" in out), "recommend 应删");
+    for (const k of ["ad", "sponsor", "promoted", "recommend", "sponsoredContent", "adData"]) {
+      a.ok(!(k in out), `${k} 应删 (广告词段)`);
+    }
+    for (const k of ["address", "adaptive", "admin", "advance", "badge", "normal"]) {
+      a.ok(k in out, `${k} 应保留 (原未锚定前缀正则的误伤)`);
+    }
   },
   "linkedin: $response 守卫放行 request 阶段": async (a, h) => {
     const sb = h.createSandbox({ request: { url: "https://www.linkedin.com/" } });
@@ -88,24 +94,25 @@ exports.tests = {
   },
 
   // ── Twitter ──
-  "twitter: 删除 ad/sponsor/promot/recommend/trend 前缀字段": async (a, h) => {
+  "twitter: 词段级广告键删除 (含 trend 词干, 不误删 address/admin)": async (a, h) => {
+    // 同 LinkedIn: 原用例锁的是未锚定前缀语义, 现统一到词段匹配 (见 src/lib/ad.ts isSocialAdKey)。
+    // 注意 trending 仍应删 (trend 是词干, 允许派生形), 而 address/adaptive/admin 不再删。
     const body = {
       data: {
         ad: {}, sponsor: {}, promoted: {}, recommend: {}, trending: {},
-        some_ad: "old-regex-false-positive",
+        address: "keep", adaptive: "keep", admin: "keep", badge: "keep",
         normal: "keep"
       }
     };
     const sb = h.createSandbox({ response: RESP(body), request: { url: "https://api.twitter.com/2/tweets" } });
     const s = await h.runScript("Scripts/Twitter.js", sb);
     const out = JSON.parse(s.doneCalls[0].body).data;
-    a.ok("some_ad" in out, "some_ad 应保留 (旧正则误删, 新正则修复)");
-    a.ok("normal" in out, "normal 保留");
-    a.ok(!("ad" in out), "ad 应删");
-    a.ok(!("sponsor" in out), "sponsor 应删");
-    a.ok(!("promoted" in out), "promoted 应删");
-    a.ok(!("recommend" in out), "recommend 应删");
-    a.ok(!("trending" in out), "trending 应删");
+    for (const k of ["ad", "sponsor", "promoted", "recommend", "trending"]) {
+      a.ok(!(k in out), `${k} 应删 (广告词段)`);
+    }
+    for (const k of ["address", "adaptive", "admin", "badge", "normal"]) {
+      a.ok(k in out, `${k} 应保留 (原未锚定前缀正则的误伤)`);
+    }
   },
   "twitter: $response 守卫放行 request 阶段": async (a, h) => {
     const sb = h.createSandbox({ request: { url: "https://api.twitter.com/" } });

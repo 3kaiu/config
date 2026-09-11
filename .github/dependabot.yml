@@ -17,31 +17,56 @@ updates:
           - "surgio*"
       dev-deps:
         dependency-type: "development"
-    # 以下全部是 surgio@3.19 → @oclif/plugin-plugins@3.x 内嵌 npm@9 的传递依赖,
-    # semver 锁死无法在范围内修复 (Dependabot 每次尝试开安全 PR 都会引擎失败刷红 Actions)。
+    # 以下 11 个包经 2026-09-11 复核, 确认**在现有 semver 约束内确实无修复路径**
+    # (复核方法: 比对 lockfile 的父级 requirement 与 GitHub advisory 的 first_patched_version):
+    #   - 9 个 (tar/sigstore/minimatch/brace-expansion/glob/ip/@tootallnate/once/cross-spawn/diff)
+    #     的漏洞副本**全部**是 npm@9.8.1 的 bundled dependency (lockfile inBundle=true);
+    #     @oclif/plugin-plugins@3.x 对 npm 是**精确锁定** `npm: 9.8.1`(非 range),
+    #     故除非上游跟进 oclif v5 / npm@11, 无法提升。
+    #   - got@9.6.0 由 package-json@^6.3.0 锁定, 首个修复版 11.8.5 超出 ^9.6.0。
+    #   - decode-uri-component@0.2.2 由 query-string@^7.1.3 锁定, 首个修复版 0.5.0 超出 ^0.2.2。
     # 判定: 构建期已知风险, 不进分发产物 — 详见 AGENTS.md「架构已知问题」。
     # surgio 升级到跟进 oclif v5 的版本后, 删除此 ignore 块。
     #
-    # 2026-09-11: js-yaml 已移出此块 — 它不属于上面这类。补丁版 3.15.2 / 4.3.2 都落在
-    # 现有 semver 范围内 (^3.14.1 / ^4.3.0), 可正常修复; 而裸 dependency-name 不写 versions
-    # 会被解释为 ">= 0", 对 security update 同样生效, 结果是告警永远关不掉, 且每次安全更新
-    # 任务都以 all_versions_ignored + exit 1 收场, 反而成为 Actions 刷红源。
-    # 如需再加 ignore, 必须写 versions 限定范围。
+    # 2026-09-11 修正 —— 原为裸 `dependency-name`, 且注释曾写"必须写 versions 限定范围"。
+    # 该表述**不完整**: `ignore` 同时作用于 security update, 而 `versions` 同样作用于安全路径,
+    # 因此裸条目等价于 `versions: ">= 0"` 的效果, 会让安全更新任务以
+    # `all_versions_ignored` + exit 1 收场 (实测 run 33785452983), 更严重的是会**永久静默
+    # 屏蔽任何未来的真实修复** —— js-yaml 正是此类 (补丁版 3.15.2/4.3.2 本就落在 ^3.14.1/^4.3.0 内)。
+    # 唯一能把规则挡在安全路径之外的字段是 `update-types`
+    # (GitHub 文档: "update-types only affects version updates, not security updates";
+    #  Dependabot 运行日志会标注 `doesn't apply to security update`)。
+    # 故此处列举三个 semver 级别 = 屏蔽全部**版本更新**, 但保留安全更新通道。
+    # ⚠️ 预期副作用 (非缺陷): 这 11 个包出现新告警时安全更新任务仍会失败, 但错误变为语义准确的
+    # `security_update_not_possible`(确实无修复版), 而非误导性的 `all_versions_ignored`。
+    # 处置方式不变: 人工以 tolerable_risk 关闭告警 (见 AGENTS.md)。
+    # 新增 ignore 条目一律必须带 `update-types`, 不得再写裸 `dependency-name`。
     ignore:
       - dependency-name: "tar"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
       - dependency-name: "sigstore"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
       - dependency-name: "minimatch"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
       - dependency-name: "brace-expansion"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
       - dependency-name: "glob"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
       - dependency-name: "ip"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
       - dependency-name: "got"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
       - dependency-name: "@tootallnate/once"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
       - dependency-name: "cross-spawn"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
       - dependency-name: "diff"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
       # 2026-09-04: decode-uri-component 经 surgio@3.19 → query-string@7.1.3 锁死 ^0.2.2,
       # 修复版 0.5.0 不兼容, Dependabot 安全 PR 必然 security_update_not_possible (run 33474329435)。
       # 同上, surgio 升级后删除。
       - dependency-name: "decode-uri-component"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
 
   - package-ecosystem: "github-actions"
     directory: "/"

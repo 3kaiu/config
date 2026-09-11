@@ -121,4 +121,35 @@ exports.tests = {
     a.notIncludes(s.logs.join("\n"), "SECRET-VALUE-123", "日志不应含 token 值");
     a.notIncludes(JSON.stringify(s.notifications), "SECRET-VALUE-123", "通知不应含 token 值");
   },
+
+  // 2026-09-11 深度审计 NEW-03: 包装层此前的打码只覆盖 $.notify/$.log,
+  // 而 qdreader 引擎绕开包装层直接使用宿主全局 → 打码对引擎无效。
+  // 修法是把掩码装到宿主出口 ($notification.post / console.*) 上, 以下三条用例锁住该契约。
+  "mask: 宿主出口被包装 (引擎 notify/log 同受掩码)": async (a, h) => {
+    const sb = h.createSandbox({
+      request: { method: "GET", url: `${QIDIAN_BASE}/v1/push/getdialog` },
+    });
+    await h.runScript("Scripts/Qidian.js", sb);
+    a.equal(sb.ctx.$notification.post.__qidianMasked, true, "$notification.post 应被包装");
+    a.equal(sb.ctx.console.log.__qidianMasked, true, "console.log 应被包装");
+  },
+  "mask: 引擎绕开包装层直调宿主全局也不泄漏 token": async (a, h) => {
+    const sb = h.createSandbox({
+      request: { method: "GET", url: `${QIDIAN_BASE}/v1/push/getdialog` },
+    });
+    await h.runScript("Scripts/Qidian.js", sb);
+    // 模拟混淆引擎直接使用宿主全局 (不经 $.notify)
+    sb.ctx.$notification.post("引擎", "", "Cookie: cmfuToken=ENGINE-LEAK-TOKEN-999");
+    sb.ctx.console.log("引擎调试: cmfuToken=ENGINE-LOG-TOKEN-888");
+    a.notIncludes(JSON.stringify(sb.state.notifications), "ENGINE-LEAK-TOKEN-999", "通知不应含 token 值");
+    a.notIncludes(sb.state.logs.join("\n"), "ENGINE-LOG-TOKEN-888", "日志不应含 token 值");
+  },
+  "mask: 掩码不误伤普通文案 (header/loading 类不受影响)": async (a, h) => {
+    const sb = h.createSandbox({
+      request: { method: "GET", url: `${QIDIAN_BASE}/v1/push/getdialog` },
+    });
+    await h.runScript("Scripts/Qidian.js", sb);
+    sb.ctx.console.log("header=loading badge=thread 任务 9/9");
+    a.includes(sb.state.logs.join("\n"), "header=loading badge=thread 任务 9/9", "普通文案应原样保留");
+  },
 };

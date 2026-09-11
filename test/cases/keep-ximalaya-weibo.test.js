@@ -181,6 +181,38 @@ exports.tests = {
     a.equal(done.body, undefined, "未匹配 URL 应无 body 返回");
   },
 
+  // ── 2026-09-11 深度审计 NEW-08: 原实现的失败模式是**静默全量降级** ──
+  // 任一元素缺 realLink / header 为空数组, 都会抛 TypeError 被入口 catch 吞掉,
+  // 于是整个响应原样放行 (本该净化 N 项, 实际 0 项), 只留一行 console.log。
+  "ximalaya: category — 元素缺 realLink 不再让整段净化失效 (NEW-08)": async (a, h) => {
+    const done = await runXimalaya(h, "https://www.ximalaya.com/discovery-category/v3/category", {
+      focusImages: {
+        data: [
+          { realLink: "open://detail", isAd: false, name: "正常" },
+          { name: "缺 realLink" },                        // 旧实现在此抛 TypeError
+          { realLink: null, isAd: false, name: "null" },  // 非字符串同样应被容忍
+          { realLink: "open://ad", isAd: true, name: "广告" },
+        ],
+      },
+    });
+    const out = JSON.parse(done.body);
+    a.equal(out.focusImages.data.length, 1, "净化仍应生效 (而非整段放行)");
+    a.equal(out.focusImages.data[0].name, "正常", "正常项保留");
+  },
+  "ximalaya: focusPic — header 为空数组不抛错 (NEW-08)": async (a, h) => {
+    // 原实现 `header.length <= 1` 在 length===0 时为真 → header[0] 是 undefined
+    // → 读 .item 抛 TypeError → 整段放行。该分支语义上只对"恰好 1 个 header"成立。
+    const done = await runXimalaya(h, "https://www.ximalaya.com/focus-mobile/focusPic", { header: [] });
+    const out = JSON.parse(done.body);
+    a.equal(out.header.length, 0, "空 header 原样保留");
+  },
+  "ximalaya: focusPic — header[0] 结构异常不抛错 (NEW-08)": async (a, h) => {
+    const done = await runXimalaya(h, "https://www.ximalaya.com/focus-mobile/focusPic", { header: [{}] });
+    const out = JSON.parse(done.body);
+    a.equal(out.header.length, 1, "结构异常时原样保留而非整段放行");
+    a.equal(out.header[0].item, undefined, "不存在的嵌套路径不应被凭空创建");
+  },
+
   // ══ Weibo ══
   "weibo: isAd — 判断广告 (mblogtypename/promotion/page_info/content_auth)": async (a) => {
     a.equal(WEIBO.isAd({ mblogtypename: "广告" }), true, "mblogtypename=广告");

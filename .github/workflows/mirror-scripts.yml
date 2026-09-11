@@ -92,6 +92,14 @@ jobs:
           # 抓取/门禁失败时保留旧清单条目 (镜像文件回退旧版, 清单不丢记录)
           keep_old() { local oe; oe=$(old_entry "$1"); [ -n "$oe" ] && ENTRIES+=("\"$1\": $oe"); }
 
+          # 2026-09-11 深度审计 NEW-11: 失败/被门禁拦截的条目此前只进 step summary —
+          # 而 step summary 只在 workflow 详情页可见, 镜像 PR 页面上**完全看不到**。
+          # 后果: FAIL>0 常年静默 (实测 7 条 NSRingo URL 漂移 + 13 条从未抓到就是这么积起来的)。
+          # 现把条目名累积下来, 在 "Report summary" 步骤以 ::warning:: 注解输出 → PR 页面可见。
+          # **不要**改成 exit 1: 保留旧版是设计意图 (与 keep_old 同哲学), 要去掉的只是"沉默"。
+          declare -a FAILED_LIST
+          mark_fail() { FAIL=$((FAIL + 1)); FAILED_LIST+=("$1"); }
+
 
           mirror() {
             local url="$1"
@@ -102,7 +110,7 @@ jobs:
             local tmpf; tmpf=$(mktemp /tmp/mirror.XXXXXXXX.js)
             if ! curl -fsSL -m 90 --retry 3 -A "Loon/3.3.9" "$url" -o "$tmpf"; then
               echo "❌ $name (FETCH FAILED)"
-              FAIL=$((FAIL + 1))
+              mark_fail "$dest"
               keep_old "$dest"
               rm -f "$tmpf"; return
             fi
@@ -129,7 +137,7 @@ jobs:
               else
                 echo "🚫 $name 门禁拦截: 体积过小 (${size}B < ${min_bytes}B), 保留旧版"
               fi
-              GATED=$((GATED + 1)); FAIL=$((FAIL + 1))
+              GATED=$((GATED + 1)); mark_fail "$dest"
               keep_old "$dest"
               rm -f "$tmpf"; return
             fi
@@ -138,7 +146,7 @@ jobs:
             # 字面量 (整个模式永不匹配)。CI 跑在 ubuntu, 但门禁必须本地可复现才能被验证。
             if head -c 200 "$tmpf" | grep -qiE '<!doctype|<html'; then
               echo "🚫 $name 门禁拦截: 内容为 HTML 错误页, 保留旧版"
-              GATED=$((GATED + 1)); FAIL=$((FAIL + 1))
+              GATED=$((GATED + 1)); mark_fail "$dest"
               keep_old "$dest"
               rm -f "$tmpf"; return
             fi
@@ -147,7 +155,7 @@ jobs:
               *.js)
                 if ! node --check "$tmpf" 2>/dev/null; then
                   echo "🚫 $name 门禁拦截: node --check 语法错误 (可能半截下载), 保留旧版"
-                  GATED=$((GATED + 1)); FAIL=$((FAIL + 1))
+                  GATED=$((GATED + 1)); mark_fail "$dest"
                   keep_old "$dest"
                   rm -f "$tmpf"; return
                 fi
@@ -167,7 +175,7 @@ jobs:
                 if [ -n "$urls" ] && printf '%s\n' "$urls" | grep -vqE '^https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one)/'; then
                   echo "🚫 $name 门禁拦截: script-path 指向非白名单域 (疑似投毒), 保留旧版"
                   printf '%s\n' "$urls" | grep -vE '^https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one)/' | head -3
-                  GATED=$((GATED + 1)); FAIL=$((FAIL + 1))
+                  GATED=$((GATED + 1)); mark_fail "$dest"
                   keep_old "$dest"
                   rm -f "$tmpf"; return
                 fi
@@ -238,15 +246,18 @@ jobs:
             "rules/ddgksf-StartUpAds.conf" "ddgksf2013 StartUpAds.conf (ifflagged 镜像)"
           node tools/build-startup-plugin.mjs
 
-          # ── Global 列表纯净度检查 (2026-08 审计) ──
-          # 远端顺序已调整为 China → Global → Advertising → ... (国际流量提前终止),
-          # 前提是 Global 列表不含广告/隐私/国内域 — 上游更新若引入污染立即拦截 (fail)
-          GLOBAL_BAD='(doubleclick|googleadservices|googletagmanager|googlesyndication|google-analytics|app-measurement|crashlytics|appsflyer|mixpanel|segment\.io|amplitude|branch\.io|adjust\.com|kochava|sentry\.io|qq\.com|taobao|tmall|baidu\.com|163\.com|aliyun|jd\.com|bilibili|meituan|douyin)'
-          if grep -E "^(DOMAIN-SUFFIX|DOMAIN-KEYWORD|DOMAIN),.*${GLOBAL_BAD}" Mirror/rules/loon-Global.list; then
-            echo "❌ Global 列表检测到广告/隐私/国内域污染 (见上) — 已拦截, 需复检远端顺序前提"
+          # ── 规则顺序遮蔽检查 (2026-09-11 深度审计 NEW-05 重写) ──
+          # 旧实现是硬编码 20 个关键词的 grep, 且**方向反了**: 它只查 "Global 里有没有
+          # 广告域", 而真正的缺陷是反向的 —— Global 是 Proxy 列表且排在三个 REJECT 列表
+          # **之前**, 其 36 个 DOMAIN-KEYWORD 是宽匹配, 会抢先命中后续 REJECT 条目
+          # (实测唯一实例: Global 的 google 抢先命中 Advertising 的 googleads)。
+          # 现改为与 Advertising/Privacy/Hijacking 做**实际集合交集断言** (KEYWORD 子串级),
+          # 要求每个被遮蔽条目都有本地 [Rule] REJECT 兜底; 并告警上游文件头与正文计数
+          # 不符 (该头描述的并非 Loon 正文, 曾导致模板写下错误的 "34,579 SUFFIX")。
+          # 同一脚本也在 config-validate.yml 中执行 (PR 阶段即可发现)。
+          if ! node tools/rule-shadow-check.mjs; then
+            echo "❌ 规则顺序遮蔽检查失败 — 见上方明细"
             FAIL=$((FAIL+1))
-          else
-            echo "✅ Global 列表纯净度检查通过: 无广告/隐私/国内域"
           fi
 
           # ═══════════════ Loon rewrite 插件 ═══════════════
@@ -588,7 +599,7 @@ jobs:
           # 断言: 补丁后不应再有任何浮动引用。上游若新增产物或改回 latest, 在此暴露。
           if grep -n -e "DualSubs/Universal/releases/latest" Mirror/dualsubs/*.plugin; then
             echo "🚫 DualSubs 补丁后仍存在 releases/latest 浮动引用 (上游可能新增了产物), 请人工核对并锁定版本"
-            FAIL=$((FAIL + 1))
+            mark_fail "dualsubs:releases/latest 浮动引用未锁定"
           fi
 
           # ═══════════════ Auraflare (Cloudflare 资源集成) ═══════════════
@@ -690,6 +701,8 @@ jobs:
           echo "success=$SUCCESS" >> $GITHUB_ENV
           echo "fail=$FAIL" >> $GITHUB_ENV
           echo "gated=$GATED" >> $GITHUB_ENV
+          # 失败条目名单 (单行, 逗号分隔 — $GITHUB_ENV 不接受多行值), 供 Report summary 输出注解
+          echo "failed_list=$(IFS=,; echo "${FAILED_LIST[*]:-}")" >> $GITHUB_ENV
 
       # PR 制: 变更推送到 mirror/<date> 分支并开/更新 PR, 不再直推 main
       - name: Open or update mirror PR
@@ -763,4 +776,12 @@ jobs:
           if (( ${fail:-0} > 0 )); then
             echo "### ⚠️ Some mirrors failed or were gated" >> $GITHUB_STEP_SUMMARY
             echo "Check run logs for details. 被门禁拦截的文件保留旧版, 不影响分发。" >> $GITHUB_STEP_SUMMARY
+            # 2026-09-11 深度审计 NEW-11: 注解 (annotation) 才会出现在 PR 的 Files changed / Checks
+            # 视图; step summary 只在 run 详情页。名称超长时截断, 避免刷屏 (GitHub 单 run 最多展示
+            # 10 条 warning, 故只列前 10 个并在末尾标注剩余数量)。
+            NAMES=$(printf '%s' "${failed_list:-}" | tr ',' '\n' | sed '/^$/d')
+            SHOWN=$(printf '%s\n' "$NAMES" | head -10 | paste -sd, -)
+            TOTAL=$(printf '%s\n' "$NAMES" | sed '/^$/d' | wc -l | tr -d ' ')
+            REST=$(( TOTAL > 10 ? TOTAL - 10 : 0 ))
+            echo "::warning::镜像同步: ${fail:-0} 个文件抓取失败或被门禁拦截 (gated: ${gated:-0}) — 已保留旧版, 不影响分发。条目: ${SHOWN}$([ "$REST" -gt 0 ] && echo " …(另有 ${REST} 个, 见 run 日志)")"
           fi

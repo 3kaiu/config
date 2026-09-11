@@ -88,12 +88,18 @@ export default [
       "no-control-regex": "off",
       "no-async-promise-executor": "off",
       "no-prototype-builtins": "off",
-      "no-cond-assign": "off",
-      "no-fallthrough": "off",
       // 保留能抓到真实问题的规则
       "no-undef": "error",
       "no-redeclare": "error",
       "no-constant-condition": ["error", { checkLoops: false }],
+      // 2026-09-11 深度审计 NEW-12: 原先 no-cond-assign / no-fallthrough 也被关闭。
+      // 这两条是控制流规则, **在压缩产物上依然有效** —— esbuild 不会凭空制造
+      // 赋值条件或 case 穿透, 故开启不会误报 (实测 60 个产物全绿)。
+      // 已实测生效: 注入 `if (x = 3)` 与无 break 的 case → 分别报
+      // no-cond-assign / no-fallthrough。走 recommended 默认 (error), 不显式声明。
+      // 注: 覆盖 src/ 需 @typescript-eslint/parser (src/*.ts 含真实 TS 语法:
+      // interface/type/类型标注), 与"仅 3 个 devDependencies"的取舍冲突 → 不做;
+      // src/ 的可机械判定部分改由 tools/src-antipattern-check.mjs 兜底。
     },
   },
   {
