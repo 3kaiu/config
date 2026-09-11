@@ -7,10 +7,11 @@
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.2.4(787)
 
-#!arguments-desc=\n- \{ENABLE_STARTUP}: switch,"true","false",tag=总开关，desc=开启后过滤所有 App 开屏广告
+#!arguments-desc=\n- \{ENABLE_STARTUP}: ["true","false"],tag=总开关，desc=开启后过滤所有 App 开屏广告\n- \{STARTUP_DEBUG}: switch,"false","true",tag=调试模式，desc=输出详细日志
 
 [Argument]
 ENABLE_STARTUP=switch,"true","false",tag=总开关，desc=开启后过滤所有 App 开屏广告
+STARTUP_DEBUG=switch,"false","true",tag=调试模式，desc=输出详细日志
 
 [Script]
 # ════════════════════════════════════════
