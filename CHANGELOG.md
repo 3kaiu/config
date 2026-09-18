@@ -42,6 +42,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 **cdn-verify 并行化**（`cdn-verify.yml` 主校验段）：串行 ~150 文件×30s 超时逼近 15min 上限 → `xargs -P8`＋结果落盘汇总；判定语义与 `$GITHUB_OUTPUT` 字段不变，内层脚本零嵌套引号；本地直连 CDN 实测 131 文件 14.8s 全一致
 
+### Fixed (2026-09-18 性能审计整改 P1~P3 — 先量后动, 客户端零改动)
+
+**量测结论**: 本地 test 0.7s / build 0.09s / lint 0.44s; 脚本单次 ~1ms (沙箱主导); 本地规则 195 条仅 7 KEYWORD; GOODBYEADS 11.5 万 DOMAIN 精确匹配 (文档称 20 万条 ~1ms); 43% 本地↔远端重叠系有意顺序语义不删; 1870 改写转 DOMAIN 会过拦截不动; 3.9MB 系上游固有。客户端结论: **不用动**, 瓶颈全在 CI 最坏情况
+
+**P1 config-validate 存活检查并行化＋附带修永不失败门禁** (`config-validate.yml` step 2): 34 URL 串行最坏超 job 上限 → `xargs -P8` 落盘汇总 (与 cdn-verify 同模板, 本地 34/34 零失败 4.3s)。附带修同 CI-02 类缺陷: 原 `code=$(curl -fsSL ... -w ... || echo FAIL)` 中 -w 先吐 "404"/"000" 再追 "FAIL", 实得 "404FAIL" 判红比较永不等 —— 本地实证 404 与 conn-refused 均 ✅, 门禁恒绿。现去 -f 以 exit 码分离判定, 仅网络层失败 (000) 判红; 404 仍放行 (新文件 PR 在 CDN 同步前必 404, 属预期)。本地三态验证: 200✅/404✅/refused❌
+
+**P2 upstream-health 并行化** (`upstream-health.yml`): ~56 探活串行 → 后台并发＋日志按序回放＋TSV 落盘重建 (结果 `.tsv` 与日志 `.log` 分后缀, 防聚合串扰); tab 守卫前置保持同步 fail-fast; `wait` 收敛 (后台赋值父 shell 不可见, 走文件是唯一通道)。抽 step 全量实跑: **5.1s, exit 0, 50/50 结果 JSON 正确** (含 kelee 哨兵映射与新 MANIFEST 派生条目)
+
+**P3 mirror old_entry 批处理** (`mirror-scripts.yml`): 每次 keep_old 起 node (~50ms) → 单次 TSV 导出＋awk 查表 (与 PREV_SIZES 同模式; 不用 `declare -A`, macOS bash 3.2 会炸)。三键等价验证 (存在/缺失) 与旧实现逐字节一致
+
 ### Fixed (2026-09-11 深度审计修复 — 逐项整改)
 
 **P1**

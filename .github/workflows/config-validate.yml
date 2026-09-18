@@ -64,18 +64,38 @@ jobs:
             exit 1
           fi
           FAIL=0
-          while IFS= read -r url; do
-            [ -z "$url" ] && continue
-            # --retry 2 (2026-09-18 优化审计): PR 门禁里的网络检查, 单次抖动即红 PR;
-            # 与 mirror-scripts/cdn-verify 的重试实践对齐 (GET 对 5xx/超时自动重试)。
-            code=$(curl -fsSL -m 15 --retry 2 -o /dev/null -w "%{http_code}" "$url" || echo "FAIL")
+          # 并行探活 (2026-09-18 性能审计): 34 个 URL 串行 × (15s 超时 + retry 2),
+          # 最坏 ~25min 超过 job 15min 上限。xargs -P8 并发, 单 URL 结果落盘再汇总 —
+          # 输出格式 (✅/❌逐行 + Failures 计数 + exit 语义) 保持不变。
+          # 内层 bash -c 零嵌套引号 (与 cdn-verify 同一模板)。
+          URLRES=$(mktemp -d)
+          sed '/^$/d' /tmp/urls.txt | xargs -P 8 -I{} bash -c '
+            u="$1"; d="$2"
+            key=$(printf "%s" "$u" | sha256sum); key=${key%% *}
+            # 2026-09-18 性能审计附带修复 (同 CI-02 类"永不失败"门禁):
+            # 原 `code=$(curl -fsSL ... -w "%{http_code}" ... || echo FAIL)` 中,
+            # -w 在 HTTP 错误/连接失败时仍会先吐出 "404"/"000", 再由 || 追加 "FAIL",
+            # 实得 "404FAIL"/"000FAIL" —— 与 "FAIL"/"000" 的判红比较永不相等,
+            # 本步恒绿 (本地实测 404 与 conn-refused 均 ✅)。现分离判定:
+            # 去掉 -f, 以 exit 码区分 HTTP 应答与网络失败; 仅后者判红。
+            # 404 仍放行 (属预期: 新文件 PR 在 CDN 同步前必 404, 判红则 PR 永红)。
+            if code=$(curl -sSL -m 15 --retry 2 -o /dev/null -w "%{http_code}" "$u" 2>/dev/null); then
+              : # HTTP 层有应答, $code 即真实状态码
+            else
+              code="000" # DNS/TCP/超时: 网络层失败
+            fi
+            printf "%s %s\n" "$code" "$u" > "$d/$key"
+          ' _ {} "$URLRES"
+          while IFS= read -r line; do
+            code=${line%% *}; url=${line#* }
             if [ "$code" = "FAIL" ] || [ "$code" = "000" ]; then
               echo "❌ $url → $code"
               FAIL=$((FAIL+1))
             else
               echo "✅ $url → $code"
             fi
-          done < /tmp/urls.txt
+          done < <(cat "$URLRES"/* 2>/dev/null | sort)
+          rm -rf "$URLRES"
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Failures: $FAIL" >> $GITHUB_STEP_SUMMARY
           exit $FAIL

@@ -30,32 +30,40 @@ jobs:
           # 另: 原实现每个 URL 起一个 node 进程 (~50 次/轮) 只为 append 一个数组元素。
           # 现改为: TSV 累积 → 循环结束后单次转换; 数据经 stdin 传递, 不经源码插值。
           RESULTS_TSV=""
+          RESULTS_DIR=$(mktemp -d)
 
           check_url() {
             local name="$1" url="$2"
-            local status
-            # 不用 -f: 失败状态码 (403/404) 也要拿到真实数字; 网络层异常时才记 000。
-            # --retry 2 (2026-09-18 优化审计): 调度任务单次抖动即开 issue, 与镜像重试实践对齐。
-            status=$(curl -sSL -m 30 --retry 2 -o /dev/null -w "%{http_code}" "$url" || true)
-            [ -z "$status" ] && status="000"
-            # kelee.one 全局 403 是 Turnstile 保护，Loon 客户端可拉取，CI 视作健康
-            if [[ "$name" == *"kelee.one"* && "$status" == "403" ]]; then
-              status="200 (kelee 403→Loon OK)"
-            fi
-            echo "::group::$name"
-            echo "URL: $url"
-            echo "Status: $status"
-            echo "::endgroup::"
-            # TSV 累积。name/status/url 三者均不含制表符 (name 来自 MANIFEST 键或本文件
-            # 字面量; status 来自 %{http_code} 或固定串), 故制表符是安全分隔符。
-            # 万一上游清单里出现制表符, 显式失败而不是静默错位写出坏 JSON。
-            case "${name}${status}${url}" in
+            # 制表符守卫前置 (同步 fail-fast): status 只可能来自 %{http_code}
+            # 或固定串, 永不含制表符, 故此处只判 name/url 即可, 与原语义等价。
+            case "${name}${url}" in
               *$'\t'*) echo "::error::探活字段含制表符, 无法序列化: $name"; exit 1 ;;
             esac
-            RESULTS_TSV+="${name}"$'\t'"${status}"$'\t'"${url}"$'\n'
-            if [ "$status" != "200" ] && [ "$status" != "200 (kelee 403→Loon OK)" ] && [ "$status" != "302" ] && [ "$status" != "301" ]; then
-              ALL_OK=false
-            fi
+            # 并行探活 (2026-09-18 性能审计): ~56 个 URL 串行 × 30s 超时逼近
+            # 15min 上限。后台并发, 结果落盘再汇总; 日志按序回放避免交错。
+            (
+              local status
+              # 不用 -f: 失败状态码 (403/404) 也要拿到真实数字; 网络层异常时才记 000。
+              # --retry 2 (2026-09-18 优化审计): 调度任务单次抖动即开 issue, 与镜像重试实践对齐。
+              status=$(curl -sSL -m 30 --retry 2 -o /dev/null -w "%{http_code}" "$url" || true)
+              [ -z "$status" ] && status="000"
+              # kelee.one 全局 403 是 Turnstile 保护，Loon 客户端可拉取，CI 视作健康
+              if [[ "$name" == *"kelee.one"* && "$status" == "403" ]]; then
+                status="200 (kelee 403→Loon OK)"
+              fi
+              local key
+              key=$(printf '%s' "$name" | sha256sum); key=${key%% *}
+              {
+                echo "::group::$name"
+                echo "URL: $url"
+                echo "Status: $status"
+                echo "::endgroup::"
+              } > "$RESULTS_DIR/$key.log"
+              # TSV 累积 (落盘, 后缀 .tsv 与 .log 日志区分 — 聚合时只取 .tsv)。
+              # name/status/url 三者均不含制表符 (name 来自 MANIFEST 键或本文件
+              # 字面量; status 来自 %{http_code} 或固定串), 故制表符是安全分隔符。
+              printf '%s\t%s\t%s\n' "$name" "$status" "$url" > "$RESULTS_DIR/$key.tsv"
+            ) &
           }
 
           # 镜像上游探活全部由下方 MANIFEST 派生循环覆盖 (35 条, 单一权威清单);
@@ -99,6 +107,20 @@ jobs:
           # 后果: 全部 MANIFEST 派生探活 (~34 条) 不写 summary、不影响 all_ok、永不触发 issue,
           # 等于硬编码之外的上游探活全是死代码。改用 /tmp 文件中转让 while 留在当前 shell。
           while IFS=$'\t' read -r name url; do check_url "$name (mirrored)" "$url"; done < /tmp/mirrors.tsv
+
+          # 收敛: 等全部后台探活完成, 按序回放日志, 再从落盘结果重建 TSV 与 ALL_OK。
+          # (2026-09-18 性能审计: 后台任务内赋值在父 shell 不可见, 故结果必须走文件。)
+          wait
+          for f in "$RESULTS_DIR"/*.log; do cat "$f"; done
+          RESULTS_TSV=$(cat "$RESULTS_DIR"/*.tsv 2>/dev/null || true)
+          ALL_OK=true
+          while IFS=$'\t' read -r _name status _url; do
+            [ -z "$_name" ] && continue
+            if [ "$status" != "200" ] && [ "$status" != "200 (kelee 403→Loon OK)" ] && [ "$status" != "302" ] && [ "$status" != "301" ]; then
+              ALL_OK=false
+            fi
+          done <<< "$RESULTS_TSV"
+          rm -rf "$RESULTS_DIR"
 
           # 单次转换 TSV → JSON (数据走 stdin, 不经 node 源码插值)。
           # 用 indexOf 而非 split("\t"): url 若含制表符也不会被截断 (末段整体保留)。
