@@ -256,13 +256,11 @@ DOMAIN-KEYWORD, qreport, REJECT
 DOMAIN, aegis.cdn-go.cn, REJECT
 
 # Google 分析与广告
-# ⚠️ `DOMAIN-KEYWORD, googleads` 必须留在本地 [Rule] 段 (即早于 [Remote Rule] 的 Global):
-#    Global 是 Proxy 列表且含宽匹配 `DOMAIN-KEYWORD,google`, 又排在 Advertising 之前,
-#    于是 googleads.* 会被 Global 抢先代理, Advertising 的 `DOMAIN-KEYWORD,googleads` 永不生效。
-#    2026-09-11 深度审计 NEW-05 实测: 这是 Global 的 36 个关键词对 Advertising(981)
-#    + Privacy(20) + Hijacking(228) 的**唯一**遮蔽实例 (1/1229), 故用一条本地精确 REJECT
-#    兜住, 而不把整个 Advertising 列表提到 Global 之前 (Global 前置能让国际主流域免扫
-#    1229 条规则; 重排的代价大于这一条遮蔽的收益)。`npm run check:shadow` 持续断言该覆盖。
+# 本地精确 REJECT: 不依赖 [Remote Rule] 的列表加载 (CDN/上游故障时仍生效), 也兜住
+# `DOMAIN-KEYWORD,googleads` 这类宽匹配。2026-09-18 重排后 Global 已排在三个 REJECT
+# 列表之后, 旧的"Global 的 google 关键词抢先 googleads"遮蔽不复存在 (NEW-05 时代的
+# 本地兜底成因已失效); 保留这些条目作为 [Rule] 段显式拦截 + 上游不可用时的兜底,
+# 代价为零 ([Rule] 本就先于一切远程列表求值)。
 DOMAIN-KEYWORD, googleads, REJECT
 DOMAIN-SUFFIX, googleadservices.com, REJECT
 DOMAIN-SUFFIX, doubleclick.net, REJECT
@@ -404,26 +402,30 @@ GEOIP, CN, DIRECT
 FINAL, Final
 
 [Remote Rule]
-# 排序 (2026-08): China 提前 — 国内流量先命中 DIRECT, 不必扫描广告/隐私/反劫持列表
-# Global 次位 — 国际主流域小列表 (198 条: 36 DOMAIN-KEYWORD + 46 USER-AGENT + 112 IP-CIDR
-#   + 4 IP-CIDR6, **0 条 DOMAIN-SUFFIX**) 命中 Proxy 即提前终止后续列表扫描。
-#   ⚠️ 2026-09-11 深度审计 NEW-04 更正: 此处原写"国际主流域 (34,579 SUFFIX)" —— 该数字
-#   系误引上游文件**头注释** (`# DOMAIN-SUFFIX: 34743` / `# TOTAL: 35069`), 而该头描述的是
-#   blackmatrix7 的完整规则集, 与 Loon 格式文件正文 (209 行 / 198 条) 并不相符
-#   (实测 body 直方图: 112 IP-CIDR / 46 USER-AGENT / 36 DOMAIN-KEYWORD / 4 IP-CIDR6;
-#    正文里 `DOMAIN-SUFFIX` 仅出现 1 次, 就是头注释那一行)。
-#   故"提前终止 3.5 万条扫描"的收益被高估约 175 倍。保留 Global 前置的真实理由仅为:
-#   命中后免于扫描 Advertising(981)+Privacy(20)+Hijacking(228) 共 1229 条, 且只对这
-#   198 条覆盖的域名成立。**上游文件头不可当作规则计数使用** (见 tools/rule-shadow-check.mjs)。
-#   前提: Global 的 36 个 DOMAIN-KEYWORD 是**宽匹配**, 会遮蔽后续 REJECT 规则 ——
-#   实测遮蔽面 1/1229 (Advertising 的 DOMAIN-KEYWORD,googleads 被 Global 的 google 抢先),
-#   已由 [Rule] 段的本地 `DOMAIN-KEYWORD, googleads, REJECT` 兜住。
-#   `npm run check:shadow` 对 Global ↔ 三个 REJECT 列表做实际集合交集断言 (CI 同步执行)。
-https://ws.wenn.in/main/Mirror/rules/loon-China.list, policy=DIRECT, tag=🇨🇳 国内域名, enabled=true
-https://ws.wenn.in/main/Mirror/rules/loon-Global.list, policy=Proxy, tag=🌍 国际域名, enabled=true
+# 排序 (2026-09-18 重排): 拦截区前置 — REJECT 列表必须排在一切非 REJECT 列表之前。
+#   遮蔽 = 靠前**非 REJECT** 列表 (DIRECT 与 Proxy 同样抢先命中并终止扫描) 的域名类规则
+#   抢先命中靠后 REJECT 条目。旧顺序 (China 提前) 下 check:shadow 实测:
+#   China 的 `DOMAIN-SUFFIX,cn` 吞掉 Advertising 47 + Hijacking 64 条 `.cn` 广告/劫持域,
+#   `DOMAIN-KEYWORD,aliyun` 再吞 7 条 —— 111 条拦截规则静默失效; 重排后复活。
+#   代价: 国内请求先扫拦截区 1229 条 (Advertising 981 + Privacy 20 + Hijacking 228),
+#   相对 China 的 63 条是可忽略的扫描成本。REJECT→REJECT 行为等价, 故拦截区内部顺序
+#   不构成遮蔽 (见 tools/rule-shadow-check.mjs 的判定原则)。
+# China 次位 — 国内流量先命中 DIRECT; Global 再次 — 国际主流域小列表 (198 条: 36
+#   DOMAIN-KEYWORD + 46 USER-AGENT + 112 IP-CIDR + 4 IP-CIDR6, **0 条 DOMAIN-SUFFIX**)
+#   命中 Proxy 即提前终止。
+#   ⚠️ 2026-09-11 深度审计 NEW-04 更正: "34,579 SUFFIX 提前终止"系误引上游文件头注释
+#   (该头描述 blackmatrix7 完整规则集, 与 Loon 正文 209 行/198 条不符, **不可当计数用**)。
+#   Global 前置的真实收益仅为: 命中后免扫其后的列表 (重排后只剩 goodbyeads)。
+# goodbyeads 压轴 — 117k 条的最大表必须排最后: China/Global 覆盖的域名 (绝大多数请求)
+#   免扫该表。代价 (check:shadow 实测): 941 + 606 条条目被 China(`cn` 后缀/aliyun 等
+#   关键词) 与 Global(google/porn 等 36 个关键词) 抢先, 其中多数本就该被拦 ——
+#   已在 tools/rule-shadow-check.mjs 的 ACCEPTED_PAIRS 登记为**刻意取舍** (含成因与
+#   复检日期); 该工具按"对"聚合断言: 已登记的对逐轮打印计数, **任何新出现的对立刻判红**。
 https://ws.wenn.in/main/Mirror/rules/loon-Advertising.list, policy=REJECT, tag=🚫 广告域名, enabled=true
 https://ws.wenn.in/main/Mirror/rules/loon-Privacy.list, policy=REJECT, tag=🔒 隐私保护, enabled=true
 https://ws.wenn.in/main/Mirror/rules/loon-Hijacking.list, policy=REJECT, tag=🛡️ 反劫持, enabled=true
+https://ws.wenn.in/main/Mirror/rules/loon-China.list, policy=DIRECT, tag=🇨🇳 国内域名, enabled=true
+https://ws.wenn.in/main/Mirror/rules/loon-Global.list, policy=Proxy, tag=🌍 国际域名, enabled=true
 # GOODBYEADS (2026-09-11 审计: 收敛为单一分发路径)
 #   原值指向 S3 带外手工上传副本 (3kaiu-mirror-*.s3-ap-northeast-1.amazonaws.com/rules/goodbyeads-qx.list),
 #   与仓库内的 Mirror/rules/goodbyeads-qx.list 构成**双份同源数据**: S3 副本无哈希门禁、

@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased] (2026-09-04 对抗审计)
 
+### Fixed (2026-09-18 优化审计 — 项 3+4: 规则顺序遮蔽盲区, 111 条拦截规则复活)
+
+**`check:shadow` 两处漏检致门禁"绿灯假象"**（`tools/rule-shadow-check.mjs` 重写判定与报告）：实测遮蔽面从"1 条已兜底"变为 **1709 条、4 对** —— ① 遮蔽者判定只认 `policy` 含 `proxy` 的列表,而排在最前的 China 是 **DIRECT**（DIRECT 同样抢先命中并终止后续列表扫描,模板自己的排序注释写着"国内流量先命中 DIRECT,不必扫描广告/隐私/反劫持列表",恰是被工具跳过的遮蔽）: China→Advertising 47 条 / China→Hijacking 64 条 / China→goodbyeads 941 条;② 命中类型只比 `DOMAIN-KEYWORD`,漏掉 `DOMAIN-SUFFIX` 吞并（China 的 `DOMAIN-SUFFIX,cn` 一条就吞掉 759 条 `.cn` 广告域）。③ 另发现**第三处更致命的漏检**: 列表路径用 `loon-${name}.list` 硬拼,而 goodbyeads 的文件是 `goodbyeads-qx.list`（无 `loon-` 前缀）→ 文件不存在被 `continue` **静默跳过,整张 117k 条的表从未参与遮蔽检查**（旧工具输出里顺序序列根本没有它）。路径改为由 URL 推出,解析不到文件改为显式告警
+
+**`[Remote Rule]` 重排：拦截区前置**（`template/loon.tpl`）—— Advertising/Privacy/Hijacking 三个 REJECT 列表提到 China/Global 之前（REJECT→REJECT 行为等价,拦截区内部顺序不构成遮蔽）,复活 **111 条**此前被 China 的 `cn` 后缀/`aliyun` 关键词吞掉的 `.cn` 广告/劫持拦截规则;China/Global 顺次后移一位,goodbyeads 仍压轴。代价: 国内请求先扫拦截区 1229 条（相对 China 的 63 条可忽略）。重排同时修正两处注释里的过时成因（NEW-05 时代"googleads 被	Global 的 google 抢先"的遮蔽已不复存在,本地 REJECT 保留的理由改为"不依赖远程列表加载 + [Rule] 显式拦截"）
+
+**残余 1522 条 goodbyeads 遮蔽按"对"登记为显性取舍**（新增 `ACCEPTED_PAIRS` 机制）：goodbyeads（117k 条最大表）压轴 = China/Global 覆盖的绝大多数请求免扫该表,被抢走的 China→goodbyeads-qx 941 条 + Global→goodbyeads-qx 606 条是"让路"的显性代价。按**对**而非按条登记: 已登记的对逐轮打印计数（`931/941 条不可达` 等）+ 成因 + 复检日期（2027-03-31）,**任何新出现的遮蔽对立刻判红**;空表/半表负向用例证明"删登记即红"。工具输出同步聚合化（千条级遮蔽逐行打印会淹没报告）,新增 `run(root, acceptedPairs)` 可注入登记表供用例做门禁语义验证;测试 220→**225** 例（+5: DIRECT 遮蔽者/SUFFIX 吞并/REJECT 等价与通配归一/路径解析/登记门禁负向）,并断言 `[Remote Rule]` 顺序契约（拦截区前置,goodbyeads 压轴）
+
 ### Fixed (2026-09-18 精简/性能优化审计 — 项 2: 镜像管线解卡, 漂移归零)
 
 **根因: `secrets.MIRROR_TOKEN` 未配置 → 镜像 PR 的 CI 从未跑过**（`.github/workflows/mirror-scripts.yml` 诊断）：`gh secret list` 为空;最近一次 run 日志实测 `MIRROR_TOKEN: (空)` + `##[warning]secrets.MIRROR_TOKEN 未配置 … ci_token: github-token (降级)`;PR #42 的 2 个 run 均 `conclusion=action_required`(jobs=0),近 100 个 run 里 14 个如此,唯一成功的是 09-17 人工批准那次。后果: 审核清单里"CI 全绿"**永远无法满足** → PR #39(09-11) 被关闭未合并、#42 积压 6 天 / 25 文件(含 13 个 bundle.js、goodbyeads 全量刷新、iRingo script-path 迁自建 CDN),镜像产出根本没进 main;而 `check:drift` 用 `ACCEPTED_*` 把 20 条"漂移/从未抓到"登记成绿色

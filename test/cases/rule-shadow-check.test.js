@@ -74,6 +74,61 @@ exports.tests = {
     a.equal(hit[0].keyword, ["google"], "应记录命中的关键词");
   },
 
+  "shadow: findShadowed 识别 DIRECT 遮蔽者 (2026-09-18: China 是 DIRECT, 旧实现只认 Proxy 而漏检)": async (a) => {
+    const { findShadowed } = await load();
+    const lists = [
+      { name: "China", policy: "DIRECT", rules: [{ type: "DOMAIN-KEYWORD", pattern: "aliyun" }] },
+      { name: "Advertising", policy: "REJECT", rules: [{ type: "DOMAIN-KEYWORD", pattern: "adash.man.aliyuncs.com" }] },
+    ];
+    const hit = findShadowed(lists);
+    a.equal(hit.length, 1, "DIRECT 列表同样抢先命中并终止扫描, 必须视为遮蔽者");
+    a.equal(hit[0].from, "China", "遮蔽方是 DIRECT 列表");
+    a.equal(hit[0].hit, ["DOMAIN-KEYWORD,aliyun"], "命中描述应含类型+模式");
+  },
+
+  "shadow: findShadowed 识别 DOMAIN-SUFFIX 遮蔽 (旧实现只比 KEYWORD 漏掉后缀吞并)": async (a) => {
+    const { findShadowed } = await load();
+    const lists = [
+      { name: "China", policy: "DIRECT", rules: [{ type: "DOMAIN-SUFFIX", pattern: "cn" }] },
+      { name: "Hijacking", policy: "REJECT", rules: [{ type: "DOMAIN-SUFFIX", pattern: "189zj.cn" }] },
+    ];
+    const hit = findShadowed(lists);
+    a.equal(hit.length, 1, "`cn` 后缀应吞掉 189zj.cn");
+    a.equal(hit[0].hit, ["DOMAIN-SUFFIX,cn"], "命中应为后缀类");
+    // 方向性: 更窄的后缀不能吞更宽的后缀
+    a.equal(findShadowed([
+      { name: "A", policy: "DIRECT", rules: [{ type: "DOMAIN-SUFFIX", pattern: "x.com.cn" }] },
+      { name: "B", policy: "REJECT", rules: [{ type: "DOMAIN-SUFFIX", pattern: "cn" }] },
+    ]).length, 0, "DOMAIN-SUFFIX,x.com.cn 不遮蔽 DOMAIN,cn (子集关系方向反了)");
+    a.equal(findShadowed([
+      { name: "A", policy: "DIRECT", rules: [{ type: "DOMAIN", pattern: "ads.example.com" }] },
+      { name: "B", policy: "REJECT", rules: [{ type: "DOMAIN", pattern: "ads.example.com" }] },
+    ]).length, 1, "DOMAIN 精确相等也算完全遮蔽");
+  },
+
+  "shadow: findShadowed 视 REJECT→REJECT 为等价而非遮蔽, 且通配前缀归一": async (a) => {
+    const { findShadowed } = await load();
+    a.equal(findShadowed([
+      { name: "Ad", policy: "REJECT", rules: [{ type: "DOMAIN-KEYWORD", pattern: "ads" }] },
+      { name: "Hijack", policy: "REJECT", rules: [{ type: "DOMAIN-KEYWORD", pattern: "adsense" }] },
+    ]).length, 0, "两个 REJECT 列表间不存在策略性遮蔽 (行为等价: 都拦)");
+    a.equal(findShadowed([
+      { name: "P", policy: "Proxy", rules: [{ type: "DOMAIN-SUFFIX", pattern: "example.com" }] },
+      { name: "R", policy: "REJECT", rules: [{ type: "DOMAIN-KEYWORD", pattern: "*.example.com" }] },
+    ]).length, 1, "QX 通配前缀 `*.` 应剥掉后参与子串比较");
+  },
+
+  "shadow: parseRemoteRules 由 URL 解出仓库内路径 (goodbyeads 无 loon- 前缀不再被硬拼路径吞掉)": async (a) => {
+    const { parseRemoteRules } = await load();
+    const out = parseRemoteRules([
+      "https://ws.wenn.in/main/Mirror/rules/loon-China.list, policy=DIRECT, tag=a, enabled=true",
+      "https://ws.wenn.in/main/Mirror/rules/goodbyeads-qx.list, tag=b, policy=REJECT, enabled=true",
+    ]);
+    a.equal(out[0].rel, "rules/loon-China.list", "loon- 前缀列表路径");
+    a.equal(out[1].rel, "rules/goodbyeads-qx.list", "无 loon- 前缀列表路径必须按 URL 推出 —— 旧实现硬拼 loon-goodbyeads-qx.list 导致整张 117k 表静默跳过检查");
+    a.equal(out[1].name, "goodbyeads-qx", "name 保留原始 basename");
+  },
+
   "shadow: findShadowed 在 REJECT 列表靠前时不报遮蔽 (顺序即语义)": async (a) => {
     const { findShadowed } = await load();
     const lists = [
@@ -113,8 +168,33 @@ exports.tests = {
     a.equal(isCompensated(entry, []), false, "无本地规则时应判未兜底");
   },
 
-  "shadow: 仓库实际状态应通过 (遮蔽面已被本地规则兜住)": async (a) => {
+  "shadow: 仓库实际状态 — 拦截区前置, 残余遮蔽仅 goodbyeads 两对且全部登记接受": async (a) => {
+    const { run, ACCEPTED_PAIRS } = await load();
+    a.equal(run(ROOT), 0, "重排后仓库当前状态应通过 (残余对已登记)");
+    // 端态断言: 防止有人改回旧顺序 / 删掉登记而不补兜底 —— 那会让上面 run() 的 0
+    // 变成"门禁绕行"。顺序契约: 拦截区 (REJECT) 必须先于 China/Global。
+    a.equal(ACCEPTED_PAIRS.size, 2, "登记表应恰为 goodbyeads 两对 (清理须走用例变更)");
+    const { parseRemoteRules, sectionLines } = await load();
+    const tpl = require("fs").readFileSync(require("path").join(ROOT, "template", "loon.tpl"), "utf8");
+    const refs = parseRemoteRules(sectionLines(tpl, "Remote Rule"));
+    a.equal(
+      JSON.stringify(refs.map((r) => [r.name, r.policy])),
+      JSON.stringify([
+        ["Advertising", "REJECT"], ["Privacy", "REJECT"], ["Hijacking", "REJECT"],
+        ["China", "DIRECT"], ["Global", "Proxy"], ["goodbyeads-qx", "REJECT"], ["Epic", "Proxy"],
+      ]),
+      "[Remote Rule] 顺序契约: 拦截区前置, goodbyeads 压轴 (见 loon.tpl 排序注释)",
+    );
+  },
+
+  "shadow: run 的登记表可注入 — 未登记的遮蔽对必须判红 (负向证明)": async (a) => {
     const { run } = await load();
-    a.equal(run(ROOT), 0, "仓库当前状态应通过规则顺序遮蔽检查");
+    // 空登记表 → 残余的 China/Global→goodbyeads 两对无人认领 → 必须红 (exit 1)。
+    // 这是"接受不是静默的"的机制证明: 删掉登记表条目, 门禁立刻变红。
+    a.equal(run(ROOT, new Map()), 1, "未登记的遮蔽对应判红");
+    // 只登记其中一对 → 仍红 (另一对没人认领)
+    a.equal(
+      run(ROOT, new Map([["China→goodbyeads-qx", { reason: "x", reviewBy: "y" }]])),
+      1, "只登记一对仍应判红 (另一对未认领)");
   },
 };
