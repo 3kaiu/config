@@ -20,6 +20,11 @@
  * `--strict` 判定为**子集**而非相等: `ACCEPTED_*` 登记的是"已知且接受"的条目, 出现登记表
  * 之外的漂移才判红。条目消解后 (如镜像 PR 合并) 保留在登记表内无害 — 避免每次上游变化
  * 都要同步删表。
+ *
+ * ⚠️ 2026-09-18 优化审计补充: "留存无害"只对**判定**成立, 对**成因标注**不成立 ——
+ * 实测两张表里 20 条的成因写着"上游已移除 .plugin asset", 而该断言只对 7 条中的 1 条属实
+ * (见下方 ACCEPTED_DRIFT 注释)。错误的成因会把红门禁变成永久静默接受, 故条目消解时应
+ * 一并清掉成因, 而不是留着一份与事实相反的"解释"。
  */
 import fs from "fs";
 import path from "path";
@@ -29,34 +34,32 @@ const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 
 /**
  * 已知且接受的 **URL 漂移** (workflow 声明 ≠ MANIFEST 记录)。
- * 成因: NSRingo 自 v3.2.0 (2026-08) 起从 release 中移除 `.plugin` asset, 改为 `.lpx`;
- * workflow 仍声明 `releases/latest/download/iRingo.*.plugin` → 必 404 → keep_old 保留
- * 最后一个提供 `.plugin` 的版本。属**有意保留** (生产插件走 .lpx 需先验证 boxjs 兼容)。
+ *
+ * 2026-09-18 优化审计: **本表已清空** —— 原 7 条 iRingo 登记随镜像 PR #42 合并全部消解
+ * (PR #42 把 13 个 bundle.js 落库、MANIFEST 的 source_url 翻到 `releases/latest/…`),
+ * 实测 `--strict` 漂移 0 条 / 从未抓到 0 条。
+ *
+ * ⚠️ 教训 (为什么必须清掉而不是"留着无害"): 原登记的成因写的是
+ * "NSRingo 自 v3.2.0 (2026-08) 起从 release 中移除 `.plugin` asset" —— 该断言**只对
+ * WeatherKit 成立**。实测其余 6 家 latest 仍供 `.plugin` 且 200 可用 (上游把仓库从
+ * `Maps` 改名为 `MapKit`, GitHub 301 重定向后照常下载); mirror-scripts.yml 已于
+ * 2026-09-18 就地更正同一条注释。一条**未核实的推断**被写成登记成因 = 把"上游坏"
+ * 当既成事实, 于是 7 条真实漂移从"待查"变成"永久静默接受", 门禁全绿而 PR 积压 6 天。
+ * 故本表的使用规则: 登记必须写明**实测成因 + 复检日期**, 且不得用推断充当成因。
  */
-export const ACCEPTED_DRIFT = new Map([
-  ["iringo/iRingo.Maps.plugin", "上游 latest 已无 .plugin asset; keep_old 保留最后一个含 .plugin 的版本"],
-  ["iringo/iRingo.News.plugin", "同上"],
-  ["iringo/iRingo.Search.plugin", "同上"],
-  ["iringo/iRingo.Siri.plugin", "同上"],
-  ["iringo/iRingo.TestFlight.plugin", "同上"],
-  ["iringo/iRingo.TV.plugin", "同上"],
-  ["iringo/iRingo.LocationService.plugin", "同上"],
-]);
+export const ACCEPTED_DRIFT = new Map([]);
 
 /**
  * 已知且接受的 **从未抓到** (workflow 声明但 MANIFEST 无记录)。
- * 成因: 这些条目由未合并的镜像 PR 引入 (工作流历史中断), main 上尚无记录。
- * 地址经手动 curl 验证有效 (200), 镜像 PR 合并后自动从本表消解。
+ *
+ * 2026-09-18 优化审计: **本表已清空** —— 原 13 条 NSRingo bundle.js 登记随镜像 PR #42
+ * 合并消解 (文件已落库, MANIFEST 有记录)。原成因"由未合并的镜像 PR 引入"属实, 但它暴露的
+ * 真问题是流程本身: 未合并的 PR 会让 main 长期处于"声明了却没抓到"的状态, 而登记表把这种
+ * 状态常态化。**排查方向应是"为什么 PR 没合并", 不是"把它登记掉"** —— 实测根因是
+ * `secrets.MIRROR_TOKEN` 未配置导致镜像 PR 的 CI 停在 action_required (见 mirror-scripts.yml
+ * 的 verify job 注释), 现已有不依赖 secret 的自校验通道。
  */
-export const ACCEPTED_MISSING = new Map(
-  [
-    "WeatherKit", "GeoServices", "News", "Siri", "TestFlight", "TV", "LocationServices",
-  ].flatMap((repo) =>
-    (repo === "News" ? ["request.bundle.js"] : ["request.bundle.js", "response.bundle.js"]).map(
-      (f) => [`iringo/${repo}/${f}`, "由未合并的镜像 PR 引入 (上游资产存在, 已验证 200)"],
-    ),
-  ),
-);
+export const ACCEPTED_MISSING = new Map([]);
 
 /**
  * 已登记条目的复检日期 (2026-09-18 优化审计)。
@@ -65,16 +68,11 @@ export const ACCEPTED_MISSING = new Map(
  * (实测 20/53 声明处于漂移/从未抓到)。到期后报告与 --strict 通过行会标注
  * `复检已过期`, 提醒决定: 修 URL / 删镜像 / 续期。判定逻辑不变 (到期不判红,
  * 只提醒), 故不改变任何现有门禁语义。
+ * 2026-09-18: 随上面两张表一并清空 (无登记条目即无复检日期)。机制保留 —— 将来确有
+ * 需接受的漂移时, 三张表必须**同时**登记 (成因 + 复检日期), 否则复检提醒会静默失效。
  */
-export const ACCEPTED_REVIEW_BY = new Map([
-  ["iringo/iRingo.Maps.plugin", "2026-12-31"],
-  ["iringo/iRingo.News.plugin", "2026-12-31"],
-  ["iringo/iRingo.Search.plugin", "2026-12-31"],
-  ["iringo/iRingo.Siri.plugin", "2026-12-31"],
-  ["iringo/iRingo.TestFlight.plugin", "2026-12-31"],
-  ["iringo/iRingo.TV.plugin", "2026-12-31"],
-  ["iringo/iRingo.LocationService.plugin", "2026-12-31"],
-]);
+export const ACCEPTED_REVIEW_BY = new Map([]);
+
 
 /** 登记条目的复检标注: 未到期 ` (复检 YYYY-MM-DD)`, 过期 ` ⚠️ 复检已过期 YYYY-MM-DD` */
 export function reviewNote(dest, today = new Date().toISOString().slice(0, 10)) {

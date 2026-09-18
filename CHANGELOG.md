@@ -8,6 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased] (2026-09-04 对抗审计)
 
+### Fixed (2026-09-18 精简/性能优化审计 — 项 2: 镜像管线解卡, 漂移归零)
+
+**根因: `secrets.MIRROR_TOKEN` 未配置 → 镜像 PR 的 CI 从未跑过**（`.github/workflows/mirror-scripts.yml` 诊断）：`gh secret list` 为空;最近一次 run 日志实测 `MIRROR_TOKEN: (空)` + `##[warning]secrets.MIRROR_TOKEN 未配置 … ci_token: github-token (降级)`;PR #42 的 2 个 run 均 `conclusion=action_required`(jobs=0),近 100 个 run 里 14 个如此,唯一成功的是 09-17 人工批准那次。后果: 审核清单里"CI 全绿"**永远无法满足** → PR #39(09-11) 被关闭未合并、#42 积压 6 天 / 25 文件(含 13 个 bundle.js、goodbyeads 全量刷新、iRingo script-path 迁自建 CDN),镜像产出根本没进 main;而 `check:drift` 用 `ACCEPTED_*` 把 20 条"漂移/从未抓到"登记成绿色
+
+**PR #42 合并（`779de21`）**：PR CI 不可用, 故在独立 worktree 做等价复核 —— MANIFEST 逐条 **56/56** sha256+bytes 与磁盘一致(0 缺失/0 不符)、`run-tests` **219/219**、`rule-order-check`/`wiring-check` 通过、`check:all` 8 项全绿、变更文件 0 个 crlf/mixed、13 个新 bundle.js 全部 `node --check` 通过(25KB~462KB)、goodbyeads 115,076→116,957 行且形态不变、merge-base = 当前 main tip(**无回滚风险** —— CHANGELOG 09-18 那条"就地合会回滚 `7750bfc`"的顾虑已随分支从新 main 重建而消解)。合并后 main 实测: **漂移 7→0、从未抓到 13→0**
+
+**新增 `verify` job（不依赖 secret 的自校验通道）**：对已推送的 `mirror/sync` 分支跑与 PR CI 等价的门禁 —— ① MANIFEST hash/bytes vs disk(`config-validate` 8b 的镜像侧等价物;**fail-before 已实证**: 一致 exit 0 / 篡改内容 exit 1 / 文件缺失 exit 1)② build 漂移 + lint + 219 用例 + `check:all` + `surgio generate` 幂等。`permissions: contents: read` —— 刻意不给写权限, 因其会 `npm ci`(执行第三方 install 脚本), 与 `script-tests.yml` 把 attestation 拆出 `npm ci` 同一供应链理由。触发条件 `needs.mirror.outputs.pushed == 'true'`(无变更时 mirror job 提前退出, 分支停在上一轮, 不该误判);PR 审核清单的"CI 全绿"改为指向本 job
+
+**清空漂移登记表并更正被证伪的成因**（`tools/mirror-drift-check.mjs`）：原 7 条 `ACCEPTED_DRIFT` 的成因写"NSRingo 自 v3.2.0 起从 release 移除 `.plugin` asset" —— 实测**只对 WeatherKit 成立**: 其余 6 家 latest 仍供 `.plugin` 且 200 可用(上游把仓库从 `Maps` 改名为 `MapKit`, GitHub 301 重定向后照常下载;`mirror-scripts` 注释已于 2026-09-18 更正同一条)。13 条 `ACCEPTED_MISSING` 随 #42 合并消解。三张表清空但**机制保留**(未登记漂移照旧判红的 fail-before 用例仍在), 并在文件头写死使用规则: 登记必须写明**实测成因 + 复检日期**, 不得用推断充当成因 —— 一条错误成因会把红门禁变成永久静默接受
+
+
 ### Fixed (2026-09-18 精简/性能优化审计 — 项 1: 零风险清理, 219 例全绿)
 
 **死导出 `readText` 删除**（`src/lib/argument.ts` + 6 个产物重建, 各 -272B）：全仓（`src/`、`test/`、`Scripts/` 产物）命中 **0** 次 —— 全部插件参数都是开关型（`readFlag` 6 处调用点），无任何脚本读文本型参数。删除后 `npm run build` 反而证明它此前**被内联进 6 个产物**（AlipayMini / Bilibili / LinkedIn / Twitter / Weibo / Zhihu 各 -272B）—— 即这段死代码一直在随 CDN 分发给客户端。验证方式（防止"删除未用导出"掩盖行为变化）：21 个产物两两比对经"≤3 字符标识符掩码"归一化后，15 个**完全一致**（纯变量重命名）、余 6 个差异段恒为 255 字符且 `function` 声明数各 -1（即恰为移除那一个函数体），配合 219 例行为用例全绿

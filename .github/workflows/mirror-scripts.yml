@@ -21,6 +21,10 @@ jobs:
   mirror:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # 供 verify job 判断本轮是否真的推送了镜像分支: 无变更时本 job 会在
+    # "Open or update mirror PR" 里提前 exit 0, 此时分支停在上一轮状态, 不该再校验。
+    outputs:
+      pushed: ${{ steps.pr.outputs.pushed }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -760,6 +764,7 @@ jobs:
 
       # PR 制: 变更推送到 mirror/<date> 分支并开/更新 PR, 不再直推 main
       - name: Open or update mirror PR
+        id: pr
         env:
           # 2026-09-11 修复: 原先只设 GH_TOKEN=github.token, 于是 PR 由 GITHUB_TOKEN 创建。
           # 官方文档 (triggering-a-workflow): 用 GITHUB_TOKEN 创建/更新的 PR, 其 pull_request
@@ -772,6 +777,9 @@ jobs:
           MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
           GH_TOKEN: ${{ secrets.MIRROR_TOKEN || github.token }}
         run: |
+          # 初值 false: 本步骤的任何早期退出 (无变更) 都意味着"没有新镜像待校验",
+          # verify job 据此跳过 (见 job 头的 outputs 说明)。
+          echo "pushed=false" >> "$GITHUB_OUTPUT"
           # 未配置 MIRROR_TOKEN 时显式告警, 而非静默降级 —— 静默降级正是本缺陷长期未被发现的根因。
           if [ -z "${MIRROR_TOKEN:-}" ]; then
             echo "::warning::secrets.MIRROR_TOKEN 未配置, 本次回退 GITHUB_TOKEN; 镜像 PR 的 CI 仍会停在 action_required 等人工批准。"
@@ -803,12 +811,14 @@ jobs:
           # -c merge.renormalize=true / 手工 strip CR。
           git rebase origin/main || { echo "::error::rebase onto origin/main failed"; exit 1; }
           git push -f origin "$BRANCH" || { echo "::error::push failed"; exit 1; }
+          # 分支已推送 → verify job 才会对该分支跑等价于 PR CI 的门禁
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
           CHANGED=$(git diff --name-only origin/main...HEAD -- Mirror/ | grep -v MANIFEST.json | wc -l)
           # 2026-09-11: printf 的**格式串**里字面量 % 必须转义为 %% —— 原先写成裸 "50%)",
           # printf 报 "%): invalid format character" 并以 exit 1 收场。后果是分支已 force-push
           # 但 PR 标题/正文永远更新不到 (表现为镜像 PR 的标题日期长期停在创建日)。
           TITLE="chore(mirror): 上游资源同步 ($(date +%Y-%m-%d))"
-          BODY=$(printf '## 镜像同步 %s\n\n变更文件: %s 个 (不含 MANIFEST)\n\n```\n%s\n```\n\n### 审核清单\n- [ ] MANIFEST.json diff: 每个变更文件的 sha256 与 source_url 已核对\n- [ ] 上游变更符合预期 (非投毒/非破坏性更新)\n- [ ] CI 全绿\n\n> 门禁: *.js 过 node --check 语法 / 体积下限 (绝对 200B + 相对上次抓取 50%%) / 非 HTML 错误页 / .plugin script-path 域白名单; 未过门禁的文件保留旧版\n' "$(date +%Y-%m-%d)" "$CHANGED" "$(git diff --stat origin/main...HEAD -- Mirror/)")
+          BODY=$(printf '## 镜像同步 %s\n\n变更文件: %s 个 (不含 MANIFEST)\n\n```\n%s\n```\n\n### 审核清单\n- [ ] MANIFEST.json diff: 每个变更文件的 sha256 与 source_url 已核对\n- [ ] 上游变更符合预期 (非投毒/非破坏性更新)\n- [ ] `Verify mirrored branch` job 全绿 (镜像 PR 由 GITHUB_TOKEN 开出时其 PR run 会停在 action_required, 以该 job 为准)\n\n> 门禁: *.js 过 node --check 语法 / 体积下限 (绝对 200B + 相对上次抓取 50%%) / 非 HTML 错误页 / .plugin script-path 域白名单; 未过门禁的文件保留旧版\n' "$(date +%Y-%m-%d)" "$CHANGED" "$(git diff --stat origin/main...HEAD -- Mirror/)")
           EXISTING=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' || true)
           if [ -n "$EXISTING" ]; then
             if gh pr edit "$EXISTING" --title "$TITLE" --body "$BODY"; then echo "pr_action=updated#"$EXISTING >> $GITHUB_ENV
@@ -839,3 +849,78 @@ jobs:
             REST=$(( TOTAL > 10 ? TOTAL - 10 : 0 ))
             echo "::warning::镜像同步: ${fail:-0} 个文件抓取失败或被门禁拦截 (gated: ${gated:-0}) — 已保留旧版, 不影响分发。条目: ${SHOWN}$([ "$REST" -gt 0 ] && echo " …(另有 ${REST} 个, 见 run 日志)")"
           fi
+
+  # ── 镜像分支自校验 (2026-09-18 优化审计) ──
+  # 为什么需要: 镜像 PR 若由 GITHUB_TOKEN 创建, 其 pull_request run 会停在
+  # conclusion=action_required (jobs=0, 需人工点 "Approve workflows to run")。
+  # 实测近 100 个 run 中 14 个如此; 后果是 PR 审核清单里的"CI 全绿"永远无法满足 ——
+  # PR #39 (09-11) 最终被关闭未合并、PR #42 积压 6 天 / 25 文件 (含 13 个 bundle.js
+  # 与 goodbyeads 全量刷新), 镜像产出根本没进 main, 而 check:drift 用"已登记"把它
+  # 变成绿色。根因: `secrets.MIRROR_TOKEN` 未配置 (上一步已 ::warning:: 提示)。
+  # 正确修法确实是配置该 secret, 但"门禁依赖仓库配置"= 配置缺失即门禁静默失效, 而本仓库
+  # 已两次栽在"看起来有门禁其实没有"(NEW-10 / NEW-11b)。故此处对**已推送的镜像分支**
+  # 再跑一遍与 PR CI 等价的门禁: 判定对象就是镜像产出本身, 结果直接落在本 run 上,
+  # 不依赖任何 secret。配置了 MIRROR_TOKEN 后本 job 仍保留 (冗余, 不是互斥)。
+  verify:
+    name: Verify mirrored branch
+    needs: mirror
+    if: needs.mirror.result == 'success' && needs.mirror.outputs.pushed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # 只读: 本 job 会 npm ci (执行第三方 install 脚本), 故刻意不给写权限 ——
+    # 与 script-tests.yml 把 attestation 拆出 npm ci 同一供应链理由。
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout mirror branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: mirror/sync
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22
+
+      # config-validate step 8b 的等价物: 清单由 workflow 自己生成, 故必须在镜像侧复核。
+      # 无此步时, MANIFEST 里任何一个手滑/半截写入的 sha256 都会直接进 main。
+      - name: Gate — MANIFEST hash/bytes vs disk
+        run: |
+          node -e '
+            const fs = require("fs"), path = require("path"), crypto = require("crypto");
+            const m = JSON.parse(fs.readFileSync("Mirror/MANIFEST.json", "utf8"));
+            let bad = 0;
+            for (const [k, v] of Object.entries(m.files)) {
+              const p = path.join("Mirror", k);
+              if (!fs.existsSync(p)) { console.log("::error::MANIFEST 条目文件缺失: " + k); bad++; continue; }
+              const buf = fs.readFileSync(p);
+              const sha = crypto.createHash("sha256").update(buf).digest("hex");
+              if (sha !== v.sha256 || buf.length !== v.bytes) {
+                console.log("::error::MANIFEST hash/bytes 不符: " + k); bad++;
+              }
+            }
+            if (bad > 0) process.exit(1);
+            console.log("✅ MANIFEST 逐条复核: " + Object.keys(m.files).length + " 条 hash/bytes 与磁盘一致");
+          '
+
+      # 与 PR CI (Script Tests + Config Validation) 等价的门禁集合。
+      # 注意 check:all 里含 check:drift --strict: 若本轮有抓取失败 (keep_old) 造成漂移,
+      # 这里就会红 —— 这是刻意的, 漂移应当被看见而不是靠 ACCEPTED_* 表登记掉。
+      - name: Gate — build drift / lint / tests / checks / generate idempotency
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+          if ! git diff --exit-code -- Scripts/; then
+            echo "::error::镜像改动导致 Scripts/ 产物漂移 (镜像不碰 src/, 不该发生)"; exit 1
+          fi
+          npm run lint
+          node test/run-tests.js
+          node test/rule-order-check.js
+          node test/wiring-check.js
+          npm run check:all
+          npm run generate
+          if ! git diff --exit-code -- Profile/Loon.lcf; then
+            echo "::error::surgio 生成结果与仓库 Loon.lcf 不一致 (产物漂移)"; exit 1
+          fi
+          echo "✅ 镜像分支通过全部门禁 (与 PR CI 等价)"
+
