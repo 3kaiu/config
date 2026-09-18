@@ -19,6 +19,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 **清空漂移登记表并更正被证伪的成因**（`tools/mirror-drift-check.mjs`）：原 7 条 `ACCEPTED_DRIFT` 的成因写"NSRingo 自 v3.2.0 起从 release 移除 `.plugin` asset" —— 实测**只对 WeatherKit 成立**: 其余 6 家 latest 仍供 `.plugin` 且 200 可用(上游把仓库从 `Maps` 改名为 `MapKit`, GitHub 301 重定向后照常下载;`mirror-scripts` 注释已于 2026-09-18 更正同一条)。13 条 `ACCEPTED_MISSING` 随 #42 合并消解。三张表清空但**机制保留**(未登记漂移照旧判红的 fail-before 用例仍在), 并在文件头写死使用规则: 登记必须写明**实测成因 + 复检日期**, 不得用推断充当成因 —— 一条错误成因会把红门禁变成永久静默接受
 
 
+**测试与生产登记数据解耦**（`tools/mirror-drift-check.mjs` + `test/cases/mirror-drift-check.test.js`, 219→220 例）：清空登记表后 `reviewNote` 三态用例立刻转红 —— 原用例直接拿**生产条目** `iringo/iRingo.News.plugin` 当夹具, 而该条目的正确归宿正是被清空。`reviewNote` 增加可注入的登记表参数(默认生产表), 用例改用夹具;另新增 1 例断言"三表同时为空"(防止只清两张表 → 复检提醒静默失效)。教训: 用例引用生产数据 = 数据一退役用例就红, 而退役往往是正确操作
+
+
+
 ### Fixed (2026-09-18 精简/性能优化审计 — 项 1: 零风险清理, 219 例全绿)
 
 **死导出 `readText` 删除**（`src/lib/argument.ts` + 6 个产物重建, 各 -272B）：全仓（`src/`、`test/`、`Scripts/` 产物）命中 **0** 次 —— 全部插件参数都是开关型（`readFlag` 6 处调用点），无任何脚本读文本型参数。删除后 `npm run build` 反而证明它此前**被内联进 6 个产物**（AlipayMini / Bilibili / LinkedIn / Twitter / Weibo / Zhihu 各 -272B）—— 即这段死代码一直在随 CDN 分发给客户端。验证方式（防止"删除未用导出"掩盖行为变化）：21 个产物两两比对经"≤3 字符标识符掩码"归一化后，15 个**完全一致**（纯变量重命名）、余 6 个差异段恒为 255 字符且 `function` 声明数各 -1（即恰为移除那一个函数体），配合 219 例行为用例全绿

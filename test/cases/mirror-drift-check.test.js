@@ -150,11 +150,23 @@ exports.tests = {
   },
 
   // ── 复检日期 (2026-09-18 优化审计: 登记≠永久豁免) ──
-  "mirror-drift: reviewNote 未到期/过期/未登记三态": async (a) => {
+  // 2026-09-18 优化审计修正: 原用例拿**生产登记数据** (`iringo/iRingo.News.plugin`) 断言,
+  // 而该条目随镜像 PR #42 合并被正确清空 → 用例转红。测试与生产数据必须解耦:
+  // 现注入夹具表; 生产表当前为空这一事实由下面第二条用例以"默认表无标注"覆盖。
+  "mirror-drift: reviewNote 未到期/过期/未登记三态 (注入夹具表)": async (a) => {
     const m = await load();
-    a.equal(m.reviewNote("iringo/iRingo.News.plugin", "2026-09-18"), " (复检 2026-12-31)", "未到期应标注日期");
-    a.equal(m.reviewNote("iringo/iRingo.News.plugin", "2027-01-01"), " ⚠️ 复检已过期 2026-12-31", "过期应告警");
-    a.equal(m.reviewNote("not-accepted.js", "2027-01-01"), "", "未登记条目无标注");
+    const fixture = new Map([["fixture/entry.js", "2026-12-31"]]);
+    a.equal(m.reviewNote("fixture/entry.js", "2026-09-18", fixture), " (复检 2026-12-31)", "未到期应标注日期");
+    a.equal(m.reviewNote("fixture/entry.js", "2027-01-01", fixture), " ⚠️ 复检已过期 2026-12-31", "过期应告警");
+    a.equal(m.reviewNote("not-accepted.js", "2027-01-01", fixture), "", "未登记条目无标注");
+  },
+
+  "mirror-drift: 生产登记表已清空 → 默认无复检标注 (且三表同时为空才是合法状态)": async (a) => {
+    const m = await load();
+    a.equal(m.reviewNote("iringo/iRingo.News.plugin", "2027-01-01"), "", "空表不得产出任何标注");
+    a.equal(m.ACCEPTED_DRIFT.size, 0, "ACCEPTED_DRIFT 应为空 (PR #42 合并后漂移归零)");
+    a.equal(m.ACCEPTED_MISSING.size, 0, "ACCEPTED_MISSING 应为空 (13 条 bundle.js 已落库)");
+    a.equal(m.ACCEPTED_REVIEW_BY.size, 0, "ACCEPTED_REVIEW_BY 应与前两表同时清空 (否则复检提醒静默失效)");
   },
 
   // ── 入口守卫 ──

@@ -74,9 +74,15 @@ export const ACCEPTED_MISSING = new Map([]);
 export const ACCEPTED_REVIEW_BY = new Map([]);
 
 
-/** 登记条目的复检标注: 未到期 ` (复检 YYYY-MM-DD)`, 过期 ` ⚠️ 复检已过期 YYYY-MM-DD` */
-export function reviewNote(dest, today = new Date().toISOString().slice(0, 10)) {
-  const by = ACCEPTED_REVIEW_BY.get(dest);
+/**
+ * 登记条目的复检标注: 未到期 ` (复检 YYYY-MM-DD)`, 过期 ` ⚠️ 复检已过期 YYYY-MM-DD`。
+ *
+ * 第三个参数是**可注入的登记表**, 默认用生产表 `ACCEPTED_REVIEW_BY`。
+ * 2026-09-18 优化审计: 原先用例直接拿生产登记条目 (`iringo/iRingo.News.plugin`) 断言,
+ * 于是清空登记表 (本条目的正确归宿) 会让用例转红 —— 测试与生产数据耦合。现由用例注入夹具表。
+ */
+export function reviewNote(dest, today = new Date().toISOString().slice(0, 10), table = ACCEPTED_REVIEW_BY) {
+  const by = table.get(dest);
   if (!by) return "";
   return today > by ? ` ⚠️ 复检已过期 ${by}` : ` (复检 ${by})`;
 }
