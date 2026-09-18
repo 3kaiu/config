@@ -8,13 +8,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased] (2026-09-04 对抗审计)
 
+### Added (2026-09-18 优化审计 — 项 6: doc-claims-check 文档数字门禁 + 深审 §3 收尾)
+
+- **doc-claims-check: 文档数字自动门禁**（deepdive §3.2 建议 4 落地, NEW-04/MOD-10 的结构性根因"文档数字无自动复核"收口）: 新增 `tools/doc-claims-check.mjs` + `test/cases/doc-claims-check.test.js`（随 `npm test` 进 CI; 刻意**不**进 `check:all` —— `check:*` 是状态自检, 本工具是文档↔产物一致性, 与 wiring-check 同区）。把 AGENTS.md 中 7 项可机械反算的数字固化为断言: 用例数（`exports.tests` 键数, 与 run-tests 语义一致）/ Scripts 产物数 / [Rule] 非注释行数 / 插件总数（Plugin+Kelee）/ Kelee 外壳数 / devDependencies 数 / engines.node 主版本。文档与产物**双向**漂移即红, 另两条红路径: **声明被删除即红**（防改写句式静默脱检）、**文档自相矛盾即红**（同键两个值并存不许取其一放行）。负向用例 4 条 + 真仓库端态断言（rows 恰 7 条, 增删断言须同步用例）。**立项即兑现两遍**: ①本日写 AGENTS 时把 [Rule] 行数写成"483→480"（从 2026-08-29 旧口径 483 推导）, 端态首跑即红 —— 实测基线 **484**（重排后重测）→ 删 3 = **481**; ②新增本用例使用例数 225→231, 端态断言立即抓住并强制同步文档。门禁的运作方式在其自身的提交里演示了两遍; 另为 check:contract 的"60 个插件"宣称补 AGENTS 锚点（Plugin 45 + Kelee 15, 此前该数字只活在工具输出里, 无任何校验）
+- **AGENTS.md proxy-sync 措辞修正**: "免费代理无投毒面"→"**风险面收窄而非归零**" —— 公共免费代理是不可信第三方节点（日志/嗅探/中间人面, 节点内容不可审计）, 原措辞只有"不像 Mirror 那样执行代码"这一半成立; 显式写入"仅 OpenCode 组引用、勿用于敏感流量"的使用边界（deepdive §3.2 建议 2）
+- **doc/infrastructure.md cdn-verify 条目补"接受的风险"**: 日检 = 最长 **~24h 检测窗口**（CDN 被篡改后客户端最多 24h 拉到坏内容）, 原文该边界不可见; 写明缩短手段（多时刻 cron）与未启用的成本理由（deepdive §3.2 建议 3）
+- **template/loon.tpl `[Proxy]` 段补新用户开箱说明**: 首次导入时 [Proxy] 为空 → 全部代理策略组无节点 → **代理类流量全部失败**（仅 China/DIRECT 正常）, 必须先在订阅设置填入机场 URL 并更新 —— 该"开箱即坏"形态此前无任何文档提示（deepdive §3.2 建议 1; regenerate 后 check:sync 643 条静态行全绿）
+
 ### Fixed (2026-09-18 优化审计 — 项 5: MOD 残余闭环 + 台账失准更正 + 3 条死规则)
 
 **逐项复测证实 MOD 系列大部分已闭环**（本轮先核伪再动手）：MOD-01/02/03（cron 声明配对/`$argument` 契约）、MOD-04（bank 惰性开关已移除）、MOD-05（声明零引用 46→**0**,contract 门禁口径）、MOD-06（`#!arguments-desc` 幽灵键/缺描述 **0**）、MOD-07（数字开头参数名无）、MOD-11（Kuaishou/WPS 已有 14 处引用）、NEW-02/03/08/09/11/13 均实测已修 —— `tools/rewrite-migrate/` 的白名单理由经核实成立（CHANGELOG L110/L422 明确"待 Loon 3.5.1 (978) 发布后可用默认模式一键恢复",是**待命工具**而非零接线负债,维持人工运行白名单）
 
 **`doc/infrastructure.md` §3b 失准更正（MOD-10 同型）**：PR #42 合并后该节仍停留在漂移修复**之前**的状态 —— ①"NSRingo/DualSubs/Auraflare/BiliUniverse 的 script-path 指向上游 GitHub release"实为**四家三种状态**: NSRingo 已收敛自建 CDN（workflow sed 补丁 + bundle.js 13 项镜像）、DualSubs/Auraflare/BiliUniverse 仍直连上游（钉版本或 raw main 分支）;②"其余 6 个声明 latest 但 keep_old 在旧版 / Maps 404 / 13 个 bundle.js 从未抓到"已全部消解（实测 MANIFEST 全部 `latest` + 当日 fetched_at,workflow 与 MANIFEST 均为 `NSRingo/Maps/`）;③连带更正 AGENTS.md 两处同源陈旧: upstream-health 条目的"NSRingo 已钉死版本"（实测已全部跟随 latest 经 MANIFEST 派生探测,漂移由 check:drift 把关）与 check:drift 条目把改名方向写反（上游是 `MapKit`→`Maps`,文档写作 `Maps`→`MapKit` —— 与 §3b 同一处失准的另一张面孔,本轮以 `git -C` 之外的**逐条实测**为更正依据,不以文档互相印证）
 
-**[Rule] 3 条同策略死规则删除**（`template/snippet/{ai-services,streaming,social}.tpl` → regenerate）: `DOMAIN, auth0.openai.com`（被 `DOMAIN-SUFFIX, openai.com` 覆盖）、`DOMAIN, nrdns.netflix.com`（被 `netflix.com` 覆盖）、`DOMAIN-SUFFIX, calls.signal.org`（被 `signal.org` 覆盖）—— 均为**同策略**父域覆盖（子域命中父域规则,策略相同,命中结果逐字节不变）,即 2026-09-11 分模块审计 M5 实测的 3/483（0.6%）;删除后脚本复测死规则 **0** 条、[Rule] 483→480 行、check:sync 639 条静态行全绿、rule-order-check/rule-shadow-check 通过;每处删行位置以注释留痕（含覆盖关系成因,防后人"补回"）
+**[Rule] 3 条同策略死规则删除**（`template/snippet/{ai-services,streaming,social}.tpl` → regenerate）: `DOMAIN, auth0.openai.com`（被 `DOMAIN-SUFFIX, openai.com` 覆盖）、`DOMAIN, nrdns.netflix.com`（被 `netflix.com` 覆盖）、`DOMAIN-SUFFIX, calls.signal.org`（被 `signal.org` 覆盖）—— 均为**同策略**父域覆盖（子域命中父域规则,策略相同,命中结果逐字节不变）;删除后脚本复测死规则 **0** 条、[Rule] 非注释行 **484→481**（实测;同日 AGENTS.md 一度写"483→480"系从 2026-08-29 旧口径推导而未实测,当即用 doc-claims-check 修正 —— 该工具的立项理由现身说法）、check:sync 639 条静态行全绿、rule-order-check/rule-shadow-check 通过;每处删行位置以注释留痕（含覆盖关系成因,防后人"补回"）
 
 ### Fixed (2026-09-18 优化审计 — 项 3+4: 规则顺序遮蔽盲区, 111 条拦截规则复活)
 

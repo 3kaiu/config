@@ -66,6 +66,10 @@ httpdns.c.cdnhwc2.com = 0.0.0.0
 [Proxy]
 # Surgio 自动生成节点: npx surgio generate
 # 通过 SURGIO_SUBSCRIPTION_URL (机场订阅) 传入; 为空时 Provider 为空节点
+# ⚠️ 新用户开箱即用形态: 首次导入本配置时 [Proxy] 为空、分流规则已全量生效,
+#    此时全部代理策略组 (Proxy/Streaming/AI/...) 均无可用节点 → 代理类流量**全部失败**,
+#    仅 China/DIRECT 规则正常。必须在 Loon 订阅设置里填入机场订阅 URL 并更新一次,
+#    或在 [Remote Proxy]/[Remote Filter] 引用的节点列表就位后, 策略组才有成员。
 # (凭据永不进仓: surgio-build 有 Loon.lcf 凭据断言, 仓库零 Secrets)
 # 容灾: Proxy url-test 组 (MainNodes 过滤) 自动纳管新节点 — 订阅中加入第二节点即双节点容灾
 # 隔离: geonode-* 免费代理被 MainNodes 排除, 仅 OpenCode 组引用 (见 [Remote Filter]/[Remote Proxy])

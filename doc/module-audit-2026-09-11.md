@@ -20,7 +20,7 @@ MOD-01…13 已全部处置完毕。逐项复测证据见 `CHANGELOG.md` 的「�
 | MOD-07 | ✅ 修复 | 数字开头参数名 0（生成器守卫 + 现库无命中） |
 | MOD-08 | 知情接受 | 同插件重复 hostname 复测仅剩 `Kelee/Remove-ads-by-keli` 1 个文件内 2 对（t-dsp/images.pinduoduo.com，上游冻结资产原样透传，解封前不本地改写）；Plugin/ 侧 0 |
 | MOD-09 | ✅ 修复 | 镜像 PR #42 合并：漂移 7→0 / 从未抓到 13→0；`check:drift --strict` 把关防回归 |
-| MOD-10 | ✅ 修复 | **一号两用，两半均已处置**: ①M5 规则层 3 条死规则已删（483→480 行，复测 0）②M10 文档失准已更正（`doc/infrastructure.md` §3b / AGENTS.md 两处，2026-09-18 实测改写） |
+| MOD-10 | ✅ 修复 | **一号两用，两半均已处置**: ①M5 规则层 3 条死规则已删（[Rule] 非注释行 484→481，复测 0）②M10 文档失准已更正（`doc/infrastructure.md` §3b / AGENTS.md 两处，2026-09-18 实测改写） |
 | MOD-11 | ✅ 修复 | Kuaishou/WPS 引用 2→14 处（`test/cases/kuaishou-wps.test.js`） |
 | MOD-12 | 知情接受 | kelee.one 403 为上游封锁，哨兵监控中（issue #27） |
 | MOD-13 | ✅ 修复 | `tools/argument-contract-check.mjs` 接线（`check:contract` + config-validate step） |

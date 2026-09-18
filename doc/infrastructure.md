@@ -34,7 +34,7 @@
 
 - `mirror-scripts.yml`：每日 03:00 从上游抓取约 60 项（MANIFEST 40 条目 + startup 插件等非清单产物；2026-09 实测单次成功 54+），经四重门禁（`*.js` 语法 / 体积下限 = 绝对 200B **+ 相对上次原始抓取 50%** / 非 HTML / `.plugin` script-path 域白名单）后写入 `Mirror/`，**走 PR 人工审核**合并（不再直推 main）。插件外壳远程引用已收敛到 `ws.wenn.in/main/Mirror/`（插件内部 bundle 引用仍直连上游，见 3b）。
 - `Mirror/MANIFEST.json`：全部镜像文件的 source_url + sha256 + `upstream_bytes`（原始抓取体积，供体积门禁做相对比较）清单，上游变更在 PR diff 中高亮。
-- `cdn-verify.yml`：每日 02:34 拉取 CDN 全量分发文件与仓库做 sha256 比对，不一致开 Issue（标签 `cdn-verify`），可选 Bark 告警（Secret `BARK_PUSH`）；同时做 GitHub Pages 链路（3kaiu.github.io/config）可达性抽查（非阻断，且 Pages 内容已冻结 — 见第 5 节）。
+- `cdn-verify.yml`：每日 02:34 拉取 CDN 全量分发文件与仓库做 sha256 比对，不一致开 Issue（标签 `cdn-verify`），可选 Bark 告警（Secret `BARK_PUSH`）；同时做 GitHub Pages 链路（3kaiu.github.io/config）可达性抽查（非阻断，且 Pages 内容已冻结 — 见第 5 节）。**接受的风险**：日检 = 最长 **~24h 检测窗口** — CDN 被篡改后最多 24h 内客户端仍在拉被篡改内容（缓解：篡改者需先持有 Cloudflare/回源控制权；MitM 域暴露的凭据轮换清单见第 5 节）。若需缩短，可在 cdn-verify 加 `schedule` 多时刻 cron（成本：Actions 分钟数线性增加），当前未启用。
 - `upstream-health.yml`：上游源可达性探活（状态码级），探测列表镜像部分派生自 `Mirror/MANIFEST.json`。
 - `Scripts/ENGINE-MANIFEST.json`：Qidian 内嵌引擎哈希清单，`config-validate.yml` step 8 强制校验。
 
