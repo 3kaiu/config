@@ -200,4 +200,26 @@ exports.tests = {
     const s = await h.runScript("Scripts/Umetrip.js", sb);
     a.equal(s.doneCalls[0].bodyBytes, undefined, "无 bodyBytes 应原样放行");
   },
+  // ── 畸形输入 fuzz (2026-09-18 优化审计: 手写 wire codec 高风险面) ──
+  // 确定性 PRNG (mulberry32 定种), 非真随机 — CI 可复现, 无 flake。
+  "umetrip: 随机字节永不抛错且 $done 恰一次": async (a, h) => {
+    let seed = 0xC0FFEE;
+    const rnd = () => (seed = (seed + 0x6D2B79F5) | 0, (() => { let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; })());
+    const rpids = ["1000002", "1000029", "1100001", "1370279", "9999999", null];
+    for (let i = 0; i < 120; i++) {
+      const len = Math.floor(rnd() * 65);
+      const bytes = Array.from({ length: len }, () => Math.floor(rnd() * 256));
+      // 掺入 wire 级畸形: 截断 varint / 非法 wire / field0 / 超长声明
+      if (i % 6 === 0) bytes.push(0x80);
+      if (i % 6 === 1) bytes.push(0x0F);
+      if (i % 6 === 2) bytes.push(0x00);
+      if (i % 6 === 3) bytes.push(0xFF, 0xFF, 0xFF, 0xFF, 0x0F);
+      const sb = h.createSandbox({
+        request: { url: "https://appmsg.umetrip.com/gateway/api/umetrip/native", headers: rpids[i % rpids.length] ? { rpid: rpids[i % rpids.length] } : {} },
+        response: { status: 200, bodyBytes: Uint8Array.from(bytes).buffer },
+      });
+      const s = await h.runScript("Scripts/Umetrip.js", sb);
+      a.doneCalledTimes(s, 1, `样本 #${i} (len=${bytes.length}, rpid=${rpids[i % rpids.length]})`);
+    }
+  },
 };

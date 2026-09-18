@@ -28,6 +28,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 **全厂商跟 latest，第二批 DualSubs/Auraflare/BiliUniverse**（同上文件＋`Mirror/biliuniverse/settings/mock.js`、`Mirror/preferencepanes/api.js|web.js`）：DualSubs×3/Auraflare DNS 的 latest 即钉死版（逐字节相同，零内容变更，仅翻 `source_url`）；DS_VER 改动态解析（钉死会在 Universal 发新版时与内嵌引用偏斜，API 失败回退＋告警）。BiliUniverse 是真更新（Enhanced v0.6.0 / Global v0.8.25 / ADBlock v0.6.27 / Redirect v0.2.24，组织迁 `BiliUniverse→Biliverse`，Enhanced 资产名含上游拼写、旧名 404，dest 文件名保持稳定）：上游自带版本钉死引用比原来干净，但拦下两类新传递依赖就地镜像（`biliverse.github.io` Pages 可变 `mock.js` 394K＋NSNanoCat 浮动 latest `api.js/web.js`，否则门禁 4 整单拦截；残留断言同 DualSubs 哲学）。MitM 增量：Global＋1、Enhanced＋2、Redirect＋3 改 1、ADBlock＋5（含 `adtrack.qianwen.com` 类广告追踪域，属职责内）—— 合并前请复核。另修正 DualSubs"未接线"过期注释（模板 503-505 明明引用着）
 
+### Fixed (2026-09-18 优化增强连击 — 219 例全绿)
+
+**push 后 CI 全绿**：`7750bfc` 四个 push run（Script Tests / Config Validation / Proxy Sync / Surgio Generation）成功；CDN 131 文件并行抽查 131/131 一致（无 transient 不一致窗口）；远端过期 `mirror/2026-07-*` 27 分支已删，仅留 live `mirror/sync`。 **注意**：`mirror/sync` 当前 tip 基于老 main 就地合会回滚 `7750bfc` —— 等下一次 03:00 UTC 定时 run 从新 main 重建后再人审合并
+
+**文档数字同步**（`AGENTS.md`）：`npm test` 215→219（历史审计文字保留原数，只改现状行）
+
+**Weibo 日志不改**（无 diff，有意）：三处裸 `console.log` 全在 catch 错误路径 —— 按 Zhihu MOD-03 既有约定"错误/警告日志保持无条件输出"，现状即正确，不收敛
+
+**Umetrip fuzz**（`test/cases/luckin-umetrip.test.js`＋1 例 → 219）：手写 protobuf wire codec 是全仓最高风险手写解析面；mulberry32 定种 PRNG，120 样本（随机字节＋截断 varint/非法 wire/field0/超长声明）×6 种 rpid，断言永不抛错且 `$done` 恰一次
+
+**依赖审计周报**（`.github/workflows/dependency-audit.yml` 新建，每周一 06:00 UTC）：`npm audit` 常年 42 项只报告不判红（exit 恒 0），偏离基线（42/1）打 `::warning::` 转人工； rationale：阈值判红在非零基线下恒红/恒绿无意义，机器基线文件属过度工程
+
+**cdn-verify 并行化**（`cdn-verify.yml` 主校验段）：串行 ~150 文件×30s 超时逼近 15min 上限 → `xargs -P8`＋结果落盘汇总；判定语义与 `$GITHUB_OUTPUT` 字段不变，内层脚本零嵌套引号；本地直连 CDN 实测 131 文件 14.8s 全一致
+
 ### Fixed (2026-09-11 深度审计修复 — 逐项整改)
 
 **P1**

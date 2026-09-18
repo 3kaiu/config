@@ -5,7 +5,7 @@ Loon 配置仓库:单入口 `Profile/Loon.lcf`,由 `surgio` 从 `template/` + `s
 ## 命令
 
 - `npm run build` — esbuild 注入 `src/env.ts` + `src/lib/*.ts` 编译 `src/*.ts` 到 `Scripts/`(minify)。改 src 后必须 build
-- `npm test` — 215 个行为级用例(含 `tools/` 单测),引用全部 27 个 Scripts 产物
+- `npm test` — 219 个行为级用例(含 `tools/` 单测),引用全部 27 个 Scripts 产物
 - `npm run lint` — eslint(flat config)
 - `npm run generate` — surgio 构建 `Profile/Loon.lcf`(surgio 3.19,内联 providers,无 patch)。**副作用**:每次执行都会创建一个**空 `dist/`**(surgio 自身行为,已实测 —— 直接 `npx surgio generate` 亦可复现,非 npm 产物;`npm run build` 不会创建)。故 `.gitignore` 的 `dist/` 条目是**承重的**,勿删;`dist/` 也**不是死目录**,勿清理(删了下次 generate 即复现 —— 2026-09-11 深度审计 NEW-13 曾把它误报为死目录,已更正)
 - `npm run check:sync` — tpl-sync-check:①`surgio.conf.js` 的 `customParams` ↔ `template/**` 的 `{{ customParams.* }}` **双向契约**(死参数 / 未声明键均判红)②template ↔ Loon.lcf 正反向静态行比对

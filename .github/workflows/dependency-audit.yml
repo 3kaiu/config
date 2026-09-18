@@ -1,0 +1,70 @@
+# 依赖漏洞跟踪 (2026-09-18 优化审计)
+#
+# 背景见 AGENTS.md「架构已知问题」: `npm audit` 常年 42 项 (2 low / 7 moderate /
+# 32 high / 1 critical), 全部属构建期工具链 (surgio 侧等 oclif v5 前无解 + 11 个
+# ignore 包), 不进任何分发产物, 故不阻断。但"已知"不能变成"不看" —— 本 job
+# 每周跑一次, 只报告不判红 (exit 恒 0): 总数/严重级别分布一旦偏离基线即打
+# ::warning:: 注解, 由人决定是否复核 (复核方法见 AGENTS.md)。
+#
+# 为何不用 `npm audit --audit-level` 判红: 基线本身非零, 任何阈值要么恒红要么
+# 恒绿; 真正有意义的信号是"新增未知项", 而那需要基线文件 +  diff 逻辑 ——
+# 当前 42 项的逐包复核结论已在 AGENTS.md 固化, 新增项靠周报人工发现即可,
+# 不值得再维护一份机器基线 (过度工程)。
+
+name: Dependency Audit Watch
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Weekly audit report (never red)
+        run: |
+          echo "### Dependency Audit Watch (report-only)" >> $GITHUB_STEP_SUMMARY
+          npm run audit:ci --silent -- --json > /tmp/audit.json 2>/dev/null || true
+          node -e '
+            const fs = require("fs");
+            let j;
+            try { j = JSON.parse(fs.readFileSync("/tmp/audit.json", "utf8")); }
+            catch (e) { console.log("audit JSON 解析失败, 跳过本轮"); process.exit(0); }
+            const vulns = j.vulnerabilities || j.advisories || {};
+            const sev = { low: 0, moderate: 0, high: 0, critical: 0 };
+            let total = 0;
+            for (const v of Object.values(vulns)) {
+              total++;
+              if (sev[v.severity] !== undefined) sev[v.severity]++;
+            }
+            console.log(`| Severity | Count | Baseline |`);
+            console.log(`|----------|-------|----------|`);
+            console.log(`| critical | ${sev.critical} | 1 |`);
+            console.log(`| high | ${sev.high} | 32 |`);
+            console.log(`| moderate | ${sev.moderate} | 7 |`);
+            console.log(`| low | ${sev.low} | 2 |`);
+            console.log(`| total | ${total} | 42 |`);
+            if (total !== 42 || sev.critical !== 1) {
+              console.log(`::warning::audit 基线偏离 (total=${total}, critical=${sev.critical}; 基线 42/1) — 按 AGENTS.md 复核方法分组确认是新增项还是版本漂移`);
+            } else {
+              console.log("与基线一致 (42/1), 无需动作");
+            }
+          ' | tee -a $GITHUB_STEP_SUMMARY
+          exit 0

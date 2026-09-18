@@ -49,25 +49,28 @@ jobs:
 
           FILES=$(echo "$MIRROR_FILES"$'\n'"$LOCAL_FILES" | sort -u)
 
-          for f in $FILES; do
-            url="https://ws.wenn.in/main/$f"
+          # 并行校验 (2026-09-18 优化审计): 原串行循环 ~150 文件 × 30s 超时,
+          # CDN 抖动即逼近 15min job 上限。xargs -P8 并发, 单文件结果落盘再汇总 —
+          # 判定语义 (mismatch>0 或 fetchfail≥3 即红) 与 $GITHUB_OUTPUT 字段保持不变。
+          # 内层 bash -c 脚本刻意只用参数展开 (${v%% *}) 取哈希, 无嵌套引号。
+          RESULT_DIR=$(mktemp -d)
+          printf '%s\n' "$FILES" | sed '/^$/d' | xargs -P 8 -I{} bash -c '
+            f="$1"; d="$2"
+            key=$(printf "%s" "$f" | sha256sum); key=${key%% *}
             tmp=$(mktemp)
-            if ! curl -fsSL -m 30 --retry 2 -o "$tmp" "$url"; then
-              FETCHFAIL="$FETCHFAIL$f\n"
-              echo "⚠️ fetch failed: $f"
-              rm -f "$tmp"
-              continue
+            if ! curl -fsSL -m 30 --retry 2 -o "$tmp" "https://ws.wenn.in/main/$f"; then
+              printf "FETCHFAIL %s\n" "$f" > "$d/$key"; rm -f "$tmp"; exit 0
             fi
-            remote=$(sha256sum "$tmp" | awk '{print $1}')
-            local=$(sha256sum "$f" | awk '{print $1}')
-            rm -f "$tmp"
-            if [ "$remote" != "$local" ]; then
-              MISMATCH="$MISMATCH$f\n"
-              echo "❌ hash mismatch: $f"
-            else
-              OK=$((OK+1))
-            fi
-          done
+            r=$(sha256sum "$tmp"); l=$(sha256sum "$f"); rm -f "$tmp"
+            if [ "${r%% *}" != "${l%% *}" ]; then printf "MISMATCH %s\n" "$f" > "$d/$key"
+            else printf "OK %s\n" "$f" > "$d/$key"; fi
+          ' _ {} "$RESULT_DIR"
+          OK=$(grep -h '^OK ' "$RESULT_DIR"/* 2>/dev/null | wc -l)
+          MISMATCH=$(grep -h '^MISMATCH ' "$RESULT_DIR"/* 2>/dev/null | sed 's/^MISMATCH //')
+          FETCHFAIL=$(grep -h '^FETCHFAIL ' "$RESULT_DIR"/* 2>/dev/null | sed 's/^FETCHFAIL //')
+          rm -rf "$RESULT_DIR"
+          for f in $MISMATCH; do echo "❌ hash mismatch: $f"; done
+          for f in $FETCHFAIL; do echo "⚠️ fetch failed: $f"; done
           MISMATCH_COUNT=$(printf "$MISMATCH" | grep -c . || true)
           FETCHFAIL_COUNT=$(printf "$FETCHFAIL" | grep -c . || true)
           echo "| Result | Count |" >> $GITHUB_STEP_SUMMARY
