@@ -10,7 +10,8 @@ DOMAIN-SUFFIX, oaistatic.com, AI
 DOMAIN-KEYWORD, openai, AI
 DOMAIN-SUFFIX, openaiapi-site.azureedge.net, AI
 DOMAIN-SUFFIX, openaicom-api-bdcpf8c6d2e9b8.azurefd.net, AI
-DOMAIN, auth0.openai.com, AI
+# (2026-09-18 精简审计) 删 `DOMAIN, auth0.openai.com` — 被 L9 DOMAIN-SUFFIX, openai.com
+# 同策略覆盖 (子域命中父域规则, 策略同为 AI), 纯死规则。
 # Anthropic
 DOMAIN-SUFFIX, anthropic.com, AI
 DOMAIN-SUFFIX, claude.ai, AI

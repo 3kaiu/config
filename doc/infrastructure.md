@@ -41,14 +41,21 @@
 ## 3b. 残留风险（知情项）
 
 1. **kelee.one 7 个 `.lpx`**：Cloudflare Turnstile 阻挡自动抓取，无法镜像/校验，Loon 端直接从该站加载。介意者在 Loon 内停用对应插件。
-2. **插件内部 bundle 引用直连上游**：NSRingo / DualSubs / Auraflare / BiliUniverse 插件的 `script-path` 指向上游 GitHub release（版本钉死），不走自建 CDN。上游清理旧 release 会导致对应功能失效；`upstream-health.yml` 持续探测这些 URL 兜底。
+2. **插件内部 bundle 引用直连上游（部分）**：**NSRingo 已收敛**（2026-09-18 镜像 PR #42：插件内
+   `script-path` 已由 workflow sed 补丁重写为 `ws.wenn.in/main/Mirror/iringo/`，bundle.js 13 项亦已镜像跟随 latest）。
+   **仍直连上游**（2026-09-18 实测）：DualSubs（钉 v1.7.5/v1.5.11/v0.5.7）、Auraflare（Cloudflare 面板三件套指 raw.githubusercontent main 分支；DNS 钉 v2.6.3）、BiliUniverse（钉 v0.6.x）。
+   上游清理旧 release 或改分支名会导致对应功能失效；`upstream-health.yml` 持续探测这些 URL 兜底。
 3. **GeoIP/ASN 库**（Loyalsoldier / P3TERX）：客户端直连上游，被篡改只会导致路由误判（非代码执行），风险低，暂不镜像。
-4. **NSRingo 版本策略（2026-09-11 分模块审计 MOD-09 修正）**：
-   - WeatherKit 钉死 v3.1.0（上游 v3.2.0 起移除 `.plugin` asset）。
-   - **其余 6 个（Maps/News/Siri/TestFlight/TV/LocationService）workflow 声明 `releases/latest/download/…`，但实测 MANIFEST 中记录的是固定旧版本**（v4.6.1/v3.2.1/v4.2.7 等），原因是上游 fetch 失败后 `keep_old` 静默保留了陈旧条目。`upstream-health.yml` 只探测 URL 是否 200，**不会**提示"声明 latest 但实际停在旧版"。
-   - `iringo/iRingo.Maps.plugin` 上游仓库已从 `MapKit` 改名为 `Maps`，workflow 声明的 `NSRingo/MapKit/releases/latest/…` 已 404，该条目为 keep_old 残留（v4.6.1）。
-   - 13 个 `bundle.js` 声明（`releases/latest/download/…bundle.js`）从未成功抓取，磁盘与 MANIFEST 均无记录。
-   - 上游发新版时：需同时改 `mirror-scripts.yml` 中的版本号 **并** 验证 MANIFEST 是否实际更新；仅改 workflow 声明不能保证产物跟进。
+4. **NSRingo 版本策略（2026-09-18 复核更新 —— MOD-09 已由镜像 PR #42 修复）**：
+   - **实测状态（2026-09-18）**：MANIFEST 中全部 iRingo 插件（含 WeatherKit —— 上游 latest 现以
+     `.lpx` 资产发布，workflow 已跟进抓取）与 13 个 bundle.js 的 `source_url` 均为
+     `releases/latest/download/…` 且 `fetched_at` 均有当日成功记录 —— 声明与实际一致，**漂移已清零**。
+     `Maps` 仓库改名已跟进（workflow 与 MANIFEST 均为 `NSRingo/Maps/…`）。
+   - 防回归机制：`mirror-drift-check --strict`（`npm run check:drift`）比对 workflow 声明的
+     `mirror()` URL 与 MANIFEST `source_url`，未登记的漂移/从未抓取即判红（CI step 9c）——
+     "声明 latest 但 keep_old 停在旧版"从此**不再静默**。`upstream-health.yml` 只探 URL 200，
+     仍探不出这类漂移，仅作兜底。
+   - 上游发新版时：无需人工改版本号（latest 自愈）；DualSubs/Auraflare/BiliUniverse 仍需人工跟进钉死版本。
 5. **Release tag 未签名 —— 不构成供应链信任锚**（2026-09-11 审计 SEC-04）：`release.yml` 用 `gh release create --generate-notes` 发布，**无 tag 签名校验**（仓库零签名 tag 历史，属有意取舍；`--verify-tag` 已于 2026-09-04 移除，因首发必红）。因此 **Release 页面只应视为"内部快照分发"，不能当作可验证产物**。
    - 真正的信任锚是 `script-tests.yml` 为 `Scripts/*.js` 生成的 **attestation**（可用 `gh attestation verify` 校验构建出处）。两者不要混为一谈 —— 需要"可验证"时用 attestation，不要用 Release tag。
 

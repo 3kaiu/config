@@ -31,7 +31,8 @@ DOMAIN-SUFFIX, whatsapp.com, Social
 DOMAIN-SUFFIX, whatsapp.net, Social
 # Signal
 DOMAIN-SUFFIX, signal.org, Social
-DOMAIN-SUFFIX, calls.signal.org, Social
+# (2026-09-18 精简审计) 删 `DOMAIN-SUFFIX, calls.signal.org` — 被 DOMAIN-SUFFIX, signal.org
+# 同策略覆盖 (Social), 纯死规则。
 # Line
 DOMAIN-SUFFIX, line.me, Social
 DOMAIN-SUFFIX, line-apps.com, Social

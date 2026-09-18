@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased] (2026-09-04 对抗审计)
 
+### Fixed (2026-09-18 优化审计 — 项 5: MOD 残余闭环 + 台账失准更正 + 3 条死规则)
+
+**逐项复测证实 MOD 系列大部分已闭环**（本轮先核伪再动手）：MOD-01/02/03（cron 声明配对/`$argument` 契约）、MOD-04（bank 惰性开关已移除）、MOD-05（声明零引用 46→**0**,contract 门禁口径）、MOD-06（`#!arguments-desc` 幽灵键/缺描述 **0**）、MOD-07（数字开头参数名无）、MOD-11（Kuaishou/WPS 已有 14 处引用）、NEW-02/03/08/09/11/13 均实测已修 —— `tools/rewrite-migrate/` 的白名单理由经核实成立（CHANGELOG L110/L422 明确"待 Loon 3.5.1 (978) 发布后可用默认模式一键恢复",是**待命工具**而非零接线负债,维持人工运行白名单）
+
+**`doc/infrastructure.md` §3b 失准更正（MOD-10 同型）**：PR #42 合并后该节仍停留在漂移修复**之前**的状态 —— ①"NSRingo/DualSubs/Auraflare/BiliUniverse 的 script-path 指向上游 GitHub release"实为**四家三种状态**: NSRingo 已收敛自建 CDN（workflow sed 补丁 + bundle.js 13 项镜像）、DualSubs/Auraflare/BiliUniverse 仍直连上游（钉版本或 raw main 分支）;②"其余 6 个声明 latest 但 keep_old 在旧版 / Maps 404 / 13 个 bundle.js 从未抓到"已全部消解（实测 MANIFEST 全部 `latest` + 当日 fetched_at,workflow 与 MANIFEST 均为 `NSRingo/Maps/`）;③连带更正 AGENTS.md 两处同源陈旧: upstream-health 条目的"NSRingo 已钉死版本"（实测已全部跟随 latest 经 MANIFEST 派生探测,漂移由 check:drift 把关）与 check:drift 条目把改名方向写反（上游是 `MapKit`→`Maps`,文档写作 `Maps`→`MapKit` —— 与 §3b 同一处失准的另一张面孔,本轮以 `git -C` 之外的**逐条实测**为更正依据,不以文档互相印证）
+
+**[Rule] 3 条同策略死规则删除**（`template/snippet/{ai-services,streaming,social}.tpl` → regenerate）: `DOMAIN, auth0.openai.com`（被 `DOMAIN-SUFFIX, openai.com` 覆盖）、`DOMAIN, nrdns.netflix.com`（被 `netflix.com` 覆盖）、`DOMAIN-SUFFIX, calls.signal.org`（被 `signal.org` 覆盖）—— 均为**同策略**父域覆盖（子域命中父域规则,策略相同,命中结果逐字节不变）,即 2026-09-11 分模块审计 M5 实测的 3/483（0.6%）;删除后脚本复测死规则 **0** 条、[Rule] 483→480 行、check:sync 639 条静态行全绿、rule-order-check/rule-shadow-check 通过;每处删行位置以注释留痕（含覆盖关系成因,防后人"补回"）
+
 ### Fixed (2026-09-18 优化审计 — 项 3+4: 规则顺序遮蔽盲区, 111 条拦截规则复活)
 
 **`check:shadow` 两处漏检致门禁"绿灯假象"**（`tools/rule-shadow-check.mjs` 重写判定与报告）：实测遮蔽面从"1 条已兜底"变为 **1709 条、4 对** —— ① 遮蔽者判定只认 `policy` 含 `proxy` 的列表,而排在最前的 China 是 **DIRECT**（DIRECT 同样抢先命中并终止后续列表扫描,模板自己的排序注释写着"国内流量先命中 DIRECT,不必扫描广告/隐私/反劫持列表",恰是被工具跳过的遮蔽）: China→Advertising 47 条 / China→Hijacking 64 条 / China→goodbyeads 941 条;② 命中类型只比 `DOMAIN-KEYWORD`,漏掉 `DOMAIN-SUFFIX` 吞并（China 的 `DOMAIN-SUFFIX,cn` 一条就吞掉 759 条 `.cn` 广告域）。③ 另发现**第三处更致命的漏检**: 列表路径用 `loon-${name}.list` 硬拼,而 goodbyeads 的文件是 `goodbyeads-qx.list`（无 `loon-` 前缀）→ 文件不存在被 `continue` **静默跳过,整张 117k 条的表从未参与遮蔽检查**（旧工具输出里顺序序列根本没有它）。路径改为由 URL 推出,解析不到文件改为显式告警
