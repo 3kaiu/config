@@ -82,10 +82,7 @@ jobs:
           # loon.tpl 收敛到 CDN 路径 — 故探活目标随之改为客户端实际拉取的 URL。
           check_url "GOODBYEADS (Remote Rule via CDN)" "https://ws.wenn.in/main/Mirror/rules/goodbyeads-qx.list"
 
-          # 免费代理源 (proxy-sync 每日拉取 → Profile/geonode.loon.txt, Loon [Remote Proxy] 引用)
-          check_url "proxylist.geonode.com API" "https://proxylist.geonode.com/api/proxy-list?page=1&limit=1&sort_by=responseTime&sort_type=asc"
-          check_url "ws.wenn.in CDN (Geonode 订阅)" "https://ws.wenn.in/main/Profile/geonode.loon.txt"
-
+          # (2026-09-19 移除免费代理订阅: geonode 探活随之删除)
           # kelee.one 封锁跟踪哨兵 (2026-08 起全局 403 见 issue #27; Loon 带 Turnstile 可拉取, curl 403 视为健康)
           # 2026-09-18 优化审计: 此前探 7 个 LPX, 其中 6 个对应功能已在 loon.tpl:514-518
           # 明确移除 (无本地替代: Spotify/微信外链/京东比价/节点检测/链路检测/VVebo)。

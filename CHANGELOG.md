@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased] (2026-09-04 对抗审计)
 
+### Removed (2026-09-19 官方文档对齐 — 免费代理订阅下线)
+
+- **Geonode 免费代理订阅整链删除**: `Profile/geonode.loon.txt` + `.github/workflows/proxy-sync.yml` + `tools/geonode-sync.mjs` + `test/cases/geonode-sync.test.js` (11 例) 一并删除, 源码留 git 历史。原因: 免费节点失活太快 (实测候选 120 仅 ~7% 连通, 每日刷新的仍是"今天可用明天死"), 且免费代理是不可信第三方节点 (日志/嗅探/中间人面) — 用户自有订阅是唯一可靠节点来源
+- **模板同步收敛** (`template/loon.tpl` → regenerate): `OpenCode = select, Proxy, DIRECT` (去 Geonode 成员); `[Remote Filter]` 删除 `MainNodes` 远端过滤器 (其唯一作用是隔离 geonode-*, 随订阅删除而删除); `VLESS` 回到单一条件 `(?i)vless` (去 geonode 负向前瞻); `Proxy`/`Fallback` 改回直引订阅全部节点; `[Remote Proxy]` Geonode 整节删除
+- **门禁同步收敛**: `upstream-health.yml` 删除 geonode API + CDN 订阅两处探活; `config-validate.yml` step 3 的 MainNodes/geonode 断言改为 `Proxy = url-test` 直引断言
+- **数字同步**: 用例总数 231 → 220 (删 geonode-sync 11 例), [Rule] 481 → 482 (qreport KEYWORD→精确枚举 +1 净增) — 两处均经 doc-claims-check 端态用例强制同步, AGENTS.md 已更新
+- 回滚: `git show <本提交>^:Profile/geonode.loon.txt` 可取回最后一份节点清单; 整链恢复则 revert 本提交
+
 ### Added (2026-09-18 优化审计 — 项 6: doc-claims-check 文档数字门禁 + 深审 §3 收尾)
 
 - **doc-claims-check: 文档数字自动门禁**（deepdive §3.2 建议 4 落地, NEW-04/MOD-10 的结构性根因"文档数字无自动复核"收口）: 新增 `tools/doc-claims-check.mjs` + `test/cases/doc-claims-check.test.js`（随 `npm test` 进 CI; 刻意**不**进 `check:all` —— `check:*` 是状态自检, 本工具是文档↔产物一致性, 与 wiring-check 同区）。把 AGENTS.md 中 7 项可机械反算的数字固化为断言: 用例数（`exports.tests` 键数, 与 run-tests 语义一致）/ Scripts 产物数 / [Rule] 非注释行数 / 插件总数（Plugin+Kelee）/ Kelee 外壳数 / devDependencies 数 / engines.node 主版本。文档与产物**双向**漂移即红, 另两条红路径: **声明被删除即红**（防改写句式静默脱检）、**文档自相矛盾即红**（同键两个值并存不许取其一放行）。负向用例 4 条 + 真仓库端态断言（rows 恰 7 条, 增删断言须同步用例）。**立项即兑现两遍**: ①本日写 AGENTS 时把 [Rule] 行数写成"483→480"（从 2026-08-29 旧口径 483 推导）, 端态首跑即红 —— 实测基线 **484**（重排后重测）→ 删 3 = **481**; ②新增本用例使用例数 225→231, 端态断言立即抓住并强制同步文档。门禁的运作方式在其自身的提交里演示了两遍; 另为 check:contract 的"60 个插件"宣称补 AGENTS 锚点（Plugin 45 + Kelee 15, 此前该数字只活在工具输出里, 无任何校验）

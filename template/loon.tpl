@@ -71,18 +71,17 @@ httpdns.c.cdnhwc2.com = 0.0.0.0
 #    仅 China/DIRECT 规则正常。必须在 Loon 订阅设置里填入机场订阅 URL 并更新一次,
 #    或在 [Remote Proxy]/[Remote Filter] 引用的节点列表就位后, 策略组才有成员。
 # (凭据永不进仓: surgio-build 有 Loon.lcf 凭据断言, 仓库零 Secrets)
-# 容灾: Proxy url-test 组 (MainNodes 过滤) 自动纳管新节点 — 订阅中加入第二节点即双节点容灾
-# 隔离: geonode-* 免费代理被 MainNodes 排除, 仅 OpenCode 组引用 (见 [Remote Filter]/[Remote Proxy])
+# 容灾: Proxy url-test 组自动纳管订阅中的全部节点 — 订阅中加入第二节点即双节点容灾
 
 [Proxy Group]
 # 2026-09-11 审计 (CFG-01): 原为 `Proxy = url-test, MainNodes, 东京, url=...`, 其中 `东京`
 # 是**悬空字面量** — [Proxy] 段设计上只有注释、无任何节点定义 (凭据永不进仓), 全仓无
-# `东京 = <proto>,...` 定义, 该成员永远解析不到。且 MainNodes 的 FilterKey 为
-# `^(?!.*geonode).*$` (匹配除 geonode-* 外的**全部**节点), 任何名为 东京 的节点本就被
-# MainNodes 覆盖 → 该字面量对作者冗余、对使用者悬空。url-test 组按延迟择优, 成员顺序
+# `东京 = <proto>,...` 定义, 该成员永远解析不到。url-test 组按延迟择优, 成员顺序
 # 亦无优先级语义, 故删除是零行为变更。
-Proxy = url-test, MainNodes, url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
-Fallback = fallback, MainNodes, url=http://cp.cloudflare.com/generate_204, interval=600, timeout=10
+# (2026-09-19 移除免费代理订阅: MainNodes 远端过滤器随之删除, Proxy/Fallback 改回
+# 直引订阅全部节点 — 见 [Remote Filter] 注释。)
+Proxy = url-test, url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
+Fallback = fallback, url=http://cp.cloudflare.com/generate_204, interval=600, timeout=10
 Apple = select, DIRECT, Proxy
 Final = select, Proxy, Fallback, DIRECT
 Streaming = select, VLESS, Proxy, Fallback, DIRECT, tag=流媒体
@@ -90,21 +89,17 @@ AI = select, VLESS, Proxy, Fallback, DIRECT, tag=AI服务
 Developer = select, Proxy, Fallback, DIRECT, tag=开发者
 Gaming = select, Proxy, Fallback, DIRECT, tag=游戏平台
 Social = select, Proxy, Fallback, DIRECT, tag=社交平台
-OpenCode = select, Proxy, DIRECT, Geonode, tag=OpenCode.ai
+OpenCode = select, Proxy, DIRECT, tag=OpenCode.ai
 
 [Remote Filter]
-# 主节点池: 排除 geonode-* 免费代理 (免费代理稳定性差, 防 url-test 自动选路到不可用节点)
-MainNodes = NameRegex, FilterKey = "^(?!.*geonode).*$"
-VLESS = NameRegex, FilterKey = "(?i)^(?=.*vless)(?!.*geonode).*$"
-#   含 geonode 负向前瞻 (2026-08-29 审计修复): 与 MainNodes 同一隔离基线。此前 "(?i)vless"
-#   无排除, 一旦 geonode 订阅出现 vless 协议免费节点, Streaming/AI 组会把免费代理当首选
-#   — 正是 MainNodes 正则要防的静默选路。(?i) 使两个条件均大小写不敏感。
+# VLESS 子池: 按名称含 vless 过滤 (大小写不敏感)。
+# (2026-09-19 移除免费代理订阅: 原 MainNodes 远端过滤器 `^(?!.*geonode).*$` 匹配
+# 除 geonode-* 外的全部节点 — 其唯一作用是隔离免费代理, 随订阅删除而删除;
+# 原 VLESS 的 geonode 负向前瞻亦同步移除, 回到单一条件。)
 
 [Remote Proxy]
-# Geonode 免费代理订阅 — 每日由 proxy-sync workflow 从 proxylist.geonode.com 拉取,
-# 候选节点先经连通性探测 (仅写入可用节点, 见 tools/geonode-sync.mjs)
-# (Profile/geonode.loon.txt, Loon 官方节点文本格式, 无需解析器)
-Geonode = https://ws.wenn.in/main/Profile/geonode.loon.txt,enabled=true
+# (2026-09-19 移除免费代理订阅: Geonode [Remote Proxy] 整节删除 — 原因见 CHANGELOG。
+# OpenCode 组改回 select, Proxy, DIRECT; 节点来源只剩用户自有订阅。)
 
 [Rule]
 DEST-PORT, 5223, DIRECT
@@ -255,8 +250,10 @@ DOMAIN, p.l.qq.com, REJECT
 DOMAIN, us.l.qq.com, REJECT
 DOMAIN-SUFFIX, imtmp.net, REJECT
 
-# 追踪
-DOMAIN-KEYWORD, qreport, REJECT
+# 追踪 (2026-09-19 官方文档对齐: KEYWORD 随数量涨耗时, 改精确枚举;
+# qreport 实测仅 qreport.qunar.com + qreport.cn 系, 不再用子串全网扫)
+DOMAIN, qreport.qunar.com, REJECT
+DOMAIN-SUFFIX, qreport.cn, REJECT
 DOMAIN, aegis.cdn-go.cn, REJECT
 
 # Google 分析与广告

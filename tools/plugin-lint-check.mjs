@@ -13,7 +13,16 @@ import { fileURLToPath } from "url";
 const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const VALID_SEG = new Set(["Rule", "Rewrite", "MitM", "Script", "Argument", "Host", "General"]);
 const ACTION_OK =
-  /reject|reject-dict|reject-img|reject-200|reject-403|reject-drop|reject-empty|response-body|mock-response-body|redirect|header-|script-path|request-body|url-remove|exception|direct|proxy|302|307|301|\d{3}|enable=\{/i;
+  /reject|reject-dict|reject-array|reject-img|reject-video|reject-200|reject-403|reject-drop|reject-empty|response-body|mock-response-body|redirect|header-|script-path|request-body|url-remove|exception|direct|proxy|302|307|301|\d{3}|enable=\{/i;
+// 可疑的 Rewrite 第二 token — 2026-09-19 官方文档对齐 (docs/Rewrite/ 旧语法动作表无此 token):
+//   `http-response <regex> url reject-200` / `list reject-200` —
+//   [Script] 行必须带 script-path= (docs/Script/), [Rewrite] 动作位无 url/list。
+//   归一化工具 rewrite-migrate 把它们当"历史遗留无效别名"处理, 佐证长期未生效。
+//   `splash-reject` / `screen-reject` 同理 (动作表无此动作)。
+//   大写 REJECT 在裸 `reject` 动作外另计 (Loon 动作大小写敏感存疑, 统一小写)。
+// 先报告不判红: 真机确认逐条语义后, 批量搬 [Rewrite] 段标准形。
+const SUSPICIOUS_ACTION =
+  /\^[^ ]+ +(url|list) +(reject(-dict|-array|-img|-video|-200|-drop)?|302|307)\b|\^[^ ]+ +(splash-reject|screen-reject)\b/;
 const RULE_PREFIX =
   /^(DOMAIN|DOMAIN-SUFFIX|DOMAIN-KEYWORD|URL-REGEX|IP-CIDR|IP-CIDR6|AND|DEST-PORT|SOURCE-IP|PROTOCOL|USER-AGENT|NETWORK|GEOIP|IN-PORT|NO-\w)/;
 
@@ -50,6 +59,18 @@ function check(dir) {
           errs++;
           if (!quiet) console.log(`[Rewrite动作] ${dir}/${f}:${i + 1} → ${t.slice(0, 80)}`);
         }
+        if (SUSPICIOUS_ACTION.test(t)) {
+          console.log(`[Rewrite动作可疑] ${dir}/${f}:${i + 1} → ${t.slice(0, 80)}`);
+        }
+      }
+      // [Script]/[Rewrite] 跨段复核 — 2026-09-19 官方文档对齐 (docs/Script/ + docs/Rewrite/):
+      // Loon 3.5.1 新语法下 `[Script]` 段的 `http-response <regex> reject-dict` 是合法形态
+      // (脚本触发器位复用 Rewrite 动作, 无 script-path 即纯拒绝)。旧认知"必须带 script-path"
+      // 已证伪 — 全仓 397 行皆此形态, Kelee 上游同构。故本检查只抓真正的段外行:
+      // 非 cron / 非 http-request / 非 http-response / 非空行注释出现在 [Script] 段。
+      if (seg === "Script" && !/^(http-request|http-response|cron)\b/.test(t)) {
+        errs++;
+        if (!quiet) console.log(`[Script段外行] ${dir}/${f}:${i + 1} → ${t.slice(0, 80)}`);
       }
       // enable={X}&{Y} 大括号配对(导入损坏形态: enable={X&{Y}})
       if (/enable=\{[^}&\s]*&\{[^}]*\}\}/.test(t)) {
@@ -70,6 +91,14 @@ function check(dir) {
         if (!RULE_PREFIX.test(t)) {
           errs++;
           if (!quiet) console.log(`[Rule错] ${dir}/${f}:${i + 1} → ${t.slice(0, 60)}`);
+        }
+        // KEYWORD 门控 — 2026-09-19 官方文档对齐 (docs/Rule/sub_rule: KEYWORD 随数量涨耗时):
+        // 裸 DOMAIN-KEYWORD 必须被 AND(SUFFIX,…)/AND(USER-AGENT,…) 锚定 (bilibili-pro:81 /
+        // qidian:71-73 双样板); ai.plugin 的 `{AI_Policy}` 占位策略行豁免 (分流非拦截)。
+        // Kelee/ 上游外壳豁免 — 上游不可改, 本地门禁只约束 Plugin/ 自维护插件。
+        if (dir === "Plugin" && /^DOMAIN-KEYWORD,/.test(t) && !/, *\{[A-Za-z0-9_]+\}\s*$/.test(t)) {
+          errs++;
+          if (!quiet) console.log(`[KEYWORD裸奔] ${dir}/${f}:${i + 1} → ${t.slice(0, 80)}`);
         }
       }
     }

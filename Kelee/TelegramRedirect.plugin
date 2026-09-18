@@ -5,7 +5,7 @@
 #!homepage=https://github.com/3kaiu/config
 #!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/Telegram.png
 #!system = iOS,iPadOS,macOS
-#!loon_version = 3.2.4(787)
+#!loon_version = 3.5.1(978)
 [Rewrite]
 request if ${url} ~= /^https:\/\/t\.me\/([A-Za-z][A-Za-z0-9_]{3,30}[A-Za-z0-9])\/?$/ as item then redirect(307, "${app}://resolve?domain=${item.1}")
 request if ${url} ~= /^https:\/\/t\.me\/\+([A-Za-z0-9_-]+)\/?$/ as item then redirect(307, "${app}://join?invite=${item.1}")
