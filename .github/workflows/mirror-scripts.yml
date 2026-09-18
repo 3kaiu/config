@@ -108,7 +108,7 @@ jobs:
             local path="Mirror/$dest"
             mkdir -p "$(dirname "$path")"
             local tmpf; tmpf=$(mktemp /tmp/mirror.XXXXXXXX.js)
-            if ! curl -fsSL -m 90 --retry 3 -A "Loon/3.3.9" "$url" -o "$tmpf"; then
+            if ! curl -fsSL -m 90 --retry 3 -A "Loon/3.5.1" "$url" -o "$tmpf"; then
               echo "❌ $name (FETCH FAILED)"
               mark_fail "$dest"
               keep_old "$dest"
@@ -161,10 +161,11 @@ jobs:
                 fi
                 ;;
             esac
-            # ── 门禁 4: .plugin 内 script-path URL 白名单 (防上游投毒) ──
-            # 上游被攻破时插件内 script-path 可指向任意恶意域; 白名单外一律拦截保留旧版
+            # ── 门禁 4: 插件内 script-path URL 白名单 (防上游投毒) ──
+            # 上游被攻破时插件内 script-path 可指向任意恶意域; 白名单外一律拦截保留旧版。
+            # 覆盖 .plugin 与 .lpx (同为纯文本 Loon 插件格式, 2026-09-18 WeatherKit 已转 .lpx)。
             case "$dest" in
-              *.plugin)
+              *.plugin|*.lpx)
                 # 2026-08-29 审计修复 (三处绕过面):
                 # 1) tab 写法 `script-path\t=\tURL` — 原 `*= *` 只认空格
                 # 2) scheme 大小写 HTTPS://evil.com — 原正则大小写敏感, 整行不进入提取集合
@@ -537,12 +538,13 @@ jobs:
             "iringo/LocationServices/response.bundle.js" "NSRingo / LocationServices response.bundle.js latest"
 
           # ═══════════════ NSRingo Loon 插件 (跟随 latest, 不固定版本) ═══════════════
-          # 上游 v3.2.0 (2026-08) 起移除 .plugin asset, 格式迁移为 .lpx;
-          # latest 已指向 v3.3.1, 拉取必 404 → 失败即红并阻塞 PR (见 audit 记录)。
-          # 锁定 v3.1.0 (最后一个提供 .plugin 的版本); 生产插件改走 .lpx 需先验证
-          # boxjs 兼容, 不在镜像 PR 内做未验证的格式切换。
-          mirror "https://github.com/NSRingo/WeatherKit/releases/download/v3.1.0/iRingo.WeatherKit.plugin" \
-            "iringo/iRingo.WeatherKit.plugin" "NSRingo / iRingo.WeatherKit.plugin v3.1.0 (latest 已无 .plugin)"
+          # 格式说明 (2026-09-18 实测修正): 仅 WeatherKit 的 latest 转为 .lpx
+          # (v3.3.2, 无 .plugin 资产); 其余 6 家的 latest 仍提供 .plugin 且 200 可用 —
+          # 此前注释"上游自 v3.2.0 起移除 .plugin"以偏概全 (仅 WeatherKit 属实)。
+          # .lpx 为纯文本 Loon 插件格式 (573xB, LF 行尾), 与 .plugin 同受门禁 4/EOL 约束;
+          # 其 #!openUrl boxjs 仅为元信息链接, 非硬依赖 (Loon 3.5.1 原生支持 .lpx)。
+          mirror "https://github.com/NSRingo/WeatherKit/releases/latest/download/iRingo.WeatherKit.lpx" \
+            "iringo/iRingo.WeatherKit.lpx" "NSRingo / iRingo.WeatherKit.lpx latest (.plugin 已无资产)"
           # (2026-09-11 分模块审计 MOD-09) 上游仓库已从 MapKit 改名为 Maps;
           # GitHub 重定向仍工作, 但直接写 Maps 避免对重定向的依赖。
           mirror "https://github.com/NSRingo/Maps/releases/latest/download/iRingo.Maps.plugin" \
@@ -560,12 +562,12 @@ jobs:
           mirror "https://github.com/NSRingo/LocationServices/releases/latest/download/iRingo.LocationService.plugin" \
             "iringo/iRingo.LocationService.plugin" "NSRingo / iRingo.LocationService.plugin latest"
 
-          # ── 本地补丁: NSRingo .plugin script-path 去版本固定, 指向 CDN latest ──
-          # 上游 .plugin 内 script-path 指向固定版本 bundle.js (如 v3.1.0/v4.2.7),
+          # ── 本地补丁: NSRingo 插件 script-path 去版本固定, 指向 CDN latest ──
+          # 上游插件 (.plugin/.lpx) 内 script-path 指向固定版本 bundle.js (如 v3.3.2/v4.2.7),
           # 重写为自建 CDN 路径, 自动跟随上游最新版本更新 (每日镜像自愈)
           # 注意: 不同仓库 bundle.js 同名但版本不同, 须按插件精确映射
           CDN="https://ws.wenn.in/main/Mirror/iringo"
-          sed -i "s|https://github.com/NSRingo/WeatherKit/releases/download/[^\"]*/|${CDN}/WeatherKit/|g" Mirror/iringo/iRingo.WeatherKit.plugin
+          sed -i "s|https://github.com/NSRingo/WeatherKit/releases/download/[^\"]*/|${CDN}/WeatherKit/|g" Mirror/iringo/iRingo.WeatherKit.lpx
           sed -i "s|https://github.com/NSRingo/GeoServices/releases/download/[^\"]*/|${CDN}/GeoServices/|g" Mirror/iringo/iRingo.Maps.plugin
           sed -i "s|https://github.com/NSRingo/News/releases/download/[^\"]*/|${CDN}/News/|g" Mirror/iringo/iRingo.News.plugin
           sed -i "s|https://github.com/NSRingo/Siri/releases/download/[^\"]*/|${CDN}/Siri/|g" Mirror/iringo/iRingo.Siri.plugin
@@ -574,26 +576,34 @@ jobs:
           sed -i "s|https://github.com/NSRingo/TV/releases/download/[^\"]*/|${CDN}/TV/|g" Mirror/iringo/iRingo.TV.plugin
           sed -i "s|https://github.com/NSRingo/LocationServices/releases/download/[^\"]*/|${CDN}/LocationServices/|g" Mirror/iringo/iRingo.LocationService.plugin
 
-          # ═══════════════ DualSubs (双语字幕) ═══════════════
-          mirror "https://github.com/DualSubs/Universal/releases/download/v1.7.5/DualSubs.Universal.plugin" \
-            "dualsubs/DualSubs.Universal.plugin" "DualSubs Universal / .plugin v1.7.5"
-          mirror "https://github.com/DualSubs/YouTube/releases/download/v1.5.11/DualSubs.YouTube.plugin" \
-            "dualsubs/DualSubs.YouTube.plugin" "DualSubs YouTube / .plugin v1.5.11"
-          mirror "https://github.com/DualSubs/Netflix/releases/download/v0.5.7/DualSubs.Netflix.plugin" \
-            "dualsubs/DualSubs.Netflix.plugin" "DualSubs Netflix / .plugin v0.5.7"
+          # ═══════════════ DualSubs (双语字幕, 跟随 latest) ═══════════════
+          # 2026-09-18: 钉死版本解钉 → latest。实测 latest 即钉死版本
+          # (Universal v1.7.5 / YouTube v1.5.11 / Netflix v0.5.7, 内容逐字节一致),
+          # 故切换为零内容变更, 仅 URL 形式跟随 latest。
+          mirror "https://github.com/DualSubs/Universal/releases/latest/download/DualSubs.Universal.plugin" \
+            "dualsubs/DualSubs.Universal.plugin" "DualSubs Universal / .plugin latest"
+          mirror "https://github.com/DualSubs/YouTube/releases/latest/download/DualSubs.YouTube.plugin" \
+            "dualsubs/DualSubs.YouTube.plugin" "DualSubs YouTube / .plugin latest"
+          mirror "https://github.com/DualSubs/Netflix/releases/latest/download/DualSubs.Netflix.plugin" \
+            "dualsubs/DualSubs.Netflix.plugin" "DualSubs Netflix / .plugin latest"
 
           # ── 本地补丁 (2026-09-11 审计, SEC-02): DualSubs 浮动 latest → 锁定具体版本 ──
           # 上游 DualSubs.YouTube / DualSubs.Netflix 两个插件内嵌的 script-path 指向
-          # releases/latest (共 5 处), 属**浮动引用**: 无法锁定版本、无法验证内容,
-          # 上游任一时刻替换产物即静默进入分发链。
-          # 同仓库的 DualSubs.Universal.plugin 已固定 v1.7.5, 且实测 latest 与 v1.7.5
-          # 逐字节相同 (Translate / Composite.Subtitles 两个 bundle sha256 一致),
-          # 故锁到同一版本为**零行为变更**, 仅去掉浮动性。
+          # Universal 仓库的 releases/latest (共 5 处), 属**浮动引用**: 无法锁定版本、
+          # 无法验证内容, 上游任一时刻替换产物即静默进入分发链。
           # 每日镜像后强制重写 → 上游若改回 latest 会被再次修正 (自愈)。
-          # 注: 这三个 dualsubs 插件当前**未接线** (template/loon.tpl 无引用), 属镜像
-          # 储备内容; 本补丁确保其一旦被启用也不会带入浮动引用。
-          # 升级版本时: 同步改下方 DS_VER 与本段上方 DualSubs.Universal 的 mirror 版本。
-          DS_VER="v1.7.5"
+          # 注: 三个插件均已接线 (template/loon.tpl:503-505 DualSubs 段)。
+          # DS_VER 动态解析 (2026-09-18 解钉配套): 钉死 v1.7.5 会在 Universal 发新版时
+          # 与 YouTube/Netflix 内嵌指向产生版本偏斜, 故每轮从 release API 取 Universal
+          # 最新 tag; API 失败/限流 (无合法 tag) 则回退上一已知版本并告警
+          # (不阻断, 偏斜风险转人工)。
+          DS_VER="$(curl -fsSL -m 30 https://api.github.com/repos/DualSubs/Universal/releases/latest | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const t=JSON.parse(s).tag_name;if(/^v[\w.]+$/.test(t||""))console.log(t)}catch(e){}})')"
+          if [ -z "$DS_VER" ]; then
+            DS_VER="v1.7.5"
+            echo "::warning::DualSubs Universal 最新 tag 解析失败, 回退 DS_VER=v1.7.5 (若上游已发新版, YouTube/Netflix 内嵌引用存在版本偏斜, 请人工核对)"
+          else
+            echo "DualSubs Universal 最新 tag: $DS_VER"
+          fi
           sed -i "s|https://github.com/DualSubs/Universal/releases/latest/download/|https://github.com/DualSubs/Universal/releases/download/${DS_VER}/|g" \
             Mirror/dualsubs/DualSubs.YouTube.plugin Mirror/dualsubs/DualSubs.Netflix.plugin
           # 断言: 补丁后不应再有任何浮动引用。上游若新增产物或改回 latest, 在此暴露。
@@ -602,21 +612,50 @@ jobs:
             mark_fail "dualsubs:releases/latest 浮动引用未锁定"
           fi
 
-          # ═══════════════ Auraflare (Cloudflare 资源集成) ═══════════════
+          # ═══════════════ Auraflare (Cloudflare 资源集成, 跟随 latest) ═══════════════
+          # 2026-09-18: DNS 插件解钉 (latest 即 v2.6.3, 内容逐字节一致, 零内容变更)。
           mirror "https://raw.githubusercontent.com/Auraflare/1.1.1.1/main/modules/Cloudflare.1.1.1.1.plugin" \
             "auraflare/Cloudflare.1.1.1.1.plugin" "Auraflare 1.1.1.1 / .plugin (main)"
-          mirror "https://github.com/Auraflare/DNS/releases/download/v2.6.3/Cloudflare.DNS.plugin" \
-            "auraflare/Cloudflare.DNS.plugin" "Auraflare DNS / .plugin v2.6.3"
+          mirror "https://github.com/Auraflare/DNS/releases/latest/download/Cloudflare.DNS.plugin" \
+            "auraflare/Cloudflare.DNS.plugin" "Auraflare DNS / .plugin latest"
 
-          # ═══════════════ BiliUniverse (哔哩哔哩功能增强) ═══════════════
-          mirror "https://github.com/BiliUniverse/Enhanced/releases/download/v0.5.13/BiliBili.Enhanced.plugin" \
-            "biliuniverse/BiliBili.Enhanced.plugin" "BiliUniverse Enhanced / .plugin v0.5.13"
-          mirror "https://github.com/BiliUniverse/Global/releases/download/v0.8.21/BiliBili.Global.plugin" \
-            "biliuniverse/BiliBili.Global.plugin" "BiliUniverse Global / .plugin v0.8.21"
-          mirror "https://github.com/BiliUniverse/ADBlock/releases/download/v0.6.24/BiliBili.ADBlock.plugin" \
-            "biliuniverse/BiliBili.ADBlock.plugin" "BiliUniverse ADBlock / .plugin v0.6.24"
-          mirror "https://github.com/BiliUniverse/Redirect/releases/download/v0.2.20/BiliBili.Redirect.plugin" \
-            "biliuniverse/BiliBili.Redirect.plugin" "BiliUniverse Redirect / .plugin v0.2.20"
+          # ═══════════════ BiliUniverse→Biliverse (哔哩哔哩功能增强, 跟随 latest) ═══════════════
+          # 2026-09-18 解钉: 上游组织已迁移 BiliUniverse → Biliverse, 且 2026-09-17/18
+          # 发布新版 (Enhanced v0.6.0 / Global v0.8.25 / ADBlock v0.6.27 / Redirect v0.2.24)。
+          # 注意 Enhanced 资产名含上游拼写 (Biliverse.Enhanced.plugin), 旧名在 latest 下 404 —
+          # dest 文件名保持 BiliBili.Enhanced.plugin 不变 (模板引用稳定), 仅 source_url 跟新名。
+          mirror "https://github.com/BiliUniverse/Enhanced/releases/latest/download/Biliverse.Enhanced.plugin" \
+            "biliuniverse/BiliBili.Enhanced.plugin" "Biliverse Enhanced / .plugin latest"
+          mirror "https://github.com/BiliUniverse/Global/releases/latest/download/BiliBili.Global.plugin" \
+            "biliuniverse/BiliBili.Global.plugin" "Biliverse Global / .plugin latest"
+          mirror "https://github.com/BiliUniverse/ADBlock/releases/latest/download/BiliBili.ADBlock.plugin" \
+            "biliuniverse/BiliBili.ADBlock.plugin" "Biliverse ADBlock / .plugin latest"
+          mirror "https://github.com/BiliUniverse/Redirect/releases/latest/download/BiliBili.Redirect.plugin" \
+            "biliuniverse/BiliBili.Redirect.plugin" "Biliverse Redirect / .plugin latest"
+
+          # ═══════════════ BiliUniverse 传递依赖 (与插件同版本跟随) ═══════════════
+          # 新版插件内嵌两类非白名单 script-path, 不收敛则门禁 4 整单拦截:
+          #   1) biliverse.github.io (Pages 可变内容) /settings/mock.js — 设置页主题脚本
+          #   2) NSNanoCat/PreferencePanes releases/latest (浮动) api.js/web.js — 设置页 get/set/delete
+          # 三者体量小 (394K/56K/155K) 且变更低频, 镜像收敛后由哈希+PR 人审覆盖, 与主插件同等待遇。
+          mirror "https://biliverse.github.io/settings/mock.js" \
+            "biliuniverse/settings/mock.js" "Biliverse Pages / settings mock.js"
+          mirror "https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/api.js" \
+            "preferencepanes/api.js" "NSNanoCat PreferencePanes / api.js latest"
+          mirror "https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/web.js" \
+            "preferencepanes/web.js" "NSNanoCat PreferencePanes / web.js latest"
+
+          # ── 本地补丁 (2026-09-18 解钉配套): 传递依赖重写到自建 CDN ──
+          # 每日镜像后强制重写 (自愈); 补丁后断言与 DualSubs 段同哲学 (见下方 DualSubs 断言块)。
+          sed -i "s|https://biliverse.github.io/settings/mock.js|https://ws.wenn.in/main/Mirror/biliuniverse/settings/mock.js|g" \
+            Mirror/biliuniverse/BiliBili.*.plugin
+          sed -i "s|https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/api.js|https://ws.wenn.in/main/Mirror/preferencepanes/api.js|g; s|https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/web.js|https://ws.wenn.in/main/Mirror/preferencepanes/web.js|g" \
+            Mirror/biliuniverse/BiliBili.*.plugin
+          # 断言: 补丁后不应残留 Pages 可变引用与浮动 latest。上游若新增传递依赖, 在此暴露。
+          if grep -n -e "biliverse.github.io/settings/mock.js" -e "NSNanoCat/PreferencePanes/releases/latest" Mirror/biliuniverse/*.plugin; then
+            echo "🚫 BiliUniverse 补丁后仍存在未收敛引用 (上游可能新增了传递依赖), 请人工核对并镜像"
+            mark_fail "biliuniverse:传递依赖未收敛"
+          fi
 
           # ── 行尾归一化: 哈希前把镜像文本文件统一为 LF ──
           # 根因 (2026-09-11 实测, Config Validation run 34527842350 红于 step 8b
@@ -640,7 +679,7 @@ jobs:
               echo "🔧 行尾归一化 CRLF→LF: $f (${before}B → ${after}B)"
             fi
           done < <(find Mirror -type f \
-                    \( -name '*.js' -o -name '*.plugin' -o -name '*.list' -o -name '*.conf' -o -name '*.json' \) \
+                    \( -name '*.js' -o -name '*.plugin' -o -name '*.lpx' -o -name '*.list' -o -name '*.conf' -o -name '*.json' \) \
                     ! -name 'MANIFEST.json' -print0)
           # Plugin/startup-adblock-pro.plugin 同样被 git add (见下方 "Open or update mirror PR"),
           # 且属 `*.plugin text`, 一并归一化以免重演同一类漂移。

@@ -24,5 +24,11 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           # 无签名 tag 流程 (git tag vX.Y.Z && git push): 内部快照分发, 不校验签名
+          # 凭据断言 (2026-09-18 优化审计, 纵深防御): main 的产物在 surgio-build 已断言过,
+          # 此处再挡一次, 防"带凭据的产物被手动打 tag 发布" (与 surgio-build 同一正则)。
+          if grep -niE '(^|,) *(password|uuid|bob|encryption) *=' Profile/Loon.lcf; then
+            echo "::error::Loon.lcf 含订阅凭据 — 禁止发布"
+            exit 1
+          fi
           gh release create "$TAG" --generate-notes \
             "Profile/Loon.lcf#Loon.lcf (完整配置)"

@@ -149,6 +149,14 @@ exports.tests = {
     fs.rmSync(tmp, { recursive: true, force: true });
   },
 
+  // ── 复检日期 (2026-09-18 优化审计: 登记≠永久豁免) ──
+  "mirror-drift: reviewNote 未到期/过期/未登记三态": async (a) => {
+    const m = await load();
+    a.equal(m.reviewNote("iringo/iRingo.News.plugin", "2026-09-18"), " (复检 2026-12-31)", "未到期应标注日期");
+    a.equal(m.reviewNote("iringo/iRingo.News.plugin", "2027-01-01"), " ⚠️ 复检已过期 2026-12-31", "过期应告警");
+    a.equal(m.reviewNote("not-accepted.js", "2027-01-01"), "", "未登记条目无标注");
+  },
+
   // ── 入口守卫 ──
   "mirror-drift: import 不触发 main (入口守卫生效)": async (a) => {
     const out = execFileSync(

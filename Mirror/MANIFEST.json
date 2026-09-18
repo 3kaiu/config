@@ -21,10 +21,11 @@
       "fetched_at": "2026-07-30T03:29:55Z"
     },
     "auraflare/Cloudflare.DNS.plugin": {
-      "source_url": "https://github.com/Auraflare/DNS/releases/download/v2.6.3/Cloudflare.DNS.plugin",
+      "source_url": "https://github.com/Auraflare/DNS/releases/latest/download/Cloudflare.DNS.plugin",
       "sha256": "717e1c62d491a803179d3e4d876e205f58bd61c883fcd3007e579dc835a652ae",
       "bytes": 2389,
-      "fetched_at": "2026-07-30T03:29:55Z"
+      "upstream_bytes": 2389,
+      "fetched_at": "2026-09-18T03:20:00Z"
     },
     "bilibili-json.js": {
       "source_url": "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js",
@@ -39,46 +40,60 @@
       "fetched_at": "2026-07-25T00:00:00Z (baseline)"
     },
     "biliuniverse/BiliBili.ADBlock.plugin": {
-      "source_url": "https://github.com/BiliUniverse/ADBlock/releases/download/v0.6.24/BiliBili.ADBlock.plugin",
-      "sha256": "5a6be286a5ef251525222672457b957afe78f309fb50b0a1388510232ce7e9da",
-      "bytes": 11422,
-      "fetched_at": "2026-07-30T03:29:55Z"
+      "source_url": "https://github.com/BiliUniverse/ADBlock/releases/latest/download/BiliBili.ADBlock.plugin",
+      "sha256": "9e91391a5b0941e5a2dfcdc22e55cd7e4a35b40afa423c224470c451bab608a2",
+      "bytes": 20664,
+      "upstream_bytes": 20664,
+      "fetched_at": "2026-09-18T03:20:00Z"
     },
     "biliuniverse/BiliBili.Enhanced.plugin": {
-      "source_url": "https://github.com/BiliUniverse/Enhanced/releases/download/v0.5.13/BiliBili.Enhanced.plugin",
-      "sha256": "e0eca33cd58a765283e863924030187448665e39397b1231e0dcc3db60429f52",
-      "bytes": 4088,
-      "fetched_at": "2026-07-30T03:29:55Z"
+      "source_url": "https://github.com/BiliUniverse/Enhanced/releases/latest/download/Biliverse.Enhanced.plugin",
+      "sha256": "2db6506f5df51d74f12ced8b3ceff9c21dc114d6e4f4a1d51afbfb06bcba43d8",
+      "bytes": 8191,
+      "upstream_bytes": 8221,
+      "fetched_at": "2026-09-18T03:20:00Z"
     },
     "biliuniverse/BiliBili.Global.plugin": {
-      "source_url": "https://github.com/BiliUniverse/Global/releases/download/v0.8.21/BiliBili.Global.plugin",
-      "sha256": "e88304d315e68f45c44b4fba8f69d05dcc3fe9ef9f96ec9612eb3960fc6c3a81",
-      "bytes": 8311,
-      "fetched_at": "2026-07-30T03:29:55Z"
+      "source_url": "https://github.com/BiliUniverse/Global/releases/latest/download/BiliBili.Global.plugin",
+      "sha256": "723b5fa49d84ed0f2186ce7c19ede6e990eae8676480513345147f0400d074cf",
+      "bytes": 8642,
+      "upstream_bytes": 8642,
+      "fetched_at": "2026-09-18T03:20:00Z"
     },
     "biliuniverse/BiliBili.Redirect.plugin": {
-      "source_url": "https://github.com/BiliUniverse/Redirect/releases/download/v0.2.20/BiliBili.Redirect.plugin",
-      "sha256": "73d93fc98e4d450fe760fbc03fd9bbfd2b66ba51b27a908d56fac60edb18005d",
-      "bytes": 4442,
-      "fetched_at": "2026-07-30T03:29:55Z"
+      "source_url": "https://github.com/BiliUniverse/Redirect/releases/latest/download/BiliBili.Redirect.plugin",
+      "sha256": "d93d9645a8d5a2bfe028f10c1199f8ffecf5c1158af0073a6e3ca7abe366bc05",
+      "bytes": 7163,
+      "upstream_bytes": 7163,
+      "fetched_at": "2026-09-18T03:20:00Z"
+    },
+    "biliuniverse/settings/mock.js": {
+      "source_url": "https://biliverse.github.io/settings/mock.js",
+      "sha256": "59c7e77591260185c3ad441704f28ab23ac4a5aa82c3cdad4540983788f1c606",
+      "bytes": 394375,
+      "upstream_bytes": 394375,
+      "fetched_at": "2026-09-18T03:20:00Z"
     },
     "dualsubs/DualSubs.Netflix.plugin": {
-      "source_url": "https://github.com/DualSubs/Netflix/releases/download/v0.5.7/DualSubs.Netflix.plugin",
+      "source_url": "https://github.com/DualSubs/Netflix/releases/latest/download/DualSubs.Netflix.plugin",
       "sha256": "16e86e6952126df3296a0852ef58a7e7eea1883ce0c62834f98c327c8de6237d",
       "bytes": 2084,
-      "fetched_at": "2026-07-30T03:29:55Z"
+      "upstream_bytes": 2084,
+      "fetched_at": "2026-09-18T03:20:00Z"
     },
     "dualsubs/DualSubs.Universal.plugin": {
-      "source_url": "https://github.com/DualSubs/Universal/releases/download/v1.7.5/DualSubs.Universal.plugin",
+      "source_url": "https://github.com/DualSubs/Universal/releases/latest/download/DualSubs.Universal.plugin",
       "sha256": "5d15c171c214d8fb020b9b44c0934310769fb6080032ec7616787209ee8c59b3",
       "bytes": 53037,
-      "fetched_at": "2026-07-30T03:29:55Z"
+      "upstream_bytes": 53037,
+      "fetched_at": "2026-09-18T03:20:00Z"
     },
     "dualsubs/DualSubs.YouTube.plugin": {
-      "source_url": "https://github.com/DualSubs/YouTube/releases/download/v1.5.11/DualSubs.YouTube.plugin",
+      "source_url": "https://github.com/DualSubs/YouTube/releases/latest/download/DualSubs.YouTube.plugin",
       "sha256": "ae837fa14da0fa73314cbcea4337326c78ca9528e7867986265fcf906ce4c1de",
       "bytes": 5847,
-      "fetched_at": "2026-07-30T03:29:55Z"
+      "upstream_bytes": 5847,
+      "fetched_at": "2026-09-18T03:20:00Z"
     },
     "iringo/iRingo.LocationService.plugin": {
       "source_url": "https://github.com/NSRingo/LocationServices/releases/download/v1.0.1/iRingo.LocationService.plugin",
@@ -94,8 +109,8 @@
     },
     "iringo/iRingo.News.plugin": {
       "source_url": "https://github.com/NSRingo/News/releases/download/v3.2.1/iRingo.News.plugin",
-      "sha256": "7678fe8ef5f9613be4bd79afd3be2331bb4986c19a9c3f30a4c3e745388cc85b",
-      "bytes": 2391,
+      "sha256": "ac648896dfdf5c97f2c199c161c3314912bdd3a9c58b0480d506bc8166e06464",
+      "bytes": 2359,
       "fetched_at": "2026-07-25T00:00:00Z (baseline)"
     },
     "iringo/iRingo.Search.plugin": {
@@ -122,11 +137,12 @@
       "bytes": 2141,
       "fetched_at": "2026-07-30T03:29:55Z"
     },
-    "iringo/iRingo.WeatherKit.plugin": {
-      "source_url": "https://github.com/NSRingo/WeatherKit/releases/download/v3.1.0/iRingo.WeatherKit.plugin",
-      "sha256": "13863a13d44ee0c823c5f4a790af538764d712c80460c65ab39701de0889338a",
-      "bytes": 3299,
-      "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    "iringo/iRingo.WeatherKit.lpx": {
+      "source_url": "https://github.com/NSRingo/WeatherKit/releases/latest/download/iRingo.WeatherKit.lpx",
+      "sha256": "a2e3586f89c97e0c3f6715977c598b248aded8a8eb2c3ab8e52bdac67e2826ef",
+      "bytes": 5670,
+      "upstream_bytes": 5740,
+      "fetched_at": "2026-09-18T03:05:55Z"
     },
     "keepStyle.js": {
       "source_url": "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/keepStyle.js",
@@ -139,6 +155,20 @@
       "sha256": "6a742d91eb746b3f77ba276374a0b63c60b51bd13dd4eee45a72d1b144517ab7",
       "bytes": 122937,
       "fetched_at": "2026-07-25T00:00:00Z (baseline)"
+    },
+    "preferencepanes/api.js": {
+      "source_url": "https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/api.js",
+      "sha256": "2892d3dbc2544207faf73a6f46f11b6247d6f0ac994a79a6159a993eb57db13e",
+      "bytes": 56479,
+      "upstream_bytes": 56479,
+      "fetched_at": "2026-09-18T03:20:00Z"
+    },
+    "preferencepanes/web.js": {
+      "source_url": "https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/web.js",
+      "sha256": "5514baf4445853b59f666d1e0ad0afed605fd7427f429bad9bbbe9cc855b52f7",
+      "bytes": 155136,
+      "upstream_bytes": 155136,
+      "fetched_at": "2026-09-18T03:20:00Z"
     },
     "rules/ddgksf-StartUpAds.conf": {
       "source_url": "https://raw.githubusercontent.com/ifflagged/Romeo/main/Modules/Others/ddgksf2013/Official/StartUpAds.conf",

@@ -104,7 +104,8 @@ jobs:
           fi
           OK=0; FAIL=0
           while read -r f; do
-            if curl -fsSL -m 30 -o /dev/null "$PAGES_BASE/$f" 2>/dev/null; then
+            # --retry 2 (2026-09-18 优化审计): 与主链路校验一致, 瞬时抖动不计入 parity 失败。
+            if curl -fsSL -m 30 --retry 2 -o /dev/null "$PAGES_BASE/$f" 2>/dev/null; then
               OK=$((OK+1))
             else
               FAIL=$((FAIL+1)); echo "⚠️ pages fetch failed: $f"

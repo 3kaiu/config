@@ -63,8 +63,8 @@ function createSandbox(opts = {}) {
   if (response !== undefined) ctx.$response = response;
   if (argument !== undefined) ctx.$argument = argument;
 
-  ctx.$loon = { version: "3.3.9" };
-  ctx.$environment = { surgeVersion: "Loon 3.3.9" };
+  ctx.$loon = { version: "3.5.1" };
+  ctx.$environment = { surgeVersion: "Loon 3.5.1" };
   ctx.$notification = { post: (t, s, b) => state.notifications.push({ title: t, subtitle: s, body: b }) };
   ctx.$persistentStore = {
     read: (k) => (k in state.store ? state.store[k] : null),

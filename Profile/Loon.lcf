@@ -1,13 +1,13 @@
 # ═══════════════════════════════════════════════════════════
 #  Loon 配置 (Loon.lcf) — Surgio 生成 (滚动 main, 版本见 CHANGELOG)
 #  核心: 自动健康检测 · 高质量多引擎去广告 · Apple原生增强 · 全球社交/流媒体分流 · 银行 MitM 冲突根治
-#  引擎支持: iOS Loon 3.3.9+
+#  引擎支持: iOS Loon 3.3.9+ (规则语义已按官方文档 3.5.1(978) 核对: interface-mode 取值等)
 # ═══════════════════════════════════════════════════════════
 
 [General]
 ip-mode = fake-ip
 fake-ip-filter = *.lan, *.local, *.home.arpa, time.*.com, *.msftconnecttest.com, *.msftncsi.com, localhost, captive.apple.com
-interface-mode = Performance
+interface-mode = Performace
 dns-server = 180.184.11.11, 180.184.22.22, 119.29.29.29, 223.5.5.5
 doh-server = https://dns.alidns.com/dns-query, https://doh.pub/dns-query
 doh3-server = h3://dns.alidns.com/dns-query, h3://doh.pub/dns-query
@@ -885,7 +885,7 @@ https://ws.wenn.in/main/Kelee/smzdm-remove-ads.plugin, enabled=true, tag=什么�
 https://ws.wenn.in/main/Kelee/guiderank-remove-ads.plugin, enabled=true, tag=盖得排行去广告
 https://ws.wenn.in/main/Kelee/umetrip-remove-ads.plugin, enabled=true, tag=航旅纵横去广告(轻量)
 https://ws.wenn.in/main/Kelee/12306-remove-ads.plugin, enabled=true, tag=12306去广告(轻量)
-https://ws.wenn.in/main/Mirror/iringo/iRingo.WeatherKit.plugin, enabled=true, tag=🍎天气增强
+https://ws.wenn.in/main/Mirror/iringo/iRingo.WeatherKit.lpx, enabled=true, tag=🍎天气增强
 https://ws.wenn.in/main/Mirror/iringo/iRingo.Maps.plugin, enabled=true, tag=🍎地图增强
 https://ws.wenn.in/main/Mirror/iringo/iRingo.News.plugin, enabled=true, tag=🍎News解锁
 https://ws.wenn.in/main/Mirror/iringo/iRingo.Siri.plugin, enabled=true, tag=🍎Siri增强

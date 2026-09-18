@@ -123,6 +123,22 @@ exports.tests = {
     a.equal(g.nodeLine(n), "geonode-socks5-DE-5.6.7.8-1080 = socks5,5.6.7.8,1080", "节点行格式");
   },
 
+  // ── 相对下限 (2026-09-18 优化审计: 与镜像门禁 1 同哲学) ──
+  "geonode: 新数量不足旧数量 50% 即保留旧文件": async (a) => {
+    const g = await load();
+    a.ok(g.isBelowRelativeFloor(3, 60), "3/60 应保留旧文件");
+    a.ok(g.isBelowRelativeFloor(29, 60), "29/60 (不足半数) 应保留旧文件");
+    a.ok(!g.isBelowRelativeFloor(30, 60), "30/60 (恰半数) 应写入新文件");
+    a.ok(!g.isBelowRelativeFloor(60, 60), "数量持平应写入新文件");
+    a.ok(!g.isBelowRelativeFloor(61, 60), "数量增长应写入新文件");
+  },
+  "geonode: 旧文件本身不足下限时不比较 (旧文件已坏)": async (a) => {
+    const g = await load();
+    a.ok(!g.isBelowRelativeFloor(0, 0), "首次运行 (无旧文件) 不应拦截");
+    a.ok(!g.isBelowRelativeFloor(3, 2), "旧文件 2 (<MIN_NODES=3) 时 3 个新节点应写入");
+    a.ok(!g.isBelowRelativeFloor(0, 2), "旧文件已坏时不因新文件更少而拦截 (绝对下限另行负责)");
+  },
+
   // ── 入口守卫 ──
   "geonode: import 不触发探测 / 不改写产物 (入口守卫生效)": async (a) => {
     // 若 main() 在顶层被调用, 子进程会打印 "🔍 探测 …" 或 "❌ geonode-sync 失败"

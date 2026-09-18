@@ -8,6 +8,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased] (2026-09-04 对抗审计)
 
+### Fixed (2026-09-18 优化审计整改 + 全厂商跟 latest — 两批, 全绿 218 例)
+
+**Loon 3.5.1(978) 官方文档对齐**（`template/loon.tpl`、`Profile/Loon.lcf`、`test/harness.js`、`.github/workflows/mirror-scripts.yml`）：逐页核对规则/插件/通用配置文档。抓到 1 个真实 bug：`interface-mode = Performance` —— 官方中英文档取值表均为 `Performace`（官方拼写），`Performance` 会被当未知值回退，网卡选择从作者本意的"最优接口"掉回默认。规则语义（DOMAIN/GEOIP/`no-resolve`/DEST-PORT/FINAL/来源优先级`本地＞插件＞订阅`、DoH 并发优先、`$argument.name` 对象形态、插件规则仅 DIRECT/REJECT/PROXY）与已弃用表（本仓未用任何已弃用参数）全部对齐；UA 与 harness mock 提到 3.5.1。**有意没动**：`ip-mode = fake-ip`（文档页是"常用参数"非全集，改 DNS 行为风险大于收益）、`ipv6-vif`（未收录也未弃用）
+
+**P0-1 行尾根治**（`Mirror/iringo/iRingo.News.plugin`、`Mirror/MANIFEST.json`、`config-validate.yml` step 8b）：全仓 231 个跟踪文件仅此 1 个 `i/mixed`（CRLF blob 违反 `.gitattributes`，本地 `git status` 常红＋mirror rebase 有中止风险）。归一化为 LF（2391→2359B）并同步 MANIFEST（`ac648896…`）；8b 新增 EOL 断言（`git ls-files --eol` 不得有 mixed/crlf，POSIX 可复现），此前门禁只比 raw 哈希、CRLF 对 CRLF 照样绿
+
+**P0-2/P0-3 同根缺陷收敛**（`.github/workflows/surgio-build.yml`、`config-validate.yml`）：surgio auto-PR 沿用已被 mirror PR #41 修掉的写法（`GH_TOKEN: github.token` → 其 PR 的 CI 停在 `action_required`），照抄 `MIRROR_TOKEN || github.token` 回退＋缺失告警；版本检查 `grep -oP`（GNU PCRE，macOS 不可复现）→ `-oE`，本地实测仍取出 `v7.8`
+
+**P1-1 proxy-sync 加固**（`proxy-sync.yml`、`tools/geonode-sync.mjs`＋2 例）：push 前 fetch＋rebase（此前与人工合并撞车即非 fast-forward 失败）；新增相对下限 `isBelowRelativeFloor`（新数量＜旧数量 50% 即保留旧文件，与镜像门禁 1 同哲学 —— `MIN_NODES=3` 拦不住"60 跌到 3"的半失活）
+
+**P1-2 漂移登记复检**（`tools/mirror-drift-check.mjs`＋1 例）：`ACCEPTED_*` 是"已知且接受"不是"永久豁免"，新增 `ACCEPTED_REVIEW_BY`（NSRingo 7 条，2026-12-31）＋`reviewNote` 三态标注；判定语义不变（到期只提醒不判红）
+
+**P1-3/P1-4 降噪**：三处存活探活加 `--retry 2`（与镜像实践对齐）；`upstream-health` 的 kelee 探活 7→1（其余 6 个功能已在模板移除，留 Google 作 issue #27 解封哨兵；`kelee.one` 子串保留，403 特判不受影响）
+
+**P2 打包**：`check:all` 聚合 8 项零依赖检查；`npm test` 纳入 `wiring-check`（此前只在 CI 跑）；`.node-version: 22`（本地曾跑在 v26＋无 `node_modules` 导致 lint/build 不可跑）；`release.yml` 加凭据断言（纵深防御，与 surgio-build 同正则）
+
+**全厂商跟 latest，第一批 iRingo**（`.github/workflows/mirror-scripts.yml`、`template/loon.tpl`、`Mirror/iringo/`、`Mirror/MANIFEST.json`、`test/wiring-check.js`）：逐仓查 latest 资产后纠正旧假设 —— 仅 WeatherKit 真迁 `.lpx`（v3.3.2），其余 7 家 latest 仍供 `.plugin` 且 200 可用；7 条漂移实为 URL 字面量差（6 家逐字节相同，News 仅差行尾＋3 行未打 CDN 补丁，内容躺在未合并的 `mirror/sync` 里）。WeatherKit v3.1.0 pin → v3.3.2 `.lpx` latest（纯文本 LF，5 处 script-path 重写 CDN，门禁 4/EOL/接线同步覆盖 `.lpx`；`#!openUrl boxjs` 仅元信息，旧顾虑解除）
+
+**全厂商跟 latest，第二批 DualSubs/Auraflare/BiliUniverse**（同上文件＋`Mirror/biliuniverse/settings/mock.js`、`Mirror/preferencepanes/api.js|web.js`）：DualSubs×3/Auraflare DNS 的 latest 即钉死版（逐字节相同，零内容变更，仅翻 `source_url`）；DS_VER 改动态解析（钉死会在 Universal 发新版时与内嵌引用偏斜，API 失败回退＋告警）。BiliUniverse 是真更新（Enhanced v0.6.0 / Global v0.8.25 / ADBlock v0.6.27 / Redirect v0.2.24，组织迁 `BiliUniverse→Biliverse`，Enhanced 资产名含上游拼写、旧名 404，dest 文件名保持稳定）：上游自带版本钉死引用比原来干净，但拦下两类新传递依赖就地镜像（`biliverse.github.io` Pages 可变 `mock.js` 394K＋NSNanoCat 浮动 latest `api.js/web.js`，否则门禁 4 整单拦截；残留断言同 DualSubs 哲学）。MitM 增量：Global＋1、Enhanced＋2、Redirect＋3 改 1、ADBlock＋5（含 `adtrack.qianwen.com` 类广告追踪域，属职责内）—— 合并前请复核。另修正 DualSubs"未接线"过期注释（模板 503-505 明明引用着）
+
 ### Fixed (2026-09-11 深度审计修复 — 逐项整改)
 
 **P1**

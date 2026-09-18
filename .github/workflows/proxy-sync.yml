@@ -54,7 +54,11 @@ jobs:
             exit 0
           fi
           git commit -m "chore(proxy): 免费代理列表同步 ($(date +%Y-%m-%d))"
-          git push origin main
+          # 2026-09-18 优化审计: main 在本 run 期间前移 (人工合并撞车) 会让直推
+          # 非 fast-forward 失败。先 rebase 再推; 该文件为 LF 纯文本, 无 CRLF 案的坑。
+          git fetch origin main --quiet
+          git rebase origin/main || { echo "::error::rebase onto origin/main failed"; exit 1; }
+          git push origin main || { echo "::error::push failed"; exit 1; }
           echo "synced=true" >> $GITHUB_ENV
 
       - name: Report summary

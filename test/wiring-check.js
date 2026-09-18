@@ -40,7 +40,8 @@ for (const m of loonTpl.matchAll(/main\/Plugin\/([\w.-]+\.plugin)/g)) {
   const name = m[1];
   log(fs.existsSync(path.join(root, "Plugin", name)), `loon.tpl 引用 Plugin/${name} 存在`);
 }
-for (const m of loonTpl.matchAll(/main\/(Kelee|Mirror\/[a-z0-9-]+)\/([\w.-]+\.plugin)/g)) {
+// (2026-09-18: 匹配 .plugin 与 .lpx — Mirror/iringo 已有 .lpx 资产跟随 latest)
+for (const m of loonTpl.matchAll(/main\/(Kelee|Mirror\/[a-z0-9-]+)\/([\w.-]+\.(?:plugin|lpx))/g)) {
   const sub = m[1];
   const name = m[2];
   log(fs.existsSync(path.join(root, sub, name)), `loon.tpl 引用 ${sub}/${name} 存在`);

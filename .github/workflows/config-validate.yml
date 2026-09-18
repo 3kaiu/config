@@ -66,7 +66,9 @@ jobs:
           FAIL=0
           while IFS= read -r url; do
             [ -z "$url" ] && continue
-            code=$(curl -fsSL -m 15 -o /dev/null -w "%{http_code}" "$url" || echo "FAIL")
+            # --retry 2 (2026-09-18 优化审计): PR 门禁里的网络检查, 单次抖动即红 PR;
+            # 与 mirror-scripts/cdn-verify 的重试实践对齐 (GET 对 5xx/超时自动重试)。
+            code=$(curl -fsSL -m 15 --retry 2 -o /dev/null -w "%{http_code}" "$url" || echo "FAIL")
             if [ "$code" = "FAIL" ] || [ "$code" = "000" ]; then
               echo "❌ $url → $code"
               FAIL=$((FAIL+1))
@@ -295,7 +297,9 @@ jobs:
       - name: Check version consistency
         run: |
           echo "## Version Consistency" >> $GITHUB_STEP_SUMMARY
-          loon_ver=$(grep -oP 'v\d+\.\d+' Profile/Loon.lcf | head -1)
+          # POSIX -oE (2026-09-18 优化审计): 原 grep -oP 为 GNU PCRE,
+          # BSD/macOS grep 不支持 — 本地无法复现本步, 与已修两轮的同类缺陷同源。
+          loon_ver=$(grep -oE 'v[0-9]+\.[0-9]+' Profile/Loon.lcf | head -1)
           plugin_vers=$(grep -rh '#!version=' Plugin/*.plugin Kelee/*.plugin | sed 's/#!version=//' | sort -u | tr '\n' ' ')
           echo "| Config | Version |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|---------|" >> $GITHUB_STEP_SUMMARY
@@ -335,6 +339,11 @@ jobs:
       # ── 8b. Mirror 清单一致性校验 (2026-09-04 对抗审计新增) ──
       # 防"改镜像文件忘同步 MANIFEST"(漂移) 与清单/磁盘分叉；
       # 注: 挡不住"文件+清单一起改"的恶意提交 — 那道防线是 mirror PR 人审。
+      # ── 8b-bis. 行尾一致性断言 (2026-09-18 优化审计) ──
+      # .gitattributes 声明全部文本 eol=lf; 任一 mixed/crlf 的 index 或工作区条目
+      # 即"下次 git 触碰就脏"的定时炸弹 (iRingo.News.plugin 曾以 CRLF blob 常驻 main,
+      # 本地 git status 常红 + mirror rebase 有中止风险)。用 git ls-files --eol
+      # 断言, POSIX grep, macOS/CI 双可复现。
       - name: Mirror manifest consistency check
         run: |
           echo "## Mirror Manifest Consistency" >> $GITHUB_STEP_SUMMARY
@@ -354,7 +363,14 @@ jobs:
             if (bad) { console.log("❌ 先同步 MANIFEST (sha256/bytes 从磁盘重算) 再提交"); process.exit(1); }
             console.log("✅ 清单与磁盘一致");
           ' 2>&1 | tee -a $GITHUB_STEP_SUMMARY
-          exit ${PIPESTATUS[0]}
+          MANIFEST_RC=${PIPESTATUS[0]}
+          if git ls-files --eol | grep -E 'mixed|crlf'; then
+            echo "❌ 存在违反 .gitattributes(eol=lf) 的条目 (mixed/crlf) — 先行尾归一化再提交" | tee -a $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "✅ 行尾一致: 无 mixed/crlf 条目" | tee -a $GITHUB_STEP_SUMMARY
+          fi
+          exit $MANIFEST_RC
 
       # ── 9. Loon 规则顺序防遮蔽检查 ──
       - name: Loon rule-order shadowing guard

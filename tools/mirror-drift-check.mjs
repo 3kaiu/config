@@ -59,6 +59,31 @@ export const ACCEPTED_MISSING = new Map(
 );
 
 /**
+ * 已登记条目的复检日期 (2026-09-18 优化审计)。
+ *
+ * ACCEPTED_* 是"已知且接受", 不是"永久豁免" —— 无到期日的登记会常态化
+ * (实测 20/53 声明处于漂移/从未抓到)。到期后报告与 --strict 通过行会标注
+ * `复检已过期`, 提醒决定: 修 URL / 删镜像 / 续期。判定逻辑不变 (到期不判红,
+ * 只提醒), 故不改变任何现有门禁语义。
+ */
+export const ACCEPTED_REVIEW_BY = new Map([
+  ["iringo/iRingo.Maps.plugin", "2026-12-31"],
+  ["iringo/iRingo.News.plugin", "2026-12-31"],
+  ["iringo/iRingo.Search.plugin", "2026-12-31"],
+  ["iringo/iRingo.Siri.plugin", "2026-12-31"],
+  ["iringo/iRingo.TestFlight.plugin", "2026-12-31"],
+  ["iringo/iRingo.TV.plugin", "2026-12-31"],
+  ["iringo/iRingo.LocationService.plugin", "2026-12-31"],
+]);
+
+/** 登记条目的复检标注: 未到期 ` (复检 YYYY-MM-DD)`, 过期 ` ⚠️ 复检已过期 YYYY-MM-DD` */
+export function reviewNote(dest, today = new Date().toISOString().slice(0, 10)) {
+  const by = ACCEPTED_REVIEW_BY.get(dest);
+  if (!by) return "";
+  return today > by ? ` ⚠️ 复检已过期 ${by}` : ` (复检 ${by})`;
+}
+
+/**
  * 解析 workflow 中的 mirror() 调用 → Map(dest → url)。
  *
  * 2026-09-11 深度审计 NEW-10: 旧实现只匹配"URL 与 dest 相邻两行"的写法, 对
@@ -131,14 +156,14 @@ export function run(root = ROOT, { strict = false, quiet = false } = {}) {
 
   if (!quiet) {
     for (const d of drift) {
-      console.log(`[URL漂移] ${d.dest}${ACCEPTED_DRIFT.has(d.dest) ? " (已登记)" : " ⚠️ 未登记"}`);
+      console.log(`[URL漂移] ${d.dest}${ACCEPTED_DRIFT.has(d.dest) ? " (已登记)" + reviewNote(d.dest) : " ⚠️ 未登记"}`);
       console.log(`  声明: ${d.declared}`);
       console.log(`  记录: ${d.recorded}`);
     }
     for (const o of orphan) console.log(`[孤儿保留] ${o.dest} (workflow 不再声明)`);
     if (missing.length) {
       console.log(`\n[从未抓到] ${missing.length} 条 (声明存在但清单无记录 — 可能永久失败, 或镜像 PR 尚未合并):`);
-      for (const m of missing) console.log(`  ${m.dest} → ${m.url}${ACCEPTED_MISSING.has(m.dest) ? " (已登记)" : " ⚠️ 未登记"}`);
+      for (const m of missing) console.log(`  ${m.dest} → ${m.url}${ACCEPTED_MISSING.has(m.dest) ? " (已登记)" + reviewNote(m.dest) : " ⚠️ 未登记"}`);
     }
     console.log(`\n══ 镜像漂移摘要 ══`);
     console.log(`  workflow 声明: ${declared.size} 条`);
@@ -166,6 +191,11 @@ export function run(root = ROOT, { strict = false, quiet = false } = {}) {
     return 1;
   }
   console.log(`✅ 镜像漂移门禁通过: 漂移 ${drift.length} 条 + 从未抓到 ${missing.length} 条均已登记 (孤儿 ${orphan.length} 条不参与判定)`);
+  const overdue = [...drift, ...missing].filter((d) => reviewNote(d.dest).includes("已过期"));
+  if (overdue.length && !quiet) {
+    console.log(`⚠️ 其中 ${overdue.length} 条登记已过复检日期 (修 URL / 删镜像 / 续期三选一):`);
+    for (const d of overdue) console.log(`  ${d.dest}${reviewNote(d.dest)}`);
+  }
   return 0;
 }
 

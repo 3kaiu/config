@@ -34,8 +34,9 @@ jobs:
           check_url() {
             local name="$1" url="$2"
             local status
-            # 不用 -f: 失败状态码 (403/404) 也要拿到真实数字; 网络层异常时才记 000
-            status=$(curl -sSL -m 30 -o /dev/null -w "%{http_code}" "$url" || true)
+            # 不用 -f: 失败状态码 (403/404) 也要拿到真实数字; 网络层异常时才记 000。
+            # --retry 2 (2026-09-18 优化审计): 调度任务单次抖动即开 issue, 与镜像重试实践对齐。
+            status=$(curl -sSL -m 30 --retry 2 -o /dev/null -w "%{http_code}" "$url" || true)
             [ -z "$status" ] && status="000"
             # kelee.one 全局 403 是 Turnstile 保护，Loon 客户端可拉取，CI 视作健康
             if [[ "$name" == *"kelee.one"* && "$status" == "403" ]]; then
@@ -77,14 +78,13 @@ jobs:
           check_url "proxylist.geonode.com API" "https://proxylist.geonode.com/api/proxy-list?page=1&limit=1&sort_by=responseTime&sort_type=asc"
           check_url "ws.wenn.in CDN (Geonode 订阅)" "https://ws.wenn.in/main/Profile/geonode.loon.txt"
 
-          # kelee.one LPX (loon.tpl 直连的第三方配置, 未镜像; 2026-08 起全局 403 见 issue #27，Loon 带 Turnstile 可拉取，curl 403 视为健康)
-          check_url "kelee.one LPX Google" "https://kelee.one/Tool/Loon/Lpx/Google.lpx"
-          check_url "kelee.one LPX JD_Price" "https://kelee.one/Tool/Loon/Lpx/JD_Price.lpx"
-          check_url "kelee.one LPX Node_detection_tool" "https://kelee.one/Tool/Loon/Lpx/Node_detection_tool.lpx"
-          check_url "kelee.one LPX NodeLinkCheck" "https://kelee.one/Tool/Loon/Lpx/NodeLinkCheck.lpx"
-          check_url "kelee.one LPX Spotify_lyrics" "https://kelee.one/Tool/Loon/Lpx/Spotify_lyrics_translation.lpx"
-          check_url "kelee.one LPX VVebo_repair" "https://kelee.one/Tool/Loon/Lpx/VVebo_repair.lpx"
-          check_url "kelee.one LPX Weixin_links" "https://kelee.one/Tool/Loon/Lpx/Weixin_external_links_unlock.lpx"
+          # kelee.one 封锁跟踪哨兵 (2026-08 起全局 403 见 issue #27; Loon 带 Turnstile 可拉取, curl 403 视为健康)
+          # 2026-09-18 优化审计: 此前探 7 个 LPX, 其中 6 个对应功能已在 loon.tpl:514-518
+          # 明确移除 (无本地替代: Spotify/微信外链/京东比价/节点检测/链路检测/VVebo)。
+          # 给已移除功能探活=噪声告警, 收敛为单个哨兵: 若其翻为真实 200 (解封),
+          # 即人工复核 issue #27 (可恢复 LPX 直连)。transport-purify 的 kelee.one
+          # script data-path (开关门后) 不在此列 — 那是运行时数据源, 非配置拉取。
+          check_url "kelee.one LPX Google (封锁哨兵)" "https://kelee.one/Tool/Loon/Lpx/Google.lpx"
 
           # 镜像上游 (单一权威清单: Mirror/MANIFEST.json — 新增镜像自动纳入, 勿在此重复硬编码)
           node -e '

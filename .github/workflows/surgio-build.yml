@@ -21,6 +21,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # 2026-09-18 优化审计: 与 mirror-scripts 同因 — GITHUB_TOKEN 开的 PR
+          # 其 pull_request run 会停在 action_required (见 mirror PR #41)。
+          # 改用 MIRROR_TOKEN (PAT), 缺失时回退并告警 (CI 仍会停摆, 但可见)。
+          token: ${{ secrets.MIRROR_TOKEN || github.token }}
 
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
@@ -61,8 +66,12 @@ jobs:
       - name: Open or update PR
         if: steps.check.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
+          GH_TOKEN: ${{ secrets.MIRROR_TOKEN || github.token }}
         run: |
+          if [ -z "${MIRROR_TOKEN:-}" ]; then
+            echo "::warning::secrets.MIRROR_TOKEN 未配置, 本次回退 GITHUB_TOKEN; surgio PR 的 CI 仍会停在 action_required 等人工批准。"
+          fi
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           BRANCH="surgio-auto"

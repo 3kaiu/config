@@ -179,6 +179,16 @@ export async function probeNodes(nodes, target, opts) {
   return results;
 }
 
+/**
+ * 相对下限判定 (2026-09-18 优化审计): MIN_NODES=3 绝对下限拦不住"从 60 个跌到 3 个"
+ * 的上游半失活 — 那会用一份差 20 倍的清单覆盖好文件。与镜像门禁 1 同哲学:
+ * 新数量须 ≥ 旧数量的 50%, 否则保留旧文件。旧文件本身不足 MIN_NODES 时不比
+ * (旧文件已坏, 任何新文件都不更差)。纯函数, 供 main() 与单测共用。
+ */
+export function isBelowRelativeFloor(newCount, oldCount) {
+  return oldCount >= MIN_NODES && newCount < Math.ceil(oldCount / 2);
+}
+
 async function main() {
   const res = await fetch(API_URL, {
     headers: { "User-Agent": "3kaiu-config/geonode-sync" },
@@ -225,6 +235,10 @@ async function main() {
   // 幂等: 节点集无变化则不重写 (头部含生成时间, 避免每日无意义提交)
   const existing = fs.existsSync(OUT) ? fs.readFileSync(OUT, "utf8") : "";
   const existingNodes = existing.split("\n").filter((l) => NODE_LINE_RE.test(l));
+  // 相对下限 (2026-09-18 优化审计): 判定逻辑见 isBelowRelativeFloor。
+  if (isBelowRelativeFloor(lines.length, existingNodes.length)) {
+    throw new Error(`新 ${lines.length} 节点 < 旧 ${existingNodes.length} 节点的 50%, 上游半失活, 保留旧文件`);
+  }
   if (existingNodes.join("\n") === lines.join("\n")) {
     console.log(`ℹ️ 节点集无变化, 跳过写入 (${path.relative(ROOT, OUT)})`);
     return;
