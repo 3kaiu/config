@@ -1,163 +1,55 @@
-# 🎯 Git Ignore Configuration for Loon Project
-# Last Updated: 2026-08-12
+# Git Ignore — 3kaiu Loon config
+# 2026-09-18 优化审计: 由 68 条精简为 27 条。原文件混入了与本仓库无关的
+# 模板残留 (Sublime/Emacs/CVS/Windows/数据库/压缩包/AWS/Sentry/WorkBuddy 等) ——
+# 本仓库是 Loon 配置仓, 无这些产物; 保留无用模式只会掩盖"真出现了这类文件"的信号。
+# 删掉模式不会影响已跟踪文件 (git 只对未跟踪文件生效), 故为纯收敛。
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Node.js Dependencies (CRITICAL)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
+# ── 依赖 ──
 node_modules/
 npm-debug.log*
-yarn-debug.log*
 yarn-error.log*
-lerna-debug.log*
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Build Artifacts & Cache (GENERATED FILES)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-# Build outputs
+# ── 构建产物 ──
+# ⚠️ `dist/` 是承重条目: surgio generate 每次都会创建一个空 dist/ (surgio 自身行为,
+#    非 npm 产物), 删掉它会让工作区常驻一个未跟踪目录。勿删, 也勿清理该目录。
 dist/
 build/
 .surgio-cache/
 .cache/
 
-# Temporary build files
+# ── 临时/备份文件 ──
 *.tmp
 *.temp
 *.bak
 *.backup
 *.swp
 *~
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# IDE & Editor Files (LOCAL CONFIGURATION)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-# VS Code
-.vscode/
-*.code-workspace
-
-# JetBrains IDEs
-.idea/
-*.iml
-*.ipr
-*.iws
-
-# Sublime Text
-*.sublime-project
-*.sublime-workspace
-
-# Emacs
-\#*\#
-.elc
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Operating System Files
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-._*
-
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-*.lnk
-
-# Linux
-.Trash-*
-.gdk-pixacs-thumbnail-cache
-
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Backup Files Created During Development
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-# Auto-generated backups from editors or tools
 *.orig
 *.old
 *.save
 
-# Local development configurations
-.env.local
-.env.development.local
-.env.test.local
+# ── 编辑器 ──
+.vscode/
+.idea/
+*.iml
+*.code-workspace
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Test Coverage Reports (REGENERATABLE)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# ── 操作系统 ──
+.DS_Store
+._*
+.AppleDouble
 
-coverage/
-.nyc_output/
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Database Files (PER-ENVIRONMENT)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-*.db
-*.sqlite
-*.ldb
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Environment Variables & Secrets
-# ⚠️ NEVER COMMIT CREDENTIALS!
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-# AWS credentials
-.aws/credentials
-.aws/config
-
-# GitHub tokens (if stored locally)
-.github/token.txt
-
-# Any environment file containing secrets
+# ── 本地环境/密钥 (勿提交任何凭据) ──
+.env*
+!.env.example
 *.pem
 *.key
 *.secret
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Temporary Archives & Compressed Files
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# ── 测试覆盖率 ──
+coverage/
+.nyc_output/
 
-# Compressed archives (can be regenerated if needed)
-*.tar.gz
-*.zip
-*.rar
-*.7z
-*.tar.bz2
-
-# Note: Only keep compressed archives that are truly immutable
-# (e.g., externally hosted assets, not locally generated)
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Miscellaneous
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-# Editor swap files
-.swp
-.*.swp
-
-# Version control backup
-CVS
-cvsignore
-
-# Sentry.io
-.sentryclirc
-
-# Debug
-debug.log
-
-# Misc
+# ── 其他 ──
 .eslintcache
-.stylelintcache
-
-# 临时目录
 scratch/
-
-
-# WorkBuddy AI project data
-.workbuddy-ai/

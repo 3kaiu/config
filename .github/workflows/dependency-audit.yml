@@ -29,14 +29,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
+      # 2026-09-18 优化审计: 本 job **不再 `npm ci`**。
+      # `npm audit` 的输入是 package-lock.json 构造的理想依赖树, 不需要 node_modules ——
+      # 本地实测 (空目录仅放 package.json + package-lock.json):
+      #   npm audit --registry=https://registry.npmjs.org --json  → 8.0s, 42 项, 与基线一致。
+      # 原 `npm ci` 每周装 581 包/187MB 只为跑这一条只读查询, 且会执行第三方 install 脚本 ——
+      # 与 script-tests.yml 把 attestation 拆出 `npm ci` 的供应链理由自相矛盾。
+      # 故 setup-node 也去掉 `cache: npm` (无 install 步骤则缓存无对象)。
       - name: Setup Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
 
       - name: Weekly audit report (never red)
         run: |

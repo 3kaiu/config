@@ -45,21 +45,10 @@ export function readFlag(name: string): boolean {
   return false;
 }
 
-/**
- * 读取一个文本型插件参数 (input / select)。
- * 未传或类型不符返回空串 — 调用方无需再做 undefined 守卫。
+/*
+ * 2026-09-18 优化审计: 此处原有 `readText(name)` (读 input/select 文本型参数)。
+ * 实测零消费者 —— 全仓 (src/、test/、Scripts/ 产物) 命中 0 次, 属死导出:
+ * 所有插件参数都是开关型 (readFlag 的 7 处调用点), 没有任何脚本读文本型参数。
+ * 按仓库"不留看起来有用其实没有的代码"原则删除 (git 历史保留实现)。
+ * 将来确有文本型参数时再补, 并同时补行为级用例。
  */
-export function readText(name: string): string {
-  const a = rawArgument();
-  if (a === undefined || a === null) return "";
-  if (typeof a === "object") {
-    const v = (a as Record<string, unknown>)[name];
-    return typeof v === "string" ? v : v === undefined || v === null ? "" : String(v);
-  }
-  if (typeof a === "string") {
-    // 传统形态 "KEY=value" — 取该键的值, 而非整串
-    const m = a.match(new RegExp("(?:^|[&;])\\s*" + name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "=([^&;]*)"));
-    return m ? m[1] : "";
-  }
-  return "";
-}

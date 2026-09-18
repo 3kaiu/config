@@ -8,6 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased] (2026-09-04 对抗审计)
 
+### Fixed (2026-09-18 精简/性能优化审计 — 项 1: 零风险清理, 219 例全绿)
+
+**死导出 `readText` 删除**（`src/lib/argument.ts` + 6 个产物重建, 各 -272B）：全仓（`src/`、`test/`、`Scripts/` 产物）命中 **0** 次 —— 全部插件参数都是开关型（`readFlag` 6 处调用点），无任何脚本读文本型参数。删除后 `npm run build` 反而证明它此前**被内联进 6 个产物**（AlipayMini / Bilibili / LinkedIn / Twitter / Weibo / Zhihu 各 -272B）—— 即这段死代码一直在随 CDN 分发给客户端。验证方式（防止"删除未用导出"掩盖行为变化）：21 个产物两两比对经"≤3 字符标识符掩码"归一化后，15 个**完全一致**（纯变量重命名）、余 6 个差异段恒为 255 字符且 `function` 声明数各 -1（即恰为移除那一个函数体），配合 219 例行为用例全绿
+
+**`.gitignore` 163→55 行**：删除与本仓库无关的模板残留（Sublime / Emacs / CVS / Windows 回收站 / Linux trash / `*.db` `*.sqlite` / 压缩包 / AWS 凭据路径 / Sentry / WorkBuddy / `*.lnk` 等），保留 27 条有效模式。`dist/`（承重: surgio generate 每次新建空目录）与 `node_modules/` 就地加注释保留。删模式只影响未跟踪文件（实测 0 个已跟踪文件命中被删模式），故为纯收敛而非风险
+
+**`dependency-audit` 免装依赖**（`.github/workflows/dependency-audit.yml`）：`npm audit` 的输入是 `package-lock.json` 构造的**理想依赖树**，不需要 `node_modules` —— 本地实测（空目录仅放 package.json + package-lock.json）8.0s 得到 42 项，与基线逐项一致。原每周 `npm ci`（581 包 / 187MB，且会执行第三方 install 脚本）只为跑一条只读查询，并与 `script-tests.yml` 把 attestation 拆出 `npm ci` 的供应链理由自相矛盾；`setup-node` 的 `cache: npm` 随之移除（无 install 步骤则无缓存对象）
 ### Fixed (2026-09-18 优化审计整改 + 全厂商跟 latest — 两批, 全绿 218 例)
 
 **Loon 3.5.1(978) 官方文档对齐**（`template/loon.tpl`、`Profile/Loon.lcf`、`test/harness.js`、`.github/workflows/mirror-scripts.yml`）：逐页核对规则/插件/通用配置文档。抓到 1 个真实 bug：`interface-mode = Performance` —— 官方中英文档取值表均为 `Performace`（官方拼写），`Performance` 会被当未知值回退，网卡选择从作者本意的"最优接口"掉回默认。规则语义（DOMAIN/GEOIP/`no-resolve`/DEST-PORT/FINAL/来源优先级`本地＞插件＞订阅`、DoH 并发优先、`$argument.name` 对象形态、插件规则仅 DIRECT/REJECT/PROXY）与已弃用表（本仓未用任何已弃用参数）全部对齐；UA 与 harness mock 提到 3.5.1。**有意没动**：`ip-mode = fake-ip`（文档页是"常用参数"非全集，改 DNS 行为风险大于收益）、`ipv6-vif`（未收录也未弃用）
