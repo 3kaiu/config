@@ -1,18 +1,17 @@
 # Geonode 免费代理订阅 — 由 tools/geonode-sync.mjs 生成, 勿手改
 # 上游: proxylist.geonode.com (每日 03:40 UTC 由 proxy-sync workflow 刷新)
-# 生成时间: 2026-09-18T08:30:40.104Z
-# 节点数: 13 (连通性已验证: https://opencode.ai/, 耗时 ≤6s)
+# 生成时间: 2026-09-19T08:18:25.849Z
+# 节点数: 12 (连通性已验证: https://opencode.ai/, 耗时 ≤6s)
 
+geonode-https-US-34.43.46.91-443 = https,34.43.46.91,443
+geonode-socks5-US-132.148.244.30-45157 = socks5,132.148.244.30,45157
 geonode-socks5-US-45.61.188.134-44499 = socks5,45.61.188.134,44499
-geonode-socks5-DE-135.125.232.151-1080 = socks5,135.125.232.151,1080
-geonode-socks5-CZ-103.119.19.36-1080 = socks5,103.119.19.36,1080
-geonode-socks5-RU-84.38.187.157-1080 = socks5,84.38.187.157,1080
-geonode-socks5-TR-2.56.108.184-1080 = socks5,2.56.108.184,1080
-geonode-socks5-KR-121.169.46.116-1090 = socks5,121.169.46.116,1090
-geonode-https-RU-217.77.102.18-3128 = https,217.77.102.18,3128
-geonode-https-SG-8.219.97.248-80 = https,8.219.97.248,80
+geonode-socks5-US-135.148.120.20-1080 = socks5,135.148.120.20,1080
+geonode-http-GB-88.80.186.173-19180 = http,88.80.186.173,19180
+geonode-socks5-US-207.244.69.164-50005 = socks5,207.244.69.164,50005
+geonode-socks5-RU-5.167.171.79-1080 = socks5,5.167.171.79,1080
+geonode-http-IR-5.200.72.58-3128 = http,5.200.72.58,3128
+geonode-http-US-104.218.199.115-16062 = http,104.218.199.115,16062
+geonode-socks5-RU-77.41.170.50-1080 = socks5,77.41.170.50,1080
 geonode-socks5-BD-203.76.123.6-1080 = socks5,203.76.123.6,1080
-geonode-socks5-ID-103.134.220.143-1080 = socks5,103.134.220.143,1080
-geonode-socks5-RU-95.220.199.192-1080 = socks5,95.220.199.192,1080
-geonode-http-ID-45.198.8.204-8080 = http,45.198.8.204,8080
-geonode-socks5-UA-212.3.127.242-10801 = socks5,212.3.127.242,10801
+geonode-socks5-RU-77.51.182.67-1080 = socks5,77.51.182.67,1080
