@@ -6,7 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-## [Unreleased] (2026-09-04 对抗审计)
+## [Unreleased]
+
+### Added (2026-09-20 精简优化 — Rewrite 冗余清除 + 常驻门禁)
+
+- **同文件"前缀遮蔽"死规则批量清除 (行为零变化)**: Loon rewrite 规则 = `^` 锚定的 URL **前缀**匹配, 故同文件内"更早的 A 是 B 的**字符串严格前缀** + action/enable 逐字一致"时 B 恒不可达 (A 已抢先消费 B 能匹配的每个 URL)。首轮实测 8 对 (自维护 3 + 镜像 AllInOne 5), 清除:
+  - `Plugin/keep-pro.plugin`: `.../search/v\d/hotwords` 被 `.../search/v\d/hotword` 前缀罩住, 删子行
+  - `Plugin/news-purify.plugin`: `.../eapi/ad/` 被 `.../eapi/ad` 前缀罩住 (网易云音乐, 同 enable), 删子行; `interface3?/eapi/(ad|abtest|...)` 有更多 alternation 保留
+  - `Plugin/startup-adblock-pro.plugin`: 生成块 `advertapi` (前缀) 罩住尾部 `adv-filter/.../getAdInfos$` 子条 — **前缀遮蔽自剪枝置入生成器** (`prunedGenLines`, 手写块永不剪), 449→448, 每日镜像重跑不漂移
+- **跨插件精确重复去重**: `dsp.fcbox.com/adSearch/` 同条规则同时存在于 social-netdisk-purify 与 shopping-purify (enable 分属两插件) — 保留 shopping/FC_BOX 一方, 删 social 副本 + 其 hostname 依赖 (`dsp.fcbox.com` 移出 social [MitM]; shopping 侧 host 与规则均在, 全覆盖保留)
+- **新增门禁 `npm run check:rewrite`** (`tools/rewrite-redundancy-check.mjs`, 接 check:all + config-validate step 9b-bis + mirror-scripts 镜像 job): 判别在**源字符串层**进行 (不解析正则), 只按严格前缀/逐字相等; 镜像 (Mirror/)**只登记不手改** (mirror-scripts 每日重写), AllInOne 5 对上游自重复中动作相同者 4 对 (ad.mcloud/gotokeep/echargenet/sf3) 已逐对登记 `ACCEPTED_PAIRS` (实测成因 + 复检 2027-03-31, 新对判红; maicai 对 action 不同 `reject` vs `reject-200` 语义不同不判)
+- **数字同步**: 用例总数 240 → 247 (rewrite-redundancy.test.js 新增 7 例, doc-claims-check 已同步, AGENTS.md 已更新)
+
+### Added (2026-09-20 精准去广告 — script 型未纳入口径闭合: EXTRA_REJECTS + 台账)
+
+- **启动插件新增 `script→原生 reject 精准补充` 块 (生成器维护)**: 上游墨鱼 StartUpAds 27 条 script 型条目生成器原本只统计不拦截, 审计以 path 级 token 全量复核 (host 级粗扫会误判, 见 AGENTS.md 台账纪律) 确认 **13 条零覆盖**。首批落地 3 条 (host 已在解密面或端点名即广告, 有同文件 reject 先例, 零功能风险):
+  - `api.m.jd.com /api?functionId=delivery_show` → `reject-dict` (京东开屏广告外层, 上游 startup.js 只剥广告字段, 纯广告 JSON 接口)
+  - `ccsp-egmas.sf-express.com /cx-app-base/.../ad/queryInfoFlow` → `reject-dict` (顺丰信息流广告, 同 host 已有 queryAdImages reject-200 先例)
+  - `api.369cx.cn /v\d/Splash/GetSplashAd` → `reject-200` (漫画开屏, 端点名即 Splash 广告接口; 该 host 新并入 [MitM] 解密面, MitM 380→381)
+- **新增未纳入台账门禁 (SCRIPT_LEDGER + scriptLedger)**: 27 条 script 条目逐条三态 (`covered` 14 — 已由其他层 [Rewrite] path 级覆盖 / `extra` 3 — 已转原生 / `pending` 10 — 待真机或已判定不做)。**新上游 script 条目不在台账 → 报告 ⚠️ + startup-plugin-host 测试判红, 强制人工分诊**, 杜绝上游新增条目静默泄漏。pending 10 条成因: 功能接口整拒会砍功能 (京东 hotWords 搜索热词 — 上游 jd_json.js 只剥广告字段, 等上游脚本化)/ 需加 MitM 或真身未确认 (IT之家 napi.ithome、值得买 zdmimg CPM、神州租车 cardes、深银 stay-fork、平安 api.jk.cn)/ 动作形态待真机 (百视TV、飞客、航旅 .com.cn、农行 mgw.htm — 上游即 script-response-header)。台账与 EXTRA 由 `startup-plugin-host.test.js` 4 例新增断言锁死 (产物一致性自动含 EXTRA; 规则与 host 同生防 mitm-orphan; token 唯一防匹配漂移)
+- **数字同步**: 用例总数 238 → 240 (doc-claims-check 已同步, AGENTS.md 已更新)
 
 ### Fixed (2026-09-20 官方语义审计 — [General] 三键整改 + hijack-dns 收窄)
 

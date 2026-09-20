@@ -235,8 +235,82 @@ ENABLE_STARTUP=switch,"true","false",tag=总开关，desc=开启后过滤所有 
 
 export const BEGIN_MANUAL = "# === BEGIN 3kaiu 手写补充 ===";
 export const END_MANUAL = "# === END 3kaiu 手写补充 ===";
+export const BEGIN_EXTRA = "# === BEGIN 3kaiu script→原生 reject 精准补充 (由 tools/build-startup-plugin.mjs 维护) ===";
+export const END_EXTRA = "# === END 3kaiu script→原生 reject 精准补充 ===";
 export const BEGIN_GEN = "# === BEGIN ddgksf2013 StartUpAds 自动生成 (勿手改, 由 tools/build-startup-plugin.mjs 维护) ===";
 export const END_GEN = "# === END ddgksf2013 StartUpAds 自动生成 ===";
+
+// ── script 型条目台账 (2026-09-20 精准去广告审计) ────────────────────────────
+// 上游墨鱼 StartUpAds 的 script-response-body/header 型条目, 生成器不纳脚本,
+// 逐条登记去向, 杜绝"上游新增 script 条目 → 静默泄漏"。status:
+//   covered   已由其他层 [Rewrite] path 级覆盖 (2026-09-20 全量核对)
+//   extra     已转 EXTRA_REJECTS 本地原生 reject (生成器维护, host 并入 MitM)
+//   pending   待真机验证 / 已判定不做 (逐条写明缘由与障碍)
+// 新上游条目不在台账 → scriptLedger 判 "unregistered" (报告 ⚠️ + 测试判红)。
+export const EXTRA_REJECTS = [
+  {
+    regex: "^https?:\\/\\/api\\.m\\.jd\\.com\\/api\\?functionId=delivery_show",
+    action: "reject-dict",
+    host: "api.m.jd.com",
+    reason: "京东开屏广告外层 (上游 startup.js); 纯广告 JSON 接口, host 已在解密面, reject-dict 去广告不伤功能",
+  },
+  {
+    regex: "^https?:\\/\\/ccsp-egmas\\.sf-express\\.com\\/cx-app-base\\/base\\/app\\/ad\\/queryInfoFlow",
+    action: "reject-dict",
+    host: "ccsp-egmas.sf-express.com",
+    reason: "顺丰信息流广告 (上游 shunfeng_json.js); 同 host 已有 queryAdImages reject-200 先例, reject-dict 去广告 JSON",
+  },
+  {
+    regex: "^https?:\\/\\/api\\.369cx\\.cn\\/v\\d\\/Splash\\/GetSplashAd",
+    action: "reject-200",
+    host: "api.369cx.cn",
+    reason: "漫画开屏广告 (上游 dict.js); 端点名即 Splash/GetSplashAd, 同文件 430+ 开屏 reject-200 先例; host 为此新入 MitM 解密面",
+  },
+];
+
+/** [token, status, note] — token 取 path 级唯一锚 (见 scriptLedger 匹配) */
+export const SCRIPT_LEDGER = [
+  // covered: 已由其他层 path 级覆盖 (2026-09-20 全量核对)
+  ["index_recommend", "covered", "video-community-purify.plugin (555Ad)"],
+  ["123pan", "covered", "Mirror/rules/loon-AllInOne.plugin"],
+  ["getAdList", "covered", "AllInOne + social-netdisk-purify"],
+  ["mobileDispatch", "covered", "shopping-purify / amap / BlockAdvertisers"],
+  ["ahhhhfs", "covered", "AllInOne"],
+  ["phpui2", "covered", "AllInOne (baidumap Ads)"],
+  ["gg\\.caixin", "covered", "AllInOne (财新广告)"],
+  ["cupid", "covered", "iqiyi-pro + AdvertisingScript"],
+  ["coolapk", "covered", "social-netdisk-purify + AllInOne"],
+  ["open-cms", "covered", "social-netdisk-purify (quark/UC)"],
+  ["pupuapi", "covered", "shopping-purify (pupu 营销 banner)"],
+  ["teamair", "covered", "AllInOne (起点/Qidian)"],
+  ["launch_v2", "covered", "zhihu-pro + AdvertisingScript"],
+  // extra: 已转 EXTRA_REJECTS 本地原生 reject
+  ["GetSplashAd", "extra", "EXTRA_REJECTS[2] 369cx 开屏 reject-200"],
+  ["delivery_show", "extra", "EXTRA_REJECTS[0] 京东开屏 reject-dict"],
+  ["queryInfoFlow", "extra", "EXTRA_REJECTS[1] 顺丰信息流 reject-dict"],
+  // pending: 待真机验证 / 已判定不做
+  ["getCommonMixData", "pending", "百视TV 信息流: host 已解密, reject 动作形态待真机"],
+  ["threadpost", "pending", "飞客茶馆: host 已解密, 待真机"],
+  ["umetrip", "pending", "航旅 .com.cn 真身待确认 (umetrip-pro 仅覆盖 .com)"],
+  ["indexv", "pending", "IT之家: 需加 MitM napi.ithome.com 后验证"],
+  ["hotWords", "pending", "京东搜索热词系功能接口 (jd_json.js 只剥广告字段), 整拒会砍功能, 不做 — 待上游脚本化"],
+  ["mgw\\.htm", "pending", "农行网关页 (上游为 script-response-header), reject 形态待真机"],
+  ["api\\.jk\\.cn", "pending", "平安广告接口: 待真机"],
+  ["stay-fork", "pending", "深银客户端: 待真机"],
+  ["get_all_advertise", "pending", "值得买 CPM (zdmimg): 需加 MitM + 真机"],
+  ["cardes", "pending", "神州租车 marketing 投放: 需加 MitM + 真机"],
+];
+
+/** 把 27 条 script 条目归类为 covered / extra / pending / unregistered */
+export function scriptLedger(scripts) {
+  return scripts.map((s) => {
+    const re = s.split(" → ")[0];
+    const hit = SCRIPT_LEDGER.find(([tok]) => re.includes(tok));
+    return hit
+      ? { line: s, regex: re, status: hit[1], note: hit[2] }
+      : { line: s, regex: re, status: "unregistered", note: "上游新增 script 条目, 需人工分诊!" };
+  });
+}
 
 /** 手写补充块: 从现有插件提取 (BEGIN/END 标记之间, 无标记则取整个手写段) */
 export function extractManualBlock(cur) {
@@ -258,25 +332,51 @@ export function renderPlugin({ updateTime, rules, rejects, seen, droppedGarbage,
     const re = r.regex.startsWith("^") ? r.regex : `^${r.regex}`;
     return `${re} ${r.action} enable={ENABLE_STARTUP}`;
   });
+  // 前缀遮蔽自剪 (2026-09-20 精简优化): Loon url-regex 规则 = 锚起始的前缀匹配,
+  // 若已有更早的 (手写或生成) 同 action+enable 规则是当前规则的严格字面前缀,
+  // 则当前规则永远无法命中, 剪掉 (如上游 ad.mcloud.139.com/advertapi 罩住尾部
+  // adv-filter/.../getAdInfos$ 子条)。手写块永不剪。
+  const parts = (l) => {
+    const m = l.trim().match(/^(\S+)\s+(\S+)\s+(.*)$/);
+    return m ? { regex: m[1], action: m[2], rest: m[3] } : null;
+  };
+  const seenMeta = manualLines.map(parts).filter(Boolean);
+  const prunedGenLines = [];
+  for (const l of genLines) {
+    const p = parts(l);
+    const shadowed = p && seenMeta.some(
+      (s) => s.action === p.action && s.rest === p.rest && p.regex.startsWith(s.regex) && p.regex.length > s.regex.length
+    );
+    if (!shadowed) { prunedGenLines.push(l); if (p) seenMeta.push(p); }
+  }
+  // script→原生 reject 精准补充块 (EXTRA_REJECTS): 生成的规则与对应 host 必须同生共死
+  const extraLines = EXTRA_REJECTS.map((e) => `# ${e.reason}\n${e.regex} ${e.action} enable={ENABLE_STARTUP}`);
+  // 未纳入计数口径: script 条目扣除已转原生的 (extra)
+  const unconvertedScripts = scriptLedger(scripts).filter((r) => r.status !== "extra").length;
   const unsafeNote = unsafe.length
     ? `\n# ⛔ 已剔除边界不安全通配 ${unsafe.length} 条 (可匹配非预期注册域, 解密面扩张): ${unsafe.join(", ")}`
     : "";
+  const mitmHosts = [...new Set([...kept, ...EXTRA_REJECTS.map((e) => e.host)])];
   return `${HEADER}
 ${BEGIN_MANUAL}
 ${manualLines.join("\n")}
 ${END_MANUAL}
 
+${BEGIN_EXTRA}
+${extraLines.join("\n")}
+${END_EXTRA}
+
 ${BEGIN_GEN}
 # 来源: https://ddgksf2013.top/rewrite/StartUpAds.conf (镜像 ifflagged/Romeo, @UpdateTime ${updateTime})
-# 转换: QX url reject[-xxx] → Loon rewrite, 共 ${rules.length} 条 (上游 ${rejects.length} 行, 去重 ${rejects.length - seen.size} 条, 垃圾host ${droppedGarbage} 条)
-# 未纳入: ${scripts.length} 条 script 型 + ${hostRules} 条 host 型 (见工具脚本注释)
-${genLines.join("\n")}
+# 转换: QX url reject[-xxx] → Loon rewrite, 共 ${prunedGenLines.length} 条 (上游 ${rejects.length} 行, 去重 ${rejects.length - seen.size} 条, 前缀遮蔽剪 ${genLines.length - prunedGenLines.length} 条, 垃圾host ${droppedGarbage} 条)
+# 未纳入: ${unconvertedScripts} 条 script 型 + ${hostRules} 条 host 型 (去向见 scriptLedger/SCRIPT_LEDGER, 见工具注释)
+${prunedGenLines.join("\n")}
 ${END_GEN}
 
 [MitM]
 # ⚠️ 注意：部分 App 禁用了 MITM，无法拦截其开屏广告
-# 上游 hostname 最小化子集 (${kept.length}/${upstreamCount} 条, 仅被 reject 规则消费的域)${unsafeNote}
-hostname = %APPEND% ${kept.join(", ")}
+# 上游 hostname 最小化子集 (${mitmHosts.length}/${upstreamCount} 条, 仅被 reject 规则消费的域 + EXTRA_REJECTS host)${unsafeNote}
+hostname = %APPEND% ${mitmHosts.join(", ")}
 `;
 }
 
@@ -319,8 +419,13 @@ export function main() {
       console.log(`   ${w.host} → ${w.rules} 条规则消费`);
     }
   }
-  console.log("\n── 未纳入的 script 型条目 (供后续决策) ──");
-  for (const s of scripts) console.log(`   ${s}`);
+  // script 型条目台账 (2026-09-20): covered/extra/pending 有主, unregistered 需分诊
+  const ledger = scriptLedger(scripts);
+  console.log(`\n── script 型条目台账 (${ledger.length} 条: covered ${ledger.filter((r) => r.status === "covered").length} / 已转原生 ${ledger.filter((r) => r.status === "extra").length} / 待真机 ${ledger.filter((r) => r.status === "pending").length} / 未登记 ${ledger.filter((r) => r.status === "unregistered").length}) ──`);
+  for (const r of ledger) {
+    const tag = r.status === "covered" ? "✅已覆盖" : r.status === "extra" ? "🔧已转原生" : r.status === "pending" ? "⏳待真机" : "⚠️未登记";
+    console.log(`   ${tag} ${r.regex.slice(0, 78)} — ${r.note}`);
+  }
   return 0;
 }
 

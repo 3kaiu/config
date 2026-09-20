@@ -430,6 +430,15 @@ jobs:
           node tools/rule-shadow-check.mjs 2>&1 | tee -a $GITHUB_STEP_SUMMARY
           exit ${PIPESTATUS[0]}
 
+      # ── 9b-bis. Rewrite 规则冗余检查 (2026-09-20 精简优化新增) ──
+      # 同文件"更早规则是后者的字面前缀 + 作用相同" ⇒ 后者恒不可达 (死规则);
+      # 跨文件精确重复 (非镜像)。镜像内同类冗余只登记不手改 (mirror-scripts 每日重写)。
+      - name: Rewrite redundancy check (tools/rewrite-redundancy-check.mjs)
+        run: |
+          echo "## Rewrite Redundancy Check" >> $GITHUB_STEP_SUMMARY
+          node tools/rewrite-redundancy-check.mjs 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          exit ${PIPESTATUS[0]}
+
       # ── 9c. 镜像声明漂移检查 (2026-09-11 深度审计 NEW-10) ──
       # MOD-09 盲区: mirror-scripts 声明 `releases/latest/…` 而 keep_old 在 fetch 失败时
       # 静默保留旧版 → MANIFEST 记的是固定旧版本, 与声明不再一致; 只有比对"workflow 声明 URL"

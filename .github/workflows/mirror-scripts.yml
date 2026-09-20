@@ -280,6 +280,13 @@ jobs:
             FAIL=$((FAIL+1))
           fi
 
+          # Rewrite 规则冗余检查 (2026-09-20 精简优化新增): 镜像更新可能在上游侧引入新的
+          # 同文件前缀遮蔽/改变镜像文件内容, 与 config-validate.yml 同门禁, 失败 keep_old。
+          if ! node tools/rewrite-redundancy-check.mjs; then
+            echo "❌ Rewrite 规则冗余检查失败 — 见上方明细 (新引入的未登记冗余)"
+            FAIL=$((FAIL+1))
+          fi
+
           # ═══════════════ Loon rewrite 插件 ═══════════════
           # 注: 插件内 script-path 传递性依赖已收敛 (2026-08), 见下方补丁;
           # 镜像消除插件文件本身 + 22 条脚本引用的全部单点

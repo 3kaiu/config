@@ -11,13 +11,14 @@
     "lint": "eslint Scripts/ test/ tools/",
     "check:sync": "node tools/tpl-sync-check.mjs",
     "check:shadow": "node tools/rule-shadow-check.mjs",
+    "check:rewrite": "node tools/rewrite-redundancy-check.mjs",
     "check:drift": "node tools/mirror-drift-check.mjs --strict",
     "check:src": "node tools/src-antipattern-check.mjs",
     "check:orphan": "node tools/mitm-orphan-check.mjs --local",
     "check:plugin": "node tools/plugin-lint-check.mjs",
     "check:contract": "node tools/argument-contract-check.mjs",
     "check:workflows": "node tools/workflow-bash-check.mjs",
-    "check:all": "npm run check:sync && npm run check:shadow && npm run check:drift && npm run check:src && npm run check:orphan && npm run check:plugin && npm run check:contract && npm run check:workflows",
+    "check:all": "npm run check:sync && npm run check:shadow && npm run check:rewrite && npm run check:drift && npm run check:src && npm run check:orphan && npm run check:plugin && npm run check:contract && npm run check:workflows",
     "audit:ci": "npm audit --registry=https://registry.npmjs.org"
   },
   "engines": {

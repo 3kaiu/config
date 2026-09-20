@@ -11,7 +11,6 @@
 # ── 弹窗/开屏/热词/广告预加载/更新检查 ──
 ^https?:\/\/hc-ssp\.sm\.cn\/.* reject-200
 ^https?:\/\/api\.gotokeep\.com\/search\/v\d\/hotword reject-200
-^https?:\/\/api\.gotokeep\.com\/search\/v\d\/hotwords reject-200
 ^https?:\/\/api\.gotokeep\.com\/opengateway\/v\d\/popup\/info reject-200
 ^https?:\/\/api\.gotokeep\.com\/opengateway\/v\d\/popup\/get reject-200
 ^https?:\/\/api\.gotokeep\.com\/opengateway\/v\d\/popup\/report reject-200

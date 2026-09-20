@@ -70,7 +70,6 @@ SNOWBALL_ENABLE=switch,"true","false",tag=是否开启雪球净化,desc=雪球�
 ^https?:\/\/c\.m\.163\.com\/nc\/gl\/ reject-dict enable={NEWS_PURIFY_ENABLE}&{NETEASENEWS_ENABLE}
 ^https?:\/\/client\.mail\.163\.com\/apptrack\/confinfo\/searchMultiAds reject enable={NEWS_PURIFY_ENABLE}&{NETEASENEWS_ENABLE} # no-retry
 ^https?:\/\/g1\.163\.com\/madfeedback reject enable={NEWS_PURIFY_ENABLE}&{NETEASENEWS_ENABLE} # no-retry
-^https?:\/\/interface\.music\.163\.com\/eapi\/ad\/ reject-dict enable={NEWS_PURIFY_ENABLE}&{NETEASENEWS_ENABLE}
 ^https?:\/\/support\.you\.163\.com\/xhr\/boot\/getBootMedia\.json reject-dict enable={NEWS_PURIFY_ENABLE}&{NETEASENEWS_ENABLE}
 ^https?:\/\/interface3?\.music\.163\.com/eapi/(ad|abtest|sp|hot|store|search/(specialkeyword|defaultkeyword|hot)) reject-dict enable={NEWS_PURIFY_ENABLE}&{NETEASENEWS_ENABLE}
 ^https:\/\/api\.xueqiu\.com\/snowpard\/launch_strategy\/query\.json\? reject-dict enable={NEWS_PURIFY_ENABLE}&{SNOWBALL_ENABLE}

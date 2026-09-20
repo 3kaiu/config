@@ -188,6 +188,35 @@ exports.tests = {
     a.equal(expected, fs.readFileSync(OUT, "utf8"), "Plugin/startup-adblock-pro.plugin 应与生成器输出逐字节一致");
   },
 
+  // ── script 型条目台账 (2026-09-20, 精准去广告审计) ──
+  "startup-host: script 型条目全分诊 (covered/extra/pending, 零 unregistered)": async (a) => {
+    const m = await load();
+    const parsed = m.parseConf(fs.readFileSync(SRC, "utf8"));
+    const rows = m.scriptLedger(parsed.scripts);
+    a.equal(rows.length, parsed.scripts.length, "台账应逐条覆盖全部 script 条目");
+    const unreg = rows.filter((r) => r.status === "unregistered");
+    a.equal(unreg, [], "不允许未登记条目 — 上游新增 script 条目时此断言判红, 需人工分诊");
+    const byStatus = (s) => rows.filter((r) => r.status === s).length;
+    a.equal(byStatus("covered"), 14, "covered 14 (2026-09-20 path 级核对)");
+    a.equal(byStatus("extra"), 3, "extra 3 (delivery_show/queryInfoFlow/GetSplashAd)");
+    a.equal(byStatus("pending"), 10, "pending 10 (待真机/已判定不做)");
+    const tokens = m.SCRIPT_LEDGER.map(([t]) => t);
+    a.equal(new Set(tokens).size, tokens.length, "SCRIPT_LEDGER token 应唯一, 否则匹配语义漂移");
+  },
+
+  "startup-host: EXTRA_REJECTS 规则与 host 同生 — 规则进 [Rewrite], host 进 [MitM]": async (a) => {
+    const m = await load();
+    const txt = fs.readFileSync(OUT, "utf8");
+    const hosts = hostnamesOf(txt);
+    a.ok(m.EXTRA_REJECTS.length > 0, "EXTRA_REJECTS 非空");
+    for (const e of m.EXTRA_REJECTS) {
+      a.includes(txt, e.regex, `${e.host} 规则应出现在产物 [Rewrite]`);
+      a.includes(txt, ` ${e.action} enable={ENABLE_STARTUP}`, `${e.host} 动作 ${e.action} 应在场`);
+      a.equal(hosts.includes(e.host), true, `${e.host} 应并入 [MitM] hostname (与规则配对, 防 mitm-orphan)`);
+      a.equal(m.isBoundaryUnsafe(e.host), false, `${e.host} 应为安全 host 形态`);
+    }
+  },
+
   "startup-host: 生成器不再产出死开关 STARTUP_DEBUG (check:contract 会判红)": async (a) => {
     const txt = fs.readFileSync(OUT, "utf8");
     a.notIncludes(txt, "STARTUP_DEBUG", "产物不得含死开关 STARTUP_DEBUG");
