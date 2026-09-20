@@ -38,6 +38,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **doc-claims-check 再次兑现**: 本批新增产物后立即抓到**三处**数字漂移（用例 227→231 / Scripts 27→28 / 插件 60→61）并强制同步 AGENTS.md —— "文档数字纪律"按设计运作
 - `test/harness.js`: httpCalls 记录 `node` 字段（配合 generic 节点钉住断言, 不影响既有用例）
 
+### Changed / Added (2026-09-20 收尾 — 镜像 PR 合并 + NEW-04 复发守卫)
+
+- **镜像 PR #43 合并** (`3db3942`, 2026-09-19 上游同步积压一日): `mirror/sync` 分支 head `16efbc2` 与同轮 `verify` 兜底 job 校验对象一致 + verify success → 按 #42 同规格 merge commit 合并; 内容 = goodbyeads-qx **+494/-1** (494 新增拦截域 + 1 行上游同域写法更替, 无删减) + MANIFEST 55 条重抓 (54 条无内容变更)。合并提交 CI 三 workflow 绿, 本地 build/231 用例/check:all/lint 复验全绿。注意: 本次仍是"verify 兜底"路径 —— `secrets.MIRROR_TOKEN` 仍未配置, PR 自身 CI 依旧 action_required
+- **NEW-04 复发守卫** (`test/cases/global-comment-claims.test.js`, 3 条): mirror 镜像 `loon-Global.list` 头部 `# DOMAIN-SUFFIX: 34767` 描述的是 blackmatrix7 完整规则集而非 Loon 正文 (209 行/198 条), template/loon.tpl 曾据此写下"34,579 SUFFIX 提前终止"的错误性能理由 (NEW-04, 2026-09-11 已改注释为实测数字但**无门禁守住**)。守卫三条: ①注释"198 条" == 正文实测 (上游再变即红) ②注释逐类构成 (`36 DOMAIN-KEYWORD`/`46 USER-AGENT`/`112 IP-CIDR`/`4 IP-CIDR6`) 与正文逐类一致 ③头声明与正文不符时, 模板免责行"不可当计数用"必须仍在。上游若同步瘦身 (头声明 == 正文), ③ 自然放行; 用例总数 231→234, doc-claims-check 端态当场抓到 231 未同步并强制更新 AGENTS.md (数字纪律照常运作)
+- **check:shadow 台账经受住上游变更检验**: 合并后两对已登记 (China→goodbyeads-qx **941/941** 不变; Global→goodbyeads-qx **606/606→591/606**, 15 条因上游新增排列获得本地兜底), `ACCEPTED_PAIRS` 按"对"登记 + 实测计数打印的语义在内容变更下无需新增登记、判定仍为接受
+
 ### Added (2026-09-18 优化审计 — 项 6: doc-claims-check 文档数字门禁 + 深审 §3 收尾)
 
 - **doc-claims-check: 文档数字自动门禁**（deepdive §3.2 建议 4 落地, NEW-04/MOD-10 的结构性根因"文档数字无自动复核"收口）: 新增 `tools/doc-claims-check.mjs` + `test/cases/doc-claims-check.test.js`（随 `npm test` 进 CI; 刻意**不**进 `check:all` —— `check:*` 是状态自检, 本工具是文档↔产物一致性, 与 wiring-check 同区）。把 AGENTS.md 中 7 项可机械反算的数字固化为断言: 用例数（`exports.tests` 键数, 与 run-tests 语义一致）/ Scripts 产物数 / [Rule] 非注释行数 / 插件总数（Plugin+Kelee）/ Kelee 外壳数 / devDependencies 数 / engines.node 主版本。文档与产物**双向**漂移即红, 另两条红路径: **声明被删除即红**（防改写句式静默脱检）、**文档自相矛盾即红**（同键两个值并存不许取其一放行）。负向用例 4 条 + 真仓库端态断言（rows 恰 7 条, 增删断言须同步用例）。**立项即兑现两遍**: ①本日写 AGENTS 时把 [Rule] 行数写成"483→480"（从 2026-08-29 旧口径 483 推导）, 端态首跑即红 —— 实测基线 **484**（重排后重测）→ 删 3 = **481**; ②新增本用例使用例数 225→231, 端态断言立即抓住并强制同步文档。门禁的运作方式在其自身的提交里演示了两遍; 另为 check:contract 的"60 个插件"宣称补 AGENTS 锚点（Plugin 45 + Kelee 15, 此前该数字只活在工具输出里, 无任何校验）
