@@ -7,12 +7,15 @@
  * fcbox dsp 去重 — 删干净后, 本门禁接管该空间, 防上游/手改重新引入。
  *
  * Loon rewrite 规则的匹配语义 = `^` 锚定的 URL **前缀**匹配 (无 `$` 时整段是字面前缀,
- * 有 `$` 才是整串锚定)。于是判别可完全在**源字符串**层完成, 不需要解析正则:
+ * 有 `$` 才是整串锚定), 且 **首个匹配即生效** (matched-then-stop)。于是判别可完全在
+ * **源字符串**层完成, 不需要解析正则:
  *   同一插件内, 若第 i 条规则的 regex 是第 j 条 (i<j) regex 的**严格字面前缀**,
- *   且**作用完全相同** (action 与 enable 等其余参数逐字一致), 则 j 永远命中不了
- *   —— i 已先把 j 能匹配的每一个 URL 抢先消费掉。j 即死规则。
+ *   且 enable 等其余参数逐字一致, 则匹配 j 的每个 URL 都会先命中 i —— **匹配在 action
+ *   派发之前终止**, 无论 i 的 action 是 reject / reject-dict / reject-200 / body 裁剪,
+ *   j 永远命中不了, 即死规则。
  * 注意只按"字符串前缀"判: 字符类/转义在两条规则源文本里就是同形字符, 前缀成立
  * 依赖的是"同形"而非正则语义; A 若以 `$` 收尾则扮演不了前缀 (锚定了整串), 天然不成立。
+ * enable 必须逐字一致: 前缀规则若可被开关关闭, "先命中"的前提不成立, 不入死规则。
  *
  * 镜像文件 (Mirror/**) 的同类冗余**只报告不修改** —— 镜像由 mirror-scripts 每日重写,
  * 手改即漂移; 非源头文件按"登记接受"处理 (须写实测成因+复检日期, 同 check:shadow 纪律)。
@@ -64,6 +67,13 @@ export const ACCEPTED_PAIRS = new Map([
     },
   ],
   [
+    "Mirror/rules/loon-AllInOne.plugin|^https?:\\/\\/maicai\\.api\\.ddxq\\.mobi\\/advert\\/startUpScreen",
+    {
+      reason: "镜像侧上游自重复: 同文件更早的 `maicai.api.ddxq.mobi/advert/` (reject) 是 startUpScreen 子条的字符串前缀 — 匹配在 action 派发前终止 (先命中即结束), 子条恒不可达 (reject-200 语义被吞)。",
+      reviewBy: "2027-03-31 (随上游 maicai 规则刷新复核)",
+    },
+  ],
+  [
     "Mirror/rules/loon-AllInOne.plugin|^https?:\\/\\/sf3-fe-tos\\.pglstatp-toutiao\\.com\\/obj\\/ad-pattern\\/renderer\\/package\\.json",
     {
       reason: "镜像侧上游自重复: `/obj/ad-pattern/renderer/` 前缀 (reject-200) 罩住 package.json 子条。",
@@ -98,7 +108,8 @@ export function scanRewriteRules(text) {
 /**
  * 同文件前缀遮蔽: 返回被遮蔽的行条目列表。
  * A 遮蔽 j 条件: sourceIndex 更小、A.regex 是 j.regex 的严格前缀、
- * action 与 rest (enable 等) 逐字一致。
+ * rest (enable 等) 逐字一致。action 不参与判定 —— 匹配在 action 派发前终止,
+ * 先命中的 A 无论是什么 action 都让 j 不可达。
  */
 export function findShadowed(rules) {
   const shadowed = [];
@@ -107,7 +118,6 @@ export function findShadowed(rules) {
     for (let i = 0; i < j; i++) {
       const ii = rules[i];
       if (
-        ii.action === jj.action &&
         ii.rest === jj.rest &&
         jj.regex.length > ii.regex.length &&
         jj.regex.startsWith(ii.regex)

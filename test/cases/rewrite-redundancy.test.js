@@ -1,7 +1,8 @@
 /**
  * rewrite-redundancy-check 用例 (2026-09-20 精简优化新增门禁)。
  * 覆盖: AllInOne `regex - action` 解析、Loon enable 尾参解析、
- * 同文件前缀遮蔽判死 ($ 锚/动作差异不误报)、跨文件精确重复、仓库现状通过门禁。
+ * 同文件前缀遮蔽判死 (action 不参与 — 匹配先于派发; enable 不同不遮蔽)、
+ * 跨文件精确重复、仓库现状通过门禁。
  */
 "use strict";
 
@@ -38,13 +39,24 @@ exports.tests = {
       a.equal(s[0].shadowedBy.regex, "^https?:\\/\\/a\\.com\\/ads", "遮蔽方是前缀规则");
     },
 
-    "findShadowed 动作不同不遮蔽 (reject vs reject-200 语义不同)": async (a) => {
+    "findShadowed action 不同仍判死 (匹配先于 action 派发, reject 罩住 reject-200)": async (a) => {
       const { findShadowed } = await import(TOOL);
       const rules = [
         { regex: "^https?:\\/\\/a\\.com\\/ads", action: "reject", rest: "" },
         { regex: "^https?:\\/\\/a\\.com\\/ads\\/v\\d\\/preload", action: "reject-200", rest: "" },
       ];
-      a.equal(findShadowed(rules).length, 0, "action 不同, 不成立遮蔽");
+      const s = findShadowed(rules);
+      a.equal(s.length, 1, "前缀先命中文档化语义: action 不同仍让子条不可达");
+      a.equal(s[0].action, "reject-200", "被遮蔽条保留自己的 action 供追踪");
+    },
+
+    "findShadowed enable 不同不遮蔽 (前缀规则可被开关关闭, 先命中前提不成立)": async (a) => {
+      const { findShadowed } = await import(TOOL);
+      const rules = [
+        { regex: "^https?:\\/\\/a\\.com\\/ads", action: "reject", rest: "enable={A}" },
+        { regex: "^https?:\\/\\/a\\.com\\/ads\\/v\\d\\/preload", action: "reject", rest: "enable={B}" },
+      ];
+      a.equal(findShadowed(rules).length, 0, "enable 不同, 不成立遮蔽");
     },
 
     "findShadowed 锚定串不充当前缀 ($ 出现在中间)": async (a) => {

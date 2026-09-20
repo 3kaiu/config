@@ -27,12 +27,12 @@
 | CDN 实现 | 未知（待确认：Cloudflare/Workers/Nginx 回源等） |
 | TLS 证书 | 未知（待确认自动续期/到期日） |
 
-> ⚠️ 域名过期被抢注 = 全量 script-path 可被第三方投毒（15 个插件 + 3 份 Profile 同时受影响）。
+> ⚠️ 域名过期被抢注 = 全量 script-path 可被第三方投毒（61 个插件外壳 + `Profile/Loon.lcf` 引用面同时受影响 — 2026-09-20 复核: 自 QX/免费代理移除后发布面收敛为 Loon.lcf 单 Profile）。
 > 建议：开启自动续费 + 注册商到期邮件 + 日历提醒（到期前 30 天）。
 
 ## 3. 完整性保障
 
-- `mirror-scripts.yml`：每日 03:00 从上游抓取约 60 项（MANIFEST 40 条目 + startup 插件等非清单产物；2026-09 实测单次成功 54+），经四重门禁（`*.js` 语法 / 体积下限 = 绝对 200B **+ 相对上次原始抓取 50%** / 非 HTML / `.plugin` script-path 域白名单）后写入 `Mirror/`，**走 PR 人工审核**合并（不再直推 main）。插件外壳远程引用已收敛到 `ws.wenn.in/main/Mirror/`（插件内部 bundle 引用仍直连上游，见 3b）。
+- `mirror-scripts.yml`：每日 03:00 从上游抓取（2026-09-20 复核：51 个 `mirror()` 声明 → `Mirror/MANIFEST.json` 56 条目），经四重门禁（`*.js` 语法 / 体积下限 = 绝对 200B **+ 相对上次原始抓取 50%** / 非 HTML / `.plugin` script-path 域白名单）后写入 `Mirror/`，**走 PR 人工审核**合并（不再直推 main）。插件外壳远程引用已收敛到 `ws.wenn.in/main/Mirror/`（插件内部 bundle 引用仍直连上游，见 3b）。
 - `Mirror/MANIFEST.json`：全部镜像文件的 source_url + sha256 + `upstream_bytes`（原始抓取体积，供体积门禁做相对比较）清单，上游变更在 PR diff 中高亮。
 - `cdn-verify.yml`：每日 02:34 拉取 CDN 全量分发文件与仓库做 sha256 比对，不一致开 Issue（标签 `cdn-verify`），可选 Bark 告警（Secret `BARK_PUSH`）；同时做 GitHub Pages 链路（3kaiu.github.io/config）可达性抽查（非阻断，且 Pages 内容已冻结 — 见第 5 节）。**接受的风险**：日检 = 最长 **~24h 检测窗口** — CDN 被篡改后最多 24h 内客户端仍在拉被篡改内容（缓解：篡改者需先持有 Cloudflare/回源控制权；MitM 域暴露的凭据轮换清单见第 5 节）。若需缩短，可在 cdn-verify 加 `schedule` 多时刻 cron（成本：Actions 分钟数线性增加），当前未启用。
 - `upstream-health.yml`：上游源可达性探活（状态码级），探测列表镜像部分派生自 `Mirror/MANIFEST.json`。

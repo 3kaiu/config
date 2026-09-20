@@ -100,7 +100,7 @@ jobs:
         run: |
           PAGES_BASE="https://3kaiu.github.io/config"
           if ! curl -fsSL -m 30 -o /dev/null "$PAGES_BASE/Mirror/MANIFEST.json" 2>/dev/null; then
-            echo "⚠️ GitHub Pages 未启用或未部署, 跳过 parity 检查 (启用方法见 pages-deploy.yml 头注)"
+            echo "⚠️ GitHub Pages 未启用或未部署, 跳过 parity 检查 (启用方法见 doc/infrastructure.md §5 — pages-deploy.yml 已于 2026-08 移除)"
             echo "### GitHub Pages Fallback Parity" >> $GITHUB_STEP_SUMMARY
             echo "**未启用/未部署 — 跳过**" >> $GITHUB_STEP_SUMMARY
             exit 0
