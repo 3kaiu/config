@@ -5,21 +5,35 @@
 # ═══════════════════════════════════════════════════════════
 
 [General]
-ip-mode = fake-ip
-fake-ip-filter = *.lan, *.local, *.home.arpa, time.*.com, *.msftconnecttest.com, *.msftncsi.com, localhost, captive.apple.com
+# 2026-09-20 审计整改 (官方 docs/General 实抓):
+# ① ip-mode = dual (官方枚举 ipv4-only/dual/ipv4-preferred/ipv6-preferred;
+#    旧值 "fake-ip" 非官方取值 — Fake IP 体系由 real-ip 控制排除, 与 IP 协议族选择正交)
+# ② fake-ip-filter / disconnect-on-policy-change 删除: 两键名在官方文档全站
+#    (General/DNS/hostmap/Scheme)、example.conf、主流社区配置中均不存在, 系
+#    Clash(fake-ip-filter)/Surge(disconnect-on-policy-change) 键混入; Loon 对应
+#    机制是 real-ip (已含 captive.apple.com/msftconnecttest 同族条目) 与 UI 开关
+# ③ hijack-dns 收窄: 旧 "*:0" 全劫持 + 6 个公开 DNS, 与 "上游全走加密 DoH/DoH3"
+#    矛盾 — 被劫持的系统查询经 Loon 转发后回落**明文 UDP DNS** (官方 DNS 页: 加密
+#    优先但回落为普通 DNS), 全劫持反而把本可本地解析的查询都送进代理解析链。
+#    收窄为仅劫持 4 个明确公开 DNS (Google/Cloudflare/114), 223.5.5.5/119.29.29.29
+#    因是 dns-server 成员 (加密失败回落明文自用) 不再自劫持
+# ④ 旧 fake-ip-filter 的功能面已映射到 real-ip: captive.apple.com/msftconnecttest/
+#    msftncsi 原已在 real-ip; *.lan/*.local 族由 bypass-tun+skip-proxy 覆盖 (不进
+#    Loon DNS, 无需 real-ip); 唯一遗漏项 time.*.com (NTP 系统服务, Fake IP 会破坏
+#    对时) 本轮补入 real-ip 尾部
+ip-mode = dual
 interface-mode = Performace
 dns-server = 180.184.11.11, 180.184.22.22, 119.29.29.29, 223.5.5.5
 doh-server = {{ customParams.doh_primary }}, {{ customParams.doh_fallback }}
 doh3-server = {{ customParams.doh3_primary }}, {{ customParams.doh3_fallback }}
 doq-server = {{ customParams.doq_server }}
-hijack-dns = *:0, 8.8.8.8, 8.8.4.4, 1.1.1.1, 114.114.114.114, 223.6.6.6, 180.76.76.76
+hijack-dns = 8.8.8.8, 8.8.4.4, 1.1.1.1, 114.114.114.114
 sni-sniffing = true
 disable-stun = false
 udp-fallback-mode = DIRECT
 ipv6-vif = off
 domain-reject-mode = DNS
 dns-reject-mode = LOOPBACKIP
-disconnect-on-policy-change = false
 geoip-url = https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb
 ipasn-url = https://raw.githubusercontent.com/P3TERX/GeoLite.mmdb/download/GeoLite2-ASN.mmdb
 # resource-parser: 已移除 (2026-09-11 供应链审计)
@@ -39,7 +53,7 @@ internet-test-url = http://cp.cloudflare.com/generate_204
 proxy-test-url = http://connectivitycheck.gstatic.com/generate_204
 skip-proxy = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32, localhost, *.local, *.lan, *.home.arpa
 bypass-tun = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32
-real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.boc.cn, *.abchina.com, *.ccb.com, *.psbc.com, *.cmbchina.com, *.icbc.com.cn, *.bankofchina.com, *.spdb.com.cn, *.cib.com.cn, *.cebbank.com, *.unionpay.com, *.pingan.com.cn, *.pingan.com, *.bankcomm.com, *.citicbank.com, *.hxb.com.cn, *.cgbchina.com.cn, *.push.apple.com, *.apns.apple.com, captive.apple.com, *.local, *.lan, *.home.arpa, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, *.msftconnecttest.com, *.msftncsi.com, *.battlenet.com.cn
+real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.boc.cn, *.abchina.com, *.ccb.com, *.psbc.com, *.cmbchina.com, *.icbc.com.cn, *.bankofchina.com, *.spdb.com.cn, *.cib.com.cn, *.cebbank.com, *.unionpay.com, *.pingan.com.cn, *.pingan.com, *.bankcomm.com, *.citicbank.com, *.hxb.com.cn, *.cgbchina.com.cn, *.push.apple.com, *.apns.apple.com, captive.apple.com, *.local, *.lan, *.home.arpa, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, *.msftconnecttest.com, *.msftncsi.com, *.battlenet.com.cn, time.*.com
 
 [Host]
 *.taobao.com = server:223.5.5.5

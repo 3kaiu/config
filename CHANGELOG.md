@@ -8,6 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased] (2026-09-04 对抗审计)
 
+### Fixed (2026-09-20 官方语义审计 — [General] 三键整改 + hijack-dns 收窄)
+
+- **`ip-mode = fake-ip` → `dual`**: 官方 docs/General 的 ip-mode 枚举 = ipv4-only/dual/ipv4-preferred/ipv6-preferred, `fake-ip` 不是 ip-mode 取值 (Fake IP 体系由 real-ip 控制排除, 与 IP 协议族选择正交)。旧行为解释: dual 并发 A+AAAA 取最快, 与"fake-ip 时代实际请求面"等价; 修复 = 官方合法值 + 显式双栈语义
+- **跨引擎键删除**: `fake-ip-filter` (Clash 键, Loon 无此键 — 对应机制 real-ip) 与 `disconnect-on-policy-change` (Surge 键, Loon 该行为仅 UI 开关)。证据: 官方文档全站 (General/DNS/hostmap/Scheme)、example.conf、repcz wiki、EDC/YueChan/deezertidal 主流社区配置均无此二键名
+- **`hijack-dns` 收窄**: `*:0` (全目标全端口劫持) + 6 个公开 DNS → 仅 4 个明确公开 DNS (8.8.8.8/8.8.4.4/1.1.1.1/114.114.114.114)。理由: 本配置上游 DNS 全走加密 (DoH/DoH3/DoQ), 官方 DNS 页明确回落 = 普通 DNS —— `*:0` 全劫持把本可本地解析的系统查询全部经 Loon 转发后**回落明文**, 扩大解析链却无加密收益; 移除 223.6.6.6/180.76.76.76 (未在 dns-server/doh 列表的孤儿条目); 223.5.5.5/119.29.29.29 系 dns-server 成员 (加密失败回落自用), 不再自劫持
+- **fake-ip-filter 功能面迁移**: captive.apple.com/msftconnecttest/msftncsi 原已在 real-ip; `*.lan/*.local/*.home.arpa` 由 bypass-tun+skip-proxy 覆盖 (不进 Loon DNS); 唯一遗漏 `time.*.com` (NTP 系统服务) 补入 real-ip 尾部
+- **新增门禁 `test/cases/general-semantics.test.js`** (4 例): ①ip-mode ∈ 官方四枚举 ②interface-mode = `Performace` 锁死官方原样拼写 (官方即少 r, wiki.repcz.link 转载同; "纠正"为 Performance 反而识别失败) ③internet-test-url 不得命中 real-ip 排除项 (TUN 断网判定链) ④三个 reject/fallback mode 取值在官方枚举内
+- 幂等自检: 同输入连跑 `surgio generate` 两次 md5 一致 (b4f86846…)。用例总数 234 → 238 (doc-claims-check 已同步)。教训记录: 幂等自检勿用 `git stash` 回退输入再生成 —— 那是"旧输入 vs 新输入"对比, 必然不同; 正确做法是同一输入连跑两次
+
 ### Removed (2026-09-19 官方文档对齐 — 免费代理订阅下线)
 
 - **Geonode 免费代理订阅整链删除**: `Profile/geonode.loon.txt` + `.github/workflows/proxy-sync.yml` + `tools/geonode-sync.mjs` + `test/cases/geonode-sync.test.js` (11 例) 一并删除, 源码留 git 历史。原因: 免费节点失活太快 (实测候选 120 仅 ~7% 连通, 每日刷新的仍是"今天可用明天死"), 且免费代理是不可信第三方节点 (日志/嗅探/中间人面) — 用户自有订阅是唯一可靠节点来源

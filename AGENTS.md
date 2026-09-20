@@ -5,7 +5,7 @@ Loon 配置仓库:单入口 `Profile/Loon.lcf`,由 `surgio` 从 `template/` + `s
 ## 命令
 
 - `npm run build` — esbuild 注入 `src/env.ts` + `src/lib/*.ts` 编译 `src/*.ts` 到 `Scripts/`(minify)。改 src 后必须 build
-- `npm test` — 234 个行为级用例(含 `tools/` 单测),引用全部 28 个 Scripts 产物;**文档数字纪律**(2026-09-18 优化审计): AGENTS.md 的关键数字(用例数/产物数/[Rule] 行数/插件数/devDeps/engines)由 `tools/doc-claims-check.mjs` 自动断言与产物实测一致(经 `doc-claims-check.test.js` 端态用例执行),改数字必须两处同步 —— 该门禁上线首日即抓到"483→480 系推导值、实测应为 484→481"的漂移
+- `npm test` — 238 个行为级用例(含 `tools/` 单测),引用全部 28 个 Scripts 产物;**文档数字纪律**(2026-09-18 优化审计): AGENTS.md 的关键数字(用例数/产物数/[Rule] 行数/插件数/devDeps/engines)由 `tools/doc-claims-check.mjs` 自动断言与产物实测一致(经 `doc-claims-check.test.js` 端态用例执行),改数字必须两处同步 —— 该门禁上线首日即抓到"483→480 系推导值、实测应为 484→481"的漂移
 - `npm run lint` — eslint(flat config)
 - `npm run generate` — surgio 构建 `Profile/Loon.lcf`(surgio 3.19,内联 providers,无 patch)。**副作用**:每次执行都会创建一个**空 `dist/`**(surgio 自身行为,已实测 —— 直接 `npx surgio generate` 亦可复现,非 npm 产物;`npm run build` 不会创建)。故 `.gitignore` 的 `dist/` 条目是**承重的**,勿删;`dist/` 也**不是死目录**,勿清理(删了下次 generate 即复现 —— 2026-09-11 深度审计 NEW-13 曾把它误报为死目录,已更正)
 - `npm run check:sync` — tpl-sync-check:①`surgio.conf.js` 的 `customParams` ↔ `template/**` 的 `{{ customParams.* }}` **双向契约**(死参数 / 未声明键均判红)②template ↔ Loon.lcf 正反向静态行比对
@@ -32,7 +32,7 @@ Loon 配置仓库:单入口 `Profile/Loon.lcf`,由 `surgio` 从 `template/` + `s
 | `Profile/Loon.lcf` | 发布入口唯一文件 | 不动;生成物(手改会被 artifact-idempotency job 判红) |
 | `Profile/geonode.loon.txt` | 已删除 (2026-09-19 移除免费代理订阅, 见 CHANGELOG; 旧文件为 proxy-sync 生成物) | 勿重建; OpenCode 组不再引用 Geonode |
 | `tools/*.mjs` | 验证脚本 / 生成器 | **只放已接线的** —— 每个工具须有 npm script 或 CI 步骤(或至少单测),否则视为"看起来有门禁其实没有"的负债,应删除而非留存(2026-09-11 深度审计 NEW-10 据此删除 `aggregate-purify.mjs` / `kelee-import.mjs` 两个已完成且**重跑有破坏性**的一次性迁移脚本,源码留 git 历史;2026-09-19 移除免费代理订阅时同理删除 `geonode-sync.mjs` + `proxy-sync.yml` + `geonode-sync.test.js` + `Profile/geonode.loon.txt`)。改动后跑 check:sync;`build-startup-plugin.mjs` / `mirror-drift-check.mjs` / `src-antipattern-check.mjs` / `tpl-sync-check.mjs` 均有**入口守卫**,可安全被测试 import(勿在顶层无条件调 `main()`) |
-| `test/cases/*.test.js` | 234 用例 | 新增/改脚本须补用例;响应类脚本用 `a.doneCalled(state)` 断言 `$done` 被调用;`.mjs` 工具用动态 `import()` 引入(勿用 `require(esm)`,会无谓抬高 engines 下限) |
+| `test/cases/*.test.js` | 238 用例 | 新增/改脚本须补用例;响应类脚本用 `a.doneCalled(state)` 断言 `$done` 被调用;`.mjs` 工具用动态 `import()` 引入(勿用 `require(esm)`,会无谓抬高 engines 下限) |
 
 ## 门禁(全部在 `.github/workflows/`,push 前本地自测)
 
@@ -55,6 +55,7 @@ Loon 配置仓库:单入口 `Profile/Loon.lcf`,由 `surgio` 从 `template/` + `s
 
 - `Scripts/Qidian.js` 无源码(上游 qidian 引擎,密文打包)
 - [Rule] 482 行(2026-09-19 实测,主 [Rule] 段非注释行;2026-09-18 删 3 条同策略死规则 484→481, 本轮 qreport KEYWORD→精确枚举 +1 净增;计数 = [Rule] 段起至 [Remote Rule] 止的非 `#` 非空行,由 doc-claims-check 自动断言);GEOIP 顺序已修;AdBlock 域硬拦截已覆盖规则
+- [General] 官方语义审计(2026-09-20):`ip-mode = dual`(旧值 `fake-ip` 非官方枚举);`fake-ip-filter`/`disconnect-on-policy-change` 系 Clash/Surge 键混入已删除(real-ip/UI 对应);`hijack-dns` 收窄为 4 个公开 DNS(`*:0` 全劫持与上游全加密矛盾,回落明文无收益);`time.*.com` 补入 real-ip。`interface-mode = Performace` 是官方原样拼写,**勿纠正**。语义门禁 `test/cases/general-semantics.test.js` 4 例
 - `npm audit` 告警(2026-09-11 实测 **42** 个:2 low / 7 moderate / 32 high / 1 critical)为**构建期已知风险,勿 force 修**。按路径归类:`node_modules/npm/node_modules/**` 32 项 + surgio 自身依赖树(`@oclif/plugin-plugins`/`npm`/`got`/`qs`/`query-string`/`update-notifier`→`latest-version`→`package-json`/`decode-uri-component`)。共同点:全部属**构建期工具链**,仅本地/CI 执行 `surgio generate`/`eslint` 时存在,**不进任何分发产物**。修复路径按子树不同 — surgio 侧待上游跟进 oclif v5(npm@11)前无解;`audit fix --force` 会破坏 semver
   - 复核方法(勿凭记忆):`npm run audit:ci --silent -- --json > /tmp/audit.json`,再按 `vulnerabilities[*].nodes` 的路径前缀分组统计。**注意** 2026-09-11 前的文档写"全部来自 surgio→内嵌 npm@9",该表述**不准确** — 实测 42 项里 32 项的 node 路径**全部**落在 `node_modules/npm/node_modules/**`(共 36 条),另有 **10 项**的 node 路径在该前缀之外:`@oclif/plugin-plugins` / `decode-uri-component` / `got` / `latest-version` / `npm` / `package-json` / `qs` / `query-string` / `surgio` / `update-notifier`(各 1 条)。按包名统计为 32 + 10,按 node 路径统计为 36 + 10
   - **`js-yaml` 已于 2026-09-11 移出此清单,勿再当无解项**:它曾被笼统归入"eslint 子树随升级自然消解",但补丁版一直落在现有 semver 范围内 — `@oclif/core@2.16.0` 要求 `^3.14.1`(装 3.15.2)、`@eslint/eslintrc` 要求 `^4.3.0`(装 4.3.2),一次 `npm update js-yaml` 即可,无需等 surgio/oclif v5。教训:归入"无解"前必须先核对 `required range` 与 `first_patched_version` 是否真的不可满足
