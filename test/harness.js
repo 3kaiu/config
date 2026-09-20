@@ -77,7 +77,7 @@ function createSandbox(opts = {}) {
   // (2026-09-11 审计实证: Bilibili httpGet 恒得 "请求失败: timeout")。
   // 要测超时分支, 让 httpHandler 返回 { hang: true } 即不投递。
   const makeHttp = (method) => (o, cb) => {
-    state.httpCalls.push({ method, url: o.url, body: o.body, headers: o.headers });
+    state.httpCalls.push({ method, url: o.url, body: o.body, headers: o.headers, node: o.node });
     let out = { err: null, res: { status: 200 }, body: "{}" };
     if (httpHandler) out = Object.assign(out, httpHandler({ method, ...o }));
     if (out && out.hang) return;

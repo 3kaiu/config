@@ -145,6 +145,26 @@ exports.tests = {
     a.ok(kept.length >= survived, `kept(${kept.length}) 应 ≥ 存活数(${survived})`);
   },
 
+  // ── 通配覆盖报告 (P2-3, 2026-09-19) ──
+  "startup-host: 通配覆盖报告 — 消费数可计算, 真实管线零消费通配 = 0": async (a) => {
+    const m = await load();
+    // 夹具: 仅含通配条目入报告, 消费数按规则文本统计
+    const rows = m.wildcardReport(
+      ["*.ziben.com", "api.foo.com"],
+      [{ regex: "^https?:\\/\\/api\\.ziben\\.com\\/x" }, { regex: "^https?:\\/\\/other\\.com" }]
+    );
+    a.equal(rows.length, 1, "非通配条目不进报告");
+    a.equal(rows[0], { host: "*.ziben.com", rules: 1 }, "消费数应正确");
+    // 真实管线: 通配全部有规则消费 (0 消费 = 纯解密面浪费, 报告应能暴露)
+    const parsed = m.parseConf(fs.readFileSync(SRC, "utf8"));
+    const { rules } = m.buildRules(parsed.rejects);
+    const upstreamHosts = m.upstreamHostsOf(parsed.mitmBody);
+    const { kept } = m.minimizeHosts(upstreamHosts, rules);
+    const real = m.wildcardReport(kept, rules);
+    a.ok(real.length > 0, "真实管线应有通配条目");
+    a.equal(real.filter((r) => r.rules === 0), [], "不得存在零消费通配");
+  },
+
   // ── 产物一致性 (生成器 ↔ 提交产物, 等价于 Loon.lcf 的 artifact-idempotency) ──
   "startup-host: 产物 == f(上游 conf) — 生成器与提交产物无漂移": async (a) => {
     const m = await load();

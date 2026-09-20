@@ -172,6 +172,24 @@ export function minimizeHosts(upstreamHosts, rules) {
   return { kept, dropped, unsafe };
 }
 
+/**
+ * 通配 hostname 覆盖报告 (2026-09-19 官方文档对齐 P2-3, **只报告不自动收敛**)。
+ *
+ * 背景: 上游保留的 `*.suffix` 通配虽经 isBoundaryUnsafe 边界校验 (只匹配单一注册域),
+ * 但"通配 = 该注册域**全量子域**解密"的覆盖面本身需要可见性 —— 维护者要能一眼看到
+ * 哪条通配被多少条规则消费、是否值得收窄为枚举。自动收敛会改变解密面, 需人工决策,
+ * 故本函数只产出数据; main() 打印为报告。
+ */
+export function wildcardReport(kept, rules) {
+  const rows = [];
+  for (const h of kept.filter((x) => x.includes("*"))) {
+    const label = h.replace(/\*/g, "").replace(/^\./, "").split(".")[0] || "";
+    const n = label ? rules.filter((r) => r.regex.toLowerCase().includes(label)).length : 0;
+    rows.push({ host: h, rules: n });
+  }
+  return rows;
+}
+
 export function upstreamHostsOf(mitmBody) {
   return [...new Set(mitmBody.split(",").map((h) => h.trim()).filter((h) => h && !h.startsWith("-")))];
 }
@@ -281,6 +299,14 @@ export function main() {
   if (unsafe.length) {
     console.log(`   ⛔ 剔除边界不安全通配 ${unsafe.length} 条 (NEW-09):`);
     for (const h of unsafe) console.log(`      ${h}`);
+  }
+  // 通配覆盖报告 (2026-09-19, P2-3): 只报告不动解密面 — 收窄通配需人工决策
+  const wild = wildcardReport(kept, rules);
+  if (wild.length) {
+    console.log(`\n── 通配 hostname 覆盖报告 (${wild.length} 条, 解密面提示, 只报告不自动收敛) ──`);
+    for (const w of wild.sort((x, y) => y.rules - x.rules || x.host.localeCompare(y.host))) {
+      console.log(`   ${w.host} → ${w.rules} 条规则消费`);
+    }
   }
   console.log("\n── 未纳入的 script 型条目 (供后续决策) ──");
   for (const s of scripts) console.log(`   ${s}`);

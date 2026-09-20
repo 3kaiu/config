@@ -97,9 +97,29 @@ fail += before(LCF, "FINAL 紧随 GEOIP 兜底", "GEOIP, CN, DIRECT", "FINAL, Fi
   fail += ok ? 0 : 1;
 }
 
+// 6) FINAL 必须是 [Rule] 段最后一条有效规则 (2026-09-19 官方文档对齐, docs/Rule/:
+//    未命中任何规则走 FINAL)。FINAL 是**兜底全匹配**, 其后任何规则永远不可达 ——
+//    静默死规则, 无任何报错。此前只断言 GEOIP→FINAL 相邻, 未防"FINAL 之后又加规则"。
+{
+  const lines = linesOf(LCF);
+  const segStart = lines.findIndex((l) => l.trim() === "[Rule]");
+  const segEnd = lines.findIndex((l) => l.trim() === "[Remote Rule]");
+  const fin = lines.findIndex((l) => l.trim() === "FINAL, Final");
+  const after = [];
+  for (let i = fin + 1; i < (segEnd > 0 ? segEnd : lines.length); i++) {
+    const t = lines[i].trim();
+    if (t && !t.startsWith("#")) after.push(`L${i + 1}:${t.slice(0, 40)}`);
+  }
+  const ok = segStart >= 0 && segEnd > segStart && fin > segStart && after.length === 0;
+  console.log(
+    `${ok ? "✅" : "❌"} FINAL 位于 [Rule] 段尾 (无不可达死规则): FINAL @${fin + 1}${after.length ? " 其后有效行 " + after.length + " → " + after.slice(0, 3).join(" | ") : ""}`
+  );
+  fail += ok ? 0 : 1;
+}
+
 console.log("");
 if (fail) {
   console.log(`❌ 规则守卫失败: ${fail} 项 — 拦截规则顺序被破坏, 禁止合并`);
   process.exit(1);
 }
-console.log("✅ 规则守卫通过: 拦截区前置、STUN 白名单生效、GEOIP/FINAL 正确收尾");
+console.log("✅ 规则守卫通过: 拦截区前置、STUN 白名单生效、GEOIP/FINAL 正确收尾、FINAL 段尾");

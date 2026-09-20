@@ -32,8 +32,11 @@ allow-wifi-access = false
 wifi-access-http-port = 7222
 wifi-access-socks5-port = 6225
 test-timeout = 10
+# 探活一主一备 (2026-09-19 官方文档对齐): internet-test-url (直连可用性) 与 proxy-test-url
+# (代理链路可用性) 用**不同**上游 —— 同端点时该端点故障会同时误判"本机断网 + 代理失效",
+# 排障时无法区分; 分端点后任一故障只影响一条链路。策略组未显式 url= 时继承 proxy-test-url。
 internet-test-url = http://cp.cloudflare.com/generate_204
-proxy-test-url = http://cp.cloudflare.com/generate_204
+proxy-test-url = http://connectivitycheck.gstatic.com/generate_204
 skip-proxy = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32, localhost, *.local, *.lan, *.home.arpa
 bypass-tun = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32
 real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.boc.cn, *.abchina.com, *.ccb.com, *.psbc.com, *.cmbchina.com, *.icbc.com.cn, *.bankofchina.com, *.spdb.com.cn, *.cib.com.cn, *.cebbank.com, *.unionpay.com, *.pingan.com.cn, *.pingan.com, *.bankcomm.com, *.citicbank.com, *.hxb.com.cn, *.cgbchina.com.cn, *.push.apple.com, *.apns.apple.com, captive.apple.com, *.local, *.lan, *.home.arpa, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, *.msftconnecttest.com, *.msftncsi.com, *.battlenet.com.cn
@@ -631,12 +634,12 @@ DOMAIN-SUFFIX, h-adashx.ut.taobao.com, REJECT
 DOMAIN, adstats.tencentmusic.com, REJECT
 DOMAIN, ad.tencentmusic.com, REJECT
 DOMAIN, adcdn.tencentmusic.com, REJECT
-DOMAIN, adcdn6.tencentmusic.com, DROP
-DOMAIN, adexpo.tencentmusic.com, DROP
-DOMAIN, adclick.tencentmusic.com, DROP
-DOMAIN, otheve.beacon.qq.com, DROP
-DOMAIN, mazu.m.qq.com, DROP
-DOMAIN, monitor.music.qq.com, DROP
+DOMAIN, adcdn6.tencentmusic.com, REJECT
+DOMAIN, adexpo.tencentmusic.com, REJECT
+DOMAIN, adclick.tencentmusic.com, REJECT
+DOMAIN, otheve.beacon.qq.com, REJECT
+DOMAIN, mazu.m.qq.com, REJECT
+DOMAIN, monitor.music.qq.com, REJECT
 DOMAIN, stat.y.qq.com, REJECT
 DOMAIN, tmead.y.qq.com, REJECT
 DOMAIN, oth.str.mdt.qq.com, REJECT
@@ -840,6 +843,8 @@ https://ws.wenn.in/main/Mirror/rules/loon-AllInOne.plugin, enabled=true, tag=通
 https://ws.wenn.in/main/Mirror/rules/loon-AdvertisingScript.plugin, enabled=true, tag=广告脚本增强
 https://ws.wenn.in/main/Plugin/quicksearch.plugin, enabled=true, tag=快捷搜索
 https://ws.wenn.in/main/Plugin/notify.plugin, enabled=true, tag=🔔 定时通知
+# 诊断助手: generic 手动触发 — 双链路探活 (代理/直连) + 判定, 零常驻流量影响
+https://ws.wenn.in/main/Plugin/diagnostics.plugin, enabled=true, tag=🩺 诊断助手
 https://ws.wenn.in/main/Plugin/privacy-shield.plugin, enabled=true, tag=🔒 隐私防护 (SDK 追踪全拦截)
 https://ws.wenn.in/main/Plugin/wechat-pro.plugin, enabled=true, tag=微信去广告 Pro
 https://ws.wenn.in/main/Plugin/bilibili-pro.plugin, enabled=true, tag=B站去广告 Pro

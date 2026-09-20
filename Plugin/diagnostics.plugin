@@ -1,0 +1,13 @@
+#!name=🩺 诊断助手
+#!desc=App 内手动触发一次: 对当前节点/策略做代理链路 + 直连链路探活, 回显状态码/耗时/判定 (排障用)
+#!version=1.0
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!icon=https://icons.duckduckgo.com/ip3/diagnostics.ico
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+
+# 零常驻影响: generic 仅在 App 内手动点击时执行一次 (官方语义: 可将节点/策略组作为
+# 上下文传入); 无 [Rule]/[Rewrite]/[MitM] 段, 不拦截任何流量。
+[Script]
+generic script-path=https://ws.wenn.in/main/Scripts/Diagnostics.js, tag=🩺 链路诊断, timeout=15, img-url=stethoscope

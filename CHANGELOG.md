@@ -16,6 +16,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **数字同步**: 用例总数 231 → 220 (删 geonode-sync 11 例), [Rule] 481 → 482 (qreport KEYWORD→精确枚举 +1 净增) — 两处均经 doc-claims-check 端态用例强制同步, AGENTS.md 已更新
 - 回滚: `git show <本提交>^:Profile/geonode.loon.txt` 可取回最后一份节点清单; 整链恢复则 revert 本提交
 
+### Changed / Added (2026-09-19 官方文档对齐 — P1 精准度/性能 + P2 运维落地)
+
+**P1 精准度/性能**
+
+- **`DROP` → `REJECT`（`Plugin/qqmusic.plugin` + `template/loon.tpl` → regenerate）**: 官方 docs/Policy/ 语义下 `REJECT-DROP` = 直接丢弃**无响应**, App 会立即重试（请求风暴）; 上报域用 `REJECT`（404 空体）同样"不展示"且不制造重试。QQ 音乐系 6 条 `REJECT-DROP` + 2 条非官方动作名 `REJECT-NO-DROP` 统一为 `REJECT`; 自有面（Plugin/Kelee/template/Profile）实测残余 **0**（Mirror/iringo 上游 vendored 文件不属可改面）。新的伴随门禁 `[DROP禁用于Rule]` 已进 plugin-lint
+- **探活 URL 一主一备（`template/loon.tpl`）**: `internet-test-url`（直连可用性, cp.cloudflare.com）与 `proxy-test-url`（代理链路, connectivitycheck.gstatic.com）分离 —— 同端点时该端点故障会同时误判"本机断网 + 代理失效", 分端点后任一故障只影响一条链路
+- **KEYWORD 门控进 plugin-lint**: 裸 `DOMAIN-KEYWORD` 判红（docs/Rule/sub_rule: KEYWORD 随条数涨耗时）, 豁免两类 —— `AND(SUFFIX,…)`/`AND(USER-AGENT,…)` 锚定（bilibili-pro:81 / qidian:71-73 双样板）与策略占位行 `{AI_Policy}`（分流非拦截）; Kelee/ 上游外壳豁免
+- **裸 `reject` 报告通道（76 行, 报告级不判红）**: docs/Policy/ 下裸 reject = 断连, 有 UI 等待的接口可能转圈/重试 → 全量清单进 plugin-lint 报告; 确认无重试的纯埋点行尾加 `# no-retry` 豁免; 逐条需真机确认, **不做无证据的批量改写**
+- **两项"评估后保持"决策（记录以防重复论证）**: ①`reject-array` 全仓 0 次（`reject-dict` 901 / `reject-img` 15）—— `{}` 对绝大多数接口安全, 数组型接口需逐条真机核实, 未核实前不批量替换; ②GEOIP/ASN 库**不纳入 mirror** —— MMDB 为多 MB 二进制而镜像管线为文本导向（LF 归一化白名单）, 且篡改后果 = 路由误判（非代码执行）, 收益/成本不成比例; 双上游已配（Loyalsoldier Country.mmdb + P3TERX ASN）
+
+**P2 运维**
+
+- **诊断助手 `Plugin/diagnostics.plugin` + `src/Diagnostics.ts`（官方 `generic` 语义）**: App 内"操作节点/策略组"处手动触发一次 → 双链路探活（代理 cp.cloudflare.com/generate_204 + 直连 baidu, 各记状态码/耗时）+ 四分支判定（双通 / 仅直连=代理故障 / 仅代理=直连异常 / 双不通=断网）; 节点上下文经 `$environment.params` 注入（官方 generic_example.js 契约）时**钉在该节点上**探活（`$httpClient.get({url,node})`）, 结果经 `$done({title, htmlMessage})` 富文本回显; 零常驻影响（无 [Rule]/[Rewrite]/[MitM] 段）, 含 8s 兜底超时（回调丢失不挂死 UI）。plugin-lint 的 [Script] 段检查同步放行 `generic` 触发器; 用例 4 条（双通/节点钉住/失败分支/回调丢失兜底）
+- **rule-order-check 新增第 6 断言: FINAL 必须是 [Rule] 段最后一条有效规则** —— FINAL 为兜底全匹配, 其后任何规则永远不可达（静默死规则）; 此前只有"GEOIP→FINAL 相邻"断言, 防不了"FINAL 之后又加规则"
+- **startup 通配覆盖报告（`tools/build-startup-plugin.mjs`）**: 27 条通配 hostname 逐条列出"被 N 条规则消费"（最大 `p*.meituan.net` 449 条）, 供人工判断是否收窄为枚举; 只报告不自动收敛（收窄 = 改变解密面, 需人工决策）; 配用例 1 条（含"零消费通配 = 纯解密面"不变量）
+
+**门禁与数字**
+
+- **plugin-lint-check 重构为可测纯函数 + 入口守卫**（`lintText` / `scanAll` / `main`）: 新增独立用例文件 `test/cases/plugin-lint-check.test.js`（6 条: DROP 判红 / KEYWORD 门控三形态 / 可疑动作报告不判红 / 裸 reject 豁免 / enable 括号与段外行 / generic 放行）+ corpus 级断言（真实 61 插件 0 errs —— 新增规则若误报立刻红）
+- **doc-claims-check 再次兑现**: 本批新增产物后立即抓到**三处**数字漂移（用例 227→231 / Scripts 27→28 / 插件 60→61）并强制同步 AGENTS.md —— "文档数字纪律"按设计运作
+- `test/harness.js`: httpCalls 记录 `node` 字段（配合 generic 节点钉住断言, 不影响既有用例）
+
 ### Added (2026-09-18 优化审计 — 项 6: doc-claims-check 文档数字门禁 + 深审 §3 收尾)
 
 - **doc-claims-check: 文档数字自动门禁**（deepdive §3.2 建议 4 落地, NEW-04/MOD-10 的结构性根因"文档数字无自动复核"收口）: 新增 `tools/doc-claims-check.mjs` + `test/cases/doc-claims-check.test.js`（随 `npm test` 进 CI; 刻意**不**进 `check:all` —— `check:*` 是状态自检, 本工具是文档↔产物一致性, 与 wiring-check 同区）。把 AGENTS.md 中 7 项可机械反算的数字固化为断言: 用例数（`exports.tests` 键数, 与 run-tests 语义一致）/ Scripts 产物数 / [Rule] 非注释行数 / 插件总数（Plugin+Kelee）/ Kelee 外壳数 / devDependencies 数 / engines.node 主版本。文档与产物**双向**漂移即红, 另两条红路径: **声明被删除即红**（防改写句式静默脱检）、**文档自相矛盾即红**（同键两个值并存不许取其一放行）。负向用例 4 条 + 真仓库端态断言（rows 恰 7 条, 增删断言须同步用例）。**立项即兑现两遍**: ①本日写 AGENTS 时把 [Rule] 行数写成"483→480"（从 2026-08-29 旧口径 483 推导）, 端态首跑即红 —— 实测基线 **484**（重排后重测）→ 删 3 = **481**; ②新增本用例使用例数 225→231, 端态断言立即抓住并强制同步文档。门禁的运作方式在其自身的提交里演示了两遍; 另为 check:contract 的"60 个插件"宣称补 AGENTS 锚点（Plugin 45 + Kelee 15, 此前该数字只活在工具输出里, 无任何校验）

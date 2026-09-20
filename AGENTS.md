@@ -5,7 +5,7 @@ Loon 配置仓库:单入口 `Profile/Loon.lcf`,由 `surgio` 从 `template/` + `s
 ## 命令
 
 - `npm run build` — esbuild 注入 `src/env.ts` + `src/lib/*.ts` 编译 `src/*.ts` 到 `Scripts/`(minify)。改 src 后必须 build
-- `npm test` — 220 个行为级用例(含 `tools/` 单测),引用全部 27 个 Scripts 产物;**文档数字纪律**(2026-09-18 优化审计): AGENTS.md 的关键数字(用例数/产物数/[Rule] 行数/插件数/devDeps/engines)由 `tools/doc-claims-check.mjs` 自动断言与产物实测一致(经 `doc-claims-check.test.js` 端态用例执行),改数字必须两处同步 —— 该门禁上线首日即抓到"483→480 系推导值、实测应为 484→481"的漂移
+- `npm test` — 231 个行为级用例(含 `tools/` 单测),引用全部 28 个 Scripts 产物;**文档数字纪律**(2026-09-18 优化审计): AGENTS.md 的关键数字(用例数/产物数/[Rule] 行数/插件数/devDeps/engines)由 `tools/doc-claims-check.mjs` 自动断言与产物实测一致(经 `doc-claims-check.test.js` 端态用例执行),改数字必须两处同步 —— 该门禁上线首日即抓到"483→480 系推导值、实测应为 484→481"的漂移
 - `npm run lint` — eslint(flat config)
 - `npm run generate` — surgio 构建 `Profile/Loon.lcf`(surgio 3.19,内联 providers,无 patch)。**副作用**:每次执行都会创建一个**空 `dist/`**(surgio 自身行为,已实测 —— 直接 `npx surgio generate` 亦可复现,非 npm 产物;`npm run build` 不会创建)。故 `.gitignore` 的 `dist/` 条目是**承重的**,勿删;`dist/` 也**不是死目录**,勿清理(删了下次 generate 即复现 —— 2026-09-11 深度审计 NEW-13 曾把它误报为死目录,已更正)
 - `npm run check:sync` — tpl-sync-check:①`surgio.conf.js` 的 `customParams` ↔ `template/**` 的 `{{ customParams.* }}` **双向契约**(死参数 / 未声明键均判红)②template ↔ Loon.lcf 正反向静态行比对
@@ -13,7 +13,7 @@ Loon 配置仓库:单入口 `Profile/Loon.lcf`,由 `surgio` 从 `template/` + `s
 - `npm run check:drift` — mirror-drift-check `--strict`:比对 workflow 声明的 `mirror()` URL 与 `Mirror/MANIFEST.json` 的 `source_url`,未登记的漂移/从未抓取即判红(登记表在该工具 `ACCEPTED_*`)。**三张 `ACCEPTED_*` 表已于 2026-09-18 清空**(镜像 PR #42 合并后实测漂移 0/从未抓到 0),机制保留。使用规则:登记必须写明**实测成因 + 复检日期**,不得用推断充当成因 —— 原 7 条登记的成因"上游已移除 `.plugin` asset"实测**只对 1 条属实**(上游是仓库改名 `MapKit`→`Maps`,301 后照常下载),一条错误成因会把红门禁变成永久静默接受
 - `npm run check:orphan` — mitm-orphan-check 本地模式(孤儿 hostname = 无收益的解密面扩张)
 - `npm run check:plugin` — plugin-lint-check 段结构与规则语法
-- `npm run check:contract` — argument-contract-check `#!arguments-desc`/`[Argument]`/占位符三方配对 + 死开关检测(宣称 60 个插件 = Plugin/ 45 + Kelee/ 15, 该计数由 doc-claims-check 自动断言, 文档/清单漂移即红)
+- `npm run check:contract` — argument-contract-check `#!arguments-desc`/`[Argument]`/占位符三方配对 + 死开关检测(宣称 61 个插件 = Plugin/ 46 + Kelee/ 15, 该计数由 doc-claims-check 自动断言, 文档/清单漂移即红)
 - `npm run check:workflows` — workflow-bash-check 校验全部 `.github/workflows/*.yml` 的 run 块 bash 语法。**只校验 bash 语法**,run 块内嵌的 node/python 代码错误与逻辑错误不在其范围
 - `npm run audit:ci` — `npm audit` 固定走 `registry.npmjs.org`(默认镜像未实现 `/-/npm/v1/security/*`,本地直接不可用);结果解读见「架构已知问题」
 
@@ -32,7 +32,7 @@ Loon 配置仓库:单入口 `Profile/Loon.lcf`,由 `surgio` 从 `template/` + `s
 | `Profile/Loon.lcf` | 发布入口唯一文件 | 不动;生成物(手改会被 artifact-idempotency job 判红) |
 | `Profile/geonode.loon.txt` | 已删除 (2026-09-19 移除免费代理订阅, 见 CHANGELOG; 旧文件为 proxy-sync 生成物) | 勿重建; OpenCode 组不再引用 Geonode |
 | `tools/*.mjs` | 验证脚本 / 生成器 | **只放已接线的** —— 每个工具须有 npm script 或 CI 步骤(或至少单测),否则视为"看起来有门禁其实没有"的负债,应删除而非留存(2026-09-11 深度审计 NEW-10 据此删除 `aggregate-purify.mjs` / `kelee-import.mjs` 两个已完成且**重跑有破坏性**的一次性迁移脚本,源码留 git 历史;2026-09-19 移除免费代理订阅时同理删除 `geonode-sync.mjs` + `proxy-sync.yml` + `geonode-sync.test.js` + `Profile/geonode.loon.txt`)。改动后跑 check:sync;`build-startup-plugin.mjs` / `mirror-drift-check.mjs` / `src-antipattern-check.mjs` / `tpl-sync-check.mjs` 均有**入口守卫**,可安全被测试 import(勿在顶层无条件调 `main()`) |
-| `test/cases/*.test.js` | 220 用例 | 新增/改脚本须补用例;响应类脚本用 `a.doneCalled(state)` 断言 `$done` 被调用;`.mjs` 工具用动态 `import()` 引入(勿用 `require(esm)`,会无谓抬高 engines 下限) |
+| `test/cases/*.test.js` | 231 用例 | 新增/改脚本须补用例;响应类脚本用 `a.doneCalled(state)` 断言 `$done` 被调用;`.mjs` 工具用动态 `import()` 引入(勿用 `require(esm)`,会无谓抬高 engines 下限) |
 
 ## 门禁(全部在 `.github/workflows/`,push 前本地自测)
 
