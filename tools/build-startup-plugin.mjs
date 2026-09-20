@@ -128,6 +128,9 @@ export function normalizeHost(h) {
 
 /** 去重 (上游存在同 regex 重复行) + host 合法性过滤 */
 export function buildRules(rejects) {
+  // 上游动作原样透传: 16 条裸 `reject` 是上游墨鱼的显式选择 (同 conf 另有 430+
+  // 条 reject-200 — 作者知晓 200 形态, 裸 reject 系"无 UI 等待"接口的断连处理,
+  // 有意而非遗漏)。故生成块 16 裸 reject 不做本地改写 (改了下次镜像即漂移)。
   const seen = new Set();
   let droppedGarbage = 0;
   const rules = rejects
@@ -181,10 +184,18 @@ export function minimizeHosts(upstreamHosts, rules) {
  * 故本函数只产出数据; main() 打印为报告。
  */
 export function wildcardReport(kept, rules) {
+  // 根域子串计数: 归一化规则文本后, 含该通配根域即计消费。
+  // 与 minimizeHosts 同口径 (判定器), 避免"计数器与判定器口径不一":
+  // 旧实现取最左 label 子串 (p*.meituan.net → label "p" 命中 449 条), 现以根域为准。
+  // 注意: 归一化后 `pinggai*.caixin.com` → `pinggai.*caixin.com`, 而规则侧
+  // `pinggai.*caixin.com` 同形 → 仍命中; 但 `interface*.music.163.com` 等
+  // 在 449 条生成规则中无文本对应 → 0 消费 (见下 ZERO_ALLOW 测试)。
+  const norm = (s) => s.replace(/\\\./g, ".").replace(/\\\*/g, "*").toLowerCase();
+  const ruleText = rules.map((r) => norm(r.regex)).join("\n");
   const rows = [];
   for (const h of kept.filter((x) => x.includes("*"))) {
-    const label = h.replace(/\*/g, "").replace(/^\./, "").split(".")[0] || "";
-    const n = label ? rules.filter((r) => r.regex.toLowerCase().includes(label)).length : 0;
+    const root = rootOf(h.replace(/\*/g, "x")).toLowerCase();
+    const n = root ? ruleText.split("\n").filter((line) => line.includes(root)).length : 0;
     rows.push({ host: h, rules: n });
   }
   return rows;

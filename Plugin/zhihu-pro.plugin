@@ -51,7 +51,7 @@ IP-CIDR6,2402:4e00:1200:ed00:0:9089:6dac:96b6/128,REJECT,no-resolve,enable={ENAB
 # 📱 我的页面净化模块
 # ═══════════════════════════════════════════
 ^https:\/\/api\.zhihu\.com\/me\/guides reject-dict enable={ENABLE_ZHIHU}&{ZHIHU_MEMBER_ENABLE}
-^https:\/\/api\.zhihu\.com\/unlimited\/go\/my_card reject enable={ENABLE_ZHIHU}&{ZHIHU_MEMBER_ENABLE}
+^https:\/\/api\.zhihu\.com\/unlimited\/go\/my_card reject-dict enable={ENABLE_ZHIHU}&{ZHIHU_MEMBER_ENABLE}
 
 # ═══════════════════════════════════════════
 # 🔍 搜索页净化模块

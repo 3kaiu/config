@@ -32,7 +32,7 @@ activityAdsSwitch=switch,"true","false",tag=活动广告位屏蔽,desc=开启后
 ^https:\/\/api\.cc\.163\.com\/v\d\/mgamenavigation\/navigation_list\? response-body-json-jq '.data.info_list |= map(select(.name == "关注" or .name == "推荐" or .name == "视频" or .name == "全部"))' enable={VIDEO_ENABLE}&{CCLIVE_ENABLE}
 ^https:\/\/api\.cc\.163\.com\/v\d\/mgamerecpage\/recommend_page\? response-body-json-jq '.data.plugins|=map(select(.module_type!="banner"))|.data.plugins|=map(select(.module_type!="show_list"))|.data.plugins|=map(select(.title!="推荐品类"))' enable={VIDEO_ENABLE}&{CCLIVE_ENABLE}
 ^https:\/\/api\.cc\.163\.com\/v\d\/entpage\/live_navbar_mobile\/ios\? response-body-json-jq '.data.top_nav |= map(select(.cn_name == "推荐" or .cn_name == "星秀" or .cn_name == "心动交友"))' enable={VIDEO_ENABLE}&{CCLIVE_ENABLE}
-^https:\/\/cc\.163\.com\/act\/m\/daily\/ad_ reject enable={VIDEO_ENABLE}&{CCLIVE_ENABLE}
+^https:\/\/cc\.163\.com\/act\/m\/daily\/ad_ reject-dict enable={VIDEO_ENABLE}&{CCLIVE_ENABLE}
 ^http:\/\/mshare\.cc\.163\.com\/mshare\/startadv_mobile_v\d\? reject-dict enable={VIDEO_ENABLE}&{CCLIVE_ENABLE}
 ^https:\/\/appapi\.cc\.163\.com\/v\d\/mixfloatingwindow\/floating_windows\? reject-dict enable={VIDEO_ENABLE}&{CCLIVE_ENABLE}
 ^http:\/\/api\.cc\.163\.com\/v1\/mpopuprecommend\/exit_room_conf$ reject-dict enable={VIDEO_ENABLE}&{CCLIVE_ENABLE}
@@ -54,9 +54,9 @@ activityAdsSwitch=switch,"true","false",tag=活动广告位屏蔽,desc=开启后
 ^https:\/\/mobile-thor\.api\.mgtv\.com\/v\d+\/vod\/info\? response-body-json-jq '.data.tabs |= map(select(.name == "视频" or .name == "讨论")) | .data.template.modules |= map(if .clipInfo.ext?.ipPublishEntrance then .clipInfo |= del(.ext) else . end) | .data.template.modules |= map(select(.dataType == 101 or .dataType == 201)) | .data.template.modules |= map(.media.list |= (if type == "array" then map(select(.type != 0)) else . end))' enable={VIDEO_ENABLE}&{MANGOTV_ENABLE}
 ^https:\/\/comment\.mgtv\.com\/v\d\/comment\/getCommentList\? response-body-json-jq '.data.list |= map(select(.type == 0))' enable={VIDEO_ENABLE}&{MANGOTV_ENABLE}
 ^https?:\/\/mobileso\.bz\.mgtv\.com\/mobile\/recommend\/v\d\? reject-dict enable={VIDEO_ENABLE}&{MANGOTV_ENABLE}
-^https:\/\/grpc\.moegirl\.org\.cn\/moegirl\.moepad\.MoepadAppMetaService\/GetAppInitialInfo$ reject enable={VIDEO_ENABLE}&{MOEGIRLWIKI_ENABLE}
-^https:\/\/grpc\.moegirl\.org\.cn\/moegirl\.moepad\.MoepadService\/GetLaunchAdPage$ reject enable={VIDEO_ENABLE}&{MOEGIRLWIKI_ENABLE}
-^https:\/\/grpc\.moegirl\.org\.cn\/moegirl\.moepad\.MoepadService\/GetFeedAdProbability$ reject enable={VIDEO_ENABLE}&{MOEGIRLWIKI_ENABLE}
+^https:\/\/grpc\.moegirl\.org\.cn\/moegirl\.moepad\.MoepadAppMetaService\/GetAppInitialInfo$ reject-dict enable={VIDEO_ENABLE}&{MOEGIRLWIKI_ENABLE}
+^https:\/\/grpc\.moegirl\.org\.cn\/moegirl\.moepad\.MoepadService\/GetLaunchAdPage$ reject-dict enable={VIDEO_ENABLE}&{MOEGIRLWIKI_ENABLE}
+^https:\/\/grpc\.moegirl\.org\.cn\/moegirl\.moepad\.MoepadService\/GetFeedAdProbability$ reject-dict enable={VIDEO_ENABLE}&{MOEGIRLWIKI_ENABLE}
 ^https:\/\/conf-m-ssl\.xunlei\.com\/external\/ response-body-json-del values.me_config.entrance_list_vertical_enable values.me_config.common_service_list values.me_config.banner_service_list enable={VIDEO_ENABLE}&{XUNLEI_ENABLE}
 ^https:\/\/api-shoulei-ssl\.xunlei\.com\/flowhub\/v1\/slots:batchGet$ response-body-json-jq '.slots |= map(select(.id == "xl_ios_mytab_vipicon" or (.native.assets.title.text.value? and (.native.assets.title.text.value | . == "清理助手" or . == "云盘容量" or . == "远程设备"))))' enable={VIDEO_ENABLE}&{XUNLEI_ENABLE}
 ^https:\/\/yyapp-fastnet\.yy\.com\/dispatch\? reject-dict enable={VIDEO_ENABLE}&{YY_VOICE_ENABLE}
@@ -68,7 +68,7 @@ activityAdsSwitch=switch,"true","false",tag=活动广告位屏蔽,desc=开启后
 ^https:\/\/personal-center\.yy\.com\/personalCenter\/list\? response-body-json-jq '.data.modules |= map(select(.moduleName != "Banner轮播")) | .data.modules |= map(if has("entrances") then .entrances |= map(select(.bizCode|IN("jishijiedaikuan","duxiaoman2","chongzhi","freeData")|not)) else . end)' enable={VIDEO_ENABLE}&{YY_VOICE_ENABLE}
 ^https:\/\/yuyin-api\.baizhanlive\.com\/homepage\/flashscreen\/get\? reject-dict enable={VIDEO_ENABLE}&{YYVOICETOOL_ENABLE}
 ^https:\/\/yuyin-api\.baizhanlive\.com\/homepage\/homepage\/banner\? reject-dict enable={VIDEO_ENABLE}&{YYVOICETOOL_ENABLE}
-^https:\/\/web\.yy\.com\/yyvoice_task_sys\/bar\.html\? reject enable={VIDEO_ENABLE}&{YYVOICETOOL_ENABLE}
+^https:\/\/web\.yy\.com\/yyvoice_task_sys\/bar\.html\? reject-dict enable={VIDEO_ENABLE}&{YYVOICETOOL_ENABLE}
 ^https:\/\/yuyin-api\.baizhanlive\.com\/postsquare\/college\/page\/tabsV3\? response-body-json-jq '.data.tabList |= map(select(.code == "post" or .code == "teamup" or .code == "college" or .code == "aiSecretRoom"))' enable={VIDEO_ENABLE}&{YYVOICETOOL_ENABLE}
 ^https:\/\/yuyin-api\.baizhanlive\.com\/search\/search\/hotword\? reject-dict enable={VIDEO_ENABLE}&{YYVOICETOOL_ENABLE}
 

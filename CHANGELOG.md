@@ -25,6 +25,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **数字同步**: 用例总数 231 → 220 (删 geonode-sync 11 例), [Rule] 481 → 482 (qreport KEYWORD→精确枚举 +1 净增) — 两处均经 doc-claims-check 端态用例强制同步, AGENTS.md 已更新
 - 回滚: `git show <本提交>^:Profile/geonode.loon.txt` 可取回最后一份节点清单; 整链恢复则 revert 本提交
 
+### Fixed (2026-09-20 精简精准优化 — 裸 reject 分诊 + 通配计数口径收敛)
+
+- **裸 `reject` 111→42 (Plugin/ 自维护面 75→0, 全绿)**: plugin-lint 报告通道原 111 行。分诊四批, 全部有仓内/上游同功能先例作证据, 非批量改写:
+  - T0 同注册域 dict 先例 12 行 → `reject-dict` (zhihu api.zhihu.com 等, 同 host 已有 dict 行)
+  - T1 纯上报埋点 4 行 → `# no-retry` 豁免 (apptrack/madfeedback/sauron-report/zto-track, 无 UI 等待) + bankcomm getGuidePageAds 1 行 → `reject-200` (startup 同 host queryGuidePageAds 已有 reject-200 先例)
+  - T2 广告内容 JSON 35 行 → `reject-dict` (social 同 App 61 dict vs 11 裸, 邻域 11 dict vs 5 裸: zto/95504/dmald/yonghuivip/cainiao/luckin-adposNew/pupu/moegirl/chelaile 等)
+  - T3 luckin 功能接口 7 行 → `reject-dict` (同 host adposNew 先例 + 同 App response-body-json 先例, 功能面 App 可解析 JSON)
+  - T4 Kelee 自维护壳 9 行 `.jpg` → `reject-img` (同文件 huami 5 行 `*_ad` reject-img 先例)
+  - T5 smzdm coupon_list 1 行 → `reject-dict` (同文件 popup_coupon dict 先例)
+  - 238 用例全绿; 剩余 42 = startup 生成块 16 (上游墨鱼显式选择, 见下) + Kelee 上游外壳 26 (BlockAdvertisers 4/Block-HTTPDNS 2/Remove-ads-by-keli 20, 无上游 dict 先例, 不做无证据改写)
+- **startup 生成块 16 裸 reject 定性为"上游显式选择", 不做本地改写**: 上游 conf 内 16 裸 `reject` vs 430+ `reject-200` — 作者知晓 200 形态, 裸 reject 系"无 UI 等待"接口的断连处理, 有意而非遗漏。本地改了下次镜像即漂移; 证据已写入 `buildRules` 注释
+- **通配覆盖报告计数口径收敛 (label 子串 → 根域子串)**: 旧实现取最左 label (`p*.meituan.net` → label `p`, `includes("p")` 命中 449/449 条规则 — 全是误报)。现以根域为准 (`meituan.net` → 6 条, 与 minimizeHosts 判定器同口径)。`interface*.music.163.com` 等 12 条旧口径"高消费"实测根域仅 1-5 条; `@UpdateTime` 级上游变更若致某通配 0 消费, 既有"零消费通配"断言即红。回归用例已加 (label 口径 449 条夹具在新口径下计 0)
+- **文档数字同步**: CHANGELOG 本条记录全量动作 (裸 reject 76→42; 通配口径 `p*.meituan.net` 449→6)。AGENTS.md 无此二数 (doc-claims-check 仅断言 7 个固定数字), 免同步
+
 ### Changed / Added (2026-09-19 官方文档对齐 — P1 精准度/性能 + P2 运维落地)
 
 **P1 精准度/性能**
@@ -32,14 +46,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **`DROP` → `REJECT`（`Plugin/qqmusic.plugin` + `template/loon.tpl` → regenerate）**: 官方 docs/Policy/ 语义下 `REJECT-DROP` = 直接丢弃**无响应**, App 会立即重试（请求风暴）; 上报域用 `REJECT`（404 空体）同样"不展示"且不制造重试。QQ 音乐系 6 条 `REJECT-DROP` + 2 条非官方动作名 `REJECT-NO-DROP` 统一为 `REJECT`; 自有面（Plugin/Kelee/template/Profile）实测残余 **0**（Mirror/iringo 上游 vendored 文件不属可改面）。新的伴随门禁 `[DROP禁用于Rule]` 已进 plugin-lint
 - **探活 URL 一主一备（`template/loon.tpl`）**: `internet-test-url`（直连可用性, cp.cloudflare.com）与 `proxy-test-url`（代理链路, connectivitycheck.gstatic.com）分离 —— 同端点时该端点故障会同时误判"本机断网 + 代理失效", 分端点后任一故障只影响一条链路
 - **KEYWORD 门控进 plugin-lint**: 裸 `DOMAIN-KEYWORD` 判红（docs/Rule/sub_rule: KEYWORD 随条数涨耗时）, 豁免两类 —— `AND(SUFFIX,…)`/`AND(USER-AGENT,…)` 锚定（bilibili-pro:81 / qidian:71-73 双样板）与策略占位行 `{AI_Policy}`（分流非拦截）; Kelee/ 上游外壳豁免
-- **裸 `reject` 报告通道（76 行, 报告级不判红）**: docs/Policy/ 下裸 reject = 断连, 有 UI 等待的接口可能转圈/重试 → 全量清单进 plugin-lint 报告; 确认无重试的纯埋点行尾加 `# no-retry` 豁免; 逐条需真机确认, **不做无证据的批量改写**
+- **裸 `reject` 报告通道（2026-09-19 建 76 行 → 2026-09-20 分诊后 42 行, 报告级不判红）**: docs/Policy/ 下裸 reject = 断连, 有 UI 等待的接口可能转圈/重试 → 全量清单进 plugin-lint 报告; 确认无重试的纯埋点行尾加 `# no-retry` 豁免; 逐条需真机确认, **不做无证据的批量改写**。2026-09-20 已分诊 69 行 (T0 同域 dict 先例 12 / T1 上报豁免 4+200 对齐 1 / T2 广告 JSON 35 / T3 luckin 功能 7 / T4 Kelee 图片 9 / T5 smzdm 同功能 1 — 全部有仓内/上游同功能先例); 剩余 42 = startup 生成块 16 (上游墨鱼显式选择: 同 conf 16 裸 vs 430+ reject-200) + Kelee 上游外壳 26 (无上游 dict 先例, 不改)
 - **两项"评估后保持"决策（记录以防重复论证）**: ①`reject-array` 全仓 0 次（`reject-dict` 901 / `reject-img` 15）—— `{}` 对绝大多数接口安全, 数组型接口需逐条真机核实, 未核实前不批量替换; ②GEOIP/ASN 库**不纳入 mirror** —— MMDB 为多 MB 二进制而镜像管线为文本导向（LF 归一化白名单）, 且篡改后果 = 路由误判（非代码执行）, 收益/成本不成比例; 双上游已配（Loyalsoldier Country.mmdb + P3TERX ASN）
 
 **P2 运维**
 
 - **诊断助手 `Plugin/diagnostics.plugin` + `src/Diagnostics.ts`（官方 `generic` 语义）**: App 内"操作节点/策略组"处手动触发一次 → 双链路探活（代理 cp.cloudflare.com/generate_204 + 直连 baidu, 各记状态码/耗时）+ 四分支判定（双通 / 仅直连=代理故障 / 仅代理=直连异常 / 双不通=断网）; 节点上下文经 `$environment.params` 注入（官方 generic_example.js 契约）时**钉在该节点上**探活（`$httpClient.get({url,node})`）, 结果经 `$done({title, htmlMessage})` 富文本回显; 零常驻影响（无 [Rule]/[Rewrite]/[MitM] 段）, 含 8s 兜底超时（回调丢失不挂死 UI）。plugin-lint 的 [Script] 段检查同步放行 `generic` 触发器; 用例 4 条（双通/节点钉住/失败分支/回调丢失兜底）
 - **rule-order-check 新增第 6 断言: FINAL 必须是 [Rule] 段最后一条有效规则** —— FINAL 为兜底全匹配, 其后任何规则永远不可达（静默死规则）; 此前只有"GEOIP→FINAL 相邻"断言, 防不了"FINAL 之后又加规则"
-- **startup 通配覆盖报告（`tools/build-startup-plugin.mjs`）**: 27 条通配 hostname 逐条列出"被 N 条规则消费"（最大 `p*.meituan.net` 449 条）, 供人工判断是否收窄为枚举; 只报告不自动收敛（收窄 = 改变解密面, 需人工决策）; 配用例 1 条（含"零消费通配 = 纯解密面"不变量）
+- **startup 通配覆盖报告（`tools/build-startup-plugin.mjs`）**: 27 条通配 hostname 逐条列出"被 N 条规则消费"(2026-09-20 起根域口径: `p*.meituan.net` 6 条; 旧 label 口径 449 条系 `includes("p")` 误报, 已修 + 回归用例锁定), 供人工判断是否收窄为枚举; 只报告不自动收敛(收窄 = 改变解密面, 需人工决策); 配用例 1 条(含"零消费通配 = 纯解密面"不变量)
 
 **门禁与数字**
 

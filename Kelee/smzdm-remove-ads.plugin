@@ -12,7 +12,7 @@ DOMAIN,adx-api.zdmimg.com,REJECT
 
 [Rewrite]
 # ── 红包/活动页 URL 拒绝 ─────────────────
-^https:\/\/h5\.smzdm\.com\/user\/coupon\/coupon_list\? reject
+^https:\/\/h5\.smzdm\.com\/user\/coupon\/coupon_list\? reject-dict
 
 # ── 全局配置净化 (util/update) ───────────
 ^https:\/\/app-api\.smzdm\.com\/util\/update$ response-body-json-jq 'if (getpath(["data"]) | has("silence_local_push")) then (setpath(["data","silence_local_push"]; 0)) else . end'

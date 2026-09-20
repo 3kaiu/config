@@ -145,16 +145,23 @@ exports.tests = {
     a.ok(kept.length >= survived, `kept(${kept.length}) 应 ≥ 存活数(${survived})`);
   },
 
-  // ── 通配覆盖报告 (P2-3, 2026-09-19) ──
-  "startup-host: 通配覆盖报告 — 消费数可计算, 真实管线零消费通配 = 0": async (a) => {
+  // ── 通配覆盖报告 (P2-3, 2026-09-19; 计数口径 2026-09-20 收敛为根域子串) ──
+  "startup-host: 通配覆盖报告 — 根域口径计数, 真实管线零消费通配 = 0": async (a) => {
     const m = await load();
-    // 夹具: 仅含通配条目入报告, 消费数按规则文本统计
+    // 夹具: 仅含通配条目入报告, 消费数按根域统计
     const rows = m.wildcardReport(
       ["*.ziben.com", "api.foo.com"],
       [{ regex: "^https?:\\/\\/api\\.ziben\\.com\\/x" }, { regex: "^https?:\\/\\/other\\.com" }]
     );
     a.equal(rows.length, 1, "非通配条目不进报告");
     a.equal(rows[0], { host: "*.ziben.com", rules: 1 }, "消费数应正确");
+    // 回归: 旧实现取最左 label 子串 — `p*.meituan.net` → label "p" 会命中 449 条。
+    // 根域口径下实测应为个位数 (当前上游 6 条); 若回退到 label 口径, 本断言即红。
+    const meituanRows = m.wildcardReport(
+      ["p*.meituan.net"],
+      Array.from({ length: 449 }, (_, i) => ({ regex: `^https://x${i}.p${i}.com/y` }))
+    );
+    a.equal(meituanRows[0].rules, 0, "label 口径回归: 无 meituan.net 根域的规则不得被计入");
     // 真实管线: 通配全部有规则消费 (0 消费 = 纯解密面浪费, 报告应能暴露)
     const parsed = m.parseConf(fs.readFileSync(SRC, "utf8"));
     const { rules } = m.buildRules(parsed.rejects);
