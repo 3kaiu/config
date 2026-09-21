@@ -226,8 +226,8 @@ exports.tests = {
     a.equal(unreg, [], "不允许未登记条目 — 上游新增 script 条目时此断言判红, 需人工分诊");
     const byStatus = (s) => rows.filter((r) => r.status === s).length;
     a.equal(byStatus("covered"), 14, "covered 14 (2026-09-20 path 级核对)");
-    a.equal(byStatus("extra"), 3, "extra 3 (delivery_show/queryInfoFlow/GetSplashAd)");
-    a.equal(byStatus("pending"), 10, "pending 10 (待真机/已判定不做)");
+    a.equal(byStatus("extra"), 5, "extra 5 (delivery_show/queryInfoFlow/GetSplashAd + 2026-09-22 get_all_advertise/cardes)");
+    a.equal(byStatus("pending"), 8, "pending 8 (待真机/已判定不做)");
     const tokens = m.SCRIPT_LEDGER.map(([t]) => t);
     a.equal(new Set(tokens).size, tokens.length, "SCRIPT_LEDGER token 应唯一, 否则匹配语义漂移");
   },

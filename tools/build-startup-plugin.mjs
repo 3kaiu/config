@@ -266,6 +266,18 @@ export const EXTRA_REJECTS = [
     host: "api.369cx.cn",
     reason: "漫画开屏广告 (上游 dict.js); 端点名即 Splash/GetSplashAd, 同文件 430+ 开屏 reject-200 先例; host 为此新入 MitM 解密面",
   },
+  {
+    regex: "^https?:\\/\\/[^\\/]*zdmimg\\.com\\/cpm\\/api\\/v\\d\\/advert_distribution\\/get_all_advertise",
+    action: "reject-dict",
+    host: "*.zdmimg.com",
+    reason: "什么值得买 CPM 广告分发 (上游 smzdm_json.js); 端点名即 get_all_advertise 纯广告 JSON, path 级精准不伤 zdmimg 图床; Kelee smzdm-remove-ads 同功能先例",
+  },
+  {
+    regex: "^https?:\\/\\/apiproxy\\.zuche\\.com\\/resource\\/cardes\\/toufang\\/marketing",
+    action: "reject-dict",
+    host: "apiproxy.zuche.com",
+    reason: "神州租车营销投放 (上游 dict.js); 路径名即 toufang/marketing 纯营销 JSON, path 级精准不伤租车功能接口; 同生成块 reject-dict 先例",
+  },
 ];
 
 /** [token, status, note] — token 取 path 级唯一锚 (见 scriptLedger 匹配) */
@@ -288,6 +300,8 @@ export const SCRIPT_LEDGER = [
   ["GetSplashAd", "extra", "EXTRA_REJECTS[2] 369cx 开屏 reject-200"],
   ["delivery_show", "extra", "EXTRA_REJECTS[0] 京东开屏 reject-dict"],
   ["queryInfoFlow", "extra", "EXTRA_REJECTS[1] 顺丰信息流 reject-dict"],
+  ["get_all_advertise", "extra", "EXTRA_REJECTS[3] 值得买 CPM reject-dict (2026-09-22 P0-3)"],
+  ["cardes", "extra", "EXTRA_REJECTS[4] 神州租车营销 reject-dict (2026-09-22 P0-3)"],
   // pending: 待真机验证 / 已判定不做
   ["getCommonMixData", "pending", "百视TV 信息流: host 已解密, reject 动作形态待真机"],
   ["threadpost", "pending", "飞客茶馆: host 已解密, 待真机"],
@@ -297,8 +311,6 @@ export const SCRIPT_LEDGER = [
   ["mgw\\.htm", "pending", "农行网关页 (上游为 script-response-header), reject 形态待真机"],
   ["api\\.jk\\.cn", "pending", "平安广告接口: 待真机"],
   ["stay-fork", "pending", "深银客户端: 待真机"],
-  ["get_all_advertise", "pending", "值得买 CPM (zdmimg): 需加 MitM + 真机"],
-  ["cardes", "pending", "神州租车 marketing 投放: 需加 MitM + 真机"],
 ];
 
 /** 把 27 条 script 条目归类为 covered / extra / pending / unregistered */

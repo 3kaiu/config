@@ -33,6 +33,14 @@ exports.tests = {
     a.equal(s.doneCalls.length, 1);
     a.equal(s.doneCalls[0].body, undefined);
   },
+  // 2026-09-22 B5: cron 下 $request/$response 皆无 — 守卫 $done 一次，不抛错
+  // (旧 cron 每日中午因此空跑报错，现 cron 已删，此例锁纵深守卫)
+  "zhihu: $request 守卫 (cron 模式不抛错)": async (a, h) => {
+    const sb = h.createSandbox({});
+    const s = await h.runScript("Scripts/Zhihu.js", sb);
+    a.ok(!s.scriptError, "不应抛 ReferenceError");
+    a.doneCalled(s, "cron 模式应 $done 一次");
+  },
 
   // ── Cainiao ──
   "cainiao: 首页净化 (page.fetch) 删 searchContents/operationList": async (a, h) => {

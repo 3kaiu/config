@@ -23,6 +23,9 @@ WEIBO_DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执
 # ════════════════════════════════════════
 
 # ── 开屏广告模块 ───────────────────────
+# (2026-09-22 P1 script→原生降级: 纯广告端点 sdkad.php/ad/preload 原走 Weibo.js
+# 脚本清洗，现转本段原生 http-response reject-dict，脚本不再触发；
+# ad/realtime 与 [Rewrite] bootrealtime 行同路径重复，删 script 留 Rewrite 原生。)
 http-response ^https?:\/\/ads\.api\.weibo\.com\/app\/splash url reject-200, enable={ENABLE_WEIBO}&{WEIBO_SPLASH_ENABLE}
 http-response ^https?:\/\/flash\.weibo\.com\/splash\/list url reject-200, enable={ENABLE_WEIBO}&{WEIBO_SPLASH_ENABLE}
 http-response ^https?:\/\/api\.weibo\.cn\/2\/splash url reject-200, enable={ENABLE_WEIBO}&{WEIBO_SPLASH_ENABLE}
@@ -74,15 +77,15 @@ http-response ^https?:\/\/api\.weibo\.cn\/2\/profile\/me script-path=https://ws.
 http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/extend script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, argument=[{WEIBO_DEBUG_ENABLE}], timeout=10, tag=微博_详情
 http-response ^https?:\/\/api\.weibo\.cn\/2\/search\/finder script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, argument=[{WEIBO_DEBUG_ENABLE}], timeout=10, tag=微博_搜索主页
 http-response ^https?:\/\/api\.weibo\.cn\/2\/search\/container_timeline script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, argument=[{WEIBO_DEBUG_ENABLE}], timeout=10, tag=微博_搜索时间线
-http-response ^https?:\/\/api\.weibo\.cn\/2\/search\/container_discover script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, argument=[{WEIBO_DEBUG_ENABLE}], timeout=10, tag=微博_搜索发现
+# (2026-09-22 B4: search/container_discover 与 [Rewrite] 同路径 reject-dict，
+# Response Script 从未触发，删除。)
 http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/unread_topic_timeline script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, argument=[{WEIBO_DEBUG_ENABLE}], timeout=10, tag=微博_超话时间线
 http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/container_timeline_topic script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, argument=[{WEIBO_DEBUG_ENABLE}], timeout=10, tag=微博_超话容器
 http-response ^https?:\/\/api\.weibo\.cn\/2\/statuses\/container_timeline script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, argument=[{WEIBO_DEBUG_ENABLE}], timeout=10, tag=微博_容器时间线
 
 # ── 开屏广告 ──
-http-response ^https?:\/\/sdkapp\.uve\.weibo\.com\/interface\/sdk\/sdkad\.php script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, argument=[{WEIBO_DEBUG_ENABLE}], timeout=10, tag=微博_开屏SDK
-http-response ^https?:\/\/api\.weibo\.cn\/2\/ad\/preload script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, argument=[{WEIBO_DEBUG_ENABLE}], timeout=10, tag=微博_广告预加载
-http-response ^https?:\/\/bootrealtime\.uve\.weibo\.com\/v[23]\/ad\/realtime script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, argument=[{WEIBO_DEBUG_ENABLE}], timeout=10, tag=微博_实时广告
+http-response ^https?:\/\/sdkapp\.uve\.weibo\.com\/interface\/sdk\/sdkad\.php reject-dict enable={ENABLE_WEIBO}&{WEIBO_SPLASH_ENABLE}
+http-response ^https?:\/\/api\.weibo\.cn\/2\/ad\/preload reject-dict enable={ENABLE_WEIBO}&{WEIBO_SPLASH_ENABLE}
 
 # ── 其他功能模块 ──
 http-response ^https?:\/\/api\.weibo\.cn\/2\/video\/remind_info script-path=https://ws.wenn.in/main/Scripts/Weibo.js, requires-body=true, argument=[{WEIBO_DEBUG_ENABLE}], timeout=10, tag=微博_视频提醒

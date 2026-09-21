@@ -15,6 +15,10 @@ const DEBUG: boolean = readFlag("BILI_DEBUG_ENABLE");
 function log(msg: string): void { if (DEBUG) console.log(msg); }
 
 const TIMEOUT = 10000;
+// 2026-09-22 B4-2: 每日一次的签到容不得单次瞬断 — 网络/超时/解析类失败重试 1 次
+// (业务码 resolve，不重试)；两次均败才报失败。
+const RETRY_WAIT = 2000;
+function sleep(ms: number): Promise<void> { return new Promise(r => setTimeout(r, ms)); }
 
 function httpGet<T>(url: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {
@@ -28,13 +32,24 @@ function httpGet<T>(url: string): Promise<T> {
 }
 
 function liveSignIn(): Promise<SignResult> {
-  return httpGet<{ code: number; data?: { text?: string }; message?: string }>("https://api.live.bilibili.com/xlive/web-interface/v1/sign/doSign")
-    .then(data => {
-      if (data.code === 0) return { ok: true, msg: data.data?.text || "签到成功" };
-      if (data.code === 1011040) return { ok: true, msg: "已签到过" };
-      return { ok: false, msg: data.message || "未知错误" };
-    })
-    .catch(e => ({ ok: false, msg: "请求失败: " + (e.message || e) }));
+  const attempt = (): Promise<SignResult> =>
+    httpGet<{ code: number; data?: { text?: string }; message?: string }>("https://api.live.bilibili.com/xlive/web-interface/v1/sign/doSign")
+      .then(data => {
+        if (data.code === 0) return { ok: true, msg: data.data?.text || "签到成功" };
+        if (data.code === 1011040) return { ok: true, msg: "已签到过" };
+        // 2026-09-22 B4-2: -101=未登录态，直给重抓指引 (存量用例断言含"未登录"，措辞保留前缀)
+        if (data.code === -101) return { ok: false, msg: "未登录 (Cookie可能过期，请重进B站App刷新登录态)" };
+        return { ok: false, msg: data.message || "未知错误" };
+      })
+      .catch(e => ({ ok: false, msg: "请求失败: " + (e.message || e) }));
+  return attempt().then(async first => {
+    if (first.ok || !first.msg.startsWith("请求失败")) return first;
+    log("签到首试失败，2s 后重试一次");
+    await sleep(RETRY_WAIT);
+    const second = await attempt();
+    log("重试结果: " + second.msg);
+    return second;
+  });
 }
 
 function getCoinBalance(): Promise<SignResult> {

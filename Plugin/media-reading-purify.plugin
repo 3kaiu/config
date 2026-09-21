@@ -56,11 +56,14 @@ FANQIE_ENABLE=switch,"true","false",tag=总开关，desc=开启后执行所有�
 AND, ((DOMAIN-SUFFIX, spotify.com), (PROTOCOL, QUIC)), REJECT,enable={MEDIA_ENABLE}&{SPOTIFY_ENABLE}
 
 [Script]
-http-response ^https?:\/\/ads\.kugou\.com script-path=https://ws.wenn.in/main/Scripts/Kugou.js, requires-body=true, timeout=10, tag=酷狗_广告投放, enable={MEDIA_ENABLE}&{KUGOU_ENABLE}
-http-response ^https?:\/\/mobilead\.kugou\.com script-path=https://ws.wenn.in/main/Scripts/Kugou.js, requires-body=true, timeout=10, tag=酷狗_移动广告, enable={MEDIA_ENABLE}&{KUGOU_ENABLE}
+# (2026-09-22 B2 script→原生降级: ads/mobilead.kugou.com + mobilead.kuwo.cn 系纯广告
+# host (handler 仅清空广告数组)，转原生 reject-dict；gateway.kugou/rich.kuwo/优酷/
+# 番茄系混合内容，保留脚本。)
+http-response ^https?:\/\/ads\.kugou\.com reject-dict enable={MEDIA_ENABLE}&{KUGOU_ENABLE}
+http-response ^https?:\/\/mobilead\.kugou\.com reject-dict enable={MEDIA_ENABLE}&{KUGOU_ENABLE}
 http-response ^https?:\/\/gateway\.kugou\.com script-path=https://ws.wenn.in/main/Scripts/Kugou.js, requires-body=true, timeout=10, tag=酷狗_信息流, enable={MEDIA_ENABLE}&{KUGOU_ENABLE}
 http-response ^https?:\/\/rich\.kuwo\.cn script-path=https://ws.wenn.in/main/Scripts/Kuwo.js, requires-body=true, timeout=10, tag=酷我_广告服务, enable={MEDIA_ENABLE}&{KUWO_ENABLE}
-http-response ^https?:\/\/mobilead\.kuwo\.cn script-path=https://ws.wenn.in/main/Scripts/Kuwo.js, requires-body=true, timeout=10, tag=酷我_移动广告, enable={MEDIA_ENABLE}&{KUWO_ENABLE}
+http-response ^https?:\/\/mobilead\.kuwo\.cn reject-dict enable={MEDIA_ENABLE}&{KUWO_ENABLE}
 http-response ^https?:\/\/api\.youku\.com script-path=https://ws.wenn.in/main/Scripts/Youku.js, requires-body=true, timeout=10, tag=优酷开屏净化, enable={MEDIA_ENABLE}&{YOUKU_ENABLE}
 http-response ^https?:\/\/iyes\.youku\.com script-path=https://ws.wenn.in/main/Scripts/Youku.js, requires-body=true, timeout=10, tag=优酷广告追踪, enable={MEDIA_ENABLE}&{YOUKU_ENABLE}
 http-response ^https?:\/\/vali\.cp31\.ott\.cibntv\.net script-path=https://ws.wenn.in/main/Scripts/Youku.js, requires-body=true, timeout=10, tag=优酷视频广告, enable={MEDIA_ENABLE}&{YOUKU_ENABLE}

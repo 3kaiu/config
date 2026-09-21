@@ -184,7 +184,9 @@ http-response ^https:\/\/(cn-acs\.m|e2e-mtop)\.cainiao\.com\/gw\/mtop\.cainiao\.
 http-response ^https:\/\/e2e-mtop\.cainiao\.com\/gw\/mtop\.cainiao\.app\.e2e\.engine\.page\.fetch\.cn script-path=https://ws.wenn.in/main/Scripts/Cainiao.js, requires-body=true, timeout=10, tag=我的页净化, enable={SHOPPING_ENABLE}&{CAINIAO_ENABLE}
 http-response ^https:\/\/longquan-mtop\.cainiao\.com\/gw\/mtop\.com\.cainiao\.longquan\.place\.getpageresourcecontent\.cn script-path=https://ws.wenn.in/main/Scripts/Cainiao.js, requires-body=true, timeout=10, tag=发现页净化, enable={SHOPPING_ENABLE}&{CAINIAO_ENABLE}
 http-response ^https:\/\/netflow-mtop\.cainiao\.com\/gw\/mtop\.cainiao\.guoguo\.nbnetflow\.ads script-path=https://ws.wenn.in/main/Scripts/Cainiao.js, requires-body=true, timeout=10, tag=开屏净化, enable={SHOPPING_ENABLE}&{CAINIAO_ENABLE}
-http-response ^https?:\/\/adservice\.wps\.cn\/ script-path=https://ws.wenn.in/main/Scripts/WPS.js, requires-body=true, timeout=10, tag=WPS_广告拦截, enable={SHOPPING_ENABLE}&{WPS_ENABLE}
+# (2026-09-22 B2: adservice.wps.cn 系纯广告 host (handler 仅清空广告数组)，转原生
+# reject-dict；nbnetflow.ads handler 按 materialId 条件清空、docer 系混合推荐，均保留脚本。)
+http-response ^https?:\/\/adservice\.wps\.cn\/ reject-dict enable={SHOPPING_ENABLE}&{WPS_ENABLE}
 http-response ^https?:\/\/docer\.wps\.cn\/ script-path=https://ws.wenn.in/main/Scripts/WPS.js, requires-body=true, timeout=10, tag=WPS_文档推荐净化, enable={SHOPPING_ENABLE}&{WPS_ENABLE}
 http-response ^https?:\/\/(tiebac|tieba|tiebaapi)\.baidu\.com script-path=https://ws.wenn.in/main/Scripts/Tieba.js, requires-body=true, timeout=10, tag=贴吧_JSON 净化，enable={SHOPPING_ENABLE}&{ENABLE_TIEBA}
 http-response ^https?:\/\/(tiebac|tieba|tiebaapi)\.baidu\.com.*\?cmd script-path=https://ws.wenn.in/main/Scripts/Tieba.js, binary-body-mode=true, requires-body=true, timeout=10, tag=贴吧_Proto 净化，enable={SHOPPING_ENABLE}&{ENABLE_TIEBA}

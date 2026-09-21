@@ -2,7 +2,9 @@ const { defineSurgioConfig } = require('surgio');
 
 // 注意: provider 由 surgio 按约定加载 provider/<name>.js (artifact.js 内
 // path.resolve(providerDir, `${name}.js`)), 本文件不再重复定义 provider 对象。
-// 因此 tokyo provider 的唯一来源是 provider/tokyo.js — 改节点来源请改那个文件。
+// 主源 provider/tokyo.js (SURGIO_SUBSCRIPTION_URL) + 备用 provider/tokyob.js
+// (SURGIO_SUBSCRIPTION_URL_2 / SURGIO_SUBSCRIPTION_URL_BAK)，经下述
+// combineProviders 合并。双变量均空时双源皆为空节点表，产物与单源一致。
 // (历史: 此处曾有一份内联 tokyoProvider 定义, 经实测为死代码 — surgio 从不读取
 //  config.providers, 且 SurgioConfigValidator 无该字段。已于 2026-09-11 移除。)
 
@@ -12,6 +14,7 @@ module.exports = defineSurgioConfig({
       name: 'Loon.lcf',
       template: 'loon',
       provider: 'tokyo',
+      combineProviders: ['tokyob'],
       // Loon.lcf 输出到 Profile/ 目录
       destDir: 'Profile',
     },

@@ -53,6 +53,34 @@ exports.tests = {
     a.equal(n.length, 1, "应发送一次通知");
     a.ok(n[0].body.includes("未登录"), "应提示未登录");
   },
+  // 2026-09-22 B4-2: 首试瞬断重试一次成功 → 按成功通知 (一日一次容不得单次抖动)
+  "bilibili: 首试失败重试成功": async (a, h) => {
+    let n = 0;
+    const sb = h.createSandbox({});
+    sb.context.$httpClient = {
+      get: (opts, cb) => {
+        if (opts.url.includes("doSign")) {
+          n++;
+          if (n === 1) cb(new Error("timeout"), null, "");
+          else cb(null, { status: 200 }, JSON.stringify({ code: 0, data: { text: "签到成功" } }));
+        }
+        else if (opts.url.includes("coin/balance")) cb(null, { status: 200 }, JSON.stringify({ code: 0, data: 7 }));
+      }
+    };
+    const s = await h.runScript("Scripts/Bilibili.js", sb);
+    a.ok(s.notifications[0].body.includes("签到成功"), "重试成功应按成功通知");
+    a.ok(s.notifications[0].body.includes("7"), "应含硬币数");
+  },
+  // 2026-09-22 B4-2: -101 追加重抓指引 (保留"未登录"前缀，存量断言兼容)
+  "bilibili: -101 提示重抓指引": async (a, h) => {
+    const sb = h.createSandbox({});
+    sb.context.$httpClient = {
+      get: (opts, cb) => cb(null, { status: 200 }, JSON.stringify({ code: -101, message: "未登录" }))
+    };
+    const s = await h.runScript("Scripts/Bilibili.js", sb);
+    a.ok(s.notifications[0].body.includes("未登录"), "保留未登录前缀");
+    a.ok(s.notifications[0].body.includes("Cookie可能过期"), "应给重抓指引");
+  },
 
   // ── LinkedIn ──
   "linkedin: 词段级广告键删除 (address/adaptive/admin 不再误删)": async (a, h) => {

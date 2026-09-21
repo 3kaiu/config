@@ -2,6 +2,19 @@
  * 📚 起点全能助手 v6.3
  * 作者：3kaiu
  *
+ * v6.5 更新 (运维优化):
+ *  1. [OBSERVE] handleReplay 单轮可观测: 每轮记 HTTP 状态 + 耗时，
+ *     异常截断 80 字记日志 (此前仅首尾两行，失败轮次黑盒)
+ *  2. [RELIABILITY] 单轮 15s 超时 (此前无 timeout，弱网下整批挂起至插件 120s 熔断)
+ *  3. [OBSERVE] 401/403 嗅探: 任一轮次鉴权失败即在汇总通知追加"Cookie 可能过期"
+ *     (此前过期表现为 X/9 哑巴数，需人工猜因)
+ *
+ * v6.4 更新 (运维优化):
+ *  1. [PERF] Token 过期短路: checkin 返回 401/403 即判 Cookie 过期，通知并
+ *     跳过 DNS 预热 + 引擎 + 400s 等待 (死 Token 原先空跑 400s+ 才失败)
+ *  2. [PERF] 超时拆分: 高阶任务四开关 (ADV/EXTRA/LOTTERY/WEEKLY) 全关时为
+ *     纯签到模式，跳过引擎等待直接结束；默认全开时保持 400s 全量
+ *
  * v6.3 更新 (性能修复):
  *  1. [PERF] checkin 快速失败: 重试 3→2 次，单次 10s 超时，间隔 3s→1.5s
  *     历史问题: 凌晨 DNS 慢时 3 次无超时重试消耗 68s，引擎启动过晚
@@ -516,22 +529,38 @@ async function handleReplay(request) {
   const headers = normalizeHeaders(request.headers || {});
   const tasks = Array.from({ length: replayCount }, async (_, i) => {
     await $.wait((i + 1) * 2000);
-    const res = await $.fetch({
-      url: request.url,
-      method: "POST",
-      headers: headers,
-      body: request.body
-    });
-    return res && res.statusCode === 200;
+    // v6.5: 单轮可观测 (状态码 + 耗时) + 15s 超时 + 异常截断记日志
+    const t0 = Date.now();
+    try {
+      const res = await $.fetch({
+        url: request.url,
+        method: "POST",
+        headers: headers,
+        body: request.body,
+        timeout: 15000
+      });
+      const ms = Date.now() - t0;
+      const code = res ? res.statusCode : "ERR";
+      const okOne = res && res.statusCode === 200;
+      $.log(`[重放 ${i + 1}/${replayCount}] ${task.name} HTTP ${code} ${ms}ms`);
+      return { ok: okOne, code };
+    } catch (e) {
+      $.log(`[重放 ${i + 1}/${replayCount}] ${task.name} 异常: ${String(e).slice(0, 80)}`);
+      return { ok: false, code: "EXC" };
+    }
   });
   const results = await Promise.allSettled(tasks);
-  const ok = results.filter(r => r.status === "fulfilled" && r.value).length;
+  const settled = results.map((r) => (r.status === "fulfilled" ? r.value : { ok: false, code: "REJ" }));
+  const ok = settled.filter((x) => x.ok).length;
+  // v6.5: 鉴权失败嗅探 — 任一轮 401/403 即提示 Cookie 可能过期
+  const expired = settled.some((x) => x.code === 401 || x.code === 403);
   const total = replayCount + 1; // +1 for the original request
+  const summary = `${task.name}: ${ok + 1}/${total}` + (expired ? " (🔑 部分请求 401/403，Cookie 可能过期)" : "");
   if (!CONFIG.SilentMode) {
     // ⚠️ 响应阶段: 必须 await 推送完成后再 $done(), 否则上下文回收中止推送
-    await $.notify("起点助手", "", `${task.name}: ${ok + 1}/${total}`);
+    await $.notify("起点助手", "", summary);
   } else {
-    $.log(`[静默模式] ${task.name}: ${ok + 1}/${total}`);
+    $.log(`[静默模式] ${summary}`);
   }
   $.done();
 }
@@ -651,7 +680,7 @@ async function handleSimpleCheckin() {
   const headers = $.get("Qidian_Headers");
   if (!headers) {
     $.log("⚠️ 未找到简单签到 Token，跳过简单签到");
-    return;
+    return "missing";
   }
 
   // v6.3 修复: 快速失败策略 — 最多 2 次尝试，单次 10s 超时，间隔 1.5s
@@ -679,7 +708,7 @@ async function handleSimpleCheckin() {
           } else {
             $.log(`[静默模式] ✅ 签到成功: ${(obj.Message || "今日签到完成") + drawMsg}`);
           }
-          return;
+          return "ok";
         } else if (obj && obj.Result === -452000) {
           const drawMsg = await checkinLottery(headers);
           if (!CONFIG.SilentMode) {
@@ -687,7 +716,7 @@ async function handleSimpleCheckin() {
           } else {
             $.log(`[静默模式] 📅 今日已签到: ${(obj.Message || "今日已签到") + drawMsg}`);
           }
-          return;
+          return "ok";
         } else {
           const msg = obj ? JSON.stringify(obj) : "未知错误";
           if (!CONFIG.SilentMode) {
@@ -695,10 +724,22 @@ async function handleSimpleCheckin() {
           } else {
             $.log(`[静默模式] ⚠️ 签到异常: ${msg}`);
           }
-          return;
+          return "failed";
         }
       }
-      // res 存在但 statusCode !== 200 (如 429/502/503)
+      // v6.4: Token 过期短路 — 401/403 说明 Cookie 已失效，重试无意义，
+      // 直接通知并返回 expired，调用方跳过引擎 + 400s 等待
+      const code = res ? res.statusCode : 0;
+      if (code === 401 || code === 403) {
+        const msg = "Cookie 已过期，请重新打开起点 App 触发抓取 (getlogininfo)";
+        if (!CONFIG.SilentMode) {
+          $.notify("起点助手", "🔑 Cookie过期", msg);
+        } else {
+          $.log(`[静默模式] 🔑 Cookie过期: ${msg}`);
+        }
+        return "expired";
+      }
+      // res 存在但 statusCode 非 200/401/403 (如 429/502/503)
       lastError = `HTTP ${res ? res.statusCode : "未知"}`;
       if (i < maxRetry - 1) {
         $.log(`[签到] ${lastError}, 重试 ${i + 1}/${maxRetry}...`);
@@ -726,11 +767,35 @@ async function handleSimpleCheckin() {
   } else {
     $.log(`[静默模式] ❌ 签到失败: ${errMsg}`);
   }
+  return "failed";
+}
+
+// v6.4: 高阶任务开关全关即纯签到模式 — 跳过引擎 + 400s 等待。
+// $argument 缺失 (如单测/手动调用) 按默认全开处理，保持全量等待。
+function engineTaskSwitchesOff() {
+  try {
+    if (typeof $argument === "undefined" || !$argument) return false;
+    const off = (k) => String($argument[k]) === "false";
+    return off("QDREADER_ADV_JOB_ENABLE")
+      && off("QDREADER_EXTRA_ADV_JOB_ENABLE")
+      && off("QDREADER_LOTTERY_ENABLE")
+      && off("QDREADER_WEEKLY_EXCHANGE_ENABLE");
+  } catch (e) { return false; }
 }
 
 async function executeCronTasks() {
   $.log("⚙️ 开始执行起点简单签到...");
-  await handleSimpleCheckin();
+  const signResult = await handleSimpleCheckin();
+  // v6.4 短路: Token 过期直接结束，省去 DNS 预热 + 引擎 + 400s 空等
+  if (signResult === "expired") {
+    $.log("⏭️ Token 已过期，跳过高阶引擎 (省 400s 等待)");
+    return;
+  }
+  // v6.4 超时拆分: 高阶开关全关 = 纯签到，跳过引擎
+  if (engineTaskSwitchesOff()) {
+    $.log("⏭️ 高阶任务开关全关，纯签到模式，跳过引擎");
+    return;
+  }
   $.log("⚙️ 开始执行起点高阶任务...");
 
   // v6.3: DNS 预热 — 在引擎启动前预建连接，减少引擎首次请求的 DNS 延迟

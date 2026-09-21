@@ -45,7 +45,7 @@ ipasn-url = https://raw.githubusercontent.com/P3TERX/GeoLite.mmdb/download/GeoLi
 allow-wifi-access = false
 wifi-access-http-port = 7222
 wifi-access-socks5-port = 6225
-test-timeout = 10
+test-timeout = 5
 # 探活一主一备 (2026-09-19 官方文档对齐): internet-test-url (直连可用性) 与 proxy-test-url
 # (代理链路可用性) 用**不同**上游 —— 同端点时该端点故障会同时误判"本机断网 + 代理失效",
 # 排障时无法区分; 分端点后任一故障只影响一条链路。策略组未显式 url= 时继承 proxy-test-url。
@@ -82,7 +82,8 @@ httpdns.c.cdnhwc2.com = 0.0.0.0
 
 [Proxy]
 # Surgio 自动生成节点: npx surgio generate
-# 通过 SURGIO_SUBSCRIPTION_URL (机场订阅) 传入; 为空时 Provider 为空节点
+# 通过 SURGIO_SUBSCRIPTION_URL (主订阅) + SURGIO_SUBSCRIPTION_URL_2 (备用订阅,
+# provider/tokyob.js, combineProviders 合并) 传入; 均为空时 Provider 为空节点
 # ⚠️ 新用户开箱即用形态: 首次导入本配置时 [Proxy] 为空、分流规则已全量生效,
 #    此时全部代理策略组 (Proxy/Streaming/AI/...) 均无可用节点 → 代理类流量**全部失败**,
 #    仅 China/DIRECT 规则正常。必须在 Loon 订阅设置里填入机场订阅 URL 并更新一次,
@@ -97,12 +98,19 @@ httpdns.c.cdnhwc2.com = 0.0.0.0
 # 亦无优先级语义, 故删除是零行为变更。
 # (2026-09-19 移除免费代理订阅: MainNodes 远端过滤器随之删除, Proxy/Fallback 改回
 # 直引订阅全部节点 — 见 [Remote Filter] 注释。)
-Proxy = url-test, url=http://cp.cloudflare.com/generate_204, interval=300, tolerance=50
-Fallback = fallback, url=http://cp.cloudflare.com/generate_204, interval=600, timeout=10
+# (2026-09-22 P0-1c 探活收紧 + Streaming/AI 自动择优: Proxy 300/50→120/100 防晚高峰
+# 抖动乱跳, Fallback 600/10→180/5; Streaming/AI 由 select 改 url-test, 追剧/AI 调用
+# 不再依赖手动切节点。VLESS 首选同步移除 — 双订阅源皆为 SS 系, VLESS 池恒空,
+# 空候选只增加一次选择延迟; 若日后接入 vless 订阅再加回。)
+# (2026-09-22 B5 单地区收尾: 订阅仅日本节点 — Final 保持 select 不改为 fallback，
+# 系刻意保留手动 DIRECT 总开关 (零代理姿态，见 [Rule] 尾注释)；Gaming/Social/
+# Developer 保持 select 手动粘滞，对局/通话中自动跳节点即掉线，手动切更稳。)
+Proxy = url-test, url=http://cp.cloudflare.com/generate_204, interval=120, tolerance=100
+Fallback = fallback, url=http://cp.cloudflare.com/generate_204, interval=180, timeout=5
 Apple = select, DIRECT, Proxy
 Final = select, Proxy, Fallback, DIRECT
-Streaming = select, VLESS, Proxy, Fallback, DIRECT, tag=流媒体
-AI = select, VLESS, Proxy, Fallback, DIRECT, tag=AI服务
+Streaming = url-test, Proxy, Fallback, DIRECT, url=http://cp.cloudflare.com/generate_204, interval=120, tolerance=100, tag=流媒体
+AI = url-test, Proxy, Fallback, DIRECT, url=http://cp.cloudflare.com/generate_204, interval=120, tolerance=100, tag=AI服务
 Developer = select, Proxy, Fallback, DIRECT, tag=开发者
 Gaming = select, Proxy, Fallback, DIRECT, tag=游戏平台
 Social = select, Proxy, Fallback, DIRECT, tag=社交平台
@@ -113,6 +121,9 @@ OpenCode = select, Proxy, DIRECT, tag=OpenCode.ai
 # (2026-09-19 移除免费代理订阅: 原 MainNodes 远端过滤器 `^(?!.*geonode).*$` 匹配
 # 除 geonode-* 外的全部节点 — 其唯一作用是隔离免费代理, 随订阅删除而删除;
 # 原 VLESS 的 geonode 负向前瞻亦同步移除, 回到单一条件。)
+# (2026-09-22 P1 VLESS 清理: 当前无策略组引用 VLESS — 双订阅源皆为 SS 系，
+# VLESS 池恒空。定义保留为“接入 vless 订阅时的回接配方”，届时把 Streaming/AI
+# 首选加回 VLESS 即可；删除该行亦零行为变化。)
 
 
 VLESS = NameRegex, FilterKey = "(?i)^(?=.*vless).*$"
@@ -955,4 +966,4 @@ https://ws.wenn.in/main/Kelee/Google.plugin, enabled=true, tag=🔍 Google搜索
 
 [MitM]
 skip-server-cert-verify = false
-hostname = -*.apple.com, -*.icloud.com, -*.icloud.com.cn, -*.95516.com, -*.cup.com.cn, -*.95516.com.cn, -*.unionpay.com, -*.icbc.com.cn, -*.mybank.icbc.com.cn, -*.icbc.com, -*.ccb.com, -*.ccb.cn, -*.boc.cn, -*.bankofchina.com, -*.jf365.boc.cn, -*.abchina.com, -*.abchina.com.cn, -*.cdn-static.abchina.com.cn, -*.cdn-static.abchina.com, -*.bankcomm.com, -*.bankcomm.cn, -*.creditcard.bankcomm.com, -*.creditcard.bankcomm.cn, -*.cmbchina.com, -*.cmbimg.com, -*.psbc.com, -*.spdb.com.cn, -*.spdbccc.com.cn, -*.citicbank.com, -*.citibank.com, -*.ecitic.com, -*.pingan.com.cn, -*.pingan.com, -*.hcz-member.pingan.com.cn, -*.iobs.pingan.com.cn, -*.stock.pingan.com, -*.cmbc.com.cn, -*.cib.com.cn, -*.cebbank.com, -*.ebchinabank.com, -*.hxb.com.cn, -*.cgbchina.com.cn, -*.95508.com, -*.static.95508.com, -*.bankofbeijing.com.cn, -*.bosc.cn, -*.js96008.com, -*.tenpay.com, -*.qianbao.qq.com, weatherkit.apple.com, configuration.ls.apple.com, gspe35-ssl.ls.apple.com, gspe35-ssl.ls.apple.cn, gspe1-ssl.ls.apple.com, news-edge.apple.com, news-todayconfig-edge.apple.com, news-events.apple.com, news-sports-events.apple.com, news-client.apple.com, news-client-search.apple.com, guzzoni.smoot.apple.com, api2.smoot.apple.com, *.smoot.apple.com, *.smoot.apple.cn, testflight.apple.com, uts-api.itunes.apple.com, umc-tempo-api.apple.com, play-cdn.itunes.apple.com, play-edge-cdn.itunes.apple.com, h5.if.qidian.com, magev6.if.qidian.com, ii.gdt.qq.com, adsmind.gdtimg.com, adsmind.ugdtimg.com, pgdt.gtimg.cn, api-access.pangolin-sdk-toutiao.com, api-access.pangolin-sdk-toutiao1.com, api.zhihuifangdong.net, netflow-mtop.cainiao.com, nbcps-mtop.cainiao.com, cn-acs.m.cainiao.com, e2e-mtop.cainiao.com, longquan-mtop.cainiao.com, -*.googlevideo.com, *.youtube.com, youtubei.googleapis.com, m5.amap.com, m5-zb.amap.com, amdc.m.taobao.com, dispatcher.is.autonavi.com, api.m.jd.com, api.zhihu.com, www.zhihu.com, appcloud2.zhihu.com, link.zhihu.com, zhuanlan.zhihu.com, m-cloud.zhihu.com, tiebac.baidu.com, tieba.baidu.com, tiebaapi.baidu.com, gql.reddit.com, gql-fed.reddit.com, duckduckgo.com, *.oca.nflxvideo.net
+hostname = -*.apple.com, -*.icloud.com, -*.icloud.com.cn, -*.95516.com, -*.cup.com.cn, -*.95516.com.cn, -*.unionpay.com, -*.icbc.com.cn, -*.mybank.icbc.com.cn, -*.icbc.com, -*.ccb.com, -*.ccb.cn, -*.boc.cn, -*.bankofchina.com, -*.jf365.boc.cn, -*.abchina.com, -*.abchina.com.cn, -*.cdn-static.abchina.com.cn, -*.cdn-static.abchina.com, -*.bankcomm.com, -*.bankcomm.cn, -*.creditcard.bankcomm.com, -*.creditcard.bankcomm.cn, -*.cmbchina.com, -*.cmbimg.com, -*.psbc.com, -*.spdb.com.cn, -*.spdbccc.com.cn, -*.citicbank.com, -*.citibank.com, -*.ecitic.com, -*.pingan.com.cn, -*.pingan.com, -*.hcz-member.pingan.com.cn, -*.iobs.pingan.com.cn, -*.stock.pingan.com, -*.cmbc.com.cn, -*.cib.com.cn, -*.cebbank.com, -*.ebchinabank.com, -*.hxb.com.cn, -*.cgbchina.com.cn, -*.95508.com, -*.static.95508.com, -*.bankofbeijing.com.cn, -*.bosc.cn, -*.js96008.com, -*.tenpay.com, -*.qianbao.qq.com, weatherkit.apple.com, configuration.ls.apple.com, gspe35-ssl.ls.apple.com, gspe35-ssl.ls.apple.cn, gspe1-ssl.ls.apple.com, news-edge.apple.com, news-todayconfig-edge.apple.com, news-events.apple.com, news-sports-events.apple.com, news-client.apple.com, news-client-search.apple.com, guzzoni.smoot.apple.com, api2.smoot.apple.com, *.smoot.apple.com, *.smoot.apple.cn, testflight.apple.com, uts-api.itunes.apple.com, umc-tempo-api.apple.com, play-cdn.itunes.apple.com, play-edge-cdn.itunes.apple.com, h5.if.qidian.com, magev6.if.qidian.com, ii.gdt.qq.com, adsmind.gdtimg.com, adsmind.ugdtimg.com, pgdt.gtimg.cn, api-access.pangolin-sdk-toutiao.com, api-access.pangolin-sdk-toutiao1.com, api.zhihuifangdong.net, netflow-mtop.cainiao.com, nbcps-mtop.cainiao.com, cn-acs.m.cainiao.com, e2e-mtop.cainiao.com, longquan-mtop.cainiao.com, -redirector*.googlevideo.com, *.googlevideo.com, *.youtube.com, youtubei.googleapis.com, m5.amap.com, m5-zb.amap.com, amdc.m.taobao.com, dispatcher.is.autonavi.com, api.m.jd.com, api.zhihu.com, www.zhihu.com, appcloud2.zhihu.com, link.zhihu.com, zhuanlan.zhihu.com, m-cloud.zhihu.com, tiebac.baidu.com, tieba.baidu.com, tiebaapi.baidu.com, gql.reddit.com, gql-fed.reddit.com, duckduckgo.com, *.oca.nflxvideo.net

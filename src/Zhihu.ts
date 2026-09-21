@@ -37,6 +37,9 @@ function log(...a: unknown[]): void { if (DEBUG) console.log(...a); }
 // ════════════════════════════════════════
 // 🛡️ 基础守卫
 // ════════════════════════════════════════
+// 2026-09-22 B5: cron 下 $request/$response 皆无 — 原裸访问抛 ReferenceError
+// (zhihu-pro 的每日 cron 即因此空跑报错，现 cron 已删，此为纵深守卫)
+if (typeof $request === "undefined") { $done(); return; }
 const url = $request.url;
 const method = $request.method;
 

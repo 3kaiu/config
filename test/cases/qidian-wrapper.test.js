@@ -152,4 +152,72 @@ exports.tests = {
     sb.ctx.console.log("header=loading badge=thread 任务 9/9");
     a.includes(sb.state.logs.join("\n"), "header=loading badge=thread 任务 9/9", "普通文案应原样保留");
   },
+
+  // 2026-09-22 P0-2: Token 过期短路 — cron 下 checkin 401 即判过期，
+  // 通知后直接结束，不跑 DNS 预热 + 引擎 + 400s 等待
+  "cron: Token过期(401)短路跳过引擎": async (a, h) => {
+    const sb = h.createSandbox({
+      // 无 request → cron 路径
+      store: { Qidian_Headers: JSON.stringify({ Cookie: "cmfuToken=dead-token" }) },
+      httpHandler: () => ({ res: { statusCode: 401 }, body: "{}" }),
+    });
+    const s = await h.runScript("Scripts/Qidian.js", sb);
+    a.includes(JSON.stringify(s.notifications), "Cookie过期", "应通知 Cookie 过期");
+    a.equal(s.httpCalls.length, 1, "401 不重试且跳过引擎：仅 1 次 checkin，无预热/引擎请求");
+    a.doneCalled(s, "cron 结束应调 $done");
+  },
+
+  // 2026-09-22 P0-2: 超时拆分 — 高阶四开关全关 = 纯签到模式，跳过引擎等待
+    "cron: 高阶开关全关时纯签到跳过引擎": async (a, h) => {    const sb = h.createSandbox({
+      store: { Qidian_Headers: JSON.stringify({ Cookie: "cmfuToken=live-token" }) },
+      httpHandler: ({ url }) => (String(url).includes("/checkin/checkin")
+        ? { res: { statusCode: 200 }, body: JSON.stringify({ Result: 0, Message: "ok" }) }
+        : { res: { statusCode: 200 }, body: "{}" }),
+      argument: {
+        QDREADER_ADV_JOB_ENABLE: "false",
+        QDREADER_EXTRA_ADV_JOB_ENABLE: "false",
+        QDREADER_LOTTERY_ENABLE: "false",
+        QDREADER_WEEKLY_EXCHANGE_ENABLE: "false",
+      },
+    });
+    const s = await h.runScript("Scripts/Qidian.js", sb);
+    a.includes(JSON.stringify(s.notifications), "签到成功", "签到应成功通知");
+    a.equal(s.httpCalls.length, 2, "仅 checkin + lottery，无预热/引擎请求");
+    a.includes(s.logs.join("\n"), "纯签到模式", "应日志纯签到跳过引擎");
+    a.doneCalled(s, "cron 结束应调 $done");
+  },
+
+  // 2026-09-22 B3-2: 重放单轮可观测 — 每轮记 HTTP 状态 + 耗时
+  "replay: 单轮日志可观测 (每轮 HTTP 状态 + 耗时)": async (a, h) => {
+    const sb = h.createSandbox({
+      request: {
+        method: "POST",
+        url: `${QIDIAN_BASE}/v1/video/adv/finishWatch`,
+        headers: { "X-Test": "1" },
+        body: JSON.stringify({ taskId: "1218712929269776384", extra: "x" }),
+      },
+    });
+    const s = await h.runScript("Scripts/Qidian.js", sb);
+    const logs = s.logs.join("\n");
+    a.includes(logs, "[重放 1/8]", "首轮应记日志");
+    a.includes(logs, "[重放 8/8]", "末轮应记日志");
+    a.includes(logs, "HTTP 200", "成功轮应记状态码");
+    a.includes(s.notifications[0].body, "9/9", "全成功汇总不变");
+  },
+
+  // 2026-09-22 B3-2: 重放 401 嗅探 — 任一轮鉴权失败即提示 Cookie 可能过期
+  "replay: 401 嗅探提示 Cookie 可能过期": async (a, h) => {
+    const sb = h.createSandbox({
+      request: {
+        method: "POST",
+        url: `${QIDIAN_BASE}/v1/video/adv/finishWatch`,
+        headers: {},
+        body: JSON.stringify({ taskId: "1218712929269776384" }),
+      },
+      httpHandler: () => ({ res: { statusCode: 401 }, body: "{}" }),
+    });
+    const s = await h.runScript("Scripts/Qidian.js", sb);
+    a.includes(s.notifications[0].body, "1/9", "0 成功 + 1 原始 = 1/9");
+    a.includes(s.notifications[0].body, "Cookie 可能过期", "应提示鉴权过期");
+  },
 };

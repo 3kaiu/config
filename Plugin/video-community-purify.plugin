@@ -104,10 +104,12 @@ http-response ^https?:\/\/api2\.kuaishou\.com script-path=https://ws.wenn.in/mai
 http-response ^https?:\/\/gql(-fed)?\.reddit\.com script-path=https://ws.wenn.in/main/Scripts/Reddit.js, requires-body=true, timeout=10, tag=Reddit_推广净化, enable={VIDEO_ENABLE}&{REDDIT_ENABLE}
 http-response ^https?:\/\/internal-api\.feishu\.cn\/.*\/feed script-path=https://ws.wenn.in/main/Scripts/Feishu.js, requires-body=true, timeout=60, tag=信息流净化, enable={VIDEO_ENABLE}&{FEISHU_ENABLE}
 http-response ^https?:\/\/open\.feishu\.cn\/.*\/recommend script-path=https://ws.wenn.in/main/Scripts/Feishu.js, requires-body=true, timeout=60, tag=推荐位净化, enable={VIDEO_ENABLE}&{FEISHU_ENABLE}
-http-response ^https?:\/\/api\.zhihuifangdong\.net\/core\/app\/activity\/appOpenAds script-path=https://ws.wenn.in/main/Scripts/Zhihuifangdong.js, requires-body=true, timeout=10, tag=开屏广告屏蔽, argument=appOpenAds, enable={VIDEO_ENABLE}&{appOpenAdsSwitch}
-http-response ^https?:\/\/api\.zhihuifangdong\.net\/core\/app\/activity\/bannerPicMore script-path=https://ws.wenn.in/main/Scripts/Zhihuifangdong.js, requires-body=true, timeout=10, tag=Banner广告屏蔽, argument=bannerPicMore, enable={VIDEO_ENABLE}&{bannerAdsSwitch}
-http-response ^https?:\/\/api\.zhihuifangdong\.net\/core\/adWhitelist\/showAds script-path=https://ws.wenn.in/main/Scripts/Zhihuifangdong.js, requires-body=true, timeout=10, tag=广告白名单屏蔽, argument=showAds, enable={VIDEO_ENABLE}&{adWhitelistSwitch}
-http-response ^https?:\/\/api\.zhihuifangdong\.net\/core\/app\/activity\/(clickPicMore|platformPic|clickPic) script-path=https://ws.wenn.in/main/Scripts/Zhihuifangdong.js, requires-body=true, timeout=10, tag=活动广告位屏蔽, argument=activityAds, enable={VIDEO_ENABLE}&{activityAdsSwitch}
+# (2026-09-22 B2 script→原生降级: 下述 4 纯广告位 handler 仅置空 data，
+# 转原生 reject-dict，同开关粒度保留；脚本零调用，随本轮删除 src/产物/用例。)
+http-response ^https?:\/\/api\.zhihuifangdong\.net\/core\/app\/activity\/appOpenAds reject-dict enable={VIDEO_ENABLE}&{appOpenAdsSwitch}
+http-response ^https?:\/\/api\.zhihuifangdong\.net\/core\/app\/activity\/bannerPicMore reject-dict enable={VIDEO_ENABLE}&{bannerAdsSwitch}
+http-response ^https?:\/\/api\.zhihuifangdong\.net\/core\/adWhitelist\/showAds reject-dict enable={VIDEO_ENABLE}&{adWhitelistSwitch}
+http-response ^https?:\/\/api\.zhihuifangdong\.net\/core\/app\/activity\/(clickPicMore|platformPic|clickPic) reject-dict enable={VIDEO_ENABLE}&{activityAdsSwitch}
 
 [MitM]
 hostname = %APPEND% api.amemv.com, api.zhihuifangdong.net, api2.kuaishou.com, api5-normal-dsa.amemv.com, aweme.snssdk.com, gql-fed.reddit.com, gql.reddit.com, graphql.kuaishou.com, internal-api.feishu.cn, log.snssdk.com, open.feishu.cn, app-v1.ecoliving168.com, 852b95d36.xwlpk.cn, api.cc.163.com, cc.163.com, mshare.cc.163.com, appapi.cc.163.com, rtbapi.douyucdn.cn, apiv2.douyucdn.cn, venus.douyucdn.cn, dc?.bz.mgtv.com, comment.mgtv.com, mobileso.bz.mgtv.com, damang.api.mgtv.com, hb-boom.api.mgtv.com, mobile.api.mgtv.com, mobile.api.hunantv.com, me.bz.mgtv.com, mobile-thor.api.mgtv.com, grpc.moegirl.org.cn, conf-m-ssl.xunlei.com, api-shoulei-ssl.xunlei.com, yyapp-act-entrance.yy.com, yyapp-fastnet.yy.com, personal-center.yy.com, tab.yy.com, data.3g.yy.com, yyapp-idx.yy.com, yuyin-api.baizhanlive.com, web.yy.com

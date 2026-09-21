@@ -34,9 +34,6 @@ http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/sp\/flow\/popu
 # 商城广告
 http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/vipmall\/couponcfg\/get script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=广告净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
 
-# 营销活动广告
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/resource-exposure\/config script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=广告净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-
 # 评论插入式广告
 http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/comment\/feed\/inserted\/resources script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=广告净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
 
@@ -55,36 +52,29 @@ http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/ios\/upgrade\/
 
 # ── 搜索净化模块 ─────────────────────
 http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/search\/default\/keyword\/list script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=搜索净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/search\/rcmd\/keyword\/get script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=搜索净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/search\/chart\/list script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=搜索净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
+# (2026-09-22 B4: rcmd/keyword + chart/list|detail + specialkeyword 四行与 [Rewrite]
+# `search/(chart/|rcmd/keyword/|specialkeyword/) reject-dict` 同路径，删 script 留原生。)
 http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/search\/suggest\/keyword\/get script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=搜索净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/search\/chart\/detail script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=搜索净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/search\/specialkeyword\/get script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=搜索净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
 
 # ── 广告拦截模块 ─────────────────────
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/ad\/loading\/get script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=广告拦截，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/ad\/loading\/current script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=广告拦截，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/ad\/get script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=广告拦截，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
+# (2026-09-22 B2: eapi/ad/* 与 [Rewrite] mock 同路径重复，删 script 留原生。
+# 2026-09-22 B3: resource-exposure/delivery/side-bar/yunbei 亦与 [Rewrite]
+# reject-dict 同路径 —— 官方文档实证“Response Body Rewrite 命中时 Response
+# Script 不执行”，此 5 行 script 从未触发，删除零行为变化。)
 
 # ── 活动与推荐模块 ───────────────────
 http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/link\/position\/show\/resource script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=活动推荐，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/link\/scene\/show\/resource script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=活动推荐，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
+# (2026-09-22 B4: link/scene/show/resource 与 [Rewrite] 同路径，删 script 留原生；
+# position/show/resource 的 Rewrite 仅覆盖 strategy，保留。)
 
 # ── 其他净化模块 ─────────────────────
 # 会员中心
 http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/vip\/cashier\/tspopup\/get script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=会员中心，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
 http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/vipnewcenter\/app\/resource\/newaccountpage script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=会员中心，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
 
-# 小程序入口
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/side-bar\/mini-program\/music-service\/account script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=小程序，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-
-# 递送配置
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/delivery\/deliver script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=递送，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/delivery\/batch-deliver script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=递送，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-
-# 勋章入口
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/yunbei\/account\/entrance\/get script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=勋章，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-
+# (2026-09-22 B3: side-bar/delivery×2/yunbei 四行与 [Rewrite] reject-dict
+# 同路径 —— 官方文档“Response Body Rewrite 命中时 Response Script 不执行”，
+# 此四行从未触发，删除零行为变化。)
 # 创作者提醒
 http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/creator\/musician\/reminder\/message\/get script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=创作者，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
 
