@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **跨插件精确重复去重**: `dsp.fcbox.com/adSearch/` 同条规则同时存在于 social-netdisk-purify 与 shopping-purify (enable 分属两插件) — 保留 shopping/FC_BOX 一方, 删 social 副本 + 其 hostname 依赖 (`dsp.fcbox.com` 移出 social [MitM]; shopping 侧 host 与规则均在, 全覆盖保留)
 - **新增门禁 `npm run check:rewrite`** (`tools/rewrite-redundancy-check.mjs`, 接 check:all + config-validate step 9b-bis + mirror-scripts 镜像 job): 判别在**源字符串层**进行 (不解析正则), 只按严格前缀/逐字相等; 同文件判定**不含 action** —— Loon rewrite 首个匹配即生效 (匹配在 action 派发前终止), 前缀先匹配者无论 reject/reject-dict/reject-200/body 裁剪都让子条不可达; **enable 必须逐字一致** (前缀可被开关关闭则前提不成立)。镜像 (Mirror/)**只登记不手改** (mirror-scripts 每日重写), AllInOne 5 对上游自重复 (ad.mcloud/gotokeep/echargenet/**maicai**/sf3, 含 action 相异的 maicai 对 — reject 罩住 reject-200) 已逐对登记 `ACCEPTED_PAIRS` (实测成因 + 复检 2027-03-31, 新对判红)
 - **数字同步**: 用例总数 240 → 248 (rewrite-redundancy.test.js 新增 7 例后, 又因弧荫判定改为 action 无关 — 匹配先于 action 派发 — 拆分出 "action 不同判死 / enable 不同不判" 2 例, 净 +1; doc-claims-check 已同步, AGENTS.md 已更新)
+- **移除 `tools/rewrite-migrate/`** (v8 旧→新 rewrite 语法迁移工具包): 迁移 v8.8 已收官、仓库处于新语法稳态, 回退路径无运行场景 — 按"只留接线工具"纪律删除, git 历史保留可随时恢复; `test/wiring-check.js` 白名单 (LOCAL_ONLY_PREFIXES) 随之清空
+- **MitM 孤儿 120 条分解探索 (2026-09-20, 结论只报告不收敛)**: 全量孤儿来源 = 99 镜像 AllInOne (remote 插件投递, 其 [MitM] 自带, 收敛须镜像 ingest 补丁 — 违反"只登记不手改" + 上游每日变动需持续复验, 不做) / 13 bundle-引擎消费的假孤儿 (DualSubs 流媒体 host、AdvertisingScript/iRingo 黑盒, 工具消费判定盲区, 碰不得) / 2 通配 host (`*.flyert.*`、`*mangaapi.manhuaren.*`) 处于生成插件但属生成器"通配只报告不自动收敛"既有决策 (NEW-09/P2-3)。结论: 模板层/生成器层无动作面, 维持现状
 
 ### Added (2026-09-20 精准去广告 — script 型未纳入口径闭合: EXTRA_REJECTS + 台账)
 

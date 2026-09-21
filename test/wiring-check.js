@@ -74,12 +74,10 @@ for (const m of allRefs.matchAll(/Scripts\/([\w.-]+\.js)/g)) {
 //   "有 npm script 但没进 CI" 的形态, 若把它算作已接线, 这条规则就永远抓不到那类缺陷。
 // 确实只能人工运行的须进下方白名单并给出理由。
 console.log("── tools/*.mjs ↔ workflow/test 引用 ──");
-const LOCAL_ONLY_PREFIXES = [
-  [
-    "tools/rewrite-migrate/",
-    "一次性迁移工具包 (旧→新 rewrite 语法转换 + 可逆回退), 由人工在 Loon 版本切换时运行; 见 CHANGELOG",
-  ],
-];
+// 白名单当前为空。2026-09-20: 移除最后一项 `tools/rewrite-migrate/`
+// (v8 旧→新 rewrite 语法迁移工具包 — 迁移 v8.8 已收官、仓库处于新语法稳态, 回退路径无运行场景,
+// 且 index.mjs 头部自引 `tools/n/` 旧路径属 v8.5 重构前的残留文案; git 历史保留可恢复)。
+const LOCAL_ONLY_PREFIXES = [];
 const workflowDir = path.join(root, ".github", "workflows");
 const workflowText = fs
   .readdirSync(workflowDir)
