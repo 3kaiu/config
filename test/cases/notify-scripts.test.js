@@ -32,6 +32,29 @@ t("health-notify: 异常状态码推送告警", async (assert) => {
   assert.equal(state.doneCalls.length, 1, "应调用 $done");
 });
 
+// 2026-09-22 B6-1: 单次瞬断不告警 — 首检失败复检成功则静默
+t("health-notify: 首检失败复检成功不告警", async (assert) => {
+  let n = 0;
+  const sb = createSandbox({
+    httpHandler: () => (++n === 1 ? { err: new Error("ETIMEDOUT") } : { res: { status: 204 }, body: "" }),
+  });
+  const state = await runScript("Scripts/health-notify.js", sb);
+  assert.equal(state.notifications.length, 0, "复检成功不应告警");
+  assert.equal(state.httpCalls.filter((c) => c.url.includes("generate_204")).length, 2, "应探测两次");
+  assert.equal(state.doneCalls.length, 1, "应调用 $done");
+});
+
+// 2026-09-22 B6-1: 两次皆败才告警 (锁定重试语义)
+t("health-notify: 两次均失败才告警", async (assert) => {
+  const sb = createSandbox({
+    httpHandler: () => ({ res: { status: 502 }, body: "" }),
+  });
+  const state = await runScript("Scripts/health-notify.js", sb);
+  assert.ok(state.notifications.length > 0, "两次失败应告警");
+  assert.equal(state.httpCalls.filter((c) => c.url.includes("generate_204")).length, 2, "应探测两次");
+  assert.equal(state.doneCalls.length, 1, "应调用 $done");
+});
+
 t("health-notify: Bark 推送", async (assert) => {
   const sb = createSandbox({
     store: { Bark_Key: "test-bark-key" },

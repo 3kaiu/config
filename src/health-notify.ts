@@ -2,6 +2,9 @@
 // 经 esbuild --inject 注入 (原为跨脚本重复副本)
 const TEST_URL = 'http://cp.cloudflare.com/generate_204';
 const TIMEOUT_MS = 10000;
+// 2026-09-22 B6-1: 单次瞬断误报消除 — 首检非 204 时等待后复检一次，
+// 两次皆败才告警 (6h 一次的 cron 容不得凌晨拥塞抖动造成狼来了)。
+const RETRY_WAIT_MS = 5000;
 
 // $done 幂等守卫 — 2026-09-11 深度审计 NEW-07。
 // 原实现末尾是 `....catch(() => doNotify(...)).then(() => $done())`。
@@ -18,9 +21,20 @@ function finish(): void {
 }
 
 const start = Date.now();
-const req = new Promise<{ status?: number }>((resolve) => $httpClient.get({ url: TEST_URL, timeout: TIMEOUT_MS }, (_e: Error | null, r: $httpClientResponse | null) => resolve(r || {})));
+function probeOnce(): Promise<{ status?: number }> {
+  return new Promise<{ status?: number }>((resolve) => $httpClient.get({ url: TEST_URL, timeout: TIMEOUT_MS }, (_e: Error | null, r: $httpClientResponse | null) => resolve(r || {})));
+}
+const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 
-req.then((response: { status?: number }) => {
+probeOnce().then(async (first: { status?: number }) => {
+  let response = first;
+  if (first.status !== 204) {
+    console.log(`⚠️ 首检异常 (HTTP ${first.status}), ${RETRY_WAIT_MS}ms 后复检一次`);
+    await sleep(RETRY_WAIT_MS);
+    response = await probeOnce();
+  }
+  return response;
+}).then((response: { status?: number }) => {
   const elapsed = Date.now() - start;
   let push: Promise<unknown> = Promise.resolve();
   if (response.status === 204) {
