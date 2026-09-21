@@ -1,6 +1,8 @@
 // barkPush / telegramPush / doNotify 已抽到 src/lib/notify.ts,
 // 经 esbuild --inject 注入 (原为跨脚本重复副本)
-const TEST_URL = 'http://cp.cloudflare.com/generate_204';
+// 2026-09-22 B7: http→https — 代理健康必须验证 TLS (CONNECT 建隧 + 握手)，
+// 纯 http 在 SNI 阻断等场景下会报假正常；cloudflare https 同样回 204。
+const TEST_URL = 'https://cp.cloudflare.com/generate_204';
 const TIMEOUT_MS = 10000;
 // 2026-09-22 B6-1: 单次瞬断误报消除 — 首检非 204 时等待后复检一次，
 // 两次皆败才告警 (6h 一次的 cron 容不得凌晨拥塞抖动造成狼来了)。

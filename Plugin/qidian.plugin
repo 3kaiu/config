@@ -45,6 +45,13 @@ cron {CRONEXP} script-path=https://ws.wenn.in/main/Scripts/Qidian.js, timeout={T
 
 [Rule]
 # 广告 SDK 白名单 — 防止误杀奖励包
+# ⚠️ 2026-09-22 B7 层间矛盾实录: Loon 来源优先级 本地配置＞插件，
+# template/loon.tpl [Rule] 对 ii.gdt/adsmind/pangolin 系是全链 REJECT
+# (2026-08-12 用户决策：开屏必除，接受秒播失效)，故下述 4 条 DIRECT
+# 对重叠域永不生效。后果：激励/每日任务 (QDREADER_ADV_JOB/EXTRA，默认全开)
+# 的奖励包可能因 SDK 被拦而计数失败 — 表现为任务 X/9 长期不满。
+# 不做本地改动 (任一方向都要真机确认)：若激励常不满，要么关两任务开关，
+# 要么把模板对应 4 域改 DIRECT (开屏会回来)。勿静默删本白名单。
 DOMAIN, ii.gdt.qq.com, DIRECT
 DOMAIN, adsmind.gdtimg.com, DIRECT
 DOMAIN-SUFFIX, pangolin-sdk-toutiao.com, DIRECT
