@@ -114,6 +114,8 @@ OpenCode = select, Proxy, DIRECT, tag=OpenCode.ai
 # 除 geonode-* 外的全部节点 — 其唯一作用是隔离免费代理, 随订阅删除而删除;
 # 原 VLESS 的 geonode 负向前瞻亦同步移除, 回到单一条件。)
 
+
+VLESS = NameRegex, FilterKey = "(?i)^(?=.*vless).*$"
 [Remote Proxy]
 # (2026-09-19 移除免费代理订阅: Geonode [Remote Proxy] 整节删除 — 原因见 CHANGELOG。
 # OpenCode 组改回 select, Proxy, DIRECT; 节点来源只剩用户自有订阅。)
@@ -161,6 +163,9 @@ DOMAIN-KEYWORD, stun.nintendo, DIRECT
 DOMAIN-KEYWORD, xboxlive.com, DIRECT
 DOMAIN-KEYWORD, stun, REJECT
 DEST-PORT, 3478, REJECT
+# 放弃项 (2026-09-21 评估, 无真机实测不加): DEST-PORT 19302 (Google) / 5349-3479
+# (TURN) — UDP 裸 IP 本就绕过域名规则, 非标端口确有泄漏面; 但端口块影响一切 host
+# (第三方 WebRTC 用非标 STUN 即断流), 白名单是域名级保不住它们, 须真机确认后加。
 
 # 局域网
 IP-CIDR, 192.168.0.0/16, DIRECT, no-resolve

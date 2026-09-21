@@ -321,6 +321,53 @@ export function extractManualBlock(cur) {
   return seg.replace(/^\n+|\n+$/g, "").replace(/^# ──.*$/gm, "").replace(/\n{3,}/g, "\n\n");
 }
 
+/**
+ * 手写块 host → 精确 MitM hostname (2026-09-21 回归修复)。
+ *
+ * 背景: 4d470bb (生成器引入前) 该插件 [MitM] 靠 `splash.*, ad.*, flash.*` 一级通配
+ * 覆盖手写块 host;NEW-09 (f9077ee) 按边界安全原则剔除这些通配, 但生成器 host 归并
+ * 只消费**上游 rejects** (`minimizeHosts` 的 `kept`), 从不扫描手写块 → 去掉通配后
+ * 手写块规则的精确 host 全部失去解密面, https 规则静默失效。
+ *
+ * 修复: 扫手写块每条 reject 规则, hostOf() 取 host 表达式 → 展开 alternation
+ * `(a|b)` → 精确域 → 边界安全校验 (NEW-09 判据不变) → 并入 [MitM]。
+ * 无法安全表达的 (跨标签通配, 如 `api.wan..*.weixin.qq.com`) 不等价于任何精确域,
+ * 按 NEW-09 口径剔除并报告 (规则保留但 https 不保证生效, 与上游 unsafe 同待遇)。
+ */
+export function manualMitmHosts(manualLines) {
+  const hosts = [];
+  const unsafe = [];
+  const seen = new Set();
+  const push = (h) => {
+    h = h.replace(/\\\./g, ".");
+    if (seen.has(h)) return;
+    const r = normalizeHost(h);
+    if (r.unsafe) { if (!unsafe.includes(h)) unsafe.push(h); return; }
+    for (const e of r.hosts) { if (!seen.has(e)) { seen.add(e); hosts.push(e); } }
+  };
+  for (const line of manualLines) {
+    if (!line) continue;
+    const m = line.match(/^(\^\S+?)\s+reject/);
+    if (!m) continue;
+    let h = hostOf(m[1]);
+    if (!h || !h.includes(".")) continue;
+    // `(a|b)` alternation 展开 → 各自精确域 (ads.api.(yy|6rooms).com → yy + 6rooms)
+    if (/\([^()]+\|[^()]+\)/.test(h)) {
+      const parts = h.split(/[()]/).filter(Boolean);
+      if (parts.length === 3 && parts[1].includes("|")) {
+        for (const alt of parts[1].split("|")) push(parts[0] + alt + parts[2]);
+        continue;
+      }
+    }
+    // `\d?` 可选数字 (dc\d?.bz.mgtv.com): 现存 [MitM] 已用 `dc?` 通配盖住, 此处不做穷举
+    if (/\\d\?/.test(h)) { unsafe.push(`${h} (可选数字, 未并入)`); continue; }
+    // 含 `*` 跨标签通配 → 不等价精确域, 剔除 (NEW-09)
+    if (h.includes("*")) { unsafe.push(h); continue; }
+    push(h);
+  }
+  return { hosts, unsafe };
+}
+
 export function renderPlugin({ updateTime, rules, rejects, seen, droppedGarbage, scripts, hostRules, manualBlock, kept, dropped, unsafe, upstreamCount }) {
   // 手写块内与上游重复的 regex 剔除 (避免重复规则)
   const manualLines = manualBlock.split("\n").filter((l) => {
@@ -356,7 +403,13 @@ export function renderPlugin({ updateTime, rules, rejects, seen, droppedGarbage,
   const unsafeNote = unsafe.length
     ? `\n# ⛔ 已剔除边界不安全通配 ${unsafe.length} 条 (可匹配非预期注册域, 解密面扩张): ${unsafe.join(", ")}`
     : "";
-  const mitmHosts = [...new Set([...kept, ...EXTRA_REJECTS.map((e) => e.host)])];
+  // 手写块规则 host 并入 [MitM] (2026-09-21 回归修复): 去掉 splash.*/ad.*/flash.*
+  // 边界不安全通配后, 手写块精确 host 必须显式并入, 否则 https 规则静默失效
+  const manual = manualMitmHosts(manualLines);
+  const manualUnsafeNote = manual.unsafe.length
+    ? `\n# ⚠️ 手写块 无法安全表达 host ${manual.unsafe.length} 条 (跨标签通配/可选数字, https 不保证): ${manual.unsafe.join(", ")}`
+    : "";
+  const mitmHosts = [...new Set([...kept, ...EXTRA_REJECTS.map((e) => e.host), ...manual.hosts])];
   return `${HEADER}
 ${BEGIN_MANUAL}
 ${manualLines.join("\n")}
@@ -375,7 +428,7 @@ ${END_GEN}
 
 [MitM]
 # ⚠️ 注意：部分 App 禁用了 MITM，无法拦截其开屏广告
-# 上游 hostname 最小化子集 (${mitmHosts.length}/${upstreamCount} 条, 仅被 reject 规则消费的域 + EXTRA_REJECTS host)${unsafeNote}
+# 上游 hostname 最小化子集 (${mitmHosts.length}/${upstreamCount} 条, 仅被 reject 规则消费的域 + EXTRA_REJECTS host + 手写块 host)${unsafeNote}${manualUnsafeNote}
 hostname = %APPEND% ${mitmHosts.join(", ")}
 `;
 }

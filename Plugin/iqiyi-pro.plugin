@@ -103,4 +103,4 @@ DOMAIN-SUFFIX, qiyi.com, DIRECT
 DOMAIN-SUFFIX, iqiyi.video, DIRECT
 
 [MitM]
-hostname = %APPEND% ads.api.iqiyi.com, mobile.ads.iqiyi.com, open.api.iqiyi.com, feed.pgc.iqiyi.com, hot.v.iqiyi.com, gateway.iqiyi.com, modules.iqiyi.com, player.api.iqiyi.com, stream.aqi.iqiyi.com, cards.iqiyi.com, comment-card.iqiyi.com
+hostname = %APPEND% ads.api.iqiyi.com, mobile.ads.iqiyi.com, open.api.iqiyi.com, feed.pgc.iqiyi.com, hot.v.iqiyi.com, gateway.iqiyi.com, modules.iqiyi.com, player.api.iqiyi.com, stream.aqi.iqiyi.com, cards.iqiyi.com, comment-card.iqiyi.com, iface2.iqiyi.com, act.vip.iqiyi.com, search.video.iqiyi.com, *.cupid.iqiyi.com

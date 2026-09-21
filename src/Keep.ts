@@ -12,6 +12,11 @@
  *                          tabs 过滤保留 home/dynamic_sports/personal;
  *                          homeTabs 硬编码为推荐+会员
  *   其他                   $done() 原样放行
+ *
+ * 取舍 (2026-09-21 评估, 维持白名单): bottomBar tabs 白名单 3 类 + homeTabs
+ * 重写 2 项, 上游新增 tab 即消失。改为"保留未知"会让未知广告 tab 复活
+ * (去广告使命优先), 且与 Weibo removeHome 白名单同构、无 HAR 反证缺 tab,
+ * 故不动; 有真机缺入口投诉时再改增量过滤并补用例。
  */
 
 function clean(body: any, url: string): any {

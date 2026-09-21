@@ -8,6 +8,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed (2026-09-21 精准去广告 — openai 宽匹配删除 + copilot 死规则 + Cainiao 数字型漏杀)
+
+- **删反写域名死规则** (`template/snippet/ai-services.tpl:57`): 实测 `api.githubcopilot.com` 存活 (404=有主机缺路径), `github.copilot.com` 传输层失败 (不解析) — 真实 API 域从未长这样, 永不命中, 纯死规则 (同文件 `auth0.openai.com` 同例)。`[Rule]` 481→480 (AGENTS.md 已同步), `check:shadow` 无新增对
+
+- **AI 区唯一 KEYWORD 删除** (`template/snippet/ai-services.tpl:10`): 本地 `[Rule]` 先于 `[Remote Rule]` 求值, 任何含 `openai` 子串的域 (钓鱼/广告) 都会被提前送 `AI`(Proxy) 而永不到达 Advertising REJECT; 4 个真实 OpenAI 族已有 SUFFIX 精确覆盖, 同 qreport"可枚举即不用宽匹配"纪律。`check:shadow` 实测无新增对, `[Rule]` 482→481 (AGENTS.md 已同步)
+
+- **`src/Cainiao.ts:66` 严格比较改宽容**: `=== "39017"` 上游回数字 `39017` 即漏杀 → `String(...) === "39017"`。`String(undefined/null)` 得 `"undefined"/"null"` 永不命中, 无误杀面。补 2 例 (`zhihu-cainiao.test.js`: 数字型清空 + 非广告 ID 保留), 用例总数 257 → 259 (AGENTS.md 三处已同步)
+
+### Fixed (2026-09-21 精准去广告 — startup 手写块 host 回归修复: 去掉通配后解密面消失 + 独立插件 [MitM] 缺口补齐)
+
+- **`tools/build-startup-plugin.mjs` 手写块 host 并入 [MitM] (root cause)**: NEW-09 (f9077ee) 按边界安全剔掉 `splash.*`/`ad.*`/`flash.*` 一级通配后, 生成器 host 归并只消费上游 rejects (`minimizeHosts` 的 `kept`), 从不扫手写块 → 手写块规则的精确 host (ad.taobao.com/splash.snssdk.com/flash.qq.com…) 全部失去解密面, https 规则**静默失效**。新增导出 `manualMitmHosts()`: 扫手写块每条 reject → `hostOf()` 取 host → 展开 `(a|b)` alternation → normalizeHost 边界安全校验 → 并入 [MitM]。跨标签通配 (`api.wan..*.weixin.qq.com`) 不等价精确域, 按 NEW-09 口径剔除并 ⚠️ 报告 (规则保留但 https 不保证)。[MitM] host 381 → 420
+- **银行死规则收敛**: MANUAL 块删除 3 条被模板 veto 的规则 (`m.ccb.com`/`app.cmbchina.com`/`creditcardapp.bankcomm.cn` mappweb), 对应 host 从 [MitM] 消失; `app.abc.china.cn` 经核对**未被** `-*.abchina*` 否决 → 保留并已并入 [MitM]
+- **独立插件 [MitM] 补齐 (v5 扫描重建)**: `iqiyi-pro.plugin` 补 `iface2.iqiyi.com`/`act.vip.iqiyi.com`/`search.video.iqiyi.com`/`*.cupid.iqiyi.com` (kjp/t7z cupid 规则 + 8 条接口级); `video-community-purify.plugin` 补 `comment.mgtv.com`。netease `interface\d?.music.163.com` 经核对被 `interface*.music.163.com` 覆盖, mgtv `dc.bz` 被 `dc?` 覆盖 → 不动 (scanner `https?` 量化符/`\d?` 截断假阳性已排除)
+- **`tools/mitm-orphan-check.mjs` alternation 展开修复 (check:orphan 由灰转绿)**: `skeletons()` 原来在 `mcs.mm.(cc|tv).cn` 的 `(` 处停止 → 方法 B 根域集缺 `cc.cn`/`tv.cn`, 方法 C 的 label ≥4 又跳过短标签 → 被手写块规则真实消费的 `mcs.mm.cc.cn/tv.cn` 误报孤儿 (局部模式判红)。先展开标签级 alternation 再抽骨架, 各分支独立成域。本地严格模式 1020 host 全消费; 全量报告 120 → 118 (2 假阳性消解)
+- **数字同步**: 新增 `startup-plugin-host.test.js` 1 例 (手写块 host 并入 + veto 域不回流 + 边界安全), 用例总数 256 → 257 (AGENTS.md 三处已同步)
+
 ### Fixed (2026-09-21 精准去广告 — 微博搜索窗值判定位: 裸子串 → 词段)
 
 - **`src/Weibo.ts` `checkSearchWindow` 值判定位精度修复 (不误杀 / 不遗漏)**: 补盲启发式原为裸子串 `source.includes("ad")` / `pic.includes("ads")` —— `source="android"`、图片 URL 含 `padstation`/`xada` 等正常内容会被误判为广告卡片删除; 且与信息流 `isAd` 的精确口径 (`source === "ad"`) 不一致。改为 lib/ad 注入的 `hasKeySegment` **词段判定** (整段等于 `ad`/`ads` 才命中): `head_ad`/`feed_ad_click` 复合标记与 `/ads/` 路径段仍命中 (覆盖不缩), `android`/`addon`/`padstation`/`xada` 不再误杀

@@ -63,7 +63,7 @@ function handleDiscover() {
 function handleSplashAd() {
   try {
     const obj = JSON.parse($response.body);
-    if (obj?.data?.result?.[0]?.materialId === "39017") {
+    if (String(obj?.data?.result?.[0]?.materialId) === "39017") {
       obj.data = {};
     }
     $done({ body: JSON.stringify(obj) });

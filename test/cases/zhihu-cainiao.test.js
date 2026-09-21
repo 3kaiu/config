@@ -67,6 +67,24 @@ exports.tests = {
     const s = await h.runScript("Scripts/Cainiao.js", sb);
     a.equal(JSON.parse(s.doneCalls[0].body).data, {}, "开屏 data 应清空");
   },
+  "cainiao: 开屏广告 materialId 数字型 39017 同样清空 (上游回数字)": async (a, h) => {
+    const body = { data: { result: [{ materialId: 39017, content: "splash" }] } };
+    const sb = h.createSandbox({
+      request: { url: "https://netflow-mtop.cainiao.com/nbnetflow.ads/x" },
+      response: RESP(body),
+    });
+    const s = await h.runScript("Scripts/Cainiao.js", sb);
+    a.equal(JSON.parse(s.doneCalls[0].body).data, {}, "数字型 materialId 也应清空");
+  },
+  "cainiao: 非开屏 materialId 不清空": async (a, h) => {
+    const body = { data: { result: [{ materialId: "12345", content: "splash" }] } };
+    const sb = h.createSandbox({
+      request: { url: "https://netflow-mtop.cainiao.com/nbnetflow.ads/x" },
+      response: RESP(body),
+    });
+    const s = await h.runScript("Scripts/Cainiao.js", sb);
+    a.equal(JSON.parse(s.doneCalls[0].body).data.result[0].materialId, "12345", "非广告 ID 原样保留");
+  },
   "cainiao: 未知路径走尾部兜底 $done()": async (a, h) => {
     const sb = h.createSandbox({ request: { url: "https://cn-acs.m.cainiao.com/other/api" }, response: RESP({ data: 1 }) });
     const s = await h.runScript("Scripts/Cainiao.js", sb);

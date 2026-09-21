@@ -172,6 +172,34 @@ exports.tests = {
     a.equal(real.filter((r) => r.rules === 0), [], "不得存在零消费通配");
   },
 
+  // ── 手写块 host 并入 [MitM] (2026-09-21 回归修复: 去掉 splash.*/ad.*/flash.*
+  //    边界不安全通配后, 手写块精确 host 必须显式并入, 否则 https 规则静默失效) ──
+  "startup-host: 手写块规则 host 并入 [MitM], 死规则 veto 域不回流": async (a) => {
+    const m = await load();
+    const manual = m.extractManualBlock(fs.readFileSync(OUT, "utf8"));
+    const manualLines = manual.split("\n").filter((l) => l);
+    const { hosts, unsafe } = m.manualMitmHosts(manualLines);
+    // 精确域示例须并入 (此前被 splash.* 通配盖住, NEW-09 剔除后失去解密面)
+    for (const h of ["ad.m.taobao.com", "splash.jd.com", "flash.qq.com", "app.abc.china.cn", "api.amap.com"]) {
+      a.ok(hosts.includes(h), `${h} 应并入 [MitM] (手写块 reject 规则)`);
+    }
+    // alternation 展开: (yy|6rooms) → 两个精确域
+    a.ok(hosts.includes("ads.api.yy.com"), "(yy|6rooms) 展开 → ads.api.yy.com");
+    a.ok(hosts.includes("ads.api.6rooms.com"), "(yy|6rooms) 展开 → ads.api.6rooms.com");
+    // 被模板 veto 的银行域 (规则已删) 不得回流
+    a.equal(hosts.includes("m.ccb.com"), false, "m.ccb.com 规则已删, host 不应并入");
+    a.equal(hosts.includes("app.cmbchina.com"), false, "app.cmbchina.com 规则已删, host 不应并入");
+    // 跨标签通配 (api.wan..*.weixin.qq.com) 无法安全表达精确域 → 剔除并报告
+    a.equal(hosts.includes("api.wan..*.weixin.qq.com"), false, "跨标签通配不得并入 [MitM]");
+    a.ok(unsafe.length >= 1, "跨标签通配应在 unsafe 报告中可见");
+    a.ok(hosts.every((h) => !m.isBoundaryUnsafe(h)), "并入的 host 全部边界安全");
+    // 与产物联动: [MitM] hostname 实际包含本次并入 (artifact 一致性以外)
+    const mitm = hostnamesOf(fs.readFileSync(OUT, "utf8"));
+    for (const h of ["ad.m.taobao.com", "splash.jd.com", "flash.qq.com", "app.abc.china.cn"]) {
+      a.ok(mitm.includes(h), `产物 [MitM] 应含手写块 host ${h}`);
+    }
+  },
+
   // ── 产物一致性 (生成器 ↔ 提交产物, 等价于 Loon.lcf 的 artifact-idempotency) ──
   "startup-host: 产物 == f(上游 conf) — 生成器与提交产物无漂移": async (a) => {
     const m = await load();

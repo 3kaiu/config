@@ -37,6 +37,8 @@ module.exports = defineSurgioConfig({
     //   这两个键从未被模板引用; 二者取值恰好是该列表的首尾两台, 极易被误当成"真源"去改。
     // (已移除) surge_node_policy_path: 死参数, 模板从未引用; 原注释指向 Sub-Store
     //   集合的 Surge 节点列表 URL, 随 Sub-Store 一并移除 (2026-09-11)。
+    // DoH/DoH3/DoQ 上游 (2026-09-21 恢复: 模板 loon.tpl:27-29 以 {{ customParams.* }}
+    //   引用, 删除即渲染成空值 — 曾被误判死参数, check:sync + 257 用例已证伪)：
     doh_primary: 'https://dns.alidns.com/dns-query',
     doh_fallback: 'https://doh.pub/dns-query',
     doh3_primary: 'h3://dns.alidns.com/dns-query',

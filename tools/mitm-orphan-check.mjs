@@ -117,8 +117,23 @@ function sampleUrl(base) {
 /**
  * 域名骨架: 从规则正则中提取全部"域名形态"片段 (含分组交替的各个分支)。
  * "(adsmind\\.gdtimg\\.com|adsmind\\.ugdtimg\\.com|pgdt\\.gtimg\\.cn)" → ["adsmind.gdtimg.com","adsmind.ugdtimg.com","pgdt.gtimg.cn"]
+ *
+ * 标签级 alternation "mcs\\.mm\\.(cc|tv)\\.cn" (2026-09-21): DOMAIN_RE 会在 `(`
+ * 处停止, 只抽出 "mcs.mm" → 方法 B 根域集合缺 "cc.cn"/"tv.cn", 方法 C 的 label ≥4
+ * 断言又跳过短标签 (cc) → 被本地规则真实消费的 host 误报孤儿。先在骨架提取前展开
+ * (cc|tv), 每个分支各自成为独立域名再抽骨架。
  */
 const DOMAIN_RE = /[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)+/g;
+
+/** 展开规则字符串里的标签级 alternation (不含点号的括号分支) → 若干完整变体 */
+function expandAlternations(str) {
+  const m = str.match(/\(([^()|.]*\|[^()|.]*)\)/);
+  if (!m) return [str];
+  return m[1]
+    .split("|")
+    .flatMap((alt) => expandAlternations(str.slice(0, m.index) + alt + str.slice(m.index + m[0].length)));
+}
+
 const SUB_TLDS = new Set([
   "com.cn", "org.cn", "net.cn", "gov.cn", "edu.cn", "com.hk", "co.uk", "org.uk",
   "co.jp", "ne.jp", "com.tw", "co.kr", "com.au", "com.br", "com.mx", "co.in",
@@ -132,17 +147,19 @@ function rootOf(domain) {
 }
 
 function skeletons(pattern) {
-  let s = pattern
-    .replace(/\\\./g, ".")
-    .replace(/\\\//g, "/")
-    .replace(/\\\?/g, "?")
-    .replace(/\\\+/g, "+")
-    .replace(/\\\*/g, "*")
-    .replace(/\\-/g, "-")
-    .replace(/\\d/g, "d");
   const out = new Set();
-  const m = s.match(DOMAIN_RE);
-  if (m) for (const d of m) out.add(d);
+  for (const variant of expandAlternations(pattern)) {
+    let s = variant
+      .replace(/\\\./g, ".")
+      .replace(/\\\//g, "/")
+      .replace(/\\\?/g, "?")
+      .replace(/\\\+/g, "+")
+      .replace(/\\\*/g, "*")
+      .replace(/\\-/g, "-")
+      .replace(/\\d/g, "d");
+    const m = s.match(DOMAIN_RE);
+    if (m) for (const d of m) out.add(d);
+  }
   return out;
 }
 
