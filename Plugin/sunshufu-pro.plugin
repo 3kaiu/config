@@ -65,4 +65,5 @@ DOMAIN-SUFFIX, unionpay.com, DIRECT
 DOMAIN-SUFFIX, mybank.com, DIRECT
 
 [MitM]
-hostname = %APPEND% m.unionpay.com, ads.unionpay.com, mbs.unionpay.com, api.unionpay.com, portal.unionpay.com, news.unionpay.com, activity.unionpay.com, event.unionpay.com, campaign.unionpay.com, coupon.unionpay.com, voucher.unionpay.com, ticket.unionpay.com, bank.unionpay.com, bankoffer.unionpay.com
+# hostname 行已删除：%APPEND% 下列域被 template/loon.tpl [General] hostname -*.unionpay.com 全链 REJECT
+<!-- 删除：m.unionpay.com, ads.unionpay.com, mbs.unionpay.com, api.unionpay.com, portal.unionpay.com, news.unionpay.com, activity.unionpay.com, event.unionpay.com, campaign.unionpay.com, coupon.unionpay.com, voucher.unionpay.com, ticket.unionpay.com, bank.unionpay.com, bankoffer.unionpay.com -->
