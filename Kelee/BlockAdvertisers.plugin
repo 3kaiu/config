@@ -352,7 +352,7 @@ DOMAIN-SUFFIX, tobidad.com, REJECT
 DOMAIN, ep7.facebook.com, REJECT
 [Rewrite]
 ^https:\/\/video-dsp\.pddpic\.com\/market-dsp-video\/ reject
-^https:\/\/t-dsp\.pinduoduo\.com\/dspcb\/i\/mrk_ reject
+^https:\/\/t-dsp\.pinduoduo\.com\/dspcb\/i\/mrk_ reject-200
 ^https:\/\/images\.pinduoduo\.com\/mrk\/ reject
 ^https:\/\/images\.pinduoduo\.com\/marketing_api\/ reject
 [MitM]

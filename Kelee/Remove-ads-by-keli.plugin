@@ -33,14 +33,14 @@ DOMAIN, mallapi2.qinlinkeji.com, REJECT // 商城页面
 DOMAIN, open-pixon.ads-pixiv.net, REJECT
 [Rewrite]
 ^https?:\/\/api-access\.pangolin-sdk-toutiao\.com\/api\/ad\/union\/sdk reject
-^https:\/\/cdn\.web\.chelaile\.net\.cn\/info-flow\/index\.html reject
+^https:\/\/cdn\.web\.chelaile\.net\.cn\/info-flow\/index\.html reject-dict
 ^http:\/\/mercury-gateway\.ixiaochuan\.cn\/mercury\/v1\/ad\/ reject
 ^https?:\/\/api\.m\.mi\.com\/v\d\/app\/start reject-200
 ^https?:\/\/api\.jr\.mi\.com\/v\d\/adv\/ reject-200
 ^https?:\/\/api\.jr\.mi\.com\/jr\/api\/playScreen reject-200
 ^https?:\/\/api-mifit.+?\.huami\.com\/discovery\/mi\/discovery\/.+?_ad\? reject-200
 ^https?:\/\/home\.mi\.com\/cgi-op\/api\/v\d\/recommendation\/banner reject
-^https?:\/\/(api-mifit|api-mifit-\w+)\.huami\.com\/discovery\/mi\/discovery\/\w+_ad\? reject
+^https?:\/\/(api-mifit|api-mifit-\w+)\.huami\.com\/discovery\/mi\/discovery\/\w+_ad\? reject-200
 ^https?:\/\/api-mifit\.huami\.com\/discovery\/mi\/discovery\/homepage_ad\? reject-img
 ^https?:\/\/api-mifit\.huami\.com\/discovery\/mi\/discovery\/sleep_ad\? reject-img
 ^https?:\/\/api-mifit\.huami\.com\/discovery\/mi\/discovery\/sport_summary_ad\? reject-img
@@ -48,10 +48,10 @@ DOMAIN, open-pixon.ads-pixiv.net, REJECT
 ^https?:\/\/api-mifit\.huami\.com\/discovery\/mi\/discovery\/step_detail_ad\? reject-img
 ^https?:\/\/api-mifit\.huami\.com\/discovery\/mi\/discovery\/training_video_ad\? reject-img
 ^https:\/\/shopapi\.io\.mi\.com\/mtop\/mf\/resource\/homePage\/pageConfig reject-200
-^https:\/\/api-mifit-cn2\.huami\.com\/discovery\/mi\/cards\/startpage_ad reject
-^https:\/\/apiwz\.midukanshu\.com\/advert\/getPopup$ reject
-^https:\/\/apiwz\.midukanshu\.com\/advert\/treasureInfo$ reject
-^https:\/\/apiwz\.midukanshu\.com\/config\/getAds$ reject
+^https:\/\/api-mifit-cn2\.huami\.com\/discovery\/mi\/cards\/startpage_ad reject-200
+^https:\/\/apiwz\.midukanshu\.com\/advert\/getPopup$ reject-dict
+^https:\/\/apiwz\.midukanshu\.com\/advert\/treasureInfo$ reject-dict
+^https:\/\/apiwz\.midukanshu\.com\/config\/getAds$ reject-dict
 ^http:\/\/img\.dailmo\.com\/img\/61\/23c7125bfe6166d69f3bff5b0ca4d31e\.jpg reject-img
 ^http:\/\/img\.dailmo\.com\/img\/50\/edb40c6392f848df37f9c31d8a6f90f6\.jpg reject-img
 ^http:\/\/img\.dailmo\.com\/img\/6\/90585d9e96c73dd49644af57d8501624\.jpg reject-img
