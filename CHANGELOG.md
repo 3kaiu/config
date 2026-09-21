@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed (2026-09-21 精准去广告 — 微博搜索窗值判定位: 裸子串 → 词段)
+
+- **`src/Weibo.ts` `checkSearchWindow` 值判定位精度修复 (不误杀 / 不遗漏)**: 补盲启发式原为裸子串 `source.includes("ad")` / `pic.includes("ads")` —— `source="android"`、图片 URL 含 `padstation`/`xada` 等正常内容会被误判为广告卡片删除; 且与信息流 `isAd` 的精确口径 (`source === "ad"`) 不一致。改为 lib/ad 注入的 `hasKeySegment` **词段判定** (整段等于 `ad`/`ads` 才命中): `head_ad`/`feed_ad_click` 复合标记与 `/ads/` 路径段仍命中 (覆盖不缩), `android`/`addon`/`padstation`/`xada` 不再误杀
+- **数字同步**: 新增 `test/cases/weibo-search-window.test.js` 8 例 (误杀 3 / 命中 4 / 短路 1), 用例总数 248 → 256 (doc-claims-check 已同步, AGENTS.md 已更新)
+
 ### Added (2026-09-20 精简优化 — Rewrite 冗余清除 + 常驻门禁)
 
 - **同文件"前缀遮蔽"死规则批量清除 (行为零变化)**: Loon rewrite 规则 = `^` 锚定的 URL **前缀**匹配, 故同文件内"更早的 A 是 B 的**字符串严格前缀** + action/enable 逐字一致"时 B 恒不可达 (A 已抢先消费 B 能匹配的每个 URL)。首轮实测 8 对 (自维护 3 + 镜像 AllInOne 5), 清除:

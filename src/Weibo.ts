@@ -285,12 +285,17 @@ function checkSearchWindow(item: any): boolean {
   if (!mainConfig.removeSearchWindow) return false;
   if (item.category !== "card") return false;
   const d = item.data || {};
+  // 值级判定必须走词段匹配 (lib/ad 注入的 hasKeySegment), 不能裸子串:
+  // source === "android" → 含 "ad" 子串、图片 URL 含 "padstation"/"xada" → 子串判定误杀正常卡片。
+  // (信息流 isAd 的 source 判定是精确 ===, 搜索窗此处原为 includes, 两处口径曾不一致)
+  // "head_ad"/"feed_ad_click" 这类复合标记仍命中 (词段含 "ad"), 不缩覆盖面。
+  const clickSource = d.mblog?.page_info?.actionlog?.source;
   return (
     d.itemid === "finder_window" || d.itemid === "discover_gallery" || d.itemid === "more_frame" ||
     d.card_type === 208 || d.card_type === 236 || d.card_type === 247 ||
     d.card_type === 217 || d.card_type === 101 || d.card_type === 19 ||
-    d.mblog?.page_info?.actionlog?.source?.includes("ad") ||
-    d.pic?.includes("ads")
+    (typeof clickSource === "string" && hasKeySegment(clickSource, (w) => w === "ad")) ||
+    (typeof d.pic === "string" && hasKeySegment(d.pic, (w) => w === "ads"))
   );
 }
 
