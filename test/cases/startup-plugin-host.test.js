@@ -42,22 +42,26 @@ const hostnamesOf = (txt) => {
 // 背景: 1c576f2 误删 [MitM] hostname 整行 (422 域): 493 条 Rewrite 对 HTTPS
 // 静默失效, 当日 push 带 3 红随后 revert。"产物一致性"只断言字节相等
 // (报 diff 不定位病因); 本断言逐条点名无解密面的规则根域。
-// EXPECTED_ORPHANS (27): 2026-09-22 逐条核对, 成因三类 —
-//   ① 上游 rule 无 hostname (21): 生成器无法凭空发明解密面, 上游补 hostname 即自愈
-//   ② rule/host TLD 不一致 (4): lanjiyin/hilton(.com.cn vs .com)、moedot(.net vs .com)、
+// EXPECTED_ORPHANS (18, 2026-09-22 全仓解密面抽查后收敛: 纯广告域 9 条由生成器
+// EXTRA_HOSTS 补入 MitM, 本轮移除登记; 剩余成因四类) —
+//   ① 上游 rule 无 hostname (12): 生成器无法凭空发明解密面, 上游补 hostname 即自愈;
+//      混合 App 主功能 host (pinduoduo/musical.ly/meitun/babytree/aastocks/dongfeng/
+//      gtmc/etnet/shaoxing/mygolbs/zjyilin/zhangyuyidong) 亦归 ① — pinning 未知不补
+//   ② rule/host TLD 不一致 (3): hilton.com.cn (.com 在列)、moedot.net (.com 在列)、
 //      hoopchina.com.cn (MitM 仅 *.hoopchina.com) — 均为上游 rule 与 hostname 打架
+//      (lanjiyin.com.cn 已由 EXTRA_HOSTS 补入, 不再登记)
 //   ③ TLD 位通配无法精确表达 (1): mangaapi.manhuaren (上游仅 *mangaapi.manhuaren.*,
-//      已按 NEW-09 剔除); kugou/kglink×4 归 ① (上游无 host)
+//      已按 NEW-09 剔除); kugou/kglink×4 归 ① (上游无 host, alternation 无法安全展开)
+//   ④ 存在性未决 (2): pzoap.moedot.net (DoH NXDOMAIN, 上游规则已实质死亡, 不补);
+//      cdn.dianshihome.com (DoH SERVFAIL 不可判定, 不补)
 // 新增条目即红 → 先查上游 conf 是否补了 hostname, 再决定登记或修 checker。
 // EXPECTED_GENERIC (6): host 无法静态抽取 (裸 catch-all / TLD 位通配 / 裸 `.*`),
 // 覆盖性不可判定 — 锁定集合, 漂移需分诊。
 const EXPECTED_ORPHANS = [
-  "360os.com", "78dm.net", "aastocks.com", "admobile.top", "babytree.com",
-  "bybutter.com", "dianshihome.com", "dongfeng-nissan.com.cn", "etnet.com.hk",
-  "gtmc.com.cn", "hilton.com.cn", "hoopchina.com.cn", "hzhcbkj.cn",
-  "kglink.cn,kglink.com,kugou.cn,kugou.com", "lanjiyin.com.cn", "mangaapi.manhuaren",
-  "medproad.com", "meitun.com", "miguvideo.com", "moedot.net", "musical.ly",
-  "mygolbs.com", "pinduoduo.com", "shaoxing.com.cn", "zaixs.com",
+  "aastocks.com", "babytree.com", "dianshihome.com", "dongfeng-nissan.com.cn",
+  "etnet.com.hk", "gtmc.com.cn", "hilton.com.cn", "hoopchina.com.cn",
+  "kglink.cn,kglink.com,kugou.cn,kugou.com", "mangaapi.manhuaren", "meitun.com",
+  "moedot.net", "musical.ly", "mygolbs.com", "pinduoduo.com", "shaoxing.com.cn",
   "zhangyuyidong.cn", "zjyilin.com",
 ];
 const EXPECTED_GENERIC = [
@@ -297,6 +301,21 @@ exports.tests = {
       "无解密面根域集合应与登记一致 — 新增即红: 先查上游 conf 是否补了 hostname, 再决定登记或修 checker"
     );
     a.equal(generic.slice().sort(), [...EXPECTED_GENERIC].sort(), "generic (host 不可静态抽取) 集合应锁定, 漂移需分诊");
+  },
+
+  "startup-host: EXTRA_HOSTS 逐条有据 — 边界安全且被规则消费 (防自造孤儿)": async (a) => {
+    const m = await load();
+    a.ok(m.EXTRA_HOSTS.length > 0, "EXTRA_HOSTS 非空");
+    const parsed = m.parseConf(fs.readFileSync(SRC, "utf8"));
+    const { rules } = m.buildRules(parsed.rejects);
+    const ruleText = rules.map((r) => r.regex.replace(/\\\./g, ".").toLowerCase()).join("\n");
+    for (const e of m.EXTRA_HOSTS) {
+      a.equal(m.isBoundaryUnsafe(e.host), false, `${e.host} 应为安全 host 形态`);
+      const root = m.rootOf(e.host.replace(/\*/g, "").toLowerCase());
+      a.ok(ruleText.includes(root), `${e.host} 必须被 ≥1 条规则消费 (根域 ${root})`);
+    }
+    const hosts = m.EXTRA_HOSTS.map((e) => e.host);
+    a.equal(new Set(hosts).size, hosts.length, "EXTRA_HOSTS 不得重复");
   },
 
   "startup-host: 生成器不再产出死开关 STARTUP_DEBUG (check:contract 会判红)": async (a) => {

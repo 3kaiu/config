@@ -280,6 +280,31 @@ export const EXTRA_REJECTS = [
   },
 ];
 
+/**
+ * 上游有 rule 无 hostname 的纯广告域补齐 (2026-09-22 全仓解密面抽查)。
+ *
+ * 入选标准 (缺一不可, 逐条 DoH 实测 Status 0 存活: 2026-09-22):
+ *   ① 规则路径即广告语义 (/site/ad|advertisements|/adv|i_adverseInterface|
+ *     start_ad|top_notice|xgapp.php) — 整 host 流量即广告, 解密面零功能风险
+ *   ② 非 App 主功能 host (pinning 风险低; pinduoduo/musical.ly 等混合 host 不入)
+ *   ③ isBoundaryUnsafe 判定安全 (精确域或裸 *.suffix)
+ * 未入选的一律保持 orphan 登记待真机: 混合 host 13 (pinning 未知) /
+ * pzoap.moedot.net (DoH NXDOMAIN, 上游规则已实质死亡) /
+ * cdn.dianshihome.com (DoH SERVFAIL, 存在性不可判定) /
+ * kugou×4 (alternation 无法安全展开) / mangaapi.manhuaren (TLD 位通配无法表达)。
+ */
+export const EXTRA_HOSTS = [
+  { host: "open.78dm.net", reason: "78dm 开屏 `/v1/site/ad/` 纯广告接口" },
+  { host: "api4.bybutter.com", reason: "bybutter `/placements/*/advertisements` 纯广告 API" },
+  { host: "cmt.comp.360os.com", reason: "360os `/adv` 纯广告接口" },
+  { host: "aikanvod.miguvideo.com", reason: "咪咕 `i_adverseInterface.jsp` 纯广告接口" },
+  { host: "siteapi.zaixs.com", reason: "zaixs `/*/start_ad` 开屏广告" },
+  { host: "qcwx.medproad.com", reason: "medproad `:8080/ad/` 纯广告接口 (去 :port 精确匹配)" },
+  { host: "js-ad.ayximgs.com.ad-universe-cdn.hzhcbkj.cn", reason: "hzhcbkj `xgapp.php` 广告 SDK (ad-universe-cdn 即广告基建)" },
+  { host: "*.admobile.top", reason: "admobile `[..]+.admobile.top` 广告域族, 裸后缀安全形态" },
+  { host: "tk.lanjiyin.com.cn", reason: "lanjiyin `/ad/getAdList` — DoH 实测 .com.cn 存活而 MitM/上游仅有 .com (TLD 打架, 以规则侧为准)" },
+];
+
 /** [token, status, note] — token 取 path 级唯一锚 (见 scriptLedger 匹配) */
 export const SCRIPT_LEDGER = [
   // covered: 已由其他层 path 级覆盖 (2026-09-20 全量核对)
@@ -306,7 +331,7 @@ export const SCRIPT_LEDGER = [
   ["getCommonMixData", "pending", "百视TV 信息流: host 已解密, reject 动作形态待真机"],
   ["threadpost", "pending", "飞客茶馆: host 已解密, 待真机"],
   ["umetrip", "pending", "航旅 .com.cn 真身待确认 (umetrip-pro 仅覆盖 .com)"],
-  ["indexv", "pending", "IT之家: 需加 MitM napi.ithome.com 后验证"],
+  ["indexv", "pending", "IT之家: MitM napi.ithome.com 已在 news-purify/上游; 缺 upstream ithome.js (indexv feed 去广告) 移植 + 真机定形"],
   ["hotWords", "pending", "京东搜索热词系功能接口 (jd_json.js 只剥广告字段), 整拒会砍功能, 不做 — 待上游脚本化"],
   ["mgw\\.htm", "pending", "农行网关页 (上游为 script-response-header), reject 形态待真机"],
   ["api\\.jk\\.cn", "pending", "平安广告接口: 待真机"],
@@ -533,7 +558,7 @@ export function renderPlugin({ updateTime, rules, rejects, seen, droppedGarbage,
   const manualUnsafeNote = manual.unsafe.length
     ? `\n# ⚠️ 手写块 无法安全表达 host ${manual.unsafe.length} 条 (跨标签通配/可选数字, https 不保证): ${manual.unsafe.join(", ")}`
     : "";
-  const mitmHosts = [...new Set([...kept, ...EXTRA_REJECTS.map((e) => e.host), ...manual.hosts])];
+  const mitmHosts = [...new Set([...kept, ...EXTRA_HOSTS.map((e) => e.host), ...EXTRA_REJECTS.map((e) => e.host), ...manual.hosts])];
   return `${HEADER}
 ${BEGIN_MANUAL}
 ${manualLines.join("\n")}
@@ -552,7 +577,7 @@ ${END_GEN}
 
 [MitM]
 # ⚠️ 注意：部分 App 禁用了 MITM，无法拦截其开屏广告
-# 上游 hostname 最小化子集 (${mitmHosts.length}/${upstreamCount} 条, 仅被 reject 规则消费的域 + EXTRA_REJECTS host + 手写块 host)${unsafeNote}${manualUnsafeNote}
+# 上游 hostname 最小化子集 (${mitmHosts.length}/${upstreamCount} 条, 仅被 reject 规则消费的域 + EXTRA_REJECTS/EXTRA_HOSTS host + 手写块 host)${unsafeNote}${manualUnsafeNote}
 hostname = %APPEND% ${mitmHosts.join(", ")}
 `;
 }
