@@ -266,6 +266,20 @@ jobs:
             "rules/ddgksf-StartUpAds.conf" "ddgksf2013 StartUpAds.conf (ifflagged 镜像)"
           node tools/build-startup-plugin.mjs
 
+          # ── 开屏数据源新鲜度提示 (2026-09-22, 只报告不判红) ──
+          # StartUpAds.conf @UpdateTime 若停滞超 21 天即 warn: 新 App 版本开屏接口
+          # 无覆盖, 提示考虑备选源/自产规则。21 天口径 = 约 3 个 App 发版周期;
+          # 不阻断 (keep_old 哲学: 旧规则对旧版 App 依然有效)。
+          UPD=$(grep -m1 -o "@UpdateTime[[:space:]]*[0-9-]*" Mirror/rules/ddgksf-StartUpAds.conf | grep -o "[0-9-]*$" || true)
+          if [ -n "$UPD" ]; then
+            AGE_DAYS=$(node -e "console.log(Math.floor((Date.now() - Date.parse('$UPD')) / 864e5))")
+            if [ "$AGE_DAYS" -gt 21 ]; then
+              echo "::warning::StartUpAds 上游 @UpdateTime=$UPD ($AGE_DAYS 天前) — 开屏情报停滞, 新 App 版本可能无覆盖"
+            else
+              echo "StartUpAds 上游新鲜 (@UpdateTime=$UPD, $AGE_DAYS 天前)"
+            fi
+          fi
+
           # ── 规则顺序遮蔽检查 (2026-09-11 深度审计 NEW-05 重写) ──
           # 旧实现是硬编码 20 个关键词的 grep, 且**方向反了**: 它只查 "Global 里有没有
           # 广告域", 而真正的缺陷是反向的 —— Global 是 Proxy 列表且排在三个 REJECT 列表
