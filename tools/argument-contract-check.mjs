@@ -53,7 +53,7 @@ function analyze(file) {
       const k = m[1];
       // 排除纯数字 token (正则量词: \d{4}, [A-Z]{2}, (…){3})
       if (/^\d+$/.test(k)) continue;
-      // 排除 ${…} JS 模板字面量 (Kelee/TelegramRedirect 的 request if … then redirect)
+      // 排除 ${…} JS 模板字面量 (rewrite 正则里的 request-if-then-redirect 写法)
       const idx = m.index;
       if (idx > 0 && lines[i][idx - 1] === "$") continue;
       if (!used.has(k)) used.set(k, []);

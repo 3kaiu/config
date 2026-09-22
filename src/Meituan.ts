@@ -4,7 +4,7 @@
  *
  * 目标端点: api.meituan.com (首页信息流) / i.waimai.meituan.com (外卖) / papi.meituan.com (推荐流)
  * 功能: 信息流广告项过滤 (is_ad/ad_id/promotion) · banner/popup 清空 · ad_list 置空
- * 守卫: $response 检查 + Env 兼容层 (Loon/QX/Surge)
+ * 守卫: $response 检查 + Env 兼容层 (Loon/Surge; Env 基于 $httpClient, QX 无此 API 不兼容)
  */
 
 // 🛡️ $response 守卫

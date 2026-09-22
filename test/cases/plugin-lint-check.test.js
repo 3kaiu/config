@@ -7,7 +7,7 @@
  *      双样板 = bilibili-pro AND(SUFFIX,…) / qidian AND(USER-AGENT,…); 策略占位行豁免)
  *   3. 可疑 Rewrite 动作与裸 reject 的**报告**通道 (url/list/splash-reject/裸 reject)
  *
- * 另有 corpus 级断言: 真实仓库 61 个插件必须 0 errs —— 门禁自身的"fail-before"是
+ * 另有 corpus 级断言: 真实仓库 52 个插件必须 0 errs —— 门禁自身的"fail-before"是
  * 反过来的: 新增规则若误报, 这条用例会立刻红 (而不是等人肉审计发现)。
  */
 "use strict";
@@ -74,7 +74,7 @@ exports.tests = {
   "plugin-lint: 真实仓库 corpus 全部通过 (新增规则零误报)": async (a) => {
     const { scanAll } = await load();
     const { errs, reports, files } = scanAll();
-    a.equal(files, 61, "扫描 61 个插件 (Plugin 46 + Kelee 15)");
+    a.equal(files, 52, "扫描 52 个插件 (Plugin 46 + Kelee 6)");
     a.equal(errs, [], `真实语料不得有 errs: ${errs.slice(0, 3).join(" | ")}`);
     a.ok(Array.isArray(reports), "报告通道存在 (裸 reject 待分拣清单)");
   },

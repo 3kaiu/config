@@ -286,7 +286,7 @@ export const SCRIPT_LEDGER = [
   ["index_recommend", "covered", "video-community-purify.plugin (555Ad)"],
   ["123pan", "covered", "Mirror/rules/loon-AllInOne.plugin"],
   ["getAdList", "covered", "AllInOne + social-netdisk-purify"],
-  ["mobileDispatch", "covered", "shopping-purify / amap / BlockAdvertisers"],
+  ["mobileDispatch", "covered", "shopping-purify / amap"],
   ["ahhhhfs", "covered", "AllInOne"],
   ["phpui2", "covered", "AllInOne (baidumap Ads)"],
   ["gg\\.caixin", "covered", "AllInOne (财新广告)"],
