@@ -100,6 +100,13 @@ DOMAIN, mssdk-bu.bytedance.com, REJECT, enable={PRIVACY_ENABLE}
 DOMAIN, catdot.dianping.com, REJECT, enable={PRIVACY_ENABLE}
 DOMAIN, data-sdk-uuid-log.d.meituan.net, REJECT, enable={PRIVACY_ENABLE}
 DOMAIN, qt-api.delicloud.com, REJECT, enable={PRIVACY_ENABLE}
+# 2026-09-22 纯追踪 SDK 补齐 (DNS-REJECT, 无功能面): 百度统计/诸葛IO/腾讯灯塔-beacon/腾讯Bugly,
+# 均为 fire-and-forget 埋点上报, 拦了只丢 dev 看板数据不伤用户功能; gdt 系不碰
+# (与 qidian.plugin DIRECT 白名单的层间矛盾未决, 见 B7-1, 不添新变量)
+DOMAIN-SUFFIX, hm.baidu.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, zhugeio.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, pingtas.qq.com, REJECT, enable={PRIVACY_ENABLE}
+DOMAIN-SUFFIX, bugly.qq.com, REJECT, enable={PRIVACY_ENABLE}
 
 # 纯 DNS 级 REJECT，无需 MitM
 [MitM]
