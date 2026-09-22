@@ -20,8 +20,8 @@ ZHIHU_DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执
 
 [Rule]
 # ── 广告域名拦截 ─────────────────────
+# (2026-09-22 删 appcloud2.in.zhihu.com: DoH 双查 NXDOMAIN 死亡, 永不命中)
 DOMAIN,appcloud.zhihu.com,REJECT,enable={ENABLE_ZHIHU}
-DOMAIN,appcloud2.in.zhihu.com,REJECT,enable={ENABLE_ZHIHU}
 DOMAIN,crash2.zhihu.com,REJECT,enable={ENABLE_ZHIHU}
 DOMAIN,mqtt.zhihu.com,REJECT,enable={ENABLE_ZHIHU}
 DOMAIN,sugar.zhihu.com,REJECT,enable={ENABLE_ZHIHU}

@@ -77,9 +77,9 @@ http-response ^https?:\/\/log\.tmall\.com\/event reject-dict enable={ENABLE_TAOB
 DOMAIN-SUFFIX, taobao.com, DIRECT
 DOMAIN, adashx.m.taobao.com, REJECT,enable={ENABLE_TAOBAO}
 DOMAIN, ossgw.alicdn.com, REJECT,enable={ENABLE_TAOBAO}
-DOMAIN, ems.youku.com, REJECT,enable={ENABLE_TAOBAO}
 DOMAIN, hudong.alicdn.com, REJECT,enable={ENABLE_TAOBAO}
 DOMAIN, ut.taobao.com, REJECT,enable={ENABLE_TAOBAO}
+# (2026-09-22 删 ems.youku.com: DoH 双查 NXDOMAIN 死亡, 永不命中)
 
 DOMAIN-SUFFIX, tmall.com, DIRECT
 DOMAIN-SUFFIX, alibaba.com, DIRECT
