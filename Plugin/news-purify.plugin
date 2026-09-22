@@ -1,5 +1,5 @@
 #!name=资讯阅读净化
-#!desc=聚合: 36氪/财新/彩云/豆瓣/豆瓣阅读/虎嗅/IT之家/墨迹/网易新闻/雪球/值得买/什么值得买 — 单插件统一总开关, 各 App 独立子开关
+#!desc=聚合: 36氪/财新/彩云/豆瓣/豆瓣阅读/虎嗅/IT之家/墨迹/网易新闻/雪球/值得买/什么值得买/腾讯新闻 — 单插件统一总开关, 各 App 独立子开关
 #!version=1.0
 #!author=3kaiu (聚合器生成)
 #!homepage=https://github.com/3kaiu/config
@@ -20,6 +20,7 @@ ITHOME_ENABLE=switch,"true","false",tag=是否开启IT之家净化,desc=IT之家
 MOJIWEATHER_ENABLE=switch,"true","false",tag=是否开启墨迹天气净化,desc=墨迹天气去广告
 NETEASENEWS_ENABLE=switch,"true","false",tag=是否开启网易新闻净化,desc=网易新闻去广告
 SNOWBALL_ENABLE=switch,"true","false",tag=是否开启雪球净化,desc=雪球去广告
+TENCENTNEWS_ENABLE=switch,"true","false",tag=是否开启腾讯新闻净化,desc=腾讯新闻feed流去广告
 
 [Rewrite]
 ^https:\/\/gateway\.36kr\.com\/api\/mis\/sys\/config\? response-body-json-del data.contentConfig data.positionConfigList data.switchConfig.ios.sunrise_sign data.switchConfig.ios.sunrise_sunit_task data.switchConfig.ios.sunrise_sunit_mall data.switchConfig.ios.sunrise_distribution_icon data.secondFloorConfig enable={NEWS_PURIFY_ENABLE}&{APP_36KR_ENABLE}
@@ -86,6 +87,11 @@ SNOWBALL_ENABLE=switch,"true","false",tag=是否开启雪球净化,desc=雪球�
 ^https:\/\/api\.xueqiu\.com\/livestream\/structure\/live\/hotCard\.json reject-dict enable={NEWS_PURIFY_ENABLE}&{SNOWBALL_ENABLE}
 ^https:\/\/open\.xueqiu\.com\/mpaas\/config\/content\?.*timeline_tab_name response-body-json-del data.im_notice_show data.request_notice_show data.timeline_tab_name data.profileMenuConfig_anonymous_V12 data.trade_open_account_promotion_url data.trade_unify_open_account_list data.community_ad_download_msg data.home_tab_dynamic data.home_tab_dynamic_before data.home_tab_dynamic_after data. isitor_page_login_config data.open_wechat_mini_app_config data.user_guide_contact_config data.brokers_router_config data.my_page_right_items enable={NEWS_PURIFY_ENABLE}&{SNOWBALL_ENABLE}
 ^https:\/\/fund\.xueqiu\.com\/fundx\/activity\/x\/web\/c\/index\/dataByCode\? reject-dict enable={NEWS_PURIFY_ENABLE}&{SNOWBALL_ENABLE}
+# 腾讯新闻 feed 流净化 (2026-09-22 app2smile 交叉移植: widget ad_list 过滤 + adList 置空;
+# 上游标记弃用/待验证端点不搬; 脚本见 Scripts/TencentNews.js)
+http-response ^https?:\/\/r\.inews\.qq\.com\/gw\/page\/(event_detail|channel_feed) script-path=https://ws.wenn.in/main/Scripts/TencentNews.js, requires-body=true, timeout=10, tag=腾讯新闻_feed净化, enable={NEWS_PURIFY_ENABLE}&{TENCENTNEWS_ENABLE}
+http-response ^https?:\/\/news\.ssp\.qq\.com\/app script-path=https://ws.wenn.in/main/Scripts/TencentNews.js, requires-body=true, timeout=10, tag=腾讯新闻_开屏净化, enable={NEWS_PURIFY_ENABLE}&{TENCENTNEWS_ENABLE}
+http-response ^https?:\/\/r\.inews\.qq\.com\/(news_feed\/hot_module_list|getTagFeedList) script-path=https://ws.wenn.in/main/Scripts/TencentNews.js, requires-body=true, timeout=10, tag=腾讯新闻_精选净化, enable={NEWS_PURIFY_ENABLE}&{TENCENTNEWS_ENABLE}
 
 [Rule]
 DOMAIN, adx.36kr.com, REJECT,enable={NEWS_PURIFY_ENABLE}&{APP_36KR_ENABLE}
@@ -98,4 +104,4 @@ DOMAIN, nex.163.com, DIRECT,enable={NEWS_PURIFY_ENABLE}&{NETEASENEWS_ENABLE}
 DOMAIN, gw.m.163.com, DIRECT,enable={NEWS_PURIFY_ENABLE}&{NETEASENEWS_ENABLE}
 
 [MitM]
-hostname = %APPEND% gateway.36kr.com, 36kr.com, e*.caixin.com, g*.caixin.com, m*.caixin.com, biz.cyapi.cn, starplucker.cyapi.cn, api.douban.com, frodo.douban.com, m.douban.com, read.douban.com, api-ms-config.huxiu.com, api-web-feed.huxiu.com, api-search.huxiu.com, api-article.huxiu.com, api-web-moment.huxiu.com, api-ms-feed.huxiu.com, napi.ithome.com, dat.ruanmei.com, fcard.api.moji.com, vdo.api.moji.com, sns.api.moji.com, mme.api.moji.com, psnlz.api.moji.com, nex.163.com, interface.music.163.com, c.m.163.com, client.mail.163.com, g1.163.com, support.you.163.com, interface3?.music.163.com, gw.m.163.com, api.xueqiu.com, open.xueqiu.com, stock.xueqiu.com, fund.xueqiu.com
+hostname = %APPEND% gateway.36kr.com, 36kr.com, e*.caixin.com, g*.caixin.com, m*.caixin.com, biz.cyapi.cn, starplucker.cyapi.cn, api.douban.com, frodo.douban.com, m.douban.com, read.douban.com, api-ms-config.huxiu.com, api-web-feed.huxiu.com, api-search.huxiu.com, api-article.huxiu.com, api-web-moment.huxiu.com, api-ms-feed.huxiu.com, napi.ithome.com, dat.ruanmei.com, fcard.api.moji.com, vdo.api.moji.com, sns.api.moji.com, mme.api.moji.com, psnlz.api.moji.com, nex.163.com, interface.music.163.com, c.m.163.com, client.mail.163.com, g1.163.com, support.you.163.com, interface3?.music.163.com, gw.m.163.com, api.xueqiu.com, open.xueqiu.com, stock.xueqiu.com, fund.xueqiu.com, r.inews.qq.com, news.ssp.qq.com

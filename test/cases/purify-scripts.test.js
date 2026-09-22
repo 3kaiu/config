@@ -68,6 +68,40 @@ exports.tests = {
     a.equal(out.keep, 2, "正常字段保留");
   },
 
+  // ── TencentNews (2026-09-22 app2smile 交叉移植) ──
+  "tencentnews: event_detail 过滤 ad_list widget": async (a, h) => {
+    const sb = h.createSandbox({
+      response: RESP({ data: { widget_list: [{ widget_type: "ad_list", x: 1 }, { widget_type: "news", y: 2 }] } }),
+      request: { url: "https://r.inews.qq.com/gw/page/event_detail" },
+    });
+    const s = await h.runScript("Scripts/TencentNews.js", sb);
+    const wl = JSON.parse(s.doneCalls[0].body).data.widget_list;
+    a.equal(wl.length, 1, "应只剩非广告 widget");
+    a.equal(wl[0].widget_type, "news", "正常内容保留");
+  },
+  "tencentnews: 开屏/精选 adList 置空, 无则不动": async (a, h) => {
+    const sb = h.createSandbox({
+      response: RESP({ adList: [{ id: 1 }], keep: 1 }),
+      request: { url: "https://news.ssp.qq.com/app" },
+    });
+    const s = await h.runScript("Scripts/TencentNews.js", sb);
+    const out = JSON.parse(s.doneCalls[0].body);
+    a.equal(out.adList, null, "adList 应置空");
+    a.equal(out.keep, 1, "正常字段保留");
+    const sb2 = h.createSandbox({
+      response: RESP({ adList: [{ id: 1 }] }),
+      request: { url: "https://r.inews.qq.com/getTagFeedList" },
+    });
+    const s2 = await h.runScript("Scripts/TencentNews.js", sb2);
+    a.equal(JSON.parse(s2.doneCalls[0].body).adList, null, "getTagFeedList 同理");
+    const sb3 = h.createSandbox({
+      response: RESP({ data: { x: 1 } }),
+      request: { url: "https://r.inews.qq.com/gw/page/event_detail" },
+    });
+    const s3 = await h.runScript("Scripts/TencentNews.js", sb3);
+    a.equal(JSON.parse(s3.doneCalls[0].body).data.x, 1, "无广告字段原样保留");
+  },
+
   // ── Reddit ──
   "reddit: 移除 AdPost 节点, 保留普通帖": async (a, h) => {
     const body = {
