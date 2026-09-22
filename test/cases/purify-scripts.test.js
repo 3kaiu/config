@@ -34,6 +34,39 @@ exports.tests = {
     const s = await h.runScript("Scripts/Tieba.js", sb);
     a.equal(s.doneCalls[0].body, undefined, "proto 应无参放行");
   },
+  // 2026-09-22 app2smile 交叉移植 (P0/P1 机制开关类)
+  "tieba: 开屏 error_code 置非零 + data 置空": async (a, h) => {
+    const sb = h.createSandbox({
+      response: RESP({ error_code: 0, data: { ad: 1 } }),
+      request: { url: "https://tieba.baidu.com/c/f/ad/getSplashAd" },
+    });
+    const s = await h.runScript("Scripts/Tieba.js", sb);
+    const out = JSON.parse(s.doneCalls[0].body);
+    a.equal(out.error_code, 2230209, "error_code 应置非零");
+    a.equal(out.data, null, "data 应置空");
+  },
+  "tieba: c/s/sync 开关类覆写 (SDK 初始化/开屏/AB 实验)": async (a, h) => {
+    const sb = h.createSandbox({
+      response: RESP({
+        floating_icon: { homepage: { icon_url: "x" } },
+        advertisement_config: { advertisement_str: "ad" },
+        config: { switch: [{ name: "platform_csj_init", type: "1" }, { name: "unrelated", type: "1" }] },
+        screen_fill_data_result: { screen_fill_advertisement_bear_switch: "1", other: "k" },
+        cloud_control_data_info: { common_config: { external_abtest_switch: "on", keep: 1 } },
+        keep: 2,
+      }),
+      request: { url: "https://tiebac.baidu.com/c/s/sync" },
+    });
+    const s = await h.runScript("Scripts/Tieba.js", sb);
+    const out = JSON.parse(s.doneCalls[0].body);
+    a.equal(out.floating_icon, null, "悬浮 icon 应清空");
+    a.equal(out.advertisement_config, null, "回帖栏广告配置应清空");
+    a.equal(out.config.switch[0].type, "0", "SDK 初始化应关闭");
+    a.equal(out.config.switch[1].type, "1", "无关开关保留");
+    a.equal(out.screen_fill_data_result.screen_fill_advertisement_bear_switch, "0", "开屏小熊应关闭");
+    a.equal(out.cloud_control_data_info.common_config.external_abtest_switch, null, "AB 实验总闸应关闭");
+    a.equal(out.keep, 2, "正常字段保留");
+  },
 
   // ── Reddit ──
   "reddit: 移除 AdPost 节点, 保留普通帖": async (a, h) => {

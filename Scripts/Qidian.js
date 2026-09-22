@@ -146,7 +146,10 @@ const CONFIG = {
     "InAppPushLimitMinutes": "999999",
     "PushNoticeFrequency": "-1",
     "AegisSignOn": 0,
-    "EnableFockRetryStrategy": 0
+    "EnableFockRetryStrategy": 0,
+    // 功能增强 (2026-09-22 app2smile 交叉比对): 搜索页允许搜用户, 缺省关闭;
+    // 纯开关置 1, 无广告/安全面 (对照 app2smile/js/qidian.js EnableSearchUser 语义)
+    "EnableSearchUser": "1"
   },
 
   // getconf 整段删除的 key（悬浮广告/活动图标/推广模块）

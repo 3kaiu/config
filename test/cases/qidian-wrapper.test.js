@@ -69,11 +69,12 @@ exports.tests = {
   "getconf: 广告字段覆写 + 删除 + GDT 移除": async (a, h) => {
     const sb = h.createSandbox({
       request: { method: "GET", url: `${QIDIAN_BASE}/v1/client/getconf` },
-      response: RESP({ Data: { PangleEnable: "1", SplashScreenInterval: "5", ActivityIcon: "x", BookShelfBottomIcons: "y", GDT: { a: 1 }, NewFeedsDiscover: 1, Keep: 42 } }),
+      response: RESP({ Data: { PangleEnable: "1", SplashScreenInterval: "5", ActivityIcon: "x", BookShelfBottomIcons: "y", GDT: { a: 1 }, NewFeedsDiscover: 1, EnableSearchUser: "0", Keep: 42 } }),
     });
     const s = await h.runScript("Scripts/Qidian.js", sb);
     const d = JSON.parse(s.doneCalls[0].body).Data;
     a.equal(d.PangleEnable, "0", "Pangle 应关闭");
+    a.equal(d.EnableSearchUser, "1", "搜索页应允许搜用户 (app2smile 交叉)");
     a.equal(d.SplashScreenInterval, "0", "开屏间隔应归零");
     a.equal(d.NewFeedsDiscover, 0, "发现 tab 应关闭");
     a.ok(!("ActivityIcon" in d), "ActivityIcon 应删除");
