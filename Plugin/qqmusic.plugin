@@ -12,28 +12,13 @@ QQMUSIC_ENABLE=switch,"true","false",tag=是否开启QQ音乐去广告,desc=开�
 
 [Rule]
 # 广告 + 追踪域名
+# (2026-09-22 删 17 条主配置已无条件 REJECT 的重复, 开关拨动对它们本就无效;
+# 登记见 test/cases/plugin-tpl-shadow.test.js; 剩余 3 条为本插件独占拦截)
 DOMAIN, mc.tencentmusic.com, REJECT,enable={QQMUSIC_ENABLE}
 DOMAIN, tmeadbak.y.qq.com, REJECT,enable={QQMUSIC_ENABLE}
 DOMAIN, tmeadquic.y.qq.com, REJECT,enable={QQMUSIC_ENABLE}
 
-DOMAIN,adstats.tencentmusic.com,REJECT,enable={QQMUSIC_ENABLE}
-DOMAIN,ad.tencentmusic.com,REJECT,enable={QQMUSIC_ENABLE}
-DOMAIN,adcdn.tencentmusic.com,REJECT,enable={QQMUSIC_ENABLE}
-DOMAIN,adcdn6.tencentmusic.com,REJECT,enable={QQMUSIC_ENABLE}
-DOMAIN,adexpo.tencentmusic.com,REJECT,enable={QQMUSIC_ENABLE}
-DOMAIN,adclick.tencentmusic.com,REJECT,enable={QQMUSIC_ENABLE}
-DOMAIN,otheve.beacon.qq.com,REJECT,enable={QQMUSIC_ENABLE}
-DOMAIN,mazu.m.qq.com,REJECT,enable={QQMUSIC_ENABLE}
-DOMAIN,monitor.music.qq.com,REJECT,enable={QQMUSIC_ENABLE}
-DOMAIN,stat.y.qq.com,REJECT,enable={QQMUSIC_ENABLE}
-DOMAIN,tmead.y.qq.com,REJECT,enable={QQMUSIC_ENABLE}
-DOMAIN,oth.str.mdt.qq.com,REJECT,enable={QQMUSIC_ENABLE}
-DOMAIN,h.trace.qq.com,REJECT,enable={QQMUSIC_ENABLE}
-DOMAIN,sdk.e.qq.com,REJECT,enable={QQMUSIC_ENABLE}
-DOMAIN,p.l.qq.com,REJECT,enable={QQMUSIC_ENABLE}
-DOMAIN,us.l.qq.com,REJECT,enable={QQMUSIC_ENABLE}
 # ⚠️ 修复(v7.3): tangram.e.qq.com 已由 qidian.plugin 统一 REJECT, 避免重复
-DOMAIN-SUFFIX,imtmp.net,REJECT,enable={QQMUSIC_ENABLE}
 
 # 纯 DNS 级 REJECT，无需 MitM
 [MitM]

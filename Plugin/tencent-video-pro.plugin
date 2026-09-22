@@ -65,12 +65,9 @@ http-response ^https?:\/\/sdk\.open\.tv\.qzone\.qq\.com reject-dict enable={ENAB
 
 [Rule]
 DOMAIN-SUFFIX, tencent.com, DIRECT
-DOMAIN, adsmind.gdtimg.com, REJECT,enable={ENABLE_TVP}
 DOMAIN, info4.video.qq.com, REJECT,enable={ENABLE_TVP}
 DOMAIN, info6.video.qq.com, REJECT,enable={ENABLE_TVP}
 DOMAIN, ios.video.mpush.qq.com, REJECT,enable={ENABLE_TVP}
-DOMAIN, otheve.beacon.qq.com, REJECT,enable={ENABLE_TVP}
-DOMAIN, pgdt.gtimg.cn, REJECT,enable={ENABLE_TVP}
 DOMAIN, tpns.qq.com, REJECT,enable={ENABLE_TVP}
 DOMAIN, vv6.video.qq.com, REJECT,enable={ENABLE_TVP}
 DOMAIN-SUFFIX, gdt.qq.com, REJECT,enable={ENABLE_TVP}

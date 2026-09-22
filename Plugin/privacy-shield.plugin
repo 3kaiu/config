@@ -11,34 +11,13 @@
 PRIVACY_ENABLE=switch,"true","false",tag=隐私防护总开关,desc=开启后 REJECT 所有追踪与分析统计域名（纯 DNS 拦截，无需 MitM）
 
 [Rule]
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Google 广告与分析
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DOMAIN-SUFFIX, googletagmanager.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, googletagservices.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, google-analytics.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, googleadservices.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, doubleclick.net, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, adservice.google.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, app-measurement.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, analytics.google.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, crashlytics.googleapis.com, REJECT, enable={PRIVACY_ENABLE}
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 国际归因 / 崩溃分析 SDK
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DOMAIN-SUFFIX, segment.io, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, amplitude.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, mixpanel.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, branch.io, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, adjust.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, appsflyer.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, kochava.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, sentry.io, REJECT, enable={PRIVACY_ENABLE}
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 国内统计 / 归因 SDK
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 开关真实控制的条目 (11): 以下域名仅由本插件拦截 — 关开关即放行。
+# 另 64 条追踪域已删 (2026-09-22): 主配置 [Rule] 对它们无条件 REJECT, 本地规则 >
+# 插件规则, 本段重复永不可达且开关拨动无任何效果 (MOD-04 同型假粒度, 删后零行为变化)。
+# 删掉的名单与成因见 test/cases/plugin-tpl-shadow.test.js 登记; 若主配置删了其中
+# 任一条, 该用例即红, 届时把对应条目加回本段。
+# ⚠️ 推送保活: 仅拦统计子域, 保留 config.jpush.cn / user.jpush.cn (极光推送) 与 api.getui.com (个推推送)
+# 国内统计 / 归因 SDK (主配置无覆盖, 开关有效)
 DOMAIN-SUFFIX, umeng.com, REJECT, enable={PRIVACY_ENABLE}
 DOMAIN-SUFFIX, umengcloud.com, REJECT, enable={PRIVACY_ENABLE}
 DOMAIN-SUFFIX, umeng.co, REJECT, enable={PRIVACY_ENABLE}
@@ -46,60 +25,6 @@ DOMAIN-SUFFIX, sensors.com, REJECT, enable={PRIVACY_ENABLE}
 DOMAIN-SUFFIX, talkingdata.com, REJECT, enable={PRIVACY_ENABLE}
 DOMAIN-SUFFIX, growingio.com, REJECT, enable={PRIVACY_ENABLE}
 DOMAIN-SUFFIX, mta.qq.com, REJECT, enable={PRIVACY_ENABLE}
-
-# 国内广告 SDK 硬拦截 (2026-08-12 HAR 审计)
-# ⚠️ 注: Loon 中插件 [Rule] 优先级低于主配置 [Rule], 国内域会被 GEOIP,CN,DIRECT 截胡,
-# 本段为兜底 — 主配置 (template/loon.tpl) 已硬拦截。
-# ⚠️ 推送保活: 仅拦统计子域, 保留 config.jpush.cn / user.jpush.cn (极光推送) 与 api.getui.com (个推推送)
-DOMAIN-SUFFIX, beizi.biz, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, stats.jpush.cn, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, gd-stats.jpush.cn, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, mmstat.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, ugdtimg.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, 1rtb.net, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, 66mobi.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, cloooud.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, hubcloud.com.cn, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, sdk-open-phone.getui.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, snssdk-eu.ninebot.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, snssdk-us.ninebot.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, toblog.ctobsnssdk.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, sentry-monitor-new.zdmimg.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, path.book.qq.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, ataru.qidian.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, fockrt.yuewen.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, connect.yuewen.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, upushv6.qidian.com, REJECT, enable={PRIVACY_ENABLE}
-
-# 第二轮 (2026-08-12 HAR 审计): 纯日志/埋点/APM 接口 + 穿山甲统计接口, 无功能依赖
-DOMAIN, api-access.pangolin-sdk-toutiao.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, api-access.pangolin-sdk-toutiao1.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, log-api.pangolin-sdk-toutiao.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, gromore.pangolin-sdk-toutiao.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN-SUFFIX, adkwai.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, datagw-edge.alipay.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, loggw-ex.alipay.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, mdap.alipay.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, mobads.baidu.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, mobads-logs.baidu.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, sensors.umetrip.com.cn, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, rmonitor.qq.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, unitelogreport.reader.qq.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, ywab.reader.qq.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, h-adashx.ut.dingtalk.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, adashbc.ut.taobao.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, statistical-report.djiservice.org, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, analytics-api-01.smzdm.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, sdk.adx.adwangmai.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, mores.toponad.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, jp.ad.gameley.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, logapi-ios.zhipin.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, apm-ios.zhipin.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, apmplus.ap-southeast-1.volces.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, mssdk-bu.bytedance.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, catdot.dianping.com, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, data-sdk-uuid-log.d.meituan.net, REJECT, enable={PRIVACY_ENABLE}
-DOMAIN, qt-api.delicloud.com, REJECT, enable={PRIVACY_ENABLE}
 # 2026-09-22 纯追踪 SDK 补齐 (DNS-REJECT, 无功能面): 百度统计/诸葛IO/腾讯灯塔-beacon/腾讯Bugly,
 # 均为 fire-and-forget 埋点上报, 拦了只丢 dev 看板数据不伤用户功能; gdt 系不碰
 # (与 qidian.plugin DIRECT 白名单的层间矛盾未决, 见 B7-1, 不添新变量)

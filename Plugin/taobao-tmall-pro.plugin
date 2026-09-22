@@ -79,7 +79,6 @@ DOMAIN, adashx.m.taobao.com, REJECT,enable={ENABLE_TAOBAO}
 DOMAIN, ossgw.alicdn.com, REJECT,enable={ENABLE_TAOBAO}
 DOMAIN, ems.youku.com, REJECT,enable={ENABLE_TAOBAO}
 DOMAIN, hudong.alicdn.com, REJECT,enable={ENABLE_TAOBAO}
-DOMAIN, h-adashx.ut.taobao.com, REJECT,enable={ENABLE_TAOBAO}
 DOMAIN, ut.taobao.com, REJECT,enable={ENABLE_TAOBAO}
 
 DOMAIN-SUFFIX, tmall.com, DIRECT

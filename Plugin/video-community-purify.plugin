@@ -76,8 +76,6 @@ activityAdsSwitch=switch,"true","false",tag=活动广告位屏蔽,desc=开启后
 [Rule]
 URL-REGEX, "^http:\/\/linkmicschedule\.douyucdn\.cn\/im_schedule\/im_gate_list", REJECT,enable={VIDEO_ENABLE}&{DOUYU_ENABLE}
 AND, ((DEST-PORT, 18000), (PROTOCOL, STUN)), REJECT,enable={VIDEO_ENABLE}&{DOUYU_ENABLE}
-DOMAIN, stun1.douyucdn.cn, REJECT,enable={VIDEO_ENABLE}&{DOUYU_ENABLE}
-DOMAIN, stun1.qvb.qcloud.com, REJECT,enable={VIDEO_ENABLE}&{DOUYU_ENABLE}
 DOMAIN, credits.bz.mgtv.com, REJECT,enable={VIDEO_ENABLE}&{MANGOTV_ENABLE}
 DOMAIN, credits2.bz.mgtv.com, REJECT,enable={VIDEO_ENABLE}&{MANGOTV_ENABLE}
 DOMAIN, credits3.bz.mgtv.com, REJECT,enable={VIDEO_ENABLE}&{MANGOTV_ENABLE}

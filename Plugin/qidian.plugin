@@ -58,16 +58,15 @@ DOMAIN-SUFFIX, pangolin-sdk-toutiao.com, DIRECT
 DOMAIN-SUFFIX, pangolin-sdk-toutiao1.com, DIRECT
 
 # 追踪/监控/埋点 SDK — 强力阻绝
-DOMAIN, rmonitor.qq.com, REJECT
-DOMAIN, unitelogreport.reader.qq.com, REJECT
-DOMAIN, sdkreport.e.qq.com, REJECT
+# (2026-09-22 删 12 条主配置已无条件 REJECT 的重复: rmonitor/unitelogreport/sdkreport/
+# path.book/connect/fockrt/upushv6/aegis/ywab/ataru/qreport.qunar/qreport.cn —
+# 本地>插件故永不可达; 登记见 test/cases/plugin-tpl-shadow.test.js)
 DOMAIN, publiclog.zhiyan.tencent-cloud.net, REJECT
 DOMAIN, zhiyan.monitor.tencent-cloud.net, REJECT
 DOMAIN, galileotelemetry.tencent.com, REJECT
 DOMAIN, tangram.e.qq.com, REJECT
 DOMAIN, gatherer.m.qq.com, REJECT
 DOMAIN, dl.tiku.qq.com, REJECT
-DOMAIN, path.book.qq.com, REJECT
 DOMAIN, apmplus.volces.com, REJECT
 DOMAIN, mssdk.volces.com, REJECT
 DOMAIN, tobapplog.ctobsnssdk.com, REJECT
@@ -78,16 +77,8 @@ DOMAIN, hd.ctobsnssdk.com, REJECT
 AND,((USER-AGENT,QDReader*),(DOMAIN-KEYWORD,pglstatp-toutiao)),REJECT
 AND,((USER-AGENT,QDReader*),(DOMAIN-KEYWORD,zijieapi)),REJECT
 AND,((USER-AGENT,QDReader*),(DOMAIN-KEYWORD,bytescm)),REJECT
-DOMAIN, connect.yuewen.com, REJECT
-DOMAIN, fockrt.yuewen.com, REJECT
 DOMAIN, noahqd.yuewen.com, REJECT
-DOMAIN, upushv6.qidian.com, REJECT
-DOMAIN, aegis.cdn-go.cn, REJECT
 DOMAIN, ali-stats.jpush.cn, REJECT
-DOMAIN, ywab.reader.qq.com, REJECT
-DOMAIN, ataru.qidian.com, REJECT
-DOMAIN, qreport.qunar.com, REJECT
-DOMAIN-SUFFIX, qreport.cn, REJECT
 
 [Rewrite]
 ^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/client\/getconf$ response-body-json-replace Data.WolfEye 0 Data.CloudSetting.TeenShowFreq 0 enable={CAPTURE_ENABLE}
