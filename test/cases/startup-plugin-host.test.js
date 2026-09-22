@@ -38,6 +38,37 @@ const hostnamesOf = (txt) => {
     .filter((h) => h && !h.startsWith("-") && !h.startsWith("%"));
 };
 
+// ── 1c576f2 回归门禁 (2026-09-22): Rewrite 规则 host 必须在 [MitM] 有解密面 ──
+// 背景: 1c576f2 误删 [MitM] hostname 整行 (422 域): 493 条 Rewrite 对 HTTPS
+// 静默失效, 当日 push 带 3 红随后 revert。"产物一致性"只断言字节相等
+// (报 diff 不定位病因); 本断言逐条点名无解密面的规则根域。
+// EXPECTED_ORPHANS (27): 2026-09-22 逐条核对, 成因三类 —
+//   ① 上游 rule 无 hostname (21): 生成器无法凭空发明解密面, 上游补 hostname 即自愈
+//   ② rule/host TLD 不一致 (4): lanjiyin/hilton(.com.cn vs .com)、moedot(.net vs .com)、
+//      hoopchina.com.cn (MitM 仅 *.hoopchina.com) — 均为上游 rule 与 hostname 打架
+//   ③ TLD 位通配无法精确表达 (1): mangaapi.manhuaren (上游仅 *mangaapi.manhuaren.*,
+//      已按 NEW-09 剔除); kugou/kglink×4 归 ① (上游无 host)
+// 新增条目即红 → 先查上游 conf 是否补了 hostname, 再决定登记或修 checker。
+// EXPECTED_GENERIC (6): host 无法静态抽取 (裸 catch-all / TLD 位通配 / 裸 `.*`),
+// 覆盖性不可判定 — 锁定集合, 漂移需分诊。
+const EXPECTED_ORPHANS = [
+  "360os.com", "78dm.net", "aastocks.com", "admobile.top", "babytree.com",
+  "bybutter.com", "dianshihome.com", "dongfeng-nissan.com.cn", "etnet.com.hk",
+  "gtmc.com.cn", "hilton.com.cn", "hoopchina.com.cn", "hzhcbkj.cn",
+  "kglink.cn,kglink.com,kugou.cn,kugou.com", "lanjiyin.com.cn", "mangaapi.manhuaren",
+  "medproad.com", "meitun.com", "miguvideo.com", "moedot.net", "musical.ly",
+  "mygolbs.com", "pinduoduo.com", "shaoxing.com.cn", "zaixs.com",
+  "zhangyuyidong.cn", "zjyilin.com",
+];
+const EXPECTED_GENERIC = [
+  "^https?:\\/\\/[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+){1,4}(:\\d+)?\\/.*?\\/v\\d\\/(version$|notice\\?|top_notice\\?|advert\\?position=[^2]+)",
+  "^https?:\\/\\/.*flyert.*\\/api\\/mobile\\/index\\.php\\?module=advis",
+  "^https?:\\/\\/.*flyert.*\\/source\\/plugin\\/mobile\\/mobile\\.php\\?module=advis",
+  "^https?:\\/\\/.*\\/yyting\\/advertclient\\/ClientAdvertList.action",
+  "^http:\\/\\/[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+){1,4}(:\\d+)?\\/\\w+\\/resolv",
+  "^https?:\\/\\/api-access\\.[0-9a-zA-Z_-]+\\.com\\/api\\/ad",
+];
+
 exports.tests = {
   // ── isBoundaryUnsafe: 安全形态 ──
   "startup-host: 安全通配形态不误判 (真实清单取样)": async (a) => {
@@ -243,6 +274,29 @@ exports.tests = {
       a.equal(hosts.includes(e.host), true, `${e.host} 应并入 [MitM] hostname (与规则配对, 防 mitm-orphan)`);
       a.equal(m.isBoundaryUnsafe(e.host), false, `${e.host} 应为安全 host 形态`);
     }
+  },
+
+  "startup-host: Rewrite 规则解密面全覆盖 — 无解密面根域逐条登记 (零新增)": async (a) => {
+    const m = await load();
+    const txt = fs.readFileSync(OUT, "utf8");
+    const mitm = hostnamesOf(txt);
+    a.ok(mitm.length > 300, `产物 [MitM] 应有规模 (当前 ${mitm.length}, 防整行误删)`);
+    const seg = (txt.split("[Rewrite]")[1] || "").split(/\n\[[A-Za-z ]+\]/)[0] || "";
+    const rules = [];
+    for (const raw of seg.split("\n")) {
+      const line = raw.trim();
+      if (!line || line.startsWith("#")) continue;
+      const mr = line.match(/^(\^\S+?)\s+(reject\S*|script-\S+)/);
+      if (mr) rules.push({ regex: mr[1], action: mr[2] });
+    }
+    a.ok(rules.length > 300, `产物 [Rewrite] 应有规模 (当前 ${rules.length})`);
+    const { uncovered, generic } = m.uncoveredRules(rules, mitm);
+    const sig = (u) => u.missing.slice().sort().join(",");
+    a.equal(
+      [...new Set(uncovered.map(sig))].sort(), [...EXPECTED_ORPHANS].sort(),
+      "无解密面根域集合应与登记一致 — 新增即红: 先查上游 conf 是否补了 hostname, 再决定登记或修 checker"
+    );
+    a.equal(generic.slice().sort(), [...EXPECTED_GENERIC].sort(), "generic (host 不可静态抽取) 集合应锁定, 漂移需分诊");
   },
 
   "startup-host: 生成器不再产出死开关 STARTUP_DEBUG (check:contract 会判红)": async (a) => {

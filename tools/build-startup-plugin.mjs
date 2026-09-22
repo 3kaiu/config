@@ -380,6 +380,110 @@ export function manualMitmHosts(manualLines) {
   return { hosts, unsafe };
 }
 
+/**
+ * Rewrite 规则 → MitM 解密面覆盖检查 (2026-09-22 1c576f2 回归门禁)。
+ *
+ * 背景: 1c576f2 误删插件 [MitM] hostname 整行 (422 域): 约 493 条 Rewrite
+ * 对 HTTPS 静默失效。既有"产物一致性"只断言字节相等 (报 diff 不定位病因),
+ * 本函数逐条回答"每条规则的 host 是否在 MitM 有解密面"。
+ * 口径与 minimizeHosts 对齐 (根域比对, SUB_TLDS 同表), 方向相反
+ * (规则→host, 而非 host→规则)。
+ *
+ * 已知局限 (从严记录, 不拦门): 根域口径会把深层子域误判为已覆盖 —
+ * 如 `api.wan.*.weixin.qq.com` 的根域 qq.com 在 MitM 有其它条目即判覆盖,
+ * 而 Loon 实际按 host pattern 精确匹配 (该条依然无解密面, 见产物手写块注释)。
+ * 精确到 host 级需要 Loon 通配语义的形式化, 暂不做; 本门禁的目标是
+ * "整行误删 / 上游 rule 无 hostname" 类结构性事故, 根域口径已足够。
+ *
+ * 返回 { uncovered: [{ regex, missing: [根域...] }], generic: [regex...] }:
+ *   - uncovered: 可抽取 host 但根域不在 MitM (多为上游 rule 无 hostname,
+ *     生成器无法凭空发明解密面 — 逐条登记, 新增即红)
+ *   - generic: host 无法静态抽取 (裸 `.*` / 全通配 catch-all / TLD 位通配类),
+ *     覆盖性不可判定 — 锁定数量, 漂移需分诊
+ */
+export function expandAltGroups(h, cap = 64) {
+  const groups = [...h.matchAll(/\(([^()]+)\)/g)];
+  if (!groups.length) return [h];
+  const parts = [];
+  const alts = [];
+  let last = 0;
+  for (const g of groups) {
+    parts.push(h.slice(last, g.index));
+    alts.push(g[1].split("|"));
+    last = g.index + g[0].length;
+  }
+  parts.push(h.slice(last));
+  const out = [];
+  const rec = (i, acc) => {
+    if (out.length >= cap) return;
+    if (i === alts.length) { out.push(acc + parts[i]); return; }
+    for (const alt of alts[i]) {
+      rec(i + 1, acc + parts[i] + alt);
+      if (out.length >= cap) return;
+    }
+  };
+  rec(0, "");
+  return out;
+}
+
+export function ruleHostRoots(regex) {
+  // 先剥 regex 首部通配前缀再取 host: `[^\/]*` 含字面 `/` 会把 hostOf 的
+  // `([^/]+)` 提前截断 (`[^\/]*zdmimg.com` → `[^\`), 必须在 hostOf 之前处理
+  const pre = regex.match(/^(\^https?\??:(?:\\?\/){2})((?:\.\*|\\\.\*|\[\^?[^\]]*\]\*?|\[[^\]]+\][+*?]?)+)/);
+  if (pre) regex = pre[1] + regex.slice(pre[1].length + pre[2].length);
+  let h = hostOf(regex);
+  if (!h) return { roots: [], generic: true, ip: null };
+  h = h.replace(/\\\//g, "/").replace(/\\\./g, ".");
+  // IP 字面量 (:port 剥离后精确比对, 不走根域口径)
+  const ip = h.split(":")[0].replace(/\\+$/g, "");
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)) return { roots: [], generic: false, ip };
+  const variants = expandAltGroups(h);
+  if (variants.length >= 64) return { roots: [], generic: true, ip: null };
+  const roots = new Set();
+  let parsedAny = false;
+  for (let v of variants) {
+    v = v.split(":")[0].replace(/\\+$/g, "");
+    // 通配序列是分隔符而非粘合剂: `.*` 直接删会把两侧拼成一个假 token
+    // (`list-app-m.i4.cn.*adinfo.xhtml` → `...cn..adinfo...` 误判), 故按段切分
+    const frags = v.split(/(?:\.\*|\*|\[[^\]]+\][+*?]?)+/).filter(Boolean);
+    const toks = [];
+    for (const f of frags) {
+      for (const t of (f.match(DOMAIN_RE) || [])) {
+        if (/[\\?[\]()+{}]/.test(t) || /^[0-9.]+$/.test(t)) continue;
+        toks.push(t);
+      }
+    }
+    if (!toks.length) continue;
+    parsedAny = true;
+    // 最长 token 优先: 短 token 多为 `api.wan` 类截断 artifact
+    const longest = toks.sort((x, y) => y.length - x.length)[0];
+    roots.add(rootOf(longest.toLowerCase()));
+  }
+  if (!parsedAny) return { roots: [], generic: true, ip: null };
+  return { roots: [...roots], generic: false, ip: null };
+}
+
+export function uncoveredRules(rules, mitmHosts) {
+  const roots = new Set();
+  const ips = new Set();
+  for (const h of mitmHosts) {
+    const low = h.toLowerCase();
+    if (/^\d{1,3}(\.\d{1,3}){3}$/.test(low)) { ips.add(low); continue; }
+    const bare = low.replace(/\*/g, "");
+    if (bare.includes(".")) roots.add(rootOf(bare));
+  }
+  const uncovered = [];
+  const generic = [];
+  for (const r of rules) {
+    const { roots: rr, generic: g, ip } = ruleHostRoots(r.regex);
+    if (g) { generic.push(r.regex); continue; }
+    if (ip) { if (!ips.has(ip)) uncovered.push({ regex: r.regex, missing: [ip] }); continue; }
+    const missing = rr.filter((x) => !roots.has(x));
+    if (missing.length) uncovered.push({ regex: r.regex, missing });
+  }
+  return { uncovered, generic };
+}
+
 export function renderPlugin({ updateTime, rules, rejects, seen, droppedGarbage, scripts, hostRules, manualBlock, kept, dropped, unsafe, upstreamCount }) {
   // 手写块内与上游重复的 regex 剔除 (避免重复规则)
   const manualLines = manualBlock.split("\n").filter((l) => {
