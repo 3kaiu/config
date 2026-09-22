@@ -16,4 +16,6 @@
 http-response ^https:\/\/capi\.lkcoffee\.com\/resource\/(?:m\/(?:sys\/(?:config\/value|common\/modules|homePage\/(?:common|contactor)\/modules|base\/myPageSectionShow\/newUI|app\/(?:adposNew|carousel)|visual\/effect\/modules)|aigc\/showAIButton)|seckill\/ar\/campaignBaseInfo) script-path=https://ws.wenn.in/main/Scripts/Luckin.js, requires-body=true, timeout=10, tag=瑞幸咖啡_净化
 
 [MitM]
-hostname = %APPEND% capi.lkcoffee.com
+# 119.29.29.87: HTTPDNS 直连 IP — 第 12 行 `^https:\/\/119\.29\.29\.87\/d` 的解密面
+# (2026-09-22 全仓解密面抽查: 规则在、MitM 缺, https 规则静默失效; IP 字面量精确匹配)
+hostname = %APPEND% capi.lkcoffee.com, 119.29.29.87

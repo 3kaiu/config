@@ -427,6 +427,9 @@ export function expandAltGroups(h, cap = 64) {
 }
 
 export function ruleHostRoots(regex) {
+  // `https:?\/\/` (匹配 http/https 的简写, 如 social 的 jumpvg 行) hostOf 无法解析
+  // (`?` 卡在 `://` 中间) — 仅 checker 内归一化, 不碰规则本身
+  regex = regex.replace(/^(\^https?):\?\\?\/\\?\//, "$1://");
   // 先剥 regex 首部通配前缀再取 host: `[^\/]*` 含字面 `/` 会把 hostOf 的
   // `([^/]+)` 提前截断 (`[^\/]*zdmimg.com` → `[^\`), 必须在 hostOf 之前处理
   const pre = regex.match(/^(\^https?\??:(?:\\?\/){2})((?:\.\*|\\\.\*|\[\^?[^\]]*\]\*?|\[[^\]]+\][+*?]?)+)/);
@@ -443,6 +446,11 @@ export function ruleHostRoots(regex) {
   let parsedAny = false;
   for (let v of variants) {
     v = v.split(":")[0].replace(/\\+$/g, "");
+    // `\d` 序列紧贴点号/结尾时直接删除取根域: 数字永不改变根域
+    // (`toutiao\d*.com` → `toutiao.com`; `p\d.meituan.net` → `p.meituan.net`)。
+    // 注意只删"点边"形态: 标签中段的 `a\db` 删除会伪造根域 (ab.com≠a5b.com),
+    // 该形态本仓未出现, 若出现则保持原样走 generic/orphan 如实报告。
+    v = v.replace(/\\d(?:\{[^}]*\})?[*+?]?(?=[.]|$)/g, "");
     // 通配序列是分隔符而非粘合剂: `.*` 直接删会把两侧拼成一个假 token
     // (`list-app-m.i4.cn.*adinfo.xhtml` → `...cn..adinfo...` 误判), 故按段切分
     const frags = v.split(/(?:\.\*|\*|\[[^\]]+\][+*?]?)+/).filter(Boolean);
