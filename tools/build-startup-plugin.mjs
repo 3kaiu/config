@@ -39,7 +39,8 @@ export function parseConf(conf) {
   const updateTime = (conf.match(/@UpdateTime\s+(\S+)/) || [])[1] || "unknown";
   const rejects = []; // { regex, action }
   const scripts = [];
-  let hostRules = 0;
+  const hostRules = []; // { kind: 'host'|'host-suffix', host, policy } — 仅收录激活行
+  let hostSkipped = 0;
   let mitmBody = "";
   for (const raw of conf.split("\n")) {
     const line = raw.trim();
@@ -48,11 +49,28 @@ export function parseConf(conf) {
     if (mr) { rejects.push({ regex: mr[1], action: mr[2] }); continue; }
     const ms = line.match(/^(\S+) url (script-\S+) (\S+)$/);
     if (ms) { scripts.push(`${ms[1]} → ${ms[2]} ${ms[3]}`); continue; }
-    if (/^host\s*,/i.test(line)) { hostRules++; continue; }
+    // QX host 语义 → Loon [Rule] (2026-09-22 去广告收敛: 上游 6 条激活 host 行
+    // 此前整类丢弃。只收录两种已实证形态: `host, h, direct` → DOMAIN,h,DIRECT;
+    // `host-suffix, s, reject` → DOMAIN-SUFFIX,s,REJECT。其它动作 (如 reject-200)
+    // 在 Loon [Rule] 无对应策略 — 不猜, 计数跳过 (当前上游仅注释行出现, 见 admobile)。
+    // `#`/`;` 开头视为上游亲手禁用 (如 msmp.abchina / admobile.top), 尊重不转。)
+    const mh2 = line.match(/^host\s*,\s*(\S+)\s*,\s*(direct|reject)\s*$/i);
+    if (mh2) {
+      const policy = mh2[2].toLowerCase() === "direct" ? "DIRECT" : "REJECT";
+      hostRules.push({ kind: "host", host: mh2[1].replace(/,$/, ""), policy });
+      continue;
+    }
+    const mh3 = line.match(/^host-suffix\s*,\s*(\S+)\s*,\s*(direct|reject)\s*$/i);
+    if (mh3) {
+      const policy = mh3[2].toLowerCase() === "direct" ? "DIRECT" : "REJECT";
+      hostRules.push({ kind: "host-suffix", host: mh3[1].replace(/,$/, ""), policy });
+      continue;
+    }
+    if (/^host\s*,/i.test(line)) { hostSkipped++; continue; }
     const mh = line.match(/^hostname\s*=\s*(.+)$/);
     if (mh) mitmBody = mh[1];
   }
-  return { updateTime, rejects, scripts, hostRules, mitmBody };
+  return { updateTime, rejects, scripts, hostRules, hostSkipped, mitmBody };
 }
 
 export function hostOf(regex) {
@@ -547,6 +565,13 @@ export function renderPlugin({ updateTime, rules, rejects, seen, droppedGarbage,
   }
   // script→原生 reject 精准补充块 (EXTRA_REJECTS): 生成的规则与对应 host 必须同生共死
   const extraLines = EXTRA_REJECTS.map((e) => `# ${e.reason}\n${e.regex} ${e.action} enable={ENABLE_STARTUP}`);
+  // 上游 host 语义转 Loon [Rule] (2026-09-22): host→DOMAIN, host-suffix→DOMAIN-SUFFIX,
+  // direct→DIRECT / reject→REJECT, 与生成块同开关。各条独立, 无需 MitM (Rule 层)。
+  const hostRuleLines = hostRules.map((h) =>
+    h.kind === "host"
+      ? `DOMAIN, ${h.host}, ${h.policy}, enable={ENABLE_STARTUP}`
+      : `DOMAIN-SUFFIX, ${h.host}, ${h.policy}, enable={ENABLE_STARTUP}`
+  );
   // 未纳入计数口径: script 条目扣除已转原生的 (extra)
   const unconvertedScripts = scriptLedger(scripts).filter((r) => r.status !== "extra").length;
   const unsafeNote = unsafe.length
@@ -571,9 +596,13 @@ ${END_EXTRA}
 ${BEGIN_GEN}
 # 来源: https://ddgksf2013.top/rewrite/StartUpAds.conf (镜像 ifflagged/Romeo, @UpdateTime ${updateTime})
 # 转换: QX url reject[-xxx] → Loon rewrite, 共 ${prunedGenLines.length} 条 (上游 ${rejects.length} 行, 去重 ${rejects.length - seen.size} 条, 前缀遮蔽剪 ${genLines.length - prunedGenLines.length} 条, 垃圾host ${droppedGarbage} 条)
-# 未纳入: ${unconvertedScripts} 条 script 型 + ${hostRules} 条 host 型 (去向见 scriptLedger/SCRIPT_LEDGER, 见工具注释)
+# 未纳入: ${unconvertedScripts} 条 script 型 (去向见 scriptLedger/SCRIPT_LEDGER, 见工具注释); host 语义 ${hostRules.length} 条已转下段 [Rule]
 ${prunedGenLines.join("\n")}
 ${END_GEN}
+
+[Rule]
+# ── 上游 host 语义转换 (QX host/host-suffix → Loon DOMAIN/DOMAIN-SUFFIX, Rule 层无需 MitM) ──
+${hostRuleLines.join("\n")}
 
 [MitM]
 # ⚠️ 注意：部分 App 禁用了 MITM，无法拦截其开屏广告
@@ -607,7 +636,7 @@ export function main() {
 
   console.log(`✅ ${path.relative(ROOT, OUT)} 已生成 (上游 @UpdateTime ${updateTime})`);
   console.log(`   reject 规则: ${rules.length} 条 (上游 ${rejects.length} 行, 去重 ${rejects.length - seen.size} 条, 垃圾host ${droppedGarbage} 条)`);
-  console.log(`   未纳入 script 型: ${scripts.length} 条 / host 型: ${hostRules} 条`);
+  console.log(`   未纳入 script 型: ${scripts.length} 条 / host 语义已转 [Rule]: ${hostRules.length} 条`);
   console.log(`   MitM hostname: 保留 ${kept.length} / 上游 ${upstreamHosts.length} (剔除未被消费 ${dropped.length})`);
   if (unsafe.length) {
     console.log(`   ⛔ 剔除边界不安全通配 ${unsafe.length} 条 (NEW-09):`);

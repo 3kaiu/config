@@ -124,7 +124,7 @@ ENABLE_STARTUP=switch,"true","false",tag=总开关，desc=开启后过滤所有 
 # === BEGIN ddgksf2013 StartUpAds 自动生成 (勿手改, 由 tools/build-startup-plugin.mjs 维护) ===
 # 来源: https://ddgksf2013.top/rewrite/StartUpAds.conf (镜像 ifflagged/Romeo, @UpdateTime 2026-08-29)
 # 转换: QX url reject[-xxx] → Loon rewrite, 共 448 条 (上游 453 行, 去重 3 条, 前缀遮蔽剪 1 条, 垃圾host 1 条)
-# 未纳入: 22 条 script 型 + 1 条 host 型 (去向见 scriptLedger/SCRIPT_LEDGER, 见工具注释)
+# 未纳入: 22 条 script 型 (去向见 scriptLedger/SCRIPT_LEDGER, 见工具注释); host 语义 6 条已转下段 [Rule]
 ^https?:\/\/ftapi\.10jqka\.com\.cn\/futgwapi\/api\/om\/v\d\/ad\/common\/transfer reject-200 enable={ENABLE_STARTUP}
 ^https?:\/\/ad\.mcloud\.139\.com\/advertapi reject-200 enable={ENABLE_STARTUP}
 ^https?:\/\/smsrebuild1\.mail\.10086\.cn\/together\/s reject-200 enable={ENABLE_STARTUP}
@@ -574,6 +574,15 @@ ENABLE_STARTUP=switch,"true","false",tag=总开关，desc=开启后过滤所有 
 ^https?:\/\/www\.biguotk\.com\/api\/advertising reject enable={ENABLE_STARTUP}
 ^https?:\/\/misc\.eol\.cn\/js\/target\/move\/zskyApp\/Appqdkp\/.*json reject enable={ENABLE_STARTUP}
 # === END ddgksf2013 StartUpAds 自动生成 ===
+
+[Rule]
+# ── 上游 host 语义转换 (QX host/host-suffix → Loon DOMAIN/DOMAIN-SUFFIX, Rule 层无需 MitM) ──
+DOMAIN, ad.12306.cn, DIRECT, enable={ENABLE_STARTUP}
+DOMAIN-SUFFIX, shenshiads.com, REJECT, enable={ENABLE_STARTUP}
+DOMAIN-SUFFIX, yfanads.com, REJECT, enable={ENABLE_STARTUP}
+DOMAIN-SUFFIX, iyes.youku.com, REJECT, enable={ENABLE_STARTUP}
+DOMAIN-SUFFIX, innoads.cn, REJECT, enable={ENABLE_STARTUP}
+DOMAIN-SUFFIX, adlog-ztjy.szy.cn, REJECT, enable={ENABLE_STARTUP}
 
 [MitM]
 # ⚠️ 注意：部分 App 禁用了 MITM，无法拦截其开屏广告

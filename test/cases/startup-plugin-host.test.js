@@ -318,6 +318,27 @@ exports.tests = {
     a.equal(new Set(hosts).size, hosts.length, "EXTRA_HOSTS 不得重复");
   },
 
+  "startup-host: 上游 host 语义转 Loon [Rule] (6 条激活, 注释行尊重禁用)": async (a) => {
+    const m = await load();
+    const parsed = m.parseConf(fs.readFileSync(SRC, "utf8"));
+    a.equal(parsed.hostRules.length, 6, "激活 host 行应 6 条 (1 direct + 5 reject-suffix)");
+    a.equal(parsed.hostSkipped, 0, "未知形态 host 行应 0 条 (新增即红: 扩展转换或登记)");
+    const kinds = parsed.hostRules.map((h) => `${h.kind}:${h.host}:${h.policy}`).sort();
+    a.ok(kinds.includes("host:ad.12306.cn:DIRECT"), "ad.12306.cn direct 应保留上游放行意图");
+    for (const s of ["shenshiads.com", "yfanads.com", "iyes.youku.com", "innoads.cn", "adlog-ztjy.szy.cn"]) {
+      a.ok(kinds.includes(`host-suffix:${s}:REJECT`), `${s} 应转 REJECT`);
+    }
+    // `#`/`;` 注释行是上游亲手禁用 (admobile.top/msmp.abchina) — 不得转入
+    a.equal(kinds.some((k) => k.includes("admobile") || k.includes("msmp.abchina")), false, "注释 host 行不得转换");
+    const txt = fs.readFileSync(OUT, "utf8");
+    for (const h of parsed.hostRules) {
+      const loon = h.kind === "host"
+        ? `DOMAIN, ${h.host}, ${h.policy}, enable={ENABLE_STARTUP}`
+        : `DOMAIN-SUFFIX, ${h.host}, ${h.policy}, enable={ENABLE_STARTUP}`;
+      a.includes(txt, loon, `产物 [Rule] 应含 ${loon}`);
+    }
+  },
+
   "startup-host: 生成器不再产出死开关 STARTUP_DEBUG (check:contract 会判红)": async (a) => {
     const txt = fs.readFileSync(OUT, "utf8");
     a.notIncludes(txt, "STARTUP_DEBUG", "产物不得含死开关 STARTUP_DEBUG");
