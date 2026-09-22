@@ -351,7 +351,7 @@ export const SCRIPT_LEDGER = [
   ["umetrip", "pending", "航旅 .com.cn 真身待确认 (umetrip-pro 仅覆盖 .com)"],
   ["indexv", "pending", "IT之家: MitM napi.ithome.com 已在 news-purify/上游; 缺 upstream ithome.js (indexv feed 去广告) 移植 + 真机定形"],
   ["hotWords", "pending", "京东搜索热词系功能接口 (jd_json.js 只剥广告字段), 整拒会砍功能, 不做 — 待上游脚本化"],
-  ["mgw\\.htm", "pending", "农行网关页 (上游为 script-response-header), reject 形态待真机"],
+  ["mgw\\.htm", "pending", "农行网关页: 2026-09-22 真机 HAR 实测 60 次 mgw.htm 全为加密 envelope (req/resp 皆密文, 响应头仅 mPaaS 网关标记无广告信号) — 任何阻断=杀银行功能; CDN getImage 系不透明内容 ID 无法分类. 不做 (证据: 340_1790074697303.har)"],
   ["api\\.jk\\.cn", "pending", "平安广告接口: 待真机"],
   ["stay-fork", "pending", "深银客户端: 待真机"],
 ];
