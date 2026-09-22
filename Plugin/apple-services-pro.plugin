@@ -137,5 +137,4 @@ DOMAIN-SUFFIX, apple-mapkit.com, DIRECT
 DOMAIN-SUFFIX, icloud.com, DIRECT
 
 [MitM]
-# hostname 行已删除：%APPEND% 下列域被 template/loon.tpl [General] hostname -*.apple.com 全链 REJECT
-<!-- 删除：apps.apple.com, amp-api.music.apple.com, icloud.com, configuration.ls.apple.com, gspe35-ssl.ls.apple.com, news-edge.apple.com, news-todayconfig-edge.apple.com, news-events.apple.com, news-sports-events.apple.com, news-client.apple.com, news-client-search.apple.com, guzzoni.smoot.apple.com, api2.smoot.apple.com -->
+hostname = %APPEND% apps.apple.com, amp-api.music.apple.com, icloud.com, configuration.ls.apple.com, gspe35-ssl.ls.apple.com, news-edge.apple.com, news-todayconfig-edge.apple.com, news-events.apple.com, news-sports-events.apple.com, news-client.apple.com, news-client-search.apple.com, guzzoni.smoot.apple.com, api2.smoot.apple.com
