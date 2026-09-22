@@ -8,6 +8,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added (2026-09-22 去广告纵深 — 解密面门禁体系 + 纯广告域激活 + 跨源交叉移植)
+
+- **解密面全覆盖门禁** (`tools/build-startup-plugin.mjs` 新增导出 `uncoveredRules()`/`ruleHostRoots()`/`expandAltGroups()` + `startup-plugin-host.test.js` 登记): 逐条回答"每条 Rewrite 的 host 是否在 MitM 有解密面" (根域口径, 与 minimizeHosts 对齐反方向)。首轮实测 27 个无解密面根域, 成因: 上游 rule 无 hostname (21) / rule-host TLD 打架 (lanjiyin-hilton-moedot-hoopchina 4) / TLD 位通配不可表达 (mangaapi) / kugou alternation 不可展开
+- **EXTRA_HOSTS 纯广告域激活 (9 条)**: 上游有 rule 无 hostname 且同时满足"路径即广告语义 + DoH 实测存活 + 非 App 主功能 host" → 生成器并入 MitM (open.78dm/api4.bybutter/cmt.360os/aikanvod.miguvideo/siteapi.zaixs/qcwx.medproad/hzhcbkj-xgapp/*.admobile.tk.lanjiyin.com.cn)。混合 host (pinduoduo 等 13)、NXDOMAIN (pzoap.moedot.net)、SERVFAIL (dianshihome)、不可展开一律保持 orphan 登记待真机。orphans 登记 27→18, 附 `EXTRA_HOSTS 逐条有据` 自检 (边界安全 + 被规则消费)
+- **上游 host 语义转 Loon [Rule] (6 条)**: 生成器此前整类丢弃 QX `host/host-suffix` 行 → 现转 `DOMAIN/DOMAIN-SUFFIX` (ad.12306.cn DIRECT 保上游放行意图 + shenshiads/yfanads/iyes.youku/innoads/adlog-ztjy REJECT); `#`/`;` 注释行 (admobile/msmp.abchina) 尊重禁用不转; 未知动作计数跳过。Rule 层无需 MitM
+- **全仓解密面抽查门禁** (`test/cases/mitm-coverage.test.js`): 非 startup 插件零 orphan (插件 MitM ∪ 模板 MitM 并集, 含 [Script] 脚本行) + generic 集合锁定 (shopping HTTPDNS /24、wechat 通用 WP-JSON)。落地即抓两条活 bug: luckin `119.29.29.87` HTTPDNS 规则无解密面、social `open-cms-api.uc.cn` 规则无解密面 (均已补 host)
+- **跨层遮蔽门禁** (`test/cases/plugin-tpl-shadow.test.js`): 插件 REJECT 不得被模板无条件条目遮蔽 (本地>插件, 开关拨动无效即 MOD-04 同型假粒度)。落地删 102 条: privacy-shield 64 (开关仅剩 11 条真条目) + qidian 12 + qqmusic 17 (QQMUSIC_ENABLE 剩 3 条) + social/taobao/tv/video 9
+- **app2smile 交叉移植**: 起点 `EnableSearchUser=1` (搜用户页开关, 表驱动一行); Tieba 开屏 error_code 协议 + SDK 初始化总闸 (穿山甲/广点通/快手等 8) + 开屏小熊/序章/CPC + AB 实验总闸 + 悬浮 icon (P2 内容判断与 lcs 传输切换不搬, 待真机); 腾讯新闻 feed 净化新脚本 `TencentNews.ts` (widget ad_list 过滤 + adList 置空, 弃用端点不搬) + news-purify 开关/MitM/路由。知乎对照确认我方领先 (对方 answers 整页置空系破坏式写法); 美团 .lpx/AdvertisingLite/Adblock4limbo 经核分别为子集/冗余/跨层, 不集成
+- **DoH 死域名清理 (4 条)**: 341 个 Rule 域名双查 (Status=3 + 父域 SOA 权威才动手): zhihu `appcloud2.in`、taobao `ems.youku.com`、qidian `hd.ctobsnssdk.com`、social `wxsmsdy.video.qq.com`。SUFFIX 形态一律保留 (子域可复活); 模板层死条目攒批再动
+- **上游新鲜度可见性**: mirror job 对 StartUpAds `@UpdateTime` 超 21 天打 `::warning::` (只报告不判红; 上游自 08-29 停更已实锤, 本地镜像与 live 逐字节一致管线无责)。另起草 ddgksf 反哺邮件 (TLD 打架/死规则/缺 hostname 清单, 待人工发送)
+- **数字同步**: 用例 257→269 (解密面×2、全仓抽查×2、EXTRA_HOSTS×1、host转Rule×1、Tieba×2、腾讯新闻×2, 跨 5 文件); Scripts 产物 27→28; 插件 61→52 (Kelee 未装入模板 9 残留删除, 见下); `[Rule]` 480 不变
+
+### Removed (2026-09-22 死物清除 — Kelee 未装入模板 9 残留 + 误导注释)
+
+- **删 Kelee 9 文件 (755 行)**: BlockAdvertisers/Block-HTTPDNS/Prevent-DNS-Leaks/QQ-Redirect/QuickSearch/Remove-ads-by-keli/TelegramRedirect/TestFlightRegionUnlock/UnnooQuan-remove-watermark — 批量吸纳转写残留, 从未进 `[Plugin]`, 对产物零效应。同步 AGENTS.md 61→52、plugin-lint corpus 计数、SCRIPT_LEDGER 注记
+- **误导注释清除**: release.yml "同步进 Pages 兜底" (Pages 2026-08 已移除); Dianping/Meituan 头注 QX 兼容 (Env 基于 $httpClient, QX 无此 API); argument-contract 举例指向已删文件; AGENTS.md SCRIPT_LEDGER extra/pending 计数过期 (3/10→5/8)
+
+### Reverted (2026-09-22 事故记录 — 1c576f2)
+
+- **误删插件 [MitM] hostname 整行后 revert**: 把模板 MitM `-` 否决(只管解密)与 [Rule] 覆盖混为一谈, 删了 5 个插件解密面 (startup 422 域, 约 493 条 Rewrite 对 HTTPS 静默失效), 且带着 3 红 push。教训已入 AGENTS.md 两条纪律 ([MitM] 只增不减; push 前全绿红即停) + `uncoveredRules` 门禁 (逐条点名, 而非只报字节漂移)
+
 ### Fixed (2026-09-21 精准去广告 — openai 宽匹配删除 + copilot 死规则 + Cainiao 数字型漏杀)
 
 - **删反写域名死规则** (`template/snippet/ai-services.tpl:57`): 实测 `api.githubcopilot.com` 存活 (404=有主机缺路径), `github.copilot.com` 传输层失败 (不解析) — 真实 API 域从未长这样, 永不命中, 纯死规则 (同文件 `auth0.openai.com` 同例)。`[Rule]` 481→480 (AGENTS.md 已同步), `check:shadow` 无新增对
