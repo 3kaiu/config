@@ -14,3 +14,4 @@ DOMAIN, cdn1.mbs.boc.cn, REJECT
 DOMAIN, ads.95516.com, REJECT
 DOMAIN, switch.cup.com.cn, REJECT
 DOMAIN, tysdk.95516.com, REJECT
+DOMAIN, ads.cup.com.cn, REJECT
