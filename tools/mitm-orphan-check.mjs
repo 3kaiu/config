@@ -24,9 +24,6 @@ const LOCAL_ONLY = process.argv.includes("--local");
 // 豁免: 已被 bundle 脚本/黑盒引擎消费, 但校验器无法静态解析的 hostname (须人工维护)
 const EXEMPT = new Set([
   "api-access.pangolin-sdk-toutiao1.com", // Qidian 黑盒引擎 (规则用 \d 数字通配, 校验器占位缺陷)
-  "splash.*", // startup-adblock 通配 hostname (覆盖任意 App 开屏域, 规则拦具体接口)
-  "ad.*",
-  "flash.*",
   "gspe35-ssl.ls.apple.cn", // iRingo 消费 (bundle)
   "*.smoot.apple.cn", // iRingo.Search 消费 (bundle)
 ]);

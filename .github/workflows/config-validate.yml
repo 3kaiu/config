@@ -56,7 +56,7 @@ jobs:
           grep -rhiE 'script-path[[:space:]]*=' Plugin/*.plugin Kelee/*.plugin 2>/dev/null | \
             grep -oiP 'https?://[^"'\'',]+' | tr '[:upper:]' '[:lower:]' | sort -u > /tmp/urls.txt
           # 域白名单检查: script-path 只允许指向受信分发域 (防本地壳投毒, 与 mirror 门禁 4 对齐)
-          BAD=$(grep -vE '^(https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one|jsdelivr\.net|unpkg\.com)/)' /tmp/urls.txt || true)
+          BAD=$(grep -vE '^(https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|kelee\.one|jsdelivr\.net|unpkg\.com)/)' /tmp/urls.txt || true)
           if [ -n "$BAD" ]; then
             echo "❌ 白名单外 script-path 域:"
             echo "$BAD"
@@ -64,7 +64,7 @@ jobs:
             exit 1
           fi
           FAIL=0
-          # 并行探活 (2026-09-18 性能审计): 34 个 URL 串行 × (15s 超时 + retry 2),
+          # 并行探活: URL 串行 × (15s 超时 + retry 2),
           # 最坏 ~25min 超过 job 15min 上限。xargs -P8 并发, 单 URL 结果落盘再汇总 —
           # 输出格式 (✅/❌逐行 + Failures 计数 + exit 语义) 保持不变。
           # 内层 bash -c 零嵌套引号 (与 cdn-verify 同一模板)。
@@ -226,8 +226,7 @@ jobs:
 
       # ── 5b. MitM 孤儿域校验 (最小范围原则) ──
       # 本地插件/主配置的正包含 hostname 须被至少一条 rewrite/script 规则消费,
-      # 无消费 = 纯解密无收益 (扩大证书暴露面)。bundle 型 (iRingo/DualSubs) 与
-      # 通配设计 (startup-adblock 的 ad.*/splash.*/flash.*) 已纳入豁免, 仅报告不阻断。
+      # 无消费 = 纯解密无收益 (扩大证书暴露面)。bundle/黑盒消费域按工具豁免表处理。
       - name: MitM orphan hostname check (local)
         run: |
           echo "## MitM Orphan Hostname Check (Local)" >> $GITHUB_STEP_SUMMARY
@@ -309,20 +308,7 @@ jobs:
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
 
-      # ── 7. 主配置版本号一致性 ──
-      - name: Check version consistency
-        run: |
-          echo "## Version Consistency" >> $GITHUB_STEP_SUMMARY
-          # POSIX -oE (2026-09-18 优化审计): 原 grep -oP 为 GNU PCRE,
-          # BSD/macOS grep 不支持 — 本地无法复现本步, 与已修两轮的同类缺陷同源。
-          loon_ver=$(grep -oE 'v[0-9]+\.[0-9]+' Profile/Loon.lcf | head -1)
-          plugin_vers=$(grep -rh '#!version=' Plugin/*.plugin Kelee/*.plugin | sed 's/#!version=//' | sort -u | tr '\n' ' ')
-          echo "| Config | Version |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|---------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Loon.lcf | $loon_ver |" >> $GITHUB_STEP_SUMMARY
-          echo "✅ 版本一致: $loon_ver" >> $GITHUB_STEP_SUMMARY
-
-      # ── 8. Qidian 内嵌引擎完整性校验 ──
+      # ── 7. Qidian 内嵌引擎完整性校验 ──
       - name: Qidian engine integrity check
         run: |
           echo "## Qidian Engine Integrity" >> $GITHUB_STEP_SUMMARY
@@ -352,10 +338,9 @@ jobs:
           ' 2>&1 | tee -a $GITHUB_STEP_SUMMARY
           exit ${PIPESTATUS[0]}
 
-      # ── 8b. Mirror 清单一致性校验 (2026-09-04 对抗审计新增) ──
+      # ── 7b. Mirror 清单一致性与行尾校验 ──
       # 防"改镜像文件忘同步 MANIFEST"(漂移) 与清单/磁盘分叉；
       # 注: 挡不住"文件+清单一起改"的恶意提交 — 那道防线是 mirror PR 人审。
-      # ── 8b-bis. 行尾一致性断言 (2026-09-18 优化审计) ──
       # .gitattributes 声明全部文本 eol=lf; 任一 mixed/crlf 的 index 或工作区条目
       # 即"下次 git 触碰就脏"的定时炸弹 (iRingo.News.plugin 曾以 CRLF blob 常驻 main,
       # 本地 git status 常红 + mirror rebase 有中止风险)。用 git ls-files --eol

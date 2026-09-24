@@ -116,8 +116,8 @@
     },
     "iringo/iRingo.LocationService.plugin": {
       "source_url": "https://github.com/NSRingo/LocationServices/releases/latest/download/iRingo.LocationService.plugin",
-      "sha256": "21b3e2e2fac7ed5b7e8d9d54f7ff4b30892e8df9b3cee1b5b06f5d25e5dee66e",
-      "bytes": 2317,
+      "sha256": "3b18af05cefb230821c35a7054b13b348cae4460db7c07ca13e179a29f6346d5",
+      "bytes": 2278,
       "upstream_bytes": 2317,
       "fetched_at": "2026-09-19T07:55:40Z"
     },
@@ -351,13 +351,6 @@
       "bytes": 32349,
       "upstream_bytes": 32349,
       "fetched_at": "2026-09-19T07:55:34Z"
-    },
-    "smzdm_json.js": {
-      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/smzdm_json.js",
-      "sha256": "cbcabf770447117a66358314950a4233448eeb86274ccfb96d148294d327eece",
-      "bytes": 2631,
-      "upstream_bytes": 2631,
-      "fetched_at": "2026-09-19T07:55:33Z"
     },
     "youtube.request.js": {
       "source_url": "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.request.js",

@@ -3,7 +3,7 @@
  *
  * 背景: `surgio.conf.js` 的 `customParams` 与 `template/**` 之间没有任何校验, 已连续两次
  * 出现同型缺陷 —— `surge_node_policy_path`(早些时候删除) 与 `dns_primary`/`dns_fallback`。
- * 后者形成**双源**: 取值恰好是 template/loon.tpl:11 硬编码 DNS 列表的首尾两台, 改
+ * 后者形成**双源**: 取值恰好是 template/loon.tpl 硬编码 DNS 列表的首尾两台, 改
  * customParams 看似生效、实则硬编码才是真值。人工审计抓了两次 → 必须机械把关。
  *
  * 本文件既验证"判得准", 也验证"删参数后门禁不误红"(说明注释不得被当成声明)。
@@ -60,13 +60,6 @@ exports.tests = {
       "});",
     ].join("\n");
     a.equal(m.declaredParams(conf), ["live_one"], "只应取出非注释行");
-  },
-
-  "tpl-params: 真实 conf 里的 (已移除) 说明注释确实含冒号 — 上一条测试不是空转": async (a) => {
-    const conf = fs.readFileSync(CONF, "utf8");
-    // 若说明注释没有冒号, 上一条"注释跳过"测试就失去了针对性
-    a.ok(/^\s*\/\/.*dns_primary\s*\/\s*dns_fallback/m.test(conf), "应保留 dns_primary/dns_fallback 的移除说明");
-    a.ok(/^\s*\/\/.*surge_node_policy_path:/m.test(conf), "应保留带冒号的 surge_node_policy_path 移除说明");
   },
 
   "tpl-params: 只统计 customParams 块内的键 (块外同名键不算)": async (a) => {

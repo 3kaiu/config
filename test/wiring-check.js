@@ -5,11 +5,13 @@
  *   1. 每个 Plugin/*.plugin 必须被 template/loon.tpl 引用 (反向: 引用的插件必须存在)
  *   2. 每个 Scripts/*.js (不含 lib/) 必须被任一模板或插件引用 (反向: 引用的脚本必须存在)
  *   3. loon.tpl 引用的 Kelee/* 与 Mirror/* 插件文件必须存在
+ *   4. Mirror 插件的自建 CDN 资源必须在 MANIFEST 登记且哈希一致；iRingo 全部走自建 CDN
  *
  * 用法: node test/wiring-check.js   (退出码 0 = 通过)
  */
 "use strict";
 
+const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 
@@ -47,6 +49,101 @@ for (const m of loonTpl.matchAll(/main\/(Kelee|Mirror\/[a-z0-9-]+)\/([\w.-]+\.(?
   log(fs.existsSync(path.join(root, sub, name)), `loon.tpl 引用 ${sub}/${name} 存在`);
 }
 
+console.log("── Mirror plugin CDN refs ──");
+const mirrorManifest = JSON.parse(read("Mirror/MANIFEST.json")).files;
+const mirrorRoot = path.resolve(root, "Mirror") + path.sep;
+const mirrorPluginFiles = [];
+function collectMirrorPlugins(dir) {
+  for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, ent.name);
+    if (ent.isDirectory()) collectMirrorPlugins(p);
+    else if (/\.(?:plugin|lpx)$/.test(ent.name)) mirrorPluginFiles.push(p);
+  }
+}
+function activeScriptPaths(text) {
+  const paths = new Set();
+  let section = "";
+  for (const line of text.split("\n")) {
+    const segment = line.match(/^\s*\[([^\]]+)\]\s*$/);
+    if (segment) {
+      section = segment[1];
+      continue;
+    }
+    if (!/^script$/i.test(section)) continue;
+    const active = line.split("#", 1)[0];
+    for (const match of active.matchAll(/\bscript-path\s*=\s*([^\s,)"']+)/gi)) paths.add(match[1]);
+  }
+  return paths;
+}
+function verifyMirrorCdnTarget(file, rawUrl, url) {
+  if (url.hostname.toLowerCase() !== "ws.wenn.in") return;
+  const source = `${path.relative(root, file)} 引用 ${rawUrl}`;
+  const pathStart = rawUrl.indexOf("/", rawUrl.indexOf("//") + 2);
+  const rawPath = pathStart >= 0 ? rawUrl.slice(pathStart) : "";
+  if (url.protocol !== "https:" || url.username || url.password || url.port || url.search || url.hash
+      || !rawPath.startsWith("/main/Mirror/")) {
+    log(false, `${source} 不是规范的自建 Mirror URL`);
+    return;
+  }
+  const encoded = rawPath.slice("/main/Mirror/".length);
+  let decoded = "";
+  try {
+    decoded = decodeURIComponent(encoded);
+  } catch {
+    log(false, `${source} 含非法 URL 编码`);
+    return;
+  }
+  const target = `Mirror/${decoded}`;
+  const resolved = path.resolve(root, target);
+  const safe = decoded === encoded
+    && !target.split("/").some((part) => part === "." || part === "..")
+    && resolved.startsWith(mirrorRoot);
+  if (!safe) {
+    log(false, `${source} 路径越界或非规范编码`);
+    return;
+  }
+  const manifestTarget = target.replace(/^Mirror\//, "");
+  const entry = mirrorManifest[manifestTarget];
+  if (!entry) {
+    log(false, `${source} 未登记到 Mirror/MANIFEST.json`);
+    return;
+  }
+  if (!fs.existsSync(resolved) || !fs.lstatSync(resolved).isFile()) {
+    log(false, `${source} 不是普通文件`);
+    return;
+  }
+  const bytes = fs.readFileSync(resolved);
+  const sha256 = crypto.createHash("sha256").update(bytes).digest("hex");
+  log(bytes.length === entry.bytes && sha256 === entry.sha256, `${source} 与 MANIFEST 一致`);
+}
+collectMirrorPlugins(path.join(root, "Mirror"));
+for (const file of mirrorPluginFiles.sort()) {
+  const relative = path.relative(root, file).split(path.sep).join("/");
+  const targets = activeScriptPaths(fs.readFileSync(file, "utf8"));
+  const isIRingo = relative.startsWith("Mirror/iringo/");
+  if (isIRingo) log(targets.size > 0, `${relative} 含 script-path`);
+  for (const rawUrl of targets) {
+    let url = null;
+    try {
+      url = new URL(rawUrl);
+    } catch {
+      log(false, `${relative} 含无效 script-path: ${rawUrl}`);
+      continue;
+    }
+    const valid = (url.protocol === "https:" || url.protocol === "http:")
+      && !url.username && !url.password && !url.port;
+    if (!valid) {
+      log(false, `${relative} 含不安全 script-path: ${rawUrl}`);
+      continue;
+    }
+    if (isIRingo && (url.protocol !== "https:" || url.hostname.toLowerCase() !== "ws.wenn.in")) {
+      log(false, `${relative} 残留直连 script-path: ${rawUrl}`);
+      continue;
+    }
+    verifyMirrorCdnTarget(file, rawUrl, url);
+  }
+}
+
 // ── 2. 脚本双向接线检查 ──
 console.log("── Scripts ↔ 引用 ──");
 const allRefs = [loonTpl]
@@ -74,9 +171,7 @@ for (const m of allRefs.matchAll(/Scripts\/([\w.-]+\.js)/g)) {
 //   "有 npm script 但没进 CI" 的形态, 若把它算作已接线, 这条规则就永远抓不到那类缺陷。
 // 确实只能人工运行的须进下方白名单并给出理由。
 console.log("── tools/*.mjs ↔ workflow/test 引用 ──");
-// 白名单当前为空。2026-09-20: 移除最后一项 `tools/rewrite-migrate/`
-// (v8 旧→新 rewrite 语法迁移工具包 — 迁移 v8.8 已收官、仓库处于新语法稳态, 回退路径无运行场景,
-// 且 index.mjs 头部自引 `tools/n/` 旧路径属 v8.5 重构前的残留文案; git 历史保留可恢复)。
+// 白名单仅用于确需人工运行的工具；当前为空。
 const LOCAL_ONLY_PREFIXES = [];
 const workflowDir = path.join(root, ".github", "workflows");
 const workflowText = fs

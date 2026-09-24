@@ -1,22 +1,10 @@
 /**
- * 共享工具 — 插件参数 ($argument) 读取
+ * 共享工具 — 插件参数 ($argument) 读取。
  *
- * 为什么单独成模块 (2026-09-11 分模块审计 MOD-02):
- * 三个脚本各自用 `$argument.includes("KEY=true")` 判断调试开关, 但**没有任何插件
- * 按这个格式传参** — 实测:
- *   src/Bilibili.ts:7    $argument.includes("BILI_DEBUG_ENABLE=true")  ← bilibili-pro:48 无 argument=
- *   src/AlipayMini.ts:29 $argument.includes("DEBUG_MODE=true")         ← 13 行传的是动作名 ad-splash-filter 等
- *   src/Zhihu.ts         从不读取 $argument                            ← zhihu-pro:115 却传了 argument=[{ZHIHU_DEBUG_ENABLE}]
- * 三处 debug 分支因此**永远不可达**, 且各自发明了不同键名。
+ * Loon 现代形态 `argument=[{KEY}]` 会传入对象，传统形态会传入字符串；
+ * 本模块兼容两者，并只把 true / "true" 视为开启。
  *
- * Loon 的两种传参形态 (官方文档 nsloon.app/docs/Plugin/):
- *   现代: `argument=[{KEY}]`  → $argument 为**对象**, 读 $argument.KEY
- *   传统: `argument=<字符串>` → $argument 为**字符串**, 按字面量匹配
- * 本模块两种都兼容, 因此插件侧改用现代形态后老写法不会静默失效。
- *
- * 分发方式: 经 esbuild `--inject` 注入, 导出名在脚本中直接以全局标识符使用
- * (与 src/env.ts 的 Env、src/lib/net.ts 的 isHost 同一机制)。
- * 见 package.json 的 build 脚本与 AGENTS.md。
+ * 经 esbuild `--inject` 注入，导出名在消费者中直接作为全局标识符使用。
  */
 
 /** 取插件传入的原始 $argument; 未传返回 undefined */

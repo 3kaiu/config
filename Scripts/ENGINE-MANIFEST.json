@@ -1,5 +1,5 @@
 {
-  "$comment": "起点全能助手内嵌 qdreader 引擎治理清单 — CI (config-validate.yml step 9) 强制校验 embedded_blob_sha256；更新引擎必须同步更新本文件",
+  "$comment": "起点全能助手内嵌 qdreader 引擎治理清单 — CI (config-validate.yml Qidian engine integrity check) 强制校验 embedded_blob_sha256；更新引擎必须同步更新本文件",
   "engine": {
     "name": "qdreader (起点读书自动签到高阶任务引擎)",
     "upstream_repo": "https://github.com/Yuheng0101/X",
@@ -25,7 +25,7 @@
     "1. 从上游获取新版 qdreader.js，diff/反混淆审查变更（解码方法: base64→RC4(key 见上)→utf8，再用字符串表 k=130 还原）",
     "2. 替换 Qidian.js 中两个 marker 之间的 IIFE",
     "3. 重新计算 blob sha256 与 rc4_payload sha256，更新本清单三个字段 (upstream_commit_at_embed / embedded_blob_sha256 / rc4_payload_sha256)",
-    "4. 本地运行: node -e 校验脚本（同 config-validate.yml step 9）确认通过",
+    "4. 本地运行 config-validate.yml 中 Qidian engine integrity check 的 node 校验逻辑确认通过",
     "5. 提交并观察 CI"
   ]
 }

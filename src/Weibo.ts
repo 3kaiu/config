@@ -70,9 +70,10 @@ interface MainConfig {
   removeUnusedPart: boolean;
   /** 按 ID 屏蔽指定卡片; 填入 ID 即生效 */
   blockIds: (string | number)[];
-  /** 以下为上游保留项, 当前代码未读取 (保留配置面, 勿删) */
+  /** 以下为上游保留项，当前代码未读取 */
   removeRelateItem: boolean;
   removeNextVideo: boolean;
+  /** 头像与 Tab 图标配置；当前代码会读取 */
   profileSkin1: string | null;
   profileSkin2: string | null;
   tabIconVersion: number;

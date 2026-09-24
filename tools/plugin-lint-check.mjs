@@ -14,11 +14,10 @@ const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const VALID_SEG = new Set(["Rule", "Rewrite", "MitM", "Script", "Argument", "Host", "General"]);
 const ACTION_OK =
   /reject|reject-dict|reject-array|reject-img|reject-video|reject-200|reject-403|reject-drop|reject-empty|response-body|mock-response-body|redirect|header-|script-path|request-body|url-remove|exception|direct|proxy|302|307|301|\d{3}|enable=\{/i;
-// 可疑的 Rewrite 第二 token — 2026-09-19 官方文档对齐 (docs/Rewrite/ 旧语法动作表无此 token):
+// 可疑的 Rewrite 第二 token — 官方动作表无此 token:
 //   `http-response <regex> url reject-200` / `list reject-200` —
-//   [Script] 行必须带 script-path= (docs/Script/), [Rewrite] 动作位无 url/list。
-//   归一化工具 rewrite-migrate 把它们当"历史遗留无效别名"处理, 佐证长期未生效。
-//   `splash-reject` / `screen-reject` 同理 (动作表无此动作)。
+//   [Script] 行必须带 script-path=，[Rewrite] 动作位无 url/list。
+//   `splash-reject` / `screen-reject` 同理。
 //   大写 REJECT 在裸 `reject` 动作外另计 (Loon 动作大小写敏感存疑, 统一小写)。
 // 先报告不判红: 真机确认逐条语义后, 批量搬 [Rewrite] 段标准形。
 const SUSPICIOUS_ACTION =

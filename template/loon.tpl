@@ -239,7 +239,7 @@ DOMAIN-SUFFIX, withgoogle.com, Proxy
 DOMAIN, g.co, Proxy
 
 # 穿山甲统计/请求/聚合接口 (2026-08-12 HAR 审计第二轮)
-# 起点秒播脚本 (src/Qidian.ts) 仅依赖 gdtimg.com/gtimg.cn 视频域, 不依赖穿山甲,
+# 起点秒播脚本 (Scripts/Qidian.js) 仅依赖 gdtimg.com/gtimg.cn 视频域, 不依赖穿山甲,
 # 故 api-access/log-api/gromore 三个接口域可安全拦截 (必须先于下方 SUFFIX DIRECT)
 DOMAIN, api-access.pangolin-sdk-toutiao.com, REJECT
 DOMAIN, api-access.pangolin-sdk-toutiao1.com, REJECT
@@ -247,7 +247,7 @@ DOMAIN, log-api.pangolin-sdk-toutiao.com, REJECT
 DOMAIN, gromore.pangolin-sdk-toutiao.com, REJECT
 
 # ⚠️ 广点通/穿山甲全链拦截 (2026-08-12 用户决策): 原白名单是起点秒播脚本
-# (src/Qidian.ts 视频替换) 的依赖, 但 adsmind.ugdtimg.com 素材同时是智慧房东
+# (Scripts/Qidian.js 视频替换) 的依赖, 但 adsmind.ugdtimg.com 素材同时是智慧房东
 # 开屏广告直投链路 (310_HAR: GDTMobSDK 206 穿透)。用户要求开屏广告彻底消失,
 # 接受起点秒播失效 — 请求/渲染/素材全链 REJECT, 秒播 [Script] 匹配不到即停用
 DOMAIN, mi.gdt.qq.com, REJECT

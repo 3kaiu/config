@@ -39,8 +39,8 @@ jobs:
       #    非 HTML 错误页 / .plugin 内 script-path 域白名单 — 任一不过保留旧文件
       # 2. MANIFEST.json: 每个镜像文件记录 source_url + sha256 + 抓取时间, 变更在 PR diff 中高亮
       # 3. PR 制: 不再直推 main — 推送到 mirror/<date> 分支并开/更新 PR, 人工审 diff 后合并
-      # 4. 覆盖范围: 脚本 + 规则列表 + rewrite 模块 + NSRingo 插件 (跟随 latest),
-      #    Profile 全部远程引用收敛到自建 CDN (ws.wenn.in/main/Mirror/...)
+      # 4. 覆盖范围: 脚本 + 规则列表 + rewrite 模块 + NSRingo 插件；
+      #    Profile 的脚本、插件与规则引用收敛到自建 CDN，GeoIP/ASN 保持直连上游。
       - name: Mirror upstream resources (with gates)
         run: |
           SUCCESS=0
@@ -192,9 +192,9 @@ jobs:
                 local urls
                  urls=$(grep -oiE 'script-path[[:space:]]*=[[:space:]]*https?://[^ ,")]*' "$tmpf" \
                    | sed 's/script-path[[:space:]]*=[[:space:]]*//I' | tr '[:upper:]' '[:lower:]')
-                if [ -n "$urls" ] && printf '%s\n' "$urls" | grep -vqE '^https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one)/'; then
+                if [ -n "$urls" ] && printf '%s\n' "$urls" | grep -vqE '^https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|kelee\.one)/'; then
                   echo "🚫 $name 门禁拦截: script-path 指向非白名单域 (疑似投毒), 保留旧版"
-                  printf '%s\n' "$urls" | grep -vE '^https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|3kaiu\.github\.io|kelee\.one)/' | head -3
+                  printf '%s\n' "$urls" | grep -vE '^https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|kelee\.one)/' | head -3
                   GATED=$((GATED + 1)); mark_fail "$dest"
                   keep_old "$dest"
                   rm -f "$tmpf"; return
@@ -219,8 +219,6 @@ jobs:
             "amdc.js" "ddgksf2013/Scripts / amdc.js"
           mirror "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/applet.js" \
             "applet.js" "ddgksf2013/Scripts / applet.js"
-          mirror "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/smzdm_json.js" \
-            "smzdm_json.js" "ddgksf2013/Scripts / smzdm_json.js"
           mirror "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js" \
             "bilibili-json.js" "app2smile / bilibili-json.js"
           mirror "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-proto.js" \
@@ -230,8 +228,8 @@ jobs:
           mirror "https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js" \
             "youtube.response.js" "Maasea / youtube.response.js"
 
-          # AllInOne 的传递性脚本依赖 (2026-08 审计): 消除 gist/raw 单点,
-          # 插件内 22 条 script-path 由下方补丁重写指向自建 CDN
+          # AllInOne 的传递性脚本依赖: 消除 gist/raw 单点，
+          # 插件内 script-path 由下方补丁重写指向自建 CDN。
           mirror "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/startup/startup.js" \
             "scripts/startup.js" "blackmatrix7 / startup.js"
           mirror "https://gist.githubusercontent.com/blackmatrix7/f5f780d0f56b319b6ad9848fd080bb18/raw/zheye.min.js" \
@@ -608,7 +606,7 @@ jobs:
           sed -i "s|https://github.com/NSRingo/Siri/releases/download/[^\"]*/|${CDN}/Siri/|g" Mirror/iringo/iRingo.Search.plugin
           sed -i "s|https://github.com/NSRingo/TestFlight/releases/download/[^\"]*/|${CDN}/TestFlight/|g" Mirror/iringo/iRingo.TestFlight.plugin
           sed -i "s|https://github.com/NSRingo/TV/releases/download/[^\"]*/|${CDN}/TV/|g" Mirror/iringo/iRingo.TV.plugin
-          sed -i "s|https://github.com/NSRingo/LocationServices/releases/download/[^\"]*/|${CDN}/LocationServices/|g" Mirror/iringo/iRingo.LocationService.plugin
+          sed -i "s|https://github.com/NSRingo/LocationService/releases/download/[^\"]*/|${CDN}/LocationServices/|g" Mirror/iringo/iRingo.LocationService.plugin
 
           # ═══════════════ DualSubs (双语字幕, 跟随 latest) ═══════════════
           # 2026-09-18: 钉死版本解钉 → latest。实测 latest 即钉死版本
@@ -626,7 +624,7 @@ jobs:
           # Universal 仓库的 releases/latest (共 5 处), 属**浮动引用**: 无法锁定版本、
           # 无法验证内容, 上游任一时刻替换产物即静默进入分发链。
           # 每日镜像后强制重写 → 上游若改回 latest 会被再次修正 (自愈)。
-          # 注: 三个插件均已接线 (template/loon.tpl:503-505 DualSubs 段)。
+          # 注: 三个插件均由 loon.tpl 的 DualSubs 段接线。
           # DS_VER 动态解析 (2026-09-18 解钉配套): 钉死 v1.7.5 会在 Universal 发新版时
           # 与 YouTube/Netflix 内嵌指向产生版本偏斜, 故每轮从 release API 取 Universal
           # 最新 tag; API 失败/限流 (无合法 tag) 则回退上一已知版本并告警
@@ -692,7 +690,7 @@ jobs:
           fi
 
           # ── 行尾归一化: 哈希前把镜像文本文件统一为 LF ──
-          # 根因 (2026-09-11 实测, Config Validation run 34527842350 红于 step 8b
+          # 根因 (2026-09-11 实测, Config Validation 的 Mirror manifest consistency check
           # "Mirror manifest consistency check"): .gitattributes 声明 `* text=auto eol=lf`
           # + `*.plugin text`, 故 `git add` 会把 CRLF 归一化为 LF 再写入 blob; 而下方清单是
           # **从磁盘原始字节**哈希的。上游 iRingo.News.plugin 本身是 CRLF, sed 补丁不改行尾
@@ -897,7 +895,7 @@ jobs:
         with:
           node-version: 22
 
-      # config-validate step 8b 的等价物: 清单由 workflow 自己生成, 故必须在镜像侧复核。
+      # config-validate 的 Mirror manifest consistency check 等价物: 清单由 workflow 自己生成, 故必须在镜像侧复核。
       # 无此步时, MANIFEST 里任何一个手滑/半截写入的 sha256 都会直接进 main。
       - name: Gate — MANIFEST hash/bytes vs disk
         run: |

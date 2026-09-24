@@ -24,6 +24,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - 删除当前 Profile、模板和插件均未引用的 `Mirror/keepStyle.js`、`Mirror/weibo_json.js`、`Mirror/ximalaya_json.js`，同步移除镜像工作流声明与 MANIFEST 条目
 - 删除失效的 `.qx` 行尾规则、QX 专用 MitM 过滤分支和未使用的跨客户端 ESLint globals；当前 Loon 运行时、历史 Changelog 及 QX 格式上游转换链保留
+- 删除已结案且持续误导当前维护判断的三份 2026-09-11 审计快照，以及已被本地原生 reject 替代的 `Mirror/smzdm_json.js`
+- 删除无效 `preview` 命令、无消费者的 Surgio filters/代理测试配置、无断言的版本一致性步骤、要求保留已删参数墓碑的冗余测试和已退役 GitHub Pages parity 链路；行为用例 269→268
+- 修复 `iRingo.LocationService.plugin` 的 CDN 重写路径，并清理失效数量、行号、QX 兼容与“脚本未使用字段”等注释；活文档只描述当前状态，历史留在 Git 与 CHANGELOG
 
 ### Removed (2026-09-22 死物清除 — Kelee 未装入模板 9 残留 + 误导注释)
 

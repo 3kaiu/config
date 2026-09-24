@@ -4,12 +4,7 @@ interface SignResult {
   coins?: number;
 }
 
-/**
- * 调试开关 — 由插件 argument=[{BILI_DEBUG_ENABLE}] 传入。
- * (2026-09-11 分模块审计 MOD-02) 原实现为 `$argument.includes("BILI_DEBUG_ENABLE=true")`,
- * 但 bilibili-pro.plugin 的 cron 行**从不传 argument=**, 故该分支永远不可达。
- * 改用共享 readFlag 后同时兼容现代(对象)与传统(字符串)两种传参形态。
- */
+/** 调试开关 — 由插件 argument=[{BILI_DEBUG_ENABLE}] 传入。 */
 const DEBUG: boolean = readFlag("BILI_DEBUG_ENABLE");
 
 function log(msg: string): void { if (DEBUG) console.log(msg); }

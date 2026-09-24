@@ -11,9 +11,8 @@
  *   upstream `hostname = ...`      →  [MitM] %APPEND% 最小化子集 (仅保留被 reject 规则消费的域,
  *                                    判定逻辑与 tools/mitm-orphan-check.mjs 对齐, 防孤儿域门禁失败)
  *
- * 不纳入 (仅统计, 见生成块尾注释与镜像 PR 报告):
- *   - script 型条目 (script-response-body 等) — 需单独评估脚本依赖
- *   - QX `host, ..., direct` 条目 — 非 rewrite 语义
+ * script 载荷不直接执行：已登记条目由其他规则覆盖，或转为 EXTRA_REJECTS 原生 reject。
+ * QX host/host-suffix 行会转换为 Loon [Rule]，不进入 [Rewrite]。
  *
  * 用法: node tools/build-startup-plugin.mjs
  *
@@ -577,8 +576,7 @@ export function renderPlugin({ updateTime, rules, rejects, seen, droppedGarbage,
   const unsafeNote = unsafe.length
     ? `\n# ⛔ 已剔除边界不安全通配 ${unsafe.length} 条 (可匹配非预期注册域, 解密面扩张): ${unsafe.join(", ")}`
     : "";
-  // 手写块规则 host 并入 [MitM] (2026-09-21 回归修复): 去掉 splash.*/ad.*/flash.*
-  // 边界不安全通配后, 手写块精确 host 必须显式并入, 否则 https 规则静默失效
+  // 上游边界不安全通配移除后，手写块精确 host 必须并入 [MitM]，否则 HTTPS 规则静默失效
   const manual = manualMitmHosts(manualLines);
   const manualUnsafeNote = manual.unsafe.length
     ? `\n# ⚠️ 手写块 无法安全表达 host ${manual.unsafe.length} 条 (跨标签通配/可选数字, https 不保证): ${manual.unsafe.join(", ")}`
@@ -633,10 +631,12 @@ export function main() {
   });
 
   fs.writeFileSync(OUT, out);
+  const ledger = scriptLedger(scripts);
+  const extraCount = ledger.filter((r) => r.status === "extra").length;
 
   console.log(`✅ ${path.relative(ROOT, OUT)} 已生成 (上游 @UpdateTime ${updateTime})`);
   console.log(`   reject 规则: ${rules.length} 条 (上游 ${rejects.length} 行, 去重 ${rejects.length - seen.size} 条, 垃圾host ${droppedGarbage} 条)`);
-  console.log(`   未纳入 script 型: ${scripts.length} 条 / host 语义已转 [Rule]: ${hostRules.length} 条`);
+  console.log(`   script 条目: ${scripts.length} 条 (未直接执行 ${scripts.length - extraCount} / 已转原生 ${extraCount}) / host 语义已转 [Rule]: ${hostRules.length} 条`);
   console.log(`   MitM hostname: 保留 ${kept.length} / 上游 ${upstreamHosts.length} (剔除未被消费 ${dropped.length})`);
   if (unsafe.length) {
     console.log(`   ⛔ 剔除边界不安全通配 ${unsafe.length} 条 (NEW-09):`);
@@ -651,8 +651,7 @@ export function main() {
     }
   }
   // script 型条目台账 (2026-09-20): covered/extra/pending 有主, unregistered 需分诊
-  const ledger = scriptLedger(scripts);
-  console.log(`\n── script 型条目台账 (${ledger.length} 条: covered ${ledger.filter((r) => r.status === "covered").length} / 已转原生 ${ledger.filter((r) => r.status === "extra").length} / 待真机 ${ledger.filter((r) => r.status === "pending").length} / 未登记 ${ledger.filter((r) => r.status === "unregistered").length}) ──`);
+  console.log(`\n── script 型条目台账 (${ledger.length} 条: covered ${ledger.filter((r) => r.status === "covered").length} / 已转原生 ${extraCount} / 待真机 ${ledger.filter((r) => r.status === "pending").length} / 未登记 ${ledger.filter((r) => r.status === "unregistered").length}) ──`);
   for (const r of ledger) {
     const tag = r.status === "covered" ? "✅已覆盖" : r.status === "extra" ? "🔧已转原生" : r.status === "pending" ? "⏳待真机" : "⚠️未登记";
     console.log(`   ${tag} ${r.regex.slice(0, 78)} — ${r.note}`);

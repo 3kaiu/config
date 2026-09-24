@@ -1,73 +1,60 @@
 # AGENTS.md
 
-Loon 配置仓库:单入口 `Profile/Loon.lcf`,由 `surgio` 从 `template/` + `surgio.conf.js` 构建;`Scripts/` 全部为 `src/*.ts` 的 esbuild 产物。
+Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.js` 生成；`Scripts/` 除 `Qidian.js` 外均为 `src/*.ts` 的 esbuild 产物。
 
 ## 命令
 
-- `npm run build` — esbuild 注入 `src/env.ts` + `src/lib/*.ts` 编译 `src/*.ts` 到 `Scripts/`(minify)。改 src 后必须 build
-- `npm test` — 269 个行为级用例(含 `tools/` 单测),引用全部 28 个 Scripts 产物;**文档数字纪律**(2026-09-18 优化审计): AGENTS.md 的关键数字(用例数/产物数/[Rule] 行数/插件数/devDeps/engines)由 `tools/doc-claims-check.mjs` 自动断言与产物实测一致(经 `doc-claims-check.test.js` 端态用例执行),改数字必须两处同步 —— 该门禁上线首日即抓到"483→480 系推导值、实测应为 484→481"的漂移
-- `npm run lint` — eslint(flat config)
-- `npm run generate` — surgio 构建 `Profile/Loon.lcf`(surgio 3.19,内联 providers,无 patch)。**副作用**:每次执行都会创建一个**空 `dist/`**(surgio 自身行为,已实测 —— 直接 `npx surgio generate` 亦可复现,非 npm 产物;`npm run build` 不会创建)。故 `.gitignore` 的 `dist/` 条目是**承重的**,勿删;`dist/` 也**不是死目录**,勿清理(删了下次 generate 即复现 —— 2026-09-11 深度审计 NEW-13 曾把它误报为死目录,已更正)
-- `npm run check:sync` — tpl-sync-check:①`surgio.conf.js` 的 `customParams` ↔ `template/**` 的 `{{ customParams.* }}` **双向契约**(死参数 / 未声明键均判红)②template ↔ Loon.lcf 正反向静态行比对
-- `npm run check:shadow` — rule-shadow-check 规则顺序遮蔽(靠前**非 REJECT** 列表 —— DIRECT 与 Proxy 同样抢先命中 —— 的域名类规则抢先命中靠后 REJECT 条目)。2026-09-18 重写: 修掉三处漏检(只认 Proxy 遮蔽者/只比 DOMAIN-KEYWORD/`loon-${name}` 硬拼路径致 goodbyeads 117k 表整张被静默跳过),实测遮蔽面 1→1709 条;`[Remote Rule]` 重排为**拦截区前置**(Advertising/Privacy/Hijacking 先于 China/Global),复活 111 条 `.cn` 广告/劫持拦截;goodbyeads 压轴的残余 2 对(China/Global→goodbyeads-qx)在工具 `ACCEPTED_PAIRS` 按"对"登记(逐轮打印计数+成因+复检日期,新对判红;登记须实测成因+复检日期,同 check:drift 规则)
-- `npm run check:rewrite` — rewrite-redundancy-check [Rewrite] 规则冗余(2026-09-20 精简优化新增):Loon rewrite 规则 = `^` 锚定的 URL **前缀**匹配、**首个匹配即生效** (匹配在 action 派发前终止),故同文件内"更早的 A 是 B 的**字符串严格前缀** + enable 逐字一致"⇒ B 恒不可达(死规则),**action 不参与判定** (reject/reject-dict/reject-200/body 裁剪 一律让子条不可达);判别在**源字符串层**进行,不解析正则。两查:①同文件前缀遮蔽(镜像 **Mirror/** 内的同类冗余同样检出但**只登记不手改** —— mirror-scripts 每日重写,登记在工具 `ACCEPTED_PAIRS` 逐对写明实测成因+复检日期)②非镜像文件(Plugin//Kelee/Profile)间 regex+action+rest **逐字相同**的跨文件精确重复。2026-09-20 首轮清理后置入:`keep-pro hotwords`、`news-purify eapi/ad/` 两条同文件死规则删除;`build-startup-plugin.mjs` 生成块加**前缀遮蔽自剪枝**(上游 `advertapi` 罩住 `getAdInfos$` 子条,449→448,镜像重跑不漂移);`social-netdisk-purify` 与 `shopping-purify` 的 `dsp.fcbox.com/adSearch` 跨文件精确重复去重(保留 shopping/FC_BOX 一方 + 其 hostname 移除,零行为变化);AllInOne 镜像 5 对上游自重复(含 action 相异的 maicai 对 —— 前缀规则先匹配,reject 罩住 reject-200 子条)登记接受
-- `npm run check:drift` — mirror-drift-check `--strict`:比对 workflow 声明的 `mirror()` URL 与 `Mirror/MANIFEST.json` 的 `source_url`,未登记的漂移/从未抓取即判红(登记表在该工具 `ACCEPTED_*`)。**三张 `ACCEPTED_*` 表已于 2026-09-18 清空**(镜像 PR #42 合并后实测漂移 0/从未抓到 0),机制保留。使用规则:登记必须写明**实测成因 + 复检日期**,不得用推断充当成因 —— 原 7 条登记的成因"上游已移除 `.plugin` asset"实测**只对 1 条属实**(上游是仓库改名 `MapKit`→`Maps`,301 后照常下载),一条错误成因会把红门禁变成永久静默接受
-- `npm run check:orphan` — mitm-orphan-check 本地模式(孤儿 hostname = 无收益的解密面扩张)。全量模式 118 孤儿(2026-09-21 实测,自 120 下降 2: `skeletons()` 展开标签级 alternation `(cc|tv)`, `mcs.mm.cc.cn/tv.cn` 数出被 startup 手写块规则消费 —— 静默衡量口径 2026-09-20 建立,**只报告不收敛**):83 来自镜像 AllInOne(remote 插件投递,其 [MitM] 自带 —— 收敛须镜像 ingest 补丁,违反"只登记不手改"且上游每日变动需持续复验,不做);23 ddgksf(含 2 通配 host `*.flyert.*`/`*mangaapi.manhuaren.*`,属生成器既有决策,通配"只报告不自动收敛",NEW-09/P2-3);8 DualSubs 流媒体 host + 4 AdvertisingScript — 系 bundle 引擎消费的**假孤儿**(黑盒,不可静态解析)
-- `npm run check:plugin` — plugin-lint-check 段结构与规则语法
-- `npm run check:contract` — argument-contract-check `#!arguments-desc`/`[Argument]`/占位符三方配对 + 死开关检测(宣称 52 个插件 = Plugin/ 46 + Kelee/ 6, 该计数由 doc-claims-check 自动断言, 文档/清单漂移即红)
-- `npm run check:workflows` — workflow-bash-check 校验全部 `.github/workflows/*.yml` 的 run 块 bash 语法。**只校验 bash 语法**,run 块内嵌的 node/python 代码错误与逻辑错误不在其范围
-- `npm run audit:ci` — `npm audit` 固定走 `registry.npmjs.org`(默认镜像未实现 `/-/npm/v1/security/*`,本地直接不可用);结果解读见「架构已知问题」
+- `npm run build`：注入 `src/env.ts` 与 `src/lib/*.ts`，把 `src/*.ts` 压缩到 `Scripts/`。改源码后必须执行。
+- `npm test`：268 个行为级用例，引用全部 28 个 Scripts 产物；随后执行规则顺序与接线检查。关键文档数字由 `tools/doc-claims-check.mjs` 对照实测。
+- `npm run lint`：ESLint flat config，检查 `Scripts/`、`test/`、`tools/`。
+- `npm run generate`：Surgio 3.19 生成 `Profile/Loon.lcf`。该命令会创建空 `dist/`，`.gitignore` 中对应规则必须保留。
+- `npm run check:all`：串行执行 sync、shadow、rewrite、drift、src、orphan、plugin、contract、workflows 门禁；不包含 build、test、lint、generate。
+- `npm run audit:ci`：固定使用 `registry.npmjs.org` 获取审计数据。
 
 ## 关键路径
 
 | 路径 | 角色 | 规则 |
 |---|---|---|
-| `src/*.ts` | 唯一源码(JS 语法,esbuild 直编) | 可改;git rm 过的 tsconfig/loon.d.ts 是死配置 |
-| `src/lib/*.ts` | 共享模块(`net`/`ad`/`notify`),**不作为入口打包** | 经 esbuild `--inject` 注入,导出名在脚本中直接当全局用(同 `Env`);build 的 `find` 已 `! -path 'src/lib/*'` 排除,勿加回 |
-| `src/env.ts` | `Env` 注入源(兼容层 + fetch/notify 封装) | 同上;`src/lib/notify.ts` 是其通知能力的**子集**(无 PushPlus),合并属行为变更需单独决策 |
-| `Scripts/` | build 产物 + `Qidian.js`(手工轨,无源码,rc4 加密) | 不手改;Qidian.js 改动须同步 `Scripts/ENGINE-MANIFEST.json` 哈希 |
-| `Plugin/*.plugin` | 净化器插件外壳(仓库静态资产,script-path 直连 CDN 的 Scripts/) | 改后须核对 triger 与 script-path;`startup-adblock-pro.plugin` 由 `tools/build-startup-plugin.mjs` 从 `Mirror/rules/ddgksf-StartUpAds.conf` 生成(手写补充块在 BEGIN/END 3kaiu 标记内勿改;`BEGIN script→原生 reject 精准补充` 块是生成器 `EXTRA_REJECTS` 的产物 勿手改;生成块从 114 行起勿改)。**script 型未纳入台账**(2026-09-20): 生成器 `SCRIPT_LEDGER` 逐条登记上游 27 条 script 条目去向 (covered 14 已由其他层 path 级覆盖 / extra 5 已转 EXTRA_REJECTS / pending 8 待真机或判定不做), 台账带 `scriptLedger()` 归类函数, **新上游 script 条目不在台账 → 报告 ⚠️ + 测试判红 (startup-plugin-host.test.js), 强制人工分诊**; EXTRA_REJECTS 规则与 host 必须同生 (规则进 [Rewrite], host 并入 [MitM], mitm-orphan-check 兜底)。**[MitM] hostname 行只增不减**(2026-09-22 1c576f2 教训: 误删整行致约 493 条 Rewrite 对 HTTPS 静默失效, 当日 push 带 3 红随后 revert; 补救 = 生成器 `uncoveredRules()` + 用例"解密面全覆盖"逐条点名无解密面根域, 新增即红)。**push 前 `npm test` 必须全绿, 红即停** — 同上, 产物一致性门禁当时已报警而被忽略。
-| `Kelee/*.plugin` | keele 上游插件外壳(6 个:12306/guiderank/smzdm/umetrip/YouTube + Google, 2026-09-22 删除 9 个从未装入模板的转写残留),上游在 kelee.one | 与 Plugin/ 同规则,config-validate 覆盖 |
-| `Mirror/` | 上游镜像:auraflare/biliuniverse/dualsubs/iringo/rules/scripts + 独立 js + ddgksf-StartUpAds.conf(开屏数据源) | mirror-scripts 每日重写 `Mirror/MANIFEST.json`(dict: $comment/generated_at/files);每条含 `source_url`/`sha256`/`bytes`/`fetched_at` + `upstream_bytes`(原始抓取体积,**不含**本地 sed 补丁增量 — 供体积门禁做相对比较,勿当"文件大小"用);手改镜像文件须同步重算该条 sha256/bytes(否则 config-validate 8b 红);镜像**文本**文件由工作流在哈希前统一归一化为 LF —— 行尾不一致同样会让 8b 红(见「门禁」mirror-scripts ③) |
-| `template/loon.tpl` / `surgio.conf.js` | Loon 配置构建输入 | 改模板后须 regenerate + check:sync;**client 侧远程引用一律走自建 CDN,勿直连 S3/其他带外副本**。`surgio.conf.js` 的 `customParams` 每个键都须被模板 `{{ customParams.<键> }}` 引用,否则 check:sync 判死参数 —— 该文件已两度出现同型缺陷(`surge_node_policy_path`、`dns_primary`/`dns_fallback`),后者与 `loon.tpl` 第 11 行硬编码的 `dns-server` 列表构成**双源**;DNS 列表的真值在模板,勿在 `customParams` 里另起一份。**`dns-server` 行不含 `{{ }}`,因此不被 `readStaticLines` 跳过,它参与静态行比对** —— 改它必须 regenerate;反之 `doh*-server`/`doq-server` 含 `{{ }}` 被跳过,由 customParams 契约覆盖 |
-| `Profile/Loon.lcf` | 发布入口唯一文件 | 不动;生成物(手改会被 artifact-idempotency job 判红) |
-| `Profile/geonode.loon.txt` | 已删除 (2026-09-19 移除免费代理订阅, 见 CHANGELOG; 旧文件为 proxy-sync 生成物) | 勿重建; OpenCode 组不再引用 Geonode |
-| `tools/*.mjs` | 验证脚本 / 生成器 | **只放已接线的** —— 每个工具须有 npm script 或 CI 步骤(或至少单测),否则视为"看起来有门禁其实没有"的负债,应删除而非留存(2026-09-11 深度审计 NEW-10 据此删除 `aggregate-purify.mjs` / `kelee-import.mjs` 两个已完成且**重跑有破坏性**的一次性迁移脚本,源码留 git 历史;2026-09-19 移除免费代理订阅时同理删除 `geonode-sync.mjs` + `proxy-sync.yml` + `geonode-sync.test.js` + `Profile/geonode.loon.txt`)。改动后跑 check:sync;`build-startup-plugin.mjs` / `mirror-drift-check.mjs` / `src-antipattern-check.mjs` / `tpl-sync-check.mjs` 均有**入口守卫**,可安全被测试 import(勿在顶层无条件调 `main()`) |
-| `test/cases/*.test.js` | 269 用例 | 新增/改脚本须补用例;响应类脚本用 `a.doneCalled(state)` 断言 `$done` 被调用;`.mjs` 工具用动态 `import()` 引入(勿用 `require(esm)`,会无谓抬高 engines 下限) |
+| `src/*.ts` | 唯一脚本源码 | 可改；改后必须 build 并补行为测试 |
+| `src/lib/*.ts` | esbuild 注入模块 | 不作为入口产物；导出名在消费者中按全局标识符使用 |
+| `src/env.ts` | `Env` 兼容与宿主封装 | 同样只经 `--inject` 注入 |
+| `Scripts/*.js` | CDN 运行时脚本 | 除 `Qidian.js` 外不手改；CI 检查 build 漂移 |
+| `Scripts/Qidian.js` | 无源码手工轨 | 引擎 marker 内变更须同步 `ENGINE-MANIFEST.json`；marker 外包装层改动仍需行为测试 |
+| `Plugin/*.plugin` | Loon 插件外壳 | `[Script]`、`[Rewrite]`、`[MitM]` 与参数必须配套；startup 插件由生成器维护 |
+| `Kelee/*.plugin` | 本地 Loon 外壳 (6 个:12306/guiderank/smzdm/umetrip/YouTube + Google) | 全部经模板 CDN 引用；修改后跑插件与参数门禁 |
+| `Mirror/` | 上游镜像与远程规则/插件/bundle | workflow 每日更新；手工修改文本镜像必须同步 MANIFEST 哈希和字节数 |
+| `template/loon.tpl` | Loon 模板 | 修改后 regenerate + `check:sync`；`surgio.conf.js` 的 `customParams` 必须与模板双向配对 |
+| `Profile/Loon.lcf` | 唯一发布入口 | 生成物，不手改；artifact-idempotency 会重生成并判红 |
+| `tools/*.mjs` | 已接线生成器/门禁 | 每个工具必须被 workflow、npm check 脚本或测试调用；未接线工具应删除 |
+| `test/cases/*.test.js` | 行为与静态回归测试 | 响应脚本必须断言 `$done`；ESM 工具用动态 `import()` |
 
-## 门禁(全部在 `.github/workflows/`,push 前本地自测)
+## 生成与镜像纪律
 
-- script-tests:build 后 git diff Scripts/ 漂移门禁 → 本地必须先 build 再提交
-- config-validate:净化器断言 + mitm-orphan + ENGINE-MANIFEST 哈希 + 参数契约(`argument-contract-check`,step 5c-bis 之前) + src 反模式(`src-antipattern-check`,同区,NEW-12) + workflow bash 语法(step 5c-bis) + 模板↔产物**与 `customParams` 双向契约**(step 5d,`tpl-sync-check`,NEW-13) + 规则顺序遮蔽(step 9b,`rule-shadow-check`) + Rewrite 规则冗余(step 9b-bis,`rewrite-redundancy-check`) + 镜像声明漂移(step 9c,`mirror-drift-check --strict`) + 接线完整性(`test/wiring-check.js`,NEW-11b) + 银行 MitM **三重断言**(规模下限 / 20 家关键银行点名在场 / 正负向无重叠 — 2026-09-11 前为永不失败的 print);另有独立 job `artifact-idempotency` 重跑 `surgio generate` 并断言 `Profile/Loon.lcf` 零漂移(手改产物即红)
-- mirror-scripts:镜像 fetch/结构/投毒门禁 + MANIFEST 重写,失败 keep_old。**另有独立 job `verify`(2026-09-18 优化审计)**:对已推送的 `mirror/sync` 分支再跑一遍与 PR CI 等价的门禁(MANIFEST hash/bytes vs disk + build 漂移 + lint + 269 用例 + `check:all` + `generate` 幂等),`permissions: contents: read`。存在的理由:镜像 PR 若由 GITHUB_TOKEN 开出,其 `pull_request` run 会停在 `conclusion=action_required`(jobs=0,需人工点 Approve),审核清单的"CI 全绿"永远无法满足 —— 实测因 `secrets.MIRROR_TOKEN` 未配置,近 100 个 run 里 14 个如此,PR #39 因此被关闭未合并、#42 积压 6 天且镜像产出未进 main。**正确修法仍是配置 `MIRROR_TOKEN`**(workflow 会 `::warning::` 提示),verify job 是"门禁不依赖仓库配置"的兜底;体积门禁 = 绝对 200B **+ 相对上次原始抓取 50%**(`upstream_bytes` 为基准,自校准到每个文件量级 — 单一绝对阈值对 588B~3.9MB 的列表无意义);MANIFEST sha256 在**补丁后 + 行尾归一化后**从磁盘重算;旧清单条目不在本轮覆盖时孤儿保留(防清单漏项静默删仓库文件);StartUpAds.conf 镜像后由 `tools/build-startup-plugin.mjs` 重新生成 startup 插件(随镜像 PR 一并审核);DualSubs 补丁把上游 `releases/latest` 浮动 script-path 锁到具体版本,补丁后仍有浮动引用即判红。镜像更新还可能在上游侧引入新的 Rewrite 冗余 —— 同 config-validate,`rewrite-redundancy-check` 也在镜像 job 内运行,未登记新冗余即 keep_old。**盲区**:"Open or update mirror PR" 步骤是 bash **运行期**行为,`check:workflows` 只做语法校验抓不到 — 2026-09-11 连修两处:①`printf` 格式串里的裸 `50%)`(报 `%): invalid format character` → exit 1),该 bug 让分支照常 force-push 但 PR 标题/正文永远更新不到,静默持续多日,表现仅为"镜像 PR 标题日期停在创建日";**printf 的格式串里字面量 `%` 必须写 `%%`**。②`git rebase` 在 `Mirror/iringo/iRingo.News.plugin` 上以 `local changes would be overwritten` 中止 —— 根因是该文件**在 main 上的 blob 是 CRLF**,违反 `.gitattributes` 的 `* text=auto eol=lf`,而镜像步骤写回的工作区副本同样是 CRLF,git 便认定有本地修改。**已修复**(见 ③ 的行尾归一化)。**已逐一实测无效,勿重试**:`git checkout --` / `checkout-index -f -a` / `stash push+pop`(还会静默丢改动) / `--autostash` / `-c merge.renormalize=true` / 手工 strip CR。该 bug 仅在 **origin/main 于本 run 期间前移**时触发(2026-09-11 因推送撞上镜像 run 才暴露)。**此场景下 `git status` 不可信**:同一仓库不同 clone 表现不同(实测本地报 clean / 全新 clone 报 ` M `),而 `git checkout <ref>` 会直接拒 —— 判定行尾问题请用 `git cat-file blob <ref>:<path> | grep -c $'\r'`。③**MANIFEST 哈希漂移(同源第三张面孔)**:清单是**从磁盘原始字节**哈希的,而 `git add` 按 `.gitattributes` 把 CRLF 归一化为 LF 再写入 blob → 上游本就是 CRLF 的 `iRingo.News.plugin` 被记成 `2349B/92d0dc9c…`,committed blob 实为 `2317B/1065a500…`(`2349-2317 = 32` = CRLF 行数),CI checkout 后重算必然漂移(8b 报 `53 条里 1 条异常`,run 34527842350)。**修复** = 哈希前把镜像文本文件统一为 LF(`行尾归一化` 块;扩展名白名单须与 `.gitattributes` 的 text 声明一致,同时保证二进制镜像不被误改),使 disk == index == blob。三张面孔(blob 违反 .gitattributes / rebase 中止 / 清单漂移)同源,一次归一化全消。**注意** `upstream_bytes` 语义不变(仍是本地 sed 补丁前的原始抓取体积,供体积门禁做相对比较);归一化只影响 `bytes`/`sha256`
-- upstream-health:探测列表 = MANIFEST 派生镜像 + 硬编码上游(含 kelee.one LPX 哨兵;NSRingo 已全部跟随 latest,经 MANIFEST 派生探测),失败开 issue;结果 JSON 经 TSV→stdin 单次转换(勿把探活字段插值回 node 源码)。**注意**: workflow 声明 `latest` 不等于 MANIFEST 实际跟进 — `keep_old` 会在 fetch 失败时静默保留旧版, 该漂移由 check:drift(step 9c)把关, upstream-health 只探 URL 200 探不出(见 2026-09-11 分模块审计 MOD-09; 2026-09-18 复核漂移已清零)
-- proxy-sync:已删除 (2026-09-19 移除免费代理订阅, 见 CHANGELOG — 免费节点失活太快 + 免费代理风险; `proxy-sync.yml` / `tools/geonode-sync.mjs` / `Profile/geonode.loon.txt` / `geonode-sync.test.js` 一并删除, `upstream-health` 的 geonode 探活与 `config-validate` 的 MainNodes/geonode 断言同步移除, MainNodes 远端过滤器删除, Proxy/Fallback 改回直引订阅全部节点)
-- cdn-verify:CDN 与仓库哈希比对 + Pages 兜底 parity(Pages 未启用时跳过)
-- surgio-build:仅在 surgio.conf.js/template/**/package.json 变更时构建并 auto-PR
+- `Plugin/startup-adblock-pro.plugin` 的手写区由 `BEGIN/END 3kaiu` marker 界定；自动生成区勿改。`SCRIPT_LEDGER` 必须登记每条上游 script，未登记项测试判红。
+- `EXTRA_REJECTS` 的 Rewrite 规则与对应 MitM hostname 必须同生。startup 插件的 `[MitM]` hostname 不允许整行误删。
+- Mirror 文本在计算哈希前统一为 LF。`Mirror/MANIFEST.json` 的 `upstream_bytes` 是原始抓取体积，不是补丁后文件大小。
+- 现有 NSRingo、DualSubs、Auraflare、Biliverse 等镜像允许按已批准策略跟随 `latest`；新增上游默认锁具体版本。`check:drift --strict` 防止 workflow 声明与实际镜像静默分叉。
+- `goodbyeads-qx.list` 与 `ddgksf-StartUpAds.conf` 虽来自 QX 格式上游，但当前被 Loon 远程规则或生成器消费，不能按文件名删除。
 
-## 约束
+## CI 门禁
 
-- 不提交 Secrets;workflow secrets 仅 BARK_PUSH(可选)
-- 发布面 = 公开 GitHub + ws.wenn.in CDN(Cloudflare,max-age=3600);GitHub Pages 未启用(2026-08 起无 pages-deploy 工作流,不可作为应急兜底通道)
-- QX 已彻底移除,任何涉及 QX 的改动/引用皆为回归
-- 依赖仅 3 个 devDependencies(esbuild/eslint/surgio),无运行时依赖,无 typescript;升级须过 build+143 测试;`engines.node >= 22`(CI 与本地一致)
+- `script-tests.yml`：lint、build、Scripts 漂移、268 用例、构建出处 attestation。
+- `config-validate.yml`：MitM、插件结构、参数契约、源码反模式、workflow bash、模板同步、Qidian 哈希、规则遮蔽/冗余、镜像漂移、接线与银行域名断言；独立 job 重生成 Loon 配置验证幂等。
+- `mirror-scripts.yml`：镜像抓取与投毒/体积门禁、startup 生成、PR；独立 verify job 在 `MIRROR_TOKEN` 缺失导致 PR run 停在 `action_required` 时提供兜底验证。
+- `surgio-build.yml`：模板、provider 或构建配置变化后自动生成 PR。
+- `cdn-verify.yml`：对 `ws.wenn.in` 与仓库文件做 sha256 校验。
+- `upstream-health.yml`：MANIFEST 派生镜像与直连依赖探活。
+- `dependency-audit.yml`：报告构建期依赖风险；`release.yml`：tag 版本快照。
 
-## 架构已知问题(勿重改)
+## 约束与已知边界
 
-- `Scripts/Qidian.js` 无源码(上游 qidian 引擎,密文打包)
-- [Rule] 485 行(2026-09-22 实测,主 [Rule] 段非注释行;2026-09-18 删 3 条同策略死规则 484→481, qreport KEYWORD→精确枚举 +1 净增 482, 删 `DOMAIN-KEYWORD,openai` 宽匹配与死规则 `DOMAIN,github.copilot.com` 回 480, 本轮云闪付 `DOMAIN,ads.cup.com.cn` +1 回 481, 再批量银行硬拦截 (浦发 lban/广发 static+mps/建行 o2o-ad-log) +4 到 485;计数 = [Rule] 段起至 [Remote Rule] 止的非 `#` 非空行,由 doc-claims-check 自动断言);GEOIP 顺序已修;AdBlock 域硬拦截已覆盖规则
-- [General] 官方语义审计(2026-09-20):`ip-mode = dual`(旧值 `fake-ip` 非官方枚举);`fake-ip-filter`/`disconnect-on-policy-change` 系 Clash/Surge 键混入已删除(real-ip/UI 对应);`hijack-dns` 收窄为 4 个公开 DNS(`*:0` 全劫持与上游全加密矛盾,回落明文无收益);`time.*.com` 补入 real-ip。`interface-mode = Performace` 是官方原样拼写,**勿纠正**。语义门禁 `test/cases/general-semantics.test.js` 4 例
-- `npm audit` 告警(2026-09-11 实测 **42** 个:2 low / 7 moderate / 32 high / 1 critical)为**构建期已知风险,勿 force 修**。按路径归类:`node_modules/npm/node_modules/**` 32 项 + surgio 自身依赖树(`@oclif/plugin-plugins`/`npm`/`got`/`qs`/`query-string`/`update-notifier`→`latest-version`→`package-json`/`decode-uri-component`)。共同点:全部属**构建期工具链**,仅本地/CI 执行 `surgio generate`/`eslint` 时存在,**不进任何分发产物**。修复路径按子树不同 — surgio 侧待上游跟进 oclif v5(npm@11)前无解;`audit fix --force` 会破坏 semver
-  - 复核方法(勿凭记忆):`npm run audit:ci --silent -- --json > /tmp/audit.json`,再按 `vulnerabilities[*].nodes` 的路径前缀分组统计。**注意** 2026-09-11 前的文档写"全部来自 surgio→内嵌 npm@9",该表述**不准确** — 实测 42 项里 32 项的 node 路径**全部**落在 `node_modules/npm/node_modules/**`(共 36 条),另有 **10 项**的 node 路径在该前缀之外:`@oclif/plugin-plugins` / `decode-uri-component` / `got` / `latest-version` / `npm` / `package-json` / `qs` / `query-string` / `surgio` / `update-notifier`(各 1 条)。按包名统计为 32 + 10,按 node 路径统计为 36 + 10
-  - **`js-yaml` 已于 2026-09-11 移出此清单,勿再当无解项**:它曾被笼统归入"eslint 子树随升级自然消解",但补丁版一直落在现有 semver 范围内 — `@oclif/core@2.16.0` 要求 `^3.14.1`(装 3.15.2)、`@eslint/eslintrc` 要求 `^4.3.0`(装 4.3.2),一次 `npm update js-yaml` 即可,无需等 surgio/oclif v5。教训:归入"无解"前必须先核对 `required range` 与 `first_patched_version` 是否真的不可满足
-  - **Dependabot 的 `ignore` 对 security update 同样生效,且 `versions` 挡不住它**(2026-09-11 实证 + 当日复核修正):裸 `dependency-name` 被解释成 `versions: ">= 0"`(GitHub 文档示例自己注释为 "ignore all updates"),后果是告警永远关不掉、每次安全更新任务以 `all_versions_ignored` + exit 1 收场(run 33785452983 / 34522468638 / 34523818286),更严重的是**永久静默屏蔽未来任何真实修复**。
-    **唯一能把规则挡在安全路径之外的字段是 `update-types`,不是 `versions`** —— `versions` 与裸条目一样作用于安全路径,所以"写 `versions` 限定范围"是**错误处方**(2026-09-11 前本文档曾如此写,已改)。依据:GitHub 文档 "`update-types` only affects *version* updates, not *security* updates. Security updates will always be created regardless of the `update-types` setting";Dependabot 运行日志逐条标注 `doesn't apply to security update`。**加 ignore 必须带 `update-types`**(三个 semver 级别全列 = 屏蔽全部版本更新、保留安全更新通道)。
-    ⚠️ 由此产生的预期副作用(非缺陷):这 11 个包出现新告警时安全更新任务**仍会失败**,但错误变为语义准确的 `security_update_not_possible`(确实无修复版,实测 run 33474329435),而非误导性的 `all_versions_ignored`。处置方式不变:人工以 `tolerable_risk` 关闭告警(2026-09-11 实测 0 open / 19 dismissed / 22 auto_dismissed)。
-  - **11 个 ignore 包的"无解"结论已于 2026-09-11 逐包复核,勿再质疑**(tar/sigstore/minimatch/brace-expansion/glob/ip/got/@tootallnate/once/cross-spawn/diff/decode-uri-component):`@oclif/plugin-plugins@3.x` 对 npm 是**精确锁定** `npm: 9.8.1`(非 range),9 个包的漏洞副本**全部**是该 npm 的 `inBundle` 依赖 → 只能等上游跟进 oclif v5/npm@11;`got@9.6.0` 由 `package-json@^6.3.0` 锁定(首修复版 11.8.5 超出 `^9.6.0`)、`decode-uri-component@0.2.2` 由 `query-string@^7.1.3` 锁定(首修复版 0.5.0 超出 `^0.2.2`)。**勿据 `npm audit` 的 `fixAvailable: true` 推翻此结论** —— 该字段不感知 `npm: 9.8.1` 这类精确锁定,对其中 5 个包会误报"可修"
-  - 本地 `node_modules` 可能与 `package-lock.json` 漂移(实测 eslint 装的是 10.9.0 而 lock 为 10.9.1)。这不影响 CI(`npm ci` 按 lock 装),但会让本地 lint 跑在与 CI 不同的补丁版本上 — 结论有疑时先 `npm ci`
-  - 改 `package-lock.json` 时勿直接跑 `npm update` 收工:本地 npm 版本会顺带重写大量无关条目(实测 `dev` 标志被从 `node_modules/npm/node_modules/**` 的 `inBundle` 条目上批量抹掉,254 行噪音)。只改目标包时手工编辑对应条目,或 `npm update` 后 `git checkout` 回退再手改,保持 diff 最小
-- kelee.one 全局 403 (2026-08-25 起,含浏览器 UA):upstream-health issue #27 对应;Kelee/*.plugin 外壳与 loon.tpl LPX 直连引用在解封前不可用,属上游封锁非本仓库可修
-- **无类型检查(有意取舍,盲区已知 — DEP-03)**:esbuild **仅转译不校验类型**,`src/*.ts` 里的字段名拼写错误、接口不符都不会在 build 期报错(`CODE-03` 的 `(mainConfig as any).removeUnfollowTopic` 即此盲区产物)。`src/env.ts` 的 `EnvInstance` 接口实际未被任何脚本用于约束。
-  - 决策:不引入 `tsc` 到构建链(会破坏 ~14ms 构建与"仅 3 个 devDependencies"原则),**接受该盲区并在此显式记录**
-  - 因此改 `src/` 时**必须补行为级用例**(`test/cases/`)来兜底 —— 类型错误不会被构建拦下,只能靠测试暴露
-  - 若将来要收口:加一个**独立的** `tsc --noEmit` 非阻断 job(devDependencies 增至 4),不要塞进 build
+- 不提交 secret。可选 secret 为 `BARK_PUSH`；`MIRROR_TOKEN` 用于让镜像 PR 正常触发 PR checks，缺失时 verify job 兜底。
+- 发布面是公开 GitHub 与 `ws.wenn.in` CDN；GitHub Pages 已退役，不是备用通道。
+- QX 运行时配置已移除；历史 CHANGELOG 和必要的 QX 格式上游转换输入保留。
+- [Rule] 485 行；52 个插件 = Plugin/ 46 + Kelee/ 6。
+- 依赖仅 3 个 devDependencies（esbuild、eslint、surgio），无运行时依赖；`engines.node >= 22`。
+- 仓库不引入 `tsc`：esbuild 只转译，不检查类型。修改 `src/` 必须用行为测试兜底；若未来增加 `tsc --noEmit`，使用独立非阻断 job。
+- `Scripts/Qidian.js` 的内嵌加密引擎无法静态审计，只能做来源、marker 与哈希治理。
+- `npm audit` 告警属于构建期工具链；禁止 `audit fix --force`，复核路径与修复范围后再处理。
+- `interface-mode = Performace` 是 Loon 模板中的官方原样拼写，勿自行纠正。
+- push 前必须确保 `npm test`、lint 与相关门禁全绿；任何红项先修复再推送。

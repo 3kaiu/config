@@ -1,5 +1,5 @@
 # 版本化发布: 推送 v* tag 时将 Profile/Loon.lcf 快照发布到 GitHub Releases
-# 用途: 用户可锁定版本回滚, 不必追 main 滚动更新 (Pages 未启用, 无兜底通道同步)
+# 用途: 提供可锁定版本回滚；仓库无备用 CDN，Release 仅是版本快照
 # 用法: git tag v8.9.1 && git push origin v8.9.1
 name: Release Profile
 

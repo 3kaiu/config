@@ -975,7 +975,7 @@ function Env(n) {
 // ⚠️ 供应链治理 (2026-07-24 审计后建立):
 //   - 下方 IIFE 为 RC4+双层混淆的第三方引擎，静态不可审计
 //   - 版本/来源/哈希/风险/更新流程见 Scripts/ENGINE-MANIFEST.json
-//   - CI (config-validate.yml step 9) 强制校验 blob 哈希，
+//   - CI (config-validate.yml Qidian engine integrity check) 强制校验 blob 哈希，
 //     引擎变更必须同步更新清单，否则 CI 失败
 //   - 已修复: notify 函数已添加 token 打码
 // ==========================================

@@ -39,7 +39,7 @@ jobs:
             case "${name}${url}" in
               *$'\t'*) echo "::error::探活字段含制表符, 无法序列化: $name"; exit 1 ;;
             esac
-            # 并行探活 (2026-09-18 性能审计): ~56 个 URL 串行 × 30s 超时逼近
+            # 并行探活: URL 串行 × 30s 超时逼近
             # 15min 上限。后台并发, 结果落盘再汇总; 日志按序回放避免交错。
             (
               local status
@@ -66,7 +66,7 @@ jobs:
             ) &
           }
 
-          # 镜像上游探活全部由下方 MANIFEST 派生循环覆盖 (35 条, 单一权威清单);
+          # 镜像上游探活全部由下方 MANIFEST 派生循环覆盖（单一权威清单）;
           # 此处仅保留"未被镜像"的直连依赖 — 硬编码块勿新增镜像内条目 (2026-08 审计去重)
 
           # 客户端直连源 (未镜像, Loon [General] 拉取, 挂了报 DNS/geoip 错误)
@@ -101,7 +101,7 @@ jobs:
           ' > /tmp/mirrors.tsv
           # 2026-08-29 修复 (审计 P0): 原用管道 `node ... | while read` — bash 中管道右侧 while
           # 跑在子 shell, check_url 内 ALL_OK / RESULTS 的赋值在循环结束后全部丢失。
-          # 后果: 全部 MANIFEST 派生探活 (~34 条) 不写 summary、不影响 all_ok、永不触发 issue,
+          # 后果: 全部 MANIFEST 派生探活不写 summary、不影响 all_ok、永不触发 issue,
           # 等于硬编码之外的上游探活全是死代码。改用 /tmp 文件中转让 while 留在当前 shell。
           while IFS=$'\t' read -r name url; do check_url "$name (mirrored)" "$url"; done < /tmp/mirrors.tsv
 

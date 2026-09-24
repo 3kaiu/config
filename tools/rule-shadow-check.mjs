@@ -8,8 +8,7 @@
  *
  * 背景: [Remote Rule] 的列表**按序线性求值, 先命中即终止**。任何**非 REJECT** 策略
  * (DIRECT / Proxy / 自定义组) 的靠前列表都会抢先命中并终止后续扫描 —— 排在 REJECT
- * 列表之前, 其域名类规则就是遮蔽者。2026-09-18 修掉两处漏检后实测遮蔽面从
- * "1 条已兜底"变为 1700+ 条:
+ * 列表之前, 其域名类规则就是遮蔽者。修复漏检后遮蔽面达到千条量级:
  *   - 旧实现只把 policy 含 `proxy` 的列表当遮蔽者, 而排在最前的 China 是 DIRECT
  *     (漏掉 China→Advertising/Hijacking/goodbyeads 共 ~1050 条);
  *   - 旧实现只比较 DOMAIN-KEYWORD, 漏掉 DOMAIN-SUFFIX 遮蔽 (China 的 `cn` 后缀一条
@@ -26,9 +25,8 @@
  *      (含 include 的 snippet) 的本地 REJECT 兜底, 要么该"对"已在 ACCEPTED_PAIRS
  *      登记接受 (须写实测成因+复检日期), 否则判红。
  *   2. [告警] 对比镜像列表**文件头声明的计数**与正文实测计数。上游 blackmatrix7 的
- *      Loon 格式列表头描述的是其**完整规则集**, 与 Loon 文件正文并不一致
- *      (实测 Global: 头称 DOMAIN-SUFFIX 34743, 正文 0 条) —— 模板注释曾据此写下
- *      "34,579 SUFFIX" 的错误性能理由 (NEW-04)。该头**不可用作计数来源**。
+ *      Loon 格式列表头描述的是其**完整规则集**, 与 Loon 文件正文并不一致。
+ *      例如 Global 文件头的 DOMAIN-SUFFIX 声明与本地正文不符；该头**不可用作计数来源**。
  *      只告警不判红: 上游元数据不在本仓库控制范围, 判红会让每日镜像无谓刷红。
  *
  * 已知盲区: 只覆盖"域名规则被域名规则遮蔽"; IP-CIDR/URL-REGEX/USER-AGENT 与域名

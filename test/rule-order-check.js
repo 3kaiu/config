@@ -8,8 +8,8 @@
  *   - "DOMAIN-SUFFIX, pangolin-sdk-toutiao.com, DIRECT" (旧白名单) 已按 2026-08-12
  *     用户决策改为 REJECT, 锚点消失 → 守卫永远失败;
  *   - "adsmind.ugdtimg.com, DIRECT" 同理改为 REJECT。
- * 一个永远红且无人执行 (不在 npm test、不在任何 workflow) 的守卫比没有守卫更糟:
- * 它制造"有防护"的错觉。现按现行拓扑重写, 并接入 config-validate.yml。
+ * 一个永远红且无人执行的守卫比没有守卫更糟: 它制造"有防护"的错觉。
+ * 现按现行拓扑重写，并同时接入 npm test 与 config-validate.yml。
  */
 "use strict";
 

@@ -6,8 +6,8 @@
  *   - 声明了但模板从未 `{{ customParams.<键> }}` 引用 = **死参数** (改它不生效)
  *   - 模板引用了但未声明 = 渲染为空 (更隐蔽: 不报错, 只是值消失)
  *   为什么必须机械把关: 该文件已连续出现两次同型缺陷 —— `surge_node_policy_path` (2026-09-11 早些时候
- *   删除) 与 `dns_primary`/`dns_fallback` (NEW-13)。后者尤其危险: 取值恰好是
- *   `template/loon.tpl:11` 硬编码 DNS 列表的首尾两台, 形成**双源** —— 改 customParams 看似生效、
+ *   删除) 与 `dns_primary`/`dns_fallback`。后者尤其危险: 取值恰好是
+ *   `template/loon.tpl` 硬编码 DNS 列表的首尾两台, 形成**双源** —— 改 customParams 看似生效、
  *   实则模板里的硬编码才是真值。人工审计抓了两次, 说明该靠门禁而不是靠眼睛。
  *
  * 断言 2: template/loon.tpl (含 snippet include) 的静态内容必须完整出现在 Profile/Loon.lcf 中。

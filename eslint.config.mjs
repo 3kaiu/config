@@ -1,8 +1,5 @@
-// ESLint 9 flat config — 取代 legacy .eslintrc.json/.eslintignore
-// (eslint 9 不再读取 legacy 配置, 此前 surgio 内嵌 eslint 因此无视 ignore
-//  规则并对 Mirror/ 做了非预期修改 — 见 2026-07 审计)
-//
-// 范围: Scripts/ 与 test/ 受检; Mirror/ (第三方 minified) 与 Profile/ 排除。
+// ESLint 10 flat config。
+// 范围: Scripts/、test/ 与 tools/ 受检；Mirror/（第三方压缩代码）、Profile/ 与 template/ 排除。
 import js from "@eslint/js";
 
 // Loon 运行时注入的全局变量 + 常用内建
@@ -91,7 +88,7 @@ export default [
       "no-constant-condition": ["error", { checkLoops: false }],
       // 2026-09-11 深度审计 NEW-12: 原先 no-cond-assign / no-fallthrough 也被关闭。
       // 这两条是控制流规则, **在压缩产物上依然有效** —— esbuild 不会凭空制造
-      // 赋值条件或 case 穿透, 故开启不会误报 (实测 60 个产物全绿)。
+      // 赋值条件或 case 穿透, 故开启不会误报 (当前 28 个产物全绿)。
       // 已实测生效: 注入 `if (x = 3)` 与无 break 的 case → 分别报
       // no-cond-assign / no-fallthrough。走 recommended 默认 (error), 不显式声明。
       // 注: 覆盖 src/ 需 @typescript-eslint/parser (src/*.ts 含真实 TS 语法:

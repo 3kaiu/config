@@ -26,8 +26,7 @@ const CONFIG: { routes: RouteConfig; debug: boolean } = {
     payment: /(traffix|success|payment)/,
     general: /microapp|recommend|openapi/
   },
-  // (2026-09-11 分模块审计 MOD-02) 原为 `$argument.includes('DEBUG_MODE=true')` —
-  // 键名 DEBUG_MODE 与插件声明的 DEBUG_ENABLE 不符, 且插件传的是动作名, 故永不可达。
+  // 插件 argument=[{DEBUG_ENABLE}] 传入现代对象参数。
   debug: readFlag('DEBUG_ENABLE')
 };
 
