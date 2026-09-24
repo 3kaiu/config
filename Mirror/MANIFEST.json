@@ -247,13 +247,6 @@
       "upstream_bytes": 286476,
       "fetched_at": "2026-09-19T07:55:36Z"
     },
-    "keepStyle.js": {
-      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/keepStyle.js",
-      "sha256": "199783afcdd891bfd5fa298638e5806263521c14fd561ab6fda84efe5fe1e332",
-      "bytes": 1779,
-      "upstream_bytes": 1779,
-      "fetched_at": "2026-09-19T07:55:33Z"
-    },
     "netease.adblock.js": {
       "source_url": "https://gist.githubusercontent.com/ddgksf2013/4f53b7c6083678df25fecc8ff68b52c4/raw/netease.adblock.js",
       "sha256": "6ba468eb994e3843d69563f8f3b31c2d63a62a68d60fc3a1fd61947c1546936f",
@@ -364,20 +357,6 @@
       "sha256": "cbcabf770447117a66358314950a4233448eeb86274ccfb96d148294d327eece",
       "bytes": 2631,
       "upstream_bytes": 2631,
-      "fetched_at": "2026-09-19T07:55:33Z"
-    },
-    "weibo_json.js": {
-      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/weibo_json.js",
-      "sha256": "1714a128eb1e2cc5c333e93bd66c860cbaa6a76bae0a3c9d15d5138fcd30b151",
-      "bytes": 15462,
-      "upstream_bytes": 15462,
-      "fetched_at": "2026-09-19T07:55:33Z"
-    },
-    "ximalaya_json.js": {
-      "source_url": "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/ximalaya_json.js",
-      "sha256": "2b0cb0abf3cf9eaf16e45591c947d2ab1905c2fa5aa8c1ca56ac1f3b4cf19533",
-      "bytes": 2236,
-      "upstream_bytes": 2236,
       "fetched_at": "2026-09-19T07:55:33Z"
     },
     "youtube.request.js": {

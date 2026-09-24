@@ -48,18 +48,14 @@ function readFiles() {
     for (const d of ["Plugin", "Kelee", "Mirror"]) walk(path.join(ROOT, d), files);
   }
   if (fs.existsSync(MAIN_CFG)) files.push(MAIN_CFG);
-  // QX 专用端 (qx-*.conf / qx-* 子目录) 不参与 Loon MitM 语义
-  return files.filter((f) => {
-    const base = path.basename(f);
-    return !base.startsWith("qx-");
-  });
+  return files;
 }
 
 function fullFiles() {
   const files = [];
   for (const d of ["Plugin", "Kelee", "Mirror"]) walk(path.join(ROOT, d), files);
   if (fs.existsSync(MAIN_CFG)) files.push(MAIN_CFG);
-  return files.filter((f) => !path.basename(f).startsWith("qx-"));
+  return files;
 }
 
 function collectHostnames(files) {

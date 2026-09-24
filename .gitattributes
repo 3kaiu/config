@@ -10,7 +10,6 @@
 *.plugin text
 *.lcf text
 *.tpl text
-*.qx text
 *.list text
 *.lpx text
 

@@ -1,7 +1,7 @@
 /** 大众点评去广告 v1.0 — 作者：3kaiu (参考 ddgksf2013 + app2smile)
  * 端点: mapi.dianping.com (首页信息流) / check.dianping.com (推荐流)
  * 功能: 信息流广告项过滤 (is_ad/ad_id/promotion) · banner/popup 清空 · ad_list 置空
- * 守卫: $response 检查 + Env 兼容层 (Loon/Surge; Env 基于 $httpClient, QX 无此 API 不兼容) */
+ * 守卫: $response 检查 + Env 兼容层 */
 
 if (typeof $response === "undefined") { $done(); return; }
 const $ = new Env("大众点评去广告");

@@ -5,18 +5,15 @@
 // 范围: Scripts/ 与 test/ 受检; Mirror/ (第三方 minified) 与 Profile/ 排除。
 import js from "@eslint/js";
 
-// 代理运行时注入的全局变量 (Loon / QX / Surge) + 常用内建
+// Loon 运行时注入的全局变量 + 常用内建
 const PROXY_GLOBALS = {
   $request: "readonly",
   $response: "writable",
   $done: "readonly",
   $loon: "readonly",
-  $task: "readonly",
   $httpClient: "readonly",
   $persistentStore: "readonly",
-  $prefs: "readonly",
   $notification: "readonly",
-  $notify: "readonly",
   $argument: "readonly",
   $environment: "readonly",
   console: "readonly",

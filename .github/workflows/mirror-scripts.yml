@@ -219,12 +219,6 @@ jobs:
             "amdc.js" "ddgksf2013/Scripts / amdc.js"
           mirror "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/applet.js" \
             "applet.js" "ddgksf2013/Scripts / applet.js"
-          mirror "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/weibo_json.js" \
-            "weibo_json.js" "ddgksf2013/Scripts / weibo_json.js"
-          mirror "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/ximalaya_json.js" \
-            "ximalaya_json.js" "ddgksf2013/Scripts / ximalaya_json.js"
-          mirror "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/keepStyle.js" \
-            "keepStyle.js" "ddgksf2013/Scripts / keepStyle.js"
           mirror "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/smzdm_json.js" \
             "smzdm_json.js" "ddgksf2013/Scripts / smzdm_json.js"
           mirror "https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js" \

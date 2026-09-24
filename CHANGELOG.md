@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the 3kaiu/config Loon & Quantumult X configuration project are documented in this file.
+All notable changes to the 3kaiu/config Loon configuration project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
@@ -19,6 +19,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **DoH 死域名清理 (4 条)**: 341 个 Rule 域名双查 (Status=3 + 父域 SOA 权威才动手): zhihu `appcloud2.in`、taobao `ems.youku.com`、qidian `hd.ctobsnssdk.com`、social `wxsmsdy.video.qq.com`。SUFFIX 形态一律保留 (子域可复活); 模板层死条目攒批再动
 - **上游新鲜度可见性**: mirror job 对 StartUpAds `@UpdateTime` 超 21 天打 `::warning::` (只报告不判红; 上游自 08-29 停更已实锤, 本地镜像与 live 逐字节一致管线无责)。另起草 ddgksf 反哺邮件 (TLD 打架/死规则/缺 hostname 清单, 待人工发送)
 - **数字同步**: 用例 257→269 (解密面×2、全仓抽查×2、EXTRA_HOSTS×1、host转Rule×1、Tieba×2、腾讯新闻×2, 跨 5 文件); Scripts 产物 27→28; 插件 61→52 (Kelee 未装入模板 9 残留删除, 见下); `[Rule]` 480 不变
+
+### Removed (2026-09-24 Loon-only 清理)
+
+- 删除当前 Profile、模板和插件均未引用的 `Mirror/keepStyle.js`、`Mirror/weibo_json.js`、`Mirror/ximalaya_json.js`，同步移除镜像工作流声明与 MANIFEST 条目
+- 删除失效的 `.qx` 行尾规则、QX 专用 MitM 过滤分支和未使用的跨客户端 ESLint globals；当前 Loon 运行时、历史 Changelog 及 QX 格式上游转换链保留
 
 ### Removed (2026-09-22 死物清除 — Kelee 未装入模板 9 残留 + 误导注释)
 
