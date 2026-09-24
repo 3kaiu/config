@@ -1,14 +1,11 @@
 const { defineSurgioConfig } = require('surgio');
 
-// Surgio 按约定加载 provider/<name>.js；主源与备用源由 artifact.combineProviders 合并。
-// 两个订阅环境变量均为空时产物确定，不把订阅凭据写入仓库。
 module.exports = defineSurgioConfig({
   artifacts: [
     {
       name: 'Loon.lcf',
       template: 'loon',
-      provider: 'tokyo',
-      combineProviders: ['tokyob'],
+      provider: 'empty',
       destDir: 'Profile',
     },
   ],

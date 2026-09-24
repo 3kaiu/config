@@ -36,21 +36,19 @@ jobs:
         run: npm ci
 
       - name: Generate configs with Surgio
-        # 2026-08-29 审计修复 (P0 条件性): 此前把 SURGIO_SUBSCRIPTION_URL secret 注入,
-        # surgio 会把订阅解析出的节点 (含 password/uuid) 写进 Profile/Loon.lcf,
-        # 再由本工作流 auto-PR 提交进公开仓库并分发到 CDN — 凭据外泄路径已通。
-        # 该 secret 当前未配置 (gh secret list 为空), 但管线是通的, 故移除注入。
         run: npx surgio generate --skip-lint
 
       - name: Assert no credentials in generated config
         run: |
-          # 公开分发产物不得含订阅凭据; 任一凭据模式命中即失败, 阻断 auto-PR
-          # -i + 允许等号旁空格: `Password=` / `password =` 曾可逃逸精确匹配 (2026-09-04 对抗审计实证)
           if grep -niE '(^|,) *(password|uuid|bob|encryption) *=' Profile/Loon.lcf; then
             echo "::error::Loon.lcf 含订阅凭据 — 禁止提交公开产物"
             exit 1
           fi
           echo "✅ Loon.lcf 无订阅凭据"
+
+      - name: Assert no static proxy nodes
+        run: |
+          node -e 'const fs=require("fs");const lines=fs.readFileSync("Profile/Loon.lcf","utf8").split("\n");let active=false;for(const raw of lines){const t=raw.trim();if(t==="[Proxy]"){active=true;continue}if(active&&t.startsWith("["))break;if(active&&t&&!t.startsWith("#")){console.error("Loon.lcf [Proxy] 含静态节点: "+t);process.exit(1)}}'
 
       - name: Check for changes
         id: check

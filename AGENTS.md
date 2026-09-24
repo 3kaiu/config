@@ -5,9 +5,9 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 ## 命令
 
 - `npm run build`：注入 `src/env.ts` 与 `src/lib/*.ts`，把 `src/*.ts` 压缩到 `Scripts/`。改源码后必须执行。
-- `npm test`：268 个行为级用例，引用全部 28 个 Scripts 产物；随后执行规则顺序与接线检查。关键文档数字由 `tools/doc-claims-check.mjs` 对照实测。
+- `npm test`：269 个行为级用例，引用全部 28 个 Scripts 产物；随后执行规则顺序与接线检查。关键文档数字由 `tools/doc-claims-check.mjs` 对照实测。
 - `npm run lint`：ESLint flat config，检查 `Scripts/`、`test/`、`tools/`。
-- `npm run generate`：Surgio 3.19 生成 `Profile/Loon.lcf`。该命令会创建空 `dist/`，`.gitignore` 中对应规则必须保留。
+- `npm run generate`：Surgio 3.19 从纯静态模板生成 `Profile/Loon.lcf`，不读取或内嵌订阅凭据。该命令会创建空 `dist/`，`.gitignore` 中对应规则必须保留。
 - `npm run check:all`：串行执行 sync、shadow、rewrite、drift、src、orphan、plugin、contract、workflows 门禁；不包含 build、test、lint、generate。
 - `npm run audit:ci`：固定使用 `registry.npmjs.org` 获取审计数据。
 
@@ -23,7 +23,9 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 | `Plugin/*.plugin` | Loon 插件外壳 | `[Script]`、`[Rewrite]`、`[MitM]` 与参数必须配套；startup 插件由生成器维护 |
 | `Kelee/*.plugin` | 本地 Loon 外壳 (6 个:12306/guiderank/smzdm/umetrip/YouTube + Google) | 全部经模板 CDN 引用；修改后跑插件与参数门禁 |
 | `Mirror/` | 上游镜像与远程规则/插件/bundle | workflow 每日更新；手工修改文本镜像必须同步 MANIFEST 哈希和字节数 |
-| `template/loon.tpl` | Loon 模板 | 修改后 regenerate + `check:sync`；`surgio.conf.js` 的 `customParams` 必须与模板双向配对 |
+| `template/loon.tpl` | Loon 模板 | 修改后 regenerate + `check:sync`；`Proxy` 必须直接聚合 Loon 外部订阅策略组“东京” |
+| `provider/empty.js` | Surgio 必需的零节点适配器 | 不读取订阅、不保存凭据；仅满足 artifact schema |
+| Loon 外部订阅 | 用户在客户端导入，策略组名固定为“东京” | 节点与凭据不进仓库；重命名策略组时必须同步模板与回归测试 |
 | `Profile/Loon.lcf` | 唯一发布入口 | 生成物，不手改；artifact-idempotency 会重生成并判红 |
 | `tools/*.mjs` | 已接线生成器/门禁 | 每个工具必须被 workflow、npm check 脚本或测试调用；未接线工具应删除 |
 | `test/cases/*.test.js` | 行为与静态回归测试 | 响应脚本必须断言 `$done`；ESM 工具用动态 `import()` |
@@ -38,17 +40,17 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 
 ## CI 门禁
 
-- `script-tests.yml`：lint、build、Scripts 漂移、268 用例、构建出处 attestation。
+- `script-tests.yml`：lint、build、Scripts 漂移、269 用例、构建出处 attestation。
 - `config-validate.yml`：MitM、插件结构、参数契约、源码反模式、workflow bash、模板同步、Qidian 哈希、规则遮蔽/冗余、镜像漂移、接线与银行域名断言；独立 job 重生成 Loon 配置验证幂等。
 - `mirror-scripts.yml`：镜像抓取与投毒/体积门禁、startup 生成、PR；独立 verify job 在 `MIRROR_TOKEN` 缺失导致 PR run 停在 `action_required` 时提供兜底验证。
-- `surgio-build.yml`：模板、provider 或构建配置变化后自动生成 PR。
+- `surgio-build.yml`：模板、`provider/empty.js` 或构建配置变化后自动生成 PR；发布前检查无凭据且 `[Proxy]` 无静态节点。
 - `cdn-verify.yml`：对 `ws.wenn.in` 与仓库文件做 sha256 校验。
 - `upstream-health.yml`：MANIFEST 派生镜像与直连依赖探活。
 - `dependency-audit.yml`：报告构建期依赖风险；`release.yml`：tag 版本快照。
 
 ## 约束与已知边界
 
-- 不提交 secret。可选 secret 为 `BARK_PUSH`；`MIRROR_TOKEN` 用于让镜像 PR 正常触发 PR checks，缺失时 verify job 兜底。
+- 不提交 secret。机场订阅由用户在 Loon 外部导入，仓库不保存 provider、节点或订阅 URL；`BARK_PUSH` 可选，`MIRROR_TOKEN` 用于自动 PR。
 - 发布面是公开 GitHub 与 `ws.wenn.in` CDN；GitHub Pages 已退役，不是备用通道。
 - QX 运行时配置已移除；历史 CHANGELOG 和必要的 QX 格式上游转换输入保留。
 - [Rule] 485 行；52 个插件 = Plugin/ 46 + Kelee/ 6。

@@ -81,31 +81,11 @@ httpdns.volcengineapi.com = 0.0.0.0
 httpdns.c.cdnhwc2.com = 0.0.0.0
 
 [Proxy]
-# Surgio 自动生成节点: npx surgio generate
-# 通过 SURGIO_SUBSCRIPTION_URL (主订阅) + SURGIO_SUBSCRIPTION_URL_2 (备用订阅,
-# provider/tokyob.js, combineProviders 合并) 传入; 均为空时 Provider 为空节点
-# ⚠️ 新用户开箱即用形态: 首次导入本配置时 [Proxy] 为空、分流规则已全量生效,
-#    此时全部代理策略组 (Proxy/Streaming/AI/...) 均无可用节点 → 代理类流量**全部失败**,
-#    仅 China/DIRECT 规则正常。必须在 Loon 订阅设置里填入机场订阅 URL 并更新一次,
-#    或在 [Remote Proxy]/[Remote Filter] 引用的节点列表就位后, 策略组才有成员。
-# (凭据永不进仓: surgio-build 有 Loon.lcf 凭据断言, 仓库零 Secrets)
-# 容灾: Proxy url-test 组自动纳管订阅中的全部节点 — 订阅中加入第二节点即双节点容灾
+# 节点由 Loon 外部订阅提供；订阅策略组名固定为“东京”，不写入公开仓库。
 
 [Proxy Group]
-# 2026-09-11 审计 (CFG-01): 原为 `Proxy = url-test, MainNodes, 东京, url=...`, 其中 `东京`
-# 是**悬空字面量** — [Proxy] 段设计上只有注释、无任何节点定义 (凭据永不进仓), 全仓无
-# `东京 = <proto>,...` 定义, 该成员永远解析不到。url-test 组按延迟择优, 成员顺序
-# 亦无优先级语义, 故删除是零行为变更。
-# (2026-09-19 移除免费代理订阅: MainNodes 远端过滤器随之删除, Proxy/Fallback 改回
-# 直引订阅全部节点 — 见 [Remote Filter] 注释。)
-# (2026-09-22 P0-1c 探活收紧 + Streaming/AI 自动择优: Proxy 300/50→120/100 防晚高峰
-# 抖动乱跳, Fallback 600/10→180/5; Streaming/AI 由 select 改 url-test, 追剧/AI 调用
-# 不再依赖手动切节点。VLESS 首选同步移除 — 双订阅源皆为 SS 系, VLESS 池恒空,
-# 空候选只增加一次选择延迟; 若日后接入 vless 订阅再加回。)
-# (2026-09-22 B5 单地区收尾: 订阅仅日本节点 — Final 保持 select 不改为 fallback，
-# 系刻意保留手动 DIRECT 总开关 (零代理姿态，见 [Rule] 尾注释)；Gaming/Social/
-# Developer 保持 select 手动粘滞，对局/通话中自动跳节点即掉线，手动切更稳。)
-Proxy = url-test, url=http://cp.cloudflare.com/generate_204, interval=120, tolerance=100
+# Proxy 直接聚合 Loon 外部订阅策略组“东京”；订阅更新后自动纳入 url-test。
+Proxy = url-test, 东京, url=http://cp.cloudflare.com/generate_204, interval=120, tolerance=100
 Fallback = fallback, url=http://cp.cloudflare.com/generate_204, interval=180, timeout=5
 Apple = select, DIRECT, Proxy
 Final = select, Proxy, Fallback, DIRECT
@@ -115,21 +95,6 @@ Developer = select, Proxy, Fallback, DIRECT, tag=开发者
 Gaming = select, Proxy, Fallback, DIRECT, tag=游戏平台
 Social = select, Proxy, Fallback, DIRECT, tag=社交平台
 OpenCode = select, Proxy, DIRECT, tag=OpenCode.ai
-
-[Remote Filter]
-# VLESS 子池: 按名称含 vless 过滤 (大小写不敏感)。
-# (2026-09-19 移除免费代理订阅: 原 MainNodes 远端过滤器 `^(?!.*geonode).*$` 匹配
-# 除 geonode-* 外的全部节点 — 其唯一作用是隔离免费代理, 随订阅删除而删除;
-# 原 VLESS 的 geonode 负向前瞻亦同步移除, 回到单一条件。)
-# (2026-09-22 P1 VLESS 清理: 当前无策略组引用 VLESS — 双订阅源皆为 SS 系，
-# VLESS 池恒空。定义保留为“接入 vless 订阅时的回接配方”，届时把 Streaming/AI
-# 首选加回 VLESS 即可；删除该行亦零行为变化。)
-
-
-VLESS = NameRegex, FilterKey = "(?i)^(?=.*vless).*$"
-[Remote Proxy]
-# (2026-09-19 移除免费代理订阅: Geonode [Remote Proxy] 整节删除 — 原因见 CHANGELOG。
-# OpenCode 组改回 select, Proxy, DIRECT; 节点来源只剩用户自有订阅。)
 
 [Rule]
 DEST-PORT, 5223, DIRECT

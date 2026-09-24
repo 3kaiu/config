@@ -111,11 +111,12 @@ jobs:
             in_loon=$(grep -cE "DOMAIN-SUFFIX, $domain, (Proxy|Streaming|Social|Developer|AI|Gaming)" Profile/Loon.lcf)
             if [ "$in_loon" -eq 0 ]; then echo "⚠️ Loon 缺少 $domain 代理规则"; MISSING=$((MISSING+1)); fi
           done
-          # 检查 Proxy 组过滤一致性 — Proxy/Fallback 直引订阅全部节点
-          loon_regex=$(grep "^Proxy = url-test" Profile/Loon.lcf | grep -o 'url-test')
-          echo "| Loon Proxy filter | $loon_regex |" >> $GITHUB_STEP_SUMMARY
+          # Proxy 必须聚合 Loon 外部订阅策略组“东京”
+          loon_proxy=$(grep '^Proxy = url-test, 东京,' Profile/Loon.lcf || true)
+          loon_regex=$(printf '%s' "$loon_proxy" | grep -o 'url-test' || true)
+          echo "| Loon Proxy subscription | 东京 |" >> $GITHUB_STEP_SUMMARY
           if [ "$loon_regex" != "url-test" ]; then
-            echo "⚠️ Loon Proxy 组过滤非预期 (需 url-test 直引订阅)" >> $GITHUB_STEP_SUMMARY
+            echo "❌ Loon Proxy 未聚合外部订阅策略组“东京”" >> $GITHUB_STEP_SUMMARY
             MISSING=$((MISSING+1))
           fi
           echo "| Missing rules | $MISSING |" >> $GITHUB_STEP_SUMMARY
@@ -282,10 +283,6 @@ jobs:
       # template/loon.tpl + snippet 的静态行必须完整存在于 Profile/Loon.lcf (反向同理)。
       # 这是"集合比对", 保证模板的每一行都进了产物; 它**挡不住**产物里出现模板之外的
       # 内容 (例如手改 Loon.lcf 加一行)。后者由下方 artifact-idempotency job 兜底。
-      # 更正 (2026-09-11 审计): 原注释称"surgio 需 provider/ 目录 (本地/CI 无 → 生成失败),
-      # 产物实为手动维护" — 该前提不成立。provider/tokyo.js 随仓库提交, 本地
-      # `npx surgio generate --skip-lint` 实测成功且逐字节确定 (连续两次 md5 相同)。
-      # 产物此前确实是手改的, 但那是流程问题而非能力限制。
       - name: Template-product sync check
         run: |
           echo "## Template ↔ Product Sync" >> $GITHUB_STEP_SUMMARY
@@ -462,9 +459,7 @@ jobs:
   # 同步产物", 但**挡不住产物里多出模板没有的内容** (手改 Loon.lcf 加规则/改策略)。
   # 直接重新生成并断言零漂移, 是唯一能证明"产物 = f(模板)"的检查。
   #
-  # 前提已实测 (2026-09-11): provider/tokyo.js 随仓库提交; SURGIO_SUBSCRIPTION_URL
-  # 未配置时 provider 降级为 custom/nodeList:[]; generate 成功且逐字节确定
-  # (连续两次 generate 的 md5 相同, git diff 为空)。
+  # provider/empty.js 仅满足 Surgio artifact schema；模板不读取订阅环境变量，结果确定。
   #
   # 注: surgio 升级若改变输出格式, 本步会红 — 这是期望行为 (提示同步提交产物)。
   artifact-idempotency:

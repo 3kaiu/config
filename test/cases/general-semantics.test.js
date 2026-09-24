@@ -14,6 +14,7 @@
  *   4. hijack-dns 的 `*:0` + IP 列表为官方语义 ("所有目标和端口" + 指定 IP 的
  *      所有查询), 上游 DNS 全部走加密通道时, 被劫持的明文查询回落明文 DNS 无收益
  *      但也无害 (官方 DNS 页: 加密优先)。
+ *   5. Loon 节点由外部订阅提供，订阅策略组“东京”必须由 Proxy 组直接聚合。
  */
 "use strict";
 
@@ -66,5 +67,11 @@ exports.tests = {
     a.ok(["LOOPBACKIP", "NOANSWER", "NXDOMAIN"].includes(value("dns-reject-mode")), "dns-reject-mode 官方枚举");
     a.ok(["DNS", "Request"].includes(value("domain-reject-mode")), "domain-reject-mode 官方枚举");
     a.ok(["DIRECT", "REJECT"].includes(value("udp-fallback-mode")), "udp-fallback-mode 官方枚举");
+  },
+  "[Proxy Group] Proxy 必须聚合 Loon 外部订阅策略组“东京”": async (a) => {
+    const text = fs.readFileSync(TPL, "utf8");
+    const line = text.split("\n").find((item) => /^Proxy\s*=/.test(item));
+    a.ok(line, "模板应有 Proxy 策略组");
+    a.ok(/^Proxy\s*=\s*url-test\s*,\s*东京\s*,/m.test(text), "Proxy 必须直接引用外部订阅策略组“东京”");
   },
 };
