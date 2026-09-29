@@ -13,7 +13,7 @@
           "plugin": "qidian.plugin",
           "module": "M7",
           "script": "Qidian.js",
-          "rules": 27,
+          "rules": 19,
           "rules_basis": "plugin-total",
           "granularity": "single-app",
           "covers": null
@@ -26,15 +26,15 @@
       "file": "Plugin/qidian.plugin",
       "module": "M7",
       "switches": 8,
-      "rules": 27,
+      "rules": 19,
       "scripts": [
         "Qidian.js"
       ],
-      "mitm_hosts": 9,
+      "mitm_hosts": 0,
       "switch_usage": [
         {
           "switch": "CAPTURE_ENABLE",
-          "rules": 18,
+          "rules": 14,
           "tag": "是否开启抓取重写"
         },
         {

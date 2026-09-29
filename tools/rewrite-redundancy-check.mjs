@@ -43,9 +43,16 @@ export const ACCEPTED_PAIRS = new Map([]);
 
 /** 拆一条 Loon rewrite 规则行为 `{regex, action, rest}`; 非规则行返回 null */
 export function parseRuleLine(line) {
-  const m = line.trim().match(/^(\^\S+)(?:\s+-\s+|\s+)(\S+)(?:\s+(.*))?$/);
-  if (!m) return null;
-  return { regex: m[1], action: m[2], rest: m[3] || "" };
+  const t = line.trim();
+  // 旧语法: `<regex> <action> [rest]`
+  const m = t.match(/^(\^\S+)(?:\s+-\s+|\s+)(\S+)(?:\s+(.*))?$/);
+  if (m) return { regex: m[1], action: m[2], rest: m[3] || "" };
+  // 新语法 (3.5.1+): `<type> if <conds> && ${url} ~= /<regex>/ then <action>`
+  //   rest 取 `if` 与 `then` 之间的**完整条件串** —— 遮蔽判定要求条件逐字一致,
+  //   条件活在 rest 里, 拆掉就会把"开关不同"的两条误判成互相遮蔽。
+  const n = t.match(/^(?:request|response)\s+if\s+(.*?)\$\{url\}\s*~=\s*\/(.+?)\/\s+then\s+(\S+)/);
+  if (n) return { regex: n[2], action: n[3], rest: n[1].trim() };
+  return null;
 }
 
 /**

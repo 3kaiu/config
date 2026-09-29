@@ -28,6 +28,40 @@ exports.tests = {
       a.equal(r.rest, "", "无尾参");
     },
 
+    // 2026-09-29: qidian [Rewrite] 迁到 Loon 3.5.1(978) 新语法后, 三个解析器
+    // (rewrite-redundancy / mitm-coverage / mitm-orphan) 全都只认旧形态 → 匹配 0 条,
+    // 门禁"全绿"实为空转假绿。本例把新形态钉进解析器契约, 防再次失明。
+    "parseRuleLine Loon 3.5.1 新语法 (response if … then …)": async (a) => {
+      const { parseRuleLine } = await import(TOOL);
+      // 用普通字符串而非模板字面量: 模板里的 `\/` 会被当作 `/` 吞掉反斜杠, 测的就不是配置了。
+      const r = parseRuleLine(
+        "response if ${CAPTURE_ENABLE} == true && ${url} ~= /^https:\\/\\/a\\.com\\/api$/ then reject_dict(200)"
+      );
+      a.ok(r !== null, "新语法行必须能解析出规则 (否则门禁对该段空转)");
+      a.equal(r.regex, "^https:\\/\\/a\\.com\\/api$", "regex 从 ${url} ~= /…/ 抽出, 转义原样保留");
+      a.equal(r.action, "reject_dict(200)", "action 从 then 之后抽出");
+      a.equal(r.rest, "${CAPTURE_ENABLE} == true &&", "条件串进 rest (遮蔽判定要求条件逐字一致)");
+    },
+
+    "parseRuleLine 新语法条件不同时不遮蔽": async (a) => {
+      const { parseRuleLine, findShadowed } = await import(TOOL);
+      const mk = (sw) =>
+        parseRuleLine(
+          "response if ${" + sw + "} == true && ${url} ~= /^https:\\/\\/a\\.com\\/ads/ then reject_dict(200)"
+        );
+      const rules = [mk("EN"), mk("DIS")];
+      a.ok(rules[0] !== null && rules[1] !== null, "两条新语法规则都应解析成功");
+      a.equal(findShadowed(rules).length, 0, "开关不同的同前缀规则不互相遮蔽");
+    },
+
+    "parseRuleLine 新旧语法混用都被识别": async (a) => {
+      const { parseRuleLine } = await import(TOOL);
+      a.ok(parseRuleLine("^https:\\/\\/a\\.com\\/x reject-dict enable={EN}") !== null, "旧形态");
+      a.ok(parseRuleLine("response if ${url} ~= /\\/a\\/ then reject_dict(200)") !== null, "新形态");
+      a.equal(parseRuleLine("# 注释行"), null, "注释不算规则");
+      a.equal(parseRuleLine("h5.if.qidian.com"), null, "[MitM] 裸 hostname 不算规则");
+    },
+
     "findShadowed 同 action+enable 严格前缀遮蔽判死": async (a) => {
       const { findShadowed } = await import(TOOL);
       const rules = [

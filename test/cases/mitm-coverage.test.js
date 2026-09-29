@@ -43,17 +43,29 @@ const hostnamesOf = (txt) => {
     .filter((h) => h && !h.startsWith("-") && !h.startsWith("%"));
 };
 
-/** 插件文本 → 待检查规则: [Rewrite] ^ 开头行 + [Script] http 脚本行 */
-const rulesOf = (txt) => {
+/** 插件文本 → 待检查规则: [Rewrite] ^ 开头行 + [Script] http 脚本行
+ *  `only` 可传 "Rewrite" 只取 [Rewrite] 段 (用于"解析器是否看得见"的对账断言)。 */
+const rulesOf = (txt, only) => {
   const rules = [];
   const seg = (txt.split("[Rewrite]")[1] || "").split(/\n\[[A-Za-z ]+\]/)[0] || "";
   for (const raw of seg.split("\n")) {
     const line = raw.trim();
     if (!line || line.startsWith("#")) continue;
-    const mr = line.match(/^(\^\S+?)\s+(reject\S*|script-\S+|response-body\S*)/);
-    if (mr) rules.push({ regex: mr[1], action: mr[2] });
+    // 旧语法: `<regex> <action> [args]`; 新语法 (3.5.1+): `response if … ${url} ~= /<regex>/ then <action>`
+    // 两种形态都要抽到 regex + action, 否则迁移后本用例会**空转假绿**。
+    const mOld = line.match(/^(\^\S+?)\s+(reject\S*|script-\S+|response-body\S*)/);
+    if (mOld) {
+      rules.push({ regex: mOld[1], action: mOld[2] });
+      continue;
+    }
+    const mNew = line.match(/^(?:request|response)\s+if\s+.*?\$\{url\}\s*~=\s*\/(.*)$/);
+    if (mNew) {
+      const act = (mNew[1].split(/\s+then\s+/)[1] || "").trim();
+      rules.push({ regex: mNew[1].split(/\s+then\s+/)[0].trim(), action: act });
+    }
   }
   for (const sec of ["[Rewrite]", "[Script]"]) {
+    if (only && sec !== only) continue;
     const part = (txt.split(sec)[1] || "").split(/\n\[[A-Za-z ]+\]/)[0] || "";
     if (sec === "[Rewrite]") continue;
     for (const raw of part.split("\n")) {
@@ -97,6 +109,38 @@ exports.tests = {
       }
     }
     a.equal(orphans, [], `无解密面规则必须为零:\n${orphans.join("\n")}`);
+  },
+
+  "mitm-coverage: 解析器不得对已迁移插件空转 (新语法失明即红)": async (a) => {
+    // 背景 (2026-09-29): qidian [Rewrite] 迁到 Loon 3.5.1(978) 新语法后, rulesOf
+    // 匹配 0 条, 而下面两处都是 `if (!rules.length) continue` —— 插件被**整段跳过**,
+    // 无解密面检查与 generic 锁定同时"全绿"。即: 门禁越是解析不了, 报得越干净。
+    // 本例把 "[Rewrite] 有实质行 ⇒ 必须解析出等量规则" 钉死, 让失明立刻判红。
+    const rows = [];
+    for (const dir of ["Plugin"]) {
+      for (const f of fs.readdirSync(path.join(ROOT, dir)).filter((x) => x.endsWith(".plugin")).sort()) {
+        if (SKIP.has(f)) continue;
+        const txt = fs.readFileSync(path.join(ROOT, dir, f), "utf8");
+        if (!txt.split(/\r?\n/).some((l) => l.trim() === "[Rewrite]")) continue;
+        const seg = (txt.split("[Rewrite]")[1] || "").split(/\n\[[A-Za-z ]+\]/)[0] || "";
+        const substantive = seg
+          .split("\n")
+          .map((l) => l.trim())
+          .filter((l) => l && !l.startsWith("#")).length;
+        const got = rulesOf(txt, "Rewrite").length;
+        rows.push(`${dir}/${f}: [Rewrite] 实质行 ${substantive}, 解析出 ${got}`);
+        a.ok(
+          got > 0,
+          `${dir}/${f} 的 [Rewrite] 有 ${substantive} 条实质规则却解析出 0 条 —— rulesOf 不认识该语法, 后续检查会整段跳过 (假绿)`
+        );
+        a.equal(
+          got,
+          substantive,
+          `${dir}/${f} 的 [Rewrite] 存在未被 rulesOf 识别的行 (旧/新语法解析器有盲区)`
+        );
+      }
+    }
+    a.ok(rows.length > 0, `应至少检查 1 个含 [Rewrite] 的插件, 实际 ${rows.length}`);
   },
 
   "mitm-coverage: generic (host 不可静态抽取) 集合锁定": async (a) => {

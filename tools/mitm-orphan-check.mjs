@@ -83,9 +83,15 @@ function collectPatterns(files) {
       if (!t || t.startsWith("#") || t.startsWith("!") || t.startsWith(";")) continue;
       const m1 = t.match(/^(?:http-request|http-response|request|response|script)\s+(\^[^ ,]+)/);
       if (m1) { patterns.push(m1[1]); continue; }
-      const m1b = t.match(/^(?:request|response|script)\s+if\s+\$\{url\}\s*~=\s*\/(.*)$/);
+      const m1b = t.match(/^(?:request|response|script)\s+if\s+.*?\$\{url\}\s*~=\s*\/(.*)$/);
       if (m1b) {
-        const pat = m1b[1].replace(/\s+as\s+.+$/, "").replace(/\/\s*$/, "");
+        // 新语法整行形如 `<type> if <conds> && ${url} ~= /<regex>/ then <action>`:
+        // 先切掉 ` then <action>` 尾, 再去掉正则两侧的 `/`。
+        const pat = m1b[1]
+          .split(/\s+then\s+/)[0]
+          .replace(/\s+as\s+.+$/, "")
+          .replace(/\/\s*$/, "")
+          .trim();
         patterns.push(pat);
         continue;
       }

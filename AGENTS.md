@@ -7,7 +7,7 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 ## 命令
 
 - `npm run build`：注入 `src/env.ts` 与 `src/lib/*.ts`，把 `src/*.ts` 压缩到 `Scripts/`。改源码后必须执行。
-- `npm test`：117 个行为级用例，引用全部 1 个 Scripts 产物（`Qidian.js` 手工轨）；随后执行规则顺序与接线检查。关键文档数字由 `tools/doc-claims-check.mjs` 对照实测。
+- `npm test`：121 个行为级用例，引用全部 1 个 Scripts 产物（`Qidian.js` 手工轨）；随后执行规则顺序与接线检查。关键文档数字由 `tools/doc-claims-check.mjs` 对照实测。
 - `npm run lint`：ESLint flat config，检查 `Scripts/`、`test/`、`tools/`。
 - `npm run generate`：Surgio 3.19 从纯静态模板生成 `Profile/Loon.lcf`。该命令会创建空 `dist/`，`.gitignore` 中对应规则必须保留。
 - `npm run check:all`：串行执行 sync、rewrite、src、orphan、plugin、contract、workflows、scripts、index 门禁；不包含 build、test、lint、generate。`scripts` 把 build 命令重定向到**临时目录**重建后与 `Scripts/` 逐字节比对 —— 补的是本地盲区：手改产物或改了 src 没 build 时，其余门禁会全绿。
@@ -65,7 +65,7 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 
 ## CI 门禁
 
-- `script-tests.yml`：lint、build、Scripts 漂移、117 用例、构建出处 attestation。
+- `script-tests.yml`：lint、build、Scripts 漂移、121 用例、构建出处 attestation。
 - `config-validate.yml`：MitM、插件结构、参数契约、源码反模式、workflow bash、模板同步、Qidian 哈希、规则冗余、模块清单、接线与银行域名断言；独立 job 重生成 Loon 配置验证幂等。
 - `surgio-build.yml`：模板/构建配置变化后自动生成 PR；发布前检查无凭据且 `[Proxy]` 无静态节点。
 - `upstream-health.yml`：客户端直连的 GeoIP mmdb + 自建 CDN（Plugin/Scripts）可用性。探活目标由 `upstream-coverage` 门禁双向锁死（漏探活与探死资源都判红）。
@@ -77,11 +77,11 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 - 不提交 secret。机场订阅由用户在 Loon 外部导入，仓库不保存 provider、节点或订阅 URL。
 - 发布面是公开 GitHub 与 `ws.wenn.in` CDN；GitHub Pages 已退役。
 - **单插件基线的已知代价**（均为用户决策，非缺陷；详见 git 历史）：
-  - **App 内部结构化广告位无法清理**：去广告只剩主配置 122 条已取证 REJECT + bank-ad-reject snippet + 起点插件的字段级净化。46 个 CDN 插件下线前实测全 200 存活（2130 条规则 / 994 个解密 host）。
+  - **App 内部结构化广告位无法清理**：去广告只剩主配置 120 条已取证 REJECT + bank-ad-reject snippet + 起点插件的字段级净化。46 个 CDN 插件下线前实测全 200 存活（2130 条规则 / 994 个解密 host）。
   - **长尾广告域不再被 REJECT，一律走 `Final`**：原 12 万条通用广告域名表 + 7 个镜像规则列表已移除。
   - 失去镜像供应链门禁（sha256 + 投毒/体积 + 漂移/孤儿）。
   - 失去 `check:shadow`（远程列表顺序遮蔽检测）—— 无远程列表后该失效面本身已不存在。
-- [Rule] 483 行；1 个插件 = 全部在 `Plugin/`（仅 `qidian.plugin`）。
+- [Rule] 483 行（其中 120 条裸 REJECT；行数与 REJECT 计数由 tools/doc-claims-check.mjs 实测）；1 个插件 = 全部在 `Plugin/`（仅 `qidian.plugin`）。
 - 依赖仅 3 个 devDependencies（esbuild、eslint、surgio）；`engines.node >= 22`。
 - 仓库不引入 `tsc`：esbuild 只转译，不检查类型。修改 `src/` 必须用行为测试兜底。
 - `Scripts/Qidian.js` 的内嵌加密引擎无法静态审计，只能做来源、marker 与哈希治理。

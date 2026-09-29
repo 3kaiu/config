@@ -4,7 +4,7 @@
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!system = iOS,iPadOS,macOS
-#!loon_version = 3.2.4(787)
+#!loon_version = 3.5.1(978)
 #!arguments-desc=\n- \{CAPTURE_ENABLE}: switch,"true","false",tag=是否开启抓取重写, desc=是否开启抓取重写以捕获 Cookie\n- \{CRONEXP}: input,"11 2 * * *",tag=CRONEXP, desc=默认每天2点11分执行, 建议自行配置。\n- \{QDREADER_DEBUG}: switch,"false","true",tag=是否开启调试模式, desc=是否开启调试模式\n- \{TIMEOUT}: input,420,tag=脚本执行超时时间, 默认420秒(高阶任务全量需3-4分钟), desc=TIMEOUT\n- \{QDREADER_ADV_JOB_ENABLE}: switch,"true","false",tag=激励任务, desc=开启后执行激励碎片任务\n- \{QDREADER_EXTRA_ADV_JOB_ENABLE}: switch,"true","false",tag=每日任务, desc=开启后执行每日广告任务\n- \{QDREADER_LOTTERY_ENABLE}: switch,"true","false",tag=每日抽奖, desc=开启后执行每日抽奖\n- \{QDREADER_WEEKLY_EXCHANGE_ENABLE}: switch,"true","false",tag=每周兑换, desc=开启后周日自动兑换章节卡\n- \{QDREADER_CHAPTER_CARD_ENABLE}: switch,"true","false",tag=章节卡片, desc=开启后查询章节卡信息\n- \{QDREADER_MESSAGE_BOX_ENABLE}: switch,"true","false",tag=大咖荐书, desc=开启后处理大咖荐书消息
 
 [Argument]
@@ -21,14 +21,10 @@ QDREADER_MESSAGE_BOX_ENABLE=switch,"true","false",tag=大咖荐书, desc=开启�
 
 [Script]
 # 第三方广告 SDK 秒播
-http-response ^https?:\/\/ii\.gdt\.qq\.com\/gdt_inner_view script-path=https://ws.wenn.in/main/Scripts/Qidian.js, requires-body=true, timeout=10, tag=GDT广告拦截
 # 穿山甲: 显式列两个 host (原 `\d*` 通配无法被 MitM 解密面门禁静态识别 —— 通配 host 会被
 # 判为 generic 而不计消费, 于是 [MitM] 里对应的域名恒被报成孤儿)。
-http-response ^https?:\/\/api-access\.pangolin-sdk-toutiao\.com\/api\/ad\/union\/sdk\/get_ads script-path=https://ws.wenn.in/main/Scripts/Qidian.js, requires-body=true, timeout=10, tag=穿山甲广告拦截
-http-response ^https?:\/\/api-access\.pangolin-sdk-toutiao1\.com\/api\/ad\/union\/sdk\/get_ads script-path=https://ws.wenn.in/main/Scripts/Qidian.js, requires-body=true, timeout=10, tag=穿山甲广告拦截
 
 # GDT 广告视频替换
-http-response ^https?:\/\/(adsmind\.gdtimg\.com|adsmind\.ugdtimg\.com|pgdt\.gtimg\.cn)\/.*\.mp4 script-path=https://ws.wenn.in/main/Scripts/Qidian.js, requires-body=true, binary-body-mode=true, timeout=5, tag=视频替换
 
 # 自动重放与 Token 窃取 (request 阶段)
 # ⚠️ 修复: timeout 从 30 提升至 120 秒，因为 9 次重放 + 递增等待(2/4/.../18s)总计约90秒
@@ -50,19 +46,19 @@ cron {CRONEXP} script-path=https://ws.wenn.in/main/Scripts/Qidian.js, timeout={T
 # ⚠️ 层间矛盾 (勿静默删本白名单)。逐条实证, 非笼统结论 (2026-09-29 审计修正):
 #   官方《规则系统 3.1》第 4 条: 来源优先级 本地配置 > 插件。故主配置 [Rule] 的 REJECT
 #   会压掉同域的插件 DIRECT。逐条核对结果:
-#     ① ii.gdt.qq.com               → 主配置 DOMAIN REJECT 覆盖 → 本条**不生效**
-#     ② adsmind.gdtimg.com           → 主配置 DOMAIN REJECT 覆盖 → 本条**不生效**
-#     ③ pangolin-sdk-toutiao.com     → 主配置 DOMAIN-SUFFIX REJECT 覆盖 → **不生效**
-#     ④ pangolin-sdk-toutiao1.com    → **部分生效**。主配置只有
+#     ① ii.gdt.qq.com / ② adsmind.gdtimg.com / ③ pangolin-sdk-toutiao.com
+#          → 均被主配置 REJECT 覆盖 → **本条永不生效**。且这三条保护的"秒播"功能
+#            已于 2026-08-12 用户决策停用(主配置全链 REJECT + 对应 [Script] 已删),
+#            保护对象本身不存在 ⇒ 于 2026-09-29 连同其 [Script]/[MitM] 一并删除。
+#            留存它们只会误导: 看着在保奖励包, 实则被主配置压掉、谁也保不到。
+#     ④ pangolin-sdk-toutiao1.com    → **部分生效, 保留**。主配置只有
 #          `DOMAIN, api-access.pangolin-sdk-toutiao1.com` 这一条精确 REJECT, 它
 #          **不覆盖** SUFFIX 的其他子域(裸域 / log-api. / gromore. 等) ⇒ 本条对这些生效。
 #          (`.com1` 是独立域, 不被 `DOMAIN-SUFFIX, pangolin-sdk-toutiao.com` 罩住)
 #   后果: 激励/每日任务奖励包可能因 SDK 被拦而计数失败(任务 X/9 长期不满)。
-#   改动任一方向都需真机确认: 要么关两任务开关, 要么把模板对应域改 DIRECT(开屏会回来)。
-#   门禁 plugin-lint-check 的「[跨层空转]」会自动报出 ①②③ 三条。
-DOMAIN, ii.gdt.qq.com, DIRECT
-DOMAIN, adsmind.gdtimg.com, DIRECT
-DOMAIN-SUFFIX, pangolin-sdk-toutiao.com, DIRECT
+#   ④ 改动任一方向都需真机确认: 要么关两任务开关, 要么把模板对应域改 DIRECT(开屏会回来)。
+#   门禁 plugin-lint-check 的「[跨层空转]」会自动报出被主配置 REJECT 覆盖的 DIRECT;
+#   ④ 不被报出(它确有生效子域), 是预期状态。
 DOMAIN-SUFFIX, pangolin-sdk-toutiao1.com, DIRECT
 
 # 追踪/监控/埋点 SDK — 强力阻绝
@@ -87,29 +83,43 @@ DOMAIN, noahqd.yuewen.com, REJECT
 DOMAIN, ali-stats.jpush.cn, REJECT
 
 [Rewrite]
-# 功能增强: EnableSearchUser=1 让搜索页可搜用户 (对齐 app2smile/rules 上游实现)。
-# ⚠️ 类型存疑 (需真机验证): 上游脚本写的是**字符串** "1", 而本条写的是裸值 1 (Number)。
-#   官方《Rewrite 新语法》: JSON 值可以是 String / Number / Boolean / null —— 语法上
-#   两者都合法, 但若 App 端按 `=== "1"` 严格比较字符串, Number 则不生效。
-#   同一疑点也存在于本文件既有的 WolfEye=0 / TeenShowFreq=0 两条 (上游同样用 '0' 字符串)。
-#   三条长期在工作 ⇒ 或 App 端容忍 Number, 或该字段本就是 Number。未经真机验证不改类型。
-^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/client\/getconf$ response-body-json-replace Data.WolfEye 0 Data.CloudSetting.TeenShowFreq 0 Data.EnableSearchUser 1 enable={CAPTURE_ENABLE}
-^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/client\/getconf$ response-body-json-del Data.ActivityPageBackPushNoticeFrequency Data.ActivityIcon Data.ActivityPopup Data.LuckBag enable={CAPTURE_ENABLE}
-^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v4\/client\/getsplashscreen\? reject-dict enable={CAPTURE_ENABLE}
-^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/adv\/ reject-dict enable={CAPTURE_ENABLE}
-^https:\/\/ywab\.reader\.qq\.com\/user\/experiments\/v2\? reject-dict enable={CAPTURE_ENABLE}
-^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/checkin\/simpleinfo\? reject-dict enable={CAPTURE_ENABLE}
-^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/push\/getdialog\? reject-dict enable={CAPTURE_ENABLE}
-^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v2\/dailyrecommend\/getdailyrecommend\? response-body-json-replace Data.Items [] enable={CAPTURE_ENABLE}
-^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/message\/getpushedmessagelist$ reject-dict enable={CAPTURE_ENABLE}
-^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/maintain\/playstrip$ reject-dict enable={CAPTURE_ENABLE}
-^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/dailyrecommend\/recommendBook\? reject-dict enable={CAPTURE_ENABLE}
-^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/freshman\/bookshelfbtn$ reject-dict enable={CAPTURE_ENABLE}
-^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/bookshelf\/getTopOperation$ reject-dict enable={CAPTURE_ENABLE}
-^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v3\/user\/getaccountpage\? response-body-json-del Data.BenefitButtonList enable={CAPTURE_ENABLE}
-^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/booksearch\/hotWords\? reject-dict enable={CAPTURE_ENABLE}
-^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/followsubscribe\/showChapterEndModule\? reject-dict enable={CAPTURE_ENABLE}
-^https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/young\/getconf$ reject-dict enable={CAPTURE_ENABLE}
+# 2026-09-29 迁移至 Loon 3.5.1(978) 新 Rewrite 语法(原 3.2.4 旧语法)。要点:
+#   ① 旧语法 enable={CAPTURE_ENABLE} 是**全部 13 条都带**的; 新语法必须逐条写成
+#      条件 ${CAPTURE_ENABLE} == true && …, 漏写一条即等于把该条开关永久打开。
+#   ② 正则**原样搬运**: 官方新语法示例同样把斜杠写作 \/ 、点写作 \. —— 在正则字面量里
+#      `/` 必须转义, 还原成 / 会让正则提前终止。只剥行首 ^, 不动内部转义。
+#   ③ 字面问号(query 分隔符)保持 \?; 旧语法行尾用于收束的 \/ 去掉(已由 / 承担)。
+#   ④ reject-dict → reject_dict(200) (官方《Rewrite 新语法》Action 速查表)。
+#   ⑥ 批量参数是**两个等长平行数组**按下标配对, 不是扁平单数组:
+#      json.replace(["k1","k2"], [v1,v2])。写成扁平数组会被加载期拒绝。
+#   ⑦ JSON 值只支持 String/Number/Boolean/null/变量 —— **不含数组/对象**,
+#      故"Data.Items 置空数组"用 json.jq(".Data.Items = []") 而非 replace 传 []。
+#   ⑤ 旧语法按空格分隔、正则内空格需 \x20; 新语法由 parser 解析整行, 不再需要。
+
+# 客户端配置净化: 3 处字段改值 (WolfEye 关强制 https / 青少年弹窗 / 允许搜索用户)
+response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/client\/getconf$/ then response.json.replace(["Data.WolfEye", "Data.CloudSetting.TeenShowFreq", "Data.EnableSearchUser"], [0, 0, 1])
+# 客户端配置净化: 4 个活动/推广字段删除
+response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/client\/getconf$/ then response.json.delete(["Data.ActivityPageBackPushNoticeFrequency", "Data.ActivityIcon", "Data.ActivityPopup", "Data.LuckBag"])
+# 广告接口: 开屏 / adv / 签到页 / 弹窗
+response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v4\/client\/getsplashscreen\?/ then reject_dict(200)
+response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/adv\// then reject_dict(200)
+response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/checkin\/simpleinfo\?/ then reject_dict(200)
+response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/push\/getdialog\?/ then reject_dict(200)
+# 每日导读: Items 置空数组
+response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v2\/dailyrecommend\/getdailyrecommend\?/ then response.json.jq(".Data.Items = []")
+# 播放条 / 推荐 / 新手引导 / 书架运营位 / 章末模块 / 青少年配置
+response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/maintain\/playstrip$/ then reject_dict(200)
+response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/dailyrecommend\/recommendBook\?/ then reject_dict(200)
+response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/freshman\/bookshelfbtn$/ then reject_dict(200)
+response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/bookshelf\/getTopOperation$/ then reject_dict(200)
+response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/followsubscribe\/showChapterEndModule\?/ then reject_dict(200)
+response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/young\/getconf$/ then reject_dict(200)
 
 [MitM]
-hostname = %APPEND% api-access.pangolin-sdk-toutiao.com, h5.if.qidian.com, magev6.if.qidian.com, ii.gdt.qq.com, adsmind.gdtimg.com, adsmind.ugdtimg.com, pgdt.gtimg.cn, api-access.pangolin-sdk-toutiao1.com, ywab.reader.qq.com
+
+# 2026-09-29 收窄 9 → 2。判据: 本仓 domain-reject-mode = DNS + dns-reject-mode = LOOPBACKIP,
+# 主配置对这些域是 DOMAIN / DOMAIN-SUFFIX,REJECT ⇒ 请求在 **DNS 阶段**即被回环拒绝, 到不了
+# MitM 解密层。留在 [MitM] 的唯一实际效果是**多背一份 CA 证书信任**, 换不来任何功能。
+# 随之删除的 4 条 [Script] (ii.gdt / 穿山甲 ×2 / adsmind+pgdt 视频) 同理: 域到不了解密层,
+# 脚本永不触发, 留着只会让人误以为"这域有处理"。
+# 重新加回的条件: 对应域在主配置**不再** REJECT, 或 domain-reject-mode 改为 Request。
