@@ -1,5 +1,5 @@
 {
-  "$comment": "资源归类真源。2026-09-29 单插件基线：仅保留 起点 一个插件 + 完整 M1 分流。外部依赖归零 (仅自建 CDN ws.wenn.in 的 qidian.plugin + geoip-url 的 mmdb 分流地基)。同日移除了原 46 条 CDN 插件引用 —— 那是用户可见的功能回退 (2130 条规则 / 994 个解密 host),取舍记录在 template/loon.tpl 的 [Plugin] 段头注。",
+  "$comment": "资源归类真源。2026-09-29 起点收尾 + 京东接入：起点(M7) + 京东(M2) 两个插件 + 完整 M1 分流。外部依赖归零 (仅自建 CDN ws.wenn.in 的 qidian.plugin + geoip-url 的 mmdb 分流地基)。同日移除了原 46 条 CDN 插件引用 —— 那是用户可见的功能回退 (2130 条规则 / 994 个解密 host),取舍记录在 template/loon.tpl 的 [Plugin] 段头注。",
   "schema_version": 1,
   "axes": {
     "module": "职责模块 M1-M6",
@@ -40,18 +40,36 @@
       "purpose": "拦广告。唯一跨 3 层的模块",
       "internal_layers": {
         "L2": "tpl 本地 [Rule] 的 REJECT 段 (122 条裸 REJECT, 全部经 DoH 双解析器 + 协议探针取证)",
-        "L4": "已随 45 个插件删除 (原 startup-adblock-pro 493 条 Rewrite)",
-        "L5": "已随 28 个 Scripts 删除"
+        "L4": "Plugin/ 京东广告位字段级净化 (qidian 的 13 [Rewrite] + jingdong 的 6 [Script])",
+        "L5": "Scripts/jingdong.js (京东, src/ 构建轨)"
       },
       "tpl_resources": {
         "snippets": []
       },
-      "plugins": [],
-      "scripts": [],
+      "plugins": [
+        {
+          "file": "jd.plugin",
+          "app": "京东",
+          "layer": "L4+L5",
+          "granularity": "single-app",
+          "reason": "1 条 [Script] 命中 7 个 functionId, 全部由 Scripts/jingdong.js 字段级净化; 解密面仅 api.m.jd.com 单域"
+        }
+      ],
+      "scripts": [
+        {
+          "file": "jingdong.js",
+          "app": "京东",
+          "layer": "L4",
+          "granularity": "single-app",
+          "build": "src/jingdong.ts (esbuild 构建轨)",
+          "reason": "api.m.jd.com client.action 的开屏/首页/订单/物流/新品页广告字段级净化; 6 个 functionId 一律 delete/filter 不整条 reject —— functionId=start 同时下发启动配置与开屏图, 整条拒致白屏 (本仓已犯错, zqzess 上游为反例)"
+        }
+      ],
       "granularity_actual": [],
       "responsibilities": [
-        "无插件成员: 去广告能力仅剩主配置 L2 硬拦截面",
-        "App 内部结构化广告位 (L4 字段重命名 / L5 字段级净化) 已无任何资源 —— 功能回退"
+        "京东: 6 个 functionId 的字段级净化 (Scripts/jingdong.js, L4+L5)",
+        "起点: 13 条 [Rewrite] 字段级净化 (qidian.plugin, L4)",
+        "主配置 120 条裸 REJECT 硬拦截面 (L2, 全部经 DoH 双解析器 + 协议探针取证)"
       ],
       "also_members": []
     },

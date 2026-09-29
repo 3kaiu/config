@@ -1,11 +1,25 @@
 {
   "schema_version": 1,
-  "plugin_count": 1,
-  "app_count": 1,
+  "plugin_count": 2,
+  "app_count": 2,
   "multi_owner": [],
   "fake_granularity": [],
   "undeclared_scripts": [],
   "apps": [
+    {
+      "app": "京东",
+      "owners": [
+        {
+          "plugin": "jd.plugin",
+          "module": "M2",
+          "script": "jingdong.js",
+          "rules": 1,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
     {
       "app": "起点",
       "owners": [
@@ -22,6 +36,17 @@
     }
   ],
   "plugins": [
+    {
+      "file": "Plugin/jd.plugin",
+      "module": "M2",
+      "switches": 0,
+      "rules": 1,
+      "scripts": [
+        "jingdong.js"
+      ],
+      "mitm_hosts": 1,
+      "switch_usage": []
+    },
     {
       "file": "Plugin/qidian.plugin",
       "module": "M7",

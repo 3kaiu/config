@@ -296,7 +296,9 @@ response … enable={CAPTURE_ENABLE}        ← 消费
 
 **现状**：京东只有 5 条功能域 `DIRECT`（`kepler` / `keplerapi` / `mapi.m` / `policy` + 友盟 `msg.umengcloud`），**无 MitM、无脚本、无字段改写、无任何 jd REJECT**。
 
-**为什么不加治理**（对抗两条路后否决"硬加"）：
+**⚠️ 本节结论已于同日修正**：初判"无治理是正确基线"**不完整**——它漏了"全网已有成熟公开实现"这一取证路径。补搜上游后结论改为：**京东去广告有成熟实现可落地，但必须字段级**（详见下）。
+
+**为什么不凭空加治理**（仍成立的纪律）：
 - 广告治理的前提是「先有解密面 + HAR 取证接口结构」。京东当前**没有任何解密面**，凭空加 `REJECT` 就是本仓已犯过的 `du.jd.com` 错。
 - 凭域名字义判断「这域像广告」不可取证。`jzt.jd.com` 看着像广告实为对外 Jenkins CI；`du.jd.com` 看着像短链实为店铺域。**每次新增京东 REJECT 都必须先 DoH 双解析器 + HTTPS 探针**。
 
@@ -306,7 +308,25 @@ response … enable={CAPTURE_ENABLE}        ← 消费
 
 **唯一改动**：5 条 DIRECT 的注释——原注释称「修正远端广告列表过粗 KEYWORD 的功能性误杀」，但本仓已移除 12 万条广告域名表 + 7 个镜像列表、长尾广告域一律走 `Final`，**「防误杀」成因已消失**。它们现在的角色是**主动声明走直连的功能域锚点**，不是被动防误杀。保留（不与任何 REJECT 冲突、不产生解密面、风险极低，且是将来 jd REJECT 重引入时的第一道防线），只把注释改成反映新成因。
 
-**判据沉淀**：功能域白名单的成因会随配置演进而失效，注释必须随成因更新，否则后人会误判它是空转或误删。**「无治理」在缺少解密面与 HAR 时是正确基线，不是缺口。**
+### 附三·补：全网已有成熟实现（推翻"要 HAR 才能做"的默认假设）
+
+初判时我以"缺 HAR ⇒ 无法取证"为由建议停手，**这是错的**——HAR 只是取证手段之一，上游仓库已含可直接交叉验证的接口与字段。三源交叉验证：
+
+| 接口 | fmz200/wool_scripts | zqzess | 研判 |
+|---|---|---|---|
+| `api.m.jd.com?functionId=start` | `obj.images=[]` 字段级 | `reject-array` **整条拒** | 前者✅ / 后者❌ 白屏 |
+| `?functionId=welcomeHome` | `floorList` filter 删 6 类推广层 | — | ✅ 字段级 |
+| `?functionId=lite_advertising` | 字段重命名 `jdLiteAdvertisingVO→fmz200` | — | ✅ 抗异常分支 |
+| `?functionId=myOrderInfo` | `floors` filter | — | ✅ 字段级 |
+| `?functionId=deliverLayer` / `orderTrackBusiness` | 删 `bannerInfo` + 过滤运费八折 | — | ✅ 字段级 |
+| `?functionId=getTabHomeInfo` | 删 `iconInfo` / `roofTop` | — | ✅ 字段级 |
+
+**这条交叉验证同时实证了本仓的 `functionId=start` 白屏教训**：zqzess 用 `reject-array` 整条拒该接口，正是 AGENTS.md 记的"既下发业务数据又下发广告不能整条拒"；fmz200 用 `obj.images=[]` 才是正解。**两个独立上游在同一接口上分叉，且分叉方向与本仓教训完全一致——这是比单方文档更强的证据。**
+
+**修正后的落地方案**（不再是"停手"）：以 `fmz200/wool_scripts/Scripts/jingdong/jingdong.js` 为准建京东插件，解密面只需 `api.m.jd.com`。三条纪律必须遵守：① 一律字段级 `delete`/`filter`，不整条 reject；② 走 `src/*.ts` + esbuild 构建（`Scripts/Qidian.js` 那种手工轨不可复制）；③ 每个 `functionId` 独立取证，不因同域批量照搬。
+
+**判据沉淀**：HAR 缺失**不等于**停手理由——先搜上游/issue/已构建插件，三源交叉验证强度往往高于单份 HAR。
+**功能域白名单的成因会随配置演进而失效**，注释必须随成因更新，否则后人会误判它是空转或误删。**「无治理」在缺少解密面与 HAR 时是正确基线，不是缺口。**
 
 ---
 

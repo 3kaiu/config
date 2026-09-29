@@ -1,0 +1,25 @@
+#!name=京东去广告 Pro
+#!desc=开屏/首页/订单/物流/新品页广告字段级净化。基于 fmz200/wool_scripts jingdong.js 字段口径, 一律 delete/filter 不整条 reject。
+#!version=1.0
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+#!arguments-desc=\n- \{JINGDONG_ENABLE}: switch,"true","false",tag=京东去广告, desc=是否开启京东广告净化\n
+
+[Argument]
+JINGDONG_ENABLE = switch,true,tag=京东去广告,desc=是否开启京东广告净化
+
+[Script]
+# ⚠️ 一律字段级, 不整条 reject —— 官方《广告面治理纪律》「一个接口既下发业务
+# 数据又下发广告, 就不能整条拒」; 本仓 AGENTS.md 记的 functionId=start 白屏正是
+# 整条 reject 的后果。zqzess 上游对该接口用 reject-array 是反例, 不采纳。
+# 脚本内对未取证 functionId 一律原样放行 (不因同域批量照搬)。
+http-response ^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(start|welcomeHome|myOrderInfo|deliverLayer|orderTrackBusiness|getTabHomeInfo|personinfoBusiness) script-path=https://ws.wenn.in/main/Scripts/jingdong.js, requires-body=true, timeout=10, tag=京东广告字段级净化, enable={JINGDONG_ENABLE}
+
+[MitM]
+# 单一解密面: 京东 client.action 网关。子域分流 (api.m / api.* / xxx.m) 由网关
+# 自身决定, 列举具体子域反而会漏; 但**不写通配**, 因为 *.jd.com 通配会让整站
+# (店铺 du / Jenkins CI jzt 等) 进解密面 —— 本仓已犯过 du.jd.com 误拦的错。
+# 加解密域前须 DoH 双解析器 + HTTPS 探针取证, 凭域名字义加 REJECT 是本仓犯过的错。
+hostname = %APPEND% api.m.jd.com
