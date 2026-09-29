@@ -290,6 +290,26 @@ response … enable={CAPTURE_ENABLE}        ← 消费
 
 ---
 
+## 附三：京东 App 的研判结论 —— 作为「何时该停手」的对照样例（2026-09-29）
+
+京东是本仓的**反面教材来源**（`du.jd.com`/`c-nfa.jd.com` 凭「广告域」命名加 REJECT，实为店铺域；`functionId=start` 整条 reject 致白屏）。本轮按本标准对抗研判后，结论是**维持现状、不加广告治理**：
+
+**现状**：京东只有 5 条功能域 `DIRECT`（`kepler` / `keplerapi` / `mapi.m` / `policy` + 友盟 `msg.umengcloud`），**无 MitM、无脚本、无字段改写、无任何 jd REJECT**。
+
+**为什么不加治理**（对抗两条路后否决"硬加"）：
+- 广告治理的前提是「先有解密面 + HAR 取证接口结构」。京东当前**没有任何解密面**，凭空加 `REJECT` 就是本仓已犯过的 `du.jd.com` 错。
+- 凭域名字义判断「这域像广告」不可取证。`jzt.jd.com` 看着像广告实为对外 Jenkins CI；`du.jd.com` 看着像短链实为店铺域。**每次新增京东 REJECT 都必须先 DoH 双解析器 + HTTPS 探针**。
+
+**本轮做的取证**（DoH Cloudflare + DNS.google 双解析器 + HTTPS 探针，复核历史结论仍成立）：
+- 4 个功能域全部存活：`kepler.jd.com` 302 / `keplerapi.jd.com` 302 / `mapi.m.jd.com` 403 / `policy.jd.com` 404（403/404 = 服务端在，非死域）。
+- 历史教训复核：`du.jd.com`、`c-nfa.jd.com` 仍 302 → `www.jd.com/error2.aspx?from=shopdomain`（**店铺域结论至今有效，勿加 REJECT**）；`jzt.jd.com` 301（对外 CI，仍非广告）。
+
+**唯一改动**：5 条 DIRECT 的注释——原注释称「修正远端广告列表过粗 KEYWORD 的功能性误杀」，但本仓已移除 12 万条广告域名表 + 7 个镜像列表、长尾广告域一律走 `Final`，**「防误杀」成因已消失**。它们现在的角色是**主动声明走直连的功能域锚点**，不是被动防误杀。保留（不与任何 REJECT 冲突、不产生解密面、风险极低，且是将来 jd REJECT 重引入时的第一道防线），只把注释改成反映新成因。
+
+**判据沉淀**：功能域白名单的成因会随配置演进而失效，注释必须随成因更新，否则后人会误判它是空转或误删。**「无治理」在缺少解密面与 HAR 时是正确基线，不是缺口。**
+
+---
+
 ## 本标准已固化的门禁
 
 `APP-ONBOARDING.md` 中可机械判定的部分已落成 `tools/plugin-lint-check.mjs` 的报告项（只报告不判红，因为这类冲突常源于用户的**主动权衡**）：

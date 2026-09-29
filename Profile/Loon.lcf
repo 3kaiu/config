@@ -719,12 +719,20 @@ DOMAIN-SUFFIX, googleapis.com, Streaming
 DOMAIN-SUFFIX, google.com, Streaming
 DOMAIN-SUFFIX, google.co.jp, Streaming
 
-# ── 误杀域名白名单 (2026-08 审计) ────────────────────────────────
-# 修正远端广告列表过粗 KEYWORD 的功能性误杀; 本地规则先于远端列表求值。
+# ── 功能域直连白名单 (原"误杀域名白名单", 2026-08 审计 → 2026-09-29 复核) ──
+# ⚠️ 成因已变: 原注释写"修正远端广告列表过粗 KEYWORD 的功能性误杀", 但本仓已移除
+#    12万条广告域名表 + 7 个镜像规则列表, 长尾广告域一律走 Final ⇒ 没有任何规则
+#    会 REJECT 下列域, "防误杀"已不成立。它们现在的角色是**主动声明走直连的
+#    功能域锚点**, 不是被动防误杀。保留 (不与任何 REJECT 冲突, 不产生解密面,
+#    风险极低), 且在将来任何 jd.* REJECT 重新引入时是第一道防线。
 # 原则: 只放行「功能域」, 统计/追踪域保持 REJECT。
 # - msg.umengcloud.com 为友盟推送 MPS 网关 (仅此域), ulogs/sec 友盟统计仍拦截
 # - kepler.jd.com 系列为第三方 App 内京东购买页/开普勒 API (什么值得买等跳转依赖)
 # - pstatp/byteimg 系列为字节内容图床 (头条信息流图片), dm./pglstatp 广告域不放行
+# 2026-09-29 DoH(Cloudflare+DNS.google 双解析器)+HTTPS 探针复核 4 个京东功能域,
+#   全部存活: kepler.jd.com 302 / keplerapi.jd.com 302 / mapi.m.jd.com 403 /
+#   policy.jd.com 404 (403/404 = 服务端在, 非死域)。京东无 MitM/脚本, 广告治理
+#   需先有解密面 + HAR 取证接口结构; 凭域名字义加 REJECT = 本仓已犯的 du.jd.com 错。
 DOMAIN, msg.umengcloud.com, DIRECT
 DOMAIN, kepler.jd.com, DIRECT
 DOMAIN, keplerapi.jd.com, DIRECT
