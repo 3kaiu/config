@@ -1,5 +1,5 @@
 {
-  "$comment": "资源归类真源。2026-09-29 精简后仅保留 起点 一个插件 + 完整 M1 分流 —— 外部依赖归零 (仅自建 CDN ws.wenn.in + geoip-url 的 mmdb 分流地基)。本文件随磁盘现状重写, 不保留已删资源的历史登记。",
+  "$comment": "资源归类真源。2026-09-29 单插件基线：仅保留 起点 一个插件 + 完整 M1 分流。外部依赖归零 (仅自建 CDN ws.wenn.in 的 qidian.plugin + geoip-url 的 mmdb 分流地基)。同日移除了原 46 条 CDN 插件引用 —— 那是用户可见的功能回退 (2130 条规则 / 994 个解密 host),取舍记录在 template/loon.tpl 的 [Plugin] 段头注。",
   "schema_version": 1,
   "axes": {
     "module": "职责模块 M1-M6",
@@ -13,7 +13,7 @@
       "layer": "L2+L3",
       "purpose": "决定请求走哪条链路, 不改写内容",
       "tpl_resources": {
-        "loon_tpl": "template/loon.tpl ([Rule] 486 条: DOMAIN-SUFFIX 363 / DOMAIN 109 / DOMAIN-KEYWORD 6 / IP-CIDR 4 / DEST-PORT 2 / GEOIP 1 / FINAL 1)",
+        "loon_tpl": "template/loon.tpl ([Rule] 484 条: DOMAIN-SUFFIX 362 / DOMAIN 108 / DOMAIN-KEYWORD 5 / IP-CIDR 4 / DEST-PORT 2 / PROTOCOL 1 / GEOIP 1 / FINAL 1)",
         "snippets": [
           "ai-services.tpl",
           "developer.tpl",
@@ -39,9 +39,9 @@
       "layer": "L2+L4",
       "purpose": "拦广告。唯一跨 3 层的模块",
       "internal_layers": {
-        "L2": "tpl 本地 [Rule] 的 REJECT 段 (122 条, 全部经 DoH 双解析器 + 协议探针取证)",
-        "L4": "模板层 0 条 —— 原 startup-adblock-pro.plugin (492 条) 已随精简删除",
-        "L5": "已随 28 个 Scripts 一并删除"
+        "L2": "tpl 本地 [Rule] 的 REJECT 段 (122 条裸 REJECT, 全部经 DoH 双解析器 + 协议探针取证)",
+        "L4": "已随 45 个插件删除 (原 startup-adblock-pro 493 条 Rewrite)",
+        "L5": "已随 28 个 Scripts 删除"
       },
       "tpl_resources": {
         "snippets": []
@@ -50,7 +50,8 @@
       "scripts": [],
       "granularity_actual": [],
       "responsibilities": [
-        "2026-09-29 起无插件成员: 去广告能力已全部移除, 保留的仅主配置 REJECT 面"
+        "无插件成员: 去广告能力仅剩主配置 L2 硬拦截面",
+        "App 内部结构化广告位 (L4 字段重命名 / L5 字段级净化) 已无任何资源 —— 功能回退"
       ],
       "also_members": []
     },
@@ -160,9 +161,9 @@
       "id": "G1",
       "owner": "M1",
       "status": "open",
-      "capability": "[Rule] 策略层 107 条全为裸 REJECT",
-      "used": "Loon 3.1.4+ 自动升级为 REJECT-DROP (App 疯狂重试致 CPU 发烫)",
-      "impact": "-NO-DROP 可禁用该升级; [Rewrite] 动作层无此缺口, 但动作层已随插件删除"
+      "capability": "[Rule] 策略层 REJECT 变体 (官方共 5 种: REJECT/-IMG/-DICT/-ARRAY/-DROP)",
+      "used": "121 条全为裸 REJECT, 变体均 0。注: 原表述引用的 REJECT-VIDEO / REJECT-NO-DROP 在官方《策略》文档中不存在, 'Loon 3.1.4+ 自动升级为 REJECT-DROP' 亦无官方出处, 已于 2026-09-29 删除该论证",
+      "impact": "策略层全部退化为 404, 部分 App 会因非预期状态码重试; 按上游响应形状分派变体可缓解"
     },
     {
       "id": "G2",
@@ -177,7 +178,7 @@
       "owner": "M2",
       "status": "open",
       "capability": "插件层去广告 (Rewrite 字段改写 / reject-dict 通道)",
-      "used": "45 个插件已随外部依赖清理全部删除, 仅余主配置 122 条 REJECT",
+      "used": "45 个插件已随外部依赖清理全部删除, 仅余主配置 121 条 REJECT (含 1 条 PROTOCOL, STUN)",
       "impact": "App 内部结构化广告位无法清理 —— 需用户逐个重新接入插件"
     },
     {
@@ -187,6 +188,38 @@
       "capability": "签到/打卡/领券/画质解锁类增强",
       "used": "除起点外全部删除 (netease 签到 / weibo 签到 / jd 领券 / iqiyi 4K 等)",
       "impact": "功能缺失。用户将逐个重新接入"
+    },
+    {
+      "id": "G8",
+      "owner": "M3",
+      "status": "resolved",
+      "capability": "PROTOCOL 规则 (官方支持 HTTP/HTTPS/TCP/QUIC/STUN/UDP)",
+      "used": "新增 1 条: PROTOCOL, STUN, REJECT —— 取代原 DOMAIN-KEYWORD, stun, REJECT",
+      "impact": "2026-09-29 修复。关键词规则只能匹配含 'stun' 的域名, 裸 IP 的 STUN 逃逸面够不着; 协议规则无此缺口。官方《规则系统 3.1》第 1 条保证域名规则先命中, 故 5 条通话白名单不受影响。需 Loon >= 3.1.7"
+    },
+    {
+      "id": "G10",
+      "owner": "M1",
+      "status": "resolved",
+      "capability": "[General] ip-mode × ipv6-vif 一致性",
+      "used": "ip-mode 由 dual 改为 ipv4-only; bypass-tun/skip-proxy 补齐 IPv6 局域网段",
+      "impact": "2026-09-29 对抗审计发现的自相矛盾: dual 把 AAAA 结果交给 App 而 ipv6-vif=off 不接管 TUN 的 IPv6 —— 丢包则 App 连不通, 绕过则静默泄漏 (与 M3 隐私模块目标冲突)。ipv4-only 从源头消除 (不发 AAAA 查询)。门禁 general-semantics.test.js 已加两条断言锁死"
+    },
+    {
+      "id": "G11",
+      "owner": "M1",
+      "status": "resolved",
+      "capability": "udp-fallback-mode (UDP 回落策略)",
+      "used": "由 DIRECT 改为 REJECT",
+      "impact": "2026-09-29 对抗审计。官方定义为'节点不支持 UDP 或未启用 UDP 转发时使用的策略'; 取 DIRECT 时节点一旦无 UDP, 全部 UDP(QUIC/游戏/通话)从本机真实 IP 直连漏出, 与已用 PROTOCOL,STUN,REJECT 封 STUN 的 posture 矛盾。REJECT = 失败可见。前置条件: 东京组节点须启用 UDP, 否则通话/游戏不可用"
+    },
+    {
+      "id": "G12",
+      "owner": "M1",
+      "status": "accepted",
+      "capability": "ipasn-url (ASN 数据库)",
+      "used": "维持不设 (12MB 下载换来 0 条有效规则)",
+      "impact": "2026-09-29 按官方文档重判: 官方 IP-ASN 示例为 `IP-ASN,4134,DIRECT,no-resolve`, 带 no-resolve 即只作用于'目标已是 IP'的一路, 而那一路上 GEOIP,CN,DIRECT 已按 mmdb 判定国别, ASN 在 DIRECT 方向是 GEOIP 的子集; REJECT 方向则需可信的广告 ASN 清单(本仓无)。故 ASN 对本配置无增量。dns-geoip.test.js 的消费者断言继续守着这条"
     }
   ],
   "resolved": [

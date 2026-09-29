@@ -7,7 +7,7 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 ## 命令
 
 - `npm run build`：注入 `src/env.ts` 与 `src/lib/*.ts`，把 `src/*.ts` 压缩到 `Scripts/`。改源码后必须执行。
-- `npm test`：107 个行为级用例，引用全部 1 个 Scripts 产物（`Qidian.js` 手工轨）；随后执行规则顺序与接线检查。关键文档数字由 `tools/doc-claims-check.mjs` 对照实测。
+- `npm test`：114 个行为级用例，引用全部 1 个 Scripts 产物（`Qidian.js` 手工轨）；随后执行规则顺序与接线检查。关键文档数字由 `tools/doc-claims-check.mjs` 对照实测。
 - `npm run lint`：ESLint flat config，检查 `Scripts/`、`test/`、`tools/`。
 - `npm run generate`：Surgio 3.19 从纯静态模板生成 `Profile/Loon.lcf`。该命令会创建空 `dist/`，`.gitignore` 中对应规则必须保留。
 - `npm run check:all`：串行执行 sync、rewrite、src、orphan、plugin、contract、workflows、scripts、index 门禁；不包含 build、test、lint、generate。`scripts` 把 build 命令重定向到**临时目录**重建后与 `Scripts/` 逐字节比对 —— 补的是本地盲区：手改产物或改了 src 没 build 时，其余门禁会全绿。
@@ -52,21 +52,22 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 
 ## 广告面治理纪律
 
-- **广告面台账**：京东台账在 `test/cases/jingdong.test.js` 的 `AD_SURFACES`，逐条登记处置方式（`rejected` 整条拒 / `rewritten` 字段重命名 / `purged` 字段级净化 / `domained` DNS 整域）与状态（`covered`/`inert`/`uncertain`/`rejected`）。3 条用例分别断言「已覆盖面全部有规则落地」「**已否决面必须不存在对应规则**（防上游误伤回流）」「台账自洽」。新增 App 的广告面照此登记。
-- **整条 reject 只用于纯广告接口**：京东 `functionId=start` 同时下发启动配置与开屏图，整条 `reject-200` 会致白屏 —— 已改为响应体改写（`Scripts/Jingdong.js`），由 `Plugin/jd-pro.plugin` 单一归属。
+以下纪律的具体资源随插件下线已不存在，但**判据本身仍适用** —— 新增任何广告拦截都按此办理：
+
+- **广告面台账**：逐条登记处置方式（`rejected` 整条拒 / `rewritten` 字段重命名 / `purged` 字段级净化 / `domained` DNS 整域）与状态（`covered`/`inert`/`uncertain`/`rejected`），并断言「已覆盖面全部有规则落地」「**已否决面必须不存在对应规则**（防上游误伤回流）」「台账自洽」。
+- **整条 reject 只用于纯广告接口**：京东 `functionId=start` 同时下发启动配置与开屏图，整条 `reject-200` 会致白屏 —— 必须改为响应体改写。**一个接口既下发业务数据又下发广告，就不能整条拒**。
 - **字段重命名法**：`response-body-replace-regex` 把广告字段的 key 改名成客户端认不出的名字。响应结构与 code 校验全保留，比 reject 抗异常分支。用例禁止外溢到主 App 通道。
 - **域名 REJECT 必须先取证**：京东 `du.jd.com`/`c-nfa.jd.com` 探针实证是**店铺域**（302 → `error2.aspx?from=shopdomain`），误拦直接破店铺页；`jzt.jd.com` 是对外 Jenkins CI。凭域名字义加 REJECT 是本仓已犯过的错 —— 新增前须 DoH + HTTPS 探针。
-- **策略层 REJECT 变体缺口**：`[Rule]` 策略层 107 条**全是裸 REJECT**（`REJECT-IMG`/`-DICT`/`-ARRAY`/`-VIDEO`/`-NO-DROP` 均 0）。Loon 3.1.4+ 会把 REJECT 自动升级为 `REJECT-DROP`（App 疯狂重试致 CPU 发烫），`-NO-DROP` 正是禁用该升级的手段。`[Rewrite]` 动作层无此缺口（`reject-dict` 901 / `reject` 25 / `reject-img` 9）。
-- `Plugin/startup-adblock-pro.plugin` **已冻结**（静态自维护，原每日重建生成器已删）。`BEGIN/END` marker 保留仅为可追溯。
-- **App 归属反查**：回答"某 App 的广告归谁管"用 `APP-INDEX.json`（2026-09-29 精简后：1 个 App / 1 个插件 / 0 假粒度）。**App 名不得从开关 tag 猜** —— tag 写法不统一（`是否开启X净化`/`X净化`/`开屏广告`/`总开关` 四类），启发式会把同一 App 记成两个名字；可靠的自描述是**开关 KEY**（`LUCKINCOFFEE_ENABLE`→瑞幸咖啡）。只能定位到插件级的归属必须标 `rules_basis=plugin-total`，不许假装精确。
-- 清理冗余解密面由两条门禁守住：`mitm-orphan`（每个正包含 MitM 域须有规则消费）+ `mitm-coverage`（每条 Rewrite 规则须有解密面）。`pangolin-sdk-toutiao\d*` 曾因通配 host 判为 generic 而恒被报孤儿，已改为显式列两个 host。
+- **策略层 REJECT 变体缺口**：`[Rule]` 策略层 122 条全是裸 `REJECT`（官方共 5 种变体，`-IMG`/`-DICT`/`-ARRAY`/`-DROP` 均 0），全部退化为 404，部分 App 会因非预期状态码重试。**注意**：`REJECT-VIDEO`/`REJECT-NO-DROP` 不存在于官方《策略》文档，「REJECT 被自动升级为 REJECT-DROP」亦无出处 —— 变体分派须按上游响应形状取证，**不得按域名字符猜**（这是 P3 暂缓的原因：根路径探测拿不到 POST 型 API 的响应形状，须真机 HAR）。
+- **App 归属反查**：回答"某 App 的广告归谁管"用 `APP-INDEX.json`。**App 名不得从开关 tag 猜** —— tag 写法不统一（`是否开启X净化`/`X净化`/`开屏广告`/`总开关` 四类），启发式会把同一 App 记成两个名字；可靠的自描述是**开关 KEY**（`LUCKINCOFFEE_ENABLE`→瑞幸咖啡）。只能定位到插件级的归属必须标 `rules_basis=plugin-total`，不许假装精确。
+- 清理冗余解密面由两条门禁守住：`mitm-orphan`（每个正包含 MitM 域须有规则消费）+ `mitm-coverage`（每条 Rewrite 规则须有解密面）。通配 host 会被判为 generic 而恒被报孤儿，须显式列举。
 
 ## CI 门禁
 
-- `script-tests.yml`：lint、build、Scripts 漂移、107 用例、构建出处 attestation。
+- `script-tests.yml`：lint、build、Scripts 漂移、114 用例、构建出处 attestation。
 - `config-validate.yml`：MitM、插件结构、参数契约、源码反模式、workflow bash、模板同步、Qidian 哈希、规则冗余、模块清单、接线与银行域名断言；独立 job 重生成 Loon 配置验证幂等。
 - `surgio-build.yml`：模板/构建配置变化后自动生成 PR；发布前检查无凭据且 `[Proxy]` 无静态节点。
-- `upstream-health.yml`：客户端直连依赖（两个 mmdb、CDN 上的 Plugin/Scripts）与 3 个去广告运行时脚本上游的探活。
+- `upstream-health.yml`：客户端直连的 GeoIP mmdb + 自建 CDN（Plugin/Scripts）可用性。探活目标由 `upstream-coverage` 门禁双向锁死（漏探活与探死资源都判红）。
 - `dependency-audit.yml` / `release.yml`：构建期依赖风险 / tag 版本快照。
 - `codeql.yml`：advanced setup，扫描面由 `.github/codeql/codeql-config.yml` 的 `paths` 白名单限定为 `src/`/`tools/`/`.github/workflows/`。workflow 自身的 `on.push.paths` 只是**触发器**、不限定分析范围。advanced 与 default setup 互斥。
 
@@ -74,17 +75,17 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 
 - 不提交 secret。机场订阅由用户在 Loon 外部导入，仓库不保存 provider、节点或订阅 URL。
 - 发布面是公开 GitHub 与 `ws.wenn.in` CDN；GitHub Pages 已退役。
-- **精简的已知代价（后续可议）**：
-  - 失去 12 万条通用广告域名兜底（原 `goodbyeads-qx.list`）+ Advertising 972 + AllInOne 712 + Hijacking 231 + Privacy 24 + China 69 + Global 207 + Epic 16。**长尾广告域现在不再被 REJECT，一律走 `Final`。**
-  - 失去 8 个 iRingo、3 个 DualSubs、4 个 b cookbooks…（详见 git 历史）。均为非去广告或已有替代的功能增强。
-  - 失去镜像供应链门禁（sha256 + 投毒/体积 + 漂移/孤儿）。9 个去广告运行时脚本改为**直连上游 raw**，随上游变更即变更。
+- **单插件基线的已知代价**（均为用户决策，非缺陷；详见 git 历史）：
+  - **App 内部结构化广告位无法清理**：去广告只剩主配置 122 条已取证 REJECT + bank-ad-reject snippet + 起点插件的字段级净化。46 个 CDN 插件下线前实测全 200 存活（2130 条规则 / 994 个解密 host）。
+  - **长尾广告域不再被 REJECT，一律走 `Final`**：原 12 万条通用广告域名表 + 7 个镜像规则列表已移除。
+  - 失去镜像供应链门禁（sha256 + 投毒/体积 + 漂移/孤儿）。
   - 失去 `check:shadow`（远程列表顺序遮蔽检测）—— 无远程列表后该失效面本身已不存在。
-- [Rule] 486 行；1 个插件 = 全部在 `Plugin/`（仅 `qidian.plugin`，2026-09-29 精简）。
+- [Rule] 484 行；1 个插件 = 全部在 `Plugin/`（仅 `qidian.plugin`）。
 - 依赖仅 3 个 devDependencies（esbuild、eslint、surgio）；`engines.node >= 22`。
 - 仓库不引入 `tsc`：esbuild 只转译，不检查类型。修改 `src/` 必须用行为测试兜底。
 - `Scripts/Qidian.js` 的内嵌加密引擎无法静态审计，只能做来源、marker 与哈希治理。
 - `npm audit` 告警属于构建期工具链；禁止 `audit fix --force`。
-- GeoIP/ASN 两个 mmdb 不入库，保持客户端直连 raw（实测 7.7MB + 12.1MB 且每日变化，入 git 会月增约 600MB）。完整性由 `upstream-health.yml` 按 `*.mmdb` 分支校验（体积 ≥5MB + 尾部含 `ab cd ef MaxMind.com` marker）。
+- GeoIP mmdb 不入库，保持客户端直连 raw（实测 7.7MB 且每日变化，入 git 会月增约 600MB）。ASN mmdb 已随 `ipasn-url` 一并停用（无活跃消费者）。完整性由 `upstream-health.yml` 校验（体积 ≥5MB + 尾部含 `ab cd ef MaxMind.com` marker）。
 - `interface-mode = Performace` 是 Loon 模板中的官方原样拼写，勿自行纠正。
 - push 前必须确保 `npm test`、lint 与相关门禁全绿。
 
