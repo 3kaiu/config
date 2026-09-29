@@ -244,6 +244,22 @@
       "capability": "doq-server 的上游冗余",
       "used": "维持单上游 quic://dns.alidns.com:853",
       "impact": "2026-09-29 对抗审计**推翻了自己的初判**。初判'alidns 故障=三层加密同时消失'是错的: doh/doh3 各有 doh.pub 作第二上游, alidns 故障时加密链不降级。真正要防的是两家同时故障, 概率已低。另: 三层加密全用国内上游(AliDNS/DNSPod)是为 CDN 调度 —— 实测国内外解析结果完全不同(taobao/bilibili/jd 三例), 换成境外上游会劣化国内访问。故维持现状"
+    },
+    {
+      "id": "G16",
+      "owner": "M1",
+      "status": "accepted",
+      "capability": "GEOIP,CN,DIRECT 隐含的 DNS 预解析面",
+      "used": "维持 GEOIP,CN,DIRECT 作为兜底",
+      "impact": "2026-09-29 审计。依官方《规则系统 3.1》第 2 条(域名规则未命中时再解析 DNS 并匹配 IP 规则), 凡走到 GEOIP 的流量都已产生一次本地解析 —— 包括最终走代理的长尾境外域。故国内 DoH 解析器会记录下用户查过的境外域名。链路正确性无风险(未匹配→FINAL,Final→Proxy), 受影响的是 DNS 隐私面。这是使用 GEOIP 类 IP 规则的固有代价(Clash/Loon 通用), 非本仓引入。根治须换成「域名级中国清单+Final 兜底」, 代价是重新引入远程规则列表 —— 与 2026-09-29 下线全部远程列表的决策冲突, 需用户定方向"
+    },
+    {
+      "id": "G17",
+      "owner": "M1",
+      "status": "accepted",
+      "capability": "DEST-PORT, 5223, DIRECT 的放行范围",
+      "used": "维持端口级无条件直连(位于 [Rule] 首行, 优先级最高)",
+      "impact": "2026-09-29 审计。5223=Google FCM/IM 推送。直连的代价是推送元数据交给 Google, 但 APNs 本就常驻 real-ip 且走 Apple 块, 不构成新增泄漏面。收窄为域名限定需要 FCM 的完整域名清单(官方无此清单); 按域名字符猜正是本仓已犯过的错(京东店铺域), 故维持现状。已在模板补注说明这是范围权衡而非疏漏"
     }
   ],
   "resolved": [

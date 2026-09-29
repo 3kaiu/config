@@ -103,6 +103,11 @@ Social = select, Proxy, Fallback, DIRECT, tag=社交平台
 OpenCode = select, Proxy, DIRECT, tag=OpenCode.ai
 
 [Rule]
+# 推送端口无条件直连, 故意的**范围**权衡 (2026-09-29 审计后维持原值):
+#   5223 = Google FCM / 各类 IM 推送。放在首行即最高优先级, 先于一切 REJECT。
+#   直连的代价: 推送元数据交给 Google/APNs —— 但 APNs 本就常驻 real-ip 且走 Apple 块,
+#   不构成**新增**泄漏面。收窄为域名限定需要 FCM 的完整域名清单, 官方无此清单;
+#   按域名字符猜恰是本仓已犯过的错(京东店铺域), 故维持端口级放行。
 DEST-PORT, 5223, DIRECT
 
 {% include "./snippet/bank-ad-reject.tpl" %}
@@ -389,10 +394,17 @@ DOMAIN, catdot.dianping.com, REJECT
 DOMAIN, data-sdk-uuid-log.d.meituan.net, REJECT
 DOMAIN, qt-api.delicloud.com, REJECT
 
-# DNS 隐私语义 (Loon): 命中域名类规则的代理流量由代理远端解析, 不产生本地 DNS 查询;
-# 本地解析 (国内 DoH, 解析器侧有记录) 仅发生在: ①走到下面 GEOIP 规则的域名
-# ②直连流量本身 (国内域, 合理)。
-# 默认姿态: Final 默认 Proxy + Fallback 双节点容灾 — 长尾域名走代理远端解析;
+# DNS 隐私语义 (依据官方《规则系统 3.1 匹配优先级》第 2 条, 2026-09-29 修正):
+#   ① 目标为域名时先匹配域名规则;
+#   ② **域名规则未命中时, 再解析 DNS 并匹配 IP 规则**;
+#   ③ 其余规则按配置顺序; ④ 来源 本地 > 插件 > 订阅; ⑤ 兜底走 FINAL。
+# 推论: 凡走到 GEOIP 这条 IP 规则的流量 —— 包括最终会走代理的**长尾境外域** ——
+#       都已产生一次**本地**解析(国内 DoH, 解析器侧有记录)。这与"是否走代理"无关,
+#       代理目标域名的远端解析发生在节点侧, 二者不冲突但也不互相抵消。
+#   链路正确性无风险 (未匹配 → FINAL, Final → Proxy); 受影响的是 DNS 隐私面。
+#   这是使用 GEOIP,CN,DIRECT 这类 IP 规则的**固有代价**(Clash/Loon 通用), 想根治须
+#   换成「域名级中国清单 + Final 兜底」, 代价是重新引入远程规则列表。
+# 默认姿态: Final 默认 Proxy + Fallback 双节点容灾;
 # 零代理姿态: Final 手动切 DIRECT (代价: 长尾域名本地解析 + 直连)。
 GEOIP, CN, DIRECT
 FINAL, Final
