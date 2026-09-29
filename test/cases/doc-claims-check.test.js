@@ -21,24 +21,24 @@ const load = async () => (mod ??= await import("../../tools/doc-claims-check.mjs
 
 const claimsOf = (pairs) =>
   new Map(pairs.map(([k, ns]) => [k, { values: ns.map((n) => ({ n, line: 1 })), pattern: "" }]));
-const MEASURED = { testCases: 225, ruleLines: 481, scripts: 27, plugins: 45, kelee: 15, devDeps: 3, nodeReq: "22" };
+const MEASURED = { testCases: 225, ruleLines: 481, scripts: 27, plugins: 45, devDeps: 3, nodeReq: "22" };
 
 exports.tests = {
   "claims: 文档与实测一致 → 0 fail": async (a) => {
     const { check } = await load();
     const claims = claimsOf([
       ["testCases", [225]], ["scriptArtifacts", [27]], ["ruleLines", [481]],
-      ["pluginTotal", [60]], ["devDeps", [3]], ["keleeCount", [15]],
+      ["pluginTotal", [45]], ["devDeps", [3]],
     ]);
     const { fails, rows } = check(claims, MEASURED, { claimsText: "engines.node >= 22" });
     a.equal(fails.length, 0, "全一致时无失败");
-    a.equal(rows.length, 7, "7 项断言全记录");
+    a.equal(rows.length, 6, "6 项断言全记录 (5 项 expect + nodeReq)");
   },
   "claims: 文档漂移 (文档 230 vs 实测 225) → 红": async (a) => {
     const { check } = await load();
     const claims = claimsOf([
       ["testCases", [230]], ["scriptArtifacts", [27]], ["ruleLines", [481]],
-      ["pluginTotal", [60]], ["devDeps", [3]], ["keleeCount", [15]],
+      ["pluginTotal", [45]], ["devDeps", [3]],
     ]);
     const { fails } = check(claims, MEASURED, { claimsText: "engines.node >= 22" });
     a.equal(fails.length, 1, "仅用例数漂移");
@@ -49,7 +49,7 @@ exports.tests = {
     const { check } = await load();
     const claims = claimsOf([
       ["scriptArtifacts", [27]], ["ruleLines", [481]],
-      ["pluginTotal", [60]], ["devDeps", [3]], ["keleeCount", [15]],
+      ["pluginTotal", [45]], ["devDeps", [3]],
     ]);
     const { fails } = check(claims, MEASURED, { claimsText: "engines.node >= 22" });
     a.equal(
@@ -62,7 +62,7 @@ exports.tests = {
     const { check } = await load();
     const claims = claimsOf([
       ["testCases", [225, 227]], ["scriptArtifacts", [27]], ["ruleLines", [481]],
-      ["pluginTotal", [60]], ["devDeps", [3]], ["keleeCount", [15]],
+      ["pluginTotal", [45]], ["devDeps", [3]],
     ]);
     const { fails } = check(claims, MEASURED, { claimsText: "engines.node >= 22" });
     a.equal(fails[0].reason, "contradiction", "两处不同值即矛盾, 不许取其一放行");
@@ -71,12 +71,12 @@ exports.tests = {
     const { check } = await load();
     const claims = claimsOf([
       ["testCases", [225]], ["scriptArtifacts", [27]], ["ruleLines", [481]],
-      ["pluginTotal", [60]], ["devDeps", [3]], ["keleeCount", [15]],
+      ["pluginTotal", [45]], ["devDeps", [3]],
     ]);
     const { fails } = check(claims, MEASURED, { claimsText: "engines.node >= 24" });
     a.equal(fails.filter((f) => f.key === "nodeReq").length, 1, "engines 漂移必须红");
   },
-  "端态 (真仓库): AGENTS.md 7 项声明与当前产物全一致": async (a) => {
+  "端态 (真仓库): AGENTS.md 6 项声明与当前产物全一致": async (a) => {
     const { extractClaims, measure, check, ROOT } = await load();
     const fs = await import("node:fs");
     const text = fs.readFileSync(path.join(ROOT, "AGENTS.md"), "utf8");
@@ -84,6 +84,6 @@ exports.tests = {
     const measured = await measure();
     const { fails, rows } = check(claims, measured, { claimsText: text });
     a.equal(fails.length, 0, `文档与实测漂移: ${JSON.stringify(fails)}`);
-    a.equal(rows.length, 7, "断言面应恰为 7 项 (增删断言须同步本用例)");
+    a.equal(rows.length, 6, "断言面应恰为 6 项 (增删断言须同步本用例)");
   },
 };

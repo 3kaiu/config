@@ -1,0 +1,28 @@
+# CodeQL 扫描面限定 (2026-09-29 新增, 对抗审计 P1-1)
+#
+# 实测事实: workflow 的 `on.push.paths` / `on.pull_request.paths` **只是触发器过滤**,
+# 不限制分析范围 —— 只要触发, `actions/checkout` 拉下全仓, CodeQL 就分析全仓。
+# 2026-09-29 首次触发即坐实: 15 条告警全部落在 `test/**` (12) 与当时的 `Mirror/**` (3),
+# 而目标扫描面 `src/` `tools/` `.github/workflows/` 自身 **0 条**。
+#
+# 因此"按路径限定"必须由本文件实现 (init 步骤 config-file 引用), workflow 里的
+# paths 触发器只负责"何时跑", 两者作用不同, 文档措辞需分开表述。
+#
+# 用 paths 黑白名单中的 `paths` 白名单 (而非 paths-ignore 反选), 契合本仓决策:
+#   - src/**             唯一脚本源码 (TS, esbuild 只转译不查类型)
+#   - tools/**           生成器与门禁 (ESM, 直接决定配置产物)
+#   - .github/workflows/**  action 脚本 (actions 语言, 抓注入/未固定依赖/不安全拼接)
+# 显式排除面 (白名单天然不含):
+#   - Scripts/**   esbuild 压缩产物, 与 src 重复
+#   - test/**      测试桩与 host 夹具, 产生 incomplete-url-substring-sanitization 误报
+#   - Profile/**   生成物
+#
+# 两个语言各自都有命中文件 (JS: src/ tools/; actions: .github/workflows/),
+# 不会触发 CodeQL "no source code seen" 空分析报错。
+
+name: 3kaiu config (src + tools + workflows)
+
+paths:
+  - src
+  - tools
+  - .github/workflows

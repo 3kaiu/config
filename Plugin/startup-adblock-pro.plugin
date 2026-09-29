@@ -1,9 +1,8 @@
 #!name=墨鱼去开屏广告 Pro v3.0
-#!desc=覆盖数百个 App 的开屏广告通杀过滤 · ddgksf2013 StartUpAds 每日数据化同步 + 手写补充
+#!desc=覆盖数百个 App 的开屏广告通杀过滤 · 数据源 ddgksf2013 StartUpAds (已固化, 2026-09-29 起不再每日刷新) + 手写补充
 #!version=3.0
 #!author=3kaiu (数据源 ddgksf2013, 参考 blackmatrix7)
 #!homepage=https://github.com/3kaiu/config
-#!icon=https://icons.duckduckgo.com/ip3/splash.*.ico
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.2.4(787)
 
@@ -108,7 +107,7 @@ ENABLE_STARTUP=switch,"true","false",tag=总开关，desc=开启后过滤所有 
 ^https?:\/\/api\.weibo\.cn\/2\/splash reject-200 enable={ENABLE_STARTUP}
 # === END 3kaiu 手写补充 ===
 
-# === BEGIN 3kaiu script→原生 reject 精准补充 (由 tools/build-startup-plugin.mjs 维护) ===
+# === BEGIN 3kaiu script→原生 reject 精准补充 (静态自维护) ===
 # 京东开屏广告外层 (上游 startup.js); 纯广告 JSON 接口, host 已在解密面, reject-dict 去广告不伤功能
 ^https?:\/\/api\.m\.jd\.com\/api\?functionId=delivery_show reject-dict enable={ENABLE_STARTUP}
 # 顺丰信息流广告 (上游 shunfeng_json.js); 同 host 已有 queryAdImages reject-200 先例, reject-dict 去广告 JSON
@@ -121,9 +120,11 @@ ENABLE_STARTUP=switch,"true","false",tag=总开关，desc=开启后过滤所有 
 ^https?:\/\/apiproxy\.zuche\.com\/resource\/cardes\/toufang\/marketing reject-dict enable={ENABLE_STARTUP}
 # === END 3kaiu script→原生 reject 精准补充 ===
 
-# === BEGIN ddgksf2013 StartUpAds 自动生成 (勿手改, 由 tools/build-startup-plugin.mjs 维护) ===
+# === BEGIN ddgksf2013 StartUpAds 固化块 (2026-09-29 起静态自维护: 镜像体系已移除, 每日刷新生成器随之删除) ===
 # 来源: https://ddgksf2013.top/rewrite/StartUpAds.conf (镜像 ifflagged/Romeo, @UpdateTime 2026-08-29)
-# 转换: QX url reject[-xxx] → Loon rewrite, 共 448 条 (上游 453 行, 去重 3 条, 前缀遮蔽剪 1 条, 垃圾host 1 条)
+# ⚠️ 本块已冻结于 2026-09-29: 上游不再自动同步, 规则只会随本仓手动增补变化。
+# 转换: QX url reject[-xxx] → Loon rewrite, 共 447 条 (上游 453 行, 去重 3 条, 前缀遮蔽剪 1 条, 垃圾host 1 条, 让位 1 条)
+# 让位 (YIELDED_TO_OWNER): ^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(start|queryMaterialAdverts) → Plugin/jd-pro.plugin (jd-pro 插件 Rewrite 段的 queryMaterialAdverts reject-200, 加 Script 段 Jingdong.js 的 start 改写)
 # 未纳入: 22 条 script 型 (去向见 scriptLedger/SCRIPT_LEDGER, 见工具注释); host 语义 6 条已转下段 [Rule]
 ^https?:\/\/ftapi\.10jqka\.com\.cn\/futgwapi\/api\/om\/v\d\/ad\/common\/transfer reject-200 enable={ENABLE_STARTUP}
 ^https?:\/\/ad\.mcloud\.139\.com\/advertapi reject-200 enable={ENABLE_STARTUP}
@@ -261,7 +262,6 @@ ENABLE_STARTUP=switch,"true","false",tag=总开关，desc=开启后过滤所有 
 ^https?:\/\/prod\.zh\.igpsport\.com\/.+\/GetStartAd reject-200 enable={ENABLE_STARTUP}
 ^https?:\/\/jdread-api\.jd\.com\/jdread\/api\/channel\/module\/opens reject-200 enable={ENABLE_STARTUP}
 ^https?:\/\/jdread-api\.jd\.com\/jdread\/api\/popup reject-200 enable={ENABLE_STARTUP}
-^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(start|queryMaterialAdverts) reject-200 enable={ENABLE_STARTUP}
 ^https?:\/\/(bdsp-x|dsp-x)\.jd\.com\/adx\/ reject-200 enable={ENABLE_STARTUP}
 ^https?:\/\/ms\.jr\.jd\.com\/gw\/generic\/aladdin\/(new)?na\/m\/getLoadingPicture reject-200 enable={ENABLE_STARTUP}
 ^https:\/\/router-app-api\.jdcloud\.com\/v\d\/board\/routerAppSplash reject-200 enable={ENABLE_STARTUP}
@@ -573,7 +573,7 @@ ENABLE_STARTUP=switch,"true","false",tag=总开关，desc=开启后过滤所有 
 ^https?:\/\/ossx-link\.ztehome\.com\.cn.*\/get-ad-position-info reject-200 enable={ENABLE_STARTUP}
 ^https?:\/\/www\.biguotk\.com\/api\/advertising reject enable={ENABLE_STARTUP}
 ^https?:\/\/misc\.eol\.cn\/js\/target\/move\/zskyApp\/Appqdkp\/.*json reject enable={ENABLE_STARTUP}
-# === END ddgksf2013 StartUpAds 自动生成 ===
+# === END ddgksf2013 StartUpAds 固化块 ===
 
 [Rule]
 # ── 上游 host 语义转换 (QX host/host-suffix → Loon DOMAIN/DOMAIN-SUFFIX, Rule 层无需 MitM) ──

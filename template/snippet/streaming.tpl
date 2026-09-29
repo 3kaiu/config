@@ -50,8 +50,9 @@ DOMAIN-SUFFIX, peacock.com, Streaming
 DOMAIN-SUFFIX, nowtv.com, Streaming
 # Bilibili 国际版
 DOMAIN-SUFFIX, bilibili.tv, Streaming
-# Apple TV+
-DOMAIN, tv.apple.com, Streaming
+# Apple TV+ — 注意: 本条在 loon.tpl 里已作为 DOMAIN-SUFFIX,apple.com 的前置例外登记
+#   (Apple 块位置更靠前, 后缀规则会罩住子域)。此处保留会与 tpl 中的例外重复,
+#   故主配置不重复登记, 以 tpl 为准; 本 snippet 单独使用时仍生效。
 # Pandora
 DOMAIN-SUFFIX, pandora.com, Streaming
 # SoundCloud

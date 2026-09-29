@@ -1,5 +1,5 @@
 // ESLint 10 flat config。
-// 范围: Scripts/、test/ 与 tools/ 受检；Mirror/（第三方压缩代码）、Profile/ 与 template/ 排除。
+// 范围: Scripts/、test/ 与 tools/ 受检；Profile/ 与 template/ 排除。
 import js from "@eslint/js";
 
 // Loon 运行时注入的全局变量 + 常用内建
@@ -63,7 +63,7 @@ const PROXY_GLOBALS = {
 
 export default [
   {
-    ignores: ["Mirror/**", "Profile/**", "node_modules/**", "template/**"],
+    ignores: ["Profile/**", "node_modules/**", "template/**"],
   },
   js.configs.recommended,
   {

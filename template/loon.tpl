@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════
-#  Loon 配置 (Loon.lcf) — Surgio 生成 (滚动 main, 版本见 CHANGELOG)
+#  Loon 配置 (Loon.lcf) — Surgio 生成 (滚动 main)
 #  核心: 自动健康检测 · 高质量多引擎去广告 · Apple原生增强 · 全球社交/流媒体分流 · 银行 MitM 冲突根治
 #  引擎支持: iOS Loon 3.3.9+ (规则语义已按官方文档 3.5.1(978) 核对: interface-mode 取值等)
 # ═══════════════════════════════════════════════════════════
@@ -35,7 +35,14 @@ ipv6-vif = off
 domain-reject-mode = DNS
 dns-reject-mode = LOOPBACKIP
 geoip-url = https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb
-ipasn-url = https://raw.githubusercontent.com/P3TERX/GeoLite.mmdb/download/GeoLite2-ASN.mmdb
+# 2026-09-29 对抗审计: 原 GeoLite2-ASN.mmdb 拉取已删, 改为不引用 ipasn-url。
+#   依据: 全仓 IP-ASN 规则的唯一消费者是 didi-pro 的 3 条上报拦截, 而那 3 条是**死规则** ——
+#   本地 [Rule] 的 GEOIP,CN,DIRECT (第 485 条) 优先级高于插件 [Rule], 境内 IP 的 TCP 连接
+#   必然先命中 GEOIP, 插件 IP-ASN 永不可能求值。保留即每次白拉 12MB。
+#   若将来确有 IP-ASN 规则, 须满足两条前提并有测试断言:
+#     ① 该规则位于**本地** [Rule] 且排在 GEOIP 之前 (插件位置无法超越本地 GEOIP);
+#     ② test/cases/dns-geoip.test.js 的「ipasn-url 有活跃消费者」断言放行。
+#   geoip-url (Country.mmdb, 7.7MB) 保留 —— GEOIP,CN,DIRECT 依赖它。
 # resource-parser: 已移除 (2026-09-11 供应链审计)
 #   原值指向 Sub-Store 的 1.27MB 解析器 bundle (上游 releases/latest 浮动)。
 #   移除理由: 该 bundle 在订阅解析上下文中执行, 可见全部节点凭据; 哈希门禁只能证明
@@ -86,7 +93,11 @@ httpdns.c.cdnhwc2.com = 0.0.0.0
 [Proxy Group]
 # Proxy 直接聚合 Loon 外部订阅策略组“东京”；订阅更新后自动纳入 url-test。
 Proxy = url-test, 东京, url=http://cp.cloudflare.com/generate_204, interval=120, tolerance=100
-Fallback = fallback, url=http://cp.cloudflare.com/generate_204, interval=180, timeout=5
+# Fallback 与 Proxy 同节点集(东京)、不同决策语义: url-test 追最低延迟(可能频繁切换),
+#   fallback 取列表中**第一个**可用节点(健康则黏住不抖)。两者并列才是 AGENTS 说的"双节点容灾"。
+#   成员必须写东京而非 Proxy: url-test 组嵌进 fallback 会多一层测速间接, 且代理了 fallback 的黏性语义。
+#   超时参数按 Loon 文档为 max-timeout(毫秒), 旧写的 timeout=5 是非文档参数, 若被按毫秒解析则 5ms 会判全组不可用。
+Fallback = fallback, 东京, url=http://cp.cloudflare.com/generate_204, interval=180, max-timeout=5000
 Apple = select, DIRECT, Proxy
 Final = select, Proxy, Fallback, DIRECT
 Streaming = url-test, Proxy, Fallback, DIRECT, url=http://cp.cloudflare.com/generate_204, interval=120, tolerance=100, tag=流媒体
@@ -177,7 +188,12 @@ DOMAIN, ip-scan.adspower.net, Proxy
 
 # Apple
 # 注: Apple News 解锁需要美区节点 — news-edge 走 Proxy url-test, 若自动选到非美节点可手动切 Proxy 组节点
+#
+# 顺序纪律: 下面两条 apple.com 显式例外**必须**排在 DOMAIN-SUFFIX,apple.com 之前。
+#   域名类规则按配置顺序首次命中即停, 后缀规则会罩住所有子域; 例外若写在其后永远不生效。
+#   (由 test/cases/rule-shadow.test.js 守住)
 DOMAIN, news-edge.apple.com, Proxy
+DOMAIN, tv.apple.com, Streaming
 DOMAIN-SUFFIX, apple.com, Apple
 DOMAIN-SUFFIX, icloud.com, Apple
 DOMAIN-SUFFIX, icloud.com.cn, Apple
@@ -206,6 +222,7 @@ DOMAIN, g.co, Proxy
 # 穿山甲统计/请求/聚合接口 (2026-08-12 HAR 审计第二轮)
 # 起点秒播脚本 (Scripts/Qidian.js) 仅依赖 gdtimg.com/gtimg.cn 视频域, 不依赖穿山甲,
 # 故 api-access/log-api/gromore 三个接口域可安全拦截 (必须先于下方 SUFFIX DIRECT)
+DOMAIN, REJECT
 DOMAIN, api-access.pangolin-sdk-toutiao.com, REJECT
 DOMAIN, api-access.pangolin-sdk-toutiao1.com, REJECT
 DOMAIN, log-api.pangolin-sdk-toutiao.com, REJECT
@@ -401,44 +418,16 @@ GEOIP, CN, DIRECT
 FINAL, Final
 
 [Remote Rule]
-# 排序 (2026-09-18 重排): 拦截区前置 — REJECT 列表必须排在一切非 REJECT 列表之前。
-#   遮蔽 = 靠前**非 REJECT** 列表 (DIRECT 与 Proxy 同样抢先命中并终止扫描) 的域名类规则
-#   抢先命中靠后 REJECT 条目。旧顺序 (China 提前) 下 check:shadow 实测:
-#   China 的 `DOMAIN-SUFFIX,cn` 吞掉 Advertising 47 + Hijacking 64 条 `.cn` 广告/劫持域,
-#   `DOMAIN-KEYWORD,aliyun` 再吞 7 条 —— 111 条拦截规则静默失效; 重排后复活。
-#   代价: 国内请求先扫拦截区 1229 条 (Advertising 981 + Privacy 20 + Hijacking 228),
-#   相对 China 的 63 条是可忽略的扫描成本。REJECT→REJECT 行为等价, 故拦截区内部顺序
-#   不构成遮蔽 (见 tools/rule-shadow-check.mjs 的判定原则)。
-# China 次位 — 国内流量先命中 DIRECT; Global 再次 — 国际主流域小列表 (201 条: 36
-#   DOMAIN-KEYWORD + 46 USER-AGENT + 115 IP-CIDR + 4 IP-CIDR6, **0 条 DOMAIN-SUFFIX**)
-#   命中 Proxy 即提前终止。
-#   ⚠️ 2026-09-11 深度审计 NEW-04 更正: "34,579 SUFFIX 提前终止"系误引上游文件头注释
-#   (该头描述 blackmatrix7 完整规则集, 与 Loon 正文 212 行/201 条不符, **不可当计数用**)。
-#   Global 前置的真实收益仅为: 命中后免扫其后的列表 (重排后只剩 goodbyeads)。
-# goodbyeads 压轴 — 117k 条的最大表必须排最后: China/Global 覆盖的域名 (绝大多数请求)
-#   免扫该表。代价 (check:shadow 实测): 941 + 606 条条目被 China(`cn` 后缀/aliyun 等
-#   关键词) 与 Global(google/porn 等 36 个关键词) 抢先, 其中多数本就该被拦 ——
-#   已在 tools/rule-shadow-check.mjs 的 ACCEPTED_PAIRS 登记为**刻意取舍** (含成因与
-#   复检日期); 该工具按"对"聚合断言: 已登记的对逐轮打印计数, **任何新出现的对立刻判红**。
-https://ws.wenn.in/main/Mirror/rules/loon-Advertising.list, policy=REJECT, tag=🚫 广告域名, enabled=true
-https://ws.wenn.in/main/Mirror/rules/loon-Privacy.list, policy=REJECT, tag=🔒 隐私保护, enabled=true
-https://ws.wenn.in/main/Mirror/rules/loon-Hijacking.list, policy=REJECT, tag=🛡️ 反劫持, enabled=true
-https://ws.wenn.in/main/Mirror/rules/loon-China.list, policy=DIRECT, tag=🇨🇳 国内域名, enabled=true
-https://ws.wenn.in/main/Mirror/rules/loon-Global.list, policy=Proxy, tag=🌍 国际域名, enabled=true
-# GOODBYEADS (2026-09-11 审计: 收敛为单一分发路径)
-#   原值指向 S3 带外手工上传副本 (3kaiu-mirror-*.s3-ap-northeast-1.amazonaws.com/rules/goodbyeads-qx.list),
-#   与仓库内的 Mirror/rules/goodbyeads-qx.list 构成**双份同源数据**: S3 副本无哈希门禁、
-#   不随 mirror-scripts 每日刷新 (靠人工上传, 天然易过期且无法被 CI 验证)。
-#   现改用与其余列表完全一致的 CDN 路径 — 该文件已在 Mirror/MANIFEST.json 内,
-#   受 sha256 门禁 + 每日镜像 + cdn-verify parity 三重覆盖。
-#   实测切换时三份副本 sha256 一致 (fe6a469a…), 故为纯结构性收敛, 无规则变化。
-https://ws.wenn.in/main/Mirror/rules/goodbyeads-qx.list, tag=GOODBYEADS, policy=REJECT, enabled=true
-https://ws.wenn.in/main/Mirror/rules/loon-Epic.list, policy=Proxy, tag=🎮 Epic Games, enabled=true
+# 2026-09-29 精简: 本段原挂 7 个第三方镜像规则列表 (Advertising 972 / Privacy 24 /
+#   Hijacking 231 / China 69 / Global 207 / Epic 16 / goodbyeads 120387 条), 现全部移除。
+#   代价 (需知悉): 失去 12 万条通用广告域名兜底, 长尾广告域不再被 REJECT, 改走 Final。
+#   保留的自建拦截面: 下方 [Rule] 段的国内外广告/追踪 SDK 硬拦截 + 46 个 Plugin +
+#   29 个 Scripts 的逐 App 字段级净化。
+#   ⚠️ 随之消失的语义: 原注释所记 "China 的 cn 后缀吞掉 941+606 条 REJECT" 一类遮蔽
+#   不再存在 (无远程列表参与按序求值), 故 check:shadow 门禁一并删除。
 
 [Plugin]
 # 注: DNS leak 规则已直接内置在 [Rule] 段, 不再需要独立插件
-https://ws.wenn.in/main/Mirror/rules/loon-AllInOne.plugin, enabled=true, tag=通用广告域名层
-https://ws.wenn.in/main/Mirror/rules/loon-AdvertisingScript.plugin, enabled=true, tag=广告脚本增强
 https://ws.wenn.in/main/Plugin/quicksearch.plugin, enabled=true, tag=快捷搜索
 https://ws.wenn.in/main/Plugin/notify.plugin, enabled=true, tag=🔔 定时通知
 # 诊断助手: generic 手动触发 — 双链路探活 (代理/直连) + 判定, 零常驻流量影响
@@ -488,37 +477,8 @@ https://ws.wenn.in/main/Plugin/luckin-pro.plugin, enabled=true, tag=瑞幸咖啡
 https://ws.wenn.in/main/Plugin/umetrip-pro.plugin, enabled=true, tag=航旅纵横去广告 Pro
 https://ws.wenn.in/main/Plugin/keep-pro.plugin, enabled=true, tag=Keep 去广告 Pro
 https://ws.wenn.in/main/Plugin/ximalaya-pro.plugin, enabled=true, tag=喜马拉雅去广告 Pro
-https://ws.wenn.in/main/Kelee/YouTube_remove_ads.plugin, enabled=true, tag=YouTube去广告
-# — 🧹 iKeLee 转写新增 (2026-08) —
-https://ws.wenn.in/main/Kelee/smzdm-remove-ads.plugin, enabled=true, tag=什么值得买去广告
-https://ws.wenn.in/main/Kelee/guiderank-remove-ads.plugin, enabled=true, tag=盖得排行去广告
-https://ws.wenn.in/main/Kelee/umetrip-remove-ads.plugin, enabled=true, tag=航旅纵横去广告(轻量)
-https://ws.wenn.in/main/Kelee/12306-remove-ads.plugin, enabled=true, tag=12306去广告(轻量)
-https://ws.wenn.in/main/Mirror/iringo/iRingo.WeatherKit.lpx, enabled=true, tag=🍎天气增强
-https://ws.wenn.in/main/Mirror/iringo/iRingo.Maps.plugin, enabled=true, tag=🍎地图增强
-https://ws.wenn.in/main/Mirror/iringo/iRingo.News.plugin, enabled=true, tag=🍎News解锁
-https://ws.wenn.in/main/Mirror/iringo/iRingo.Siri.plugin, enabled=true, tag=🍎Siri增强
-https://ws.wenn.in/main/Mirror/iringo/iRingo.Search.plugin, enabled=true, tag=🍎搜索建议增强
-https://ws.wenn.in/main/Mirror/iringo/iRingo.TestFlight.plugin, enabled=true, tag=🍎TestFlight增强
-https://ws.wenn.in/main/Mirror/iringo/iRingo.TV.plugin, enabled=true, tag=🍎TV增强
-https://ws.wenn.in/main/Mirror/iringo/iRingo.LocationService.plugin, enabled=true, tag=🍎定位服务增强
-# — 🍿️ DualSubs 双语字幕增强 —
-https://ws.wenn.in/main/Mirror/dualsubs/DualSubs.Universal.plugin, enabled=true, tag=🍿️ DualSubs: 流媒体双语字幕
-https://ws.wenn.in/main/Mirror/dualsubs/DualSubs.YouTube.plugin, enabled=true, tag=🍿️ DualSubs: YouTube 双语字幕
-https://ws.wenn.in/main/Mirror/dualsubs/DualSubs.Netflix.plugin, enabled=true, tag=🍿️ DualSubs: Netflix 双语字幕
-# — ☁️ Auraflare Cloudflare 增强 —
-https://ws.wenn.in/main/Mirror/auraflare/Cloudflare.1.1.1.1.plugin, enabled=true, tag=☁️ 1.1.1.1 WARP 面板
-https://ws.wenn.in/main/Mirror/auraflare/Cloudflare.DNS.plugin, enabled=true, tag=☁️ Cloudflare DNS 管理
-# — 📺 BiliUniverse B站增强 —
-https://ws.wenn.in/main/Mirror/biliuniverse/BiliBili.Enhanced.plugin, enabled=true, tag=📺 B站增强模式
-https://ws.wenn.in/main/Mirror/biliuniverse/BiliBili.Global.plugin, enabled=true, tag=📺 B站全球模式
-https://ws.wenn.in/main/Mirror/biliuniverse/BiliBili.ADBlock.plugin, enabled=true, tag=📺 B站去广告
-https://ws.wenn.in/main/Mirror/biliuniverse/BiliBili.Redirect.plugin, enabled=true, tag=📺 B站CDN重定向
 # — 功能增强插件 (本地替代 kelee.one LPX, 2026-08-25 起 kelee.one 全局 403) —
 # Google 重定向: 本地 Kelee/Google.plugin 替代原 kelee.one/Google.lpx
-https://ws.wenn.in/main/Kelee/Google.plugin, enabled=true, tag=🔍 Google搜索重定向
-# Spotify 歌词翻译 / 微信外链解锁 / 京东比价 / 节点检测 / 链路检测: 无本地替代, 已移除
-# 参见 AGENTS.md 架构已知问题: kelee.one 全局 403 (issue #27)
 
 [Rewrite]
 ^https?:\/\/119\.29\.29\.29\/d reject-200
@@ -529,4 +489,4 @@ https://ws.wenn.in/main/Kelee/Google.plugin, enabled=true, tag=🔍 Google搜索
 
 [MitM]
 skip-server-cert-verify = false
-hostname = -*.apple.com, -*.icloud.com, -*.icloud.com.cn, -*.95516.com, -*.cup.com.cn, -*.95516.com.cn, -*.unionpay.com, -*.icbc.com.cn, -*.mybank.icbc.com.cn, -*.icbc.com, -*.ccb.com, -*.ccb.cn, -*.boc.cn, -*.bankofchina.com, -*.jf365.boc.cn, -*.abchina.com, -*.abchina.com.cn, -*.cdn-static.abchina.com.cn, -*.cdn-static.abchina.com, -*.bankcomm.com, -*.bankcomm.cn, -*.creditcard.bankcomm.com, -*.creditcard.bankcomm.cn, -*.cmbchina.com, -*.cmbimg.com, -*.psbc.com, -*.spdb.com.cn, -*.spdbccc.com.cn, -*.citicbank.com, -*.citibank.com, -*.ecitic.com, -*.pingan.com.cn, -*.pingan.com, -*.hcz-member.pingan.com.cn, -*.iobs.pingan.com.cn, -*.stock.pingan.com, -*.cmbc.com.cn, -*.cib.com.cn, -*.cebbank.com, -*.ebchinabank.com, -*.hxb.com.cn, -*.cgbchina.com.cn, -*.95508.com, -*.static.95508.com, -*.bankofbeijing.com.cn, -*.bosc.cn, -*.js96008.com, -*.tenpay.com, -*.qianbao.qq.com, weatherkit.apple.com, configuration.ls.apple.com, gspe35-ssl.ls.apple.com, gspe35-ssl.ls.apple.cn, gspe1-ssl.ls.apple.com, news-edge.apple.com, news-todayconfig-edge.apple.com, news-events.apple.com, news-sports-events.apple.com, news-client.apple.com, news-client-search.apple.com, guzzoni.smoot.apple.com, api2.smoot.apple.com, *.smoot.apple.com, *.smoot.apple.cn, testflight.apple.com, uts-api.itunes.apple.com, umc-tempo-api.apple.com, play-cdn.itunes.apple.com, play-edge-cdn.itunes.apple.com, h5.if.qidian.com, magev6.if.qidian.com, ii.gdt.qq.com, adsmind.gdtimg.com, adsmind.ugdtimg.com, pgdt.gtimg.cn, api-access.pangolin-sdk-toutiao.com, api-access.pangolin-sdk-toutiao1.com, api.zhihuifangdong.net, netflow-mtop.cainiao.com, nbcps-mtop.cainiao.com, cn-acs.m.cainiao.com, e2e-mtop.cainiao.com, longquan-mtop.cainiao.com, -redirector*.googlevideo.com, *.googlevideo.com, *.youtube.com, youtubei.googleapis.com, m5.amap.com, m5-zb.amap.com, amdc.m.taobao.com, dispatcher.is.autonavi.com, api.m.jd.com, api.zhihu.com, www.zhihu.com, appcloud2.zhihu.com, link.zhihu.com, zhuanlan.zhihu.com, m-cloud.zhihu.com, tiebac.baidu.com, tieba.baidu.com, tiebaapi.baidu.com, gql.reddit.com, gql-fed.reddit.com, duckduckgo.com, *.oca.nflxvideo.net
+hostname = -*.apple.com, -*.icloud.com, -*.icloud.com.cn, -*.95516.com, -*.cup.com.cn, -*.95516.com.cn, -*.unionpay.com, -*.icbc.com.cn, -*.mybank.icbc.com.cn, -*.icbc.com, -*.ccb.com, -*.ccb.cn, -*.boc.cn, -*.bankofchina.com, -*.jf365.boc.cn, -*.abchina.com, -*.abchina.com.cn, -*.cdn-static.abchina.com.cn, -*.cdn-static.abchina.com, -*.bankcomm.com, -*.bankcomm.cn, -*.creditcard.bankcomm.com, -*.creditcard.bankcomm.cn, -*.cmbchina.com, -*.cmbimg.com, -*.psbc.com, -*.spdb.com.cn, -*.spdbccc.com.cn, -*.citicbank.com, -*.citibank.com, -*.ecitic.com, -*.pingan.com.cn, -*.pingan.com, -*.hcz-member.pingan.com.cn, -*.iobs.pingan.com.cn, -*.stock.pingan.com, -*.cmbc.com.cn, -*.cib.com.cn, -*.cebbank.com, -*.ebchinabank.com, -*.hxb.com.cn, -*.cgbchina.com.cn, -*.95508.com, -*.static.95508.com, -*.bankofbeijing.com.cn, -*.bosc.cn, -*.js96008.com, -*.tenpay.com, -*.qianbao.qq.com, weatherkit.apple.com, configuration.ls.apple.com, gspe35-ssl.ls.apple.com, gspe35-ssl.ls.apple.cn, gspe1-ssl.ls.apple.com, news-edge.apple.com, news-todayconfig-edge.apple.com, news-events.apple.com, news-sports-events.apple.com, news-client.apple.com, news-client-search.apple.com, guzzoni.smoot.apple.com, api2.smoot.apple.com, *.smoot.apple.com, *.smoot.apple.cn, testflight.apple.com, uts-api.itunes.apple.com, umc-tempo-api.apple.com, play-cdn.itunes.apple.com, play-edge-cdn.itunes.apple.com, h5.if.qidian.com, magev6.if.qidian.com, ii.gdt.qq.com, adsmind.gdtimg.com, adsmind.ugdtimg.com, pgdt.gtimg.cn, api-access.pangolin-sdk-toutiao1.com, api.zhihuifangdong.net, netflow-mtop.cainiao.com, nbcps-mtop.cainiao.com, cn-acs.m.cainiao.com, e2e-mtop.cainiao.com, longquan-mtop.cainiao.com, -redirector*.youtube.com, youtubei.googleapis.com, m5.amap.com, m5-zb.amap.com, amdc.m.taobao.com, api.m.jd.com, api.zhihu.com, www.zhihu.com, appcloud2.zhihu.com, link.zhihu.com, zhuanlan.zhihu.com, m-cloud.zhihu.com, tiebac.baidu.com, tieba.baidu.com, tiebaapi.baidu.com, gql.reddit.com, gql-fed.reddit.com, duckduckgo.com, *.oca.nflxvideo.net

@@ -22,8 +22,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          # 2026-09-18 优化审计: 与 mirror-scripts 同因 — GITHUB_TOKEN 开的 PR
-          # 其 pull_request run 会停在 action_required (见 mirror PR #41)。
+          # 2026-09-18 优化审计: GITHUB_TOKEN 开的 PR
+          # 其 pull_request run 会停在 action_required。
           # 改用 MIRROR_TOKEN (PAT), 缺失时回退并告警 (CI 仍会停摆, 但可见)。
           token: ${{ secrets.MIRROR_TOKEN || github.token }}
 
@@ -77,8 +77,8 @@ jobs:
           git add Profile/Loon.lcf
           git commit -m "chore(surgio): auto-update generated configs ($(date +%Y-%m-%d))"
           # 2026-08-29 审计修复: push / gh pr 的 `2>/dev/null || echo skipped` 改为失败即红
-          # (同 mirror-scripts 批)。此前静默失败让 auto-PR 门禁失效且日志不可见。
-          # 日期分支改固定分支: 与 mirror-scripts 一致, 避免 PR 卡住无法复用、分支堆积。
+          # 此前静默失败让 auto-PR 门禁失效且日志不可见。
+          # 日期分支改固定分支, 避免 PR 卡住无法复用、分支堆积。
           git push -f origin "$BRANCH" || { echo "::error::push failed"; exit 1; }
 
           BODY="## Surgio 自动配置更新\n\nSurgio 配置模板变更触发生成，Profile/ 文件已自动更新。\n\n### 审核清单\n- [ ] Loon.lcf 变更符合预期\n- [ ] CI 全绿"

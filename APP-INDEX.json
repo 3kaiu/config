@@ -1,0 +1,3722 @@
+{
+  "schema_version": 1,
+  "plugin_count": 46,
+  "app_count": 147,
+  "multi_owner": [
+    {
+      "app": "Spotify",
+      "owners": [
+        "media-reading-purify.plugin",
+        "streaming-overseas-pro.plugin"
+      ]
+    },
+    {
+      "app": "瑞幸咖啡",
+      "owners": [
+        "luckin-pro.plugin",
+        "shopping-purify.plugin"
+      ]
+    }
+  ],
+  "fake_granularity": [],
+  "undeclared_scripts": [],
+  "apps": [
+    {
+      "app": "2BULU",
+      "owners": [
+        {
+          "plugin": "transport-purify.plugin",
+          "module": "M2",
+          "switch": "APP_2BULU_ENABLE",
+          "rules": 4,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "36KR",
+      "owners": [
+        {
+          "plugin": "news-purify.plugin",
+          "module": "M2",
+          "switch": "APP_36KR_ENABLE",
+          "rules": 14,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "555DY",
+      "owners": [
+        {
+          "plugin": "video-community-purify.plugin",
+          "module": "M2",
+          "switch": "APP_555DY_ENABLE",
+          "rules": 1,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "AI 服务",
+      "owners": [
+        {
+          "plugin": "ai.plugin",
+          "module": "M1",
+          "switch": null,
+          "rules": 0,
+          "rules_basis": "plugin-total",
+          "granularity": "cross-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "ALIEXPRESS",
+      "owners": [
+        {
+          "plugin": "shopping-overseas-pro.plugin",
+          "module": "M2",
+          "switch": "ALIEXPRESS_ENABLE",
+          "rules": 6,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "ALIYUNDRIVE",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "ALIYUNDRIVE_ENABLE",
+          "rules": 3,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "AMAZON",
+      "owners": [
+        {
+          "plugin": "shopping-overseas-pro.plugin",
+          "module": "M2",
+          "switch": "AMAZON_ENABLE",
+          "rules": 10,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "Apple 服务",
+      "owners": [
+        {
+          "plugin": "apple-services-pro.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 38,
+          "rules_basis": "plugin-total",
+          "granularity": "global",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "BAIDUPHOTO",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "BAIDUPHOTO_ENABLE",
+          "rules": 3,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "BAIDUTRANSLATE",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "BAIDUTRANSLATE_ENABLE",
+          "rules": 4,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "BAIDUWENKU",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "BAIDUWENKU_ENABLE",
+          "rules": 12,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "BEIKE",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "switch": "BEIKE_ENABLE",
+          "rules": 8,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "BODIANMUSIC",
+      "owners": [
+        {
+          "plugin": "media-reading-purify.plugin",
+          "module": "M2",
+          "switch": "BODIANMUSIC_ENABLE",
+          "rules": 20,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "BOOHEE",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "switch": "BOOHEE_ENABLE",
+          "rules": 9,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "CAINIAO",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "switch": "CAINIAO_ENABLE",
+          "rules": 9,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "CAIXINMEDIA",
+      "owners": [
+        {
+          "plugin": "news-purify.plugin",
+          "module": "M2",
+          "switch": "CAIXINMEDIA_ENABLE",
+          "rules": 5,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "CCLIVE",
+      "owners": [
+        {
+          "plugin": "video-community-purify.plugin",
+          "module": "M2",
+          "switch": "CCLIVE_ENABLE",
+          "rules": 7,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "CHELAILE",
+      "owners": [
+        {
+          "plugin": "transport-purify.plugin",
+          "module": "M2",
+          "switch": "CHELAILE_ENABLE",
+          "rules": 9,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "COLORFULCLOUDS",
+      "owners": [
+        {
+          "plugin": "news-purify.plugin",
+          "module": "M2",
+          "switch": "COLORFULCLOUDS_ENABLE",
+          "rules": 5,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "COOKIES",
+      "owners": [
+        {
+          "plugin": "safari-webview-pro.plugin",
+          "module": "M2",
+          "switch": "COOKIES_ENABLE",
+          "rules": 2,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "COOLAPK",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "COOLAPK_ENABLE",
+          "rules": 7,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "DAMAI",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "switch": "DAMAI_ENABLE",
+          "rules": 5,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "DIANPING",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "switch": "DIANPING_ENABLE",
+          "rules": 2,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "DINGDONGMAICAI",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "switch": "DINGDONGMAICAI_ENABLE",
+          "rules": 22,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "DISNEY",
+      "owners": [
+        {
+          "plugin": "streaming-overseas-pro.plugin",
+          "module": "M2",
+          "switch": "DISNEY_ENABLE",
+          "rules": 6,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "DOUBAN",
+      "owners": [
+        {
+          "plugin": "news-purify.plugin",
+          "module": "M2",
+          "switch": "DOUBAN_ENABLE",
+          "rules": 6,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "DOUBANREAD",
+      "owners": [
+        {
+          "plugin": "news-purify.plugin",
+          "module": "M2",
+          "switch": "DOUBANREAD_ENABLE",
+          "rules": 5,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "DOUYIN",
+      "owners": [
+        {
+          "plugin": "video-community-purify.plugin",
+          "module": "M2",
+          "switch": "DOUYIN_ENABLE",
+          "rules": 3,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "EASYCHARGE",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "switch": "EASYCHARGE_ENABLE",
+          "rules": 7,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "EBAY",
+      "owners": [
+        {
+          "plugin": "shopping-overseas-pro.plugin",
+          "module": "M2",
+          "switch": "EBAY_ENABLE",
+          "rules": 6,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "FACEBOOK",
+      "owners": [
+        {
+          "plugin": "overseas-social-pro.plugin",
+          "module": "M2",
+          "switch": "FACEBOOK_ENABLE",
+          "rules": 8,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "FANQIE",
+      "owners": [
+        {
+          "plugin": "media-reading-purify.plugin",
+          "module": "M2",
+          "switch": "FANQIE_ENABLE",
+          "rules": 3,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "FC BOX",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "switch": "FC_BOX_ENABLE",
+          "rules": 10,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "Feishu",
+      "owners": [
+        {
+          "plugin": "video-community-purify.plugin",
+          "module": "M2",
+          "switch": "FEISHU_ENABLE",
+          "rules": 2,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "Feishu  Lark",
+      "owners": [
+        {
+          "plugin": "video-community-purify.plugin",
+          "module": "M2",
+          "script": "Feishu.js",
+          "rules": 74,
+          "rules_basis": "plugin-total",
+          "granularity": "via-script"
+        }
+      ]
+    },
+    {
+      "app": "FLYERTEA",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "switch": "FLYERTEA_ENABLE",
+          "rules": 4,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "HANTINGHOTELS",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "switch": "HANTINGHOTELS_ENABLE",
+          "rules": 7,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "HBO",
+      "owners": [
+        {
+          "plugin": "streaming-overseas-pro.plugin",
+          "module": "M2",
+          "switch": "HBO_ENABLE",
+          "rules": 6,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "HUPU",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "HUPU_ENABLE",
+          "rules": 8,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "HUXIU",
+      "owners": [
+        {
+          "plugin": "news-purify.plugin",
+          "module": "M2",
+          "switch": "HUXIU_ENABLE",
+          "rules": 7,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "IMAICAI",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "switch": "IMAICAI_ENABLE",
+          "rules": 7,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "INSTAGRAM",
+      "owners": [
+        {
+          "plugin": "overseas-social-pro.plugin",
+          "module": "M2",
+          "switch": "INSTAGRAM_ENABLE",
+          "rules": 10,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "ITHOME",
+      "owners": [
+        {
+          "plugin": "news-purify.plugin",
+          "module": "M2",
+          "switch": "ITHOME_ENABLE",
+          "rules": 1,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "JDWAIMAI",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "switch": "JDWAIMAI_ENABLE",
+          "rules": 6,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "JUMP",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "JUMP_ENABLE",
+          "rules": 6,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "Keep",
+      "owners": [
+        {
+          "plugin": "keep-pro.plugin",
+          "module": "M2",
+          "script": "Keep.js",
+          "rules": 5,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "KUAIDI100",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "switch": "KUAIDI100_ENABLE",
+          "rules": 5,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "KUAISHOU",
+      "owners": [
+        {
+          "plugin": "video-community-purify.plugin",
+          "module": "M2",
+          "switch": "KUAISHOU_ENABLE",
+          "rules": 2,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "KUGOUYOUTH",
+      "owners": [
+        {
+          "plugin": "media-reading-purify.plugin",
+          "module": "M2",
+          "switch": "KUGOUYOUTH_ENABLE",
+          "rules": 10,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "KUWO",
+      "owners": [
+        {
+          "plugin": "media-reading-purify.plugin",
+          "module": "M2",
+          "switch": "KUWO_ENABLE",
+          "rules": 2,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "LinkedIn",
+      "owners": [
+        {
+          "plugin": "overseas-social-pro.plugin",
+          "module": "M2",
+          "script": "LinkedIn.js",
+          "rules": 40,
+          "rules_basis": "plugin-total",
+          "granularity": "via-script"
+        }
+      ]
+    },
+    {
+      "app": "LINKEDIN",
+      "owners": [
+        {
+          "plugin": "overseas-social-pro.plugin",
+          "module": "M2",
+          "switch": "LINKEDIN_ENABLE",
+          "rules": 6,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "LOL BIBLE",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "LOL_BIBLE_ENABLE",
+          "rules": 6,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "MAFENGWO",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "switch": "MAFENGWO_ENABLE",
+          "rules": 4,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "MAILMASTER",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "MAILMASTER_ENABLE",
+          "rules": 5,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "MAIMAI",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "MAIMAI_ENABLE",
+          "rules": 4,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "MEITUAN",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "switch": "MEITUAN_ENABLE",
+          "rules": 3,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "MOEGIRLWIKI",
+      "owners": [
+        {
+          "plugin": "video-community-purify.plugin",
+          "module": "M2",
+          "switch": "MOEGIRLWIKI_ENABLE",
+          "rules": 3,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "MOJIWEATHER",
+      "owners": [
+        {
+          "plugin": "news-purify.plugin",
+          "module": "M2",
+          "switch": "MOJIWEATHER_ENABLE",
+          "rules": 7,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "MRHEMA",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "switch": "MRHEMA_ENABLE",
+          "rules": 12,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "NETEASEGODLIKE",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "NETEASEGODLIKE_ENABLE",
+          "rules": 1,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "NETEASENEWS",
+      "owners": [
+        {
+          "plugin": "news-purify.plugin",
+          "module": "M2",
+          "switch": "NETEASENEWS_ENABLE",
+          "rules": 8,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "NETFLIX",
+      "owners": [
+        {
+          "plugin": "streaming-overseas-pro.plugin",
+          "module": "M2",
+          "switch": "NETFLIX_ENABLE",
+          "rules": 8,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "ONTHEWAY",
+      "owners": [
+        {
+          "plugin": "transport-purify.plugin",
+          "module": "M2",
+          "switch": "ONTHEWAY_ENABLE",
+          "rules": 4,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "ORAYSUNLOGIN",
+      "owners": [
+        {
+          "plugin": "transport-purify.plugin",
+          "module": "M2",
+          "switch": "ORAYSUNLOGIN_ENABLE",
+          "rules": 1,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "PAYPAL",
+      "owners": [
+        {
+          "plugin": "shopping-overseas-pro.plugin",
+          "module": "M2",
+          "switch": "PAYPAL_ENABLE",
+          "rules": 6,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "PICC INSURANCE",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "PICC_INSURANCE_ENABLE",
+          "rules": 3,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "PUPUMALL",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "switch": "PUPUMALL_ENABLE",
+          "rules": 2,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "QQ音乐",
+      "owners": [
+        {
+          "plugin": "qqmusic.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 3,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "QUARKBROWSER",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "QUARKBROWSER_ENABLE",
+          "rules": 3,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "QUARKSCANKING",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "QUARKSCANKING_ENABLE",
+          "rules": 2,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "Reddit",
+      "owners": [
+        {
+          "plugin": "video-community-purify.plugin",
+          "module": "M2",
+          "script": "Reddit.js",
+          "rules": 74,
+          "rules_basis": "plugin-total",
+          "granularity": "via-script"
+        }
+      ]
+    },
+    {
+      "app": "ROBOTAXI",
+      "owners": [
+        {
+          "plugin": "transport-purify.plugin",
+          "module": "M2",
+          "switch": "ROBOTAXI_ENABLE",
+          "rules": 3,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "SAFARI",
+      "owners": [
+        {
+          "plugin": "safari-webview-pro.plugin",
+          "module": "M2",
+          "switch": "SAFARI_ENABLE",
+          "rules": 10,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "SF EXPRESS",
+      "owners": [
+        {
+          "plugin": "transport-purify.plugin",
+          "module": "M2",
+          "switch": "SF_EXPRESS_ENABLE",
+          "rules": 4,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "SNOWBALL",
+      "owners": [
+        {
+          "plugin": "news-purify.plugin",
+          "module": "M2",
+          "switch": "SNOWBALL_ENABLE",
+          "rules": 14,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "Spotify",
+      "owners": [
+        {
+          "plugin": "media-reading-purify.plugin",
+          "module": "M2",
+          "switch": "SPOTIFY_ENABLE",
+          "rules": 3,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        },
+        {
+          "plugin": "streaming-overseas-pro.plugin",
+          "module": "M2",
+          "switch": "SPOTIFY_ENABLE",
+          "rules": 8,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "TAOBAOTRAVEL",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "switch": "TAOBAOTRAVEL_ENABLE",
+          "rules": 5,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "TENCENTNEWS",
+      "owners": [
+        {
+          "plugin": "news-purify.plugin",
+          "module": "M2",
+          "switch": "TENCENTNEWS_ENABLE",
+          "rules": 3,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "TMALLCAMPUS",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "switch": "TMALLCAMPUS_ENABLE",
+          "rules": 6,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "TRACKER",
+      "owners": [
+        {
+          "plugin": "safari-webview-pro.plugin",
+          "module": "M2",
+          "switch": "TRACKER_ENABLE",
+          "rules": 3,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "Twitter",
+      "owners": [
+        {
+          "plugin": "overseas-social-pro.plugin",
+          "module": "M2",
+          "script": "Twitter.js",
+          "rules": 40,
+          "rules_basis": "plugin-total",
+          "granularity": "via-script"
+        }
+      ]
+    },
+    {
+      "app": "TWITTER X",
+      "owners": [
+        {
+          "plugin": "overseas-social-pro.plugin",
+          "module": "M2",
+          "switch": "TWITTER_X_ENABLE",
+          "rules": 6,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "TXDOCS",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "TXDOCS_ENABLE",
+          "rules": 2,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "VALORANTBIBLE",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "VALORANTBIBLE_ENABLE",
+          "rules": 3,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "WEBVIEW",
+      "owners": [
+        {
+          "plugin": "safari-webview-pro.plugin",
+          "module": "M2",
+          "switch": "WEBVIEW_ENABLE",
+          "rules": 15,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "WEIBO INTL",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "WEIBO_INTL_ENABLE",
+          "rules": 14,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "WPFORUM",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "WPFORUM_ENABLE",
+          "rules": 2,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "WPS",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "script": "WPS.js",
+          "rules": 144,
+          "rules_basis": "plugin-total",
+          "granularity": "via-script"
+        }
+      ]
+    },
+    {
+      "app": "WPS DOCUMENTS",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "WPS_DOCUMENTS_ENABLE",
+          "rules": 3,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "XIAOHEIHE",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "XIAOHEIHE_ENABLE",
+          "rules": 2,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "XIAOJUKEJICHARGE",
+      "owners": [
+        {
+          "plugin": "transport-purify.plugin",
+          "module": "M2",
+          "switch": "XIAOJUKEJICHARGE_ENABLE",
+          "rules": 5,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "XIAOMISPEAKER",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "XIAOMISPEAKER_ENABLE",
+          "rules": 3,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "XUNLEI",
+      "owners": [
+        {
+          "plugin": "video-community-purify.plugin",
+          "module": "M2",
+          "switch": "XUNLEI_ENABLE",
+          "rules": 2,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "YOUDAODICT",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "YOUDAODICT_ENABLE",
+          "rules": 6,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "YOUDAONOTE",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "YOUDAONOTE_ENABLE",
+          "rules": 1,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "YOUDAOTRANS",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "YOUDAOTRANS_ENABLE",
+          "rules": 7,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "YOUKU",
+      "owners": [
+        {
+          "plugin": "media-reading-purify.plugin",
+          "module": "M2",
+          "switch": "YOUKU_ENABLE",
+          "rules": 3,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "YOUTUBE",
+      "owners": [
+        {
+          "plugin": "streaming-overseas-pro.plugin",
+          "module": "M2",
+          "switch": "YOUTUBE_ENABLE",
+          "rules": 8,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "YY VOICE",
+      "owners": [
+        {
+          "plugin": "video-community-purify.plugin",
+          "module": "M2",
+          "switch": "YY_VOICE_ENABLE",
+          "rules": 10,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "YYVOICETOOL",
+      "owners": [
+        {
+          "plugin": "video-community-purify.plugin",
+          "module": "M2",
+          "switch": "YYVOICETOOL_ENABLE",
+          "rules": 5,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "云闪付",
+      "owners": [
+        {
+          "plugin": "sunshufu-pro.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 16,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "京东",
+      "owners": [
+        {
+          "plugin": "jd-pro.plugin",
+          "module": "M2",
+          "script": "Jingdong.js",
+          "rules": 18,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "优酷",
+      "owners": [
+        {
+          "plugin": "media-reading-purify.plugin",
+          "module": "M2",
+          "script": "Youku.js",
+          "rules": 44,
+          "rules_basis": "plugin-total",
+          "granularity": "via-script"
+        }
+      ]
+    },
+    {
+      "app": "全局开屏",
+      "owners": [
+        {
+          "plugin": "startup-adblock-pro.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 498,
+          "rules_basis": "plugin-total",
+          "granularity": "global",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "全局追踪 SDK",
+      "owners": [
+        {
+          "plugin": "privacy-shield.plugin",
+          "module": "M3",
+          "switch": null,
+          "rules": 11,
+          "rules_basis": "plugin-total",
+          "granularity": "global",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "哔哩哔哩",
+      "owners": [
+        {
+          "plugin": "bilibili-pro.plugin",
+          "module": "M2",
+          "script": "Bilibili.js",
+          "rules": 38,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "哔哩哔哩漫画",
+      "owners": [
+        {
+          "plugin": "bilicomics.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 0,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "喜马拉雅",
+      "owners": [
+        {
+          "plugin": "ximalaya-pro.plugin",
+          "module": "M2",
+          "script": "Ximalaya.js",
+          "rules": 5,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "大众点评",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "script": "Dianping.js",
+          "rules": 144,
+          "rules_basis": "plugin-total",
+          "granularity": "via-script"
+        }
+      ]
+    },
+    {
+      "app": "定时通知",
+      "owners": [
+        {
+          "plugin": "notify.plugin",
+          "module": "M5",
+          "script": "traffic-notify.js",
+          "rules": 2,
+          "rules_basis": "plugin-total",
+          "granularity": "global",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "小红书",
+      "owners": [
+        {
+          "plugin": "xiaohongshu-pro.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 31,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "微信",
+      "owners": [
+        {
+          "plugin": "wechat-pro.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 19,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "微信小程序",
+      "owners": [
+        {
+          "plugin": "social-netdisk-purify.plugin",
+          "module": "M2",
+          "switch": "WEXINMINIPROGRAMS_REMOVE_ENABLE",
+          "rules": 126,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "微信读书",
+      "owners": [
+        {
+          "plugin": "wechat-read.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 2,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "微博",
+      "owners": [
+        {
+          "plugin": "weibo-pro.plugin",
+          "module": "M2",
+          "script": "Weibo.js",
+          "rules": 73,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "快手",
+      "owners": [
+        {
+          "plugin": "video-community-purify.plugin",
+          "module": "M2",
+          "script": "Kuaishou.js",
+          "rules": 74,
+          "rules_basis": "plugin-total",
+          "granularity": "via-script"
+        }
+      ]
+    },
+    {
+      "app": "快捷搜索",
+      "owners": [
+        {
+          "plugin": "quicksearch.plugin",
+          "module": "M5",
+          "switch": null,
+          "rules": 8,
+          "rules_basis": "plugin-total",
+          "granularity": "global",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "抖音",
+      "owners": [
+        {
+          "plugin": "video-community-purify.plugin",
+          "module": "M2",
+          "script": "Douyin.js",
+          "rules": 74,
+          "rules_basis": "plugin-total",
+          "granularity": "via-script"
+        }
+      ]
+    },
+    {
+      "app": "拼多多",
+      "owners": [
+        {
+          "plugin": "pinduoduo-pro.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 61,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "支付宝",
+      "owners": [
+        {
+          "plugin": "alipay-pro.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 17,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "支付宝小程序",
+      "owners": [
+        {
+          "plugin": "alipay-miniprogram-pro.plugin",
+          "module": "M2",
+          "script": "AlipayMini.js",
+          "rules": 13,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "斗鱼",
+      "owners": [
+        {
+          "plugin": "video-community-purify.plugin",
+          "module": "M2",
+          "switch": "DOUYU_ENABLE",
+          "rules": 6,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "汽水音乐",
+      "owners": [
+        {
+          "plugin": "qishui.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 25,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "淘宝天猫",
+      "owners": [
+        {
+          "plugin": "taobao-tmall-pro.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 32,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "淘票票",
+      "owners": [
+        {
+          "plugin": "taopiaopiao-pro.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 8,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "滴滴出行",
+      "owners": [
+        {
+          "plugin": "didi-pro.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 35,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "爱奇艺",
+      "owners": [
+        {
+          "plugin": "iqiyi-pro.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 45,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "瑞幸咖啡",
+      "owners": [
+        {
+          "plugin": "luckin-pro.plugin",
+          "module": "M2",
+          "script": "Luckin.js",
+          "rules": 1,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        },
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "script": "Luckin.js",
+          "rules": 144,
+          "rules_basis": "plugin-total",
+          "granularity": "via-script"
+        }
+      ]
+    },
+    {
+      "app": "番茄小说",
+      "owners": [
+        {
+          "plugin": "media-reading-purify.plugin",
+          "module": "M2",
+          "script": "Fanqie.js",
+          "rules": 44,
+          "rules_basis": "plugin-total",
+          "granularity": "via-script"
+        }
+      ]
+    },
+    {
+      "app": "百度网盘",
+      "owners": [
+        {
+          "plugin": "bdpan-pro.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 21,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "百度贴吧",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "script": "Tieba.js",
+          "rules": 144,
+          "rules_basis": "plugin-total",
+          "granularity": "via-script"
+        }
+      ]
+    },
+    {
+      "app": "知乎",
+      "owners": [
+        {
+          "plugin": "zhihu-pro.plugin",
+          "module": "M2",
+          "script": "Zhihu.js",
+          "rules": 36,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "网易云音乐",
+      "owners": [
+        {
+          "plugin": "netease-pro.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 13,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "美团",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "script": "Meituan.js",
+          "rules": 144,
+          "rules_basis": "plugin-total",
+          "granularity": "via-script"
+        }
+      ]
+    },
+    {
+      "app": "腾讯新闻",
+      "owners": [
+        {
+          "plugin": "news-purify.plugin",
+          "module": "M2",
+          "script": "TencentNews.js",
+          "rules": 75,
+          "rules_basis": "plugin-total",
+          "granularity": "via-script"
+        }
+      ]
+    },
+    {
+      "app": "腾讯视频",
+      "owners": [
+        {
+          "plugin": "tencent-video-pro.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 30,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "航旅纵横",
+      "owners": [
+        {
+          "plugin": "umetrip-pro.plugin",
+          "module": "M2",
+          "script": "Umetrip.js",
+          "rules": 1,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "芒果TV",
+      "owners": [
+        {
+          "plugin": "video-community-purify.plugin",
+          "module": "M2",
+          "switch": "MANGOTV_ENABLE",
+          "rules": 28,
+          "rules_basis": "switch-consumers",
+          "granularity": "per-app-switch"
+        }
+      ]
+    },
+    {
+      "app": "菜鸟裹裹",
+      "owners": [
+        {
+          "plugin": "shopping-purify.plugin",
+          "module": "M2",
+          "script": "Cainiao.js",
+          "rules": 144,
+          "rules_basis": "plugin-total",
+          "granularity": "via-script"
+        }
+      ]
+    },
+    {
+      "app": "诊断助手",
+      "owners": [
+        {
+          "plugin": "diagnostics.plugin",
+          "module": "M5",
+          "script": "Diagnostics.js",
+          "rules": 1,
+          "rules_basis": "plugin-total",
+          "granularity": "global",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "起点",
+      "owners": [
+        {
+          "plugin": "qidian.plugin",
+          "module": "M2",
+          "script": "Qidian.js",
+          "rules": 27,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "酷我音乐",
+      "owners": [
+        {
+          "plugin": "media-reading-purify.plugin",
+          "module": "M2",
+          "script": "Kuwo.js",
+          "rules": 44,
+          "rules_basis": "plugin-total",
+          "granularity": "via-script"
+        }
+      ]
+    },
+    {
+      "app": "酷狗音乐",
+      "owners": [
+        {
+          "plugin": "media-reading-purify.plugin",
+          "module": "M2",
+          "script": "Kugou.js",
+          "rules": 44,
+          "rules_basis": "plugin-total",
+          "granularity": "via-script"
+        }
+      ]
+    },
+    {
+      "app": "钉钉",
+      "owners": [
+        {
+          "plugin": "dingtalk-pro.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 14,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "银行与云闪付",
+      "owners": [
+        {
+          "plugin": "bank.plugin",
+          "module": "M4",
+          "switch": null,
+          "rules": 0,
+          "rules_basis": "plugin-total",
+          "granularity": "cross-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "高德地图",
+      "owners": [
+        {
+          "plugin": "amap.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 25,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    }
+  ],
+  "plugins": [
+    {
+      "file": "Plugin/ai.plugin",
+      "module": "M1",
+      "switches": 0,
+      "rules": 0,
+      "scripts": [],
+      "mitm_hosts": 0,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/alipay-miniprogram-pro.plugin",
+      "module": "M2",
+      "switches": 7,
+      "rules": 13,
+      "scripts": [
+        "AlipayMini.js"
+      ],
+      "mitm_hosts": 11,
+      "switch_usage": [
+        {
+          "switch": "DEBUG_ENABLE",
+          "rules": 13,
+          "tag": "调试模式"
+        },
+        {
+          "switch": "ENABLE_ALIPAY_MINI",
+          "rules": 13,
+          "tag": "总开关"
+        },
+        {
+          "switch": "MINI_FEED_ENABLE",
+          "rules": 3,
+          "tag": "信息流净化"
+        },
+        {
+          "switch": "MINI_POPUP_ENABLE",
+          "rules": 3,
+          "tag": "弹窗净化"
+        },
+        {
+          "switch": "MINI_SEARCH_ENABLE",
+          "rules": 2,
+          "tag": "搜索净化"
+        },
+        {
+          "switch": "MINI_SPLASH_ENABLE",
+          "rules": 1,
+          "tag": "开屏净化"
+        },
+        {
+          "switch": "MINI_TRAFFIC_ENABLE",
+          "rules": 2,
+          "tag": "支付页净化"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/alipay-pro.plugin",
+      "module": "M2",
+      "switches": 6,
+      "rules": 17,
+      "scripts": [],
+      "mitm_hosts": 15,
+      "switch_usage": [
+        {
+          "switch": "ALIPAY_HOME_ENABLE",
+          "rules": 4,
+          "tag": "首页净化"
+        },
+        {
+          "switch": "ALIPAY_INVEST_ENABLE",
+          "rules": 3,
+          "tag": "理财净化"
+        },
+        {
+          "switch": "ALIPAY_MEMBER_ENABLE",
+          "rules": 2,
+          "tag": "会员增强"
+        },
+        {
+          "switch": "ALIPAY_SPLASH_ENABLE",
+          "rules": 3,
+          "tag": "开屏广告"
+        },
+        {
+          "switch": "ALIPAY_TRANSFER_ENABLE",
+          "rules": 3,
+          "tag": "转账净化"
+        },
+        {
+          "switch": "ENABLE_ALIPAY",
+          "rules": 17,
+          "tag": "总开关"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/amap.plugin",
+      "module": "M2",
+      "switches": 1,
+      "rules": 25,
+      "scripts": [],
+      "mitm_hosts": 6,
+      "switch_usage": [
+        {
+          "switch": "AMAP_ENABLE",
+          "rules": 25,
+          "tag": "是否开启高德地图去广告"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/apple-services-pro.plugin",
+      "module": "M2",
+      "switches": 8,
+      "rules": 38,
+      "scripts": [],
+      "mitm_hosts": 13,
+      "switch_usage": [
+        {
+          "switch": "APPSTORE_ENABLE",
+          "rules": 6,
+          "tag": ""
+        },
+        {
+          "switch": "ENABLE_APPLE",
+          "rules": 38,
+          "tag": "总开关"
+        },
+        {
+          "switch": "ICLOUD_ENABLE",
+          "rules": 4,
+          "tag": ""
+        },
+        {
+          "switch": "MAPS_ENABLE",
+          "rules": 6,
+          "tag": ""
+        },
+        {
+          "switch": "MUSIC_ENABLE",
+          "rules": 6,
+          "tag": ""
+        },
+        {
+          "switch": "NEWS_ENABLE",
+          "rules": 6,
+          "tag": ""
+        },
+        {
+          "switch": "PRIVACY_ENABLE",
+          "rules": 6,
+          "tag": ""
+        },
+        {
+          "switch": "SIRI_ENABLE",
+          "rules": 4,
+          "tag": ""
+        }
+      ]
+    },
+    {
+      "file": "Plugin/bank.plugin",
+      "module": "M4",
+      "switches": 0,
+      "rules": 0,
+      "scripts": [],
+      "mitm_hosts": 0,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/bdpan-pro.plugin",
+      "module": "M2",
+      "switches": 5,
+      "rules": 21,
+      "scripts": [],
+      "mitm_hosts": 4,
+      "switch_usage": [
+        {
+          "switch": "BDPAN_FEED_ENABLE",
+          "rules": 4,
+          "tag": "信息流净化"
+        },
+        {
+          "switch": "BDPAN_SPEED_ENABLE",
+          "rules": 1,
+          "tag": "倍速解锁"
+        },
+        {
+          "switch": "BDPAN_SPLASH_ENABLE",
+          "rules": 2,
+          "tag": "开屏净化"
+        },
+        {
+          "switch": "BDPAN_VIP_ENABLE",
+          "rules": 3,
+          "tag": "会员增强"
+        },
+        {
+          "switch": "ENABLE_BDPAN",
+          "rules": 20,
+          "tag": "总开关"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/bilibili-pro.plugin",
+      "module": "M2",
+      "switches": 7,
+      "rules": 38,
+      "scripts": [
+        "Bilibili.js"
+      ],
+      "mitm_hosts": 8,
+      "switch_usage": [
+        {
+          "switch": "BILI_1080P_ENABLE",
+          "rules": 2,
+          "tag": "高清画质解锁"
+        },
+        {
+          "switch": "BILI_DEBUG_ENABLE",
+          "rules": 1,
+          "tag": "调试模式"
+        },
+        {
+          "switch": "BILI_DYNAMIC_ENABLE",
+          "rules": 2,
+          "tag": "动态净化"
+        },
+        {
+          "switch": "BILI_FEED_ENABLE",
+          "rules": 3,
+          "tag": "信息流净化"
+        },
+        {
+          "switch": "BILI_LIVE_ENABLE",
+          "rules": 2,
+          "tag": "直播净化"
+        },
+        {
+          "switch": "BILI_SPLASH_ENABLE",
+          "rules": 2,
+          "tag": "开屏广告"
+        },
+        {
+          "switch": "ENABLE_BILI",
+          "rules": 38,
+          "tag": "总开关"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/bilicomics.plugin",
+      "module": "M2",
+      "switches": 0,
+      "rules": 0,
+      "scripts": [],
+      "mitm_hosts": 1,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/diagnostics.plugin",
+      "module": "M5",
+      "switches": 0,
+      "rules": 1,
+      "scripts": [
+        "Diagnostics.js"
+      ],
+      "mitm_hosts": 0,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/didi-pro.plugin",
+      "module": "M2",
+      "switches": 6,
+      "rules": 35,
+      "scripts": [],
+      "mitm_hosts": 25,
+      "switch_usage": [
+        {
+          "switch": "DIDI_COUPON_ENABLE",
+          "rules": 3,
+          "tag": "优惠券管理"
+        },
+        {
+          "switch": "DIDI_HOME_ENABLE",
+          "rules": 4,
+          "tag": "首页净化"
+        },
+        {
+          "switch": "DIDI_ORDER_ENABLE",
+          "rules": 3,
+          "tag": "订单净化"
+        },
+        {
+          "switch": "DIDI_SPLASH_ENABLE",
+          "rules": 3,
+          "tag": "开屏广告"
+        },
+        {
+          "switch": "DIDI_VIP_ENABLE",
+          "rules": 2,
+          "tag": "D 豆会员"
+        },
+        {
+          "switch": "ENABLE_DIDI",
+          "rules": 35,
+          "tag": "总开关"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/dingtalk-pro.plugin",
+      "module": "M2",
+      "switches": 6,
+      "rules": 14,
+      "scripts": [],
+      "mitm_hosts": 12,
+      "switch_usage": [
+        {
+          "switch": "DINGTALK_ASSISTANT_ENABLE",
+          "rules": 2,
+          "tag": "助手优化"
+        },
+        {
+          "switch": "DINGTALK_DOC_ENABLE",
+          "rules": 2,
+          "tag": "文档净化"
+        },
+        {
+          "switch": "DINGTALK_MEET_ENABLE",
+          "rules": 2,
+          "tag": "会议净化"
+        },
+        {
+          "switch": "DINGTALK_MSG_ENABLE",
+          "rules": 3,
+          "tag": "消息净化"
+        },
+        {
+          "switch": "DINGTALK_WORK_ENABLE",
+          "rules": 3,
+          "tag": "工作台净化"
+        },
+        {
+          "switch": "ENABLE_DINGTALK",
+          "rules": 14,
+          "tag": "总开关"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/iqiyi-pro.plugin",
+      "module": "M2",
+      "switches": 6,
+      "rules": 45,
+      "scripts": [],
+      "mitm_hosts": 15,
+      "switch_usage": [
+        {
+          "switch": "ENABLE_IQIYI",
+          "rules": 45,
+          "tag": "总开关"
+        },
+        {
+          "switch": "IQIYI_4K_ENABLE",
+          "rules": 3,
+          "tag": "4K 画质解锁"
+        },
+        {
+          "switch": "IQIYI_HOME_ENABLE",
+          "rules": 4,
+          "tag": "首页净化"
+        },
+        {
+          "switch": "IQIYI_PLAY_ENABLE",
+          "rules": 3,
+          "tag": "播放优化"
+        },
+        {
+          "switch": "IQIYI_SPLASH_ENABLE",
+          "rules": 3,
+          "tag": "开屏广告"
+        },
+        {
+          "switch": "IQIYI_VIP_ENABLE",
+          "rules": 2,
+          "tag": "会员增强"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/jd-pro.plugin",
+      "module": "M2",
+      "switches": 8,
+      "rules": 18,
+      "scripts": [
+        "Jingdong.js"
+      ],
+      "mitm_hosts": 5,
+      "switch_usage": [
+        {
+          "switch": "ENABLE_JD",
+          "rules": 18,
+          "tag": "总开关"
+        },
+        {
+          "switch": "JD_COUPON_ENABLE",
+          "rules": 1,
+          "tag": "领券中心"
+        },
+        {
+          "switch": "JD_DEBUG_ENABLE",
+          "rules": 6,
+          "tag": "调试日志"
+        },
+        {
+          "switch": "JD_HOME_ENABLE",
+          "rules": 3,
+          "tag": "首页"
+        },
+        {
+          "switch": "JD_MINE_ENABLE",
+          "rules": 1,
+          "tag": "我的"
+        },
+        {
+          "switch": "JD_ORDER_ENABLE",
+          "rules": 2,
+          "tag": "订单物流"
+        },
+        {
+          "switch": "JD_PRICE_ENABLE",
+          "rules": 1,
+          "tag": "比价工具"
+        },
+        {
+          "switch": "JD_SPLASH_ENABLE",
+          "rules": 4,
+          "tag": "开屏"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/keep-pro.plugin",
+      "module": "M2",
+      "switches": 0,
+      "rules": 5,
+      "scripts": [
+        "Keep.js"
+      ],
+      "mitm_hosts": 4,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/luckin-pro.plugin",
+      "module": "M2",
+      "switches": 0,
+      "rules": 1,
+      "scripts": [
+        "Luckin.js"
+      ],
+      "mitm_hosts": 2,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/media-reading-purify.plugin",
+      "module": "M2",
+      "switches": 8,
+      "rules": 44,
+      "scripts": [
+        "Fanqie.js",
+        "Kugou.js",
+        "Kuwo.js",
+        "Youku.js"
+      ],
+      "mitm_hosts": 14,
+      "switch_usage": [
+        {
+          "switch": "BODIANMUSIC_ENABLE",
+          "rules": 20,
+          "tag": "是否开启波点音乐净化"
+        },
+        {
+          "switch": "FANQIE_ENABLE",
+          "rules": 3,
+          "tag": "总开关"
+        },
+        {
+          "switch": "KUGOU_ENABLE",
+          "rules": 3,
+          "tag": "是否开启酷狗音乐去广告"
+        },
+        {
+          "switch": "KUGOUYOUTH_ENABLE",
+          "rules": 10,
+          "tag": "是否开启酷狗概念版净化"
+        },
+        {
+          "switch": "KUWO_ENABLE",
+          "rules": 2,
+          "tag": "是否开启酷我音乐去广告"
+        },
+        {
+          "switch": "MEDIA_ENABLE",
+          "rules": 44,
+          "tag": "总开关"
+        },
+        {
+          "switch": "SPOTIFY_ENABLE",
+          "rules": 3,
+          "tag": "是否开启Spotify净化"
+        },
+        {
+          "switch": "YOUKU_ENABLE",
+          "rules": 3,
+          "tag": "是否开启优酷去广告"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/netease-pro.plugin",
+      "module": "M2",
+      "switches": 2,
+      "rules": 13,
+      "scripts": [],
+      "mitm_hosts": 3,
+      "switch_usage": [
+        {
+          "switch": "ENABLE_NEMUSIC",
+          "rules": 13,
+          "tag": "总开关"
+        },
+        {
+          "switch": "NEMUSIC_ADBLOCK_ENABLE",
+          "rules": 7,
+          "tag": "广告净化"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/news-purify.plugin",
+      "module": "M2",
+      "switches": 12,
+      "rules": 75,
+      "scripts": [
+        "TencentNews.js"
+      ],
+      "mitm_hosts": 38,
+      "switch_usage": [
+        {
+          "switch": "APP_36KR_ENABLE",
+          "rules": 14,
+          "tag": "是否开启36氪净化"
+        },
+        {
+          "switch": "CAIXINMEDIA_ENABLE",
+          "rules": 5,
+          "tag": "是否开启财新净化"
+        },
+        {
+          "switch": "COLORFULCLOUDS_ENABLE",
+          "rules": 5,
+          "tag": "是否开启彩云天气净化"
+        },
+        {
+          "switch": "DOUBAN_ENABLE",
+          "rules": 6,
+          "tag": "是否开启豆瓣净化"
+        },
+        {
+          "switch": "DOUBANREAD_ENABLE",
+          "rules": 5,
+          "tag": "是否开启豆瓣阅读净化"
+        },
+        {
+          "switch": "HUXIU_ENABLE",
+          "rules": 7,
+          "tag": "是否开启虎嗅净化"
+        },
+        {
+          "switch": "ITHOME_ENABLE",
+          "rules": 1,
+          "tag": "是否开启IT之家净化"
+        },
+        {
+          "switch": "MOJIWEATHER_ENABLE",
+          "rules": 7,
+          "tag": "是否开启墨迹天气净化"
+        },
+        {
+          "switch": "NETEASENEWS_ENABLE",
+          "rules": 8,
+          "tag": "是否开启网易新闻净化"
+        },
+        {
+          "switch": "NEWS_PURIFY_ENABLE",
+          "rules": 75,
+          "tag": "总开关"
+        },
+        {
+          "switch": "SNOWBALL_ENABLE",
+          "rules": 14,
+          "tag": "是否开启雪球净化"
+        },
+        {
+          "switch": "TENCENTNEWS_ENABLE",
+          "rules": 3,
+          "tag": "是否开启腾讯新闻净化"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/notify.plugin",
+      "module": "M5",
+      "switches": 0,
+      "rules": 2,
+      "scripts": [
+        "health-notify.js",
+        "traffic-notify.js"
+      ],
+      "mitm_hosts": 0,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/overseas-social-pro.plugin",
+      "module": "M2",
+      "switches": 7,
+      "rules": 40,
+      "scripts": [
+        "LinkedIn.js",
+        "Twitter.js"
+      ],
+      "mitm_hosts": 20,
+      "switch_usage": [
+        {
+          "switch": "DEBUG_ENABLE",
+          "rules": 12,
+          "tag": ""
+        },
+        {
+          "switch": "ENABLE_OVERSEAS",
+          "rules": 28,
+          "tag": "总开关"
+        },
+        {
+          "switch": "FACEBOOK_ENABLE",
+          "rules": 8,
+          "tag": ""
+        },
+        {
+          "switch": "INSTAGRAM_ENABLE",
+          "rules": 10,
+          "tag": ""
+        },
+        {
+          "switch": "LINKEDIN_ENABLE",
+          "rules": 6,
+          "tag": ""
+        },
+        {
+          "switch": "PRIVACY_ENABLE",
+          "rules": 8,
+          "tag": ""
+        },
+        {
+          "switch": "TWITTER_X_ENABLE",
+          "rules": 6,
+          "tag": ""
+        }
+      ]
+    },
+    {
+      "file": "Plugin/pinduoduo-pro.plugin",
+      "module": "M2",
+      "switches": 6,
+      "rules": 61,
+      "scripts": [],
+      "mitm_hosts": 9,
+      "switch_usage": [
+        {
+          "switch": "ENABLE_PDD",
+          "rules": 61,
+          "tag": "总开关"
+        },
+        {
+          "switch": "PDD_HOME_ENABLE",
+          "rules": 4,
+          "tag": "首页净化"
+        },
+        {
+          "switch": "PDD_RECOMMEND_ENABLE",
+          "rules": 2,
+          "tag": "推荐净化"
+        },
+        {
+          "switch": "PDD_SEARCH_ENABLE",
+          "rules": 3,
+          "tag": "搜索净化"
+        },
+        {
+          "switch": "PDD_SPLASH_ENABLE",
+          "rules": 3,
+          "tag": "开屏广告"
+        },
+        {
+          "switch": "PDD_SUBSIDY_ENABLE",
+          "rules": 2,
+          "tag": "百亿补贴优化"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/privacy-shield.plugin",
+      "module": "M3",
+      "switches": 1,
+      "rules": 11,
+      "scripts": [],
+      "mitm_hosts": 0,
+      "switch_usage": [
+        {
+          "switch": "PRIVACY_ENABLE",
+          "rules": 11,
+          "tag": "隐私防护总开关"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/qidian.plugin",
+      "module": "M2",
+      "switches": 8,
+      "rules": 27,
+      "scripts": [
+        "Qidian.js"
+      ],
+      "mitm_hosts": 9,
+      "switch_usage": [
+        {
+          "switch": "CAPTURE_ENABLE",
+          "rules": 18,
+          "tag": "是否开启抓取重写"
+        },
+        {
+          "switch": "QDREADER_ADV_JOB_ENABLE",
+          "rules": 1,
+          "tag": "激励任务"
+        },
+        {
+          "switch": "QDREADER_CHAPTER_CARD_ENABLE",
+          "rules": 1,
+          "tag": "章节卡片"
+        },
+        {
+          "switch": "QDREADER_DEBUG",
+          "rules": 2,
+          "tag": "是否开启调试模式"
+        },
+        {
+          "switch": "QDREADER_EXTRA_ADV_JOB_ENABLE",
+          "rules": 1,
+          "tag": "每日任务"
+        },
+        {
+          "switch": "QDREADER_LOTTERY_ENABLE",
+          "rules": 1,
+          "tag": "每日抽奖"
+        },
+        {
+          "switch": "QDREADER_MESSAGE_BOX_ENABLE",
+          "rules": 1,
+          "tag": "大咖荐书"
+        },
+        {
+          "switch": "QDREADER_WEEKLY_EXCHANGE_ENABLE",
+          "rules": 1,
+          "tag": "每周兑换"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/qishui.plugin",
+      "module": "M2",
+      "switches": 1,
+      "rules": 25,
+      "scripts": [],
+      "mitm_hosts": 5,
+      "switch_usage": [
+        {
+          "switch": "QISHUI_ENABLE",
+          "rules": 15,
+          "tag": "是否开启汽水音乐去广告"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/qqmusic.plugin",
+      "module": "M2",
+      "switches": 1,
+      "rules": 3,
+      "scripts": [],
+      "mitm_hosts": 0,
+      "switch_usage": [
+        {
+          "switch": "QQMUSIC_ENABLE",
+          "rules": 3,
+          "tag": "是否开启QQ音乐去广告"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/quicksearch.plugin",
+      "module": "M5",
+      "switches": 0,
+      "rules": 8,
+      "scripts": [],
+      "mitm_hosts": 1,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/safari-webview-pro.plugin",
+      "module": "M2",
+      "switches": 6,
+      "rules": 34,
+      "scripts": [],
+      "mitm_hosts": 34,
+      "switch_usage": [
+        {
+          "switch": "COOKIES_ENABLE",
+          "rules": 2,
+          "tag": "Cookies 管理"
+        },
+        {
+          "switch": "ENABLE_BROWSE",
+          "rules": 34,
+          "tag": "总开关"
+        },
+        {
+          "switch": "PRIVACY_ENABLE",
+          "rules": 2,
+          "tag": "隐私增强"
+        },
+        {
+          "switch": "SAFARI_ENABLE",
+          "rules": 10,
+          "tag": "Safari 净化"
+        },
+        {
+          "switch": "TRACKER_ENABLE",
+          "rules": 3,
+          "tag": "追踪防护"
+        },
+        {
+          "switch": "WEBVIEW_ENABLE",
+          "rules": 15,
+          "tag": "WebView 净化"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/shopping-overseas-pro.plugin",
+      "module": "M2",
+      "switches": 7,
+      "rules": 38,
+      "scripts": [],
+      "mitm_hosts": 14,
+      "switch_usage": [
+        {
+          "switch": "ALIEXPRESS_ENABLE",
+          "rules": 6,
+          "tag": ""
+        },
+        {
+          "switch": "AMAZON_ENABLE",
+          "rules": 10,
+          "tag": ""
+        },
+        {
+          "switch": "EBAY_ENABLE",
+          "rules": 6,
+          "tag": ""
+        },
+        {
+          "switch": "ENABLE_SHOPPING",
+          "rules": 38,
+          "tag": "总开关"
+        },
+        {
+          "switch": "PAYPAL_ENABLE",
+          "rules": 6,
+          "tag": ""
+        },
+        {
+          "switch": "PRICE_ENABLE",
+          "rules": 4,
+          "tag": ""
+        },
+        {
+          "switch": "PRIVACY_ENABLE",
+          "rules": 4,
+          "tag": ""
+        }
+      ]
+    },
+    {
+      "file": "Plugin/shopping-purify.plugin",
+      "module": "M2",
+      "switches": 23,
+      "rules": 144,
+      "scripts": [
+        "Cainiao.js",
+        "Dianping.js",
+        "Luckin.js",
+        "Meituan.js",
+        "Tieba.js",
+        "WPS.js"
+      ],
+      "mitm_hosts": 45,
+      "switch_usage": [
+        {
+          "switch": "BEIKE_ENABLE",
+          "rules": 8,
+          "tag": "是否开启贝壳找房净化"
+        },
+        {
+          "switch": "BOOHEE_ENABLE",
+          "rules": 9,
+          "tag": "是否开启薄荷健康净化"
+        },
+        {
+          "switch": "CAINIAO_ENABLE",
+          "rules": 9,
+          "tag": "是否开启菜鸟包裹去广告"
+        },
+        {
+          "switch": "DAMAI_ENABLE",
+          "rules": 5,
+          "tag": "是否开启大麦净化"
+        },
+        {
+          "switch": "DIANPING_ENABLE",
+          "rules": 2,
+          "tag": "是否开启大众点评去广告"
+        },
+        {
+          "switch": "DINGDONGMAICAI_ENABLE",
+          "rules": 22,
+          "tag": "是否开启叮咚买菜净化"
+        },
+        {
+          "switch": "EASYCHARGE_ENABLE",
+          "rules": 7,
+          "tag": "是否开启e充电净化"
+        },
+        {
+          "switch": "ENABLE_TIEBA",
+          "rules": 3,
+          "tag": "总开关"
+        },
+        {
+          "switch": "FC_BOX_ENABLE",
+          "rules": 10,
+          "tag": "是否开启丰巢净化"
+        },
+        {
+          "switch": "FLYERTEA_ENABLE",
+          "rules": 4,
+          "tag": "是否开启飞客净化"
+        },
+        {
+          "switch": "HANTINGHOTELS_ENABLE",
+          "rules": 7,
+          "tag": "是否开启华住会净化"
+        },
+        {
+          "switch": "IMAICAI_ENABLE",
+          "rules": 7,
+          "tag": "是否开启小象超市净化"
+        },
+        {
+          "switch": "JDWAIMAI_ENABLE",
+          "rules": 6,
+          "tag": "是否开启京东外卖净化"
+        },
+        {
+          "switch": "KUAIDI100_ENABLE",
+          "rules": 5,
+          "tag": "是否开启快递100净化"
+        },
+        {
+          "switch": "LUCKINCOFFEE_ENABLE",
+          "rules": 6,
+          "tag": "是否开启瑞幸咖啡净化"
+        },
+        {
+          "switch": "MAFENGWO_ENABLE",
+          "rules": 4,
+          "tag": "是否开启马蜂窝净化"
+        },
+        {
+          "switch": "MEITUAN_ENABLE",
+          "rules": 3,
+          "tag": "是否开启美团去广告"
+        },
+        {
+          "switch": "MRHEMA_ENABLE",
+          "rules": 12,
+          "tag": "是否开启盒马净化"
+        },
+        {
+          "switch": "PUPUMALL_ENABLE",
+          "rules": 2,
+          "tag": "是否开启朴朴超市净化"
+        },
+        {
+          "switch": "SHOPPING_ENABLE",
+          "rules": 144,
+          "tag": "总开关"
+        },
+        {
+          "switch": "TAOBAOTRAVEL_ENABLE",
+          "rules": 5,
+          "tag": "是否开启飞猪旅行净化"
+        },
+        {
+          "switch": "TMALLCAMPUS_ENABLE",
+          "rules": 6,
+          "tag": "是否开启天猫校园净化"
+        },
+        {
+          "switch": "WPS_ENABLE",
+          "rules": 2,
+          "tag": "是否开启WPS去广告"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/social-netdisk-purify.plugin",
+      "module": "M2",
+      "switches": 26,
+      "rules": 236,
+      "scripts": [],
+      "mitm_hosts": 131,
+      "switch_usage": [
+        {
+          "switch": "ALIYUNDRIVE_ENABLE",
+          "rules": 3,
+          "tag": "是否开启阿里云盘净化"
+        },
+        {
+          "switch": "BAIDUPHOTO_ENABLE",
+          "rules": 3,
+          "tag": "是否开启一刻相册净化"
+        },
+        {
+          "switch": "BAIDUTRANSLATE_ENABLE",
+          "rules": 4,
+          "tag": "是否开启百度翻译净化"
+        },
+        {
+          "switch": "BAIDUWENKU_ENABLE",
+          "rules": 12,
+          "tag": "是否开启百度文库净化"
+        },
+        {
+          "switch": "COOLAPK_ENABLE",
+          "rules": 7,
+          "tag": "是否开启酷安净化"
+        },
+        {
+          "switch": "HUPU_ENABLE",
+          "rules": 8,
+          "tag": "是否开启虎扑净化"
+        },
+        {
+          "switch": "JUMP_ENABLE",
+          "rules": 6,
+          "tag": "是否开启Jump净化"
+        },
+        {
+          "switch": "LOL_BIBLE_ENABLE",
+          "rules": 6,
+          "tag": "是否开启掌上英雄联盟净化"
+        },
+        {
+          "switch": "MAILMASTER_ENABLE",
+          "rules": 5,
+          "tag": "是否开启网易邮箱大师净化"
+        },
+        {
+          "switch": "MAIMAI_ENABLE",
+          "rules": 4,
+          "tag": "是否开启脉脉净化"
+        },
+        {
+          "switch": "NETEASEGODLIKE_ENABLE",
+          "rules": 1,
+          "tag": "是否开启网易大神净化"
+        },
+        {
+          "switch": "PICC_INSURANCE_ENABLE",
+          "rules": 3,
+          "tag": "是否开启中国人保净化"
+        },
+        {
+          "switch": "QUARKBROWSER_ENABLE",
+          "rules": 3,
+          "tag": "是否开启夸克净化"
+        },
+        {
+          "switch": "QUARKSCANKING_ENABLE",
+          "rules": 2,
+          "tag": "是否开启夸克扫描王净化"
+        },
+        {
+          "switch": "SOCIAL_NETDISK_PURIFY_ENABLE",
+          "rules": 236,
+          "tag": "总开关"
+        },
+        {
+          "switch": "TXDOCS_ENABLE",
+          "rules": 2,
+          "tag": "是否开启腾讯文档净化"
+        },
+        {
+          "switch": "VALORANTBIBLE_ENABLE",
+          "rules": 3,
+          "tag": "是否开启掌上无畏契约净化"
+        },
+        {
+          "switch": "WEIBO_INTL_ENABLE",
+          "rules": 14,
+          "tag": "是否开启微博轻享版净化"
+        },
+        {
+          "switch": "WEXINMINIPROGRAMS_REMOVE_ENABLE",
+          "rules": 126,
+          "tag": "是否开启微信小程序净化"
+        },
+        {
+          "switch": "WPFORUM_ENABLE",
+          "rules": 2,
+          "tag": "是否开启威锋净化"
+        },
+        {
+          "switch": "WPS_DOCUMENTS_ENABLE",
+          "rules": 3,
+          "tag": "是否开启金山文档净化"
+        },
+        {
+          "switch": "XIAOHEIHE_ENABLE",
+          "rules": 2,
+          "tag": "是否开启小黑盒净化"
+        },
+        {
+          "switch": "XIAOMISPEAKER_ENABLE",
+          "rules": 3,
+          "tag": "是否开启小米音箱净化"
+        },
+        {
+          "switch": "YOUDAODICT_ENABLE",
+          "rules": 6,
+          "tag": "是否开启网易有道词典净化"
+        },
+        {
+          "switch": "YOUDAONOTE_ENABLE",
+          "rules": 1,
+          "tag": "是否开启有道云笔记净化"
+        },
+        {
+          "switch": "YOUDAOTRANS_ENABLE",
+          "rules": 7,
+          "tag": "是否开启有道翻译官净化"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/startup-adblock-pro.plugin",
+      "module": "M2",
+      "switches": 1,
+      "rules": 498,
+      "scripts": [],
+      "mitm_hosts": 431,
+      "switch_usage": [
+        {
+          "switch": "ENABLE_STARTUP",
+          "rules": 498,
+          "tag": "总开关"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/streaming-overseas-pro.plugin",
+      "module": "M2",
+      "switches": 7,
+      "rules": 43,
+      "scripts": [],
+      "mitm_hosts": 11,
+      "switch_usage": [
+        {
+          "switch": "DISNEY_ENABLE",
+          "rules": 6,
+          "tag": ""
+        },
+        {
+          "switch": "ENABLE_STREAMING",
+          "rules": 43,
+          "tag": "总开关"
+        },
+        {
+          "switch": "HBO_ENABLE",
+          "rules": 6,
+          "tag": ""
+        },
+        {
+          "switch": "NETFLIX_ENABLE",
+          "rules": 8,
+          "tag": ""
+        },
+        {
+          "switch": "PRIVACY_ENABLE",
+          "rules": 7,
+          "tag": ""
+        },
+        {
+          "switch": "SPOTIFY_ENABLE",
+          "rules": 8,
+          "tag": ""
+        },
+        {
+          "switch": "YOUTUBE_ENABLE",
+          "rules": 8,
+          "tag": ""
+        }
+      ]
+    },
+    {
+      "file": "Plugin/sunshufu-pro.plugin",
+      "module": "M2",
+      "switches": 6,
+      "rules": 16,
+      "scripts": [],
+      "mitm_hosts": 14,
+      "switch_usage": [
+        {
+          "switch": "ACTIVITY_ENABLE",
+          "rules": 3,
+          "tag": "活动净化"
+        },
+        {
+          "switch": "BANK_ENABLE",
+          "rules": 2,
+          "tag": "银行优惠"
+        },
+        {
+          "switch": "COUPON_ENABLE",
+          "rules": 3,
+          "tag": "优惠券净化"
+        },
+        {
+          "switch": "ENABLE_SUNSHUFU",
+          "rules": 16,
+          "tag": "总开关"
+        },
+        {
+          "switch": "HOME_ENABLE",
+          "rules": 3,
+          "tag": "首页净化"
+        },
+        {
+          "switch": "SPLASH_ENABLE",
+          "rules": 3,
+          "tag": "开屏广告"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/taobao-tmall-pro.plugin",
+      "module": "M2",
+      "switches": 6,
+      "rules": 32,
+      "scripts": [],
+      "mitm_hosts": 16,
+      "switch_usage": [
+        {
+          "switch": "ENABLE_TAOBAO",
+          "rules": 32,
+          "tag": "总开关"
+        },
+        {
+          "switch": "TAOBAO_88VIP_ENABLE",
+          "rules": 2,
+          "tag": "88VIP 增强"
+        },
+        {
+          "switch": "TAOBAO_CART_ENABLE",
+          "rules": 3,
+          "tag": "购物车净化"
+        },
+        {
+          "switch": "TAOBAO_HOME_ENABLE",
+          "rules": 4,
+          "tag": "首页净化"
+        },
+        {
+          "switch": "TAOBAO_SEARCH_ENABLE",
+          "rules": 3,
+          "tag": "搜索净化"
+        },
+        {
+          "switch": "TAOBAO_SPLASH_ENABLE",
+          "rules": 3,
+          "tag": "开屏广告"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/taopiaopiao-pro.plugin",
+      "module": "M2",
+      "switches": 7,
+      "rules": 8,
+      "scripts": [],
+      "mitm_hosts": 2,
+      "switch_usage": [
+        {
+          "switch": "ENABLE_TAOPIAOPIAO",
+          "rules": 8,
+          "tag": "总开关"
+        },
+        {
+          "switch": "TAOPIAOPIAO_CINEMA_ENABLE",
+          "rules": 1,
+          "tag": "影院广告"
+        },
+        {
+          "switch": "TAOPIAOPIAO_HOME_ENABLE",
+          "rules": 2,
+          "tag": "首页净化"
+        },
+        {
+          "switch": "TAOPIAOPIAO_MINE_ENABLE",
+          "rules": 1,
+          "tag": "我的页面"
+        },
+        {
+          "switch": "TAOPIAOPIAO_POPUP_ENABLE",
+          "rules": 1,
+          "tag": "弹窗广告"
+        },
+        {
+          "switch": "TAOPIAOPIAO_SCRINSCEEN_ENABLE",
+          "rules": 1,
+          "tag": "开屏广告"
+        },
+        {
+          "switch": "TAOPIAOPIAO_SEARCH_ENABLE",
+          "rules": 2,
+          "tag": "搜索净化"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/tencent-video-pro.plugin",
+      "module": "M2",
+      "switches": 6,
+      "rules": 30,
+      "scripts": [],
+      "mitm_hosts": 6,
+      "switch_usage": [
+        {
+          "switch": "ENABLE_TVP",
+          "rules": 30,
+          "tag": "总开关"
+        },
+        {
+          "switch": "TVP_4K_ENABLE",
+          "rules": 3,
+          "tag": "4K 画质解锁"
+        },
+        {
+          "switch": "TVP_HOME_ENABLE",
+          "rules": 4,
+          "tag": "首页净化"
+        },
+        {
+          "switch": "TVP_RECOMMEND_ENABLE",
+          "rules": 2,
+          "tag": "推荐净化"
+        },
+        {
+          "switch": "TVP_SPLASH_ENABLE",
+          "rules": 3,
+          "tag": "开屏广告"
+        },
+        {
+          "switch": "TVP_VIP_ENABLE",
+          "rules": 2,
+          "tag": "会员增强"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/transport-purify.plugin",
+      "module": "M2",
+      "switches": 8,
+      "rules": 30,
+      "scripts": [],
+      "mitm_hosts": 13,
+      "switch_usage": [
+        {
+          "switch": "APP_2BULU_ENABLE",
+          "rules": 4,
+          "tag": "是否开启两步路户外助手净化"
+        },
+        {
+          "switch": "CHELAILE_ENABLE",
+          "rules": 9,
+          "tag": "是否开启车来了净化"
+        },
+        {
+          "switch": "ONTHEWAY_ENABLE",
+          "rules": 4,
+          "tag": "是否开启行者户外净化"
+        },
+        {
+          "switch": "ORAYSUNLOGIN_ENABLE",
+          "rules": 1,
+          "tag": "是否开启向日葵净化"
+        },
+        {
+          "switch": "ROBOTAXI_ENABLE",
+          "rules": 3,
+          "tag": "是否开启萝卜快跑净化"
+        },
+        {
+          "switch": "SF_EXPRESS_ENABLE",
+          "rules": 4,
+          "tag": "是否开启顺丰速运净化"
+        },
+        {
+          "switch": "TRANSPORT_PURIFY_ENABLE",
+          "rules": 30,
+          "tag": "总开关"
+        },
+        {
+          "switch": "XIAOJUKEJICHARGE_ENABLE",
+          "rules": 5,
+          "tag": "是否开启小桔充电净化"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/umetrip-pro.plugin",
+      "module": "M2",
+      "switches": 0,
+      "rules": 1,
+      "scripts": [
+        "Umetrip.js"
+      ],
+      "mitm_hosts": 9,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/video-community-purify.plugin",
+      "module": "M2",
+      "switches": 13,
+      "rules": 74,
+      "scripts": [
+        "Douyin.js",
+        "Feishu.js",
+        "Kuaishou.js",
+        "Reddit.js"
+      ],
+      "mitm_hosts": 40,
+      "switch_usage": [
+        {
+          "switch": "APP_555DY_ENABLE",
+          "rules": 1,
+          "tag": "是否开启555电影净化"
+        },
+        {
+          "switch": "CCLIVE_ENABLE",
+          "rules": 7,
+          "tag": "是否开启CC直播净化"
+        },
+        {
+          "switch": "DOUYIN_ENABLE",
+          "rules": 3,
+          "tag": "总开关"
+        },
+        {
+          "switch": "DOUYU_ENABLE",
+          "rules": 6,
+          "tag": "是否开启斗鱼净化"
+        },
+        {
+          "switch": "FEISHU_ENABLE",
+          "rules": 2,
+          "tag": "飞书去广告总开关"
+        },
+        {
+          "switch": "KUAISHOU_ENABLE",
+          "rules": 2,
+          "tag": "是否开启快手去广告"
+        },
+        {
+          "switch": "MANGOTV_ENABLE",
+          "rules": 28,
+          "tag": "是否开启芒果TV净化"
+        },
+        {
+          "switch": "MOEGIRLWIKI_ENABLE",
+          "rules": 3,
+          "tag": "是否开启萌娘百科净化"
+        },
+        {
+          "switch": "REDDIT_ENABLE",
+          "rules": 1,
+          "tag": "是否开启Reddit去广告"
+        },
+        {
+          "switch": "VIDEO_ENABLE",
+          "rules": 74,
+          "tag": "总开关"
+        },
+        {
+          "switch": "XUNLEI_ENABLE",
+          "rules": 2,
+          "tag": "是否开启迅雷净化"
+        },
+        {
+          "switch": "YY_VOICE_ENABLE",
+          "rules": 10,
+          "tag": "是否开启YY净化"
+        },
+        {
+          "switch": "YYVOICETOOL_ENABLE",
+          "rules": 5,
+          "tag": "是否开启YY语音净化"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/wechat-pro.plugin",
+      "module": "M2",
+      "switches": 6,
+      "rules": 19,
+      "scripts": [],
+      "mitm_hosts": 11,
+      "switch_usage": [
+        {
+          "switch": "ENABLE_WECHAT",
+          "rules": 19,
+          "tag": "总开关"
+        },
+        {
+          "switch": "WECHAT_FRIEND_ENABLE",
+          "rules": 3,
+          "tag": "朋友圈净化"
+        },
+        {
+          "switch": "WECHAT_MP_ENABLE",
+          "rules": 5,
+          "tag": "公众号净化"
+        },
+        {
+          "switch": "WECHAT_SEARCH_ENABLE",
+          "rules": 1,
+          "tag": "搜索净化"
+        },
+        {
+          "switch": "WECHAT_UNBLOCK_ENABLE",
+          "rules": 3,
+          "tag": "外链解锁"
+        },
+        {
+          "switch": "WECHAT_VIDEO_ENABLE",
+          "rules": 2,
+          "tag": "视频号净化"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/wechat-read.plugin",
+      "module": "M2",
+      "switches": 1,
+      "rules": 2,
+      "scripts": [],
+      "mitm_hosts": 2,
+      "switch_usage": [
+        {
+          "switch": "WECHAT_READ_ENABLE",
+          "rules": 2,
+          "tag": "是否开启微信读书去广告"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/weibo-pro.plugin",
+      "module": "M2",
+      "switches": 6,
+      "rules": 73,
+      "scripts": [
+        "Weibo.js"
+      ],
+      "mitm_hosts": 13,
+      "switch_usage": [
+        {
+          "switch": "ENABLE_WEIBO",
+          "rules": 44,
+          "tag": "总开关"
+        },
+        {
+          "switch": "WEIBO_COMMENT_ENABLE",
+          "rules": 2,
+          "tag": "评论区净化"
+        },
+        {
+          "switch": "WEIBO_DEBUG_ENABLE",
+          "rules": 29,
+          "tag": "调试模式"
+        },
+        {
+          "switch": "WEIBO_FEED_ENABLE",
+          "rules": 6,
+          "tag": "信息流净化"
+        },
+        {
+          "switch": "WEIBO_HOT_ENABLE",
+          "rules": 4,
+          "tag": "热搜净化"
+        },
+        {
+          "switch": "WEIBO_SPLASH_ENABLE",
+          "rules": 5,
+          "tag": "开屏广告"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/xiaohongshu-pro.plugin",
+      "module": "M2",
+      "switches": 5,
+      "rules": 31,
+      "scripts": [],
+      "mitm_hosts": 7,
+      "switch_usage": [
+        {
+          "switch": "ENABLE_XHS",
+          "rules": 31,
+          "tag": "总开关"
+        },
+        {
+          "switch": "XHS_FEED_ENABLE",
+          "rules": 5,
+          "tag": "信息流净化"
+        },
+        {
+          "switch": "XHS_SEARCH_ENABLE",
+          "rules": 4,
+          "tag": "搜索净化"
+        },
+        {
+          "switch": "XHS_SPLASH_ENABLE",
+          "rules": 3,
+          "tag": "开屏广告"
+        },
+        {
+          "switch": "XHS_WATERMARK_ENABLE",
+          "rules": 3,
+          "tag": "去水印"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/ximalaya-pro.plugin",
+      "module": "M2",
+      "switches": 0,
+      "rules": 5,
+      "scripts": [
+        "Ximalaya.js"
+      ],
+      "mitm_hosts": 8,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/zhihu-pro.plugin",
+      "module": "M2",
+      "switches": 7,
+      "rules": 36,
+      "scripts": [
+        "Zhihu.js"
+      ],
+      "mitm_hosts": 5,
+      "switch_usage": [
+        {
+          "switch": "ENABLE_ZHIHU",
+          "rules": 36,
+          "tag": "总开关"
+        },
+        {
+          "switch": "ZHIHU_ANSWER_ENABLE",
+          "rules": 6,
+          "tag": "回答净化"
+        },
+        {
+          "switch": "ZHIHU_DEBUG_ENABLE",
+          "rules": 2,
+          "tag": "调试模式"
+        },
+        {
+          "switch": "ZHIHU_HOME_ENABLE",
+          "rules": 7,
+          "tag": "首页净化"
+        },
+        {
+          "switch": "ZHIHU_LINK_ENABLE",
+          "rules": 1,
+          "tag": "外链追踪"
+        },
+        {
+          "switch": "ZHIHU_MEMBER_ENABLE",
+          "rules": 4,
+          "tag": "会员净化"
+        },
+        {
+          "switch": "ZHIHU_SEARCH_ENABLE",
+          "rules": 2,
+          "tag": "搜索净化"
+        }
+      ]
+    }
+  ]
+}

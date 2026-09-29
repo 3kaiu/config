@@ -3,7 +3,6 @@
 #!version=1.0
 #!author=3kaiu (聚合器生成)
 #!homepage=https://github.com/3kaiu/config
-#!icon=https://icons.duckduckgo.com/ip3/acs.m.goofish.com.ico
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.2.4(787)
 #!tag=🛍 购物生活净化
@@ -130,13 +129,18 @@ DOMAIN, advert.mafengwo.cn, REJECT,enable={SHOPPING_ENABLE}&{MAFENGWO_ENABLE}
 ^https?:\/\/p\.kuaidi100\.com\/e-commerce\/act\/actInfo\? reject-dict enable={SHOPPING_ENABLE}&{KUAIDI100_ENABLE}
 ^https?:\/\/p\.kuaidi100\.com\/apicenter\/card\.dox reject-dict enable={SHOPPING_ENABLE}&{KUAIDI100_ENABLE}
 ^https:\/\/capi\.lkcoffee\.com\/resource\/m\/growUp\/calendarList reject-dict enable={SHOPPING_ENABLE}&{LUCKINCOFFEE_ENABLE}
+# 瑞幸咖啡 —— 机制存疑, 待真机验证 (2026-09-29 对抗审计):
+#   capi.lkcoffee.com 是 AES-128-ECB 加密报文域 (见 luckin-pro 的 Scripts/Luckin.js:
+#   解密 → 清洗 → 重加密)。**reject-dict 返回明文 {}**, 客户端拿它去 AES 解密会失败。
+#   正确做法是把这些路径并入 luckin-pro 的加密净化脚本, 而非在此整条 reject。
+#   本次已删 2 条与脚本覆盖范围**字面重复**的规则 (m/sys/common/modules、m/sys/app/adposNew);
+#   余下 6 条能否生效须真机确认, 未确认前保留但在此登记。
+#   收敛口径: 瑞幸咖啡主责插件是 luckin-pro (专用 + 加密净化), 本处为待迁移过渡面。
 ^https:\/\/capi\.lkcoffee\.com\/resource\/m\/promotion\/giftCard\/topPage reject-dict enable={SHOPPING_ENABLE}&{LUCKINCOFFEE_ENABLE}
 ^https:\/\/capi\.lkcoffee\.com\/resource\/m\/sys\/base\/myLittleLuck reject-dict enable={SHOPPING_ENABLE}&{LUCKINCOFFEE_ENABLE}
 ^https:\/\/capi\.lkcoffee\.com\/resource\/core\/v2\/menu\/ordinaryUserLayeredArea reject-dict enable={SHOPPING_ENABLE}&{LUCKINCOFFEE_ENABLE}
-^https:\/\/capi\.lkcoffee\.com\/resource\/m\/sys\/common\/modules reject-dict enable={SHOPPING_ENABLE}&{LUCKINCOFFEE_ENABLE}
 ^https:\/\/capi\.lkcoffee\.com\/resource\/core\/v2\/homepage\/homePageCoffeeList reject-dict enable={SHOPPING_ENABLE}&{LUCKINCOFFEE_ENABLE}
 ^https:\/\/capi\.lkcoffee\.com\/resource\/m\/eorder\/product\/popAppTagProductList reject-dict enable={SHOPPING_ENABLE}&{LUCKINCOFFEE_ENABLE}
-^https:\/\/capi\.lkcoffee\.com\/resource\/m\/sys\/app\/adposNew reject-dict enable={SHOPPING_ENABLE}&{LUCKINCOFFEE_ENABLE}
 ^https:\/\/mapi\.mafengwo\.cn\/discovery\/get_index\/v7\? response-body-json-jq '.data.list |= map(select(.data.business_type != "gdcpm"))' enable={SHOPPING_ENABLE}&{MAFENGWO_ENABLE}
 ^https:\/\/mapi\.mafengwo\.cn\/sales\/home\/get_header\/v3\? response-body-json-jq '.data.list[] |= ( .data |= del(.banners) )' enable={SHOPPING_ENABLE}&{MAFENGWO_ENABLE}
 ^https:\/\/mapi\.mafengwo\.cn\/user\/growth\/get_growth_tip\/v1\? reject-dict enable={SHOPPING_ENABLE}&{MAFENGWO_ENABLE}
@@ -179,7 +183,6 @@ http-response ^https?:\/\/check\.dianping\.com script-path=https://ws.wenn.in/ma
 http-response ^https?:\/\/api\.meituan\.com script-path=https://ws.wenn.in/main/Scripts/Meituan.js, requires-body=true, timeout=10, tag=美团首页净化, enable={SHOPPING_ENABLE}&{MEITUAN_ENABLE}
 http-response ^https?:\/\/i\.waimai\.meituan\.com script-path=https://ws.wenn.in/main/Scripts/Meituan.js, requires-body=true, timeout=10, tag=美团外卖净化, enable={SHOPPING_ENABLE}&{MEITUAN_ENABLE}
 http-response ^https?:\/\/papi\.meituan\.com script-path=https://ws.wenn.in/main/Scripts/Meituan.js, requires-body=true, timeout=10, tag=美团推荐净化, enable={SHOPPING_ENABLE}&{MEITUAN_ENABLE}
-http-response ^https?:\/\/(amdc\.m\.(taobao|goofish|youku|tmall)\.com|acs\.m\.goofish\.com)\/amdc\/mobileDispatch script-path=https://ws.wenn.in/main/Mirror/amdc.js, requires-body=true, timeout=10, tag=AMDC净化
 http-response ^https:\/\/(cn-acs\.m|e2e-mtop)\.cainiao\.com\/gw\/mtop\.cainiao\.app\.e2e\.engine\.page\.fetch script-path=https://ws.wenn.in/main/Scripts/Cainiao.js, requires-body=true, timeout=10, tag=首页净化, enable={SHOPPING_ENABLE}&{CAINIAO_ENABLE}
 http-response ^https:\/\/e2e-mtop\.cainiao\.com\/gw\/mtop\.cainiao\.app\.e2e\.engine\.page\.fetch\.cn script-path=https://ws.wenn.in/main/Scripts/Cainiao.js, requires-body=true, timeout=10, tag=我的页净化, enable={SHOPPING_ENABLE}&{CAINIAO_ENABLE}
 http-response ^https:\/\/longquan-mtop\.cainiao\.com\/gw\/mtop\.com\.cainiao\.longquan\.place\.getpageresourcecontent\.cn script-path=https://ws.wenn.in/main/Scripts/Cainiao.js, requires-body=true, timeout=10, tag=发现页净化, enable={SHOPPING_ENABLE}&{CAINIAO_ENABLE}

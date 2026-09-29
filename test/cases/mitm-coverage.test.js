@@ -11,10 +11,16 @@
  * 其与并入条目的冲突优先级未经官方文档确认, 见 2026-09-22 结论: 未知即不动)。
  * startup-adblock-pro.plugin 除外 (专用测试已逐条登记, 避免双重维护)。
  *
- * EXPECTED_GENERIC (2): host 无法静态抽取, 覆盖性不可判定 — 锁定集合 —
+ * EXPECTED_GENERIC (1): host 无法静态抽取, 覆盖性不可判定 — 锁定集合 —
  *   ① shopping-purify `119.29.29.\d+` (HTTPDNS /24, IP 段通配无精确 MitM 表达)
- *   ② wechat-pro `^(https?://)?([alnum]+.)+...` 全通用域名正则 (裸 catch-all 形态)
  * 漂移 (新增 orphan 或 generic 增减) 即红 → 先定位是规则新增还是 MitM 被改。
+ *
+ * 2026-09-29 收缩: 原 ② wechat-pro 的 `^(https?://)?([alnum]+.)+.../wp-json/...` 全通用
+ *   域名正则已移除 —— 它是唯一一条 generic 规则, 且其 script-path 指向本仓已删的
+ *   Mirror/applet.js (非第三方 raw, 但同属"非自维护"依赖), 随上游清理一并删除。
+ *   代价是明确的: **微信小程序 wp-json 广告净化能力失去**。微信其余净化 (公众号 /
+ *   朋友圈 / 视频号) 均为本地 Rewrite, 不受影响。
+ *   若日后自研小程序净化, 须重新评估: 通用域名正则会导致 MitM 解密面不可静态判定。
  */
 "use strict";
 
@@ -27,11 +33,10 @@ const SKIP = new Set(["startup-adblock-pro.plugin"]);
 
 const EXPECTED_GENERIC = [
   "Plugin/shopping-purify.plugin :: ^https?:\\/\\/119\\.29\\.29\\.\\d+\\/d",
-  "Plugin/wechat-pro.plugin :: ^(https?://)?([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\\.)+[a-zA-Z]{2,}(:\\d+)?/wp-json/[a-zA-Z0-9_-]+/(mp\\/)?v\\d/posts",
 ];
 
 let mod = null;
-const load = async () => (mod ??= await import("../../tools/build-startup-plugin.mjs"));
+const load = async () => (mod ??= await import("../lib/mitm-hosts.mjs"));
 
 /** 插件文本 → [MitM] hostname 列表 (去 %APPEND% / 负条目, 与 startup 测试同口径) */
 const hostnamesOf = (txt) => {
@@ -68,12 +73,12 @@ const rulesOf = (txt) => {
 };
 
 exports.tests = {
-  "mitm-coverage: 非 startup 插件零无解密面规则 (新增 orphan 即红)": async (a) => {
+  "mitm-coverage: 非 startup 插件零无解密面规则 (新增 orphan 即红; host 提取逻辑见 test/lib/mitm-hosts.mjs)": async (a) => {
     const m = await load();
     const tplHosts = hostnamesOf(fs.readFileSync(TPL, "utf8"));
     a.ok(tplHosts.length > 50, `模板 [MitM] 应有规模 (当前 ${tplHosts.length})`);
     const orphans = [];
-    for (const dir of ["Plugin", "Kelee"]) {
+    for (const dir of ["Plugin"]) {
       for (const f of fs.readdirSync(path.join(ROOT, dir)).filter((x) => x.endsWith(".plugin")).sort()) {
         if (SKIP.has(f)) continue;
         const txt = fs.readFileSync(path.join(ROOT, dir, f), "utf8");
@@ -91,7 +96,7 @@ exports.tests = {
     const m = await load();
     const tplHosts = hostnamesOf(fs.readFileSync(TPL, "utf8"));
     const generics = [];
-    for (const dir of ["Plugin", "Kelee"]) {
+    for (const dir of ["Plugin"]) {
       for (const f of fs.readdirSync(path.join(ROOT, dir)).filter((x) => x.endsWith(".plugin")).sort()) {
         if (SKIP.has(f)) continue;
         const txt = fs.readFileSync(path.join(ROOT, dir, f), "utf8");

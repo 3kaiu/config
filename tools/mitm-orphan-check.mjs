@@ -9,7 +9,7 @@
  *
  * 用法:
  *   node tools/mitm-orphan-check.mjs          全量 (含镜像上游, 报告式)
- *   node tools/mitm-orphan-check.mjs --local  仅本地 Plugin/Kelee/主配置 (CI 严格模式)
+ *   node tools/mitm-orphan-check.mjs --local  仅本地 Plugin/ 与主配置 (CI 严格模式)
  * 退出码: 0 = 无孤儿; 1 = 存在孤儿
  */
 import fs from "node:fs";
@@ -40,9 +40,9 @@ function walk(dir, acc) {
 function readFiles() {
   const files = [];
   if (LOCAL_ONLY) {
-    for (const d of ["Plugin", "Kelee"]) walk(path.join(ROOT, d), files);
+    for (const d of ["Plugin"]) walk(path.join(ROOT, d), files);
   } else {
-    for (const d of ["Plugin", "Kelee", "Mirror"]) walk(path.join(ROOT, d), files);
+    for (const d of ["Plugin"]) walk(path.join(ROOT, d), files);
   }
   if (fs.existsSync(MAIN_CFG)) files.push(MAIN_CFG);
   return files;
@@ -50,7 +50,7 @@ function readFiles() {
 
 function fullFiles() {
   const files = [];
-  for (const d of ["Plugin", "Kelee", "Mirror"]) walk(path.join(ROOT, d), files);
+  for (const d of ["Plugin"]) walk(path.join(ROOT, d), files);
   if (fs.existsSync(MAIN_CFG)) files.push(MAIN_CFG);
   return files;
 }
@@ -157,7 +157,7 @@ function skeletons(pattern) {
 }
 
 function main() {
-  const localFiles = readFiles(); // 本地模式: Plugin/Kelee+主配置; 全量: 含 Mirror
+  const localFiles = readFiles(); // 本地 Plugin/ + 主配置
   // 每个文件 [Rewrite] 段原文 (方法 C 用)
   const rewriteText = new Map();
   for (const f of localFiles) {

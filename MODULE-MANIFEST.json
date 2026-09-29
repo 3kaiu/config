@@ -1,0 +1,934 @@
+{
+  "$comment": "资源模块清单 —— 重构的单一真源 (2026-09-29)。人类可读版见 MODULES.md。门禁: test/cases/module-manifest.test.js 断言零未归类/零重复/枚举合法。本文件只做归类判定, 不含任何 Loon 规则。",
+  "schema_version": 1,
+  "axes": {
+    "module": "职责模块 M1-M6",
+    "layer": "Loon 介入层: L0 节点 / L1 DNS与映射 / L2 分流 / L3 策略组 / L4 流量改写 / L5 脚本 / L6 MitM解密面 / L- 跨层聚合 / L? 不适用",
+    "granularity": "single-app 单 App / cross-app 跨 App 聚合 / global 全局"
+  },
+  "modules": [
+    {
+      "id": "M1",
+      "name": "分流",
+      "layer": "L2+L3",
+      "purpose": "决定请求走哪条链路 (直连/代理/特定策略组), 不改写任何内容",
+      "responsibilities": [
+        "按业务域把域名/IP 归入策略组",
+        "维持 FINAL 兜底与 GEOIP CN 收口",
+        "误伤白名单 (第三方 App 内嵌域) 的显式放行"
+      ],
+      "tpl_resources": {
+        "snippets": [
+          "ai-services.tpl",
+          "developer.tpl",
+          "gaming.tpl",
+          "social.tpl",
+          "streaming.tpl"
+        ],
+        "policy_groups": [
+          "Proxy",
+          "Fallback",
+          "Apple",
+          "Final",
+          "Streaming",
+          "AI",
+          "Developer",
+          "Gaming",
+          "Social",
+          "OpenCode"
+        ],
+        "local_rule_blocks": [
+          "Apple 服务",
+          "微信",
+          "OpenCode",
+          "Discord STUN",
+          "STUN 白名单/阻断",
+          "局域网",
+          "HTTPDNS 拦截",
+          "DNS/隐私泄漏检测",
+          "Google 全家桶",
+          "Google 通配域名",
+          "误杀域名白名单",
+          "GEOIP,CN,DIRECT / FINAL,Final"
+        ]
+      },
+      "plugins": [
+        {
+          "file": "ai.plugin",
+          "app": "AI 服务",
+          "layer": "L2",
+          "granularity": "cross-app",
+          "reason": "AI 域 → AI 策略组, 纯分流无改写"
+        }
+      ],
+      "scripts": [],
+      "also_members": []
+    },
+    {
+      "id": "M2",
+      "name": "广告治理",
+      "layer": "L2+L4+L5",
+      "purpose": "唯一跨 3 个介入层的模块: L2 硬拦截广告域 + L4 改写/拒绝响应 + L5 字段级净化",
+      "responsibilities": [
+        "L2: 国内外广告/追踪 SDK 域硬 REJECT (不依赖解密面)",
+        "L4: 纯广告接口整条 reject / 广告字段重命名",
+        "L5: 业务响应内嵌广告的字段级净化 (逐 App)",
+        "开屏广告的 4 类处置台账 (见 test/cases/jingdong.test.js AD_SURFACES)",
+        "粒度分布 (实测): single-app 28 / cross-app 10 / global 1 —— 现有 46 插件的切分轴不一致, 25 个 -pro 是单 App 而 13 个 *-purify 是跨 App 聚合, 该轴源自上游作者原始切分而非职责"
+      ],
+      "internal_layers": {
+        "L2": "tpl 本地 [Rule] 的 REJECT 段 (~119 条, 分 3 轮 HAR 审计)",
+        "L4": "startup-adblock-pro.plugin (492 条) + 各插件 Rewrite 段",
+        "L5": "29 个 Scripts 中 26 个 + 各插件 Script 段"
+      },
+      "tpl_resources": {
+        "snippets": [],
+        "local_rule_blocks": [
+          "Google 分析与广告",
+          "常见分析 SDK",
+          "国内广告 SDK 硬拦截 (第一轮)",
+          "国内广告/追踪 SDK 硬拦截 (第二轮)",
+          "QQ音乐 DNS REJECT",
+          "淘宝 heic/h-adashx",
+          "穿山甲/广点通全链拦截",
+          "京东 kepler/policy 等误伤白名单",
+          "HTTPDNS 拦截"
+        ]
+      },
+      "plugins": [
+        {
+          "file": "startup-adblock-pro.plugin",
+          "app": "全局开屏",
+          "layer": "L4",
+          "granularity": "global",
+          "reason": "447 条开屏 reject-200, 已冻结为静态自维护"
+        },
+        {
+          "file": "jd-pro.plugin",
+          "app": "京东",
+          "layer": "L2+L4+L5",
+          "granularity": "single-app",
+          "reason": "7 通道净化, 本仓广告面台账的样板"
+        },
+        {
+          "file": "bilibili-pro.plugin",
+          "app": "哔哩哔哩",
+          "layer": "L4+L5",
+          "granularity": "single-app",
+          "reason": "json + proto 双通道去广告"
+        },
+        {
+          "file": "bilicomics.plugin",
+          "app": "哔哩哔哩漫画",
+          "layer": "L4",
+          "granularity": "single-app",
+          "reason": "20 条 rewrite 纯净化"
+        },
+        {
+          "file": "zhihu-pro.plugin",
+          "app": "知乎",
+          "layer": "L4+L5",
+          "granularity": "single-app",
+          "reason": "多分支字段级净化, 审计标准样板"
+        },
+        {
+          "file": "weibo-pro.plugin",
+          "app": "微博",
+          "layer": "L4+L5",
+          "granularity": "single-app",
+          "reason": "7 条 Script 通道, 脚本量最大的单 App"
+        },
+        {
+          "file": "wechat-pro.plugin",
+          "app": "微信",
+          "layer": "L4+L5",
+          "granularity": "single-app",
+          "reason": "会话净化 + 小程序净化"
+        },
+        {
+          "file": "wechat-read.plugin",
+          "app": "微信读书",
+          "layer": "L4",
+          "granularity": "single-app",
+          "reason": "轻量 2 条 rewrite"
+        },
+        {
+          "file": "alipay-pro.plugin",
+          "app": "支付宝",
+          "layer": "L4",
+          "granularity": "single-app",
+          "reason": "6 开关, 无脚本"
+        },
+        {
+          "file": "alipay-miniprogram-pro.plugin",
+          "app": "支付宝小程序",
+          "layer": "L4+L5",
+          "granularity": "single-app",
+          "reason": "13 条 Script 通道"
+        },
+        {
+          "file": "taobao-tmall-pro.plugin",
+          "app": "淘宝天猫",
+          "layer": "L2+L4",
+          "granularity": "single-app",
+          "reason": "11 条 rewrite + 4 条 rule"
+        },
+        {
+          "file": "pinduoduo-pro.plugin",
+          "app": "拼多多",
+          "layer": "L2+L4",
+          "granularity": "single-app",
+          "reason": "28 条 rewrite + 17 条 rule"
+        },
+        {
+          "file": "sunshufu-pro.plugin",
+          "app": "云闪付",
+          "layer": "L4",
+          "granularity": "single-app",
+          "reason": "6 个开关, 无脚本无 rewrite, 全部依赖主配置的云闪付域规则"
+        },
+        {
+          "file": "amap.plugin",
+          "app": "高德地图",
+          "layer": "L4",
+          "granularity": "single-app",
+          "reason": "21 条 rewrite"
+        },
+        {
+          "file": "bdpan-pro.plugin",
+          "app": "百度网盘",
+          "layer": "L4",
+          "granularity": "single-app",
+          "reason": "8 条 rewrite"
+        },
+        {
+          "file": "didi-pro.plugin",
+          "app": "滴滴出行",
+          "layer": "L2+L4",
+          "granularity": "single-app",
+          "reason": "17 条 rewrite + 4 条 rule"
+        },
+        {
+          "file": "dingtalk-pro.plugin",
+          "app": "钉钉",
+          "layer": "L4",
+          "granularity": "single-app",
+          "reason": "6 个开关, 无脚本无 rewrite, 纯声明式开关 (规则待真机补齐)"
+        },
+        {
+          "file": "iqiyi-pro.plugin",
+          "app": "爱奇艺",
+          "layer": "L2+L4",
+          "granularity": "single-app",
+          "reason": "22 条 rewrite"
+        },
+        {
+          "file": "tencent-video-pro.plugin",
+          "app": "腾讯视频",
+          "layer": "L2+L4",
+          "granularity": "single-app",
+          "reason": "9 条 rule 为主"
+        },
+        {
+          "file": "netease-pro.plugin",
+          "app": "网易云音乐",
+          "layer": "L2+L4",
+          "granularity": "single-app",
+          "reason": "7 条本地 Rewrite (广告位/搜索/播客)。2026-09-29 移除全部 16 条上游 netease.adblock 脚本通道后仅剩本地规则 —— L5 签到/打卡能力已随该上游失去。"
+        },
+        {
+          "file": "qqmusic.plugin",
+          "app": "QQ音乐",
+          "layer": "L2",
+          "granularity": "single-app",
+          "reason": "3 条 rule, 全靠主配置 DNS REJECT"
+        },
+        {
+          "file": "qishui.plugin",
+          "app": "汽水音乐",
+          "layer": "L4",
+          "granularity": "single-app",
+          "reason": "26 条 rewrite"
+        },
+        {
+          "file": "ximalaya-pro.plugin",
+          "app": "喜马拉雅",
+          "layer": "L4+L5",
+          "granularity": "single-app",
+          "reason": "5 脚本 + 14 rewrite"
+        },
+        {
+          "file": "qidian.plugin",
+          "app": "起点",
+          "layer": "L2+L4+L5",
+          "granularity": "single-app",
+          "reason": "起点秒播视频替换 (scripts 直挂 loon.tpl 而非插件)"
+        },
+        {
+          "file": "umetrip-pro.plugin",
+          "app": "航旅纵横",
+          "layer": "L5",
+          "granularity": "single-app",
+          "reason": "单脚本通道 (Scripts/Umetrip.js), 无 rewrite 无 rule"
+        },
+        {
+          "file": "keep-pro.plugin",
+          "app": "Keep",
+          "layer": "L4+L5",
+          "granularity": "single-app",
+          "reason": "5 脚本 + 13 rewrite"
+        },
+        {
+          "file": "luckin-pro.plugin",
+          "app": "瑞幸咖啡",
+          "layer": "L4+L5",
+          "granularity": "single-app",
+          "reason": "单脚本 + 1 rewrite"
+        },
+        {
+          "file": "taopiaopiao-pro.plugin",
+          "app": "淘票票",
+          "layer": "L4+L5",
+          "granularity": "single-app",
+          "reason": "AMDC 脚本 + 8 rewrite"
+        },
+        {
+          "file": "xiaohongshu-pro.plugin",
+          "app": "小红书",
+          "layer": "L2+L4",
+          "granularity": "single-app",
+          "reason": "10 条 rewrite"
+        },
+        {
+          "file": "safari-webview-pro.plugin",
+          "app": "Safari/WebView",
+          "layer": "L4",
+          "granularity": "cross-app",
+          "reason": "5 个开关: WebView/Safari 广告净化 + 追踪防护 + 指纹防护 + Cookie 管理, 广告侧为主责 (跨 App 聚合: 覆盖 4 个 App, 逐 App 开关见 covers 字段)",
+          "covers": [
+            "WEBVIEW_ENABLE",
+            "SAFARI_ENABLE",
+            "TRACKER_ENABLE",
+            "COOKIES_ENABLE"
+          ]
+        },
+        {
+          "file": "shopping-overseas-pro.plugin",
+          "app": "海外购物支付",
+          "layer": "L4",
+          "granularity": "cross-app",
+          "reason": "工具箱形态, 7 开关跨多个海外购物 App (跨 App 聚合: 覆盖 4 个 App, 逐 App 开关见 covers 字段)",
+          "covers": [
+            "AMAZON_ENABLE",
+            "EBAY_ENABLE",
+            "PAYPAL_ENABLE",
+            "ALIEXPRESS_ENABLE"
+          ]
+        },
+        {
+          "file": "streaming-overseas-pro.plugin",
+          "app": "海外流媒体",
+          "layer": "L2",
+          "granularity": "cross-app",
+          "reason": "域名分流为主, 挂 Streaming 策略组 (跨 App 聚合: 覆盖 5 个 App, 逐 App 开关见 covers 字段)",
+          "covers": [
+            "NETFLIX_ENABLE",
+            "DISNEY_ENABLE",
+            "HBO_ENABLE",
+            "SPOTIFY_ENABLE",
+            "YOUTUBE_ENABLE"
+          ]
+        },
+        {
+          "file": "shopping-purify.plugin",
+          "app": "购物生活聚合",
+          "layer": "L4+L5",
+          "granularity": "cross-app",
+          "reason": "128 rewrite + 13 脚本, 聚合淘宝/闲鱼/美团/点评/京东外卖/ Cainiao (跨 App 聚合: 覆盖 21 个 App, 逐 App 开关见 covers 字段)",
+          "covers": [
+            "BEIKE_ENABLE",
+            "BOOHEE_ENABLE",
+            "DAMAI_ENABLE",
+            "DINGDONGMAICAI_ENABLE",
+            "EASYCHARGE_ENABLE",
+            "FC_BOX_ENABLE",
+            "FLYERTEA_ENABLE",
+            "HANTINGHOTELS_ENABLE",
+            "JDWAIMAI_ENABLE",
+            "KUAIDI100_ENABLE",
+            "LUCKINCOFFEE_ENABLE",
+            "MAFENGWO_ENABLE",
+            "MRHEMA_ENABLE",
+            "PUPUMALL_ENABLE",
+            "TAOBAOTRAVEL_ENABLE",
+            "TMALLCAMPUS_ENABLE",
+            "IMAICAI_ENABLE",
+            "DIANPING_ENABLE",
+            "MEITUAN_ENABLE",
+            "CAINIAO_ENABLE",
+            "WPS_ENABLE"
+          ]
+        },
+        {
+          "file": "video-community-purify.plugin",
+          "app": "视频社区聚合",
+          "layer": "L2+L4+L5",
+          "granularity": "cross-app",
+          "reason": "44 rewrite + 7 脚本, 聚合抖音/快手/Feishu/Reddit/贴吧 (跨 App 聚合: 覆盖 12 个 App, 逐 App 开关见 covers 字段)",
+          "covers": [
+            "APP_555DY_ENABLE",
+            "CCLIVE_ENABLE",
+            "DOUYU_ENABLE",
+            "MANGOTV_ENABLE",
+            "MOEGIRLWIKI_ENABLE",
+            "XUNLEI_ENABLE",
+            "YY_VOICE_ENABLE",
+            "YYVOICETOOL_ENABLE",
+            "DOUYIN_ENABLE",
+            "KUAISHOU_ENABLE",
+            "REDDIT_ENABLE",
+            "FEISHU_ENABLE"
+          ]
+        },
+        {
+          "file": "media-reading-purify.plugin",
+          "app": "影音阅读聚合",
+          "layer": "L2+L4+L5",
+          "granularity": "cross-app",
+          "reason": "32 rewrite + 7 脚本, 聚合番茄/酷狗/酷我/Youku (跨 App 聚合: 覆盖 7 个 App, 逐 App 开关见 covers 字段)",
+          "covers": [
+            "BODIANMUSIC_ENABLE",
+            "KUGOUYOUTH_ENABLE",
+            "SPOTIFY_ENABLE",
+            "KUGOU_ENABLE",
+            "KUWO_ENABLE",
+            "YOUKU_ENABLE",
+            "FANQIE_ENABLE"
+          ]
+        },
+        {
+          "file": "news-purify.plugin",
+          "app": "资讯阅读聚合",
+          "layer": "L2+L4+L5",
+          "granularity": "cross-app",
+          "reason": "64 rewrite + 3 脚本 + 8 rule (跨 App 聚合: 覆盖 11 个 App, 逐 App 开关见 covers 字段)",
+          "covers": [
+            "APP_36KR_ENABLE",
+            "CAIXINMEDIA_ENABLE",
+            "COLORFULCLOUDS_ENABLE",
+            "DOUBAN_ENABLE",
+            "DOUBANREAD_ENABLE",
+            "HUXIU_ENABLE",
+            "ITHOME_ENABLE",
+            "MOJIWEATHER_ENABLE",
+            "NETEASENEWS_ENABLE",
+            "SNOWBALL_ENABLE",
+            "TENCENTNEWS_ENABLE"
+          ]
+        },
+        {
+          "file": "transport-purify.plugin",
+          "app": "出行外卖聚合",
+          "layer": "L2+L4",
+          "granularity": "cross-app",
+          "reason": "29 rewrite, 聚合出行/外卖平台 (跨 App 聚合: 覆盖 7 个 App, 逐 App 开关见 covers 字段)",
+          "covers": [
+            "APP_2BULU_ENABLE",
+            "CHELAILE_ENABLE",
+            "ONTHEWAY_ENABLE",
+            "ORAYSUNLOGIN_ENABLE",
+            "ROBOTAXI_ENABLE",
+            "SF_EXPRESS_ENABLE",
+            "XIAOJUKEJICHARGE_ENABLE"
+          ]
+        },
+        {
+          "file": "social-netdisk-purify.plugin",
+          "app": "社交网盘聚合",
+          "layer": "L2+L4",
+          "granularity": "cross-app",
+          "reason": "225 rewrite + 10 rule, 聚合网盘/社交/工具类 App (跨 App 聚合: 覆盖 25 个 App, 逐 App 开关见 covers 字段)",
+          "covers": [
+            "ALIYUNDRIVE_ENABLE",
+            "BAIDUPHOTO_ENABLE",
+            "BAIDUTRANSLATE_ENABLE",
+            "BAIDUWENKU_ENABLE",
+            "COOLAPK_ENABLE",
+            "HUPU_ENABLE",
+            "JUMP_ENABLE",
+            "LOL_BIBLE_ENABLE",
+            "MAIMAI_ENABLE",
+            "MAILMASTER_ENABLE",
+            "NETEASEGODLIKE_ENABLE",
+            "PICC_INSURANCE_ENABLE",
+            "QUARKBROWSER_ENABLE",
+            "QUARKSCANKING_ENABLE",
+            "TXDOCS_ENABLE",
+            "VALORANTBIBLE_ENABLE",
+            "WPFORUM_ENABLE",
+            "WPS_DOCUMENTS_ENABLE",
+            "WEIBO_INTL_ENABLE",
+            "XIAOHEIHE_ENABLE",
+            "XIAOMISPEAKER_ENABLE",
+            "YOUDAODICT_ENABLE",
+            "YOUDAONOTE_ENABLE",
+            "YOUDAOTRANS_ENABLE",
+            "WEXINMINIPROGRAMS_REMOVE_ENABLE"
+          ]
+        },
+        {
+          "file": "overseas-social-pro.plugin",
+          "app": "海外社交聚合",
+          "layer": "L4+L5",
+          "granularity": "cross-app",
+          "reason": "12 脚本通道, Twitter + LinkedIn (跨 App 聚合: 覆盖 4 个 App, 逐 App 开关见 covers 字段)",
+          "covers": [
+            "INSTAGRAM_ENABLE",
+            "FACEBOOK_ENABLE",
+            "TWITTER_X_ENABLE",
+            "LINKEDIN_ENABLE"
+          ]
+        },
+        {
+          "file": "apple-services-pro.plugin",
+          "app": "Apple 服务",
+          "layer": "L4",
+          "granularity": "global",
+          "reason": "6 条 apps.apple.com/v1/* reject-dict (含 /advertising) = 广告与内容改写为主责, 原误归 M1 分流 —— 该插件无任何策略组/分流规则"
+        }
+      ],
+      "scripts": [
+        {
+          "file": "AlipayMini.js",
+          "app": "支付宝小程序"
+        },
+        {
+          "file": "Bilibili.js",
+          "app": "哔哩哔哩"
+        },
+        {
+          "file": "Cainiao.js",
+          "app": "菜鸟裹裹"
+        },
+        {
+          "file": "Dianping.js",
+          "app": "大众点评"
+        },
+        {
+          "file": "Douyin.js",
+          "app": "抖音"
+        },
+        {
+          "file": "Fanqie.js",
+          "app": "番茄小说"
+        },
+        {
+          "file": "Feishu.js",
+          "app": "Feishu  Lark"
+        },
+        {
+          "file": "Jingdong.js",
+          "app": "京东"
+        },
+        {
+          "file": "Keep.js",
+          "app": "Keep"
+        },
+        {
+          "file": "Kuaishou.js",
+          "app": "快手"
+        },
+        {
+          "file": "Kugou.js",
+          "app": "酷狗音乐"
+        },
+        {
+          "file": "Kuwo.js",
+          "app": "酷我音乐"
+        },
+        {
+          "file": "LinkedIn.js",
+          "app": "LinkedIn"
+        },
+        {
+          "file": "Luckin.js",
+          "app": "瑞幸咖啡"
+        },
+        {
+          "file": "Meituan.js",
+          "app": "美团"
+        },
+        {
+          "file": "Qidian.js",
+          "app": "起点"
+        },
+        {
+          "file": "Reddit.js",
+          "app": "Reddit"
+        },
+        {
+          "file": "TencentNews.js",
+          "app": "腾讯新闻"
+        },
+        {
+          "file": "Tieba.js",
+          "app": "百度贴吧"
+        },
+        {
+          "file": "Twitter.js",
+          "app": "Twitter"
+        },
+        {
+          "file": "Umetrip.js",
+          "app": "航旅纵横"
+        },
+        {
+          "file": "Weibo.js",
+          "app": "微博"
+        },
+        {
+          "file": "WPS.js",
+          "app": "WPS"
+        },
+        {
+          "file": "Ximalaya.js",
+          "app": "喜马拉雅"
+        },
+        {
+          "file": "Youku.js",
+          "app": "优酷"
+        },
+        {
+          "file": "Zhihu.js",
+          "app": "知乎"
+        }
+      ],
+      "granularity_actual": {
+        "single-app": 28,
+        "cross-app": 10,
+        "global": 1
+      },
+      "also_members": []
+    },
+    {
+      "id": "M3",
+      "name": "隐私",
+      "layer": "L2",
+      "purpose": "拦追踪/统计/归因 SDK 与 DNS 泄漏, 走 DNS/规则层, 不解密内容",
+      "responsibilities": [
+        "纯 DNS 级 REJECT (无需 MitM)",
+        "推送保活 (只拦统计子域, 保留推送域)",
+        "DNS 泄漏检测域 → 强制走代理远端解析"
+      ],
+      "tpl_resources": {
+        "snippets": [],
+        "local_rule_blocks": [
+          "常见分析 SDK (GA/AppsFlyer/Adjust/Sentry 等)",
+          "HTTPDNS 拦截",
+          "DNS/隐私泄漏检测"
+        ]
+      },
+      "plugins": [
+        {
+          "file": "privacy-shield.plugin",
+          "app": "全局追踪 SDK",
+          "layer": "L2",
+          "granularity": "global",
+          "reason": "唯一职责单一的插件, 11 条 DNS REJECT + 1 开关"
+        }
+      ],
+      "scripts": [],
+      "also_members": [
+        {
+          "file": "safari-webview-pro.plugin",
+          "from": "M2",
+          "reason": "同上, 主责判定为广告侧"
+        },
+        {
+          "file": "apple-services-pro.plugin",
+          "from": "M2",
+          "reason": "PRIVACY_ENABLE 开关拦截 Apple 追踪与数据收集, 与同插件的 apps.apple.com 广告改写并存"
+        }
+      ]
+    },
+    {
+      "id": "M4",
+      "name": "银行与支付",
+      "layer": "L2+L6",
+      "purpose": "银行/支付类 App 免解密 (负号 MitM) + 免广告, 是唯一以\"不解密\"为目标的功能域",
+      "responsibilities": [
+        "[MitM] 负号列表 —— 对银行域**不开**解密面",
+        "银行广告接口按 URL 路径级 REJECT (16 条)",
+        "银行域强制 DIRECT (第三方 App 内嵌依赖)"
+      ],
+      "tpl_resources": {
+        "snippets": [
+          "bank-ad-reject.tpl"
+        ],
+        "policy_groups": [],
+        "local_rule_blocks": [
+          "银行 DOMAIN-SUFFIX DIRECT (19 条)",
+          "[MitM] 负号银行域列表"
+        ]
+      },
+      "plugins": [
+        {
+          "file": "bank.plugin",
+          "app": "银行与云闪付",
+          "layer": "L2",
+          "granularity": "cross-app",
+          "reason": "与 snippet 共同构成银行的\"免解密 + 免广告\"闭环"
+        }
+      ],
+      "scripts": [],
+      "also_members": []
+    },
+    {
+      "id": "M5",
+      "name": "工具",
+      "layer": "L5",
+      "purpose": "与业务无关的自建工具: 通知/诊断/搜索, 走 cron 或 generic 脚本, 不参与分流",
+      "responsibilities": [
+        "定时通知 (流量/健康)",
+        "双链路探活诊断 (代理/直连)",
+        "快捷搜索面板"
+      ],
+      "tpl_resources": {
+        "snippets": [],
+        "policy_groups": [],
+        "local_rule_blocks": []
+      },
+      "plugins": [
+        {
+          "file": "notify.plugin",
+          "app": "定时通知",
+          "layer": "L5",
+          "granularity": "global",
+          "reason": "cron 脚本, 零常驻流量"
+        },
+        {
+          "file": "diagnostics.plugin",
+          "app": "诊断助手",
+          "layer": "L5",
+          "granularity": "global",
+          "reason": "generic 手动触发, 零常驻流量"
+        },
+        {
+          "file": "quicksearch.plugin",
+          "app": "快捷搜索",
+          "layer": "L4",
+          "granularity": "global",
+          "reason": "8 条 rewrite 重写搜索页, 唯一非 L5 的工具"
+        }
+      ],
+      "scripts": [
+        {
+          "file": "Diagnostics.js",
+          "app": "诊断助手"
+        },
+        {
+          "file": "health-notify.js",
+          "app": "定时通知"
+        },
+        {
+          "file": "traffic-notify.js",
+          "app": "定时通知"
+        }
+      ],
+      "also_members": [
+        {
+          "file": "qidian.plugin",
+          "from": "M2",
+          "reason": "cron 起点读书自动签到 + 获取Token + 获取Cookie 三条规则, 与 notify/diagnostics 同属自动化工具形态"
+        }
+      ]
+    },
+    {
+      "id": "M6",
+      "name": "基建",
+      "layer": "L?",
+      "purpose": "生成与门禁本身: 源码、构建、测试、CI。不产生 Loon 运行时资源",
+      "responsibilities": [
+        "src/*.ts → Scripts/ 的唯一构建链 (esbuild + inject)",
+        "tools/*.mjs 门禁 (每条必须被接线)",
+        "test/cases/*.test.js 行为回归",
+        "Loon.lcf 生成与幂等"
+      ],
+      "tpl_resources": {
+        "snippets": [],
+        "policy_groups": [],
+        "local_rule_blocks": []
+      },
+      "plugins": [],
+      "scripts": [],
+      "also_members": []
+    },
+    {
+      "id": "M7",
+      "name": "功能增强",
+      "layer": "L4+L5",
+      "purpose": "非广告、非隐私、非分流的功能改写: VIP/画质/倍速解锁、签到打卡(cron)、去水印、领券、外链与区域解锁",
+      "responsibilities": [
+        "解锁类响应体改写 (画质档位 / VIP 权益 / 倍速 / 签名参数)",
+        "cron 自动化 (签到 / 打卡 / 福利任务 / Token 与 Cookie 获取)",
+        "水印与外链类去改写",
+        "⚠️ 判据: 必须有**真实规则消费**该开关, 仅措辞含\"解锁/增强\"不算 (审计 8 逐一验证)"
+      ],
+      "tpl_resources": {
+        "snippets": [],
+        "policy_groups": [],
+        "local_rule_blocks": []
+      },
+      "plugins": [],
+      "scripts": [],
+      "also_members": [
+        {
+          "file": "taobao-tmall-pro.plugin",
+          "from": "M2",
+          "reason": "88VIP 增强 开关消费 3 处"
+        },
+        {
+          "file": "iqiyi-pro.plugin",
+          "from": "M2",
+          "reason": "4K 画质解锁 消费 4 处 + 会员增强 消费 3 处"
+        },
+        {
+          "file": "tencent-video-pro.plugin",
+          "from": "M2",
+          "reason": "4K 画质解锁 消费 4 处 + 会员增强 消费 3 处"
+        },
+        {
+          "file": "bdpan-pro.plugin",
+          "from": "M2",
+          "reason": "倍速解锁 消费 2 处 + 会员增强 消费 4 处"
+        },
+        {
+          "file": "alipay-pro.plugin",
+          "from": "M2",
+          "reason": "会员增强 消费 3 处"
+        },
+        {
+          "file": "didi-pro.plugin",
+          "from": "M2",
+          "reason": "D 豆会员权益 消费 3 处 + 优惠券管理"
+        },
+        {
+          "file": "sunshufu-pro.plugin",
+          "from": "M2",
+          "reason": "银行优惠展示优化 消费 3 处"
+        },
+        {
+          "file": "xiaohongshu-pro.plugin",
+          "from": "M2",
+          "reason": "去水印 消费 4 处"
+        },
+        {
+          "file": "jd-pro.plugin",
+          "from": "M2",
+          "reason": "领券中心 消费 2 处"
+        },
+        {
+          "file": "weibo-pro.plugin",
+          "from": "M2",
+          "reason": "api.weibo.cn/2/checkin/show 微博_签到 规则"
+        },
+        {
+          "file": "bilibili-pro.plugin",
+          "from": "M2",
+          "reason": "cron B站定时任务 + 高清画质解锁"
+        },
+        {
+          "file": "qidian.plugin",
+          "from": "M2",
+          "reason": "cron 起点读书自动签到(高阶任务) + 获取Token + 获取Cookie"
+        },
+        {
+          "file": "apple-services-pro.plugin",
+          "from": "M2",
+          "reason": "Music 无损/歌词翻译、Maps 卫星图、News 内容解锁、Siri 国际版 4 条 http-response 改写, 均为功能解锁"
+        }
+      ]
+    }
+  ],
+  "gaps": [
+    {
+      "id": "G1",
+      "capability": "REJECT 策略的 12 种变体",
+      "used": "[Rule] 策略层 107 条**全部是裸 REJECT** (REJECT-IMG/DICT/ARRAY/VIDEO/-NO-DROP 均 0 条); 但 [Rewrite] 动作层变体用得很足 (reject-dict 901 / reject 25 / reject-img 9 / mock-response-body 16)",
+      "impact": "缺口仅在策略层: ① 全部退化为 HTTP 404 ② Loon 3.1.4+ 会把 REJECT 自动升级为 REJECT-DROP (App 疯狂重试致 CPU 发烫), -NO-DROP 变体正是禁用该升级的手段。动作层无缺口",
+      "owner": "M2"
+    },
+    {
+      "id": "G2",
+      "capability": "NOT 逻辑规则",
+      "used": "0 条",
+      "impact": "无法表达\"排除某类的兜底\"",
+      "owner": "M2"
+    },
+    {
+      "id": "G3",
+      "capability": "SRC-PORT 规则",
+      "used": "0 条",
+      "impact": "未使用 (DEST-PORT 用了 7 条)",
+      "owner": "M1"
+    },
+    {
+      "id": "G4",
+      "capability": "CELLULAR / SSID 规则",
+      "used": "0 条",
+      "impact": "未做蜂窝/WiFi 分流",
+      "owner": "M1"
+    },
+    {
+      "id": "G5",
+      "capability": "新版权重与优先级",
+      "used": "0 条",
+      "impact": "插件 [Rule] 无法限定\"仅在非 Final 策略下生效\"",
+      "owner": "M1"
+    }
+  ],
+  "resolved": [
+    {
+      "question": "本地 [Rule] 与插件 [Rule] 谁优先",
+      "answer": "本地 > 插件 > 订阅 (官方《规则系统 3.1 规则优先级》明文)",
+      "consequence": "46 个插件里的 DOMAIN-SUFFIX,<app 域>,DIRECT 不会遮蔽主配置 REJECT; privacy-shield.plugin 注释正确, kelee 知识库的说法有误"
+    },
+    {
+      "question": "域名类规则与 IP 类规则的先后",
+      "answer": "域名类优先; 域名命中后不再走 IP 匹配; 域名/IP 之外按配置顺序",
+      "consequence": "IP-CIDR 规则务必带 no-resolve, 否则触发无效 DNS 查询"
+    }
+  ],
+  "audit": {
+    "date": "2026-09-29",
+    "method": "对抗审计: 把清单自身的每条数字与断言拿去跟磁盘/官方文档对账",
+    "found": [
+      "E1 MODULES.md 的 M2 粒度分布写 25/13/1, 实测 28/10/1",
+      "E2 G1 缺口描述不准确: [Rewrite] 动作层变体用了 951 次 (reject-dict 901 等), 缺口只在 [Rule] 策略层 107 条",
+      "E3 apple-services-pro 误归 M1 分流: 该插件无任何策略组/分流规则, 实为 6 条 apps.apple.com reject-dict (含 /advertising)",
+      "E4 taxonomy 缺第 7 类职责: 14/46 插件带真实功能解锁/签到规则 (逐一验证开关有 2-4 处规则消费), 原 M1-M6 为过早闭合",
+      "E5 schema 缺陷: 强制\"一插件一模块\"在逼误分类 —— 5 个插件真跨模块, 改为 primary + also_members"
+    ]
+  },
+  "app_ownership": {
+    "$comment": "同一 App 被多个插件命中时的**裁决登记**。工具(app-index.mjs)只报事实(multi_owner), 不做裁决 —— 因为\"哪个是主责\"是人的判断, 从 tag/KEY 猜会重蹈覆辙。门禁要求每个重叠 App 都在此登记, 且登记值必须是真实 owner 之一。",
+    "Spotify": {
+      "verdict": "合理分工, 非冲突",
+      "by_concern": {
+        "M2-广告治理": "media-reading-purify.plugin",
+        "M7-功能增强": "streaming-overseas-pro.plugin"
+      },
+      "evidence": "两者 host 与机制均不同: media-reading 走 spclient.wg.spotify.com (pendragon reject-dict / artistview header 重写 / QUIC REJECT = 去广告); streaming-overseas 走 api.spotify.com (tracks/lyrics/songs reject-dict = 无损音质与歌词翻译 = 解锁)。职责正交, 均为 M2 但面不同",
+      "caveat": "两个插件各自声明了同名开关 SPOTIFY_ENABLE —— Loon 插件参数各自命名空间, 不冲突, 但阅读时易混, 已在两处 tag 明确区分 (净化 vs 增强)"
+    },
+    "瑞幸咖啡": {
+      "verdict": "真冲突, 已部分收敛 (2026-09-29)",
+      "by_concern": {
+        "M2-广告治理": "luckin-pro.plugin"
+      },
+      "evidence": "同 host capi.lkcoffee.com、同职责 (去广告)。且该 host 是 AES-128-ECB 加密报文域 —— luckin-pro 用 Scripts/Luckin.js 做解密→清洗→重加密, 而 shopping-purify 对同一 host 用 reject-dict (返回明文 {}), 客户端拿它去 AES 解密必然失败 = **机制选错**",
+      "action_taken": "已删 2 条与脚本覆盖范围字面重复的规则 (m/sys/common/modules、m/sys/app/adposNew); 余下 6 条在原位加注登记",
+      "remaining": "6 条待真机验证; 确认无效后应删除而非迁移 (正确做法是并入 luckin-pro 的加密净化脚本)"
+    }
+  }
+}

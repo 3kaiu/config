@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 插件语法门禁: 校验 Plugin/ 与 Kelee/ 全部 .plugin 的段结构、规则类型、Rewrite 动作。
+ * 插件语法门禁: 校验 Plugin/ 全部 .plugin 的段结构、规则类型、Rewrite 动作。
  * 合法但易误报的写法已豁免: 捕获组重定向 (^...)(...) 302 $1、request if 条件式、
  * 301/302/307 重定向动作。
  *
@@ -65,7 +65,7 @@ export function lintText(txt, { dir = "Plugin", file = "x.plugin" } = {}) {
     // [Script]/[Rewrite] 跨段复核 — 2026-09-19 官方文档对齐 (docs/Script/ + docs/Rewrite/):
     // Loon 3.5.1 新语法下 `[Script]` 段的 `http-response <regex> reject-dict` 是合法形态
     // (脚本触发器位复用 Rewrite 动作, 无 script-path 即纯拒绝)。旧认知"必须带 script-path"
-    // 已证伪 — 全仓大量行皆此形态, Kelee 上游同构。故本检查只抓真正的段外行:
+    // 已证伪 — 全仓大量行皆此形态, 上游同构。故本检查只抓真正的段外行:
     // 非 cron / 非 http-request / 非 http-response / 非 generic (手动触发) 出现在 [Script] 段。
     // (generic 见 docs/Script/: "在 App 中手动触发" — 如 Plugin/diagnostics.plugin。)
     if (seg === "Script" && !/^(http-request|http-response|cron|generic)\b/.test(t)) {
@@ -96,7 +96,7 @@ export function lintText(txt, { dir = "Plugin", file = "x.plugin" } = {}) {
       // KEYWORD 门控 — 2026-09-19 官方文档对齐 (docs/Rule/sub_rule: KEYWORD 随数量涨耗时):
       // 裸 DOMAIN-KEYWORD 必须被 AND(SUFFIX,…)/AND(USER-AGENT,…) 锚定 (bilibili-pro:81 /
       // qidian:71-73 双样板); ai.plugin 的 `{AI_Policy}` 占位策略行豁免 (分流非拦截)。
-      // Kelee/ 上游外壳豁免 — 上游不可改, 本地门禁只约束 Plugin/ 自维护插件。
+      // 上游外壳豁免 — 本地门禁只约束 Plugin/ 自维护插件。
       if (dir === "Plugin" && /^DOMAIN-KEYWORD,/.test(t) && !/, *\{[A-Za-z0-9_]+\}\s*$/.test(t)) {
         errs.push(`[KEYWORD裸奔] ${dir}/${file}:${i + 1} → ${t.slice(0, 80)}`);
       }
@@ -105,8 +105,8 @@ export function lintText(txt, { dir = "Plugin", file = "x.plugin" } = {}) {
   return { errs, reports };
 }
 
-/** 扫描 Plugin/ 与 Kelee/ 全部外壳。@returns {{ errs, reports, files }} */
-export function scanAll(dirs = ["Plugin", "Kelee"]) {
+/** 扫描 Plugin/ 全部外壳。@returns {{ errs, reports, files }} */
+export function scanAll(dirs = ["Plugin"]) {
   const errs = [];
   const reports = [];
   let files = 0;

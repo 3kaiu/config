@@ -1,91 +1,25 @@
-#!name=网易云音乐 Pro v7.8
-#!desc=网易云 — 签到/打卡/广告净化全流程 + 多端分流控制 (整合 kelee 规则)
-#!version=8.8
+#!name=网易云音乐 Pro
+#!desc=网易云 — 首页/搜索/播客/广告位净化 (纯本地 Rewrite, 无第三方脚本)
+#!version=9.0
 #!author=3kaiu (基于通用插件增强框架)
 #!homepage=https://github.com/3kaiu/config
-#!icon=https://icons.duckduckgo.com/ip3/music.163.com.ico
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.2.4(787)
 
-#!arguments-desc=\n- \{ENABLE_NEMUSIC}: switch,"true","false",tag=总开关，desc=开启后执行所有网易云功能\n- \{NEMUSIC_CRON_EXP}: input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）\n- \{TIMEOUT}: input,120,tag=超时时间 (秒), desc=脚本最大执行时长\n- \{NEMUSIC_SIGNIN_ENABLE}: switch,"true","false",tag=每日签到，desc=每日签到 + 福利\n- \{NEMUSIC_CHECKIN_ENABLE}: switch,"true","false",tag=周打卡，desc=连续听歌打卡\n- \{NEMUSIC_ADBLOCK_ENABLE}: switch,"true","false",tag=广告净化，desc=去除弹窗/推荐/搜索广告\n- \{NEMUSIC_FRAMEWORK_ENABLE}: switch,"true","false",tag=框架净化，desc=首页/发现页框架净化\n- \{NEMUSIC_DEBUG_ENABLE}: switch,"false","true",tag=调试模式，desc=输出详细执行日志
+#!arguments-desc=\n- \{ENABLE_NEMUSIC}: switch,"true","false",tag=总开关，desc=开启后执行所有网易云功能\n- \{NEMUSIC_ADBLOCK_ENABLE}: switch,"true","false",tag=广告净化，desc=去除弹窗/推荐/搜索广告\n- \{NEMUSIC_DEBUG_ENABLE}: switch,"false","true",tag=调试模式，desc=输出详细执行日志
 
 [Argument]
 ENABLE_NEMUSIC=switch,"true","false",tag=总开关，desc=开启后执行所有网易云功能
-NEMUSIC_CRON_EXP=input,"0 12 * * *",tag=Cron 表达式，desc=定时任务时间（默认中午 12 点）
-TIMEOUT=input,120,tag=超时时间 (秒), desc=脚本最大执行时长
-NEMUSIC_SIGNIN_ENABLE=switch,"true","false",tag=每日签到，desc=每日签到 + 福利
-NEMUSIC_CHECKIN_ENABLE=switch,"true","false",tag=周打卡，desc=连续听歌打卡
 NEMUSIC_ADBLOCK_ENABLE=switch,"true","false",tag=广告净化，desc=去除弹窗/推荐/搜索广告
-NEMUSIC_FRAMEWORK_ENABLE=switch,"true","false",tag=框架净化，desc=首页/发现页框架净化
-NEMUSIC_DEBUG_ENABLE=switch,"false","true",tag=调试模式，desc=输出详细执行日志
 
-[Script]
-# ═══════════════════════════════════════════
-# 🔄 实时净化规则（响应阶段）
-# ═══════════════════════════════════════════
-
-# ── 广告净化模块 ─────────────────────
-# 首页框架广告
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/content\/activity\/music\/jar\/template\/list script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=广告净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-
-# 弹窗广告
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/sp\/flow\/popup\/query script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=广告净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-
-# 商城广告
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/vipmall\/couponcfg\/get script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=广告净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-
-# 评论插入式广告
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/comment\/feed\/inserted\/resources script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=广告净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-
-# ── 框架净化模块 ─────────────────────
-# 首页框架 Tab
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/link\/home\/framework\/tab script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=框架净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_FRAMEWORK_ENABLE}
-
-# 发现页资源展示
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/link\/page\/discovery\/resource\/show script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=框架净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_FRAMEWORK_ENABLE}
-
-# 推荐页资源
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/link\/page\/rcmd\/resource\/show script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=框架净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_FRAMEWORK_ENABLE}
-
-# 升级弹窗
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/ios\/upgrade\/get script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=框架净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_FRAMEWORK_ENABLE}
-
-# ── 搜索净化模块 ─────────────────────
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/search\/default\/keyword\/list script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=搜索净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-# (2026-09-22 B4: rcmd/keyword + chart/list|detail + specialkeyword 四行与 [Rewrite]
-# `search/(chart/|rcmd/keyword/|specialkeyword/) reject-dict` 同路径，删 script 留原生。)
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/search\/suggest\/keyword\/get script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=搜索净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-
-# ── 广告拦截模块 ─────────────────────
-# (2026-09-22 B2: eapi/ad/* 与 [Rewrite] mock 同路径重复，删 script 留原生。
-# 2026-09-22 B3: resource-exposure/delivery/side-bar/yunbei 亦与 [Rewrite]
-# reject-dict 同路径 —— 官方文档实证“Response Body Rewrite 命中时 Response
-# Script 不执行”，此 5 行 script 从未触发，删除零行为变化。)
-
-# ── 活动与推荐模块 ───────────────────
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/link\/position\/show\/resource script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=活动推荐，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-# (2026-09-22 B4: link/scene/show/resource 与 [Rewrite] 同路径，删 script 留原生；
-# position/show/resource 的 Rewrite 仅覆盖 strategy，保留。)
-
-# ── 其他净化模块 ─────────────────────
-# 会员中心
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/vip\/cashier\/tspopup\/get script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=会员中心，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/vipnewcenter\/app\/resource\/newaccountpage script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=会员中心，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-
-# (2026-09-22 B3: side-bar/delivery×2/yunbei 四行与 [Rewrite] reject-dict
-# 同路径 —— 官方文档“Response Body Rewrite 命中时 Response Script 不执行”，
-# 此四行从未触发，删除零行为变化。)
-# 创作者提醒
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/creator\/musician\/reminder\/message\/get script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=创作者，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-
-# ── 批量处理 ─────────────────────────
-http-response ^https?:\/\/interface(\d)?\.music\.163\.com\/e?api\/batch script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, requires-body=true, timeout=30, tag=批量净化，enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
-
-# ═══════════════════════════════════════════
-# ⏰ Cron 定时任务（签到 + 打卡）
-# ═══════════════════════════════════════════
-cron {NEMUSIC_CRON_EXP} script-path=https://ws.wenn.in/main/Mirror/netease.adblock.js, timeout={TIMEOUT}, tag=网易云签到打卡，argument=[{NEMUSIC_DEBUG_ENABLE},{NEMUSIC_SIGNIN_ENABLE},{NEMUSIC_CHECKIN_ENABLE}], enable={ENABLE_NEMUSIC}&{NEMUSIC_SIGNIN_ENABLE}
-
+#==================================================================
+# [Script] 段已移除 (2026-09-29): 原 16 条全部直连第三方上游 netease.adblock.js
+#   按决定「移除所有依赖上游的东西」整体移除 —— 故本插件的签到/打卡/框架净化能力
+#   (原由该上游 cron 脚本提供) **永久失去**, 不是待补回的缺口而是本次决定的代价。
+#   保留的是 7 条 [Rewrite] 本地广告净化规则。相应死开关 (SIGNIN/CHECKIN/FRAMEWORK/
+#   DEBUG/CRON_EXP/TIMEOUT) 已一并删除, 不留"拨了没反应"的假参数。
+#   若日后自研脚本补回签到能力, 需同时恢复 Argument 声明与 [Script] 段。
+###################################################################
 [Rule]
 DOMAIN-SUFFIX,music.163.com, DIRECT
 DOMAIN, iadmat.nosdn.127.net, REJECT,enable={ENABLE_NEMUSIC}
@@ -98,13 +32,13 @@ DOMAIN, ipv6.music.163.com, REJECT,enable={ENABLE_NEMUSIC}
 DOMAIN-SUFFIX,music.163.com.cn, DIRECT
 
 [Rewrite]
-^https?:\/\/interface\d?\.music\.163\.com\/e?api\/(ocpc\/)?ad\/ mock-response-body data-type=text enable={ENABLE_NEMUSIC}
-^https?:\/\/interface\d?\.music\.163\.com\/eapi\/(?:delivery\/(batch-)?deliver|moment\/tab\/info\/|side-bar\/mini-program\/music-service\/account|yunbei\/account\/entrance\/) reject-dict enable={ENABLE_NEMUSIC}
-^https?:\/\/interface\d?\.music\.163\.com\/eapi\/(?:community\/friends\/fans-group\/artist\/group\/|mine\/applet\/redpoint|music\/songshare\/text\/recommend\/|resniche\/position\/play\/new\/|resniche\/tspopup\/show|resource\/comments?\/musiciansaid\/|user\/sub\/artist) reject-dict enable={ENABLE_NEMUSIC}
-^https?:\/\/interface\d?\.music\.163\.com\/eapi\/(?:ios\/version|mlivestream\/entrance\/playpage\/|link\/position\/show\/strategy|link\/scene\/show\/resource|v1\/content\/exposure\/comment\/banner\/) reject-dict enable={ENABLE_NEMUSIC}
-^https?:\/\/interface\d?\.music\.163.com\/w?e?api\/search\/default mock-response-body data-type=text enable={ENABLE_NEMUSIC}
-^https?:\/\/interface\d?\.music\.163\.com\/w?eapi\/(?:activity\/bonus\/playpage\/time\/query|resource-exposure\/|search\/(?:chart\/|rcmd\/keyword\/|specialkeyword\/)) reject-dict enable={ENABLE_NEMUSIC}
-^https:\/\/interface\d\.music\.163\.com\/eapi\/my\/podcast\/tab\/recommend reject-dict enable={ENABLE_NEMUSIC}
+^https?:\/\/interface\d?\.music\.163\.com\/e?api\/(ocpc\/)?ad\/ mock-response-body data-type=text enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
+^https?:\/\/interface\d?\.music\.163\.com\/eapi\/(?:delivery\/(batch-)?deliver|moment\/tab\/info\/|side-bar\/mini-program\/music-service\/account|yunbei\/account\/entrance\/) reject-dict enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
+^https?:\/\/interface\d?\.music\.163\.com\/eapi\/(?:community\/friends\/fans-group\/artist\/group\/|mine\/applet\/redpoint|music\/songshare\/text\/recommend\/|resniche\/position\/play\/new\/|resniche\/tspopup\/show|resource\/comments?\/musiciansaid\/|user\/sub\/artist) reject-dict enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
+^https?:\/\/interface\d?\.music\.163\.com\/eapi\/(?:ios\/version|mlivestream\/entrance\/playpage\/|link\/position\/show\/strategy|link\/scene\/show\/resource|v1\/content\/exposure\/comment\/banner\/) reject-dict enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
+^https?:\/\/interface\d?\.music\.163.com\/w?e?api\/search\/default mock-response-body data-type=text enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
+^https?:\/\/interface\d?\.music\.163\.com\/w?eapi\/(?:activity\/bonus\/playpage\/time\/query|resource-exposure\/|search\/(?:chart\/|rcmd\/keyword\/|specialkeyword\/)) reject-dict enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
+^https:\/\/interface\d\.music\.163\.com\/eapi\/my\/podcast\/tab\/recommend reject-dict enable={ENABLE_NEMUSIC}&{NEMUSIC_ADBLOCK_ENABLE}
 
 [MitM]
 hostname = %APPEND% music.163.com, interface*.music.163.com, interfaced.music.163.com

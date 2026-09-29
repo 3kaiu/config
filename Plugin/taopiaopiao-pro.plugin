@@ -3,7 +3,6 @@
 #!version=7.8
 #!author=3kaiu (基于通用插件增强框架)
 #!homepage=https://github.com/3kaiu/config
-#!icon=https://icons.duckduckgo.com/ip3/acs.m.taobao.com.ico
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.2.4(787)
 
@@ -18,16 +17,12 @@ TAOPIAOPIAO_MINE_ENABLE=switch,"true","false",tag=我的页面，desc=去除个�
 TAOPIAOPIAO_POPUP_ENABLE=switch,"true","false",tag=弹窗广告，desc=拦截启动弹窗
 TAOPIAOPIAO_CINEMA_ENABLE=switch,"true","false",tag=影院广告，desc=去除影院 Tab 栏广告
 
-[Script]
-# ═══════════════════════════════════════════
-# 🔄 AMDC 净化（响应阶段）
-# ═══════════════════════════════════════════
-http-response ^http:\/\/amdc\.m\.taobao\.com script-path=https://ws.wenn.in/main/Mirror/amdc.js, requires-body=true, timeout=10, tag=AMDC 净化，enable={ENABLE_TAOPIAOPIAO}
-
-# ═══════════════════════════════════════════
-# ⏰ Cron 定时任务（可选功能）
-# ═══════════════════════════════════════════
-
+#==================================================================
+# [Script] 段已移除 (2026-09-29): 原 16/1 条全部直连第三方上游
+#   (netease.adblock.js / amdc.js), 按决定「暂时只留自己维护的」整体移除。
+#   本插件保留全部 [Rewrite] 本地规则; [MitM] 与之配套的解密面不受影响。
+# taopiaopiao-pro 的脚本能力待后续自研脚本补回。
+###################################################################
 [Rewrite]
 # ── 开屏广告模块 ─────────────────────
 ^https:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopadvertiseapi\.queryloadingbanner reject-200 enable={ENABLE_TAOPIAOPIAO}&{TAOPIAOPIAO_SCRINSCEEN_ENABLE}

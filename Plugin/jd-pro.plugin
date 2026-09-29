@@ -1,29 +1,56 @@
-#!name=京东去广告 Pro v7.9
-#!desc=京东 — 商城/领券/商品页/比价净化（内联 jq，零脚本依赖） (整合 kelee 规则)
-#!version=8.9
-#!author=3kaiu (功能开关架构参考起点引擎模式)
+#!name=京东去广告 Pro v8.12
+#!desc=京东 — 开屏/首页/我的/订单/物流全通道广告净化 (内联 jq + Scripts/Jingdong.js)
+#!version=8.12
+#!author=3kaiu (整合 kelee 规则, 数据源 RuCu6/京东金融净化)
 #!homepage=https://github.com/3kaiu/config
-#!icon=https://icons.duckduckgo.com/ip3/jd.com.ico
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.2.4(787)
 
-#!arguments-desc=\n- \{ENABLE_JD}: switch,"true","false",tag=总开关，desc=开启后执行所有京东功能\n- \{JD_MALL_ENABLE}: switch,"true","false",tag=逛商城，desc=净化商城推荐流\n- \{JD_COUPON_ENABLE}: switch,"true","false",tag=领券中心，desc=领取可用优惠券\n- \{JD_PRICE_ENABLE}: switch,"true","false",tag=比价工具，desc=价格监控与历史对比
+#!arguments-desc=\n- \{ENABLE_JD}: switch,"true","false",tag=总开关，desc=开启后执行所有京东功能\n- \{JD_SPLASH_ENABLE}: switch,"true","false",tag=开屏，desc=关闭开屏广告与启动频控\n- \{JD_HOME_ENABLE}: switch,"true","false",tag=首页，desc=净化首页通栏/悬浮/券/左上角logo/下拉二楼\n- \{JD_MINE_ENABLE}: switch,"true","false",tag=我的，desc=净化大促楼层/快讯/推荐/全局弹窗\n- \{JD_ORDER_ENABLE}: switch,"true","false",tag=订单物流，desc=净化订单与物流页横幅广告\n- \{JD_COUPON_ENABLE}: switch,"true","false",tag=领券中心，desc=领取可用优惠券\n- \{JD_PRICE_ENABLE}: switch,"true","false",tag=比价工具，desc=价格监控与历史对比\n- \{JD_DEBUG_ENABLE}: switch,"false","true",tag=调试日志,desc=打开后输出逐请求诊断日志
 
 [Argument]
-ENABLE_JD=switch,"true","false",tag=总开关，desc=开启后执行所有京东功能
-JD_MALL_ENABLE=switch,"true","false",tag=逛商城，desc=净化商城推荐流
-JD_COUPON_ENABLE=switch,"true","false",tag=领券中心，desc=领取可用优惠券
-JD_PRICE_ENABLE=switch,"true","false",tag=比价工具，desc=价格监控与历史对比
+ENABLE_JD=switch,"true","false",tag=总开关,desc=开启后执行所有京东功能
+JD_SPLASH_ENABLE=switch,"true","false",tag=开屏,desc=关闭开屏广告与启动频控
+JD_HOME_ENABLE=switch,"true","false",tag=首页,desc=净化首页通栏/悬浮/券/左上角logo/下拉二楼
+JD_MINE_ENABLE=switch,"true","false",tag=我的,desc=净化大促楼层/快讯/推荐/全局弹窗
+JD_ORDER_ENABLE=switch,"true","false",tag=订单物流,desc=净化订单与物流页横幅广告
+JD_COUPON_ENABLE=switch,"true","false",tag=领券中心,desc=领取可用优惠券
+JD_PRICE_ENABLE=switch,"true","false",tag=比价工具,desc=价格监控与历史对比
+JD_DEBUG_ENABLE=switch,"false","true",tag=调试日志,desc=打开后输出逐请求诊断日志
 
 [Script]
-# ═══════════════════════════════════════════════
-# 🔄 实时净化规则（响应阶段）
-# v7.9 (2026-08 审计): http-response 脚本 → 内联 response-body-json-jq (.data = {})
-# 行为等价 (JD.ts 仅清空 data 字段), 去掉脚本运行时依赖; 虚设 cron (无签到逻辑) 已移除
-# ═══════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════
+# 🔄 京东全通道广告净化 (Scripts/Jingdong.js)
+#
+# 2026-09-29 落地: 原 v8.9 只有 4 条内联 jq (商城/领券/商品页/比价) 走 .data = {},
+# 功能广告 (首页通栏/我的弹窗/订单横幅/物流banner/开屏) 全部未覆盖。
+# 现按 functionId 分派, 每个开关对应一个业务面。
+# ════════════════════════════════════════════════════════════
+
+# 开屏: images=[] + showTimesDaily=0 (不整条 reject — start 同时下发启动配置)
+http-response ^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=start script-path=https://ws.wenn.in/main/Scripts/Jingdong.js, requires-body=true, timeout=10, argument=[{JD_DEBUG_ENABLE}], tag=京东_开屏, enable={ENABLE_JD}&{JD_SPLASH_ENABLE}
+
+# 首页配置: 底部通栏/悬浮圆图/顶部动图/右上角券/左上角logo/下拉二楼
+http-response ^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=welcomeHome script-path=https://ws.wenn.in/main/Scripts/Jingdong.js, requires-body=true, timeout=10, argument=[{JD_DEBUG_ENABLE}], tag=京东_首页配置, enable={ENABLE_JD}&{JD_HOME_ENABLE}
+
+# 我的: 大促楼层/常买常逛/快讯/顶部横幅/我的推荐 + 弹窗/续费横幅/评价提醒
+http-response ^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=personinfoBusiness script-path=https://ws.wenn.in/main/Scripts/Jingdong.js, requires-body=true, timeout=10, argument=[{JD_DEBUG_ENABLE}], tag=京东_我的, enable={ENABLE_JD}&{JD_MINE_ENABLE}
+
+# 我的订单: banner/动态/PLUS 楼层 + 服务中心精选特惠 + 客服引导
+http-response ^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=myOrderInfo script-path=https://ws.wenn.in/main/Scripts/Jingdong.js, requires-body=true, timeout=10, argument=[{JD_DEBUG_ENABLE}], tag=京东_我的订单, enable={ENABLE_JD}&{JD_ORDER_ENABLE}
+
+# 物流: deliverLayer / orderTrackBusiness 两条通道共用一套结构
+http-response ^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(deliverLayer|orderTrackBusiness) script-path=https://ws.wenn.in/main/Scripts/Jingdong.js, requires-body=true, timeout=10, argument=[{JD_DEBUG_ENABLE}], tag=京东_物流, enable={ENABLE_JD}&{JD_ORDER_ENABLE}
+
+# 新品页: 悬浮动图 iconInfo + 下拉二楼 roofTop
+http-response ^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=getTabHomeInfo script-path=https://ws.wenn.in/main/Scripts/Jingdong.js, requires-body=true, timeout=10, argument=[{JD_DEBUG_ENABLE}], tag=京东_新品页, enable={ENABLE_JD}&{JD_HOME_ENABLE}
+
+# ════════════════════════════════════════════════════════════
+# 🔄 内联 jq 净化 (轻量面, 无需脚本)
+# ════════════════════════════════════════════════════════════
 
 # 商城首页净化
-http-response ^https?:\/\/(m|app)\.jd\.com\/(mind|item)/ response-body-json-jq '.data = {}', tag=商城净化，enable={ENABLE_JD}&{JD_MALL_ENABLE}
+http-response ^https?:\/\/(m|app)\.jd\.com\/(mind|item)/ response-body-json-jq '.data = {}', tag=商城净化，enable={ENABLE_JD}&{JD_HOME_ENABLE}
 
 # 领券中心净化
 http-response ^https?:\/\/api\.360buy\.com\/marketing\/window\/get_window_info response-body-json-jq '.data = {}', tag=领券净化，enable={ENABLE_JD}&{JD_COUPON_ENABLE}
@@ -35,14 +62,60 @@ http-response ^https?:\/\/(m|item)\.jd\.com\/item\/ response-body-json-jq '.data
 http-response ^https?:\/\/p.360buy\.com\/price\/tower response-body-json-jq '.data = {}', tag=比价工具，enable={ENABLE_JD}&{JD_PRICE_ENABLE}
 
 [Rule]
-DOMAIN-SUFFIX,ad.jddg.com, DIRECT
-URL-REGEX, "^http:\/\/\w{32}\.jddebug\.com\/diagnose\?", REJECT,enable={ENABLE_JD}
-
-DOMAIN-SUFFIX,bjzhnl.jd.com, DIRECT
+# ad.jddg.com: 2026-09-29 DoH 实测 (dns.alidns.com/resolve) Status=3 NXDOMAIN —— 域已下线。
+#   仍保持 REJECT 而非回退成 v8.9 的 DIRECT: 死域上 REJECT 零成本 (DNS 阶段即失败,
+#   不产生连接), 且若京东日后重新启用该域, 按 ad- 前缀语义它就是广告网关。
+#   ⚠️ v8.9→本版的修正依据是"域名字义", 不是实测存在性 —— 该依据已被证伪 (域不存在),
+#   保留 REJECT 的理由改为"防御性 + 零成本", 不是"它是活跃广告域"。
+DOMAIN-SUFFIX, ad.jddg.com, REJECT, enable={ENABLE_JD}
+# 京东诊断上报 (纯 debug 域, 无用户可见功能面)
+# ⚠️ jddebug.com 整域 DoH 实测 Status=2 SERVFAIL (2026-09-29) = 已死域,
+#   故只保留 /diagnose 路径级规则 (http:// 明文, 无需解密面), 不升级为整域拦截。
+URL-REGEX, "^http:\/\/\w{32}\.jddebug\.com\/diagnose\?", REJECT, enable={ENABLE_JD}
+# 京东自建 HTTPDNS 服务端 (探针实证: GET / 返回 {"code":-1,"msg":"uri错误"} = 服务在线)
+# 它绕过 Loon DNS 体系, 使 DOMAIN 类规则对其全部失效 —— basicConfig 响应体改写是
+# 第一道 (关客户端开关), 本条是第二道 (服务端本身)。
+DOMAIN, dns.jd.com, REJECT, enable={ENABLE_JD}
+# ── 已否决: fmz200/blockAds 另列 7 个京东 SUFFIX REJECT ──────────────────
+# 2026-09-29 DoH + HTTPS 探针逐条定性, 结论是**一条都不能加**:
+#   jzt.jd.com      301 → /home/, Server 头 `jen/2.1.8` = 对外暴露的 Jenkins CI, 非广告域
+#   du.jd.com        302 → error2.aspx?from=shopdomain = 店铺域 (店铺装修功能)
+#   c-nfa.jd.com     302 → error2.aspx?from=shopdomain = 同上
+#   dgstatic.jd.com  80/443 均 connection refused = 死域
+#   jdqd.jd.com      200 "Welcome to nginx!" 默认页, 无广告信号
+#   img-x.jd.com     302 → error.html (openresty), 名称含 img 但无可证实广告面
+#   jddebug.com      SERVFAIL (见上)
+# 其中 du / c-nfa 是**功能域**, 误 REJECT 会直接打断店铺页 —— 上游这条建议必须反对。
+# 与主配置对 kepler / keplerapi / mapi.m / policy.jd 的 DIRECT 放行同源成因:
+# 第三方 App 内嵌京东页 (什么值得买等) 依赖这些域。
+DOMAIN-SUFFIX, bjzhnl.jd.com, DIRECT
 
 [Rewrite]
 ^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(searchBoxWord|stationPullService|uniformRecommend[06]) reject-dict enable={ENABLE_JD}
 ^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=basicConfig response-body-json-replace data.JDMessage.socketmonitor.isSocketEstablishedAhead 0 data.JDMessage.socketmonitor.isSocketReport 0 data.JDHttpToolKit.httpdns.httpdns 0 enable={ENABLE_JD}
+# 开屏素材广告 (纯广告接口, 可安全整条 reject)
+# 2026-09-29: 原与 start 打包在 startup-adblock-pro 的
+#   `functionId=(start|queryMaterialAdverts) reject-200` 一条里; start 已由本插件的
+#   Scripts/Jingdong.js 接管 (start 同时下发启动配置, reject-200 会白屏), 该生成条目
+#   经 tools/build-startup-plugin.mjs 的 YIELDED_TO_OWNER 让位, queryMaterialAdverts
+#   由本条补回 —— 开屏通道由此单一归属本插件, 消除跨插件双写。
+^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=queryMaterialAdverts reject-200 enable={ENABLE_JD}&{JD_SPLASH_ENABLE}
+
+# ── 京喜系 (京喜 / 京喜特价 / 京东小家) ────────────────────────────────
+# 与京东主 App 共用 api.m.jd.com, 但 functionId 带 lite_ 前缀, 主 App 不调用 ——
+# 故这三条对主 App 完全惰性 (命中不了), 对京喜系才生效。
+# 机制: response-body-replace-regex **字段重命名法** (Loon 旧语法, 对应新语法
+# response.body.replace)。把广告字段的 key 改名成客户端认不出的名字, 广告数据
+# 仍在 JSON 里但客户端取不到; 整个响应结构、code 校验、其余业务字段全部原样保留。
+# 为什么不用 reject-200: 京喜客户端对 adInfo 为 null 走异常分支的概率不低, 而
+# 重命名等价于"该 key 不存在", 客户端的缺省分支一定处理过。零脚本、零 jq、零 reject。
+^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=lite_advertising response-body-replace-regex jdLiteAdvertisingVO _3kaiu_jd_noad enable={ENABLE_JD}&{JD_SPLASH_ENABLE}
+# lite_SmartPush = 智能推送 (推送广告通道)。pushData 是该响应的全部载荷,
+# 重命名后客户端读到"无推送数据" → 推送广告消失, 常规推送不受影响 (它走 APNs 长连接,
+# 不经此接口)。
+^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=lite_SmartPush response-body-replace-regex pushData _3kaiu_jd_noad enable={ENABLE_JD}&{JD_SPLASH_ENABLE}
 
 [MitM]
+# %APPEND% = 追加而非覆盖主配置 [MitM]
+# api.m.jd.com 为主配置已有项, 此处仍列出以保证本插件单独启用时自洽
 hostname = %APPEND% jd.com, 360buy.com, m.jd.com, app.jd.com, api.m.jd.com

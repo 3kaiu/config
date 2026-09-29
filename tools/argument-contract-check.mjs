@@ -21,7 +21,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-const DIRS = ["Plugin", "Kelee"];
+const DIRS = ["Plugin"];
 const quiet = process.argv.includes("--quiet");
 
 function analyze(file) {

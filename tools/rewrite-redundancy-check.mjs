@@ -24,7 +24,7 @@
  *   1. [同文件前缀遮蔽] 逐插件扫描 [Rewrite] 行, 报告 A⊇B 且 B 不可达的对。
  *      B 已登记接受 (ACCEPTED_PAIRS) 或 B 属于生成块且其遮蔽方也同为生成块 → 通过,
  *      否则判红。
- *   2. [跨文件精确重复] 非镜像文件 (Plugin//Kelee//Profile/) 间 regex+action+rest
+ *   2. [跨文件精确重复] Plugin//Profile/ 间 regex+action+rest
  *      逐字相同的规则。镜像与自维护文件的重复是"上游各自维护同名过滤"的常态
  *      (如 AllInOne 与 Plugin/ 共享大量域), 不作为缺陷; 自维护文件之间的精确重复
  *      才是本轮清理 (fcbox dsp) 的对象, 判红。
@@ -38,49 +38,13 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 /**
- * 已知且接受的 **(文件|被遮蔽 REJECT 规则) 镜像对** (2026-09-20 新增)。
+ * 已知且接受的 (文件|被遮蔽 REJECT 规则) 对。
  *
- * 全部来自 Mirror/rules/loon-AllInOne.plugin —— 上游自身同文件重复 (更宽的
- * 前缀规则先出现, 子规则永远不可达)。镜像不手改 (mirror-scripts 每日重写, 手改漂移),
- * 故登记接受; 上游下次刷新即自然消解或继续如此, 由复检日期滚动复核。
+ * 2026-09-29 精简: 原 6 条全部来自 `Mirror/rules/loon-AllInOne.plugin` (上游自身同文件
+ * 重复, 镜像不手改故登记接受)。Mirror 体系整体移除后该表清空 —— 当前 Plugin/ 内零
+ * 已知遮蔽对。新增遮蔽对时在此登记 (须写实测成因 + 复检日期)。
  */
-export const ACCEPTED_PAIRS = new Map([
-  [
-    "Mirror/rules/loon-AllInOne.plugin|^https?:\\/\\/ad\\.mcloud\\.139\\.com\\/advertapi\\/adv-filter\\/adv-filter\\/AdInfoFilter\\/getAdInfos$",
-    {
-      reason: "镜像侧上游自重复: 同文件更早的 `advertapi` (reject-200) 已罩住其尾部 getAdInfos 子条。同对已在本仓库生成器侧剪枝 (startup-adblock-pro), 镜像无法手改, 等待镜像源刷新消解或复核。",
-      reviewBy: "2027-03-31 (随 mirror-scripts 刷新复核该对是否仍存在)",
-    },
-  ],
-  [
-    "Mirror/rules/loon-AllInOne.plugin|^https?:\\/\\/api\\.gotokeep\\.com\\/ads\\/v\\d\\/ads\\/preload",
-    {
-      reason: "镜像侧上游自重复: `api.gotokeep.com/ads` (reject) 为 `/ads/v\\d/ads/preload` 等所有 ads 子路径的字符串前缀。keep-pro 本体只保留热词/弹窗等独立路径,认证面不相撞。",
-      reviewBy: "2027-03-31 (随上游 gotokeep 规则刷新复核)",
-    },
-  ],
-  [
-    "Mirror/rules/loon-AllInOne.plugin|^https?:\\/\\/cdn-evone-ceph\\.echargenet\\.com\\/gw-emas-cdn\\/63c4e3b558bb610008969f89",
-    {
-      reason: "镜像侧上游自重复: `cdn-evone-ceph.echargenet.com/gw-emas-cdn` 前缀 (reject-200) 罩住指纹路径子条。",
-      reviewBy: "2027-03-31 (随上游 echargenet 规则刷新复核)",
-    },
-  ],
-  [
-    "Mirror/rules/loon-AllInOne.plugin|^https?:\\/\\/maicai\\.api\\.ddxq\\.mobi\\/advert\\/startUpScreen",
-    {
-      reason: "镜像侧上游自重复: 同文件更早的 `maicai.api.ddxq.mobi/advert/` (reject) 是 startUpScreen 子条的字符串前缀 — 匹配在 action 派发前终止 (先命中即结束), 子条恒不可达 (reject-200 语义被吞)。",
-      reviewBy: "2027-03-31 (随上游 maicai 规则刷新复核)",
-    },
-  ],
-  [
-    "Mirror/rules/loon-AllInOne.plugin|^https?:\\/\\/sf3-fe-tos\\.pglstatp-toutiao\\.com\\/obj\\/ad-pattern\\/renderer\\/package\\.json",
-    {
-      reason: "镜像侧上游自重复: `/obj/ad-pattern/renderer/` 前缀 (reject-200) 罩住 package.json 子条。",
-      reviewBy: "2027-03-31 (随上游 pglstatp-toutiao 规则刷新复核)",
-    },
-  ],
-]);
+export const ACCEPTED_PAIRS = new Map([]);
 
 const MIRROR_PREFIX = "Mirror/";
 
@@ -155,15 +119,11 @@ export function findExactDuplicates(fileRules) {
 /** 全局扫描入口 (供测试调用; 渲染报告并返回问题数) */
 export function analyze(root = ROOT) {
   const ownFiles = [];
-  for (const dir of ["Plugin", "Kelee"]) {
+  for (const dir of ["Plugin"]) {
     const p = path.join(root, dir);
     for (const f of fs.readdirSync(p).filter((x) => x.endsWith(".plugin"))) {
       ownFiles.push({ rel: path.join(dir, f), isMirror: false, text: fs.readFileSync(path.join(p, f), "utf8") });
     }
-  }
-  const pdir = path.join(root, "Mirror", "rules");
-  for (const f of fs.readdirSync(pdir).filter((x) => x.endsWith(".plugin"))) {
-    ownFiles.push({ rel: path.join("Mirror", "rules", f), isMirror: true, text: fs.readFileSync(path.join(pdir, f), "utf8") });
   }
   const lcf = path.join(root, "Profile", "Loon.lcf");
   if (fs.existsSync(lcf)) ownFiles.push({ rel: "Profile/Loon.lcf", isMirror: false, text: fs.readFileSync(lcf, "utf8") });
@@ -205,7 +165,7 @@ export function analyze(root = ROOT) {
   // ── 2. 跨文件精确重复 (非镜像) ──
   const nonMirror = ownFiles.filter((f) => !f.isMirror);
   const dups = findExactDuplicates(nonMirror.map((f) => [f.rel, scanRewriteRules(f.text)]));
-  console.log(`\n## 跨文件精确重复 (非镜像 Plugin//Kelee/Profile/, ${dups.length} 组)`);
+  console.log(`\n## 跨文件精确重复 (非镜像 Plugin//Profile/, ${dups.length} 组)`);
   if (!dups.length) {
     console.log("✅ 精确重复 0 组");
   }

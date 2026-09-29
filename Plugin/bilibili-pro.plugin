@@ -3,7 +3,6 @@
 #!version=9.2
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
-#!icon=https://icons.duckduckgo.com/ip3/api.bilibili.com.ico
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.2.4(787)
 
@@ -24,13 +23,11 @@ http-response ^https?:\/\/api\.bilibili\.com\/x\/app\/home\/splash url reject-20
 http-response ^https?:\/\/mobi\.bilibili\.com\/open\/splash list reject-200, enable={ENABLE_BILI}&{BILI_SPLASH_ENABLE}
 
 # 信息流净化
-http-response ^https?:\/\/api\.bilibili\.com\/x\/(web-interface\/home|feed-section\/section|ad\/home) script-path=https://ws.wenn.in/main/Mirror/bilibili-json.js, requires-body=true, timeout=10, tag=去广告, enable={ENABLE_BILI}&{BILI_FEED_ENABLE}
 http-response ^https?:\/\/api\.bilibili\.com\/x\/web-interface\/nav url reject-dict, enable={ENABLE_BILI}&{BILI_FEED_ENABLE}
 http-response ^https?:\/\/api\.bilibili\.com\/pgc\/season\/home url reject-dict, enable={ENABLE_BILI}&{BILI_FEED_ENABLE}
 http-response ^https?:\/\/api\.bilibili\.com\/x\/v2\/rank url reject-dict, enable={ENABLE_BILI}&{BILI_FEED_ENABLE}
 
 # Proto 去广告 (沿用常规版方案)
-http-response ^https:\/\/(grpc\.biliapi\.net|app\.bilibili\.com)\/bilibili\.app\.(viewunite\.v1\.View\/View|dynamic\.v2\.Dynamic\/DynAll) script-path=https://ws.wenn.in/main/Mirror/bilibili-proto.js, binary-body-mode=true, requires-body=true, timeout=10, tag=Proto去广告, enable={ENABLE_BILI}&{BILI_FEED_ENABLE}
 
 # 直播净化
 http-response ^https?:\/\/api\.live\.bilibili\.com\/xlive\/app-room\/v2\/room\/get_info url reject-dict, enable={ENABLE_BILI}&{BILI_LIVE_ENABLE}

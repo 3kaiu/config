@@ -61,7 +61,7 @@ exports.tests = {
     const shadows = loadTemplateShadows();
     a.ok(shadows.length > 50, `模板无条件 REJECT 应有规模 (当前 ${shadows.length})`);
     const fakes = [];
-    for (const dir of ["Plugin", "Kelee"]) {
+    for (const dir of ["Plugin", "Plugin"]) {
       for (const f of fs.readdirSync(path.join(ROOT, dir)).filter((x) => x.endsWith(".plugin")).sort()) {
         const txt = fs.readFileSync(path.join(ROOT, dir, f), "utf8");
         for (const raw of section(txt, "Rule")) {

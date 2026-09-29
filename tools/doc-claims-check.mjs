@@ -30,7 +30,6 @@ export function extractClaims(text) {
     ["ruleLines", /\[Rule\]\s*(\d+)\s*行/g],
     ["pluginTotal", /(\d+)\s*个插件(?:的声明与占位符全部配对|\s*=)/g],
     ["devDeps", /仅\s*(\d+)\s*个 devDependencies/g],
-    ["keleeCount", /\(\s*(\d+)\s*个:12306/g],
   ];
   const claims = new Map();
   const lines = text.split("\n");
@@ -71,14 +70,12 @@ export async function measure(root = ROOT) {
   // 3-5. 产物与插件计数; 6-7. package.json
   const scripts = fs.readdirSync(path.join(root, "Scripts")).filter((x) => x.endsWith(".js"));
   const plugins = fs.readdirSync(path.join(root, "Plugin")).filter((x) => x.endsWith(".plugin"));
-  const kelee = fs.readdirSync(path.join(root, "Kelee")).filter((x) => x.endsWith(".plugin"));
   const pkg = JSON.parse(read("package.json"));
   return {
     testCases,
     ruleLines,
     scripts: scripts.length,
     plugins: plugins.length,
-    kelee: kelee.length,
     devDeps: Object.keys(pkg.devDependencies || {}).length,
     nodeReq: ((pkg.engines && pkg.engines.node) || "").replace(/[^\d.]/g, "").split(".")[0],
   };
@@ -109,9 +106,8 @@ export function check(claims, measured, options = {}) {
   expect("testCases", measured.testCases, "npm test 用例数");
   expect("scriptArtifacts", measured.scripts, "Scripts 产物数");
   expect("ruleLines", measured.ruleLines, "[Rule] 非注释行数");
-  expect("pluginTotal", measured.plugins + measured.kelee, "插件总数 (Plugin + Kelee)");
+  expect("pluginTotal", measured.plugins, "插件总数 (Plugin)");
   expect("devDeps", measured.devDeps, "devDependencies 数");
-  expect("keleeCount", measured.kelee, "Kelee 外壳数");
 
   // engines.node: 文档形态 `engines.node >= 22`, 与 pkg 实测主版本比对
   const claimed = options.claimsText ? (options.claimsText.match(/engines\.node\s*[≥>=]+\s*(\d+)/) || [])[1] : null;

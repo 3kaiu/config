@@ -1,18 +1,20 @@
 #!name=微信 Pro v8.1
 #!desc=微信 — 朋友圈/公众号/视频号/小程序全流程净化 + 功能增强 (整合 kelee 规则)
-#!version=9.1
+#!version=9.2
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
-#!icon=https://icons.duckduckgo.com/ip3/api.weixin.qq.com.ico
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.2.4(787)
 
 [Argument]
+# 2026-09-29 移除 WECHAT_MINI_ENABLE(小程序净化): 它声明「小程序净化」, 但唯一消费它的是
+#   一条 script-path 指向第三方 applet.js 的规则 —— 即它**从未真正管过任何东西**,
+#   是仓库遗留的假开关(拨了没反应)。上游引用移除后它连假消费都没了, 故一并删除。
+#   微信本体的公众号/朋友圈/视频号净化均为本地 Rewrite, 不受影响。
 ENABLE_WECHAT=switch,"true","false",tag=总开关
 WECHAT_FRIEND_ENABLE=switch,"true","false",tag=朋友圈净化
 WECHAT_MP_ENABLE=switch,"true","false",tag=公众号净化
 WECHAT_VIDEO_ENABLE=switch,"true","false",tag=视频号净化
-WECHAT_MINI_ENABLE=switch,"true","false",tag=小程序净化
 WECHAT_SEARCH_ENABLE=switch,"true","false",tag=搜索净化
 WECHAT_UNBLOCK_ENABLE=switch,"true","false",tag=外链解锁
 
@@ -32,7 +34,6 @@ http-response ^https?:\/\/channels\.video\.qq\.com\/channel url reject-dict, ena
 http-response ^https?:\/\/channels\.video\.qq\.com\/(feed|recommend) url reject-dict, enable={ENABLE_WECHAT}&{WECHAT_VIDEO_ENABLE}
 
 # 小程序净化 (沿用 applet.js)
-http-response ^(https?://)?([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+[a-zA-Z]{2,}(:\d+)?/wp-json/[a-zA-Z0-9_-]+/(mp\/)?v\d/posts script-path=https://ws.wenn.in/main/Mirror/applet.js, requires-body=true, timeout=10, tag=小程序净化, enable={ENABLE_WECHAT}&{WECHAT_MINI_ENABLE}
 
 # 搜索净化
 http-response ^https?:\/\/cgi\.wechat\.qq\.com\/(msg|search) url reject-dict, enable={ENABLE_WECHAT}&{WECHAT_SEARCH_ENABLE}

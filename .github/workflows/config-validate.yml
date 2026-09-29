@@ -34,8 +34,8 @@ jobs:
             if [ -z "$desc" ]; then echo "⚠️ $f: missing #!desc"; fi
             echo "| $(basename $f) | ${name:-UNKNOWN} | v${ver:-?} | OK |" >> $GITHUB_STEP_SUMMARY
           done
-          # Kelee/ 为 vendored 第三方插件, 元信息仅警告不阻断
-          for f in Kelee/*.plugin; do
+          # 第三方 vendored 插件元信息仅警告不阻断
+          for f in Plugin/*.plugin; do
             name=$(grep -m1 '#!name=' "$f" | sed 's/#!name=//')
             ver=$(grep -m1 '#!version=' "$f" | sed 's/#!version=//')
             if [ -z "$ver" ]; then echo "ℹ️ $f: vendored 插件无 #!version (不阻断)"; fi
@@ -53,10 +53,10 @@ jobs:
           # 2) -i + 小写归一: 原正则大小写敏感, HTTPS://evil.com 整行不进入提取集合即逃逸白名单
           # 3) -i: `SCRIPT-PATH=` 大写 key 曾整体逃逸提取 (2026-09-04 对抗审计实证);
           #    Loon key 大小写语义未定, 按 fail-closed 宁可误杀注释行
-          grep -rhiE 'script-path[[:space:]]*=' Plugin/*.plugin Kelee/*.plugin 2>/dev/null | \
+          grep -rhiE 'script-path[[:space:]]*=' Plugin/*.plugin 2>/dev/null | \
             grep -oiP 'https?://[^"'\'',]+' | tr '[:upper:]' '[:lower:]' | sort -u > /tmp/urls.txt
-          # 域白名单检查: script-path 只允许指向受信分发域 (防本地壳投毒, 与 mirror 门禁 4 对齐)
-          BAD=$(grep -vE '^(https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in|kelee\.one|jsdelivr\.net|unpkg\.com)/)' /tmp/urls.txt || true)
+          # 域白名单检查: script-path 只允许指向受信分发域 (防本地壳投毒)
+          BAD=$(grep -vE '^(https?://(github\.com|raw\.githubusercontent\.com|gist\.githubusercontent\.com|ws\.wenn\.in)/)' /tmp/urls.txt || true)
           if [ -n "$BAD" ]; then
             echo "❌ 白名单外 script-path 域:"
             echo "$BAD"
@@ -67,7 +67,7 @@ jobs:
           # 并行探活: URL 串行 × (15s 超时 + retry 2),
           # 最坏 ~25min 超过 job 15min 上限。xargs -P8 并发, 单 URL 结果落盘再汇总 —
           # 输出格式 (✅/❌逐行 + Failures 计数 + exit 语义) 保持不变。
-          # 内层 bash -c 零嵌套引号 (与 cdn-verify 同一模板)。
+          # 内层 bash -c 零嵌套引号。
           URLRES=$(mktemp -d)
           sed '/^$/d' /tmp/urls.txt | xargs -P 8 -I{} bash -c '
             u="$1"; d="$2"
@@ -129,7 +129,7 @@ jobs:
       #   2) `echo "$x" | wc -l` 在 $x 为空时返回 1 (echo 仍吐出一个换行),
       #      故 loon_count 恒 ≥1, 计数本身无法暴露"清单为空";
       #   3) 用 `grep -oP` (GNU PCRE) + BRE 的 '\|' 交替 — BSD/macOS grep 均不支持,
-      #      该检查在本地无法复现 (与 mirror 门禁 2 同一类可移植性缺陷)。
+      #      该检查在本地无法复现。
       #   并且步骤名为 "conflict detection" 却从不检测任何冲突。
       # 现改为 POSIX 提取 + 三重断言: 清单规模下限 / 关键银行在场 / 正负向无重叠。
       - name: Bank MitM conflict detection
@@ -237,7 +237,7 @@ jobs:
 
       # ── 5c. 插件段结构与规则语法检查 (2026-08 新增) ──
       # 防合并/批量生成引入坏规则 (段错 / Rule 类型错 / Rewrite 动作缺失):
-      # 校验 Plugin/ 与 Kelee/ 全部 .plugin, 合法重定向/条件式已豁免。
+      # 校验 Plugin/ 全部 .plugin, 合法重定向/条件式已豁免。
       - name: Plugin lint check
         run: |
           echo "## Plugin Lint Check" >> $GITHUB_STEP_SUMMARY
@@ -269,7 +269,7 @@ jobs:
           exit ${PIPESTATUS[0]}
 
       # ── 5c-bis. workflow 内嵌 bash 语法检查 (2026-09-11 审计新增) ──
-      # workflow 里的 bash 只有在 CI 执行到那一步时才暴露语法错误; mirror-scripts 与
+      # workflow 里的 bash 只有在 CI 执行到那一步时才暴露语法错误; 本仓
       # upstream-health 都是每日定时任务, 坏掉可能数天后才被发现, 期间门禁形同虚设。
       # 本步把校验提前到 PR 阶段。零依赖 (node 内置 + 系统 bash)。
       # 边界: 只校验 bash 语法 — run 块内嵌的 node/python 代码错误与逻辑错误不在此列。
@@ -335,41 +335,6 @@ jobs:
           ' 2>&1 | tee -a $GITHUB_STEP_SUMMARY
           exit ${PIPESTATUS[0]}
 
-      # ── 7b. Mirror 清单一致性与行尾校验 ──
-      # 防"改镜像文件忘同步 MANIFEST"(漂移) 与清单/磁盘分叉；
-      # 注: 挡不住"文件+清单一起改"的恶意提交 — 那道防线是 mirror PR 人审。
-      # .gitattributes 声明全部文本 eol=lf; 任一 mixed/crlf 的 index 或工作区条目
-      # 即"下次 git 触碰就脏"的定时炸弹 (iRingo.News.plugin 曾以 CRLF blob 常驻 main,
-      # 本地 git status 常红 + mirror rebase 有中止风险)。用 git ls-files --eol
-      # 断言, POSIX grep, macOS/CI 双可复现。
-      - name: Mirror manifest consistency check
-        run: |
-          echo "## Mirror Manifest Consistency" >> $GITHUB_STEP_SUMMARY
-          node -e '
-            const fs = require("fs"), crypto = require("crypto");
-            const m = JSON.parse(fs.readFileSync("Mirror/MANIFEST.json", "utf8"));
-            let bad = 0, n = 0;
-            for (const [k, v] of Object.entries(m.files)) {
-              n++;
-              const p = "Mirror/" + k;
-              if (!fs.existsSync(p)) { console.log("❌ 清单有记录但文件缺失: " + p); bad++; continue; }
-              const buf = fs.readFileSync(p);
-              const h = crypto.createHash("sha256").update(buf).digest("hex");
-              if (h !== v.sha256 || buf.length !== v.bytes) { console.log("❌ 哈希漂移: " + p); bad++; }
-            }
-            console.log("MANIFEST 条目: " + n + ", 异常: " + bad);
-            if (bad) { console.log("❌ 先同步 MANIFEST (sha256/bytes 从磁盘重算) 再提交"); process.exit(1); }
-            console.log("✅ 清单与磁盘一致");
-          ' 2>&1 | tee -a $GITHUB_STEP_SUMMARY
-          MANIFEST_RC=${PIPESTATUS[0]}
-          if git ls-files --eol | grep -E 'mixed|crlf'; then
-            echo "❌ 存在违反 .gitattributes(eol=lf) 的条目 (mixed/crlf) — 先行尾归一化再提交" | tee -a $GITHUB_STEP_SUMMARY
-            exit 1
-          else
-            echo "✅ 行尾一致: 无 mixed/crlf 条目" | tee -a $GITHUB_STEP_SUMMARY
-          fi
-          exit $MANIFEST_RC
-
       # ── 9. Loon 规则顺序防遮蔽检查 ──
       - name: Loon rule-order shadowing guard
         run: |
@@ -400,37 +365,13 @@ jobs:
           fi
           exit $FAIL
 
-      # ── 9b. 规则顺序遮蔽检查 (2026-09-11 深度审计 NEW-05) ──
-      # 取代 mirror-scripts 里那段硬编码 20 个关键词、且**方向反了**的 grep。
-      # 对 [Remote Rule] 的**实际列表内容**求集合交集: 靠前的 Proxy 列表关键词若抢先
-      # 命中靠后的 REJECT 条目, 该条目必须有本地 [Rule] REJECT 兜底, 否则判红。
-      # 放在本 job (而非只在 mirror-scripts): 该检查只读 template/ + Mirror/, PR 阶段即可发现。
-      # 同一步骤也在 mirror-scripts.yml 中执行, 以捕捉上游列表更新引入的新遮蔽。
-      - name: Rule shadow check (tools/rule-shadow-check.mjs)
-        run: |
-          echo "## Rule Shadow Check" >> $GITHUB_STEP_SUMMARY
-          node tools/rule-shadow-check.mjs 2>&1 | tee -a $GITHUB_STEP_SUMMARY
-          exit ${PIPESTATUS[0]}
-
       # ── 9b-bis. Rewrite 规则冗余检查 (2026-09-20 精简优化新增) ──
       # 同文件"更早规则是后者的字面前缀 + 作用相同" ⇒ 后者恒不可达 (死规则);
-      # 跨文件精确重复 (非镜像)。镜像内同类冗余只登记不手改 (mirror-scripts 每日重写)。
+      # 跨文件精确重复。同 Plugin 内同类冗余只登记不手改。
       - name: Rewrite redundancy check (tools/rewrite-redundancy-check.mjs)
         run: |
           echo "## Rewrite Redundancy Check" >> $GITHUB_STEP_SUMMARY
           node tools/rewrite-redundancy-check.mjs 2>&1 | tee -a $GITHUB_STEP_SUMMARY
-          exit ${PIPESTATUS[0]}
-
-      # ── 9c. 镜像声明漂移检查 (2026-09-11 深度审计 NEW-10) ──
-      # MOD-09 盲区: mirror-scripts 声明 `releases/latest/…` 而 keep_old 在 fetch 失败时
-      # 静默保留旧版 → MANIFEST 记的是固定旧版本, 与声明不再一致; 只有比对"workflow 声明 URL"
-      # 与 "MANIFEST source_url" 才能发现。此前 tools/mirror-drift-check.mjs 零接线 (= 无门禁),
-      # 现以 --strict 接入: 出现**未登记**的漂移/从未抓取即判红 (登记表见该工具 ACCEPTED_* 表)。
-      # 纯静态 (workflow 文件 + MANIFEST.json, 无网络), 故放 PR 阶段。
-      - name: Mirror declaration drift check (tools/mirror-drift-check.mjs --strict)
-        run: |
-          echo "## Mirror Drift Check" >> $GITHUB_STEP_SUMMARY
-          node tools/mirror-drift-check.mjs --strict 2>&1 | tee -a $GITHUB_STEP_SUMMARY
           exit ${PIPESTATUS[0]}
 
       # ── 10. 接线完整性检查 (审计修复 2026-08) ──
