@@ -1,6 +1,6 @@
 {
   "$comment": "镜像文件哈希清单 — 由 mirror-scripts.yml 维护; 变更会出现在镜像 PR 的 diff 中, 合并前请核对 source 变更是否符合预期",
-  "generated_at": "2026-09-19T07:55:44Z",
+  "generated_at": "2026-09-29T03:13:07Z",
   "files": {
     "amdc.js": {
       "source_url": "https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amdc.js",
@@ -53,9 +53,9 @@
     },
     "biliuniverse/BiliBili.Enhanced.plugin": {
       "source_url": "https://github.com/BiliUniverse/Enhanced/releases/latest/download/Biliverse.Enhanced.plugin",
-      "sha256": "2db6506f5df51d74f12ced8b3ceff9c21dc114d6e4f4a1d51afbfb06bcba43d8",
-      "bytes": 8191,
-      "upstream_bytes": 8221,
+      "sha256": "03a63f314300d3e7c11a8248963825bc84ae28def7f0af8edd0fb0dfb8607e2c",
+      "bytes": 9000,
+      "upstream_bytes": 8954,
       "fetched_at": "2026-09-18T03:20:00Z"
     },
     "biliuniverse/BiliBili.Global.plugin": {
@@ -72,12 +72,61 @@
       "upstream_bytes": 7163,
       "fetched_at": "2026-09-19T07:55:43Z"
     },
-    "biliuniverse/settings/mock.js": {
-      "source_url": "https://biliverse.github.io/settings/mock.js",
-      "sha256": "59c7e77591260185c3ad441704f28ab23ac4a5aa82c3cdad4540983788f1c606",
-      "bytes": 394375,
-      "upstream_bytes": 394375,
-      "fetched_at": "2026-09-19T07:55:43Z"
+    "biliuniverse/settings/assets/ADBlock_subject.png": {
+      "source_url": "https://biliverse.github.io/settings/assets/ADBlock_subject.png",
+      "sha256": "450d418aa0d53175cf9f473dfbb8c55d42a43086ed0e18120d180762734f0509",
+      "bytes": 18529,
+      "upstream_bytes": 0,
+      "fetched_at": "2026-09-29T03:13:07Z"
+    },
+    "biliuniverse/settings/assets/Biliverse_subject.png": {
+      "source_url": "https://biliverse.github.io/settings/assets/Biliverse_subject.png",
+      "sha256": "5d323fd482ad2d0541fa93fdf79fd73bb6ea37173365b4291937759eca0dcf68",
+      "bytes": 21153,
+      "upstream_bytes": 0,
+      "fetched_at": "2026-09-29T03:13:07Z"
+    },
+    "biliuniverse/settings/assets/Enhanced_subject.png": {
+      "source_url": "https://biliverse.github.io/settings/assets/Enhanced_subject.png",
+      "sha256": "134211c977b6570d50f929ebc0c40cfb2af1d5dc3459a99175e502e269edfd42",
+      "bytes": 21513,
+      "upstream_bytes": 0,
+      "fetched_at": "2026-09-29T03:13:07Z"
+    },
+    "biliuniverse/settings/assets/Global_subject.png": {
+      "source_url": "https://biliverse.github.io/settings/assets/Global_subject.png",
+      "sha256": "1c433265b50f7dc470989d01e69ebe27dd358e9bbbce20be38379a51c7a51358",
+      "bytes": 22535,
+      "upstream_bytes": 0,
+      "fetched_at": "2026-09-29T03:13:07Z"
+    },
+    "biliuniverse/settings/assets/Redirect_subject.png": {
+      "source_url": "https://biliverse.github.io/settings/assets/Redirect_subject.png",
+      "sha256": "9128a672674d33c1d07289c3bafbc76a4f76414ca5f030fc6fa9e3109e68362b",
+      "bytes": 16712,
+      "upstream_bytes": 0,
+      "fetched_at": "2026-09-29T03:13:07Z"
+    },
+    "biliuniverse/settings/index.html": {
+      "source_url": "https://biliverse.github.io/settings/",
+      "sha256": "2b616ec9e414050b08d45579d93edce1ac6cb3144004b27b38cc4d91c20ae232",
+      "bytes": 2811,
+      "upstream_bytes": 0,
+      "fetched_at": "2026-09-29T03:13:07Z"
+    },
+    "biliuniverse/settings/index.mjs": {
+      "source_url": "https://biliverse.github.io/settings/index.mjs",
+      "sha256": "2acba84d5c52271e6c61d42d676e78e005182fc5ba2279ede7917d4d246016a8",
+      "bytes": 6416,
+      "upstream_bytes": 0,
+      "fetched_at": "2026-09-29T03:13:07Z"
+    },
+    "biliuniverse/settings/theme.css": {
+      "source_url": "https://biliverse.github.io/settings/theme.css",
+      "sha256": "4fdb5c15308b515be52fef03238040968aa5806eb9c789e740dd75d55fedac8b",
+      "bytes": 2039,
+      "upstream_bytes": 0,
+      "fetched_at": "2026-09-29T03:13:07Z"
     },
     "dualsubs/DualSubs.Netflix.plugin": {
       "source_url": "https://github.com/DualSubs/Netflix/releases/latest/download/DualSubs.Netflix.plugin",
@@ -261,12 +310,26 @@
       "upstream_bytes": 56479,
       "fetched_at": "2026-09-19T07:55:43Z"
     },
-    "preferencepanes/web.js": {
-      "source_url": "https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/web.js",
-      "sha256": "5514baf4445853b59f666d1e0ad0afed605fd7427f429bad9bbbe9cc855b52f7",
-      "bytes": 155136,
-      "upstream_bytes": 155136,
-      "fetched_at": "2026-09-19T07:55:43Z"
+    "preferencepanes/index.html": {
+      "source_url": "https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/index.html",
+      "sha256": "a17279634a4a5f831a5ee3eb6feaed653f0782507017db363f1d33b6e0d06dd0",
+      "bytes": 495,
+      "upstream_bytes": 0,
+      "fetched_at": "2026-09-29T03:13:07Z"
+    },
+    "preferencepanes/index.mjs": {
+      "source_url": "https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/index.mjs",
+      "sha256": "b8b82c2fd6b9d446f9848c0145701991597211cbf661924e0d1f5998a2179ae1",
+      "bytes": 82529,
+      "upstream_bytes": 0,
+      "fetched_at": "2026-09-29T03:13:07Z"
+    },
+    "preferencepanes/navigation.mjs": {
+      "source_url": "https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/navigation.mjs",
+      "sha256": "cc292df6846a793ec238637a989c160fa69438ab421d39911c722ab9b096a1fc",
+      "bytes": 24528,
+      "upstream_bytes": 0,
+      "fetched_at": "2026-09-29T03:13:07Z"
     },
     "rules/ddgksf-StartUpAds.conf": {
       "source_url": "https://raw.githubusercontent.com/ifflagged/Romeo/main/Modules/Others/ddgksf2013/Official/StartUpAds.conf",
@@ -277,14 +340,14 @@
     },
     "rules/goodbyeads-qx.list": {
       "source_url": "https://raw.githubusercontent.com/8680/GOODBYEADS/master/data/rules/qx.list",
-      "sha256": "ca122a3ff4d700f80c93394a60ea370f0a8e0b34d782d595da9ac31e4a7284e1",
-      "bytes": 4036539,
+      "sha256": "deecf22daf7d04d7647b01e0845c9b4ebd91fe0971e755ac4afdfadba07862a5",
+      "bytes": 4135666,
       "upstream_bytes": 4036539,
       "fetched_at": "2026-09-19T07:55:35Z"
     },
     "rules/loon-Advertising.list": {
       "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Advertising/Advertising.list",
-      "sha256": "25b852ecbf39c1c6ed1931a6ec189e13c25ec537a7ccda1099d88681ad0c9325",
+      "sha256": "680b1a8d0e02f45b63919ad64fd34e5b5439b857fe05865b2b7b16afa450b954",
       "bytes": 32842,
       "upstream_bytes": 26870,
       "fetched_at": "2026-09-19T07:55:34Z"
@@ -319,8 +382,8 @@
     },
     "rules/loon-Global.list": {
       "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Loon/Global/Global.list",
-      "sha256": "81f2a44eac0d9b3df5e1e5ae778fa9479a4d45e26f6e57f22d36b09dd6eaa89a",
-      "bytes": 6115,
+      "sha256": "ed7ea1fde58b28b24c2a58d2268b1ce63bb902f76f5bf7595392f6893585ce9c",
+      "bytes": 6218,
       "upstream_bytes": 6115,
       "fetched_at": "2026-09-19T07:55:34Z"
     },

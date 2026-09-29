@@ -5,7 +5,7 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 ## 命令
 
 - `npm run build`：注入 `src/env.ts` 与 `src/lib/*.ts`，把 `src/*.ts` 压缩到 `Scripts/`。改源码后必须执行。
-- `npm test`：269 个行为级用例，引用全部 28 个 Scripts 产物；随后执行规则顺序与接线检查。关键文档数字由 `tools/doc-claims-check.mjs` 对照实测。
+- `npm test`：272 个行为级用例，引用全部 28 个 Scripts 产物；随后执行规则顺序与接线检查。关键文档数字由 `tools/doc-claims-check.mjs` 对照实测。
 - `npm run lint`：ESLint flat config，检查 `Scripts/`、`test/`、`tools/`。
 - `npm run generate`：Surgio 3.19 从纯静态模板生成 `Profile/Loon.lcf`，不读取或内嵌订阅凭据。该命令会创建空 `dist/`，`.gitignore` 中对应规则必须保留。
 - `npm run check:all`：串行执行 sync、shadow、rewrite、drift、src、orphan、plugin、contract、workflows 门禁；不包含 build、test、lint、generate。
@@ -40,13 +40,14 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 
 ## CI 门禁
 
-- `script-tests.yml`：lint、build、Scripts 漂移、269 用例、构建出处 attestation。
+- `script-tests.yml`：lint、build、Scripts 漂移、272 用例、构建出处 attestation。
 - `config-validate.yml`：MitM、插件结构、参数契约、源码反模式、workflow bash、模板同步、Qidian 哈希、规则遮蔽/冗余、镜像漂移、接线与银行域名断言；独立 job 重生成 Loon 配置验证幂等。
 - `mirror-scripts.yml`：镜像抓取与投毒/体积门禁、startup 生成、PR；独立 verify job 在 `MIRROR_TOKEN` 缺失导致 PR run 停在 `action_required` 时提供兜底验证。
 - `surgio-build.yml`：模板、`provider/empty.js` 或构建配置变化后自动生成 PR；发布前检查无凭据且 `[Proxy]` 无静态节点。
 - `cdn-verify.yml`：对 `ws.wenn.in` 与仓库文件做 sha256 校验。
 - `upstream-health.yml`：MANIFEST 派生镜像与直连依赖探活。
 - `dependency-audit.yml`：报告构建期依赖风险；`release.yml`：tag 版本快照。
+- `codeql.yml`：advanced setup，`javascript-typescript` + `actions` 两语言，按路径限定 `src/**`、`tools/**`、`.github/workflows/**`（不扫 `Scripts/**`/`test/**`）。advanced 与仓库 default setup 互斥，若改用后者必须删本文件。
 
 ## 约束与已知边界
 
