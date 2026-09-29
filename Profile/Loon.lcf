@@ -660,9 +660,8 @@ DOMAIN, us.l.qq.com, REJECT
 DOMAIN-SUFFIX, imtmp.net, REJECT
 
 # 追踪 — 官方点名 DOMAIN-KEYWORD 耗时随数量线性增长, 故用精确枚举而非子串全网扫。
-# (qreport 实测仅 qreport.qunar.com + qreport.cn 系)
+# 去遛: 用精确枚举而非 DOMAIN-KEYWORD(官方点名该类型耗时随数量线性增长)。
 DOMAIN, qreport.qunar.com, REJECT
-DOMAIN-SUFFIX, qreport.cn, REJECT
 DOMAIN, aegis.cdn-go.cn, REJECT
 
 # Google 分析与广告
@@ -734,7 +733,12 @@ DOMAIN, win.gdt.qq.com, REJECT
 DOMAIN-SUFFIX, sigmob.cn, REJECT
 DOMAIN, open.e.kuaishou.com, REJECT
 DOMAIN-SUFFIX, gdfp.gifshow.com, REJECT
-DOMAIN-SUFFIX, alisc1.zijieapi.com, REJECT
+# 2026-09-29 修正主机名错配: 原写 `DOMAIN-SUFFIX, alisc1.zijieapi.com`, 但四解析器
+# (@1.1.1.1/@8.8.8.8/@223.5.5.5/@119.29.29.29) 一致 NXDOMAIN —— 规则永不命中。
+# 而同段注释里记的真实 host 是 `tnc3-alisc1.zijieapi.com`, 该域存活(CNAME →
+# w.kunluncan.com / queniuyk.com, A 段 120.226.57.x, HTTPS 404=主机在线)。
+# 即**该拦的没拦住, 还白占一条**。tnc1/tnc2-alisc1 均 NXDOMAIN, 仅 tnc3 在用。
+DOMAIN-SUFFIX, tnc3-alisc1.zijieapi.com, REJECT
 DOMAIN-SUFFIX, beizi.biz, REJECT
 DOMAIN-SUFFIX, stats.jpush.cn, REJECT
 DOMAIN-SUFFIX, gd-stats.jpush.cn, REJECT

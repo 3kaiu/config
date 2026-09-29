@@ -91,10 +91,10 @@ exports.tests = {
   // 故与纯广告域分开登记, 便于将来若需放开时精准摘除。
   const EVIDENCED = {
     "广告/联盟": [
-      "1rtb.net", "66mobi.com", "adkwai.com", "alisc1.zijieapi.com", "beizi.biz", "cloooud.com",
+      "1rtb.net", "66mobi.com", "adkwai.com", "beizi.biz", "cloooud.com",
       "doubleclick.net", "gd-stats.jpush.cn", "gdfp.gifshow.com",
       "googlesyndication.com", "googletagmanager.com", "googletagservices.com", "hubcloud.com.cn",
-      "imtmp.net", "mmstat.com", "pangle.io", "pangolin-sdk-toutiao.com", "qreport.cn", "sigmob.cn",
+      "imtmp.net", "mmstat.com", "pangle.io", "pangolin-sdk-toutiao.com", "sigmob.cn",
       "stats.jpush.cn", "ugdtimg.com",
     ],
     "分析/归因 SDK": [
@@ -103,7 +103,7 @@ exports.tests = {
       "segment.io", "sentry.io",
     ],
     "银行/支付广告面": ["lban.spdb.com.cn", "mps.95508.com", "o2o-ad-log-gateway.alibaba.com", "static.95508.com", "track.bankcomm.com"],
-    "国内平台广告面": ["adservice.google.com", "h-adashx.ut.taobao.com"],
+    "国内平台广告面": ["adservice.google.com", "h-adashx.ut.taobao.com", "tnc3-alisc1.zijieapi.com"],
   };
   const flat = Object.values(EVIDENCED).flat().sort();
   a.equal(

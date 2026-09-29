@@ -34,7 +34,7 @@ Loon 官方文档分 12 个域（交互UI / 节点订阅 / 规则系统 / 策略
 
 | 处置方式 | 层 | 本仓实例 | 适用前提 |
 |---|---|---|---|
-| 硬拦截域 | L2 | 主配置 **121 条 REJECT** | 广告域与业务域不同 host |
+| 硬拦截域 | L2 | 主配置 **120 条 REJECT** | 广告域与业务域不同 host |
 | 整条 reject | L4 | 已随插件删除（`startup-adblock-pro` 493 条） | **纯**广告接口（丢整个响应可接受） |
 | 字段重命名 | L4 | 已随插件删除（京喜系 `response-body-replace-regex`） | 广告字段与业务同响应，客户端认不出改名即消失 |
 | 字段级净化 | L5 | 已随插件删除（26 个 Scripts） | 广告内嵌在业务数据里 |
@@ -95,7 +95,7 @@ Loon 官方文档分 12 个域（交互UI / 节点订阅 / 规则系统 / 策略
 
 | # | Loon 能力 | 本仓用量 | 影响 | 归属 |
 |---|---|---|---|---|
-| G1 | `[Rule]` 策略层 REJECT 变体（官方共 5 种） | **121 条全是裸 REJECT**（`-IMG`/`-DICT`/`-ARRAY`/`-DROP` 均 0） | 策略层全部退化为 404，部分 App 会因非预期状态码而重试 | M2 |
+| G1 | `[Rule]` 策略层 REJECT 变体（官方共 5 种） | **120 条全是裸 REJECT**（`-IMG`/`-DICT`/`-ARRAY`/`-DROP` 均 0） | 策略层全部退化为 404，部分 App 会因非预期状态码而重试 | M2 |
 | G2 | `NOT` 逻辑规则 | 0 | 无法表达「排除某类的兜底」 | M2 |
 | G3 | `SRC-PORT` 规则 | 0 | 未使用（主配置 DEST-PORT 2 条） | M1 |
 | G4 | `load-balance`（PCC / Round-Robin / Random） | 0 | 单订阅组下收益低，暂不引入 | M1 |
@@ -105,9 +105,11 @@ Loon 官方文档分 12 个域（交互UI / 节点订阅 / 规则系统 / 策略
 
 **已解决**：`PROTOCOL, STUN, REJECT` 取代 `DOMAIN-KEYWORD, stun, REJECT`。关键词规则只能匹配含 "stun" 的域名，裸 IP STUN 逃逸面够不着；协议规则无此缺口，且官方《规则系统 3.1》第 1 条保证域名规则先命中，5 条通话白名单不受影响。需 Loon ≥ 3.1.7。
 
+**已解决**（域名存活性）：全量 121 条 REJECT 经 DoH 多解析器交叉审计，修正 1 处主机名错配（`alisc1.zijieapi.com` NXDOMAIN → 真实 host `tnc3-alisc1.zijieapi.com` 存活，规则从未生效）、删除 1 条错误补录（`qreport.cn` 系已全下线）。新增 `dns-liveness` 门禁守住此类静默失效——**语法合法的规则写错主机名，现有门禁一条都抓不到**。判据须落到子域（`imtmp.net` 裸域 NXDOMAIN 但 7 个子域存活，删掉即误伤），并区分「域名已注销」与「NS 活跃仅业务下线」。
+
 **已解决**（UDP 面）：`udp-fallback-mode` 由 `DIRECT` 改为 `REJECT`。官方定义为「节点不支持 UDP 或未启用 UDP 转发时使用的策略」——取 DIRECT 时节点一旦无 UDP，全部 UDP（QUIC/游戏/通话）从本机真实 IP 直连漏出，与已用 `PROTOCOL, STUN, REJECT` 封 STUN 的 posture 矛盾。REJECT = 失败可见。**前置条件：东京组节点须启用 UDP**，否则通话/游戏不可用。
 
-已用满的（`Profile/Loon.lcf` `[Rule]` 段 484 行）：`DOMAIN-SUFFIX` 362 / `DOMAIN` 108 / `DOMAIN-KEYWORD` 5 / `PROTOCOL` 1（关键词少是**优点** —— 官方警告该类型耗时随数量线性增长）/ `IP-CIDR` 4 / `DEST-PORT` 2 / `GEOIP` 1 / `FINAL` 1。`qidian.plugin` 另含 `AND` 3 / `DOMAIN` 13 / `DOMAIN-SUFFIX` 2。
+已用满的（`Profile/Loon.lcf` `[Rule]` 段 483 行）：`DOMAIN-SUFFIX` 361 / `DOMAIN` 108 / `DOMAIN-KEYWORD` 5 / `PROTOCOL` 1（关键词少是**优点** —— 官方警告该类型耗时随数量线性增长）/ `IP-CIDR` 4 / `DEST-PORT` 2 / `GEOIP` 1 / `FINAL` 1。`qidian.plugin` 另含 `AND` 3 / `DOMAIN` 13 / `DOMAIN-SUFFIX` 2。
 
 **已停用**（随插件下线而失去，非主动选择）：`URL-REGEX` / `USER-AGENT` / `IP-ASN` / `IP-CIDR6` / `OR` / `NOT`。
 

@@ -13,7 +13,7 @@
       "layer": "L2+L3",
       "purpose": "决定请求走哪条链路, 不改写内容",
       "tpl_resources": {
-        "loon_tpl": "template/loon.tpl ([Rule] 484 条: DOMAIN-SUFFIX 362 / DOMAIN 108 / DOMAIN-KEYWORD 5 / IP-CIDR 4 / DEST-PORT 2 / PROTOCOL 1 / GEOIP 1 / FINAL 1)",
+        "loon_tpl": "template/loon.tpl ([Rule] 483 条: DOMAIN-SUFFIX 361 / DOMAIN 108 / DOMAIN-KEYWORD 5 / IP-CIDR 4 / DEST-PORT 2 / PROTOCOL 1 / GEOIP 1 / FINAL 1)",
         "snippets": [
           "ai-services.tpl",
           "developer.tpl",
@@ -162,7 +162,7 @@
       "owner": "M1",
       "status": "open",
       "capability": "[Rule] 策略层 REJECT 变体 (官方共 5 种: REJECT/-IMG/-DICT/-ARRAY/-DROP)",
-      "used": "121 条全为裸 REJECT, 变体均 0。注: 原表述引用的 REJECT-VIDEO / REJECT-NO-DROP 在官方《策略》文档中不存在, 'Loon 3.1.4+ 自动升级为 REJECT-DROP' 亦无官方出处, 已于 2026-09-29 删除该论证",
+      "used": "120 条全为裸 REJECT, 变体均 0。注: 原表述引用的 REJECT-VIDEO / REJECT-NO-DROP 在官方《策略》文档中不存在, 'Loon 3.1.4+ 自动升级为 REJECT-DROP' 亦无官方出处, 已于 2026-09-29 删除该论证",
       "impact": "策略层全部退化为 404, 部分 App 会因非预期状态码重试; 按上游响应形状分派变体可缓解"
     },
     {
@@ -178,7 +178,7 @@
       "owner": "M2",
       "status": "open",
       "capability": "插件层去广告 (Rewrite 字段改写 / reject-dict 通道)",
-      "used": "45 个插件已随外部依赖清理全部删除, 仅余主配置 121 条 REJECT (含 1 条 PROTOCOL, STUN)",
+      "used": "45 个插件已随外部依赖清理全部删除, 仅余主配置 120 条 REJECT (含 1 条 PROTOCOL, STUN)",
       "impact": "App 内部结构化广告位无法清理 —— 需用户逐个重新接入插件"
     },
     {
@@ -220,6 +220,14 @@
       "capability": "ipasn-url (ASN 数据库)",
       "used": "维持不设 (12MB 下载换来 0 条有效规则)",
       "impact": "2026-09-29 按官方文档重判: 官方 IP-ASN 示例为 `IP-ASN,4134,DIRECT,no-resolve`, 带 no-resolve 即只作用于'目标已是 IP'的一路, 而那一路上 GEOIP,CN,DIRECT 已按 mmdb 判定国别, ASN 在 DIRECT 方向是 GEOIP 的子集; REJECT 方向则需可信的广告 ASN 清单(本仓无)。故 ASN 对本配置无增量。dns-geoip.test.js 的消费者断言继续守着这条"
+    },
+    {
+      "id": "G13",
+      "owner": "M2",
+      "status": "resolved",
+      "capability": "REJECT 域名的 DNS 存活性",
+      "used": "修正 1 处主机名错配 (alisc1.zijieapi.com → tnc3-alisc1.zijieapi.com), 删除 1 条错误补录 (qreport.cn 系已全下线且真实 host qreport.qunar.com 已在另一条精确规则覆盖)",
+      "impact": "2026-09-29 对抗审计。全量 121 条 DoH 多解析器交叉后: 原规则写的是 NXDOMAIN 域, 而注释记录的真实 host 存活 → 该拦的没拦住还白占一条。新增 dns-liveness 门禁: 多解析器 + 子域 + 模板显式 host 三重判据, 且区分「域名已注销(判红)」与 「NS 仍活跃仅业务下线(只报告)」—— 后者删除属不可逆误伤"
     }
   ],
   "resolved": [
