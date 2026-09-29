@@ -1,0 +1,68 @@
+# CodeQL advanced setup (2026-09-29 恢复, issue #45 审计产物)
+#
+# 2026-08-29 `db2f2f1 chore(ci): 移除无用 workflows` 把本文件删掉了, 理由是当时
+# languages 只有 javascript-typescript 而扫描面与本地门禁重复、且从未真正产出告警。
+# 2026-09-29 对抗审计的结论是"删错了": 本仓库的门禁 (lint / 行为测试 / src 反模式 / 镜像
+# 投毒) 全部是**仓库自己写的规则**, CodeQL 提供的是**独立来源**的语义分析 —— 两者
+# 不可互相替代。恢复时按路径限定扫描面, 避免再次退化成"跑但没人看":
+#   - src/**            唯一脚本源码 (TS, esbuild 只转译不查类型, 见 AGENTS.md)
+#   - tools/**          生成器与门禁 (ESM, 直接决定配置产物)
+#   - .github/workflows/**  action 脚本 (新开语言 actions, 抓注入 / 未固定依赖 / 不安全拼接)
+#   不扫 Scripts/** (esbuild 压缩产物, 与 src 重复) 与 test/** (测试桩噪声)。
+#
+# 用 advanced setup 而非 default setup: default 由 GitHub 自动选语言与路径, 本仓库
+# 明确要排除 Scripts/ 与 test/, 只能用本文件声明。二者互斥, 故若在仓库设置里开启
+# default setup, 本文件必须同时删除。
+#
+# cron 用 05:00 周一, 错开旧值 06:00 (与 dependency-audit 撞车, GitHub 对同刻 cron 限流)。
+
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'tools/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'tools/**'
+      - '.github/workflows/**'
+  schedule:
+    - cron: '0 5 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['javascript-typescript', 'actions']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@88585263c0627ee42c0e1c5143a112c8d6f4aa18 # v4.38.2
+        with:
+          languages: ${{ matrix.language }}
+
+      # javascript-typescript 与 actions 都是解释型, 无需 Autobuild ——
+      # 旧文件里的 Autobuild 步骤对 JS 是空操作, 已删。
+
+      - name: Perform analysis
+        uses: github/codeql-action/analyze@88585263c0627ee42c0e1c5143a112c8d6f4aa18 # v4.38.2
+        with:
+          category: '/language:${{ matrix.language }}'

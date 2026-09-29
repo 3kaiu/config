@@ -160,18 +160,37 @@ jobs:
               keep_old "$dest"
               rm -f "$tmpf"; return
             fi
-            # ── 门禁 2: 非 HTML ──
+            # ── 门禁 2: 非 HTML 错误页 ──
             # 注: 用 -E 而非 BRE 的 '\|' — GNU grep 认 '\|' 为交替, BSD/macOS grep 视作
             # 字面量 (整个模式永不匹配)。CI 跑在 ubuntu, 但门禁必须本地可复现才能被验证。
-            if head -c 200 "$tmpf" | grep -qiE '<!doctype|<html'; then
-              echo "🚫 $name 门禁拦截: 内容为 HTML 错误页, 保留旧版"
-              GATED=$((GATED + 1)); mark_fail "$dest"
-              keep_old "$dest"
-              rm -f "$tmpf"; return
-            fi
-            # ── 门禁 3: JS 语法 (仅 .js; .list/.conf/.plugin 非 JS) ──
+            # 2026-09-29: .html 是**合法镜像资产** (PreferencePanes / Biliverse settings 入口页,
+            # 实测以 `<!doctype html>` 开头), 不能继续按"出现 doctype 即错误页"一刀切 —— 那会
+            # 让两类入口页永久 门禁拦截 + 保留旧版。改为: 非 .html 维持原断言; .html 只拦
+            # Cloudflare 挑战页与 404 页指纹 (HTTP 状态码已由 curl -f 在取回阶段拦掉)。
             case "$dest" in
-              *.js)
+              *.html)
+                if head -c 1024 "$tmpf" | grep -qiE 'cf-error|<title>[^<]*404|page not found|error 404'; then
+                  echo "🚫 $name 门禁拦截: 内容为错误页 (HTML 资产), 保留旧版"
+                  GATED=$((GATED + 1)); mark_fail "$dest"
+                  keep_old "$dest"
+                  rm -f "$tmpf"; return
+                fi
+                ;;
+              *)
+                if head -c 200 "$tmpf" | grep -qiE '<!doctype|<html'; then
+                  echo "🚫 $name 门禁拦截: 内容为 HTML 错误页, 保留旧版"
+                  GATED=$((GATED + 1)); mark_fail "$dest"
+                  keep_old "$dest"
+                  rm -f "$tmpf"; return
+                fi
+                ;;
+            esac
+            # ── 门禁 3: JS 语法 (仅 .js/.mjs; .list/.conf/.plugin/.html/.css/.png 非 JS) ──
+            # 2026-09-29 扩到 .mjs: 新镜像的 Settings/PreferencePanes 入口模块是 ESM。
+            # 临时文件虽固定叫 mirror.XXXX.js, 但 Node ≥22 默认语法探测会按 ESM 解析 import/export
+            # (实测 3 个 .mjs 复制成 .js 后 node --check 全绿), 故无需改临时文件名。
+            case "$dest" in
+              *.js|*.mjs)
                 if ! node --check "$tmpf" 2>/dev/null; then
                   echo "🚫 $name 门禁拦截: node --check 语法错误 (可能半截下载), 保留旧版"
                   GATED=$((GATED + 1)); mark_fail "$dest"
@@ -666,28 +685,84 @@ jobs:
             "biliuniverse/BiliBili.Redirect.plugin" "Biliverse Redirect / .plugin latest"
 
           # ═══════════════ BiliUniverse 传递依赖 (与插件同版本跟随) ═══════════════
-          # 新版插件内嵌两类非白名单 script-path, 不收敛则门禁 4 整单拦截:
-          #   1) biliverse.github.io (Pages 可变内容) /settings/mock.js — 设置页主题脚本
-          #   2) NSNanoCat/PreferencePanes releases/latest (浮动) api.js/web.js — 设置页 get/set/delete
-          # 三者体量小 (394K/56K/155K) 且变更低频, 镜像收敛后由哈希+PR 人审覆盖, 与主插件同等待遇。
-          mirror "https://biliverse.github.io/settings/mock.js" \
-            "biliuniverse/settings/mock.js" "Biliverse Pages / settings mock.js"
+          # 2026-09-29 全量收敛: Enhanced v0.6.0+ 的设置页不再引用 mock.js/web.js (二者上游 404,
+          # 已按孤儿删除), 改为 Settings/index.html+index.mjs+theme.css+5 张主题 PNG,
+          # 以及 PreferencePanes 的 index.html/index.mjs/navigation.mjs (仍 releases/latest 浮动)。
+          # 12 个传递依赖 (新增 11 + 沿用 api.js) 全部镜像到自建 CDN, 由哈希门禁 +
+          # cdn-verify 每日 sha256 兜底; 少声明任何一个都会在 check:drift 里变孤儿告警。
           mirror "https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/api.js" \
             "preferencepanes/api.js" "NSNanoCat PreferencePanes / api.js latest"
-          mirror "https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/web.js" \
-            "preferencepanes/web.js" "NSNanoCat PreferencePanes / web.js latest"
+          mirror "https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/index.html" \
+            "preferencepanes/index.html" "NSNanoCat PreferencePanes / index.html latest"
+          mirror "https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/index.mjs" \
+            "preferencepanes/index.mjs" "NSNanoCat PreferencePanes / index.mjs latest"
+          mirror "https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/navigation.mjs" \
+            "preferencepanes/navigation.mjs" "NSNanoCat PreferencePanes / navigation.mjs latest"
+          mirror "https://biliverse.github.io/settings/" \
+            "biliuniverse/settings/index.html" "Biliverse Pages / settings dir → index.html"
+          mirror "https://biliverse.github.io/settings/index.mjs" \
+            "biliuniverse/settings/index.mjs" "Biliverse Pages / settings index.mjs"
+          mirror "https://biliverse.github.io/settings/theme.css" \
+            "biliuniverse/settings/theme.css" "Biliverse Pages / settings theme.css"
+          mirror "https://biliverse.github.io/settings/assets/Biliverse_subject.png" \
+            "biliuniverse/settings/assets/Biliverse_subject.png" "Biliverse Pages / Biliverse_subject.png"
+          mirror "https://biliverse.github.io/settings/assets/Enhanced_subject.png" \
+            "biliuniverse/settings/assets/Enhanced_subject.png" "Biliverse Pages / Enhanced_subject.png"
+          mirror "https://biliverse.github.io/settings/assets/Global_subject.png" \
+            "biliuniverse/settings/assets/Global_subject.png" "Biliverse Pages / Global_subject.png"
+          mirror "https://biliverse.github.io/settings/assets/Redirect_subject.png" \
+            "biliuniverse/settings/assets/Redirect_subject.png" "Biliverse Pages / Redirect_subject.png"
+          mirror "https://biliverse.github.io/settings/assets/ADBlock_subject.png" \
+            "biliuniverse/settings/assets/ADBlock_subject.png" "Biliverse Pages / ADBlock_subject.png"
 
-          # ── 本地补丁 (2026-09-18 解钉配套): 传递依赖重写到自建 CDN ──
-          # 每日镜像后强制重写 (自愈); 补丁后断言与 DualSubs 段同哲学 (见下方 DualSubs 断言块)。
-          sed -i "s|https://biliverse.github.io/settings/mock.js|https://ws.wenn.in/main/Mirror/biliuniverse/settings/mock.js|g" \
-            Mirror/biliuniverse/BiliBili.*.plugin
-          sed -i "s|https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/api.js|https://ws.wenn.in/main/Mirror/preferencepanes/api.js|g; s|https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/web.js|https://ws.wenn.in/main/Mirror/preferencepanes/web.js|g" \
-            Mirror/biliuniverse/BiliBili.*.plugin
-          # 断言: 补丁后不应残留 Pages 可变引用与浮动 latest。上游若新增传递依赖, 在此暴露。
-          if grep -n -e "biliverse.github.io/settings/mock.js" -e "NSNanoCat/PreferencePanes/releases/latest" Mirror/biliuniverse/*.plugin; then
-            echo "🚫 BiliUniverse 补丁后仍存在未收敛引用 (上游可能新增了传递依赖), 请人工核对并镜像"
-            mark_fail "biliuniverse:传递依赖未收敛"
-          fi
+          # ── 本地补丁: 全量运行时 URL 收敛到自建 CDN (每日镜像后强制重写, 自愈) ──
+          # 表达式顺序不可换: 先吃掉 `settings/"` (目录 URL 结尾), 再改写其余 `settings/` 前缀 ——
+          # 反过来会把目录 URL 改成 `.../settings/"` 而丢失 index.html。
+          # 用 sed 重定向而非 `-i`: BSD/GNU sed 都可用, 本地可复现与 CI 字节一致。
+          for f in Mirror/biliuniverse/BiliBili.*.plugin; do
+            sed \
+              -e 's|https://biliverse\.github\.io/settings/"|https://ws.wenn.in/main/Mirror/biliuniverse/settings/index.html"|g' \
+              -e 's|https://biliverse\.github\.io/settings/|https://ws.wenn.in/main/Mirror/biliuniverse/settings/|g' \
+              -e 's|https://github\.com/NSNanoCat/PreferencePanes/releases/latest/download/|https://ws.wenn.in/main/Mirror/preferencepanes/|g' \
+              "$f" > "$RUNNER_TEMP/biliplugin" && mv "$RUNNER_TEMP/biliplugin" "$f"
+          done
+
+          # ── 门禁 5: 运行时 URL 收敛属性断言 (2026-09-29 对抗审计 NEW-14) ──
+          # 旧实现 grep 两个字面量 (mock.js / NSNanoCat...latest), 是"上游换个字符串就绕过"的伪
+          # 门禁 —— 实测 Enhanced v0.6.0 另有 8 处 mock_file/script-path 指向 biliverse.github.io,
+          # 旧门禁全绿。现改为断言**不变量**: 插件内运行时被 Loon 拉取的 URL (script-path= 与
+          # mock_file 第二参, 跳过 # 注释行) 必须命中白名单之一:
+          #   ① https://ws.wenn.in/main/Mirror/…  自建 CDN, 有 sha256 + cdn-verify 门禁
+          #   ② https://github.com/<o>/<r>/releases/download/<tag>/…  固定 tag (排除 latest)
+          # 头部元数据 (#!icon/#!homepage/#!author) 不参与: 仅 UI 展示, 不进执行链。
+          node -e '
+            const fs = require("fs");
+            const path = require("path");
+            const dir = "Mirror/biliuniverse";
+            const CDN = "https://ws.wenn.in/main/Mirror/";
+            const bad = [];
+            for (const f of fs.readdirSync(dir).filter((x) => x.endsWith(".plugin"))) {
+              const txt = fs.readFileSync(path.join(dir, f), "utf8");
+              const urls = [];
+              for (const line of txt.split("\n")) {
+                if (line.trim().startsWith("#")) continue;
+                for (const m of line.matchAll(/script-path\s*=\s*(https?:\/\/[^\s,")]+)/gi)) urls.push(m[1]);
+                for (const m of line.matchAll(/mock_file\s*\(\s*"[^"]+"\s*,\s*"(https?:\/\/[^"]+)"/g)) urls.push(m[1]);
+              }
+              for (const u of urls) {
+                if (u.startsWith(CDN)) continue;
+                const pin = u.match(/^https:\/\/github\.com\/[^/]+\/[^/]+\/releases\/download\/([^/]+)\//);
+                if (pin && pin[1] !== "latest") continue;
+                bad.push(f + " -> " + u);
+              }
+            }
+            if (bad.length) {
+              console.log("BiliUniverse 门禁 5: 运行时 URL 未收敛 (上游可能新增了传递依赖):");
+              for (const b of bad) console.log("  " + b);
+              process.exit(1);
+            }
+            console.log("BiliUniverse 门禁 5: 运行时 URL 全部收敛 (CDN 镜像 或 固定 tag)");
+          ' || mark_fail "biliuniverse:运行时URL未收敛"
 
           # ── 行尾归一化: 哈希前把镜像文本文件统一为 LF ──
           # 根因 (2026-09-11 实测, Config Validation 的 Mirror manifest consistency check

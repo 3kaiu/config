@@ -409,11 +409,11 @@ FINAL, Final
 #   代价: 国内请求先扫拦截区 1229 条 (Advertising 981 + Privacy 20 + Hijacking 228),
 #   相对 China 的 63 条是可忽略的扫描成本。REJECT→REJECT 行为等价, 故拦截区内部顺序
 #   不构成遮蔽 (见 tools/rule-shadow-check.mjs 的判定原则)。
-# China 次位 — 国内流量先命中 DIRECT; Global 再次 — 国际主流域小列表 (198 条: 36
-#   DOMAIN-KEYWORD + 46 USER-AGENT + 112 IP-CIDR + 4 IP-CIDR6, **0 条 DOMAIN-SUFFIX**)
+# China 次位 — 国内流量先命中 DIRECT; Global 再次 — 国际主流域小列表 (201 条: 36
+#   DOMAIN-KEYWORD + 46 USER-AGENT + 115 IP-CIDR + 4 IP-CIDR6, **0 条 DOMAIN-SUFFIX**)
 #   命中 Proxy 即提前终止。
 #   ⚠️ 2026-09-11 深度审计 NEW-04 更正: "34,579 SUFFIX 提前终止"系误引上游文件头注释
-#   (该头描述 blackmatrix7 完整规则集, 与 Loon 正文 209 行/198 条不符, **不可当计数用**)。
+#   (该头描述 blackmatrix7 完整规则集, 与 Loon 正文 212 行/201 条不符, **不可当计数用**)。
 #   Global 前置的真实收益仅为: 命中后免扫其后的列表 (重排后只剩 goodbyeads)。
 # goodbyeads 压轴 — 117k 条的最大表必须排最后: China/Global 覆盖的域名 (绝大多数请求)
 #   免扫该表。代价 (check:shadow 实测): 941 + 606 条条目被 China(`cn` 后缀/aliyun 等

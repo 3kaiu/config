@@ -65,7 +65,7 @@ export const ACCEPTED_PAIRS = new Map([
   [
     "Global→goodbyeads-qx",
     {
-      reason: "Global(Proxy,198 条,36 个宽匹配 DOMAIN-KEYWORD) 在 goodbyeads 之前: 国际主流域名请求提前终止, 免扫 117k 条; 被抢条目 (porn/google 等关键词命中的成人/广告域) 本就会被 Global 走代理而非拦截 —— 这是取舍的真实代价: 这部分域名从 REJECT 变为 Proxy。",
+      reason: "Global(Proxy,201 条,36 个宽匹配 DOMAIN-KEYWORD) 在 goodbyeads 之前: 国际主流域名请求提前终止, 免扫 117k 条; 被抢条目 (porn/google 等关键词命中的成人/广告域) 本就会被 Global 走代理而非拦截 —— 这是取舍的真实代价: 这部分域名从 REJECT 变为 Proxy。",
       reviewBy: "2027-03-31 (随上游 goodbyeads 复检)",
     },
   ],
