@@ -102,6 +102,82 @@ export function lintText(txt, { dir = "Plugin", file = "x.plugin" } = {}) {
       }
     }
   }
+  // ── 跨层矛盾扫描 (2026-09-29, 见 APP-ONBOARDING.md 第 6 节) ──
+  // 只报告不判红: 这类冲突往往源于用户的**主动权衡**(如"开屏必除, 接受秒播失效"),
+  // 擅自判红等于推翻决策。门禁的职责是把它们**显式化**, 而不是替用户选边。
+  {
+    // ⚠️ 段定位必须**行首锚定**: `txt.indexOf("[MitM]")` 会命中 [Script] 段注释里
+    // 提到的 "[MitM]" 字样(本插件就有一处), 导致取到错误的段、hostname 正则不匹配,
+    // 检查静默失效 —— 又一个"看起来有门禁其实没有"的形态。
+    const sec = (name) => {
+      const re = new RegExp(`^\\[${name}\\]\\s*$`, "m");
+      const m0 = txt.match(re);
+      if (!m0) return "";
+      const i = m0.index + m0[0].length;
+      return txt.slice(i).replace(/^\n/, "").split(/^\[[A-Za-z ]+\]\s*$/m)[0];
+    };
+    // ① 插件 [Rule] 的 DIRECT 白名单, 若被主配置 [Rule] 的 REJECT 覆盖 → 空转
+    const tplPath = path.join(ROOT, "template", "loon.tpl");
+    if (fs.existsSync(tplPath) && dir === "Plugin") {
+      const tpl = fs.readFileSync(tplPath, "utf8");
+      const rs = tpl.slice(tpl.indexOf("[Rule]"), tpl.indexOf("[Remote Rule]"));
+      const rej = [];
+      for (const l of rs.split("\n")) {
+        const t = l.trim();
+        if (!t || t.startsWith("#")) continue;
+        const f = t.split(",").map((x) => x.trim());
+        if (f.length >= 3 && /^REJECT/.test(f[2])) rej.push([f[0], f[1]]);
+      }
+      const covered = (d) => {
+        for (const [k, v] of rej) {
+          if (k === "DOMAIN" && v === d) return true;
+          // DOMAIN-SUFFIX 只覆盖完全相同的后缀或真子域 —— .com1 是独立域, 不被 .com 覆盖
+          if (k === "DOMAIN-SUFFIX" && (v === d || d.endsWith("." + v))) return true;
+        }
+        return false;
+      };
+      for (const l of sec("Rule").split("\n")) {
+        const t = l.trim();
+        if (!t || t.startsWith("#")) continue;
+        const f = t.split(",").map((x) => x.trim());
+        if (f.length < 3 || f[2] !== "DIRECT") continue;
+        if (covered(f[1]))
+          reports.push(
+            `[跨层空转] ${dir}/${file}: ${f[0]}, ${f[1]}, DIRECT 被主配置 [Rule] 的 REJECT 覆盖` +
+              `(本地配置 > 插件, 官方《规则系统 3.1》第 4 条) —— 该条永不生效。` +
+              `若是有意为之请在注释登记矛盾; 若是无意请删除`
+          );
+      }
+    }
+    // ② 插件 [MitM] 正条目, 若被主配置 REJECT 覆盖 → 解密面无消费
+    //    (domain-reject-mode=DNS 时域在 DNS 阶段即被拒, 到不了解密层)
+    const m = sec("MitM").match(/^hostname\s*=\s*(.*)$/m);
+    if (m && dir === "Plugin") {
+      const tplPath = path.join(ROOT, "template", "loon.tpl");
+      if (fs.existsSync(tplPath)) {
+        const tpl = fs.readFileSync(tplPath, "utf8");
+        const rs = tpl.slice(tpl.indexOf("[Rule]"), tpl.indexOf("[Remote Rule]"));
+        const rej = [];
+        for (const l of rs.split("\n")) {
+          const t = l.trim();
+          if (!t || t.startsWith("#")) continue;
+          const f = t.split(",").map((x) => x.trim());
+          if (f.length >= 3 && /^REJECT/.test(f[2])) rej.push([f[0], f[1]]);
+        }
+        const covered = (d) =>
+          rej.some(([k, v]) => (k === "DOMAIN" && v === d) || (k === "DOMAIN-SUFFIX" && (v === d || d.endsWith("." + v))));
+        for (const h0 of m[1].split(",")) {
+          const h = h0.trim().replace(/^%APPEND%\s*,?\s*/, "");
+          if (!h || h.startsWith("-") || h.startsWith("%")) continue;
+          if (covered(h))
+            reports.push(
+              `[解密面无消费] ${dir}/${file}: ${h} 在主配置被 REJECT; domain-reject-mode=DNS 下` +
+                `该域在 DNS 阶段即被拒, 到不了解密层 —— 应从 [MitM] 移除`
+            );
+        }
+      }
+    }
+  }
   return { errs, reports };
 }
 

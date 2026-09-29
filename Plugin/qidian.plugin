@@ -47,11 +47,19 @@ cron {CRONEXP} script-path=https://ws.wenn.in/main/Scripts/Qidian.js, timeout={T
 
 [Rule]
 # 广告 SDK 白名单 — 防止误杀奖励包
-# ⚠️ 层间矛盾 (勿静默删本白名单): Loon 优先级 本地配置＞插件, 而 template/loon.tpl
-# [Rule] 对 ii.gdt/adsmind/pangolin 系是全链 REJECT (用户决策: 开屏必除, 接受秒播
-# 失效), 故下述 4 条 DIRECT 对重叠域**永不生效**。后果: 激励/每日任务奖励包可能因
-# SDK 被拦而计数失败 (表现为任务 X/9 长期不满)。改动任一方向都需真机确认:
-# 要么关两任务开关, 要么把模板对应 4 域改 DIRECT (开屏会回来)。
+# ⚠️ 层间矛盾 (勿静默删本白名单)。逐条实证, 非笼统结论 (2026-09-29 审计修正):
+#   官方《规则系统 3.1》第 4 条: 来源优先级 本地配置 > 插件。故主配置 [Rule] 的 REJECT
+#   会压掉同域的插件 DIRECT。逐条核对结果:
+#     ① ii.gdt.qq.com               → 主配置 DOMAIN REJECT 覆盖 → 本条**不生效**
+#     ② adsmind.gdtimg.com           → 主配置 DOMAIN REJECT 覆盖 → 本条**不生效**
+#     ③ pangolin-sdk-toutiao.com     → 主配置 DOMAIN-SUFFIX REJECT 覆盖 → **不生效**
+#     ④ pangolin-sdk-toutiao1.com    → **部分生效**。主配置只有
+#          `DOMAIN, api-access.pangolin-sdk-toutiao1.com` 这一条精确 REJECT, 它
+#          **不覆盖** SUFFIX 的其他子域(裸域 / log-api. / gromore. 等) ⇒ 本条对这些生效。
+#          (`.com1` 是独立域, 不被 `DOMAIN-SUFFIX, pangolin-sdk-toutiao.com` 罩住)
+#   后果: 激励/每日任务奖励包可能因 SDK 被拦而计数失败(任务 X/9 长期不满)。
+#   改动任一方向都需真机确认: 要么关两任务开关, 要么把模板对应域改 DIRECT(开屏会回来)。
+#   门禁 plugin-lint-check 的「[跨层空转]」会自动报出 ①②③ 三条。
 DOMAIN, ii.gdt.qq.com, DIRECT
 DOMAIN, adsmind.gdtimg.com, DIRECT
 DOMAIN-SUFFIX, pangolin-sdk-toutiao.com, DIRECT

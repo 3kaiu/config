@@ -48,6 +48,7 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 | `Profile/Loon.lcf` | 唯一发布入口 | 生成物，不手改 |
 | `tools/*.mjs` | 已接线门禁 | 每个工具必须被 workflow、npm check 或测试调用 |
 | `test/cases/*.test.js` | 行为与静态回归 | 响应脚本必须断言 `$done` |
+| `APP-ONBOARDING.md` | **单 App 接入标准** | 逐个 App 接入时照此执行：取证 → 处置分层 → 解密面最小化 → 语法版本 → 参数契约 → 跨层矛盾自查 → 收尾门禁 |
 | `test/lib/mitm-hosts.mjs` | MitM 解密面 host 提取 | 非用例文件，勿删 |
 
 ## 广告面治理纪律
