@@ -35,7 +35,7 @@ const KNOWN_UNCONVERGED = {
   // 2026-09-29 登记: Auraflare 的 script-path 指向 raw.githubusercontent 的可变
   // `main` 分支 (域名在 mirror-scripts.yml 门禁 4 白名单内, 故镜像步骤不会拦)。
   // 与 BiliUniverse 同类暴露, 属"靠上游仓库不可变性兜底"而非收敛;
-  // 待办见 issue #47。
+  // 待办见 issue #48。
   "auraflare/Cloudflare.1.1.1.1.plugin": [
     "https://raw.githubusercontent.com/VirgilClyne/Cloudflare/main/js/1.1.1.1.panel.js",
     "https://raw.githubusercontent.com/VirgilClyne/Cloudflare/main/js/1.1.1.1.request.js",
