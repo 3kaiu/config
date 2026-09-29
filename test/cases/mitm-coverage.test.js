@@ -11,16 +11,12 @@
  * 其与并入条目的冲突优先级未经官方文档确认, 见 2026-09-22 结论: 未知即不动)。
  * startup-adblock-pro.plugin 除外 (专用测试已逐条登记, 避免双重维护)。
  *
- * EXPECTED_GENERIC (1): host 无法静态抽取, 覆盖性不可判定 — 锁定集合 —
- *   ① shopping-purify `119.29.29.\d+` (HTTPDNS /24, IP 段通配无精确 MitM 表达)
- * 漂移 (新增 orphan 或 generic 增减) 即红 → 先定位是规则新增还是 MitM 被改。
- *
- * 2026-09-29 收缩: 原 ② wechat-pro 的 `^(https?://)?([alnum]+.)+.../wp-json/...` 全通用
- *   域名正则已移除 —— 它是唯一一条 generic 规则, 且其 script-path 指向本仓已删的
- *   Mirror/applet.js (非第三方 raw, 但同属"非自维护"依赖), 随上游清理一并删除。
- *   代价是明确的: **微信小程序 wp-json 广告净化能力失去**。微信其余净化 (公众号 /
- *   朋友圈 / 视频号) 均为本地 Rewrite, 不受影响。
- *   若日后自研小程序净化, 须重新评估: 通用域名正则会导致 MitM 解密面不可静态判定。
+ * EXPECTED_GENERIC (0): 2026-09-29 精简后剩余的 qidian.plugin, 其 10 条 [Script]
+ *   规则域名均为具名 host (ii.gdt.qq.com / api-access.pangolin-sdk-toutiao{,.1}.com /
+ *   h5|magev6.if.qidian.com), 无不可静态抽取的 catch-all 正则 → 集合为空。
+ *   原基线两条 (shopping-purify 的 119.29.29.\d+ HTTPDNS 通配、wechat-pro 的全通用
+ *   域名正则) 已随 45 个插件删除而消失 —— 这是真实的覆盖面收缩, 不是门禁放宽。
+ *   漂移 (新增 orphan 或 generic 增减) 仍即红 → 先定位是规则新增还是 MitM 被改。
  */
 "use strict";
 
@@ -31,9 +27,7 @@ const ROOT = path.join(__dirname, "..", "..");
 const TPL = path.join(ROOT, "template", "loon.tpl");
 const SKIP = new Set(["startup-adblock-pro.plugin"]);
 
-const EXPECTED_GENERIC = [
-  "Plugin/shopping-purify.plugin :: ^https?:\\/\\/119\\.29\\.29\\.\\d+\\/d",
-];
+const EXPECTED_GENERIC = [];
 
 let mod = null;
 const load = async () => (mod ??= await import("../lib/mitm-hosts.mjs"));
@@ -76,7 +70,20 @@ exports.tests = {
   "mitm-coverage: 非 startup 插件零无解密面规则 (新增 orphan 即红; host 提取逻辑见 test/lib/mitm-hosts.mjs)": async (a) => {
     const m = await load();
     const tplHosts = hostnamesOf(fs.readFileSync(TPL, "utf8"));
-    a.ok(tplHosts.length > 50, `模板 [MitM] 应有规模 (当前 ${tplHosts.length})`);
+    // 2026-09-29 精简: 正解密面由 51 条收窄至 7 条 (仅 qidian 实际消费)。
+    // 注: hostnamesOf 按设计已过滤负条目(去 %APPEND% / - 前缀), 故 tplHosts 即"正解密面"。
+    // 原 "> 50" 断言写死了旧规模, 现改为按**实际消费面**判定 —— 收窄过度(删掉 qidian
+    // 真正需要的 host)会静默失去净化能力, 那是比"规模缩水"更危险的失败方向。
+    a.ok(tplHosts.length > 0, `模板 [MitM] 正解密面不应为空 (当前 ${tplHosts.length})`);
+    for (const need of ["h5.if.qidian.com", "magev6.if.qidian.com"])
+      a.ok(tplHosts.includes(need), `qidian 实际消费的解密面 ${need} 缺失 —— 收窄过度会静默失去净化能力`);
+
+    // 免解密排除(负条目)由 mitm-orphan 门禁从产物侧另行校验, 此处只断言其仍在模板中
+    // —— M4 的核心保证是银行域不进解密面, 与正解密面规模无关。
+    const tplRaw = fs.readFileSync(TPL, "utf8");
+    const negLine = (tplRaw.match(/^hostname\s*=\s*(.*)$/m) || ["", ""])[1];
+    const negCount = negLine.split(",").map((x) => x.trim()).filter((x) => x.startsWith("-")).length;
+    a.ok(negCount >= 40, `负条目(银行/Apple 免解密排除) 应保留, 当前 ${negCount} 条 —— 归零即破坏 M4 保证`);
     const orphans = [];
     for (const dir of ["Plugin"]) {
       for (const f of fs.readdirSync(path.join(ROOT, dir)).filter((x) => x.endsWith(".plugin")).sort()) {

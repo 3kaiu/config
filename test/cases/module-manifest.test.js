@@ -110,7 +110,15 @@ exports.tests = {
   "module: M7 功能增强必须逐条给出规则消费证据 (拒绝仅凭措辞归类)": async (a) => {
     const m7 = M.modules.find((m) => m.id === "M7");
     a.ok(m7, "M7 应存在 —— 14/46 插件带真实功能解锁/签到规则, 审计 E4 判定原 M1-M6 为过早闭合");
-    a.ok((m7.also_members || []).length > 0, "M7 无成员即空模块");
+    // 2026-09-29 精简: 45 个插件删除后仅剩 qidian.plugin, 而它**本身就是 M7 主责**。
+    // 原断言要求 also_members 非空, 隐含"存在主责在别的模块、本模块只挂次要"的前提 ——
+    // 该前提在单插件场景下不成立。故改为: M7 有主责成员 **或** 有跨模块次要成员, 二者其一即可。
+    const m7Primary = (m7.plugins || []).length + (m7.scripts || []).length;
+    a.ok(
+      m7Primary > 0 || (m7.also_members || []).length > 0,
+      "M7 既无主责成员也无次要成员 —— 空模块 (原断言要求 also_members 非空, " +
+        "但单插件场景下 M7 主责插件无法把 from 指向自己, 断言自相矛盾)"
+    );
     for (const x of m7.also_members || [])
       a.ok(/消费 \d+ 处|规则|cron|http-response|条改写/.test(x.reason),
         `M7/${x.file}: 理由须指明规则消费或 cron 事实, 实际 "${x.reason}"`);

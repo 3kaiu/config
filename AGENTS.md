@@ -7,7 +7,7 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 ## 命令
 
 - `npm run build`：注入 `src/env.ts` 与 `src/lib/*.ts`，把 `src/*.ts` 压缩到 `Scripts/`。改源码后必须执行。
-- `npm test`：302 个行为级用例，引用全部 29 个 Scripts 产物；随后执行规则顺序与接线检查。关键文档数字由 `tools/doc-claims-check.mjs` 对照实测。
+- `npm test`：107 个行为级用例，引用全部 1 个 Scripts 产物（`Qidian.js` 手工轨）；随后执行规则顺序与接线检查。关键文档数字由 `tools/doc-claims-check.mjs` 对照实测。
 - `npm run lint`：ESLint flat config，检查 `Scripts/`、`test/`、`tools/`。
 - `npm run generate`：Surgio 3.19 从纯静态模板生成 `Profile/Loon.lcf`。该命令会创建空 `dist/`，`.gitignore` 中对应规则必须保留。
 - `npm run check:all`：串行执行 sync、rewrite、src、orphan、plugin、contract、workflows、scripts、index 门禁；不包含 build、test、lint、generate。`scripts` 把 build 命令重定向到**临时目录**重建后与 `Scripts/` 逐字节比对 —— 补的是本地盲区：手改产物或改了 src 没 build 时，其余门禁会全绿。
@@ -35,9 +35,9 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 | `src/*.ts` | 唯一脚本源码 | 可改；改后必须 build 并补行为测试 |
 | `src/lib/*.ts` | esbuild 注入模块 | 导出名在消费者中按全局标识符使用 |
 | `src/env.ts` | `Env` 兼容与宿主封装 | 只经 `--inject` 注入 |
-| `Scripts/*.js` | CDN 运行时脚本 | 除 `Qidian.js` 外不手改；CI 检查 build 漂移 |
+| `Scripts/*.js` | CDN 运行时脚本 | **仅 `Qidian.js` 存在**（手工轨，无 src）；新增脚本须走 src/ 构建并由 CI 检查漂移 |
 | `Scripts/Qidian.js` | 无源码手工轨 | 引擎 marker 内变更须同步 `ENGINE-MANIFEST.json` |
-| `Plugin/*.plugin` | Loon 插件外壳（46 个） | `[Script]`/`[Rewrite]`/`[MitM]` 与参数必须配套 |
+| `Plugin/*.plugin` | Loon 插件外壳（**仅 `qidian.plugin`**） | `[Script]`/`[Rewrite]`/`[MitM]` 与参数必须配套 |
 | `template/loon.tpl` | Loon 模板 | 修改后 regenerate + `check:sync`；`Proxy` 必须直接聚合外部订阅策略组"东京" |
 | `template/snippet/*.tpl` | 分流规则片段 | 归 M1（5 个）或 M4（1 个） |
 | `MODULE-MANIFEST.json` | 资源归类真源 | 改插件/脚本必须同步，否则 `module-manifest` 门禁判红 |
@@ -58,12 +58,12 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 - **域名 REJECT 必须先取证**：京东 `du.jd.com`/`c-nfa.jd.com` 探针实证是**店铺域**（302 → `error2.aspx?from=shopdomain`），误拦直接破店铺页；`jzt.jd.com` 是对外 Jenkins CI。凭域名字义加 REJECT 是本仓已犯过的错 —— 新增前须 DoH + HTTPS 探针。
 - **策略层 REJECT 变体缺口**：`[Rule]` 策略层 107 条**全是裸 REJECT**（`REJECT-IMG`/`-DICT`/`-ARRAY`/`-VIDEO`/`-NO-DROP` 均 0）。Loon 3.1.4+ 会把 REJECT 自动升级为 `REJECT-DROP`（App 疯狂重试致 CPU 发烫），`-NO-DROP` 正是禁用该升级的手段。`[Rewrite]` 动作层无此缺口（`reject-dict` 901 / `reject` 25 / `reject-img` 9）。
 - `Plugin/startup-adblock-pro.plugin` **已冻结**（静态自维护，原每日重建生成器已删）。`BEGIN/END` marker 保留仅为可追溯。
-- **App 归属反查**：回答"某 App 的广告归谁管"用 `APP-INDEX.json`（147 个 App / 46 插件 / 0 假粒度）。**App 名不得从开关 tag 猜** —— tag 写法不统一（`是否开启X净化`/`X净化`/`开屏广告`/`总开关` 四类），启发式会把同一 App 记成两个名字；可靠的自描述是**开关 KEY**（`LUCKINCOFFEE_ENABLE`→瑞幸咖啡）。只能定位到插件级的归属必须标 `rules_basis=plugin-total`，不许假装精确。
+- **App 归属反查**：回答"某 App 的广告归谁管"用 `APP-INDEX.json`（2026-09-29 精简后：1 个 App / 1 个插件 / 0 假粒度）。**App 名不得从开关 tag 猜** —— tag 写法不统一（`是否开启X净化`/`X净化`/`开屏广告`/`总开关` 四类），启发式会把同一 App 记成两个名字；可靠的自描述是**开关 KEY**（`LUCKINCOFFEE_ENABLE`→瑞幸咖啡）。只能定位到插件级的归属必须标 `rules_basis=plugin-total`，不许假装精确。
 - 清理冗余解密面由两条门禁守住：`mitm-orphan`（每个正包含 MitM 域须有规则消费）+ `mitm-coverage`（每条 Rewrite 规则须有解密面）。`pangolin-sdk-toutiao\d*` 曾因通配 host 判为 generic 而恒被报孤儿，已改为显式列两个 host。
 
 ## CI 门禁
 
-- `script-tests.yml`：lint、build、Scripts 漂移、302 用例、构建出处 attestation。
+- `script-tests.yml`：lint、build、Scripts 漂移、107 用例、构建出处 attestation。
 - `config-validate.yml`：MitM、插件结构、参数契约、源码反模式、workflow bash、模板同步、Qidian 哈希、规则冗余、模块清单、接线与银行域名断言；独立 job 重生成 Loon 配置验证幂等。
 - `surgio-build.yml`：模板/构建配置变化后自动生成 PR；发布前检查无凭据且 `[Proxy]` 无静态节点。
 - `upstream-health.yml`：客户端直连依赖（两个 mmdb、CDN 上的 Plugin/Scripts）与 3 个去广告运行时脚本上游的探活。
@@ -79,7 +79,7 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
   - 失去 8 个 iRingo、3 个 DualSubs、4 个 b cookbooks…（详见 git 历史）。均为非去广告或已有替代的功能增强。
   - 失去镜像供应链门禁（sha256 + 投毒/体积 + 漂移/孤儿）。9 个去广告运行时脚本改为**直连上游 raw**，随上游变更即变更。
   - 失去 `check:shadow`（远程列表顺序遮蔽检测）—— 无远程列表后该失效面本身已不存在。
-- [Rule] 486 行；插件总数 46 个插件 = 全部在 `Plugin/`。
+- [Rule] 486 行；1 个插件 = 全部在 `Plugin/`（仅 `qidian.plugin`，2026-09-29 精简）。
 - 依赖仅 3 个 devDependencies（esbuild、eslint、surgio）；`engines.node >= 22`。
 - 仓库不引入 `tsc`：esbuild 只转译，不检查类型。修改 `src/` 必须用行为测试兜底。
 - `Scripts/Qidian.js` 的内嵌加密引擎无法静态审计，只能做来源、marker 与哈希治理。

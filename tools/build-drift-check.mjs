@@ -65,18 +65,29 @@ export function listArtifacts(root) {
 export function rebuild(root) {
   const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
   const build = String(pkg.scripts?.build || "");
+  // 2026-09-29: build 从内联 esbuild 改为 tools/build.mjs 后, 输出目录不再以
+  // `--outdir=Scripts` 出现在 npm script 里, 改由脚本自身推导。新形式通过
+  // `BUILD_OUTDIR` 环境变量注入临时目录 —— 空 src/ 时 build.mjs 直接 exit 0,
+  // 此时 rebuiltDir 为空, compare() 自然判定"无漂移" (Qidian.js 属手工轨已豁免)。
+  const NEWFORM = /tools\/build\.mjs/.test(build);
   const MARK = "--outdir=Scripts";
-  if (!build.includes(MARK)) {
-    throw new Error(`package.json 的 build 脚本不含 ${MARK}, 无法重定向到临时目录`);
+  if (!NEWFORM && !build.includes(MARK)) {
+    throw new Error(
+      `package.json 的 build 脚本既非 tools/build.mjs 形式, 也不含 ${MARK}, 无法重定向到临时目录`
+    );
   }
   const outdir = fs.mkdtempSync(path.join(os.tmpdir(), "build-drift-"));
-  const cmd = build.replaceAll(MARK, `--outdir=${outdir}`);
+  const cmd = NEWFORM ? build : build.replaceAll(MARK, `--outdir=${outdir}`);
   const bin = path.join(root, "node_modules", ".bin");
   execFileSync(cmd, {
     cwd: root,
     shell: "/bin/bash",
     stdio: "pipe",
-    env: { ...process.env, PATH: `${bin}${path.delimiter}${process.env.PATH || ""}` },
+    env: {
+      ...process.env,
+      PATH: `${bin}${path.delimiter}${process.env.PATH || ""}`,
+      ...(NEWFORM ? { BUILD_OUTDIR: outdir } : {}),
+    },
   });
   return outdir;
 }

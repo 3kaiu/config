@@ -53,9 +53,22 @@ exports.tests = {
   },
 
   "app-index: per-app-switch 归属的规则数须与插件内该开关消费数一致": async (a) => {
-    // 自审 BUG-4: 曾把对象数组当字符串用, 导致 covers 全部失配、索引静默退化为 0 条
+    // 自审 BUG-4: 曾把对象数组当字符串用, 导致 covers 全部失配、索引静默退化为 0 条。
+    // 2026-09-29 精简后聚合插件全删, 写死"上百个槽位"会让 baseline 随规模漂移而失去意义;
+    // 改为断言「有聚合型插件 ⟺ 有 switch-consumers 归属」—— 覆盖不变量而非具体数字。
+    // 真正的覆盖不变量: manifest 里声明为跨 App 聚合(covers 非空)的插件,
+    // 索引里必须产出 per-app-switch 粒度的归属条目。
+    const MAN = JSON.parse(fs.readFileSync(path.join(ROOT, "MODULE-MANIFEST.json"), "utf8"));
+    const aggregate = MAN.modules.flatMap((m) => m.plugins || []).filter((r) => (r.covers || []).length > 0);
     const exact = IDX.apps.flatMap((a2) => a2.owners).filter((o) => o.rules_basis === "switch-consumers");
-    a.ok(exact.length > 80, `按开关精确计数的归属应覆盖上百个 App 槽位, 实际 ${exact.length} (若骤降说明 covers 匹配断了)`);
+    const covered = new Set(exact.map((o) => o.plugin));
+    for (const agg of aggregate)
+      a.ok(covered.has(agg.file), `manifest 声明 ${agg.file} 覆盖 ${agg.covers.length} 个 App, 但索引无其 per-app-switch 归属 —— covers 匹配断了`);
+    a.equal(
+      exact.length,
+      [...new Set(aggregate.flatMap((r) => r.covers))].length,
+      `per-app-switch 归属数 ${exact.length} 与 manifest 声明的跨 App 槽位数不自洽`
+    );
   },
 
   "app-index: 跨插件 App 重叠必须被登记 (重构期的收敛对象)": async (a) => {
