@@ -384,6 +384,21 @@ response … enable={CAPTURE_ENABLE}        ← 消费
 - **绝不拦推送通道**：`jpush.cn`/`jpush.io`/`getui.com`/`getui.net`/`gepush.com`/厂商 `xmpush·api-push·upush·config.umeng` 任一被拦即判红 —— 断推送是功能损失不是少条统计。
 - **不拦商店/系统更新域**：`ad.apk.vivo`/`apps.oppomobile`/`pandora.xiaomi` 系被拦即判红 —— 拦了 App 无法更新，属灾难级误伤。
 
+## 附六：国际广告聚合/变现平台（2026-09-29）
+
+**基准来源换了一层**：不再只靠社区规则，而是取广告主 App 的 **AdMob `appads.txt`** —— 由变现平台**自报**的来源域（`applovin` / `vungle` / `chartboost` / `fyber` / `ironsrc` / `mintegral` / `mopub` / `tapjoy` / `unity3d` / `ogury` / `streamkey.tv` …）。这比任何第三方清单都硬：平台自己声明自己是谁。
+
+**只拦子域，不拦平台主域**（逐条有理由，不是保守）：
+| 主域 | 处置 | 理由 |
+|---|---|---|
+| `unity3d.com` | ❌ 排除 | Unity **引擎本体**，整域拦直接破 Unity 游戏运行与资源加载 |
+| `mopub.com` | ❌ 排除 | 已并入 AppLovin（探针 302 → `applovin.com/max`），拦了是重复 |
+| `supersonicads.com` | ❌ 排除 | 实测已死域（CF 解析 0 条），不占资源 |
+| `streamkey.tv` | ❌ 排除 | 直播广告主站且有正常站点内容，非 SDK 出口 |
+| `applovin.com` / `startapp.com` | 只拦 SDK 子域 | 含开发者后台与站点 |
+
+**探针省下 24 条无效规则**：对每个候选子域单独跑 DoH，`sdk.applovin.com` / `init.ironsrc.com` / `mcs.mintegral.com` / `sdk.mbridge.cc` / `api.adcolony.com` / `ads.advangelists.com` 等实测**解析 0 条**。写进配置就是 24 条永不生效的规则 —— 平台子域变更频繁，死子域比预期多。⇒ **子域级拦截必须逐条探针，不能按父域推定**。
+
 **判据沉淀**：给广告平台做去广告时，先问"这层拦截需不需要解密面"——L2 域名 REJECT 一律不需要，**加了 `[MitM]` 就是净损失**。
 **HAR 缺失**不等于**停手理由**——先搜上游/issue/已构建插件，三源交叉验证强度往往高于单份 HAR。
 **功能域白名单的成因会随配置演进而失效**，注释必须随成因更新，否则后人会误判它是空转或误删。**「无治理」在缺少解密面与 HAR 时是正确基线，不是缺口。**

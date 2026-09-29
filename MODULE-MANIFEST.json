@@ -95,6 +95,13 @@
           "layer": "L2",
           "granularity": "global",
           "reason": "3 个域, DNS 阶段 REJECT, 无 [MitM] ⇒ 零证书成本。Sigmob/TradPlus/AnyThink 已部分被主配置 SUFFIX 覆盖, 插件只留未覆盖的 Unity/InMobi/AdView"
+        },
+        {
+          "file": "ad-intl-mediation.plugin",
+          "app": "国际广告聚合/变现平台",
+          "layer": "L2",
+          "granularity": "global",
+          "reason": "21 域, DNS 阶段 REJECT, 无 [MitM] ⇒ 零证书成本。基准取自广告主 App 的 AdMob appads.txt(变现平台自报) + 社区规则交叉; 只拦 SDK/上报子域, 排除 unity3d(引擎本体)/mopub(已并入 AppLovin)/streamkey.tv(站点内容); 24 个子域经 DoH 实测已死或已覆盖故未写入"
         }
       ],
       "scripts": [
@@ -109,7 +116,7 @@
       ],
       "granularity_actual": [],
       "responsibilities": [
-        "广告平台拦截: 6 个独立插件按平台分组 (穿山甲17/广点通8/快手7/百度2/Google1/国际3), 启停插件即按平台开关",
+        "广告平台拦截: 7 个独立插件按平台分组 (穿山甲17/广点通8/快手7/百度2/Google1/国际3/国际变现21), 启停插件即按平台开关",
         "京东: 6 个 functionId 的字段级净化 (Scripts/jingdong.js, L4+L5)",
         "起点: 15 条 [Rewrite] 字段级净化 (qidian.plugin, L4)",
         "主配置 127 条裸 REJECT 硬拦截面 (L2, 全部经 DoH 双解析器 + 协议探针取证)"
