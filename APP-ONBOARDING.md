@@ -214,6 +214,42 @@ response … enable={CAPTURE_ENABLE}        ← 消费
 
 3. **语法门槛落后** —— `#!loon_version = 3.2.4(787)`，17 条 Rewrite + 10 条 Script 全用旧语法。规则条数 > 15，按第 4 节判据**值得迁移**到 3.5.1 新语法（可换条件表达式、JSON 批量数组、jq、正则命名捕获，且不再需要 `\x20` 转义）。
 
+## 附二：全网对标（起点 × app2smile/rules，2026-09-29）
+
+作为「该拿上游做什么」的标准样例 —— 对标对象：[`app2smile/rules/plugin/qidian.plugin`](https://github.com/app2smile/rules)。该插件 12 行 + 147 行 JS，覆盖 7 个处置点。
+
+| 上游处置点 | 上游动作 | 本仓 |
+|---|---|---|
+| `getsplashscreen` | `Data.List=null`、`EnableGDT=0` | ✅ 已覆盖 |
+| `deeplink/geturl` | `Data.ActionUrl=''` | ✅ 已覆盖 |
+| `adv/getadvlistbatch?positions=iOS_tab` | `Data.iOS_tab=[]` | ✅ 已覆盖（本仓整包 Script 净化，更宽） |
+| `dailyrecommend` | `Data.Items=[]` | ✅ 已覆盖 |
+| `bookshelf/getHoverAdv` | `Data.ItemList=[]` | ✅ 已覆盖 |
+| `getconf` | `ActivityPopup=null`、`WolfEye=0`、`TeenShowFreq='0'`、`ActivityIcon` 清零 | ✅ 已覆盖 |
+| `getconf` | `EnableSearchUser='1'`（功能增强） | ❌ 缺 → **本轮已补** |
+
+**本仓覆盖面远超上游**：另有 15 个上游未拦的处置点（`getTopOperation` / `playstrip` / `mainPageDialog` / `reportDialog` / `bookshelfbtn` / `freshmanGuidePopup` / `showChapterEndModule` / `readpage` / `getclassicbookinfo` / `batchget` / `getdot` / `pullOperationPush` / `pullSocialPush` / `iosad` / `popgetdialog`）。
+
+### 对标抓出的真问题：3 处**过度拦截**
+
+上游对以下三处**均未拦**，且上游的 `EnableSearchUser` 意图明确是**增强搜索** —— 而本仓恰好打断了搜索：
+
+| 接口 | 本仓动作 | 后果 |
+|---|---|---|
+| `booksearch/hotWords` | `reject-dict` 整包 | 搜索联想全没 —— 与上游增强搜索的意图**直接冲突** |
+| `user/getaccountpage` | `json-del Data.BenefitButtonList` | 「我的」页福利/会员入口消失 |
+| `message/getpushedmessagelist` | `reject-dict` 整包 | 站内消息看不到 |
+
+**判定依据不是"上游没拦所以该放行"**，而是：官方《Script v2》明确「Response Body Rewrite 命中时，Response Script 不执行」——这三处的最终行为完全由 `[Rewrite]` 决定，与脚本无关，不可兼得。且三者都是**功能**而非广告。上游对 `getconf` 的处理方式是「只删广告字段、不动功能字段」（`ActivityPopup` 删而 `EnableSearchUser` 改），这正是本仓应对齐的处置粒度。
+
+经用户决策，**三处已恢复**（`[Rewrite]` 规则删除 + `[Script]` 大正则分支移除），保留其余 15 个去广告处置。
+
+### 遗留待验证项
+
+`getconf` 三处赋值（`WolfEye=0` / `TeenShowFreq=0` / `EnableSearchUser=1`）本仓写**裸值 Number**，上游脚本写**字符串** `"1"`/`"0"`。官方《Rewrite 新语法》允许 String 与 Number，语法上都合法，但若 App 端按 `=== "1"` 严格比较字符串则 Number 不生效。三条长期在工作 ⇒ 或 App 端容忍 Number，或该字段本就是 Number。**未经真机验证不改类型**，已在插件内登记。
+
+---
+
 ## 本标准已固化的门禁
 
 `APP-ONBOARDING.md` 中可机械判定的部分已落成 `tools/plugin-lint-check.mjs` 的报告项（只报告不判红，因为这类冲突常源于用户的**主动权衡**）：
