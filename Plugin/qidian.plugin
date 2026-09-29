@@ -102,7 +102,6 @@ response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian
 response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/client\/getconf$/ then response.json.delete(["Data.ActivityPageBackPushNoticeFrequency", "Data.ActivityIcon", "Data.ActivityPopup", "Data.LuckBag"])
 # 广告接口: 开屏 / adv / 签到页 / 弹窗
 response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v4\/client\/getsplashscreen\?/ then reject_dict(200)
-response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/adv\// then reject_dict(200)
 response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/checkin\/simpleinfo\?/ then reject_dict(200)
 response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/push\/getdialog\?/ then reject_dict(200)
 # 每日导读: Items 置空数组
@@ -114,6 +113,39 @@ response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian
 response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/bookshelf\/getTopOperation$/ then reject_dict(200)
 response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/followsubscribe\/showChapterEndModule\?/ then reject_dict(200)
 response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/young\/getconf$/ then reject_dict(200)
+
+
+# ── 2026-09-29 三源交叉验证补齐 (app2smile / fmz200 / zqzess) ──
+# 本组 3 条 + qpic 域为本仓此前完全缺失的广告面。三源处置口径一致, **全部字段改值,
+# 无一条整条 reject**: app2smile 对应 ActionUrl='' / iOS_tab=[] / ItemList=[], fmz200
+# 对同接口用 reject-dict/reject-img 等价保守形态。符合 AGENTS.md「既下发业务数据又
+# 下发广告的接口不能整条拒」。
+# 探针取证: 4 个接口均返回 Result:-3 设备信息错误 (路由通, 缺设备头) ⇒ 端点真实存在。
+# v1/adv/ 原为整段 reject_dict(200), 现只清 iOS_tab (app2smile 唯一有取证的口径)。
+# 为何不保留 reject_dict 兜底: reject_dict 把整个响应变 {}, 而 v1/adv/ 是**广告列表接口**
+# 之外的其它子路径共用同一前缀, 整段拒会连带清掉非广告字段 (本仓 functionId=start 白屏同源)。
+# 也**不臆造** Data.adList/Data.ads 之类未经取证的字段名 —— 无 HAR 无上游依据的字段名是猜测。
+# 置空数组用 json.jq 而非 json.replace(…, []) —— 官方《Rewrite 新语法》JSON 段: 值只支持
+# String/Number/Boolean/null/变量, **不含数组**; 传 [] 会被加载期拒绝。
+# 冷启动强制跳转精选页: ActionUrl 置空 (app2smile 口径)
+response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v2\/deeplink\/geturl/ then response.json.replace(["Data.ActionUrl", ""])
+# 发现页「精选/发现」之间的活动 tab: iOS_tab 置空数组
+# v1/adv/ 原为整段 reject_dict(200), 但会连带清掉 getadvlistbatch 的非广告字段;
+# 改为**只清 iOS_tab** (app2smile 口径), 保留接口结构 —— 精度更高且不被前缀遮蔽。
+response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/adv\// then response.json.jq(".Data.iOS_tab = []")
+# 书架右下角悬浮广告: ItemList 置空数组
+response if ${CAPTURE_ENABLE} == true && ${url} ~= /https:\/\/magev6\.if\.qidian\.com\/argus\/api\/v1\/bookshelf\/getHoverAdv/ then response.json.jq(".Data.ItemList = []")
+
+# ── 已撤销: qidian.qpic.cn (2026-09-29 三源研判时的反例记录) ──
+# fmz200 对 qidian.qpic.cn/qidian_common 用 reject-img, 曾照搬为 request 阶段
+# reject_img(200)。撤销理由 (两条独立证据, 非拍脑袋):
+#   ① **跨层矛盾**: 主配置 `DOMAIN-SUFFIX, qpic.cn, DIRECT` 把整域先路由走直连
+#      (该条归在微信白名单组, qpic 是图片 CDN)。request 阶段拦截发生在路由**之后**,
+#      图片已转发 → 规则本就抓不到, 属写上去就空转的规则。
+#   ② **不是广告平台**: qpic.cn 是起点**书封面/内容图床**, /qidian_common 是共用
+#      素材接口。改主配置为 REJECT 会连带拦掉书封面等正常素材, 风险远大于收益。
+# 判据: 上游按**单域**给的动作, 不能脱离本仓分层直接照搬 —— 同一域在不同配置里
+# 可能已承担别的职责。跨层矛盾优先于上游一致性。
 
 [MitM]
 

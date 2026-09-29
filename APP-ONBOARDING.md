@@ -325,6 +325,17 @@ response … enable={CAPTURE_ENABLE}        ← 消费
 
 **修正后的落地方案**（不再是"停手"）：以 `fmz200/wool_scripts/Scripts/jingdong/jingdong.js` 为准建京东插件，解密面只需 `api.m.jd.com`。三条纪律必须遵守：① 一律字段级 `delete`/`filter`，不整条 reject；② 走 `src/*.ts` + esbuild 构建（`Scripts/Qidian.js` 那种手工轨不可复制）；③ 每个 `functionId` 独立取证，不因同域批量照搬。
 
+### 附三·补二：起点三源研判补齐 3 个广告面 + 经典广告平台覆盖（2026-09-29）
+
+**起点**（app2smile × fmz200 × zqzess 交叉）本仓此前缺失、本次补齐：`deeplink/geturl`（冷启动强制跳精选页，`ActionUrl=''`）、`adv/getadvlistbatch?positions=iOS_tab`（发现页活动 tab）、`bookshelf/getHoverAdv`（书架悬浮广告，`ItemList=[]`）。三源处置口径一致，**全部字段改值无一条整条 reject**；探针 4 接口均返 `Result:-3 设备信息错误`（路由通、缺设备头）⇒ 端点真实存在。
+
+**本次三个"没有照抄上游"的判断**（都比照抄更值）：
+1. **不加 `mage.if.qidian.com` 解密面** —— 探针 200 存活、但 fmz200 走 `Atom.axd` 旧路径而 app2smile（更新）只用 `magev6`。两源分歧时取**更新且更保守**的一方；解密面是 CA 信任资产，不为"能拦到"而扩大。
+2. **撤销照搬的 `qidian.qpic.cn` reject-img** —— 主配置已有 `DOMAIN-SUFFIX, qpic.cn, DIRECT`（图片 CDN，归在微信白名单组），request 阶段拦截发生在路由之后 ⇒ 规则本就抓不到；且 qpic 是书封面图床，改 REJECT 会伤正常素材。**上游的单域动作不能脱离本仓分层照搬** —— 同一域在本仓可能已承担别的职责，跨层矛盾优先于上游一致性。
+3. **不臆造字段名** —— 合并 `v1/adv/` 宽规则时曾顺手写 `Data.adList`/`Data.ads`，无 HAR 无上游依据，属猜测，已撤。宁可少清一个字段，不留猜出来的名字。
+
+**经典广告平台**（候选 24 缺口域 → 实加 7 条）：探针后**明确排除 7 个平台主域**（`kuaishou`/`snssdk`/`e.qq`/`gdt.qq`/`union.baidu`/`miui`/`ads.union.jd`）—— 整域拦会破 App 功能，只拦已取证的广告子域；另 7 个已死域（CF 解析 0 条）不占资源不拦。只加 3 条纯广告联盟 SDK（`tradplusad`/`anythinktech`/`gromore`）+ 4 条广告 API（`ad.qq`/`cpro`/`pos`/`cpu-openapi`）。全部走 DNS 阶段 REJECT，**零证书成本**。
+
 **判据沉淀**：HAR 缺失**不等于**停手理由——先搜上游/issue/已构建插件，三源交叉验证强度往往高于单份 HAR。
 **功能域白名单的成因会随配置演进而失效**，注释必须随成因更新，否则后人会误判它是空转或误删。**「无治理」在缺少解密面与 HAR 时是正确基线，不是缺口。**
 

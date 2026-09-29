@@ -81,7 +81,7 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
   - **长尾广告域不再被 REJECT，一律走 `Final`**：原 12 万条通用广告域名表 + 7 个镜像规则列表已移除。
   - 失去镜像供应链门禁（sha256 + 投毒/体积 + 漂移/孤儿）。
   - 失去 `check:shadow`（远程列表顺序遮蔽检测）—— 无远程列表后该失效面本身已不存在。
-- [Rule] 483 行（其中 120 条裸 REJECT；行数与 REJECT 计数由 tools/doc-claims-check.mjs 实测）；2 个插件 = 全部在 `Plugin/`（`qidian.plugin` 起点 M7 / `jd.plugin` 京东 M2）。
+- [Rule] 490 行（其中 127 条裸 REJECT；行数与 REJECT 计数由 tools/doc-claims-check.mjs 实测）；2 个插件 = 全部在 `Plugin/`（`qidian.plugin` 起点 M7 / `jd.plugin` 京东 M2）。
 - 依赖仅 3 个 devDependencies（esbuild、eslint、surgio）；`engines.node >= 22`。
 - 仓库不引入 `tsc`：esbuild 只转译，不检查类型。修改 `src/` 必须用行为测试兜底。
 - `Scripts/Qidian.js` 的内嵌加密引擎无法静态审计，只能做来源、marker 与哈希治理。

@@ -27,7 +27,7 @@
           "plugin": "qidian.plugin",
           "module": "M7",
           "script": "Qidian.js",
-          "rules": 19,
+          "rules": 21,
           "rules_basis": "plugin-total",
           "granularity": "single-app",
           "covers": null
@@ -51,7 +51,7 @@
       "file": "Plugin/qidian.plugin",
       "module": "M7",
       "switches": 8,
-      "rules": 19,
+      "rules": 21,
       "scripts": [
         "Qidian.js"
       ],
@@ -59,7 +59,7 @@
       "switch_usage": [
         {
           "switch": "CAPTURE_ENABLE",
-          "rules": 14,
+          "rules": 16,
           "tag": "是否开启抓取重写"
         },
         {

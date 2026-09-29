@@ -638,6 +638,29 @@ DOMAIN-SUFFIX, ggpht.com, Proxy
 DOMAIN-SUFFIX, withgoogle.com, Proxy
 DOMAIN, g.co, Proxy
 
+# ── 经典广告联盟平台覆盖 (2026-09-29 三源全网研判) ──────────────────
+# 候选 24 个缺口域, 经 DoH(Cloudflare) + HTTPS 探针 + 跨层核对后**只加 6 条**。
+# 筛选判据 (逐条实证, 非按平台名批量照搬):
+#   ① 已死域 (CF 解析 0 条) 不加 —— 不占资源, 拦了也无意义:
+#      anythinktech / bytegoofy / bytescm / ggzqt / pangolin-sdk-toutiao-b /
+#      pangolin-sdk-toutiao1 / pglstatp-toutiao
+#   ② **平台主域含 App 功能, 整域拦会破功能** —— 明确排除:
+#      kuaishou.com(短视频本体) / union.baidu.com(百度广告主站, 含落地页)
+#      miui.com(小米系统) / ads.union.jd.com(京东联盟主站)
+#      snssdk.com(字节内容分发) / e.qq.com(企微/公众号) / gdt.qq.com(广点通落地页)
+#      这类只能拦**已取证的广告子域**, 已在下方各自登记。
+#   ③ 纯广告 SDK / 投放 API, 无功能页 ⇒ 整域拦安全:
+DOMAIN-SUFFIX, tradplusad.com, REJECT
+DOMAIN-SUFFIX, anythinktech.com, REJECT
+DOMAIN-SUFFIX, gromore.com, REJECT
+DOMAIN, ad.qq.com, REJECT
+DOMAIN, cpro.baidu.com, REJECT
+DOMAIN, pos.baidu.com, REJECT
+DOMAIN, cpu-openapi.baidu.com, REJECT
+#   探针留证: tradplusad 200 / ad.qq.com 200 / cpro 200 / pos 200 / cpu-openapi 404
+#   (404 = 服务端在, 非死域; gromore/anythinktech 裸域无 A 记录但子域有, 故用 SUFFIX)
+# ⚠️ 本组**不进 [MitM]** —— 域名 REJECT 在 DNS 阶段完成, 拦广告零证书成本。
+
 # 穿山甲统计/请求/聚合接口 (2026-08-12 HAR 审计第二轮)
 # 起点秒播脚本 (Scripts/Qidian.js) 仅依赖 gdtimg.com/gtimg.cn 视频域, 不依赖穿山甲,
 # 故 api-access/log-api/gromore 三个接口域可安全拦截 (必须先于下方 SUFFIX DIRECT)

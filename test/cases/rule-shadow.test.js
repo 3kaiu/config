@@ -91,11 +91,16 @@ exports.tests = {
   // 故与纯广告域分开登记, 便于将来若需放开时精准摘除。
   const EVIDENCED = {
     "广告/联盟": [
-      "1rtb.net", "66mobi.com", "adkwai.com", "beizi.biz", "cloooud.com",
-      "doubleclick.net", "gd-stats.jpush.cn", "gdfp.gifshow.com",
+      // 2026-09-29 三源研判新增 3 条纯广告联盟 SDK (无功能页, SUFFIX 拦安全):
+      //   tradplusad / anythinktech / gromore —— 探针 tradplusad 200, 后两者裸域无 A
+      //   记录但子域有(故用 SUFFIX); 三者与任何 DIRECT/Proxy 零重叠。
+      //   明确排除的平台主域(整域拦会破 App)不登记在此: kuaishou / snssdk /
+      //   e.qq / gdt.qq / union.baidu / miui / ads.union.jd。
+      "1rtb.net", "66mobi.com", "adkwai.com", "anythinktech.com", "beizi.biz", "cloooud.com",
+      "doubleclick.net", "gd-stats.jpush.cn", "gdfp.gifshow.com", "gromore.com",
       "googlesyndication.com", "googletagmanager.com", "googletagservices.com", "hubcloud.com.cn",
       "imtmp.net", "mmstat.com", "pangle.io", "pangolin-sdk-toutiao.com", "sigmob.cn",
-      "stats.jpush.cn", "ugdtimg.com",
+      "stats.jpush.cn", "tradplusad.com", "ugdtimg.com",
     ],
     "分析/归因 SDK": [
       "adjust.com", "amplitude.com", "analytics.google.com", "app-measurement.com", "appsflyer.com",
