@@ -91,11 +91,12 @@ Loon 官方文档分 12 个域（交互UI / 节点订阅 / 规则系统 / 策略
 
 ## 能力缺口台账
 
+**已关闭（G1，2026-09-29 按文档定论）**：策略层 REJECT 官方共 **5 种**（REJECT / -IMG / -DICT / -ARRAY / -DROP），本配置 120 条全为裸 REJECT——**这不是缺口**。三个变体描述的都是 HTTP 响应内容（官方《策略》：1×1 GIF / `{}` / `[]`），只有拒绝发生在请求转发阶段、客户端真收到 HTTP 响应时才有意义；而本配置 `domain-reject-mode = DNS`（官方《通用配置》），域名拒绝在 DNS 阶段用 `LOOPBACKIP` 完成，请求到不了 HTTP 响应层。叠加官方《HTTP 规则》"HTTP 规则仅匹配 HTTP 和 HTTPS 请求"——而本配置 483 条规则中 `URL-REGEX`/`USER-AGENT` 合计 **0 条**，变体唯一适用场景不存在。原台账把"未使用的功能"误记为"未做好的功能"，已关闭。重新引入的触发条件：改 `domain-reject-mode = Request`，或引入 `URL-REGEX`/`USER-AGENT` 做 HTTP 级拦截。
+
 注：策略层 REJECT 官方共 **5 种**（REJECT / -IMG / -DICT / -ARRAY / -DROP）。`REJECT-VIDEO` 与 `REJECT-NO-DROP` 在官方《策略》文档中不存在；「REJECT 会被自动升级为 REJECT-DROP」亦无官方出处（文档只说 REJECT 返回 404 空体、REJECT-DROP 才丢包，并提示重试风暴时慎用）。
 
 | # | Loon 能力 | 本仓用量 | 影响 | 归属 |
 |---|---|---|---|---|
-| G1 | `[Rule]` 策略层 REJECT 变体（官方共 5 种） | **120 条全是裸 REJECT**（`-IMG`/`-DICT`/`-ARRAY`/`-DROP` 均 0） | 策略层全部退化为 404，部分 App 会因非预期状态码而重试 | M2 |
 | G2 | `NOT` 逻辑规则 | 0 | 无法表达「排除某类的兜底」 | M2 |
 | G3 | `SRC-PORT` 规则 | 0 | 未使用（主配置 DEST-PORT 2 条） | M1 |
 | G4 | `load-balance`（PCC / Round-Robin / Random） | 0 | 单订阅组下收益低，暂不引入 | M1 |
@@ -104,6 +105,8 @@ Loon 官方文档分 12 个域（交互UI / 节点订阅 / 规则系统 / 策略
 | G7 | `disable-udp-ports` | 0（**主动不启用**） | 该参数自 Loon 3.1.7 起已被 `DEST-PORT`/`PROTOCOL`/逻辑规则取代；本仓的等价能力由 `PROTOCOL, STUN, REJECT` + `DEST-PORT, 3478` 承担 | M1 |
 
 **已解决**：`PROTOCOL, STUN, REJECT` 取代 `DOMAIN-KEYWORD, stun, REJECT`。关键词规则只能匹配含 "stun" 的域名，裸 IP STUN 逃逸面够不着；协议规则无此缺口，且官方《规则系统 3.1》第 1 条保证域名规则先命中，5 条通话白名单不受影响。需 Loon ≥ 3.1.7。
+
+**已定论**（G16，经四条路径实测）：`GEOIP, CN, DIRECT` 维持不动。根因是官方《规则系统 3.1》第 2 条——域名规则未命中时再解析 DNS 并匹配 IP 规则，故任何需解析的 IP 兜底规则都会让长尾域产生本地解析。三条"零泄漏"替代路径全部实测否决：删 GEOIP 走纯域名规则 → 国内站走代理 4/4 超时；GEOIP 加 `no-resolve` → 域名类请求全部跳过 GEOIP 一律走代理，等同前者且更彻底；本地解析改走境外 DoH → 国内站解析到海外节点，直连 2/2 超时。第四条"恢复 CN 域名远程列表"隐私收益递减（长尾域仍解析），却需引入 Loon 无内建防护的依赖（官方未提供远程规则 hash/签名/版本锁定），否决。结论：泄漏面只是"解析器知道查过哪些域"，不改变流量走向；而三条零泄漏路全部实测损害可用性。
 
 **已解决**（域名存活性）：全量 121 条 REJECT 经 DoH 多解析器交叉审计，修正 1 处主机名错配（`alisc1.zijieapi.com` NXDOMAIN → 真实 host `tnc3-alisc1.zijieapi.com` 存活，规则从未生效）、删除 1 条错误补录（`qreport.cn` 系已全下线）。新增 `dns-liveness` 门禁守住此类静默失效——**语法合法的规则写错主机名，现有门禁一条都抓不到**。判据须落到子域（`imtmp.net` 裸域 NXDOMAIN 但 7 个子域存活，删掉即误伤），并区分「域名已注销」与「NS 活跃仅业务下线」。
 

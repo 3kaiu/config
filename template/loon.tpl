@@ -54,6 +54,20 @@ allow-wifi-access = false
 wifi-access-http-port = 7222
 wifi-access-socks5-port = 6225
 test-timeout = 5
+# ⚠️ 为什么 [Rule] 段的 REJECT 全是裸 REJECT, 不用 REJECT-IMG/-DICT/-ARRAY
+#   (2026-09-29 按官方文档定论, 非"待优化"):
+#   ① 这三个变体描述的都是 **HTTP 响应内容**(官方《策略》): -IMG=200+1x1 GIF,
+#      -DICT=200+空 JSON 对象, -ARRAY=200+空 JSON 数组。只有当拒绝发生在**请求转发
+#      阶段**、客户端真的收到一个 HTTP 响应时, 它们才有意义。
+#   ② 本配置 domain-reject-mode = DNS(官方《通用配置》): 域名拒绝在 **DNS 阶段**
+#      用 LOOPBACKIP 回环地址完成, 请求根本到不了 HTTP 响应层。
+#   ③ 官方《HTTP 规则》明言"HTTP 规则仅匹配 HTTP 和 HTTPS 请求", 而本配置 483 条
+#      规则中 URL-REGEX / USER-AGENT 合计 **0 条** —— 变体唯一的适用场景不存在。
+#   ⇒ 结论: 裸 REJECT 在本配置下**行为等价**, 不是缺口。把变体当"待优化项"登记
+#      是对台账的误读 —— 它把"未使用的功能"误记为"未做好的功能"。
+#   ⇒ 何时才需要变体: ①domain-reject-mode 改为 Request ②或引入 URL-REGEX/USER-AGENT
+#      做 HTTP 级拦截(如仅拦某路径而非整个域)。两者当前都不成立。
+#
 # 探活一主一备: internet-test-url (直连可用性) 与 proxy-test-url (代理链路可用性)
 # 必须用**不同**上游 —— 同端点故障会同时误判"本机断网 + 代理失效", 排障无法区分。
 # 策略组未显式 url= 时继承 proxy-test-url。
