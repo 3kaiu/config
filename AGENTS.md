@@ -7,7 +7,7 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 ## 命令
 
 - `npm run build`：注入 `src/env.ts` 与 `src/lib/*.ts`，把 `src/*.ts` 压缩到 `Scripts/`。改源码后必须执行。
-- `npm test`：116 个行为级用例，引用全部 1 个 Scripts 产物（`Qidian.js` 手工轨）；随后执行规则顺序与接线检查。关键文档数字由 `tools/doc-claims-check.mjs` 对照实测。
+- `npm test`：117 个行为级用例，引用全部 1 个 Scripts 产物（`Qidian.js` 手工轨）；随后执行规则顺序与接线检查。关键文档数字由 `tools/doc-claims-check.mjs` 对照实测。
 - `npm run lint`：ESLint flat config，检查 `Scripts/`、`test/`、`tools/`。
 - `npm run generate`：Surgio 3.19 从纯静态模板生成 `Profile/Loon.lcf`。该命令会创建空 `dist/`，`.gitignore` 中对应规则必须保留。
 - `npm run check:all`：串行执行 sync、rewrite、src、orphan、plugin、contract、workflows、scripts、index 门禁；不包含 build、test、lint、generate。`scripts` 把 build 命令重定向到**临时目录**重建后与 `Scripts/` 逐字节比对 —— 补的是本地盲区：手改产物或改了 src 没 build 时，其余门禁会全绿。
@@ -64,7 +64,7 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 
 ## CI 门禁
 
-- `script-tests.yml`：lint、build、Scripts 漂移、116 用例、构建出处 attestation。
+- `script-tests.yml`：lint、build、Scripts 漂移、117 用例、构建出处 attestation。
 - `config-validate.yml`：MitM、插件结构、参数契约、源码反模式、workflow bash、模板同步、Qidian 哈希、规则冗余、模块清单、接线与银行域名断言；独立 job 重生成 Loon 配置验证幂等。
 - `surgio-build.yml`：模板/构建配置变化后自动生成 PR；发布前检查无凭据且 `[Proxy]` 无静态节点。
 - `upstream-health.yml`：客户端直连的 GeoIP mmdb + 自建 CDN（Plugin/Scripts）可用性。探活目标由 `upstream-coverage` 门禁双向锁死（漏探活与探死资源都判红）。

@@ -49,15 +49,27 @@ function registeredHosts() {
   return out;
 }
 
+/**
+ * 返回三态: "exists" / "gone" / null(不可达)。
+ *
+ * ⚠️ 踩坑记录: 首版只判"有 A 记录", 于是把 NOERROR 但无 A 的域全判成死亡 ——
+ * `apns.apple.com`(Apple 推送核心) 与 `stun.playstation.net` 双双误报。二者 rcode 均为
+ * NOERROR(域确实存在), 只是自身不带 A 记录: apns 处于 CNAME 链末端
+ * (push.apple.com → apns.apple.com), 记录在上一跳。
+ * 三态判定才能区分"域不存在(NXDOMAIN)"与"域存在但无自身记录(NOERROR)"。
+ */
 function digStatus(name, resolver, type = "A") {
   try {
     const out = execFileSync(
       "dig",
-      ["+short", "+time=3", "+tries=1", `@${resolver}`, name, type],
+      ["+time=3", "+tries=1", `@${resolver}`, name, type],
       { encoding: "utf8", timeout: 8000, stdio: ["ignore", "pipe", "ignore"] }
     );
-    const ans = out.split("\n").map((s) => s.trim()).filter((s) => s && !s.startsWith(";") && s !== ".");
-    return { reachable: ans.length > 0 };
+    const m = out.match(/status:\s*([A-Z]+)/);
+    if (!m) return null;
+    if (m[1] === "NXDOMAIN") return "gone";
+    if (m[1] !== "NOERROR") return null; // SERVFAIL/REFUSED 等 → 不可达, 不得判死
+    return "exists";
   } catch {
     return null; // 解析器不可达 —— 不得据此判死
   }
@@ -78,15 +90,14 @@ function digStatus(name, resolver, type = "A") {
 function nsAlive(base) {
   for (const r of RESOLVERS) {
     const st = digStatus(base, r, "NS");
-    if (st === null) continue;
-    if (st.reachable) return true;
+    if (st === "exists") return true;
   }
   return false;
 }
 
 /** 探针自检: 已知一定存活的域必须解析成功, 否则本次探测不可信 */
 function probeSelfCheck() {
-  return digStatus("www.apple.com", "1.1.1.1")?.reachable === true;
+  return digStatus("www.apple.com", "1.1.1.1") === "exists";
 }
 
 function rejSuffixes() {
@@ -111,6 +122,44 @@ exports.tests = {
     a.ok(true, "探针自检通过 (www.apple.com 解析成功)");
   },
 
+  // real-ip 与 REJECT 是同类风险的另一面: 写错/已注销的条目静默失效。
+  // 判据更保守 —— 追加"裸域之外探常见子域", 因为 real-ip 几乎全用 *. 通配, 真实
+  // 主机是子域(银行/系统服务域的裸域本就没有 A 记录)。仅当裸域与子域**全部**无解、
+  // 且 NS 亦无(域名已注销)时才判红。
+  "dns-live: real-ip 条目不得是域名已注销的残留": async (a) => {
+    if (!probeSelfCheck()) {
+      a.ok(true, "跳过: 公共 DNS 不可达");
+      return;
+    }
+    const txt = fs.readFileSync(TPL, "utf8");
+    const sec = (txt.match(/^real-ip\s*=\s*(.*)$/m) || [])[1] || "";
+    const entries = sec.split(",").map((s) => s.trim()).filter(Boolean);
+    const dead = [];
+    for (const e of entries) {
+      // 通配与本地域跳过(其语义不由公网 DNS 判定)
+      if (!/^[\w.-]+\.[a-z]{2,}$/i.test(e.replace(/^\*\./, ""))) continue;
+      if (/^(local|lan|home\.arpa)$/i.test(e.replace(/^\*\./, ""))) continue;
+      const base = e.replace(/^\*\./, "");
+      const names = [base, ...SUBDOMAINS.map((s) => `${s}.${base}`)];
+      let anyAlive = false;
+      for (const n of names) {
+        for (const r of RESOLVERS) {
+          if (digStatus(n, r) === "exists") { anyAlive = true; break; }
+        }
+        if (anyAlive) break;
+      }
+      if (anyAlive) continue;
+      if (nsAlive(base)) continue; // NS 活跃 = 业务下线, 可能恢复
+      dead.push(e);
+    }
+    a.equal(
+      dead.length,
+      0,
+      `${dead.length} 条 real-ip 条目域名已注销(裸域、子域、NS 全部无解) —— 静默失效, 白占一条:\n` +
+        `  ${dead.join("\n  ")}`
+    );
+  },
+
   "dns-live: REJECT 后缀不得是全解析器一致 NXDOMAIN 的死亡域": async (a) => {
     if (!probeSelfCheck()) {
       a.ok(true, "跳过: 公共 DNS 不可达");
@@ -129,7 +178,7 @@ exports.tests = {
         for (const r of RESOLVERS) {
           const st = digStatus(n, r);
           if (st === null) continue; // 该解析器不可达
-          if (st.reachable) { anyAlive = true; allDead = false; break; }
+          if (st === "exists") { anyAlive = true; allDead = false; break; }
         }
         if (anyAlive) break;
       }

@@ -63,7 +63,12 @@ skip-proxy = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/
 # IPv6 局域网段为前向冗余: 当前 ip-mode = ipv4-only 用不到, 但一旦切到 dual,
 # 缺了它们会让 mDNS(ff02::/16)/ULA/链路本地流量被卷进隧道 —— 组播与 ULA 走隧道必坏。
 bypass-tun = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32, ::1/128, fc00::/7, fe80::/10, ff00::/8
-real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.boc.cn, *.abchina.com, *.ccb.com, *.psbc.com, *.cmbchina.com, *.icbc.com.cn, *.bankofchina.com, *.spdb.com.cn, *.cib.com.cn, *.cebbank.com, *.unionpay.com, *.pingan.com.cn, *.pingan.com, *.bankcomm.com, *.citicbank.com, *.hxb.com.cn, *.cgbchina.com.cn, *.push.apple.com, *.apns.apple.com, captive.apple.com, *.local, *.lan, *.home.arpa, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, *.msftconnecttest.com, *.msftncsi.com, *.battlenet.com.cn, time.*.com
+real-ip = *.cmpassport.com, *.jegotrip.com.cn, id6.me, *.boc.cn, *.abchina.com, *.ccb.com, *.psbc.com, *.cmbchina.com, *.icbc.com.cn, *.bankofchina.com, *.spdb.com.cn, *.cib.com.cn, *.cebbank.com, *.unionpay.com, *.pingan.com.cn, *.pingan.com, *.bankcomm.com, *.citicbank.com, *.hxb.com.cn, *.cgbchina.com.cn, *.push.apple.com, *.apns.apple.com, captive.apple.com, *.local, *.lan, *.home.arpa, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, *.msftconnecttest.com, *.msftncsi.com, *.battlenet.com.cn, time.*.com
+# real-ip 条目已按 DNS 存活性核验(2026-09-29): 已删 *.icitymobile.mobi(四解析器
+# NXDOMAIN 且无 NS, 域名已注销)。保留但公网无解的 *.srv.nintendo.net 属**不确定项** ——
+# 任天堂 SWIFT/NSO 主机在部分网络走内网 DNS, 公网查不到不代表设备上无效, 不擅自删。
+# 判据同 dns-liveness 门禁: 裸域无解**不等于**死规则(real-ip 用 *. 通配, 真实主机是子域),
+# 须多解析器交叉且 NS 亦无才判死。
 
 [Host]
 # 本段为空 (2026-09-29 对抗审计)。原 17 条 `server:` 映射是**净亏损**，已全删:
