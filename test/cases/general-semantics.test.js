@@ -11,9 +11,13 @@
  *      wiki.repcz.link 转载同样写作 Performace —— 不得"纠正"拼写, 否则识别失败。
  *   3. 断网判定链: internet-test-url 必须不在 real-ip 排除名单内 (real-ip 域名
  *      绕过 Fake IP, 若探活域在其中则 TUN 下探活可能失真)。
- *   4. hijack-dns 的 `*:0` + IP 列表为官方语义 ("所有目标和端口" + 指定 IP 的
- *      所有查询), 上游 DNS 全部走加密通道时, 被劫持的明文查询回落明文 DNS 无收益
- *      但也无害 (官方 DNS 页: 加密优先)。
+ *   4. hijack-dns 官方语义 = "劫持指定目标的 UDP DNS 查询, 并**返回 Fake IP**"
+ *      (General 页原文), 官方示例给的三种形态为 `*:53` / `*:0` / `8.8.8.8`。
+ *      由此推出的形态判据 (2026-09-29 修正上一轮的反向推理):
+ *      被劫持的查询由 Loon 应答 Fake IP, 应用**不再联系那个解析器**。故
+ *      列举式 ("只劫持几个公开 IP") 是**反效果** —— 未列举的解析器明文 UDP 直出,
+ *      既绕过 domain-reject-mode = DNS 的拒绝面, 又吃污染风险; 而 `*:0`
+ *      虽方向对却过宽 (劫持所有端口, 含非 53 流量)。正解是官方首例 `*:53`。
  *   5. Loon 节点由外部订阅提供，订阅策略组“东京”必须由 Proxy 组直接聚合。
  */
 "use strict";
@@ -48,6 +52,71 @@ exports.tests = {
       `ip-mode=${v} 不在官方枚举 (ipv4-only/dual/ipv4-preferred/ipv6-preferred); fake-ip 是 Fake IP 体系的概念, 不是 IP 模式取值`
     );
   },
+  // 2026-09-29 对抗审计新增: ip-mode 与 ipv6-vif 的**一致性**。
+  // 两者单独看都合法, 并置才出问题: ip-mode = dual 会把 AAAA 结果交给 App, 而
+  // ipv6-vif = off 不接管 TUN 的 IPv6 转发 —— 官方未说明"不处理"是丢包还是绕过,
+  // 但两种解释都不可接受 (丢包=连不通, 绕过=泄漏)。
+  // 判据: 一切「会把 IPv6 地址交给 App」的 ip-mode, 必须配一个接管 IPv6 的 ipv6-vif。
+  "[General] ip-mode 与 ipv6-vif 必须自洽 (否则 IPv6 要么泄漏要么连不通)": async (a) => {
+    const ipMode = value("ip-mode");
+    const v6vif = value("ipv6-vif");
+    a.ok(v6vif, "模板应有 ipv6-vif 行");
+    a.ok(
+      ["off", "auto", "always"].includes(v6vif),
+      `ipv6-vif=${v6vif} 不在官方枚举 (off/auto/always)`
+    );
+    const handsOutIPv6 = ipMode !== "ipv4-only";
+    const takesOverIPv6 = v6vif !== "off";
+    if (handsOutIPv6 && !takesOverIPv6) {
+      a.ok(
+        false,
+        `ip-mode=${ipMode} 会把 AAAA 结果交给 App, 但 ipv6-vif=${v6vif} 不接管 TUN 的 IPv6 —— ` +
+          `IPv6 或被丢包(App 连不通) 或绕过隧道(静默泄漏)。二者须同向: ` +
+          `要么 ip-mode=ipv4-only, 要么 ipv6-vif=auto/always`
+      );
+    }
+    a.ok(true, `ip-mode=${ipMode} / ipv6-vif=${v6vif} 自洽`);
+  },
+
+  // 前向保障: 启用 IPv6 后, 局域网 IPv6 段必须在 bypass-tun/skip-proxy 里,
+  // 否则 mDNS(ff02::/16) / ULA / 链路本地流量会被卷进隧道, 必坏。
+  "[General] bypass-tun / skip-proxy 须含 IPv6 局域网段 (为 dual 预留)": async (a) => {
+    const need = { "::1/128": "回环", "fc00::/7": "ULA 私有", "fe80::/10": "链路本地", "ff00::/8": "组播/mDNS" };
+    for (const key of ["bypass-tun", "skip-proxy"]) {
+      const v = value(key) || "";
+      const missing = Object.keys(need).filter((seg) => !v.includes(seg));
+      a.equal(
+        missing.join(","),
+        "",
+        `[General] ${key} 缺 IPv6 局域网段: ${missing.map((m) => `${m}(${need[m]})`).join(", ")} —— ` +
+          `一旦 ip-mode 切到 dual, 这些流量会被卷入隧道`
+      );
+    }
+  },
+
+  // 2026-09-29 对抗审计: 探活端点必须**一主一备**。
+  // 配置注释自称"internet 与 proxy 用不同上游", 但 4 个策略组都写死了
+  // url=cp.cloudflare.com, 而 cp.cloudflare.com 恰是 internet-test-url 的端点 ——
+  // 于是全部探活压在同一下游上。该端点故障时"本机断网"与"代理链失效"同时报红,
+  // 恰好是这条注释要避免的情形。
+  "[General] 探活端点须一主一备 (组 url= 不得与 internet-test-url 同源)": async (a) => {
+    const tpl = fs.readFileSync(TPL, "utf8");
+    const internet = value("internet-test-url") || "";
+    const internetHost = new URL(internet).hostname;
+    const groupUrls = [...tpl.matchAll(/^\s*\w+\s*=\s*url-test[^\n]*?url=(\S+)/gm)].map((m) => m[1]);
+    const same = groupUrls.filter((u) => new URL(u).hostname === internetHost);
+    a.equal(
+      same.length,
+      0,
+      `${same.length} 个 url-test 组把测速端点设为 ${internetHost}, 与 internet-test-url 同源 —— ` +
+        `该端点故障时无法区分"本机断网"与"代理链失效"。组应改用 proxy-test-url 的端点`
+    );
+    a.ok(
+      new URL(value("proxy-test-url") || "").hostname !== internetHost,
+      "proxy-test-url 与 internet-test-url 指向同一端点, 一主一备失效"
+    );
+  },
+
   "[General] interface-mode = Performace 为官方原样拼写, 不得改写": async (a) => {
     const v = value("interface-mode");
     a.ok(v, "模板应有 interface-mode 行");
@@ -63,6 +132,32 @@ exports.tests = {
     });
     a.equal(hit, undefined, `internet-test-url (${host}) 命中 real-ip 排除项 ${hit}, TUN 下探活可能失真`);
   },
+  "[General] hijack-dns 必须是 *:53 全端口 53 形态 (列举式是反效果)": async (a) => {
+    const v = value("hijack-dns");
+    a.ok(v, "模板应有 hijack-dns 行");
+    a.equal(
+      v,
+      "*:53",
+      `hijack-dns=${v}。官方语义是"劫持 UDP DNS 并返回 Fake IP"(应用不再联系原解析器), ` +
+        `故列举式会让未列举的解析器明文 UDP 直出 (绕过 domain-reject-mode=DNS 且吃污染), ` +
+        `*:0 又过宽 (劫持所有端口); 官方首例 *:53 才是正解。需 Loon >= 3.2.5(789)`
+    );
+  },
+  // 2026-09-29 对抗审计新增: UDP 回落不得为 DIRECT。
+  // 官方: udp-fallback-mode 是"节点不支持 UDP 或未启用 UDP 转发时使用的策略"。
+  // 取 DIRECT 则节点一旦无 UDP, 全部 UDP(QUIC/游戏/通话)从本机真实 IP 直连漏出 ——
+  // 与本配置已用 PROTOCOL,STUN,REJECT 封 STUN 的 posture 自相矛盾。
+  // REJECT = 失败可见: 节点开了 udp=true 时本键永不触发, 零影响。
+  "[General] udp-fallback-mode 须为 REJECT (DIRECT 会让 UDP 从真实 IP 漏出)": async (a) => {
+    const v = value("udp-fallback-mode");
+    a.equal(
+      v,
+      "REJECT",
+      `udp-fallback-mode=${v} —— 节点无 UDP 时 ${v === "DIRECT" ? "全部 UDP 从本机真实 IP 直连漏出" : "回落行为不符合预期"}。` +
+        `应取 REJECT: 失败可见而非静默泄露。前置条件: 东京组节点需启用 UDP`
+    );
+  },
+
   "[General] dns-reject-mode / domain-reject-mode / udp-fallback-mode 取值在官方枚举内": async (a) => {
     a.ok(["LOOPBACKIP", "NOANSWER", "NXDOMAIN"].includes(value("dns-reject-mode")), "dns-reject-mode 官方枚举");
     a.ok(["DNS", "Request"].includes(value("domain-reject-mode")), "domain-reject-mode 官方枚举");

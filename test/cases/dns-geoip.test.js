@@ -146,9 +146,22 @@ exports.tests = {
     );
   },
 
+  // 2026-09-29: hijack-dns 改为 *:53 后, 本用例的"列举式比对"变得**恒真** ——
+  // 那是"看起来有门禁其实没有"的典型形态, 不能就这么留着。改为显式分流:
+  //   · 列举式形态 → 保留原重叠检查 (自噬防护有意义)
+  //   · *:53 形态  → 重叠检查不适用 (全端口 53 语义下与具体 IP 无可比项),
+  //     改断言"未混入列举项", 真正的形态语义由 general-semantics 的
+  //     "hijack-dns 必须是 *:53" 用例承担。
   "dns-geoip: dns-server 不被自身 hijack (防加密链自噬)": async (a) => {
     const servers = (generalValue("dns-server") || "").split(",").map((x) => x.trim()).filter(Boolean);
     const hijack = (generalValue("hijack-dns") || "").split(",").map((x) => x.trim()).filter(Boolean);
+    if (hijack.length === 1 && /^\*:(\d+)$/.test(hijack[0])) {
+      a.ok(
+        hijack[0] === "*:53",
+        `hijack-dns=${hijack[0]} 为全端口形态, 官方示例只给 *:53 (劫持所有端口会误伤非 DNS 流量)`
+      );
+      return;
+    }
     const overlap = servers.filter((s) => hijack.includes(s));
     a.equal(
       overlap.join(","),
@@ -157,7 +170,12 @@ exports.tests = {
     );
   },
 
-  "dns-geoip: [Host] 零值条目与 HTTPDNS 拦截一致": async (a) => {
+  // 2026-09-29 反转为"零值条目须为空"。
+  // 原断言要求恰好 6 条 httpdns 零值映射, 但它们已被 [Rule] 的
+  // `DOMAIN-KEYWORD, httpdns, REJECT` 完全覆盖 (超集 + 同为 DNS 层处置), 属冗余。
+  // 判据之所以反转而非删除: 零值映射 (`域 = 0.0.0.0`) 会**静默吞掉真实解析** ——
+  // 一旦有人为省事再加一条, 没有任何门禁会报警。空集合是唯一安全终态。
+  "dns-geoip: [Host] 不得有零值条目 (会静默吞掉真实解析)": async (a) => {
     const h = TPL_TEXT.match(/^\[Host\]\n([\s\S]*?)(?=^\[[A-Za-z ]+\]$)/m);
     a.ok(h, "应有 [Host] 段");
     const zero = [];
@@ -167,7 +185,17 @@ exports.tests = {
       const rhs = s.split("=").slice(1).join("=").trim();
       if (rhs === "0.0.0.0") zero.push(s.split("=")[0].trim());
     }
-    a.equal(zero.length, 6, `[Host] 零值(HTTPDNS 拦截)条目应为 6, 实得 ${zero.length}: ${zero.join(", ")}`);
-    for (const d of zero) a.ok(/httpdns/.test(d), `[Host] 零值条目 ${d} 非 httpdns 域 —— 零值会吞掉真实解析`);
+    a.equal(
+      zero.length,
+      0,
+      `[Host] 出现 ${zero.length} 条零值映射: ${zero.join(", ")} —— 零值会静默吞掉真实解析; ` +
+        `HTTPDNS 拦截请走 [Rule] 的 DOMAIN-KEYWORD, httpdns, REJECT (超集且同为 DNS 层)`
+    );
+  },
+
+  // 兜底: HTTPDNS 拦截面本身不能消失 —— 上一条把零值映射清空后, 拦截责任全落在这里。
+  "dns-geoip: HTTPDNS 拦截规则须存在 (零值映射已移除)": async (a) => {
+    const found = ruleSection().some((f) => f[0] === "DOMAIN-KEYWORD" && f[1] === "httpdns" && /REJECT/.test(f[2] || ""));
+    a.ok(found, "应有 DOMAIN-KEYWORD, httpdns, REJECT —— [Host] 零值映射已于 2026-09-29 移除, 此规则是唯一的 HTTPDNS 拦截面");
   },
 };

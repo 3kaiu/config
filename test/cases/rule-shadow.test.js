@@ -45,7 +45,12 @@ exports.tests = {
     for (let j = i + 1; j < rows.length; j++) {
       const [k2, v2, p2 = ""] = rows[j];
       if (!DOM.has(k2)) continue;
-      if (p2 === policy) continue;
+      // ⚠️ 同策略遮蔽同样是死规则(该行永不执行), 只是不改变**行为**。
+      // 早期版本 `p2 === policy` 直接 continue, 于是
+      //   DOMAIN-SUFFIX googleadservices.com → REJECT
+      // 被前面的 DOMAIN-KEYWORD googleads → REJECT 完全覆盖(googleadservices 含
+      // "googleads")却长期判绿 —— "看起来有门禁"的典型缺口。改为不豁免, 同策略遮蔽
+      // 需与异策略遮蔽一并清掉 (清掉不改变任何请求的最终策略, 纯死代码消除)。
       const shadowed =
         (kind === "DOMAIN" && val === v2) ||
         (kind === "DOMAIN-SUFFIX" && (v2 === val || v2.endsWith(`.${val}`))) ||
@@ -87,7 +92,7 @@ exports.tests = {
   const EVIDENCED = {
     "广告/联盟": [
       "1rtb.net", "66mobi.com", "adkwai.com", "alisc1.zijieapi.com", "beizi.biz", "cloooud.com",
-      "doubleclick.net", "gd-stats.jpush.cn", "gdfp.gifshow.com", "googleadservices.com",
+      "doubleclick.net", "gd-stats.jpush.cn", "gdfp.gifshow.com",
       "googlesyndication.com", "googletagmanager.com", "googletagservices.com", "hubcloud.com.cn",
       "imtmp.net", "mmstat.com", "pangle.io", "pangolin-sdk-toutiao.com", "qreport.cn", "sigmob.cn",
       "stats.jpush.cn", "ugdtimg.com",
@@ -155,5 +160,32 @@ exports.tests = {
     /Fallback\s*=\s*fallback,\s*东京/.test(sec),
     "Fallback 成员应直接聚合外部订阅组“东京”"
   );
+  },
+
+  // 2026-09-29 对抗审计新增。
+  // 官方《策略组》: url-test「定期测试所有节点, 并选择延迟最低的节点」。DIRECT
+  // 参与比延迟时, 只要直连更快它就会被自动选中 —— 对流媒体/AI 这类依赖**非本地区
+  // IP** 的服务, 自动切到 DIRECT 等于静默击穿分区限制 (Netflix/ChatGPT 报地区错)。
+  // select 组不受影响 (用户显式选择, DIRECT 作为选项是合理的逃生口), 故只约束 url-test。
+  "分流: url-test 组不得含 DIRECT (会被自动选中而击穿分区限制)": async (a) => {
+    const tpl = expand(path.join(TPL, "loon.tpl"));
+    const sec = tpl.match(/^\[Proxy Group\]\n([\s\S]*?)(?=^\[[A-Za-z ]+\]$)/m)[1];
+    const bad = [];
+    for (const l of sec.split("\n")) {
+      const line = l.trim();
+      if (!line || line.startsWith("#")) continue;
+      const eq = line.indexOf("=");
+      const name = line.slice(0, eq).trim();
+      const body = line.slice(eq + 1).split(",").map((x) => x.trim());
+      if (body[0] !== "url-test") continue;
+      if (body.slice(1).includes("DIRECT"))
+        bad.push(`${name}: 成员含 DIRECT, 直连延迟更低时会被自动选中`);
+    }
+    a.equal(
+      bad.length,
+      0,
+      `${bad.length} 个 url-test 组含 DIRECT:\n  ${bad.join("\n  ")}\n` +
+        `需分区锁定的服务(流媒体/AI)应只保留代理成员; 若确需 DIRECT 逃生口, 改成 select 组`
+    );
   },
 };

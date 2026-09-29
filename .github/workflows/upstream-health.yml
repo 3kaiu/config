@@ -97,24 +97,14 @@ jobs:
           # ipasn-url 已随之删除 —— 探活一个已不被引用的文件无意义, 每次还白下 12MB。
           check_url "Loyalsoldier GeoIP mmdb" "https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb"
 
-          # 2026-09-29 精简: Mirror 体系已整体移除 (镜像目录 + mirror-scripts +
-          # cdn-verify), 故原"自建 CDN Mirror 探活"与"GOODBYEADS CDN 探活"随之删除。
-          # 保留项: ①客户端直连的 mmdb ②kelee.one 封锁哨兵 ③Plugin/Scripts 的 CDN 可用性。
+          # 自建 CDN 可用性 —— 必须指向**当前仍在引用**的资源。客户端每次启动都会
+          # 从这里拉插件与脚本, 挂了即全部去广告能力失效。目标由
+          # test/cases/upstream-coverage.test.js 的双向覆盖断言锁死。
+          check_url "ws.wenn.in CDN (Plugin)" "https://ws.wenn.in/main/Plugin/qidian.plugin"
+          check_url "ws.wenn.in CDN (Scripts)" "https://ws.wenn.in/main/Scripts/Qidian.js"
 
-          # 自建 CDN 可用性 (Plugin/ 与 Scripts/ 仍走 CDN 分发)
-          check_url "ws.wenn.in CDN (Plugin)" "https://ws.wenn.in/main/Plugin/jd-pro.plugin"
-          check_url "ws.wenn.in CDN (Scripts)" "https://ws.wenn.in/main/Scripts/Jingdong.js"
-
-          # 2026-09-29 移除上游集成: Plugin/ 中所有 `script-path=https://raw|gist.githubusercontent.com`
-          #   的第三方脚本引用已全部删除 (bilibili-json/proto、netease.adblock、amdc、applet),
-          #   按决定「暂时只留自己维护的」。故此处原有的 3 条 upstream raw 探活随之删除。
-          #   注: youtube.response.js 本就**不是活引用** —— streaming-overseas-pro 只在
-          #   #!author 与说明注释里提及 Maasea, 从未 script-path 引用它, 属探了个不存在的东西。
-          #
-          # 保留项: ①两个 mmdb (客户端直连, 挂了 DNS/geoip 立刻出错) ②自建 CDN 分发可用性。
-          # 若日后重新集成第三方上游, 须同时: 在 Plugin/ 加引用 + 在此加 check_url, 二者缺一判红
-          #   (由 test/cases/upstream-coverage.test.js 的集合覆盖断言守住)。
-
+          # 当前无第三方 GitHub 直连脚本 (决定: 暂时只留自己维护的)。若日后重新集成,
+          # 须同时在 Plugin/ 加 script-path 引用 + 在此加 check_url, 二者缺一判红。
 
           # 收敛: 等全部后台探活完成, 按序回放日志, 再从落盘结果重建 TSV 与 ALL_OK。
           # (2026-09-18 性能审计: 后台任务内赋值在父 shell 不可见, 故结果必须走文件。)

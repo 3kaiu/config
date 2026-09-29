@@ -17,17 +17,14 @@
  * 依赖的是"同形"而非正则语义; A 若以 `$` 收尾则扮演不了前缀 (锚定了整串), 天然不成立。
  * enable 必须逐字一致: 前缀规则若可被开关关闭, "先命中"的前提不成立, 不入死规则。
  *
- * 镜像文件 (Mirror/**) 的同类冗余**只报告不修改** —— 镜像由 mirror-scripts 每日重写,
- * 手改即漂移; 非源头文件按"登记接受"处理 (须写实测成因+复检日期, 同 check:shadow 纪律)。
+ * 非自维护文件按"登记接受"处理 (须写实测成因+复检日期)。
  *
  * 两项检查:
  *   1. [同文件前缀遮蔽] 逐插件扫描 [Rewrite] 行, 报告 A⊇B 且 B 不可达的对。
  *      B 已登记接受 (ACCEPTED_PAIRS) 或 B 属于生成块且其遮蔽方也同为生成块 → 通过,
  *      否则判红。
- *   2. [跨文件精确重复] Plugin//Profile/ 间 regex+action+rest
- *      逐字相同的规则。镜像与自维护文件的重复是"上游各自维护同名过滤"的常态
- *      (如 AllInOne 与 Plugin/ 共享大量域), 不作为缺陷; 自维护文件之间的精确重复
- *      才是本轮清理 (fcbox dsp) 的对象, 判红。
+ *   2. [跨文件精确重复] Plugin/ 与 Profile/ 间 regex+action+rest 逐字相同的规则。
+ *      判红。
  *
  * 用法: node tools/rewrite-redundancy-check.mjs
  */
@@ -40,13 +37,9 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 /**
  * 已知且接受的 (文件|被遮蔽 REJECT 规则) 对。
  *
- * 2026-09-29 精简: 原 6 条全部来自 `Mirror/rules/loon-AllInOne.plugin` (上游自身同文件
- * 重复, 镜像不手改故登记接受)。Mirror 体系整体移除后该表清空 —— 当前 Plugin/ 内零
- * 已知遮蔽对。新增遮蔽对时在此登记 (须写实测成因 + 复检日期)。
+ * 当前为空 —— Plugin/ 内零已知遮蔽对。新增时在此登记 (须写实测成因 + 复检日期)。
  */
 export const ACCEPTED_PAIRS = new Map([]);
-
-const MIRROR_PREFIX = "Mirror/";
 
 /** 拆一条 Loon rewrite 规则行为 `{regex, action, rest}`; 非规则行返回 null */
 export function parseRuleLine(line) {

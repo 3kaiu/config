@@ -72,13 +72,36 @@ exports.tests = {
     );
   },
 
+  // 2026-09-29: 原豁免写的是 `!url.includes("ws.wenn.in")` —— 一刀切跳过整个 CDN,
+  // 于是 CDN 探活指向已删资源也判绿 (曾长期探活 jd-pro.plugin / Jingdong.js 两个
+  // 早已不存在的文件)。改为按 [Plugin] 段与 script-path 的**实际引用**判定。
   "upstream: 探活清单不得含已不被引用的资源 (探活死资源即红)": async (a) => {
     const checked = checkedUrls();
     const live = liveUpstreamScriptPaths();
     const general = generalExternalUrls();
-    const dead = [...checked.entries()].filter(
-      ([url, name]) => !live.has(url) && !general.has(url) && !url.includes("ws.wenn.in")
-    );
+    // 自建 CDN 例外: CDN 上的资源由 [Plugin] 段的 URL 引用, 而 [Plugin] 段不在
+    // loon.tpl 的 [General] 里, 故需从模板的 [Plugin] 段单独收集。
+    const cdnPluginUrls = (() => {
+      const tpl = fs.readFileSync(path.join(REPO, "template", "loon.tpl"), "utf8");
+      const sec = (tpl.match(/^\[Plugin\]\n([\s\S]*?)(?=^\[)/m) || [])[1] || "";
+      const out = new Map();
+      for (const l of sec.split("\n")) {
+        const s = l.trim();
+        if (!s || s.startsWith("#") || !s.startsWith("http")) continue;
+        const u = s.split(",")[0].trim();
+        out.set(u, "template [Plugin] 段");
+      }
+      return out;
+    })();
+    // CDN 上的脚本 URL (Plugin 内 script-path 指向 ws.wenn.in 的) 同样算活引用
+    for (const fn of fs.readdirSync(path.join(REPO, "Plugin"))) {
+      if (!fn.endsWith(".plugin")) continue;
+      const txt = fs.readFileSync(path.join(REPO, "Plugin", fn), "utf8");
+      for (const m of txt.matchAll(/script-path=(https?:\/\/ws\.wenn\.in\/\S+?)(?:,\s*|\s*$)/gm)) {
+        cdnPluginUrls.set(m[1], `Plugin/${fn} script-path`);
+      }
+    }
+    const dead = [...checked.entries()].filter(([url]) => !live.has(url) && !general.has(url) && !cdnPluginUrls.has(url));
     a.equal(
       dead.length,
       0,

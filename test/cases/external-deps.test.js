@@ -31,8 +31,9 @@ const ALLOWED_TPL_PREFIXES = [
   "https://raw.githubusercontent.com/Loyalsoldier/geoip/", // geoip-url, GEOIP,CN,DIRECT 依赖
   // 探活端点: 只发一个请求判断链路通断, **不下载任何内容**, 不构成依赖面。
   // 一主一备是 AGENTS 已定论(同端点故障无法区分"本机断网"与"代理失效")。
-  "http://cp.cloudflare.com/generate_204",
-  "http://connectivitycheck.gstatic.com/generate_204",
+  "http://cp.cloudflare.com/generate_204", // 策略组 url-test 测速端点
+  "http://connectivitycheck.platform.hicloud.com/generate_204", // internet-test-url (直连可用性)
+  "http://connectivitycheck.gstatic.com/generate_204", // proxy-test-url (代理链路可用性)
 ];
 
 function pluginFiles() {

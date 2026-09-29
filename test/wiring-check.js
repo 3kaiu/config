@@ -88,7 +88,34 @@ function collectTestText(dir) {
   return acc;
 }
 const testText = collectTestText(testDir);
-const wiredText = workflowText + "\n" + testText;
+
+// npm-script 间接解析 (2026-09-29 修复误报)。
+// 背景: `tools/build.mjs` 真实在 CI 里 (script-tests.yml 的 `npm run build` →
+// package.json `"build": "node tools/build.mjs"`), 但下面的字面量搜索看不穿 `npm run`
+// 这一跳, 把它误判为"零接线"。误报的代价是逼人加**假引用**去骗门禁 —— 比漏检更坏。
+//
+// ⚠️ 解引用的前提: 只对 **workflow 里真的出现 `npm run <name>`** 的 script 解引用。
+// 这保留了本节的核心防御 —— "package.json 里有 check:script 但没有任何 workflow 调它"
+// 依旧判红 (例: argument-contract-check 走的是 workflow 内 `node tools/xxx.mjs` 直调,
+// 从不经过 `npm run check:contract`)。若改成"凡 package.json 声明即算已接线",
+// 这条规则会立刻失效。
+const pkgForWiring = JSON.parse(read("package.json"));
+const invokedScripts = new Set();
+for (const m of workflowText.matchAll(/\bnpm\s+(?:run\s+)?([a-z][\w:-]*)\b/g)) {
+  invokedScripts.add(m[1]);
+}
+const indirect = [];
+for (const name of invokedScripts) {
+  const cmd = (pkgForWiring.scripts || {})[name];
+  if (typeof cmd !== "string") continue;
+  for (const m of cmd.matchAll(/tools\/([\w./-]+\.mjs)/g)) {
+    const rel = "tools/" + m[1];
+    indirect.push(rel);
+    console.log(`ℹ️  ${rel} — 经 \`npm run ${name}\` 间接接线 (workflow 已调用该 script)`);
+  }
+}
+
+const wiredText = workflowText + "\n" + testText + "\n" + indirect.join("\n");
 
 function walkTools(dir, acc) {
   for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {

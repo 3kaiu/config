@@ -77,14 +77,29 @@ fail += before(LCF, "穿山甲精确 REJECT 先于 SUFFIX 兜底", "DOMAIN, api-
 // 3) 优量汇: 同上拓扑
 fail += before(LCF, "优量汇精确 REJECT 先于 SUFFIX 兜底", "DOMAIN, adsmind.ugdtimg.com, REJECT", "DOMAIN-SUFFIX, ugdtimg.com, REJECT");
 
-// 4) STUN 白名单先于泛 stun REJECT (否则 WhatsApp/Meet/Zoom 通话被阻断)
-fail += allBefore(LCF, "STUN 白名单先于泛 stun REJECT", "DOMAIN-KEYWORD, stun, REJECT", [
-  "DOMAIN-SUFFIX, stun.whatsapp.net, Social",
-  "DOMAIN, stun.l.google.com, Streaming",
-  "DOMAIN, stun.services.mozilla.com, Proxy",
-  "DOMAIN-SUFFIX, stun.twilio.com, Proxy",
-  "DOMAIN, stun.zoom.us, Proxy",
-], 4);
+// 4) STUN 白名单先于泛 STUN REJECT (否则 WhatsApp/Meet/Zoom 通话被阻断)
+//    2026-09-29: 锚点由 "DOMAIN-KEYWORD, stun, REJECT" 改为 "PROTOCOL, STUN, REJECT"。
+//    位置断言本身不变 —— 官方《规则系统 3.1》第 1 条保证"目标为域名时先匹配域名规则",
+//    但白名单仍前置是有意的双保险: 一旦日后有人把 PROTOCOL 规则上移, 位置断言立即报红,
+//    而非等到真机通话断流才发现。
+//    同时断言泛关键词规则确实已被移除 —— 它与 PROTOCOL 规则并存会让 5 条白名单中
+//    仅 stun.services.mozilla.com 之外的域重复走关键词匹配 (线性变慢的规则类型)。
+{
+  const lines = linesOf(LCF);
+  const hasKeyword = indexOf(lines, "DOMAIN-KEYWORD, stun, REJECT") > 0;
+  console.log(
+    `${!hasKeyword ? "✅" : "❌"} STUN 兜底已用 PROTOCOL 规则 (无残留 DOMAIN-KEYWORD, stun): ` +
+      `当前 ${hasKeyword ? "仍存在关键词规则 (与 PROTOCOL 重复匹配)" : "已切换"}`
+  );
+  if (hasKeyword) fail++;
+  fail += allBefore(LCF, "STUN 白名单先于泛 STUN REJECT", "PROTOCOL, STUN, REJECT", [
+    "DOMAIN-SUFFIX, stun.whatsapp.net, Social",
+    "DOMAIN, stun.l.google.com, Streaming",
+    "DOMAIN, stun.services.mozilla.com, Proxy",
+    "DOMAIN-SUFFIX, stun.twilio.com, Proxy",
+    "DOMAIN, stun.zoom.us, Proxy",
+  ], 4);
+}
 
 // 5) FINAL 紧随 GEOIP 兜底 (兜底后不得再有业务规则, 否则兜底失效)
 fail += before(LCF, "FINAL 紧随 GEOIP 兜底", "GEOIP, CN, DIRECT", "FINAL, Final");
