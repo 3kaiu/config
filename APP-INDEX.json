@@ -1,11 +1,25 @@
 {
   "schema_version": 1,
-  "plugin_count": 8,
-  "app_count": 8,
+  "plugin_count": 14,
+  "app_count": 14,
   "multi_owner": [],
   "fake_granularity": [],
   "undeclared_scripts": [],
   "apps": [
+    {
+      "app": "Firebase/Segment",
+      "owners": [
+        {
+          "plugin": "probe-firebase.plugin",
+          "module": "M3",
+          "switch": null,
+          "rules": 0,
+          "rules_basis": "plugin-total",
+          "granularity": "global",
+          "covers": null
+        }
+      ]
+    },
     {
       "app": "Google/AdMob",
       "owners": [
@@ -30,6 +44,48 @@
           "rules": 1,
           "rules_basis": "plugin-total",
           "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "前端监控/埋点",
+      "owners": [
+        {
+          "plugin": "probe-webtrack.plugin",
+          "module": "M3",
+          "switch": null,
+          "rules": 0,
+          "rules_basis": "plugin-total",
+          "granularity": "global",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "厂商自有遥测",
+      "owners": [
+        {
+          "plugin": "probe-oem.plugin",
+          "module": "M3",
+          "switch": null,
+          "rules": 0,
+          "rules_basis": "plugin-total",
+          "granularity": "global",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "友盟+ Umeng",
+      "owners": [
+        {
+          "plugin": "probe-umeng.plugin",
+          "module": "M3",
+          "switch": null,
+          "rules": 0,
+          "rules_basis": "plugin-total",
+          "granularity": "global",
           "covers": null
         }
       ]
@@ -105,6 +161,20 @@
       ]
     },
     {
+      "app": "腾讯 Bugly",
+      "owners": [
+        {
+          "plugin": "probe-bugly.plugin",
+          "module": "M3",
+          "switch": null,
+          "rules": 0,
+          "rules_basis": "plugin-total",
+          "granularity": "global",
+          "covers": null
+        }
+      ]
+    },
+    {
       "app": "起点",
       "owners": [
         {
@@ -114,6 +184,20 @@
           "rules": 21,
           "rules_basis": "plugin-total",
           "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "阿里云 ARMS/SLS",
+      "owners": [
+        {
+          "plugin": "probe-arms.plugin",
+          "module": "M3",
+          "switch": null,
+          "rules": 0,
+          "rules_basis": "plugin-total",
+          "granularity": "global",
           "covers": null
         }
       ]
@@ -183,6 +267,60 @@
         "jingdong.js"
       ],
       "mitm_hosts": 1,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/probe-arms.plugin",
+      "module": "M3",
+      "switches": 0,
+      "rules": 0,
+      "scripts": [],
+      "mitm_hosts": 0,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/probe-bugly.plugin",
+      "module": "M3",
+      "switches": 0,
+      "rules": 0,
+      "scripts": [],
+      "mitm_hosts": 0,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/probe-firebase.plugin",
+      "module": "M3",
+      "switches": 0,
+      "rules": 0,
+      "scripts": [],
+      "mitm_hosts": 0,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/probe-oem.plugin",
+      "module": "M3",
+      "switches": 0,
+      "rules": 0,
+      "scripts": [],
+      "mitm_hosts": 0,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/probe-umeng.plugin",
+      "module": "M3",
+      "switches": 0,
+      "rules": 0,
+      "scripts": [],
+      "mitm_hosts": 0,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/probe-webtrack.plugin",
+      "module": "M3",
+      "switches": 0,
+      "rules": 0,
+      "scripts": [],
+      "mitm_hosts": 0,
       "switch_usage": []
     },
     {

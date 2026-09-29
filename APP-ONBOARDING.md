@@ -360,6 +360,30 @@ response … enable={CAPTURE_ENABLE}        ← 消费
 
 **新增门禁**（`test/cases/ad-platform-plugins.test.js`，6 例）锁死三条属性：① 零 `[MitM]`（拦广告不得产生证书成本）；② 全部规则裸 `DOMAIN REJECT`、无 `DIRECT`/`Proxy` 例外（广告域出现例外即说明有人凭域名字义误判）；③ **不得声明 `[Argument]`**（纯 `[Rule]` 插件挂不了条件，声明即死参数）。
 
+## 附五：探针与隐私上报拦截（M3 隐私，2026-09-29）
+
+从**产品开发者视角**反推：App 出厂时会埋哪些上报通道、每个通道拦了会破什么。据此建 6 个独立插件（38 域），全部 L2 域名 REJECT、零证书成本。
+
+| 插件 | 通道 | 域数 | 明确不拦（拦了=真损失） |
+|---|---|---|---|
+| `probe-umeng` | 友盟+ 统计/崩溃 | 15 | `config./user./msg.` 与 jpush/getui 推送 |
+| `probe-oem` | 小米/vivo/OPPO/魅族 自有遥测 | 12 | 商店(`ad.apk.vivo`)、推送(`xmpush`)、系统设置(`bss·de·dvb·jellyfish`) |
+| `probe-webtrack` | GrowingIO/神策/网易易盾 RUM | 7 | — |
+| `probe-bugly` | 腾讯 Bugly 崩溃 | 2 | jpush 推送 |
+| `probe-arms` | 阿里云 ARMS 前端 RUM | 1 | `arms.console.aliyun.com`（开发者自用控制台）、`oss`（可能承载内容） |
+| `probe-firebase` | Crashlytics/Segment 增量 | 1 | `firebaseinstallations`（FCM 推送，主配置已保留） |
+
+**开发者视角的三档代价**（决定拦不拦）：① 纯统计埋点 —— 拦了无功能损失，**最安全**；② 崩溃/APM —— 拦了不破功能，但**丢失调试可见性**（排障变难），由插件可关停来平衡；③ 推送/归因 —— 推送**绝对不拦**（断推送是真功能损失），归因只影响安装统计。
+
+**三个探针实证纠正了我写错的判断**（都靠 DoH 拦下）：
+- `arms.console.aliyun.com` 我原以为该拦 → 探针 302 + 语义确认那是**开发者自己的控制台**，不是 App 遥测出口，改成不拦。
+- `oa-panther.data.aliyun.com` / `log.aliyuncs.com` 我按印象写进 ARMS → 实测 CF 解析 0 条**已死域**，删除。ARMS 只保留唯一存活的 `arms-retcode.aliyuncs.com`（CF=25 / HTTPS=405）。
+- 「不凭印象写域名」被提为硬要求：197 个候选逐条双解析器核验后才入库。
+
+**新增红线门禁**（2 例）：
+- **绝不拦推送通道**：`jpush.cn`/`jpush.io`/`getui.com`/`getui.net`/`gepush.com`/厂商 `xmpush·api-push·upush·config.umeng` 任一被拦即判红 —— 断推送是功能损失不是少条统计。
+- **不拦商店/系统更新域**：`ad.apk.vivo`/`apps.oppomobile`/`pandora.xiaomi` 系被拦即判红 —— 拦了 App 无法更新，属灾难级误伤。
+
 **判据沉淀**：给广告平台做去广告时，先问"这层拦截需不需要解密面"——L2 域名 REJECT 一律不需要，**加了 `[MitM]` 就是净损失**。
 **HAR 缺失**不等于**停手理由**——先搜上游/issue/已构建插件，三源交叉验证强度往往高于单份 HAR。
 **功能域白名单的成因会随配置演进而失效**，注释必须随成因更新，否则后人会误判它是空转或误删。**「无治理」在缺少解密面与 HAR 时是正确基线，不是缺口。**

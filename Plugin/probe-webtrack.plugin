@@ -1,0 +1,29 @@
+#!name=前端监控/埋点上报拦截
+#!desc=GrowingIO / 神策 SensorsData / 网易云易盾 前端监控与埋点上报拦截。
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+#!tag = 隐私,探针,上报,growingio,神策,前端监控,探针
+#!type = normal
+# 本插件**无 [Argument]**: 官方《插件》策略位仅 DIRECT/REJECT/PROXY, 插件参数只作用于
+# Script(enable={}) 与 Rewrite(${}); 普通 [Rule] 行挂不了条件 ⇒ 声明即死参数。
+# 启停插件即开关。
+
+[Rule]
+# ── 生效层: L2 域名 REJECT (DNS 阶段) ────────────────────────────
+# 本仓 domain-reject-mode = DNS ⇒ 拒绝在 DNS 阶段回环完成, 请求到不了解密层。
+# 故本插件**无 [MitM]**, 零 CA 证书成本。
+#
+# 处置口径: 均为 RUM/埋点上报通道, 无功能页; 神策仅有 saas.sensorsdata.cn 一个主机在用。
+# 代价: 丢失前端性能监控与漏斗埋点数据。
+# 取证: DoH(Cloudflare + DNS.google **双解析器交叉**) + HTTPS 探针; 逐条核验存在性,
+# 不凭印象写域名; 已剔除已死域与主配置已覆盖的域。
+
+DOMAIN, api.growingio.com, REJECT
+DOMAIN, apihk.growingio.com, REJECT
+DOMAIN, t.growingio.com, REJECT
+DOMAIN, crashapi.growingio.com, REJECT
+DOMAIN, tags.growingio.com, REJECT
+DOMAIN, bohe.sfo-tx-shanghai-01.saas.sensorsdata.cn, REJECT
+DOMAIN, crashlytics.163.com, REJECT

@@ -1,5 +1,5 @@
 /**
- * 广告平台插件 (ad-*.plugin) 结构回归 (2026-09-29 新增)
+ * 广告平台 + 探针上报插件 (ad-*.plugin / probe-*.plugin) 结构回归 (2026-09-29 新增)
  *
  * 锁死三条属性, 每条都对应一次真实风险:
  *   ① **零 [MitM]** — 广告平台是纯 L2 域名 REJECT。本仓 domain-reject-mode = DNS,
@@ -17,9 +17,10 @@ const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.join(__dirname, "..", "..");
+// 覆盖两类纯 L2 插件: ad-* (广告平台) 与 probe-* (探针/隐私上报)
 const PLUGINS = fs
   .readdirSync(path.join(ROOT, "Plugin"))
-  .filter((f) => /^ad-.*\.plugin$/.test(f))
+  .filter((f) => /^(ad|probe)-.*\.plugin$/.test(f))
   .sort();
 
 /** 取插件的某一段 (行首锚定, 不用 indexOf —— 会命中注释里提到的段名) */
@@ -38,17 +39,17 @@ const section = (txt, name) => {
 const rulesOf = (txt) => section(txt, "Rule").map((l) => l.trim()).filter((l) => l && !l.startsWith("#"));
 
 exports.tests = {
-  "ad-*.plugin: 至少覆盖 6 个广告平台": async (a) => {
-    a.ok(PLUGINS.length >= 6, `应至少 6 个广告平台独立插件, 实际 ${PLUGINS.length}: ${PLUGINS.join(", ")}`);
-    for (const must of ["穿山甲", "广点通", "快手", "百度", "Google"]) {
+  "ad-*/probe-*.plugin: 广告平台与探针类别齐备": async (a) => {
+    a.ok(PLUGINS.length >= 12, `应至少 12 个纯 L2 插件(6 广告平台 + 6 探针通道), 实际 ${PLUGINS.length}: ${PLUGINS.join(", ")}`);
+    for (const must of ["穿山甲", "广点通", "快手", "百度", "Google", "友盟", "Bugly", "ARMS"]) {
       a.ok(
         PLUGINS.some((f) => fs.readFileSync(path.join(ROOT, "Plugin", f), "utf8").includes(must)),
-        `缺少 ${must} 平台插件`
+        `缺少 ${must} 对应插件`
       );
     }
   },
 
-  "ad-*.plugin: 零 [MitM] (拦广告不得产生证书成本)": async (a) => {
+  "ad-*/probe-*.plugin: 零 [MitM] (L2 拦截不得产生证书成本)": async (a) => {
     for (const f of PLUGINS) {
       const txt = fs.readFileSync(path.join(ROOT, "Plugin", f), "utf8");
       const mitm = section(txt, "MitM").filter((l) => l.trim() && !l.trim().startsWith("#"));
@@ -60,7 +61,7 @@ exports.tests = {
     }
   },
 
-  "ad-*.plugin: 零 [Script]/[Rewrite] (纯 L2 域名拦截)": async (a) => {
+  "ad-*/probe-*.plugin: 零 [Script]/[Rewrite] (纯 L2 域名拦截)": async (a) => {
     for (const f of PLUGINS) {
       const txt = fs.readFileSync(path.join(ROOT, "Plugin", f), "utf8");
       for (const seg of ["Script", "Rewrite"]) {
@@ -70,7 +71,7 @@ exports.tests = {
     }
   },
 
-  "ad-*.plugin: 全部 [Rule] 一律 REJECT, 无 DIRECT/Proxy 例外": async (a) => {
+  "ad-*/probe-*.plugin: 全部 [Rule] 一律 REJECT, 无 DIRECT/Proxy 例外": async (a) => {
     for (const f of PLUGINS) {
       const txt = fs.readFileSync(path.join(ROOT, "Plugin", f), "utf8");
       for (const r of rulesOf(txt)) {
@@ -82,7 +83,7 @@ exports.tests = {
     }
   },
 
-  "ad-*.plugin: 不得声明 [Argument] ([Rule] 挂不了条件, 声明即死参数)": async (a) => {
+  "ad-*/probe-*.plugin: 不得声明 [Argument] ([Rule] 挂不了条件, 声明即死参数)": async (a) => {
     for (const f of PLUGINS) {
       const txt = fs.readFileSync(path.join(ROOT, "Plugin", f), "utf8");
       const arg = section(txt, "Argument").filter((l) => l.trim() && !l.trim().startsWith("#"));
@@ -94,7 +95,7 @@ exports.tests = {
     }
   },
 
-  "ad-*.plugin: 每个平台都有可核验的域, 且不含已死域形态": async (a) => {
+  "ad-*/probe-*.plugin: 每个插件都有可核验的域, 且无通配": async (a) => {
     for (const f of PLUGINS) {
       const txt = fs.readFileSync(path.join(ROOT, "Plugin", f), "utf8");
       const rs = rulesOf(txt);
@@ -109,4 +110,43 @@ exports.tests = {
       }
     }
   },
+};
+
+/**
+ * 推送通道是**硬红线**: 断推送 = 真功能损失(收不到消息通知), 不是"少一条统计"。
+ * AGENTS.md 早已记「全拦 SUFFIX 会断推送」(个推/极光), 本组插件按类别拆域名正是为了
+ * 避开它。此用例把红线钉死 —— 任何人想加推送域, 门禁立刻判红。
+ */
+const PUSH_DOMAINS = [
+  "jpush.cn", "jpush.io", "getui.com", "getui.net", "gepush.com",
+  "xmpush.xiaomi.com", "api-push.meizu.com", "upush.res.meizu.com",
+  "message.meizu.com", "config.umeng.com", "msg.umeng.com",
+];
+
+exports.tests["ad-*/probe-*.plugin: 绝不拦推送通道 (断推送=真功能损失)"] = async (a) => {
+  for (const f of PLUGINS) {
+    const txt = fs.readFileSync(path.join(ROOT, "Plugin", f), "utf8");
+    for (const d of rulesOf(txt)) {
+      const dom = /^DOMAIN,\s*([^,]+),\s*REJECT$/.exec(d)[1];
+      for (const push of PUSH_DOMAINS) {
+        a.ok(
+          dom !== push && !dom.endsWith("." + push),
+          `Plugin/${f} 拦了推送域 ${dom} (属 ${push}) —— 断推送是真功能损失, 不是少一条统计`
+        );
+      }
+    }
+  }
+};
+
+exports.tests["ad-*/probe-*.plugin: 探针插件不得拦应用商店与系统更新域"] = async (a) => {
+  // 商店/更新域被拦 ⇒ App 无法更新/分发, 属灾难级误伤
+  const STORE = ["ad.apk.vivo.com.cn", "apps.oppomobile.com", "bss.pandora.xiaomi.com",
+                 "dvb.pandora.xiaomi.com", "de.pandora.xiaomi.com", "jellyfish.pandora.xiaomi.com"];
+  for (const f of PLUGINS) {
+    const txt = fs.readFileSync(path.join(ROOT, "Plugin", f), "utf8");
+    for (const d of rulesOf(txt)) {
+      const dom = /^DOMAIN,\s*([^,]+),\s*REJECT$/.exec(d)[1];
+      a.ok(!STORE.includes(dom), `Plugin/${f} 拦了商店/系统域 ${dom} —— 会影响 App 分发与更新`);
+    }
+  }
 };
