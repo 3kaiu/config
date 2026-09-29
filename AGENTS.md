@@ -58,7 +58,7 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 - **整条 reject 只用于纯广告接口**：京东 `functionId=start` 同时下发启动配置与开屏图，整条 `reject-200` 会致白屏 —— 必须改为响应体改写。**一个接口既下发业务数据又下发广告，就不能整条拒**。
 - **字段重命名法**：`response-body-replace-regex` 把广告字段的 key 改名成客户端认不出的名字。响应结构与 code 校验全保留，比 reject 抗异常分支。用例禁止外溢到主 App 通道。
 - **域名 REJECT 必须先取证**：京东 `du.jd.com`/`c-nfa.jd.com` 探针实证是**店铺域**（302 → `error2.aspx?from=shopdomain`），误拦直接破店铺页；`jzt.jd.com` 是对外 Jenkins CI。凭域名字义加 REJECT 是本仓已犯过的错 —— 新增前须 DoH + HTTPS 探针。
-- **策略层 REJECT 变体缺口**：`[Rule]` 策略层 122 条全是裸 `REJECT`（官方共 5 种变体，`-IMG`/`-DICT`/`-ARRAY`/`-DROP` 均 0），全部退化为 404，部分 App 会因非预期状态码重试。**注意**：`REJECT-VIDEO`/`REJECT-NO-DROP` 不存在于官方《策略》文档，「REJECT 被自动升级为 REJECT-DROP」亦无出处 —— 变体分派须按上游响应形状取证，**不得按域名字符猜**（这是 P3 暂缓的原因：根路径探测拿不到 POST 型 API 的响应形状，须真机 HAR）。
+- **策略层 REJECT 变体（已按官方文档定论，非缺口）**：`[Rule]` 全是裸 `REJECT` 是**正确**的。官方《策略》定义 REJECT-IMG=200+1×1 GIF / REJECT-DICT=200+`{}` / REJECT-ARRAY=200+`[]`，三者描述的都是 **HTTP 响应内容**，只有拒绝发生在请求转发阶段、客户端真收到响应时才有意义；而本配置 `domain-reject-mode = DNS`，域名拒绝在 DNS 阶段用 LOOPBACKIP 回环地址完成，请求到不了 HTTP 响应层。叠加官方《HTTP 规则》"HTTP 规则仅匹配 HTTP 和 HTTPS 请求"，而本配置 483 条规则中 `URL-REGEX`/`USER-AGENT` 合计 **0 条** —— 变体唯一的适用场景不存在。`REJECT-VIDEO`/`REJECT-NO-DROP` 在官方文档中不存在，「REJECT 被自动升级为 REJECT-DROP」亦无出处。重新引入的触发条件：改 `domain-reject-mode = Request`，或引入 HTTP 级规则做路径级拦截。
 - **App 归属反查**：回答"某 App 的广告归谁管"用 `APP-INDEX.json`。**App 名不得从开关 tag 猜** —— tag 写法不统一（`是否开启X净化`/`X净化`/`开屏广告`/`总开关` 四类），启发式会把同一 App 记成两个名字；可靠的自描述是**开关 KEY**（`LUCKINCOFFEE_ENABLE`→瑞幸咖啡）。只能定位到插件级的归属必须标 `rules_basis=plugin-total`，不许假装精确。
 - 清理冗余解密面由两条门禁守住：`mitm-orphan`（每个正包含 MitM 域须有规则消费）+ `mitm-coverage`（每条 Rewrite 规则须有解密面）。通配 host 会被判为 generic 而恒被报孤儿，须显式列举。
 
