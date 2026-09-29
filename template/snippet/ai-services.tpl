@@ -7,14 +7,11 @@ DOMAIN-SUFFIX, ai.com, AI
 DOMAIN-SUFFIX, chatgpt.com, AI
 DOMAIN-SUFFIX, oaiusercontent.com, AI
 DOMAIN-SUFFIX, oaistatic.com, AI
-# (2026-09-21 精准去广告) 删 `DOMAIN-KEYWORD, openai, AI` — 本地 [Rule] 先于 [Remote Rule]
-# 求值, 任何含 openai 子串的域 (钓鱼 openai-ads.evil.com / notopenai-tracker.com)
-# 都会被提前送 AI(Proxy) 而永不到达 Advertising REJECT; 4 个真实 OpenAI 族已有
-# SUFFIX 精确覆盖 (openai.com + 2 azure), 同 qreport "可枚举即不用宽匹配" 纪律。
+# 纪律: 可枚举即不用宽匹配。DOMAIN-KEYWORD, openai 会被钓鱼域 (openai-ads.evil.com)
+# 抢先命中而送进代理, 4 个真实 OpenAI 族已由 SUFFIX 精确覆盖。同理 auth0.openai.com
+# 是死规则 (子域命中 DOMAIN-SUFFIX, openai.com, 策略同为 AI)。
 DOMAIN-SUFFIX, openaiapi-site.azureedge.net, AI
 DOMAIN-SUFFIX, openaicom-api-bdcpf8c6d2e9b8.azurefd.net, AI
-# (2026-09-18 精简审计) 删 `DOMAIN, auth0.openai.com` — 被 L9 DOMAIN-SUFFIX, openai.com
-# 同策略覆盖 (子域命中父域规则, 策略同为 AI), 纯死规则。
 # Anthropic
 DOMAIN-SUFFIX, anthropic.com, AI
 DOMAIN-SUFFIX, claude.ai, AI
@@ -57,9 +54,7 @@ DOMAIN-SUFFIX, fireworks.ai, AI
 DOMAIN-SUFFIX, cursor.sh, AI
 DOMAIN-SUFFIX, cursor.com, AI
 DOMAIN-SUFFIX, cursor-api.com, AI
-# (2026-09-21 精准去广告) 删 `DOMAIN, github.copilot.com` — 死规则。实测
-# api.githubcopilot.com 存活 (404=有主机缺路径), github.copilot.com 传输层失败
-# (不解析, 域名写反)。同文件 :13-14 `auth0.openai.com` 同例。
+# github.copilot.com 是死规则: 实测传输层失败(域名写反), 存活的是 api.githubcopilot.com。
 DOMAIN-SUFFIX, copilot-proxy.githubusercontent.com, AI
 DOMAIN-SUFFIX, codeium.com, AI
 DOMAIN-SUFFIX, codeiumserver.com, AI

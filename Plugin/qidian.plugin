@@ -47,22 +47,19 @@ cron {CRONEXP} script-path=https://ws.wenn.in/main/Scripts/Qidian.js, timeout={T
 
 [Rule]
 # 广告 SDK 白名单 — 防止误杀奖励包
-# ⚠️ 2026-09-22 B7 层间矛盾实录: Loon 来源优先级 本地配置＞插件，
-# template/loon.tpl [Rule] 对 ii.gdt/adsmind/pangolin 系是全链 REJECT
-# (2026-08-12 用户决策：开屏必除，接受秒播失效)，故下述 4 条 DIRECT
-# 对重叠域永不生效。后果：激励/每日任务 (QDREADER_ADV_JOB/EXTRA，默认全开)
-# 的奖励包可能因 SDK 被拦而计数失败 — 表现为任务 X/9 长期不满。
-# 不做本地改动 (任一方向都要真机确认)：若激励常不满，要么关两任务开关，
-# 要么把模板对应 4 域改 DIRECT (开屏会回来)。勿静默删本白名单。
+# ⚠️ 层间矛盾 (勿静默删本白名单): Loon 优先级 本地配置＞插件, 而 template/loon.tpl
+# [Rule] 对 ii.gdt/adsmind/pangolin 系是全链 REJECT (用户决策: 开屏必除, 接受秒播
+# 失效), 故下述 4 条 DIRECT 对重叠域**永不生效**。后果: 激励/每日任务奖励包可能因
+# SDK 被拦而计数失败 (表现为任务 X/9 长期不满)。改动任一方向都需真机确认:
+# 要么关两任务开关, 要么把模板对应 4 域改 DIRECT (开屏会回来)。
 DOMAIN, ii.gdt.qq.com, DIRECT
 DOMAIN, adsmind.gdtimg.com, DIRECT
 DOMAIN-SUFFIX, pangolin-sdk-toutiao.com, DIRECT
 DOMAIN-SUFFIX, pangolin-sdk-toutiao1.com, DIRECT
 
 # 追踪/监控/埋点 SDK — 强力阻绝
-# (2026-09-22 删 12 条主配置已无条件 REJECT 的重复: rmonitor/unitelogreport/sdkreport/
-# path.book/connect/fockrt/upushv6/aegis/ywab/ataru/qreport.qunar/qreport.cn —
-# 本地>插件故永不可达; 登记见 test/cases/plugin-tpl-shadow.test.js)
+# (与主配置重复的条目一律不在此登记: 本地>插件故永不可达, 门禁见
+#  test/cases/plugin-tpl-shadow.test.js)
 DOMAIN, publiclog.zhiyan.tencent-cloud.net, REJECT
 DOMAIN, zhiyan.monitor.tencent-cloud.net, REJECT
 DOMAIN, galileotelemetry.tencent.com, REJECT
@@ -72,7 +69,6 @@ DOMAIN, dl.tiku.qq.com, REJECT
 DOMAIN, apmplus.volces.com, REJECT
 DOMAIN, mssdk.volces.com, REJECT
 DOMAIN, tobapplog.ctobsnssdk.com, REJECT
-# (2026-09-22 删 hd.ctobsnssdk.com: DoH 双查 NXDOMAIN 死亡, 永不命中)
 # 字节系 SDK/CDN 拦截 — 限定起点 App UA (QDReader*), 避免全局通杀误伤
 # 抖音/头条/飞书等字节系 App (*.bytescm.com 是图片 CDN, *-zijieapi.com 是
 # 网络配置端点); 同时避免抢占汽水音乐对 tnc*.zijieapi.com 的 reject-200 语义

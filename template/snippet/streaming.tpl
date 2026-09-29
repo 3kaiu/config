@@ -11,8 +11,6 @@ DOMAIN-SUFFIX, nflximg.net, Streaming
 DOMAIN-SUFFIX, nflximg.com, Streaming
 DOMAIN-SUFFIX, nflxext.com, Streaming
 DOMAIN-SUFFIX, netflixcdn.net, Streaming
-# (2026-09-18 精简审计) 删 `DOMAIN, nrdns.netflix.com` — 被 DOMAIN-SUFFIX, netflix.com
-# 同策略覆盖 (Streaming), 纯死规则。
 # Disney+
 DOMAIN-SUFFIX, disneyplus.com, Streaming
 DOMAIN-SUFFIX, disney-plus.net, Streaming
@@ -72,7 +70,7 @@ DOMAIN-SUFFIX, twitch.tv, Streaming
 DOMAIN-SUFFIX, abema.tv, Streaming
 # TVB
 DOMAIN-SUFFIX, tvb.com, Streaming
-# Max (原 HBO Max)
+# Max
 DOMAIN-SUFFIX, max.com, Streaming
 # Discovery+
 DOMAIN-SUFFIX, discoveryplus.com, Streaming

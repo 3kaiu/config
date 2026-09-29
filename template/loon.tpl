@@ -5,87 +5,77 @@
 # ═══════════════════════════════════════════════════════════
 
 [General]
-# 2026-09-20 审计整改 (官方 docs/General 实抓):
-# ① ip-mode = dual (官方枚举 ipv4-only/dual/ipv4-preferred/ipv6-preferred;
-#    旧值 "fake-ip" 非官方取值 — Fake IP 体系由 real-ip 控制排除, 与 IP 协议族选择正交)
-# ② fake-ip-filter / disconnect-on-policy-change 删除: 两键名在官方文档全站
-#    (General/DNS/hostmap/Scheme)、example.conf、主流社区配置中均不存在, 系
-#    Clash(fake-ip-filter)/Surge(disconnect-on-policy-change) 键混入; Loon 对应
-#    机制是 real-ip (已含 captive.apple.com/msftconnecttest 同族条目) 与 UI 开关
-# ③ hijack-dns 收窄: 旧 "*:0" 全劫持 + 6 个公开 DNS, 与 "上游全走加密 DoH/DoH3"
-#    矛盾 — 被劫持的系统查询经 Loon 转发后回落**明文 UDP DNS** (官方 DNS 页: 加密
-#    优先但回落为普通 DNS), 全劫持反而把本可本地解析的查询都送进代理解析链。
-#    收窄为仅劫持 4 个明确公开 DNS (Google/Cloudflare/114), 223.5.5.5/119.29.29.29
-#    因是 dns-server 成员 (加密失败回落明文自用) 不再自劫持
-# ④ 旧 fake-ip-filter 的功能面已映射到 real-ip: captive.apple.com/msftconnecttest/
-#    msftncsi 原已在 real-ip; *.lan/*.local 族由 bypass-tun+skip-proxy 覆盖 (不进
-#    Loon DNS, 无需 real-ip); 唯一遗漏项 time.*.com (NTP 系统服务, Fake IP 会破坏
-#    对时) 本轮补入 real-ip 尾部
-ip-mode = dual
+# 四条不可回退的官方语义约束 (依据 https://nsloon.app/docs/General/):
+# ① ip-mode 官方枚举 = ipv4-only/dual/ipv4-preferred/ipv6-preferred。"fake-ip" 不是
+#    ip-mode 的取值 —— Fake IP 体系由 real-ip 控制排除名单, 与 IP 协议族选择正交。
+# ② hijack-dns 官方语义是"劫持 UDP DNS 并返回 Fake IP", 即 Loon 自己应答, 应用
+#    **不再联系那个解析器**。故列举式(只列几个公开 IP)是反效果: 未列举的解析器
+#    明文 UDP 直出, 绕过 domain-reject-mode=DNS 的拒绝面且吃污染; 而 *:0 又过宽
+#    (劫持所有端口)。官方首例 *:53 才是正解。需 Loon >= 3.2.5(789)。
+# ③ 不设 ipasn-url: 本地 GEOIP,CN,DIRECT 优先级高于插件 [Rule], 境内 IP 必先命中
+#    GEOIP, 插件 IP-ASN 永不可能求值 —— 设置即每次白拉 12MB。若将来确有 IP-ASN
+#    规则, 须排在**本地** GEOIP 之前, 且 dns-geoip.test.js 的消费者断言放行。
+# ④ real-ip 须含 captive.apple.com / *.msftconnecttest.com / time.*.com 等系统服务域:
+#    它们会缓存 Fake IP, 被伪 IP 污染即断网或对时失败。*.lan/*.local 族不在此列,
+#    由 bypass-tun + skip-proxy 在进 Loon 前就绕开了。
+# ⚠️ 必须与下方 ipv6-vif 保持一致 (2026-09-29 对抗审计发现的自相矛盾):
+#   原值 dual 会并发查 A + AAAA 并把结果交给 App, 而 ipv6-vif = off 不接管 TUN 的
+#   IPv6 转发 —— 两条并置的结果无论官方对 "不处理" 作何解释都不可接受:
+#     · 若 IPv6 被丢包  → App 拿到 IPv6 地址却连不通, 靠回退重连, 平白加延迟;
+#     · 若 IPv6 绕过 TUN → 静默泄漏, 而本仓恰恰有 M3 隐私模块在防这件事。
+#   ipv4-only 从源头消除矛盾: 不发起 AAAA 查询, App 永远拿不到 IPv6 地址。
+#   代价: 无 IPv6 (happy-eyeballs 失效, 少一个 CDN 选路维度)。对本配置可接受 ——
+#   全仓 485 条规则**零条 IPv6 规则**, 4 条 IP-CIDR 亦全为 IPv4, IPv6 本就无路可走。
+#   若要启用 IPv6: 改 dual + ipv6-vif = auto, 并保留下方 bypass-tun/skip-proxy
+#   已补齐的 IPv6 局域网段, 否则 mDNS/ULA 流量会被卷进隧道。
+ip-mode = ipv4-only
 interface-mode = Performace
 dns-server = 180.184.11.11, 180.184.22.22, 119.29.29.29, 223.5.5.5
 doh-server = {{ customParams.doh_primary }}, {{ customParams.doh_fallback }}
 doh3-server = {{ customParams.doh3_primary }}, {{ customParams.doh3_fallback }}
 doq-server = {{ customParams.doq_server }}
-hijack-dns = 8.8.8.8, 8.8.4.4, 1.1.1.1, 114.114.114.114
+hijack-dns = *:53
 sni-sniffing = true
 disable-stun = false
-udp-fallback-mode = DIRECT
+# 回落策略 = REJECT 而非 DIRECT (2026-09-29 对抗审计, 用户决策)。
+# 官方: 该键是"节点不支持 UDP 或未启用 UDP 转发时使用的策略"。取 DIRECT 意味着
+# 节点一旦没有 UDP, **全部 UDP 流量(QUIC / 游戏 / 通话 / WireGuard)会从本机真实 IP
+# 直连漏出** —— 与本配置既有 posture 矛盾: 已用 PROTOCOL,STUN,REJECT 堵掉 UDP 泄漏里
+# 最典型的 STUN/WebRTC, 却把更大的 QUIC/任意 UDP 敞着。
+# 取 REJECT = 失败可见而非静默泄露: 节点开了 udp=true 时本键永不触发, 零影响;
+# 没开时 UDP 请求直接失败, 便于发现"节点该开 UDP"而不是默默用真实 IP 出门。
+# ⚠️ 前提: 请在 Loon 节点详情确认东京组已启用 UDP, 否则 FaceTime/游戏会连不上。
+udp-fallback-mode = REJECT
 ipv6-vif = off
 domain-reject-mode = DNS
 dns-reject-mode = LOOPBACKIP
 geoip-url = https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb
-# 2026-09-29 对抗审计: 原 GeoLite2-ASN.mmdb 拉取已删, 改为不引用 ipasn-url。
-#   依据: 全仓 IP-ASN 规则的唯一消费者是 didi-pro 的 3 条上报拦截, 而那 3 条是**死规则** ——
-#   本地 [Rule] 的 GEOIP,CN,DIRECT (第 485 条) 优先级高于插件 [Rule], 境内 IP 的 TCP 连接
-#   必然先命中 GEOIP, 插件 IP-ASN 永不可能求值。保留即每次白拉 12MB。
-#   若将来确有 IP-ASN 规则, 须满足两条前提并有测试断言:
-#     ① 该规则位于**本地** [Rule] 且排在 GEOIP 之前 (插件位置无法超越本地 GEOIP);
-#     ② test/cases/dns-geoip.test.js 的「ipasn-url 有活跃消费者」断言放行。
-#   geoip-url (Country.mmdb, 7.7MB) 保留 —— GEOIP,CN,DIRECT 依赖它。
-# resource-parser: 已移除 (2026-09-11 供应链审计)
-#   原值指向 Sub-Store 的 1.27MB 解析器 bundle (上游 releases/latest 浮动)。
-#   移除理由: 该 bundle 在订阅解析上下文中执行, 可见全部节点凭据; 哈希门禁只能证明
-#   "与上游发布一致", 无法证明上游可信 — 与移除 Sub-Store 插件同一信任前提, 故一并移除。
-#   影响: Loon 回退内置解析器 (原生 ss/ssr/vm 等链接格式与 Clash 配置均可解析)。
-#   如需恢复 Clash YAML 等扩展格式: 自行指定 resource-parser, 并锁定具体版本而非 latest。
 allow-wifi-access = false
 wifi-access-http-port = 7222
 wifi-access-socks5-port = 6225
 test-timeout = 5
-# 探活一主一备 (2026-09-19 官方文档对齐): internet-test-url (直连可用性) 与 proxy-test-url
-# (代理链路可用性) 用**不同**上游 —— 同端点时该端点故障会同时误判"本机断网 + 代理失效",
-# 排障时无法区分; 分端点后任一故障只影响一条链路。策略组未显式 url= 时继承 proxy-test-url。
-internet-test-url = http://cp.cloudflare.com/generate_204
+# 探活一主一备: internet-test-url (直连可用性) 与 proxy-test-url (代理链路可用性)
+# 必须用**不同**上游 —— 同端点故障会同时误判"本机断网 + 代理失效", 排障无法区分。
+# 策略组未显式 url= 时继承 proxy-test-url。
+internet-test-url = http://connectivitycheck.platform.hicloud.com/generate_204
 proxy-test-url = http://connectivitycheck.gstatic.com/generate_204
-skip-proxy = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32, localhost, *.local, *.lan, *.home.arpa
-bypass-tun = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32
+skip-proxy = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32, ::1/128, fc00::/7, fe80::/10, ff00::/8, localhost, *.local, *.lan, *.home.arpa
+# IPv6 局域网段为前向冗余: 当前 ip-mode = ipv4-only 用不到, 但一旦切到 dual,
+# 缺了它们会让 mDNS(ff02::/16)/ULA/链路本地流量被卷进隧道 —— 组播与 ULA 走隧道必坏。
+bypass-tun = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32, ::1/128, fc00::/7, fe80::/10, ff00::/8
 real-ip = *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, id6.me, *.boc.cn, *.abchina.com, *.ccb.com, *.psbc.com, *.cmbchina.com, *.icbc.com.cn, *.bankofchina.com, *.spdb.com.cn, *.cib.com.cn, *.cebbank.com, *.unionpay.com, *.pingan.com.cn, *.pingan.com, *.bankcomm.com, *.citicbank.com, *.hxb.com.cn, *.cgbchina.com.cn, *.push.apple.com, *.apns.apple.com, captive.apple.com, *.local, *.lan, *.home.arpa, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, *.msftconnecttest.com, *.msftncsi.com, *.battlenet.com.cn, time.*.com
 
 [Host]
-*.taobao.com = server:223.5.5.5
-*.tmall.com = server:223.5.5.5
-*.alipay.com = server:223.5.5.5
-*.alicdn.com = server:223.5.5.5
-*.qq.com = server:119.29.29.29
-*.tencent.com = server:119.29.29.29
-*.weixin.qq.com = server:119.29.29.29
-*.jd.com = server:119.29.29.29
-*.baidu.com = server:223.5.5.5
-*.bilibili.com = server:223.5.5.5
-*.meituan.com = server:223.5.5.5
-*.douyin.com = server:119.29.29.29
-*.163.com = server:119.29.29.29
-*.mi.com = server:223.5.5.5
-*.apple.com = server:223.5.5.5
-*.icloud.com = server:223.5.5.5
-*.icloud.com.cn = server:223.5.5.5
-httpdns.c.cdnhwc.com = 0.0.0.0
-httpdns.gslb.netease.com = 0.0.0.0
-httpdns.alikunlun.com = 0.0.0.0
-httpdns.baidubce.com = 0.0.0.0
-httpdns.volcengineapi.com = 0.0.0.0
-httpdns.c.cdnhwc2.com = 0.0.0.0
+# 本段为空 (2026-09-29 对抗审计)。原 17 条 `server:` 映射是**净亏损**，已全删:
+#   ① 降级传输: `server:` 是按域名的 DNS **覆盖** (官方《DNS映射》), 会让这 17 个域
+#      绕过全局 doh/doh3/doq 直连明文 UDP。全局加密链本就够用, 无需逐域指定。
+#   ② 零收益: 目标 223.5.5.5 / 119.29.29.29 与全局 DoH 上游 dns.alidns.com /
+#      doh.pub **同属 AliDNS / DNSPod** —— 不是"换个更快的解析器", 是把同样的解析
+#      从加密降级到明文。被降级的还包含 *.apple.com / *.icloud.com(.cn)。
+#   ③ 含 1 条死规则: `*.weixin.qq.com` 被前面的 `*.qq.com` 完全覆盖
+#      (域名类首次命中即停, 该条永不生效)。
+# 如需对某域指定解析器, 正确形态是 `[Host] <域> = server:<加密 DoH URL>`,
+# 而不是明文 IP。
 
 [Proxy]
 # 节点由 Loon 外部订阅提供；订阅策略组名固定为“东京”，不写入公开仓库。
@@ -100,8 +90,8 @@ Proxy = url-test, 东京, url=http://cp.cloudflare.com/generate_204, interval=12
 Fallback = fallback, 东京, url=http://cp.cloudflare.com/generate_204, interval=180, max-timeout=5000
 Apple = select, DIRECT, Proxy
 Final = select, Proxy, Fallback, DIRECT
-Streaming = url-test, Proxy, Fallback, DIRECT, url=http://cp.cloudflare.com/generate_204, interval=120, tolerance=100, tag=流媒体
-AI = url-test, Proxy, Fallback, DIRECT, url=http://cp.cloudflare.com/generate_204, interval=120, tolerance=100, tag=AI服务
+Streaming = url-test, Proxy, Fallback, url=http://cp.cloudflare.com/generate_204, interval=120, tolerance=100, tag=流媒体
+AI = url-test, Proxy, Fallback, url=http://cp.cloudflare.com/generate_204, interval=120, tolerance=100, tag=AI服务
 Developer = select, Proxy, Fallback, DIRECT, tag=开发者
 Gaming = select, Proxy, Fallback, DIRECT, tag=游戏平台
 Social = select, Proxy, Fallback, DIRECT, tag=社交平台
@@ -148,11 +138,13 @@ DOMAIN, stun.zoom.us, Proxy
 DOMAIN-KEYWORD, stun.playstation, DIRECT
 DOMAIN-KEYWORD, stun.nintendo, DIRECT
 DOMAIN-KEYWORD, xboxlive.com, DIRECT
-DOMAIN-KEYWORD, stun, REJECT
+# 官方《规则系统 3.1》第 1 条: 目标为域名时先匹配域名规则。故上列 5 条通话白名单
+# 必先于本条命中, 白名单语义不受位置影响; 而**裸 IP 的 STUN** (无域名可匹配) 只有
+# 本条能拦 —— DOMAIN-KEYWORD 够不着它。协议匹配零成本, 优于关键词 (官方点名其耗时随
+# 数量线性增长), 且不像 DEST-PORT 那样误伤一切 host 的非标 WebRTC。需 Loon >= 3.1.7。
+# TURN (5349-3479) 走 TLS/TCP 不属 STUN 协议, 本条不覆盖; 3478 兜明文 TURN 中继。
+PROTOCOL, STUN, REJECT
 DEST-PORT, 3478, REJECT
-# 放弃项 (2026-09-21 评估, 无真机实测不加): DEST-PORT 19302 (Google) / 5349-3479
-# (TURN) — UDP 裸 IP 本就绕过域名规则, 非标端口确有泄漏面; 但端口块影响一切 host
-# (第三方 WebRTC 用非标 STUN 即断流), 白名单是域名级保不住它们, 须真机确认后加。
 
 # 局域网
 IP-CIDR, 192.168.0.0/16, DIRECT, no-resolve
@@ -222,7 +214,6 @@ DOMAIN, g.co, Proxy
 # 穿山甲统计/请求/聚合接口 (2026-08-12 HAR 审计第二轮)
 # 起点秒播脚本 (Scripts/Qidian.js) 仅依赖 gdtimg.com/gtimg.cn 视频域, 不依赖穿山甲,
 # 故 api-access/log-api/gromore 三个接口域可安全拦截 (必须先于下方 SUFFIX DIRECT)
-DOMAIN, REJECT
 DOMAIN, api-access.pangolin-sdk-toutiao.com, REJECT
 DOMAIN, api-access.pangolin-sdk-toutiao1.com, REJECT
 DOMAIN, log-api.pangolin-sdk-toutiao.com, REJECT
@@ -265,20 +256,16 @@ DOMAIN, p.l.qq.com, REJECT
 DOMAIN, us.l.qq.com, REJECT
 DOMAIN-SUFFIX, imtmp.net, REJECT
 
-# 追踪 (2026-09-19 官方文档对齐: KEYWORD 随数量涨耗时, 改精确枚举;
-# qreport 实测仅 qreport.qunar.com + qreport.cn 系, 不再用子串全网扫)
+# 追踪 — 官方点名 DOMAIN-KEYWORD 耗时随数量线性增长, 故用精确枚举而非子串全网扫。
+# (qreport 实测仅 qreport.qunar.com + qreport.cn 系)
 DOMAIN, qreport.qunar.com, REJECT
 DOMAIN-SUFFIX, qreport.cn, REJECT
 DOMAIN, aegis.cdn-go.cn, REJECT
 
 # Google 分析与广告
-# 本地精确 REJECT: 不依赖 [Remote Rule] 的列表加载 (CDN/上游故障时仍生效), 也兜住
-# `DOMAIN-KEYWORD,googleads` 这类宽匹配。2026-09-18 重排后 Global 已排在三个 REJECT
-# 列表之后, 旧的"Global 的 google 关键词抢先 googleads"遮蔽不复存在 (NEW-05 时代的
-# 本地兜底成因已失效); 保留这些条目作为 [Rule] 段显式拦截 + 上游不可用时的兜底,
-# 代价为零 ([Rule] 本就先于一切远程列表求值)。
+# 显式拦截而非依赖远程列表: [Rule] 本就先于一切 Remote Rule 求值, 故上游列表故障
+# 时这些仍生效, 代价为零。
 DOMAIN-KEYWORD, googleads, REJECT
-DOMAIN-SUFFIX, googleadservices.com, REJECT
 DOMAIN-SUFFIX, doubleclick.net, REJECT
 DOMAIN-SUFFIX, googlesyndication.com, REJECT
 DOMAIN-SUFFIX, google-analytics.com, REJECT
@@ -329,26 +316,16 @@ DOMAIN, a3.bytecdn.cn, DIRECT
 DOMAIN, p3-pack.byteimg.com, DIRECT
 DOMAIN, p6-pack.byteimg.com, DIRECT
 
-# ── 国内广告 SDK 硬拦截 (2026-08-12 HAR 审计) ─────────────────────
-# 来源: 2026-08-12 抓包 (4602 条) — 以下 SDK 域名全部 200 穿透:
-#   beizi.biz (贝兹广告: 什么值得买/西塞网等), stats.jpush.cn (极光统计: WPS/QQ阅读/米家),
-#   mmstat.com (阿里 arms), ugdtimg.com (优量汇视频素材), 1rtb.net / 66mobi.com (移动广告),
-#   cloooud.com / hubcloud.com.cn (广告聚合), sdk-open-phone.getui.com (个推统计),
-#   snssdk-eu/-us.ninebot.com (九号出行字节日志), toblog.ctobsnssdk.com (字节日志),
-#   sentry-monitor-new.zdmimg.com (smzdm 自建崩溃监控), path.book.qq.com (QQ阅读埋点),
-#   ataru/fockrt/connect.yuewen.com + upushv6.qidian.com (阅文/起点追踪)
-# ⚠️ 必须在 GEOIP,CN,DIRECT 之前: 本地规则优先, 国内域会被 GEOIP 直连截胡,
-# 插件 [Rule] 与 Remote Rule 均无法拦截国内域 (已验证 ataru/qreport 穿透)
-# ⚠️ 推送保活: 仅拦统计子域, 保留 config.jpush.cn / user.jpush.cn (极光推送) 与
-# api.getui.com (个推推送) — 全拦 SUFFIX 会断推送
-# ⚠️ GDT/穿山甲已全链 REJECT (见白名单区, 2026-08-12): 起点秒播视频替换
-# 依赖的域已随"开屏广告必除"决策一并拦截 — 秒播脚本 [Script] 匹配不到即停用,
-# 此处 SUFFIX 兜底覆盖 pgdt.ugdtimg.com 等素材子域; 统计/接口域已前置 REJECT
-# ⚠️ 广告 SDK 下发/上报接口拦截 (2026-08-12 310_HAR 审计): 智慧房东开屏广告残留
-# = 第三方 SDK 直投 (广点通素材/快手联盟/穿山甲/Sigmob)。广点通请求/素材域已全链
-# REJECT (见白名单区); 此处拦截快手联盟 (gdfp.gifshow.com 下发 + open.e.kuaishou.com
-# 配置/广告请求), 穿山甲请求接口 (tnc3-alisc1.zijieapi.com), Sigmob (sigmob.cn 全家),
-# 优量汇展示上报 (v.gdt.qq.com / win.gdt.qq.com)
+# ── 国内广告 SDK 硬拦截 ──────────────────────────────────────
+# 全部条目经 HAR 抓包实证为 200 穿透 (纯广告/统计/上报接口, 无功能依赖)。
+# 三条纪律:
+# ① 整段必须在 GEOIP,CN,DIRECT 之前 —— 本地规则优先, 国内域会被 GEOIP 直连截胡,
+#    插件与 Remote Rule 均无法拦截国内域。
+# ② 推送保活: 只拦统计子域, 保留 config.jpush.cn / user.jpush.cn (极光推送) 与
+#    api.getui.com (个推推送) —— 全拦 SUFFIX 会断推送。
+# ③ 新增域名须先 DoH 双解析器 + HTTPS 探针取证。凭域名字义加 REJECT 是本仓犯过的错:
+#    京东 du.jd.com / c-nfa.jd.com 实为店铺域 (302 → error2.aspx?from=shopdomain),
+#    误拦直接破店铺页; jzt.jd.com 是对外 Jenkins CI。
 DOMAIN, v.gdt.qq.com, REJECT
 DOMAIN, win.gdt.qq.com, REJECT
 DOMAIN-SUFFIX, sigmob.cn, REJECT
@@ -375,15 +352,9 @@ DOMAIN, fockrt.yuewen.com, REJECT
 DOMAIN, connect.yuewen.com, REJECT
 DOMAIN, upushv6.qidian.com, REJECT
 
-# ── 国内广告/追踪 SDK 硬拦截 · 第二轮 (2026-08-12 HAR 审计) ──────
-# 来源: 同一 HAR 继续挖掘 — 纯日志/埋点/APM 接口, 无功能依赖 (均实测 200 穿透):
-#   穿山甲 (api-access/log-api/gromore, 已前置), adkwai.com (快手广告: p66-ad/p4-lm),
-#   支付宝日志网关 (datagw-edge/loggw-ex/mdap, 纯 logUpload), mobads.baidu.com (百度广告),
-#   sensors.umetrip.com.cn (航旅纵横神策), rmonitor.qq.com, QQ阅读 (unitelogreport/ywab),
-#   UT 埋点 (h-adashx.ut.dingtalk, adashbc.ut.taobao), djiservice.org (大疆),
-#   analytics-api-01.smzdm.com, adwangmai/toponad/gameley (小广告网),
-#   zhipin (logapi-ios/apm-ios), volces APM / bytedance mssdk, 点评/美团埋点, delicloud
-# 放弃项: proj-xtrace-*.log.aliyuncs.com / ce3e75d5.jpush.cn (哈希前缀轮换, 无法精确)
+# ── 日志/埋点/APM 接口 (纯上报, 无功能依赖) ────────────────────
+# 放弃项: proj-xtrace-*.log.aliyuncs.com / ce3e75d5.jpush.cn —— 哈希前缀每日轮换,
+# 无法写成精确域名规则, 拦截即随上游轮换失效。
 DOMAIN-SUFFIX, adkwai.com, REJECT
 DOMAIN, datagw-edge.alipay.com, REJECT
 DOMAIN, loggw-ex.alipay.com, REJECT
@@ -418,74 +389,24 @@ GEOIP, CN, DIRECT
 FINAL, Final
 
 [Remote Rule]
-# 2026-09-29 精简: 本段原挂 7 个第三方镜像规则列表 (Advertising 972 / Privacy 24 /
-#   Hijacking 231 / China 69 / Global 207 / Epic 16 / goodbyeads 120387 条), 现全部移除。
-#   代价 (需知悉): 失去 12 万条通用广告域名兜底, 长尾广告域不再被 REJECT, 改走 Final。
-#   保留的自建拦截面: 下方 [Rule] 段的国内外广告/追踪 SDK 硬拦截 + 46 个 Plugin +
-#   29 个 Scripts 的逐 App 字段级净化。
-#   ⚠️ 随之消失的语义: 原注释所记 "China 的 cn 后缀吞掉 941+606 条 REJECT" 一类遮蔽
-#   不再存在 (无远程列表参与按序求值), 故 check:shadow 门禁一并删除。
+# 本段为空。历史曾挂 7 个第三方镜像规则列表 (末位一个 12 万条的通用广告域名表),
+# 2026-09-29 全部移除 —— 代价是**失去长尾广告域兜底**: 未登记的广告域不再被 REJECT,
+# 一律走 Final (默认 Proxy)。保留的拦截面是 [Rule] 段的 122 条已取证 REJECT。
 
 [Plugin]
-# 注: DNS leak 规则已直接内置在 [Rule] 段, 不再需要独立插件
-https://ws.wenn.in/main/Plugin/quicksearch.plugin, enabled=true, tag=快捷搜索
-https://ws.wenn.in/main/Plugin/notify.plugin, enabled=true, tag=🔔 定时通知
-# 诊断助手: generic 手动触发 — 双链路探活 (代理/直连) + 判定, 零常驻流量影响
-https://ws.wenn.in/main/Plugin/diagnostics.plugin, enabled=true, tag=🩺 诊断助手
-https://ws.wenn.in/main/Plugin/privacy-shield.plugin, enabled=true, tag=🔒 隐私防护 (SDK 追踪全拦截)
-https://ws.wenn.in/main/Plugin/wechat-pro.plugin, enabled=true, tag=微信去广告 Pro
-https://ws.wenn.in/main/Plugin/bilibili-pro.plugin, enabled=true, tag=B站去广告 Pro
-https://ws.wenn.in/main/Plugin/shopping-purify.plugin, enabled=true, tag=🛍 购物生活净化 Pro
-https://ws.wenn.in/main/Plugin/video-community-purify.plugin, enabled=true, tag=🎬 视频社区净化
-https://ws.wenn.in/main/Plugin/media-reading-purify.plugin, enabled=true, tag=🎵 影音阅读净化
-https://ws.wenn.in/main/Plugin/transport-purify.plugin, enabled=true, tag=🚕 出行外卖净化
-https://ws.wenn.in/main/Plugin/news-purify.plugin, enabled=true, tag=📰 资讯阅读净化
-https://ws.wenn.in/main/Plugin/social-netdisk-purify.plugin, enabled=true, tag=⚙️ 社交网盘工具净化
-
-https://ws.wenn.in/main/Plugin/bilicomics.plugin, enabled=true, tag=B站漫画去广告
-https://ws.wenn.in/main/Plugin/netease-pro.plugin, enabled=true, tag=网易云音乐净化 Pro
-https://ws.wenn.in/main/Plugin/qishui.plugin, enabled=true, tag=汽水音乐净化
-https://ws.wenn.in/main/Plugin/taopiaopiao-pro.plugin, enabled=true, tag=淘票票净化 Pro
-https://ws.wenn.in/main/Plugin/amap.plugin, enabled=true, tag=高德地图去广告
-https://ws.wenn.in/main/Plugin/jd-pro.plugin, enabled=true, tag=京东去广告 Pro
-https://ws.wenn.in/main/Plugin/qqmusic.plugin, enabled=true, tag=QQ音乐去广告
-https://ws.wenn.in/main/Plugin/zhihu-pro.plugin, enabled=true, tag=知乎去广告 Pro
-# — App Pro 深度净化 —
-https://ws.wenn.in/main/Plugin/weibo-pro.plugin, enabled=true, tag=微博去广告 Pro
-https://ws.wenn.in/main/Plugin/xiaohongshu-pro.plugin, enabled=true, tag=小红书净化 Pro
-https://ws.wenn.in/main/Plugin/iqiyi-pro.plugin, enabled=true, tag=爱奇艺净化 Pro
-https://ws.wenn.in/main/Plugin/tencent-video-pro.plugin, enabled=true, tag=腾讯视频净化 Pro
-https://ws.wenn.in/main/Plugin/taobao-tmall-pro.plugin, enabled=true, tag=淘宝天猫净化 Pro
-https://ws.wenn.in/main/Plugin/pinduoduo-pro.plugin, enabled=true, tag=拼多多净化 Pro
-https://ws.wenn.in/main/Plugin/alipay-pro.plugin, enabled=true, tag=支付宝净化 Pro
-https://ws.wenn.in/main/Plugin/alipay-miniprogram-pro.plugin, enabled=true, tag=支付宝小程序净化 Pro
-https://ws.wenn.in/main/Plugin/sunshufu-pro.plugin, enabled=true, tag=云闪付净化 Pro
-https://ws.wenn.in/main/Plugin/bdpan-pro.plugin, enabled=true, tag=百度网盘净化 Pro
-https://ws.wenn.in/main/Plugin/didi-pro.plugin, enabled=true, tag=滴滴出行净化 Pro
-https://ws.wenn.in/main/Plugin/dingtalk-pro.plugin, enabled=true, tag=钉钉净化 Pro
-https://ws.wenn.in/main/Plugin/overseas-social-pro.plugin, enabled=true, tag=海外社交净化 Pro
-https://ws.wenn.in/main/Plugin/streaming-overseas-pro.plugin, enabled=true, tag=海外流媒体增强 Pro
-https://ws.wenn.in/main/Plugin/shopping-overseas-pro.plugin, enabled=true, tag=海外购物净化 Pro
-https://ws.wenn.in/main/Plugin/apple-services-pro.plugin, enabled=true, tag=Apple 服务增强 Pro
-https://ws.wenn.in/main/Plugin/safari-webview-pro.plugin, enabled=true, tag=浏览器净化 Pro
-https://ws.wenn.in/main/Plugin/startup-adblock-pro.plugin, enabled=true, tag=开屏广告通杀 Pro
+# 唯一自维护插件。其余 45 个 CDN 插件已下线 —— 本配置的去广告能力只剩本段
+# [Rule] 的 122 条 REJECT + bank-ad-reject snippet + 本插件的字段级净化,
+# **App 内部结构化广告位无法清理**。恢复方式: 在本段补回对应 URL。
 https://ws.wenn.in/main/Plugin/qidian.plugin, enabled=true, tag=起点全能助手 Pro
-https://ws.wenn.in/main/Plugin/bank.plugin, enabled=true, tag=银行及云闪付去广告
-https://ws.wenn.in/main/Plugin/ai.plugin, enabled=true, tag=AI 服务分流
-https://ws.wenn.in/main/Plugin/wechat-read.plugin, enabled=true, tag=微信读书去广告
-https://ws.wenn.in/main/Plugin/luckin-pro.plugin, enabled=true, tag=瑞幸咖啡去广告 Pro
-https://ws.wenn.in/main/Plugin/umetrip-pro.plugin, enabled=true, tag=航旅纵横去广告 Pro
-https://ws.wenn.in/main/Plugin/keep-pro.plugin, enabled=true, tag=Keep 去广告 Pro
-https://ws.wenn.in/main/Plugin/ximalaya-pro.plugin, enabled=true, tag=喜马拉雅去广告 Pro
-# — 功能增强插件 (本地替代 kelee.one LPX, 2026-08-25 起 kelee.one 全局 403) —
-# Google 重定向: 本地 Kelee/Google.plugin 替代原 kelee.one/Google.lpx
 
 [Rewrite]
-^https?:\/\/119\.29\.29\.29\/d reject-200
-^https?:\/\/203\.107\.1\.1\/d reject-200
-^https?:\/\/223\.5\.5\.5\/d reject-200
-^https?:\/\/1\.12\.12\.12\/d reject-200
-^https?:\/\/120\.53\.53\.53\/d reject-200
+# 本段为空。历史曾有 5 条针对公共 DoH 端点 (/d 路径) 的 reject-200, 因两重死因失效:
+#   ① 路径错 —— 真实端点在 /dns-query, /d 一律 404 或超时 (已实测);
+#   ② 裸 IP 不在 [MitM] 正条目, 故 https:// 变体连 Rewrite 都进不去 (Rewrite 只对
+#      HTTP 与经 MitM 解密的 HTTPS 生效)。
+# 若将来要拦"应用绕过加密 DNS": 只能对**已知的第三方 DoH 端点**加 DOMAIN-SUFFIX
+# REJECT, 且**绝不能**含 dns.alidns.com / doh.pub —— 那是本配置自身的 doh-server
+# 上游 (surgio.conf.js customParams), 拦了即解析链自噬。
 
 [MitM]
 skip-server-cert-verify = false
