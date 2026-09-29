@@ -336,7 +336,32 @@ response … enable={CAPTURE_ENABLE}        ← 消费
 
 **经典广告平台**（候选 24 缺口域 → 实加 7 条）：探针后**明确排除 7 个平台主域**（`kuaishou`/`snssdk`/`e.qq`/`gdt.qq`/`union.baidu`/`miui`/`ads.union.jd`）—— 整域拦会破 App 功能，只拦已取证的广告子域；另 7 个已死域（CF 解析 0 条）不占资源不拦。只加 3 条纯广告联盟 SDK（`tradplusad`/`anythinktech`/`gromore`）+ 4 条广告 API（`ad.qq`/`cpro`/`pos`/`cpu-openapi`）。全部走 DNS 阶段 REJECT，**零证书成本**。
 
-**判据沉淀**：HAR 缺失**不等于**停手理由——先搜上游/issue/已构建插件，三源交叉验证强度往往高于单份 HAR。
+## 附四：广告平台去广告插件（2026-09-29，全网平台研判）
+
+**设计前提**（决定了整套形态）：本仓 `domain-reject-mode = DNS` ⇒ 域名拒绝在 DNS 阶段用回环地址完成，请求到不了 HTTP 响应层。⇒ 广告平台拦截**一律 L2 纯 `[Rule] REJECT`、无 `[MitM]`、零 CA 证书成本**。官方《策略》的 REJECT-IMG/DICT/ARRAY 等变体描述的都是 HTTP 响应内容，在 DNS 拒绝场景下**不适用**。
+
+**为什么拆成 6 个独立插件、而不是一个带开关的大插件**：官方《插件》明确策略位只有 `DIRECT`/`REJECT 系列`/`PROXY`，插件参数只作用于 `Script`(`enable={}`) 与 `Rewrite`(`${}`) —— **普通 `[Rule]` 行挂不了条件**。在一个纯 REJECT 插件里声明 6 个 switch 会得到 6 个**死参数**，误导用户以为能开关。拆成独立插件、**启停插件即按平台开关**，是 Loon 原生且无死参数的做法。
+
+| 插件 | 平台 | 域数 | 明确排除（拦了会破功能） |
+|---|---|---|---|
+| `ad-pangolin.plugin` | 穿山甲/字节 | 17 | aweme 内容流 / video-cn 视频CDN / temai 电商 / tnc3 内容 / bytescm 通用CDN / gecko-pangle 落地页 |
+| `ad-gdt.plugin` | 广点通/腾讯广告 | 8 | `e.qq.com` 父域（企微/公众号）/ trace·btrace·imgcache（全站埋点非广告专有） |
+| `ad-kuaishou.plugin` | 快手联盟 | 7 | `kuaishou.com` 主域（短视频本体）/`e.kuaishou.com` 主域级电商 |
+| `ad-baidu.plugin` | 百度联盟 | 2 | `union.baidu.com` 主站（含落地页） |
+| `ad-google.plugin` | Google/AdMob | 1 | `doubleclick.net`/`googlesyndication.com` 主配置已有 SUFFIX 覆盖，不重复 |
+| `ad-intl.plugin` | 国际聚合 | 3 | Sigmob/TradPlus/AnyThink 已部分被主配置 SUFFIX 覆盖，只留未覆盖的 |
+
+**筛选漏斗**（101 候选 → 38 实装，每一步都有门禁或探针支撑）：
+1. 从两份上游规则提取广告平台域 → 101 个活域候选
+2. DoH(Cloudflare + DNS.google) 探针 → 剔除 15 个已死域（解析 0 条，不占资源）
+3. 跨层核对 → 剔除 17 个主配置已覆盖的域
+4. 语义排除内容本体域 → 上表的"明确排除"列
+5. `plugin-tpl-shadow` 门禁**当场抓到 10 条子域被主配置 SUFFIX 遮蔽**（`doubleclick.net` / `googlesyndication.com` 等）—— 我的初始"已覆盖"检测只比对精确 `DOMAIN`，**漏判 SUFFIX 覆盖**，是门禁替我补上的。
+
+**新增门禁**（`test/cases/ad-platform-plugins.test.js`，6 例）锁死三条属性：① 零 `[MitM]`（拦广告不得产生证书成本）；② 全部规则裸 `DOMAIN REJECT`、无 `DIRECT`/`Proxy` 例外（广告域出现例外即说明有人凭域名字义误判）；③ **不得声明 `[Argument]`**（纯 `[Rule]` 插件挂不了条件，声明即死参数）。
+
+**判据沉淀**：给广告平台做去广告时，先问"这层拦截需不需要解密面"——L2 域名 REJECT 一律不需要，**加了 `[MitM]` 就是净损失**。
+**HAR 缺失**不等于**停手理由**——先搜上游/issue/已构建插件，三源交叉验证强度往往高于单份 HAR。
 **功能域白名单的成因会随配置演进而失效**，注释必须随成因更新，否则后人会误判它是空转或误删。**「无治理」在缺少解密面与 HAR 时是正确基线，不是缺口。**
 
 ---

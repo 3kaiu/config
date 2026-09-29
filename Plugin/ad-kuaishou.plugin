@@ -1,0 +1,31 @@
+#!name=快手联盟去广告
+#!desc=快手联盟广告 API 域拦截。DNS 阶段生效, 零证书成本。
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+#!tag = 去广告,广告平台,快手,快手联盟,ksapisrv
+#!type = normal
+# 本插件**无 [Argument]**: 官方《插件》仅支持策略位 DIRECT/REJECT/PROXY,
+# 插件参数只作用于 Script(enable={}) 与 Rewrite(${}); 普通 [Rule] 行无法挂条件
+# ⇒ 死参数会误导用户以为能开关。按平台拆成独立插件, 启停插件即按平台开关。
+
+[Rule]
+# ── 生效层: L2 域名 REJECT ──────────────────────────────────────
+# 本仓 domain-reject-mode = DNS + dns-reject-mode = LOOPBACKIP ⇒ 拒绝在
+# **DNS 阶段**用回环地址完成, 请求到不了 HTTP 响应层。故本插件**无 [MitM]**,
+# 拦广告零 CA 证书成本 (不进解密面 = 不多背一份证书信任)。
+# 官方《策略》: REJECT-DICT/IMG/ARRAY 等变体描述的都是 HTTP 响应内容,
+# 在 DNS 阶段拒绝的场景下**不适用** (见 AGENTS.md 策略层 REJECT 变体定论)。
+#
+# **不拦 kuaishou.com 主域**(短视频本体)与 e.kuaishou.com 主域级电商, 只拦 ksapisrv 广告 API。
+# 取证: DoH(Cloudflare + DNS.google 双解析器) + HTTPS 探针; 已剔除已死域、
+# 平台主域、以及主配置已覆盖的域(避免跨层重复)。
+
+DOMAIN, az2-api.ksapisrv.com, REJECT
+DOMAIN, az2-api-idc.ksapisrv.com, REJECT
+DOMAIN, az4-api.ksapisrv.com, REJECT
+DOMAIN, az4-api-idc.ksapisrv.com, REJECT
+DOMAIN, az2-live.ksapisrv.com, REJECT
+DOMAIN, apissl.ksapisrv.com, REJECT
+DOMAIN, open.e.kuaishou.cn, REJECT

@@ -1,11 +1,25 @@
 {
   "schema_version": 1,
-  "plugin_count": 2,
-  "app_count": 2,
+  "plugin_count": 8,
+  "app_count": 8,
   "multi_owner": [],
   "fake_granularity": [],
   "undeclared_scripts": [],
   "apps": [
+    {
+      "app": "Google/AdMob",
+      "owners": [
+        {
+          "plugin": "ad-google.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 0,
+          "rules_basis": "plugin-total",
+          "granularity": "global",
+          "covers": null
+        }
+      ]
+    },
     {
       "app": "京东",
       "owners": [
@@ -16,6 +30,76 @@
           "rules": 1,
           "rules_basis": "plugin-total",
           "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "国际广告聚合",
+      "owners": [
+        {
+          "plugin": "ad-intl.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 0,
+          "rules_basis": "plugin-total",
+          "granularity": "global",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "广点通 GDT/腾讯广告",
+      "owners": [
+        {
+          "plugin": "ad-gdt.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 0,
+          "rules_basis": "plugin-total",
+          "granularity": "global",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "快手联盟 Kwai",
+      "owners": [
+        {
+          "plugin": "ad-kuaishou.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 0,
+          "rules_basis": "plugin-total",
+          "granularity": "global",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "百度联盟",
+      "owners": [
+        {
+          "plugin": "ad-baidu.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 0,
+          "rules_basis": "plugin-total",
+          "granularity": "global",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "穿山甲/字节 Pangolin",
+      "owners": [
+        {
+          "plugin": "ad-pangolin.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 0,
+          "rules_basis": "plugin-total",
+          "granularity": "global",
           "covers": null
         }
       ]
@@ -36,6 +120,60 @@
     }
   ],
   "plugins": [
+    {
+      "file": "Plugin/ad-baidu.plugin",
+      "module": "M2",
+      "switches": 0,
+      "rules": 0,
+      "scripts": [],
+      "mitm_hosts": 0,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/ad-gdt.plugin",
+      "module": "M2",
+      "switches": 0,
+      "rules": 0,
+      "scripts": [],
+      "mitm_hosts": 0,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/ad-google.plugin",
+      "module": "M2",
+      "switches": 0,
+      "rules": 0,
+      "scripts": [],
+      "mitm_hosts": 0,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/ad-intl.plugin",
+      "module": "M2",
+      "switches": 0,
+      "rules": 0,
+      "scripts": [],
+      "mitm_hosts": 0,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/ad-kuaishou.plugin",
+      "module": "M2",
+      "switches": 0,
+      "rules": 0,
+      "scripts": [],
+      "mitm_hosts": 0,
+      "switch_usage": []
+    },
+    {
+      "file": "Plugin/ad-pangolin.plugin",
+      "module": "M2",
+      "switches": 0,
+      "rules": 0,
+      "scripts": [],
+      "mitm_hosts": 0,
+      "switch_usage": []
+    },
     {
       "file": "Plugin/jd.plugin",
       "module": "M2",
