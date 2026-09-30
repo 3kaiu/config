@@ -1,4 +1,4 @@
-#!name=上报与埋点拦截器（M3·6 通道 37 域）
+#!name=上报与埋点拦截器（M3）
 #!desc=友盟+ · 厂商自有遥测(小米/vivo/OPPO/魅族) · 前端监控埋点(GrowingIO/神策/网易易盾) · 腾讯 Bugly · 阿里云 ARMS · Firebase-Segment 六通道并集。纯 L2 域名 REJECT, 无 [MitM]/[Script]。
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config

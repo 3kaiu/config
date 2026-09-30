@@ -151,10 +151,24 @@ request|response if <条件> then <action> [| <action>…]
 
 ### 1.9 `[Plugin]`
 
-- 元数据（官方 `#!` 集合）：`name/desc/author/homepage/icon/version/system/system_version/loon_version/tag/type`（type: normal｜parser）。**`#!arguments-desc` 不在官方集合内** —— 本仓已于 2026-09-30 从两个插件移除，参数唯一真源是 `[Argument]`。
+- 元数据（官方 `#!` 集合，2026-09-30 逐字重核 `https://nsloon.app/docs/Plugin/`）：**恰好 10 个** ——
+  `name/desc/author/homepage/icon/system/system_version/loon_version/tag/type`（`type`: `normal`｜`parser`，后者为「资源解析器」）。
+  - ⚠️ **本文件此前把 `version` 错列为官方字段** ⇒ 两个插件照着写了 `#!version`，而当时无任何门禁可发现。
+    已修正：`jd.plugin`/`qidian.plugin` 的 `#!version` 移除（版本信息留在 `#!desc`），并补
+    `#!tag`/`#!type` 便于 Loon UI 分类。**教训：基准文档写错 = 全仓照着错**，故这次同时补了门禁。
+  - `#!arguments-desc`（旧版常见）同样不在表内 —— 本仓 2026-09-30 移除，参数唯一真源是 `[Argument]`。
+  - 门禁（2026-09-30 新增，此前是纸面纪律）：`tools/plugin-lint-check.mjs` 的 `META_KEYS` 白名单判红表外字段；
+    `#!name` 内**嵌数量**（域/条/平台/通道）判红 —— 实测 `ad-block.plugin` 的 `#!name` 写着"7 平台 59 域"时
+    文件里已是 967 条。行为用例：`test/cases/plugin-lint.test.js`。
+- **文件名与扩展名（官方无规定，2026-09-30 核实）**：官方《插件》页对文件名/扩展名**零要求**；官方
+  **插件转换器**（nsloon.app/plugin-converter）接受 `.lpx · .plugin · .conf · .txt · .zip · .rar` 作为插件输入
+  ⇒ `.plugin` 与社区常用的 `.lpx` **同等合法**（Loon 按 URL 取回后解析内容，扩展名不参与判定）。
+  本仓选择：kebab-case、按层前缀（`ad-block` / `dns-httpdns` / `dns-leak` / `probe-block` / `qidian` / `jd`）；
+  分发只经 `[Plugin]` 段，文件名对用户不可见。
 - `[Argument]`：`input`/`select`/`switch` + `tag`/`desc`；脚本侧 `argument=[{KEY}]`（旧）/ `{${KEY}}`（v2 对象）；`enable={KEY}` 开关绑定（官方收录）；v2 复写用 `${KEY}` 条件。
 - 插件规则策略白名单：**DIRECT / REJECT 系列 / PROXY**，缺省 DIRECT —— 13 个 L2 插件正踩此契约。
-- 分发：`template/loon.tpl` `[Plugin]` 段是唯一渠道（wiring-check 判红）；客户端侧最短接入路径 `loon://import?plugin=encode(url)`。
+- 分发：`template/loon.tpl` `[Plugin]` 段是唯一渠道（wiring-check 判红）；客户端侧最短接入路径 `loon://import?plugin=encode(url)`（⚠️ 官方 Scheme 表**无斜杠**：`loon://import?plugin=`，社区常见的 `loon://import/?plugin=` 多一个 `/`）。
+- **`[Plugin]` 段的条目参数（`enabled=` / `tag=`）未见于现行文档**（2026-09-30 逐页核对 General/Plugin/Scheme 三页均无）——属 App UI 写出的既成事实（用户在客户端拨开关时由 Loon 写入）。本仓照用并记录该缺口：**未文档化参数有变更风险**，故 `[Plugin]` 段每次改动都由 `upstream-coverage` 与 wiring-check 双向锁死。
 
 ### 1.10 `[MitM]`
 
@@ -163,6 +177,8 @@ hostname = example.com, *.example.org, -private.example.org   # 通配 + `-` 排
 ca-p12 = <Base64 单行>
 ca-passphrase = <密码>
 ```
+
+**段名拼写**：MitM 文档页写作 `[MitM]`，而《插件》页的完整示例写作 `[Mitm]` —— 官方自身不一致，实测大小写不敏感。本仓统一 `[MitM]`，并由 `plugin-lint-check` 的段名白名单固定（`VALID_SEG`）。
 
 CA 用官网证书工具本地生成。**本仓纪律**：解密面最小化（mitm-orphan/mitm-coverage 双门禁）；**通配与 `-` 排除弃用** —— 通配 host 判 generic 恒报孤儿，显式列举是硬约束；银行域靠 `real-ip` + 不进 hostname 实现免解密（L6）。
 

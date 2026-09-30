@@ -7,7 +7,7 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 ## 命令
 
 - `npm run build`：注入 `src/env.ts` 与 `src/lib/*.ts`，把 `src/*.ts` 压缩到 `Scripts/`。改源码后必须执行。
-- `npm test`：195 个行为级用例（含复写×脚本互斥门禁），引用全部 2 个 Scripts 产物（`Qidian.js` 手工轨 + `jingdong.js` 构建轨）；随后执行规则顺序与接线检查。关键文档数字由 `tools/doc-claims-check.mjs` 对照实测（该系统扫 `AGENTS.md` + `MODULES.md` + `MODULE-MANIFEST.json` 三份，跨文件矛盾判红）。
+- `npm test`：198 个行为级用例（含复写×脚本互斥门禁），引用全部 2 个 Scripts 产物（`Qidian.js` 手工轨 + `jingdong.js` 构建轨）；随后执行规则顺序与接线检查。关键文档数字由 `tools/doc-claims-check.mjs` 对照实测（该系统扫 `AGENTS.md` + `MODULES.md` + `MODULE-MANIFEST.json` 三份，跨文件矛盾判红）。
 - `npm run lint`：ESLint flat config，检查 `Scripts/`、`test/`、`tools/`。
 - `npm run generate`：Surgio 3.19 从纯静态模板生成 `Profile/Loon.lcf`。该命令会创建空 `dist/`，`.gitignore` 中对应规则必须保留。
 - `npm run check:all`：串行执行 sync、rewrite、src、orphan、plugin、contract、workflows、scripts、index、secrets、profile-hash、**coverage** 门禁；不包含 build、test、lint、generate。`scripts` 把 build 命令重定向到**临时目录**重建后与 `Scripts/` 逐字节比对 —— 补的是本地盲区：手改产物或改了 src 没 build 时，其余门禁会全绿。
@@ -37,7 +37,7 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 | `src/env.ts` | `Env` 兼容与宿主封装 | 只经 `--inject` 注入 |
 | `Scripts/*.js` | CDN 运行时脚本 | **仅 `Qidian.js` 存在**（手工轨，无 src）；新增脚本须走 src/ 构建并由 CI 检查漂移 |
 | `Scripts/Qidian.js` | 无源码手工轨 | 引擎 marker 内变更须同步 `ENGINE-MANIFEST.json` |
-| `Plugin/*.plugin` | Loon 插件外壳（**6 个**，**分两层**：L0 依赖层 = `ad-block.plugin` 广告平台拦截器（967 = 人工策展 + 418 生成 + 490 社区复核）+ `dns-httpdns.plugin` HTTPDNS 拦截器（72）+ `dns-leak.plugin` DNS 防泄漏（35）；L1 消费层 = `qidian.plugin` 起点 + `jd.plugin` 京东 + `probe-block.plugin` 上报/埋点拦截（M3·6 通道并集）。L0 必须是 `[Plugin]` 段最前三条） | `[Script]`/`[Rewrite]`/`[MitM]` 与参数必须配套；**新增插件必须同时登记进 `template/loon.tpl` 的 `[Plugin]` 段**（该段是唯一分发渠道），否则 `npm test` 的 wiring-check 判红；插件元数据只用官方 `#!` 集合 —— `#!arguments-desc` 已移除（2026-09-30），参数唯一真源是 `[Argument]` |
+| `Plugin/*.plugin` | Loon 插件外壳（**6 个**，**分两层**：L0 依赖层 = `ad-block.plugin` 广告平台拦截器（967 = 人工策展 + 418 生成 + 490 社区复核）+ `dns-httpdns.plugin` HTTPDNS 拦截器（72）+ `dns-leak.plugin` DNS 防泄漏（35）；L1 消费层 = `qidian.plugin` 起点 + `jd.plugin` 京东 + `probe-block.plugin` 上报/埋点拦截（M3·6 通道并集）。L0 必须是 `[Plugin]` 段最前三条） | `[Script]`/`[Rewrite]`/`[MitM]` 与参数必须配套；**新增插件必须同时登记进 `template/loon.tpl` 的 `[Plugin]` 段**（该段是唯一分发渠道），否则 `npm test` 的 wiring-check 判红；插件元数据只用官方 `#!` 集合（**10 个**：name/desc/author/homepage/icon/system/system_version/loon_version/tag/type）—— 由 `tools/plugin-lint-check.mjs` 的 `META_KEYS` 白名单**判红**（2026-09-30 前是纸面纪律：`#!version` 曾照抄本仓基准里的错记录混进两个插件）；`#!name` 内不得嵌数量（会漂移）；参数唯一真源是 `[Argument]`。扩展名官方无规定（转换器接受 `.lpx/.plugin/.conf/.txt`），详见 [LOON-FEATURES.md](LOON-FEATURES.md) §1.9 |
 | `template/loon.tpl` | Loon 模板 | 修改后 regenerate + `check:sync`；`Proxy` 必须直接聚合外部订阅策略组"东京"；`[Plugin]` 增删 URL 后须同步 `.github/workflows/upstream-health.yml` 的 CDN 探活（`upstream-coverage` 双向断言） |
 | `template/snippet/*.tpl` | 分流规则片段 | 归 M1（5 个）或 M4（1 个） |
 | `MODULE-MANIFEST.json` | 资源归类真源 | 改插件/脚本必须同步，否则 `module-manifest` 门禁判红 |
@@ -79,7 +79,7 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 
 ## CI 门禁
 
-- `script-tests.yml`：lint、build、Scripts 漂移、195 用例（含复写×脚本互斥、app-ads.txt 平台层取证、插件分层、插件↔插件死规则、密钥扫描、Profile 校验和、候选流水线、L0 覆盖管线与台账新鲜度、社区清单准入、JD 新协议 base64）、构建出处 attestation。
+- `script-tests.yml`：lint、build、Scripts 漂移、198 用例（含复写×脚本互斥、app-ads.txt 平台层取证、插件分层、插件↔插件死规则、密钥扫描、Profile 校验和、候选流水线、L0 覆盖管线与台账新鲜度、社区清单准入、JD 新协议 base64）、构建出处 attestation。
 - `config-validate.yml`：MitM、插件结构、参数契约、源码反模式、workflow bash、模板同步、密钥扫描、Profile 校验和、**L0 覆盖管线产物一致性**、Qidian 哈希、规则冗余、模块清单、接线与银行域名断言；独立 job 重生成 Loon 配置验证幂等。
 - `surgio-build.yml`：模板/构建配置变化后自动生成 PR；发布前检查无凭据且 `[Proxy]` 无静态节点。
 - `upstream-health.yml`：客户端直连的 GeoIP mmdb + 自建 CDN（Plugin/Scripts）可用性。探活目标由 `upstream-coverage` 门禁双向锁死（漏探活与探死资源都判红）。**自建 CDN 不只是探状态码**（2026-09-30 吸纳 SukkaW/Surge 的 post-deploy marker 判据）：`ws.wenn.in/main/<path>` 实测是 `origin/main` 的纯字节镜像 ⇒ 同路径比对 sha256（不一致复取一次再判，避免边缘节点竞态开 issue），补三类静默失效：CDN 缓存滞后（200 但内容是旧版）、200 的 HTML 错误页/截断、产物改了没重新发布；「CDN 有内容但仓库无此文件」= 模板引用与仓库脱节，同样判红。

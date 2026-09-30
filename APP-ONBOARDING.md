@@ -12,7 +12,9 @@
 
 | 用途 | 地址 |
 |---|---|
-| 导入（客户端订阅） | `https://ws.wenn.in/main/Profile/Loon.lcf` |
+| 导入（客户端订阅） | `https://ws.wenn.in/main/Profile/Loon.lcf
+
+> 一键导入（官方 Scheme，注意**无斜杠**）：`loon://import?sub=` + URL 编码后的上面那个地址。` |
 | 同源镜像（自建 CDN 不可用时） | `https://raw.githubusercontent.com/3kaiu/config/main/Profile/Loon.lcf` |
 | **完整性校验和** | `Profile/Loon.lcf.sha256`（仓库内，`sha256sum -c` 兼容格式） |
 

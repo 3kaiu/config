@@ -1,10 +1,11 @@
 #!name=京东去广告 Pro
 #!desc=开屏/首页/我的/订单/物流/新品页广告字段级净化, 兼容京东 15.9.50+ base64 新协议。一律 delete/filter, 不整条 reject。
-#!version=1.0
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.2.4(787)
+#!tag = 去广告,京东
+#!type = normal
 
 [Argument]
 JINGDONG_ENABLE = switch,true,tag=京东去广告,desc=是否开启京东广告净化

@@ -1,10 +1,11 @@
 #!name=起点全能助手 Pro v7.8
 #!desc=抓包驱动深度净化 · 福利中心精简 · 发现页白名单 · 自动静默签到 & 高阶福利任务自动化。v7.8: checkin 快速失败 + DNS 预热 + TIMEOUT 420s。 (整合 kelee 规则)
-#!version=8.8
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.5.1(978)
+#!tag = 起点,去广告,签到
+#!type = normal
 
 [Argument]
 CAPTURE_ENABLE=switch,"true","false",tag=是否开启抓取重写, desc=是否开启抓取重写以捕获 Cookie

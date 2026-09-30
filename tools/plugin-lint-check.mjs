@@ -12,6 +12,17 @@ import { fileURLToPath } from "url";
 
 const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const VALID_SEG = new Set(["Rule", "Rewrite", "MitM", "Script", "Argument", "Host", "General"]);
+// 官方《插件》页的 #! 字段表 (2026-09-30 逐字核对 https://nsloon.app/docs/Plugin/)。表外字段判红 ——
+// 补的是"AGENTS.md 声称『插件元数据只用官方 #! 集合』, 却**没有任何门禁在查**"的假门禁:
+// 2026-09-30 实测 `jd.plugin`/`qidian.plugin` 用了社区习惯的 `#!version`(官方未收录)而无人发现。
+// `#!icon` 在表内但本仓不用(第三方图标服务 32/45 已 404, 见 external-deps 用例)。
+const META_KEYS = new Set([
+  "name", "desc", "author", "homepage", "icon",
+  "system", "system_version", "loon_version", "tag", "type",
+]);
+// 名字里嵌数量(域/条/平台/通道)必然漂移 —— 实测 ad-block 的 `#!name` 写着"7 平台 59 域"时,
+// 文件里已是 967 条规则(生成式覆盖 + 社区复核收录后没人回头改名字)。数量属于 desc/注释/清单。
+const COUNT_IN_NAME = /\d+\s*个?\s*(域|条|平台|通道)/;
 const ACTION_OK =
   /reject|reject-dict|reject-array|reject-img|reject-video|reject-200|reject-403|reject-drop|reject-empty|response-body|mock-response-body|redirect|header-|script-path|request-body|url-remove|exception|direct|proxy|302|307|301|\d{3}|enable=\{/i;
 // 可疑的 Rewrite 第二 token — 官方动作表无此 token:
@@ -28,7 +39,7 @@ const RULE_PREFIX =
 const quiet = process.argv.includes("--quiet");
 
 /**
- * 单插件文本检查 — 纯函数 (无 I/O、无全局态), 供 CLI 与 test/cases/plugin-lint-check.test.js 复用。
+ * 单插件文本检查 — 纯函数 (无 I/O、无全局态), 供 CLI 与 test/cases/plugin-lint.test.js 复用。
  * @returns {{ errs: string[], reports: string[] }} errs 判红; reports 仅报告 (不判红)
  */
 export function lintText(txt, { dir = "Plugin", file = "x.plugin" } = {}) {
@@ -42,6 +53,17 @@ export function lintText(txt, { dir = "Plugin", file = "x.plugin" } = {}) {
     if (sm) {
       seg = sm[1];
       if (!VALID_SEG.has(sm[1])) errs.push(`[段错] ${dir}/${file}:${i + 1} [${sm[1]}]`);
+      continue;
+    }
+    // `#!` 元数据: 必须在"跳过注释"之前判, 否则整行被当注释吞掉(原实现即如此)
+    if (t.startsWith("#!")) {
+      const km = /^#!\s*([A-Za-z_][\w-]*)\s*=?/.exec(t);
+      const key = km ? km[1] : "";
+      if (!META_KEYS.has(key)) {
+        errs.push(`[元数据] ${dir}/${file}:${i + 1} 非官方 #! 字段 "${key}" —— 官方表: ${[...META_KEYS].join(" ")}`);
+      } else if (key === "name" && COUNT_IN_NAME.test(t)) {
+        errs.push(`[元数据] ${dir}/${file}:${i + 1} #!name 里嵌了数量(会漂移): ${t.slice(0, 60)} —— 数量属 desc/注释/清单`);
+      }
       continue;
     }
     if (!seg || !t || t.startsWith("#") || t.startsWith("!")) continue;
