@@ -1,0 +1,104 @@
+#!name=上报与埋点拦截器（M3·6 通道 37 域）
+#!desc=友盟+ · 厂商自有遥测(小米/vivo/OPPO/魅族) · 前端监控埋点(GrowingIO/神策/网易易盾) · 腾讯 Bugly · 阿里云 ARMS · Firebase-Segment 六通道并集。纯 L2 域名 REJECT, 无 [MitM]/[Script]。
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+#!tag = 隐私,探针,上报,遥测,埋点
+#!type = normal
+# ── 合并说明 (2026-09-30) ────────────────────────────────────────────────
+# 原 6 个 `probe-*.plugin`(arms / bugly / firebase / oem / umeng / webtrack)**零重叠并集**,
+# 与 `ad-block`(7 个 `ad-*.plugin` 合并)、`dns-*` 同形。合并理由:
+#   · 6 个文件形状**完全一致**(纯 [Rule] DOMAIN REJECT, 无 [MitM]/[Script]/[Argument]), 没有独立
+#     生命周期; 其中 4 个各只承载 1–2 条域 ⇒ 分散只增加 [Plugin] 段、CDN 探活清单与文档计数的
+#     维护面(外加 6 份重复样板注释);
+#   · 通道分类**不丢**: 原每份的处置口径/取证/代价原样保留为下面 ①–⑥ 小节注释。
+# 代价(与 ad-block 同): **通道级开关收敛为单插件开关**。要单独放行某通道, 复制本文件删掉对应小节。
+#
+# 无 [Argument]: 官方《插件》策略位仅 DIRECT/REJECT/PROXY, 插件参数只作用于 Script(enable={})
+#   与 Rewrite(${}); 普通 [Rule] 行挂不了条件 ⇒ 声明即死参数。启停插件即开关。
+#
+# ── 生效层: L2 域名 REJECT (DNS 阶段) ────────────────────────────────────
+# domain-reject-mode = DNS ⇒ 拒绝在 DNS 阶段回环完成, 请求到不了解密层 ⇒ 无 [MitM], 零证书成本。
+#
+# 通用红线 (各通道另有具体口径):
+#   · **不拦推送通道**(jpush/getui/xmpush/res) —— 断推送是真功能损失, AGENTS.md 已记该教训;
+#   · **不拦厂商商店与系统域**(ad.apk.vivo / bss·de·dvb·jellyfish pandora) —— 影响 App 分发与更新;
+#   · **不拦开发者控制台**(arms.console.aliyun.com / config.·user. 等) —— 拦了影响排障;
+#   · 承载内容的 OSS/CDN 域不整域拦(可能兼作图床)。
+# 取证: 每条 DoH(Cloudflare + DNS.google **双解析器交叉**) + HTTPS 探针逐条核验存在性, 不凭印象
+#   写域名; 已剔除已死域, 以及与更高优先级来源重复的域(见 ② 的 2026-09-30 记录)。
+#
+# 与其它层的关系: 本插件拦的是**上报/埋点**出口(隐私面 M3), 不拦广告平台域(那在 ad-block/M2);
+#   插件按 [Plugin] 段注册顺序匹配 ⇒ L0 三项先于本插件, 故本插件内不得出现 L0 已有的域
+#   (plugin-shadow 门禁守 plugin↔plugin 方向)。
+
+# ══ ① 友盟+ (umeng) (15 域) ══════════════════════════════════════
+# 处置口径: 只拦统计/日志/崩溃上报(alog/alogs/cnlogs/errlog/errnewlog/ulogs/plbslog/sec/ucc/utoken/ar/aaid);
+#   **不拦** config./user./msg. 与 jpush/getui 推送通道。
+# 代价: 丢失友盟统计与崩溃可见性(看不到崩溃堆栈与日活)。
+[Rule]
+DOMAIN, alog.umeng.com, REJECT
+DOMAIN, alog.umengcloud.com, REJECT
+DOMAIN, alogs.umeng.com, REJECT
+DOMAIN, alogs.umengcloud.com, REJECT
+DOMAIN, cnlogs.umeng.com, REJECT
+DOMAIN, errlog.umeng.com, REJECT
+DOMAIN, errnewlog.umeng.com, REJECT
+DOMAIN, plbslog.umeng.com, REJECT
+DOMAIN, ulogs.umeng.com, REJECT
+DOMAIN, ulogs.umengcloud.com, REJECT
+DOMAIN, sec.umeng.com, REJECT
+DOMAIN, ucc.umeng.com, REJECT
+DOMAIN, utoken.umeng.com, REJECT
+DOMAIN, aaid.umeng.com, REJECT
+DOMAIN, aspect-upush.umeng.com, REJECT
+
+# ══ ② 厂商自有遥测 (小米 / vivo / OPPO / 魅族) (11 域) ══════════════════════════════════════
+# 处置口径: 只拦 **mistat 统计 / adxlog·adlog 广告日志 / stsdk·adsfs·adreq 广告请求 / umid·uxip 设备标识**;
+#   **不拦**商店(ad.apk.vivo)、推送(xmpush/res)、系统设置(bss·de·dvb·jellyfish pandora) —— 拦商店域会影响分发与更新。
+# 2026-09-30: 原 12 域里的 `resolver.msg.xiaomi.net`(小米推送解析面)**移出** —— 它由 L0 的
+#   `dns-httpdns.plugin` 拦截(DNS 收编层才是它的语义归属), 留在这里是永不命中的死规则
+#   (插件按 [Plugin] 注册顺序匹配, L0 先于本插件)。
+# 代价: 丢失厂商侧统计/广告请求; 隐私收益最大(设备标识上报是监管重点)。
+DOMAIN, data.mistat.xiaomi.com, REJECT
+DOMAIN, storeconfig.mistat.xiaomi.com, REJECT
+DOMAIN, adxlog.vivo.com.cn, REJECT
+DOMAIN, adlog.vivo.com.cn, REJECT
+DOMAIN, stsdk.vivo.com.cn, REJECT
+DOMAIN, stsdk.vivoglobal.com, REJECT
+DOMAIN, adreq.vivo.com.cn, REJECT
+DOMAIN, adsfs.oppomobile.com, REJECT
+DOMAIN, umid.orion.meizu.com, REJECT
+DOMAIN, uxip.meizu.com, REJECT
+DOMAIN, aider-res.meizu.com, REJECT
+
+# ══ ③ 前端监控/埋点 (GrowingIO / 神策 / 网易易盾) (7 域) ══════════════════════════════════════
+# 处置口径: 均为 RUM/埋点上报通道, 无功能页; 神策仅有 saas.sensorsdata.cn 一个主机在用。
+# 代价: 丢失前端性能监控与漏斗埋点数据。
+DOMAIN, api.growingio.com, REJECT
+DOMAIN, apihk.growingio.com, REJECT
+DOMAIN, t.growingio.com, REJECT
+DOMAIN, crashapi.growingio.com, REJECT
+DOMAIN, tags.growingio.com, REJECT
+DOMAIN, bohe.sfo-tx-shanghai-01.saas.sensorsdata.cn, REJECT
+DOMAIN, crashlytics.163.com, REJECT
+
+# ══ ④ 腾讯 Bugly 崩溃上报 (2 域) ══════════════════════════════════════
+# 处置口径: 只拦 android/ios 崩溃上报域; 不拦 jpush.cn 推送与其它腾讯功能域。
+# 代价: 开发者将收不到 Android/iOS 崩溃报告。
+DOMAIN, android.bugly.qq.com, REJECT
+DOMAIN, ios.bugly.qq.com, REJECT
+
+# ══ ⑤ 阿里云 ARMS / SLS 前端监控 (1 域) ══════════════════════════════════════
+# 处置口径: 只拦 ARMS 前端监控上报端点。**不拦 arms.console.aliyun.com** —— 那是开发者自己看的控制台,
+#   不是 App 遥测出口; 也不拦其它 aliyuncs/oss 域(OSS 可能承载内容图床)。
+# 取证: arms-retcode.aliyuncs.com DoH 双解析器 CF=25 条 A / HTTPS 405(端点存在, 拒绝 GET 属正常);
+#   oa-panther.data.aliyun.com 与 log.aliyuncs.com 实测已死(CF 解析 0 条), 不加。
+# 代价: 丢失 ARMS 链路与前端 RUM 数据, 排障能力下降。
+DOMAIN, arms-retcode.aliyuncs.com, REJECT
+
+# ══ ⑥ Firebase / Segment 统计 (1 域) ══════════════════════════════════════
+# 处置口径: crashlytics.googleapis.com 等主配置已覆盖, 这里只补 segment 设置域。
+# 代价: 丢失埋点下发配置。
+DOMAIN, cdn-settings.segment.com, REJECT

@@ -105,46 +105,11 @@
           "reason": "35 域(19 人工策展 + 16 生成式覆盖)公共加密解析器端点(DoH/DoT), 逐条双解析器 A + HTTPS /dns-query 取证; DNS 阶段 REJECT, 无 [MitM]。2026-09-30 架构分层: 原主配置 6 条 DoH 封堵迁入并扩到 19 条; 与主配置框架层 `DEST-PORT, 853, REJECT`(DoT/DoQ 端口兜底)分工 —— 域名级在插件(可按需启停/独立更新), 端口级在本地(插件关掉也在); 残留面 = IP 直连型 DoH, 见 LOON-FEATURES.md 【2026-09-30 生成式覆盖】公共解析器候选 25 个→16 条(8 个无 A、1 个 200+HTML 转人工), 台账同上"
         },
         {
-          "file": "probe-umeng.plugin",
-          "app": "友盟+ Umeng",
+          "file": "probe-block.plugin",
+          "app": "上报与埋点拦截器 (6 通道并集)",
           "layer": "L2",
           "granularity": "global",
-          "reason": "15 域, DNS 阶段 REJECT, 无 [MitM] ⇒ 零证书成本。统计/日志/崩溃上报域; 不拦 config./user./msg. 与 jpush/getui 推送(断推送=真功能损失)"
-        },
-        {
-          "file": "probe-oem.plugin",
-          "app": "厂商自有遥测",
-          "layer": "L2",
-          "granularity": "global",
-          "reason": "12 域, DNS 阶段 REJECT, 无 [MitM] ⇒ 零证书成本。mistat 统计/adxlog 广告日志/umid·uxip 设备标识; 不拦商店(ad.apk.vivo)、推送(xmpush)、系统设置(bss·de·dvb)"
-        },
-        {
-          "file": "probe-webtrack.plugin",
-          "app": "前端监控/埋点",
-          "layer": "L2",
-          "granularity": "global",
-          "reason": "7 域, DNS 阶段 REJECT, 无 [MitM] ⇒ 零证书成本。GrowingIO/神策/网易易盾 RUM 与埋点上报, 无功能页"
-        },
-        {
-          "file": "probe-bugly.plugin",
-          "app": "腾讯 Bugly",
-          "layer": "L2",
-          "granularity": "global",
-          "reason": "2 域, DNS 阶段 REJECT, 无 [MitM] ⇒ 零证书成本。android/ios 崩溃上报; 不拦 jpush 推送"
-        },
-        {
-          "file": "probe-arms.plugin",
-          "app": "阿里云 ARMS/SLS",
-          "layer": "L2",
-          "granularity": "global",
-          "reason": "1 域, DNS 阶段 REJECT, 无 [MitM] ⇒ 零证书成本。arms-retcode 前端 RUM 上报; 不拦 arms.console(开发者自用控制台)与 oss(可能承载内容)"
-        },
-        {
-          "file": "probe-firebase.plugin",
-          "app": "Firebase/Segment",
-          "layer": "L2",
-          "granularity": "global",
-          "reason": "1 域, DNS 阶段 REJECT, 无 [MitM] ⇒ 零证书成本。e./setting(s).crashlytics 与 segment 设置域; google-analytics/crashlytics 主配置已覆盖"
+          "reason": "37 域, DNS 阶段 REJECT, 无 [MitM] ⇒ 零证书成本。2026-09-30 由 6 个 `probe-*.plugin`(umeng 15 / oem 12 / webtrack 7 / bugly 2 / arms 1 / firebase 1)**零重叠并集** —— 与 ad-block 同形: 形状完全一致(纯 [Rule] DOMAIN REJECT)、无独立生命周期, 而 4 个各只承载 1–2 条域 ⇒ 分散只增加 [Plugin] 段、探活清单与文档计数的维护面。通道分类不丢(①–⑥ 小节原样保留处置口径/取证/代价注释); 代价是**通道级开关收敛为单插件开关**(同 ad-block)。并集时移除 `resolver.msg.xiaomi.net` —— 它由 L0 的 dns-httpdns 拦截, 留在此处是永不命中的死规则(插件按注册顺序匹配, L0 先于本插件)。红线: 不拦推送通道(jpush/getui/xmpush/res)、厂商商店与系统域(ad.apk.vivo/bss/de/dvb/pandora)、开发者控制台(arms.console.aliyun.com)与承载内容的 OSS/CDN 域。"
         }
       ],
       "scripts": [],

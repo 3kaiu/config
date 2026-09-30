@@ -75,7 +75,8 @@ const readPlugin = (f) => fs.readFileSync(path.join(PLUGIN_DIR, f), "utf8");
 exports.tests = {
   "layering: L0 依赖层必须排在 [Plugin] 段最前且 enabled": async (a) => {
     const entries = pluginEntries();
-    a.ok(entries.length >= 10, `[Plugin] 段应至少 10 个插件, 实为 ${entries.length}`);
+    // 2026-09-30: 6 个 probe-* 合并为 probe-block, 7 个 ad-* 合并为 ad-block ⇒ 下限随结构下调
+    a.ok(entries.length >= 5, `[Plugin] 段应至少 5 个插件(L0 三项 + qidian + jd/probe-block), 实为 ${entries.length}`);
     // ① L0 三项必须都在
     for (const f of BASE_LAYER) {
       a.ok(fs.existsSync(path.join(PLUGIN_DIR, f)), `L0 依赖层缺少 Plugin/${f}`);

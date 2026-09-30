@@ -497,7 +497,7 @@ FINAL, Final
 
 [Plugin]
 # ── 本段是插件的**唯一分发渠道** ──
-# 2026-09-29 修正: 14 个插件 (7 ad-* + 6 probe-* + jd.plugin) 此前只存在于 Plugin/
+# 2026-09-29 修正: 插件此前只存在于 Plugin/ 目录
 # 与 MODULE-MANIFEST.json, 没有进本段 —— 用户导入 Profile/Loon.lcf 实际一条都拿不到
 # ("门禁全绿"是因为 wiring-check 挂在 npm test 而非 check:all)。新增 Plugin/*.plugin
 # 必须在此登记, 否则 npm test 第一条判据 ("每个 Plugin/*.plugin 必须被 loon.tpl 引用")
@@ -523,10 +523,11 @@ FINAL, Final
 #   · qidian.plugin —— M7 脚本容器, 本仓全部 [Script] 能力寄生于此, 停用即全灭 (M5 单点)。
 #   · jd.plugin —— 唯一带 [Script]+[MitM] 的自维护插件: 解密面 +1 (api.m.jd.com),
 #     京东字段级净化 (7 个 functionId, 一律改写不整条 reject), 无 [Rule] 行。
-#   · 6 个 probe-* (38 条) —— 上报通道拦截。
-# L0 三项 + 6 个 probe-* = 9 个**纯 L2** 插件(无 [MitM]/[Script], 零证书成本), 合计 132 条
+#   · probe-block.plugin —— M3 上报/埋点拦截(友盟/厂商遥测/前端埋点/Bugly/ARMS/Firebase 六通道零重叠并集, 37 条)。
+#     2026-09-30 由 6 个 probe-*.plugin 合并(与 ad-block 同形): 形状完全一致、无独立生命周期, 4 个还各只有 1–2 条域。
+# L0 三项 + probe-block = 4 个**纯 L2** 插件(无 [MitM]/[Script], 零证书成本), 合计 131 条
 # 域级/端口级 REJECT(59 + 13 + 19 + 38 + 端口/协议兜底, 逐条取证见各插件头部)。
-# 默认姿态 enabled=true (2026-09-29 用户决策): 10 个非 qidian 插件随入口默认生效。
+# 默认姿态 enabled=true (2026-09-29 用户决策): 5 个非 qidian 插件随入口默认生效(2026-09-30 合并后)。
 # 关闭方式: 改本行 enabled=false, 或客户端插件面板逐个停用。
 # ⚠️ 关掉 L0 任一项 = 该层收编失效(加密 DNS/HTTPDNS 绕过回归), 而不是"少拦几条广告"。
 https://ws.wenn.in/main/Plugin/ad-block.plugin, enabled=true, tag=广告平台拦截器（L0·人工+生成式覆盖）
@@ -534,12 +535,7 @@ https://ws.wenn.in/main/Plugin/dns-httpdns.plugin, enabled=true, tag=HTTPDNS 拦
 https://ws.wenn.in/main/Plugin/dns-leak.plugin, enabled=true, tag=DNS 防泄漏（L0·DoH/DoT 收编）
 https://ws.wenn.in/main/Plugin/qidian.plugin, enabled=true, tag=起点全能助手 Pro
 https://ws.wenn.in/main/Plugin/jd.plugin, enabled=true, tag=京东去广告 Pro
-https://ws.wenn.in/main/Plugin/probe-umeng.plugin, enabled=true, tag=友盟+ 上报拦截
-https://ws.wenn.in/main/Plugin/probe-oem.plugin, enabled=true, tag=厂商自有遥测上报拦截
-https://ws.wenn.in/main/Plugin/probe-webtrack.plugin, enabled=true, tag=前端监控/埋点上报拦截
-https://ws.wenn.in/main/Plugin/probe-bugly.plugin, enabled=true, tag=腾讯 Bugly 上报拦截
-https://ws.wenn.in/main/Plugin/probe-arms.plugin, enabled=true, tag=阿里云 ARMS/SLS 上报拦截
-https://ws.wenn.in/main/Plugin/probe-firebase.plugin, enabled=true, tag=Firebase/Segment 统计拦截
+https://ws.wenn.in/main/Plugin/probe-block.plugin, enabled=true, tag=上报与埋点拦截器（M3·6 通道并集）
 
 [Rewrite]
 # 本段为空。历史曾有 5 条针对公共 DoH 端点 (/d 路径) 的 reject-200, 因两重死因失效:

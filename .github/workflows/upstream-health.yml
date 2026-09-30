@@ -138,7 +138,7 @@ jobs:
           # 「0. 分发与验真」公开声明, upstream-coverage 用例双向断言(必须被声明且被探活)。
           check_url "ws.wenn.in CDN (Profile)" "https://ws.wenn.in/main/Profile/Loon.lcf"
 
-          # 2026-09-29: 14 个插件接入 [Plugin] 段 (7 个 ad-* + 6 个 probe-* + jd.plugin)
+          # 2026-09-30: 插件接入 [Plugin] 段(6 个: L0 三项 + qidian + jd + probe-block)
           # 后, 它们从"仓库里的文件"变成"客户端每次启动拉取的资源" ——
           # 不探活则 CDN 404/被投毒时无人告警, 而配置本身仍然语法合法、门禁全绿。
           # 双向覆盖由 test/cases/upstream-coverage.test.js 锁定: 此处每加一条, 模板
@@ -151,13 +151,8 @@ jobs:
           check_url "ws.wenn.in CDN (ad-block)" "https://ws.wenn.in/main/Plugin/ad-block.plugin"
           check_url "ws.wenn.in CDN (dns-httpdns)" "https://ws.wenn.in/main/Plugin/dns-httpdns.plugin"
           check_url "ws.wenn.in CDN (dns-leak)" "https://ws.wenn.in/main/Plugin/dns-leak.plugin"
+          check_url "ws.wenn.in CDN (probe-block)" "https://ws.wenn.in/main/Plugin/probe-block.plugin"
           check_url "ws.wenn.in CDN (jd)" "https://ws.wenn.in/main/Plugin/jd.plugin"
-          check_url "ws.wenn.in CDN (probe-umeng)" "https://ws.wenn.in/main/Plugin/probe-umeng.plugin"
-          check_url "ws.wenn.in CDN (probe-oem)" "https://ws.wenn.in/main/Plugin/probe-oem.plugin"
-          check_url "ws.wenn.in CDN (probe-webtrack)" "https://ws.wenn.in/main/Plugin/probe-webtrack.plugin"
-          check_url "ws.wenn.in CDN (probe-bugly)" "https://ws.wenn.in/main/Plugin/probe-bugly.plugin"
-          check_url "ws.wenn.in CDN (probe-arms)" "https://ws.wenn.in/main/Plugin/probe-arms.plugin"
-          check_url "ws.wenn.in CDN (probe-firebase)" "https://ws.wenn.in/main/Plugin/probe-firebase.plugin"
 
           # 当前无第三方 GitHub 直连脚本 (决定: 暂时只留自己维护的)。若日后重新集成,
           # 须同时在 Plugin/ 加 script-path 引用 + 在此加 check_url, 二者缺一判红。

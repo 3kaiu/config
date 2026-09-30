@@ -397,12 +397,12 @@ response … enable={CAPTURE_ENABLE}        ← 消费
 
 | 插件 | 通道 | 域数 | 明确不拦（拦了=真损失） |
 |---|---|---|---|
-| `probe-umeng` | 友盟+ 统计/崩溃 | 15 | `config./user./msg.` 与 jpush/getui 推送 |
-| `probe-oem` | 小米/vivo/OPPO/魅族 自有遥测 | 12 | 商店(`ad.apk.vivo`)、推送(`xmpush`)、系统设置(`bss·de·dvb·jellyfish`) |
-| `probe-webtrack` | GrowingIO/神策/网易易盾 RUM | 7 | — |
-| `probe-bugly` | 腾讯 Bugly 崩溃 | 2 | jpush 推送 |
-| `probe-arms` | 阿里云 ARMS 前端 RUM | 1 | `arms.console.aliyun.com`（开发者自用控制台）、`oss`（可能承载内容） |
-| `probe-firebase` | Crashlytics/Segment 增量 | 1 | `firebaseinstallations`（FCM 推送，主配置已保留） |
+| `probe-block` ① 友盟+ | 统计/崩溃 | 15 | `config./user./msg.` 与 jpush/getui 推送 |
+| `probe-block` ② 厂商自有遥测 | 小米/vivo/OPPO/魅族 | 11 | 商店(`ad.apk.vivo`)、推送(`xmpush`)、系统设置(`bss·de·dvb·jellyfish`) |
+| `probe-block` ③ 前端监控/埋点 | GrowingIO/神策/网易易盾 RUM | 7 | — |
+| `probe-block` ④ Bugly | 腾讯崩溃上报 | 2 | jpush 推送 |
+| `probe-block` ⑤ ARMS | 阿里云前端 RUM | 1 | `arms.console.aliyun.com`（开发者自用控制台）、`oss`（可能承载内容） |
+| `probe-block` ⑥ Firebase/Segment | Crashlytics 增量 | 1 | `firebaseinstallations`（FCM 推送，主配置已保留） |
 
 **开发者视角的三档代价**（决定拦不拦）：① 纯统计埋点 —— 拦了无功能损失，**最安全**；② 崩溃/APM —— 拦了不破功能，但**丢失调试可见性**（排障变难），由插件可关停来平衡；③ 推送/归因 —— 推送**绝对不拦**（断推送是真功能损失），归因只影响安装统计。
 

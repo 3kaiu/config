@@ -61,12 +61,13 @@ cron {CRONEXP} script-path=https://ws.wenn.in/main/Scripts/Qidian.js, timeout={T
 DOMAIN-SUFFIX, pangolin-sdk-toutiao1.com, DIRECT
 
 # 追踪/监控/埋点 SDK — 强力阻绝
+# 2026-09-30: `tangram.e.qq.com` 移除 —— L0 的 ad-block.plugin 已拦同域, 而插件按 [Plugin] 注册顺序匹配
+#   (L0 先于本插件) ⇒ 留在这里是永不命中的死规则。plugin-shadow 门禁现已覆盖 plugin↔plugin 方向。
 # (与主配置重复的条目一律不在此登记: 本地>插件故永不可达, 门禁见
 #  test/cases/plugin-tpl-shadow.test.js)
 DOMAIN, publiclog.zhiyan.tencent-cloud.net, REJECT
 DOMAIN, zhiyan.monitor.tencent-cloud.net, REJECT
 DOMAIN, galileotelemetry.tencent.com, REJECT
-DOMAIN, tangram.e.qq.com, REJECT
 DOMAIN, gatherer.m.qq.com, REJECT
 DOMAIN, dl.tiku.qq.com, REJECT
 DOMAIN, apmplus.volces.com, REJECT

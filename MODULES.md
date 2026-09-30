@@ -18,11 +18,11 @@ Loon 官方文档分 12 个域（交互UI / 节点订阅 / 规则系统 / 策略
 | **L5** 脚本 | `[Script]` | **是** | 任意 JS | 广告照显 / **请求挂死** |
 | **L6** 解密面 | `[MitM]` | — | 域名通配 | HTTPS 静默失效 / 证书暴露面 |
 
-`[Plugin]` **不是一层**，是聚合容器 —— 它把 L1–L6 任意组合打包复用。本仓 11 个插件全部经 `template/loon.tpl` 的 `[Plugin]` 段分发（该段是**唯一分发渠道**，漏登记即 `npm test` 的 wiring-check 判红）。
+`[Plugin]` **不是一层**，是聚合容器 —— 它把 L1–L6 任意组合打包复用。本仓 6 个插件全部经 `template/loon.tpl` 的 `[Plugin]` 段分发（该段是**唯一分发渠道**，漏登记即 `npm test` 的 wiring-check 判红）。
 
 **插件内部再分两层**（2026-09-30 架构分层，顺序由 `test/cases/plugin-layering.test.js` 钉死 —— 官方《规则》页：插件之间按 `[Plugin]` 登记顺序匹配）：
 - **L0 依赖层（必须最前三条）**：`ad-block` 广告平台拦截器（M2，482 域 = 59 人工 + 423 生成式覆盖）+ `dns-httpdns` HTTPDNS 拦截器（M3，15）+ `dns-leak` DNS 防泄漏（M3，35）。生成式覆盖见 `tools/ad-coverage.mjs`（五道判据 + 证据台账 + 每月自动刷新 PR）。三者是"域名 REJECT 真正生效"的**前置条件**：域名拒绝在 DNS 阶段完成，而自带 HTTPDNS/DoH 的 SDK 与浏览器会绕过系统 DNS 拿到真实 IP。用户仍需 L1 插件搭配使用。
-- **L1 消费层**：`qidian` 聚合容器（L4+L5+L6，全部 `[Script]` 能力寄生于此）+ `jd`（M2，唯一带 `[MitM]`）+ 6 个 `probe-*`（M3 上报通道）。
+- **L1 消费层**：`qidian` 聚合容器（L4+L5+L6，全部 `[Script]` 能力寄生于此）+ `jd`（M2，唯一带 `[MitM]`）+ `probe-block`（M3 上报/埋点拦截, 6 通道零重叠并集）。
 
 ## 六个模块
 
@@ -52,7 +52,7 @@ Loon 官方文档分 12 个域（交互UI / 节点订阅 / 规则系统 / 策略
 ### M3 隐私 · L2 · 6 插件 / 0 脚本
 
 **职责**：拦追踪/统计/归因 SDK 与 DNS 泄漏，纯 DNS 级 REJECT，不解密内容。
-**资源**：主配置的常见分析 SDK 段（GA/AppsFlyer/Adjust/Sentry 等）+ DNS 泄漏检测域（18 条 → 强制走代理远端解析）。原 `Plugin/privacy-shield.plugin`（11 条 + 1 开关）已随收敛删除。现行拦截面是 6 个 `probe-*.plugin`（友盟 15 + 厂商遥测 12 + 前端监控 7 + Bugly 2 + ARMS 1 + Firebase 1 = **38 域**），全部 L2 DNS 级 REJECT、无 `[MitM]`。
+**资源**：主配置的常见分析 SDK 段（GA/AppsFlyer/Adjust/Sentry 等）+ DNS 泄漏检测域（18 条 → 强制走代理远端解析）。原 `Plugin/privacy-shield.plugin`（11 条 + 1 开关）已随收敛删除。现行拦截面是 `probe-block.plugin`（友盟 15 + 厂商遥测 11 + 前端监控 7 + Bugly 2 + ARMS 1 + Firebase 1 = **37 域**），全部 L2 DNS 级 REJECT、无 `[MitM]`。2026-09-30 由 6 个 `probe-*.plugin` 按 `ad-block` 同形合并（形状一致、无独立生命周期；通道分类保留为 ①–⑥ 小节注释，代价是通道级开关收敛为单插件开关）；并集时移出 `resolver.msg.xiaomi.net`（已由 L0 的 `dns-httpdns` 拦，留着是死规则）。
 **关键约束**：推送保活 —— 只拦统计子域，保留 `config.jpush.cn` / `api.getui.com`，全拦 SUFFIX 会断推送。
 
 ### M4 银行与支付 · L2+L6 · 0 插件 / 1 snippet
@@ -112,13 +112,13 @@ Loon 官方文档分 12 个域（交互UI / 节点订阅 / 规则系统 / 策略
 
 **已定论**（G16，经四条路径实测）：`GEOIP, CN, DIRECT` 维持不动。根因是官方《规则系统 3.1》第 2 条——域名规则未命中时再解析 DNS 并匹配 IP 规则，故任何需解析的 IP 兜底规则都会让长尾域产生本地解析。三条"零泄漏"替代路径全部实测否决：删 GEOIP 走纯域名规则 → 国内站走代理 4/4 超时；GEOIP 加 `no-resolve` → 域名类请求全部跳过 GEOIP 一律走代理，等同前者且更彻底；本地解析改走境外 DoH → 国内站解析到海外节点，直连 2/2 超时。第四条"恢复 CN 域名远程列表"隐私收益递减（长尾域仍解析），却需引入 Loon 无内建防护的依赖（官方未提供远程规则 hash/签名/版本锁定），否决。结论：泄漏面只是"解析器知道查过哪些域"，不改变流量走向；而三条零泄漏路全部实测损害可用性。
 
-**已解决**（域名存活性）：主配置 127 条 REJECT + 9 个插件的 127 条域级 REJECT（合计 230 条）经 DoH 多解析器交叉审计，修正 1 处主机名错配（`alisc1.zijieapi.com` NXDOMAIN → 真实 host `tnc3-alisc1.zijieapi.com` 存活，规则从未生效）、删除 1 条错误补录（`qreport.cn` 系已全下线）。新增 `dns-liveness` 门禁守住此类静默失效——**语法合法的规则写错主机名，现有门禁一条都抓不到**。判据须落到子域（`imtmp.net` 裸域 NXDOMAIN 但 7 个子域存活，删掉即误伤），并区分「域名已注销」与「NS 活跃仅业务下线」。**2026-09-29 补齐覆盖**：该门禁原只读 `template/loon.tpl`，7 个 `ad-block`/`probe-*` 插件与 `qidian` 的 139 条可探针域条目（138 精确 DOMAIN + 1 SUFFIX）**没有任何存活门禁**；现已扩面，实测 107 条存活、1 条「无 A 但 NS 活跃」只报告（`qidian.plugin` 的 `dl.tiku.qq.com`）。
+**已解决**（域名存活性）：主配置 127 条 REJECT + 9 个插件的 127 条域级 REJECT（合计 230 条）经 DoH 多解析器交叉审计，修正 1 处主机名错配（`alisc1.zijieapi.com` NXDOMAIN → 真实 host `tnc3-alisc1.zijieapi.com` 存活，规则从未生效）、删除 1 条错误补录（`qreport.cn` 系已全下线）。新增 `dns-liveness` 门禁守住此类静默失效——**语法合法的规则写错主机名，现有门禁一条都抓不到**。判据须落到子域（`imtmp.net` 裸域 NXDOMAIN 但 7 个子域存活，删掉即误伤），并区分「域名已注销」与「NS 活跃仅业务下线」。**2026-09-29 补齐覆盖**：该门禁原只读 `template/loon.tpl`，L0 三插件与 `qidian`/`probe-block` 的 139 条可探针域条目（138 精确 DOMAIN + 1 SUFFIX；生成块内的规则不重探, 由覆盖管线台账与 ≤45 天新鲜度守）**没有任何存活门禁**；现已扩面，实测 107 条存活、1 条「无 A 但 NS 活跃」只报告（`qidian.plugin` 的 `dl.tiku.qq.com`）。
 
 **已解决**（UDP 面）：`udp-fallback-mode` 由 `DIRECT` 改为 `REJECT`。官方定义为「节点不支持 UDP 或未启用 UDP 转发时使用的策略」——取 DIRECT 时节点一旦无 UDP，全部 UDP（QUIC/游戏/通话）从本机真实 IP 直连漏出，与已用 `PROTOCOL, STUN, REJECT` 封 STUN 的 posture 矛盾。REJECT = 失败可见。**前置条件：东京组节点须启用 UDP**，否则通话/游戏不可用。
 
 **已解决**（DoH 绕过面，2026-09-30）：`hijack-dns` 只收编**明文 UDP 53**；内置 DoH 的客户端（Chrome→`dns.google`、Firefox→`mozilla.cloudflare-dns.com`、Android 私有 DNS 等）自己加密解析，广告/追踪域拿到真实 IP 后 DNS 阶段域名 REJECT 被整体绕过 → 落到 IP 规则 → 境内 CDN 广告被 `GEOIP,CN,DIRECT` 直连放行。现封堵 6 个**纯公共解析器端点**（dns.google / cloudflare-dns.com / mozilla.cloudflare-dns.com / dns.quad9.net / doh.opendns.com / dns.adguard.com，双解析器 A 一致 + HTTPS `/dns-query` 探针取证），客户端回落明文 53 被 hijack 收编、拒绝面恢复。扩列判据：同语义（纯解析器端点）+ 双解析器取证 + 不与既有 REJECT/分流冲突，逐条登记。代价（用户接受）：手动配置上述解析器的客户端会失败回落明文 DNS —— 这正是收编目标。
 
-已用满的（`Profile/Loon.lcf` `[Rule]` 段 490 行）：`DOMAIN-SUFFIX` 364 / `DOMAIN` 112 / `DOMAIN-KEYWORD` 4 / `PROTOCOL` 1（关键词少是**优点** —— 官方警告该类型耗时随数量线性增长）/ `IP-CIDR` 4 / `DEST-PORT` 3（含 DoT/DoQ 853 框架层兜底） / `GEOIP` 1 / `FINAL` 1。插件层另有：`qidian.plugin` `AND` 3 / `DOMAIN` 11 / `DOMAIN-SUFFIX` 1（共 15），9 个纯 L2 插件共 `DOMAIN` 127 条(ad-block 59 / dns-httpdns 11 / dns-leak 19 / probe-* 38)。
+已用满的（`Profile/Loon.lcf` `[Rule]` 段 490 行）：`DOMAIN-SUFFIX` 364 / `DOMAIN` 112 / `DOMAIN-KEYWORD` 4 / `PROTOCOL` 1（关键词少是**优点** —— 官方警告该类型耗时随数量线性增长）/ `IP-CIDR` 4 / `DEST-PORT` 3（含 DoT/DoQ 853 框架层兜底） / `GEOIP` 1 / `FINAL` 1。插件层另有：`qidian.plugin` `AND` 3 / `DOMAIN` 11 / `DOMAIN-SUFFIX` 1（共 15），4 个纯 L2 插件：`ad-block`(人工策展 + 生成块) / `dns-httpdns` / `dns-leak` / `probe-block`(37) —— 生成块由 `tools/ad-coverage.mjs` 维护, 逐条证据在台账。
 
 **已停用**（随插件下线而失去，非主动选择）：`URL-REGEX` / `USER-AGENT` / `IP-ASN` / `IP-CIDR6` / `OR` / `NOT`。
 

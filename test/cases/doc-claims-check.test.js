@@ -105,7 +105,7 @@ exports.tests = {
     const { checkPluginDomains, ROOT } = await load();
     const { fails, rows } = checkPluginDomains(ROOT);
     a.equal(fails.length, 0, `插件域数声明漂移: ${JSON.stringify(fails)}`);
-    a.ok(rows.length >= 7, `断言面 ${rows.length} 项 (期望 ≥7: 1 个 ad-block 集合 + 6 个 probe-*); ` +
+    a.ok(rows.length >= 4, `断言面 ${rows.length} 项 (期望 ≥4: ad-block 集合 + 2 个 dns-* + probe-block); ` +
       "新增带域数声明的插件须同步抬高本下限, 否则可静默脱检");
   },
 };

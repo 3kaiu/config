@@ -77,4 +77,57 @@ exports.tests = {
     }
     a.equal(fakes, [], `插件侧被模板遮蔽的 REJECT 必须为零:\n${fakes.join("\n")}`);
   },
+  "plugin-shadow: 后注册插件的规则不得被先注册插件遮蔽 (含同文件内重复)": async (a) => {
+    // 2026-09-30 补的另一半: 原门禁只查"模板 → 插件", 而**插件之间**同样按 [Plugin] 注册顺序
+    // 先到先得 ⇒ 先注册插件里已有的域, 在后注册插件里是永不命中的死规则。实测抓到两条真重复:
+    //   · `tangram.e.qq.com`  ad-block(L0) 与 qidian     · `resolver.msg.xiaomi.net`  dns-httpdns(L0) 与 probe-oem
+    // 两条都已删(各留一行说明); 本用例守这条不变量 —— 判据与模板-shadow 同源, 只判 REJECT-vs-REJECT 的域名维度。
+    const tpl = fs.readFileSync(path.join(ROOT, "template", "loon.tpl"), "utf8");
+    const order = section(tpl, "Plugin")
+      .map((l) => /Plugin\/([\w.-]+\.plugin)/.exec(l))
+      .filter(Boolean)
+      .map((m) => m[1]);
+    a.ok(order.length >= 5, `[Plugin] 段插件数异常: ${order.length}`);
+
+    const rulesOf = (file) => {
+      const txt = fs.readFileSync(path.join(ROOT, "Plugin", file), "utf8");
+      return section(txt, "Rule")
+        .map((l) => l.trim())
+        .filter((l) => l && !l.startsWith("#"));
+    };
+
+    /** 累积"已被先注册插件拦下的域"(精确 + 后缀包含) */
+    const exact = new Map(); // host → 先注册的插件
+    const suffixes = []; // [{suffix, file}]
+    const coveredBy = (host) => {
+      if (exact.has(host)) return exact.get(host);
+      const hit = suffixes.find((s) => host !== s.suffix && host.endsWith("." + s.suffix));
+      return hit ? hit.file : null;
+    };
+
+    const problems = [];
+    for (const file of order) {
+      const seen = new Set(); // 同文件内重复
+      for (const line of rulesOf(file)) {
+        const m = /^(DOMAIN|DOMAIN-SUFFIX),\s*([\w.-]+),\s*REJECT$/.exec(line);
+        if (!m) continue; // 只判裸域名 REJECT: AND/USER-AGENT/URL-REGEX 等形态不参与
+        const kind = m[1];
+        const host = m[2].toLowerCase();
+        if (seen.has(host)) problems.push(`Plugin/${file} 文件内重复: ${host}`);
+        seen.add(host);
+        if (kind === "DOMAIN") {
+          const who = coveredBy(host);
+          if (who && who !== file) problems.push(`Plugin/${file}: ${host} 已被先注册的 ${who} 拦下(永不命中)`);
+          exact.set(host, file);
+        } else {
+          const who = coveredBy(host);
+          if (who && who !== file) problems.push(`Plugin/${file}: 后缀 ${host} 已被先注册的 ${who} 罩住`);
+          suffixes.push({ suffix: host, file });
+          exact.set(host, file);
+        }
+      }
+    }
+    a.equal(problems.length, 0, `插件↔插件死规则:\n${problems.join("\n")}`);
+  },
+
 };
