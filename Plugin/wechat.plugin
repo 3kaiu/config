@@ -1,0 +1,111 @@
+#!name=微信去广告
+#!desc=微信公众号文章广告治理: 文章广告接口的广告计数/列表字段级净化, 文章扩展接口同名字段净化, 商品推广(CPS)接口整条转空。朋友圈/视频号/开屏走 MMTLS 私有协议, HTTP 层不可达 —— 已否决面与未落地台账见 APP-ONBOARDING.md 附九。
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.5.1(978)
+#!tag = 微信,去广告
+#!type = normal
+
+# ── 单 App 接入取证 (2026-09-30, 照 APP-ONBOARDING.md §1 执行, 全量台账见附九) ──
+# App 身份: iOS bundle id `com.tencent.xin` v8.0.79 (iTunes Lookup id=414478124, 中国区,
+#   seller = Tencent Technology (Shenzhen) Company Limited, 2026-09-29 发布); 安卓包名 `com.tencent.mm`。
+#   `weixin` / `wechat` 是品牌词, **不是**包名。
+# 覆盖天花板(一手结论, 决定本插件为什么只有 3 条规则):
+#   ① 朋友圈 / 视频号 / 开屏 / 激励视频广告的下发链路走 **MMTLS 私有二进制协议** —— 对应的连接面
+#      主机(long / short / szlong / szshort / szminorshort / szextshort / hklong / hkshort.weixin.qq.com)
+#      全部有 A 记录(2–10 条), 但 443 一律无法完成 TLS ⇒ Rewrite/Script 只见 HTTP(S) ⇒ **结构性不可达**。
+#      全网取证(11 个规则仓 / 41 条微信相关规则)亦无一条 HTTP 层规则命中这些面, 现成方案只有
+#      UI 层(Xposed `wcx`、GKD `分段广告-朋友圈广告`)—— 网络层方案不存在, 不是"没找到"。
+#   ② 「朋友圈广告」字面候选域 **整族已未注册**: wxsnsad.qq.com / wxsnsad.weixin.qq.com /
+#      wxsnsdy.qq.com / wxsnsdythumb.qq.com / wxsns.weixin.qq.com / mmsns.qlogo.cn 在
+#      Cloudflare / Google / AliDNS / doh.pub(腾讯自家) / AdGuard-Unfiltered **五路一致 NXDOMAIN**
+#      (所属根域 SOA 活跃) ⇒ 任何以它们为目标的 REJECT 都是死规则。
+#      结论是"没有可拦的域名", 不是"规则没写"。
+#   ③ 唯一 HTTPS 可达面是 `mp.weixin.qq.com`(公众号平台主站 + 文章业务接口)。路由判据:
+#      控制组 `/mp/zz-not-exist-*` 稳定 404 + 0 字节, 而 `/mp/getappmsgad`、`/mp/getappmsgext`、
+#      `/mp/profile_ext`、`/mp/homepage` 均 200 ⇒ 200 = 路由存在(写上去不是死规则)。
+#      **读作"可达", 不读作"可整条拒"** —— 见下 ①②。
+#   ④ 名字里带 ad 的活域全是**广告主侧后台/官网**, 不是 App 内广告下发端点:
+#      ad.qq.com(腾讯营销投放管理平台) / e.qq.com(腾讯广告营销平台) /
+#      ad.weixin.qq.com(微信广告官网 SPA, 任意路径回同一 index) ⇒ 拦它零收益且打掉官网,
+#      已列"已否决面"防上游回流。单复数之差: ads.weixin.qq.com(复数)**未注册**。
+#   ⑤ 本插件的处置全在 `mp.weixin.qq.com` 上, 属 **L4**, 需要 MitM 解密 —— 代价是该主机
+#      (公众号全部文章流量)进解密面。这是本插件唯一解密面, 无通配。
+
+[Argument]
+WECHAT_ENABLE=switch,"true","false",tag=微信去广告, desc=是否开启微信公众号文章广告净化
+
+[Rewrite]
+# 新语法(Loon 3.5.1(978)), 逐条带开关 —— 新语法没有全局 enable=, 漏写一条等于把该条永久打开。
+# 三条都只动"广告字段 / 纯推广端点", 业务字段(more_read_list / appmsg_album_videos / sec_control …)
+# 一律不碰。JSON Action 官方口径"仅在 Body 是有效 JSON 时生效"⇒ GET 拿到验证页 HTML 时自动空转,
+# 不会把文章页打坏(这也是本插件不需要按 method 分叉的原因)。
+
+# ① 公众号文章广告接口(文中 / 文末广告)。**字段级**, 不整条拒, 依据三条:
+#    · 响应是 JSON 封套(base_resp + 广告字段); 上游两份**直接挂在本路径**的脚本逐字一致:
+#      NobyDa `QuantumultX/File/Wechat.js` 与 chxm1023 `Advertising/wxgzhad.js` 都是
+#      `advertisement_num = 0; advertisement_info = []; delete appid`(两者同源, 按"作者+字符串"
+#      去重后只算 1 份强证据, 故必须叠加下条一手证据);
+#    · 本仓一手观测: `advertisement_info` 是 2026-09 活响应里真实存在的字段名, 且**空数组就是
+#      服务端自己的"无广告"状态**(见 ② 的 374B 样本)⇒ 处置取"置空"而非"删 key"时, 客户端
+#      拿到的结构与服务端无广告时完全一致, 不引入新的异常分支;
+#    · 与其它 mp 接口同形, 保结构比整条拒抗异常分支(AGENTS.md《字段重命名法》条)。
+#    未采纳(记录理由防回流): 整条 `reject_dict(200)`(QingRex / zirawell / AWAvenue 三源这么做,
+#      但 AWAvenue 把该条放在 Replenish 补充列表并自述"对订阅号拦截会相当激进"); ddgksf2013 / 奶思
+#      的 `advertisement`→改名(前者文件头自述**已失效**, 后者是 2023 旧形态字段)。
+#    真机回归若发现文中广告仍在, 第一顺位补 `.advertisement = []`(字段名有 2 源, 只是时代旧)。
+response if ${WECHAT_ENABLE} == true && ${url} ~= /https:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad(\?|$)/ then response.json.jq(".advertisement_num = 0 | .advertisement_info = []")
+
+# ② 文章扩展接口(业务 + 广告同体)。**一手证据**: 匿名请求
+#    `https://mp.weixin.qq.com/mp/getappmsgext?__biz=MzA5&mid=1&idx=1&sn=abc` = 200 JSON 374B, 顶层:
+#      {"advertisement_info":[],"appmsg_album_videos":[],"base_resp":{"exportkey_token":"","ret":0},
+#       "effective_content_last_html_node":[],"feeds_click_trigger_list":[],"link_component_list":[],
+#       "more_read_list":[],"neg_feedback_groups":[],"neg_feedback_options":[],"related_tag_video":[],
+#       "reward_head_img_infos":[],"reward_head_imgs":[],"sec_control":{"ad_violation_middle_page":0}}
+#    ⇒ `advertisement_info` 是**活字段名**(不是猜的), 且与 `more_read_list` / `appmsg_album_videos`
+#      等业务字段同体 ⇒ **绝不允许整条拒**(AGENTS.md 京东 `functionId=start` 白屏教训)。
+#    置 `[]` = 复用服务端自己的无广告状态。不碰 `sec_control`(它是风控/中间页开关, 不是广告载荷)。
+response if ${WECHAT_ENABLE} == true && ${url} ~= /https:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgext(\?|$)/ then response.json.jq(".advertisement_info = []")
+
+# ③ 商品推广(CPS)接口: 整条转空。判据 = 上游三源一致 + 端点存活 + 语义专用:
+#    · fmz200(奶思) `^https?://mp\.weixin\.qq\.com/mp/cps_product_info\?action reject-dict`;
+#    · QingRex `Map Local` 对同一路径 `data="{}" status-code=200 header=Content-Type:application/json`
+#      (= reject_dict 等价物, 独立作者);
+#    · zirawell 把它并进 reject-dict 组;
+#    · 一手探针: `?action=1` → 200, 裸路径 → 404 ⇒ **带 action 才是业务分支**, 故正则带 `\?action`;
+#    · 它是"文章内插入的商品推广卡"下发口, 不承载文章正文 ⇒ 允许整条拒(纯推广端点判据成立)。
+response if ${WECHAT_ENABLE} == true && ${url} ~= /https:\/\/mp\.weixin\.qq\.com\/mp\/cps_product_info\?action/ then reject_dict(200)
+
+# ── 明确不落地 (发现项, 台账在 APP-ONBOARDING.md 附九; 防后人"看着像漏了"补进来) ──
+#   · 小程序广告素材 CDN(`wxsnsdy.wxs.qq.com` / `wxsnsdythumb.wxs.qq.com` / `wxsnsdy.video.qq.com` /
+#     `wxsnsad.tc.qq.com` / `wxsnsdy.tc.qq.com` / `wxa.wxs.qq.com` / `wxsmw.wxs.qq.com`):
+#     上游多源按域 REJECT(Kuroba / 045200 / 8680 / FuGfConfig + 可莉), DoH 三路也确认存活,
+#     **但角色证据只有域名与上游** —— 本机对该族 80/443 一律 curl(7)(被本地过滤名单即时拒绝),
+#     拿不到内容级证据; 且可莉原文的 `wxsmsdy.video.qq.com`(sm)实测 NXDOMAIN, 被 Moli-X/Repcz/
+#     fmz200 三个镜像复制传播成"多源一致"假象 ⇒ 按"域名字义不构成取证"纪律停在发现项。
+#     落地前置条件: 真机抓包或可达网络取到内容级角色证据(并只写精确子域, 不写 `wxs.qq.com` 后缀
+#     —— 该后缀会连带拒掉存活的 `wxa.wxs.qq.com` / `wximg.wxs.qq.com` / `wxsmw.wxs.qq.com`)。
+#   · `masonryfeed` / `relatedarticle` / `relatedsearchword` / `searchkeywordreport` / `geticon` /
+#     `getainfo` / `jsmonitor`: zirawell 整条拒、QingRex 置 `{}` —— 但它们承载**相关阅读/推荐/图标**
+#     类内容(非纯广告), 且无字段证据可删 ⇒ 不落地。
+#   · `dl.wechat.com/checkresupdate`(资源更新检查, zirawell 拒): 该域被 blackmatrix7 / BOB 当微信
+#     本体业务域分流(`HOST,dl.wechat.com,WeChat`); 收益是"去开屏"、代价未验证 ⇒ 不落地。
+#   · `payapp.weixin.qq.com/mchopenapp/goldplan/adpage`(支付页广告, zirawell 拒): **上游自相矛盾**
+#     —— Kuroba 把 `@@||payapp.weixin.qq.com^` 整体放进白名单; 且属支付面(M4) ⇒ 不落地。
+#   · `ad.weixin.qq.com` / `adn.` / `adtest.` / `adcdn.weixin.qq.com`(045200 / FuGfConfig 拒):
+#     实测是微信广告**官网**(SPA), 拦它零收益 ⇒ 已否决面。
+#   · `finder.weixin.qq.com` / `finds.weixin.qq.com`(045200 按域拒): 实测 NXDOMAIN(未注册子域)
+#     ⇒ 规则已过期, 写上去即死规则。
+#   · `mmgame.qpic.cn` / `mmsns.qpic.cn` / 任何 `qpic.cn` 系: 与本仓 `DOMAIN-SUFFIX, qpic.cn, DIRECT`
+#     跨层矛盾(既有先例: qidian.qpic.cn 因"书封面图床"被撤销) ⇒ 已否决面。
+#   · `dns.weixin.qq.com` / `aedns.weixin.qq.com`(微信自带 HTTPDNS): 见 `dns-httpdns.plugin` 的
+#     跨层矛盾登记 —— 那两条被主配置 `DOMAIN-SUFFIX, weixin.qq.com, DIRECT` 罩住而空转, 不属本插件。
+
+[MitM]
+# 解密面 = 1 个具体 host(`mp.weixin.qq.com`), 被上面 3 条 [Rewrite] 消费(mitm-coverage 守)。
+# 不写 `*.weixin.qq.com` 通配 —— 同一后缀下还挂着 channels / open / res / dns 等业务与解析主机。
+# 残留风险(诚实记录, 无法离线证伪): 若微信客户端对 `mp.weixin.qq.com` 启用证书固定, 本段全部失效
+# (症状 = 规则在日志里命中但文章广告不变)。该主机是 WebView 承载的 H5 业务域, 与原生 MMTLS 面不同,
+# 固定概率低; 一旦证实, 处置是转 L2 域名层(但本插件[见上]已无具备取证的可拦域名)。
+hostname = %APPEND% mp.weixin.qq.com

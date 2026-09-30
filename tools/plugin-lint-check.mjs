@@ -170,6 +170,37 @@ export function lintText(txt, { dir = "Plugin", file = "x.plugin" } = {}) {
               `若是有意为之请在注释登记矛盾; 若是无意请删除`
           );
       }
+      // ①′ 反方向 (2026-09-30 补): 插件 REJECT 被主配置 [Rule] 的 DIRECT 覆盖 → 同样空转。
+      //     触发场景极集中: 主配置的白名单组(DIRECT 后缀)罩住某域后, 插件里任何针对其子域的
+      //     REJECT 都永不生效 —— **微信白名单组 (`weixin.qq.com` / `qpic.cn` / `wx.qq.com` /
+      //     `wechat.com`) 就是活样板**: dns-httpdns 想收编 `dns.weixin.qq.com` 自带 HTTPDNS,
+      //     但本地 `DOMAIN-SUFFIX, weixin.qq.com, DIRECT` 先命中 ⇒ 收编从未发生。
+      //     与 ① 是同一判据的两个方向, 只报告不判红 (同上: 冲突要显式化, 不替用户选边)。
+      const dirs = [];
+      for (const l of rs.split("\n")) {
+        const t = l.trim();
+        if (!t || t.startsWith("#")) continue;
+        const f = t.split(",").map((x) => x.trim());
+        if (f.length >= 3 && f[2] === "DIRECT") dirs.push([f[0], f[1]]);
+      }
+      const coveredByDirect = (d) =>
+        dirs.some(([k, v]) => (k === "DOMAIN" && v === d) || (k === "DOMAIN-SUFFIX" && (v === d || d.endsWith("." + v))));
+      for (const l of sec("Rule").split("\n")) {
+        const t = l.trim();
+        if (!t || t.startsWith("#")) continue;
+        if (/^AND,/.test(t)) continue; // AND 的锚点不构成"整域路由", 不适用本条
+        const f = t.split(",").map((x) => x.trim());
+        if (f.length < 3) continue;
+        if (f[2] === "DIRECT") continue; // ① 已覆盖
+        if (f[0] !== "DOMAIN" && f[0] !== "DOMAIN-SUFFIX") continue;
+        if (coveredByDirect(f[1]))
+          reports.push(
+            `[跨层空转] ${dir}/${file}: ${f[0]}, ${f[1]}, ${f[2]} 被主配置 [Rule] 的 DIRECT 覆盖` +
+              `(本地配置 > 插件, 官方《规则系统 3.1》第 4 条) —— 该条永不生效。` +
+              `若要生效须把例外写在主配置该 DIRECT 之前(见 "顺序纪律" 的 apple.com 样板), ` +
+              `否则请删除并在注释登记该限制`
+          );
+      }
     }
     // ② 插件 [MitM] 正条目, 若被主配置 REJECT 覆盖 → 解密面无消费
     //    (domain-reject-mode=DNS 时域在 DNS 阶段即被拒, 到不了解密层)

@@ -499,3 +499,368 @@ response … enable={CAPTURE_ENABLE}        ← 消费
 另有一条**判红**门禁（上表两项只报告，与此不同）：`test/cases/ad-exclusions.test.js` + `tools/lib/ad-exclusions.mjs` 守住附六的排除决策 —— 「整域排除的域不得有任何规则命中（含子域）」「只拦子域的平台裸域不得被拦」，外加扫描面地板（主配置与插件都必须真的扫到）。理由：排除决策的失效方式是**后人顺手补一条规则**，没有任何运行时症状，只有断言能抓。
 
 **基准类门禁**（附六）：`tools/appads-check.mjs` + `test/cases/appads-check.test.js` —— **平台层取证门禁**（被拦平台须有一手声明，或经 `tools/lib/ad-platform-map.mjs` 台账记账且**每次运行都列出**；0 声明且无归属即判红）、语料 sha256 漂移检测（`--check`）、IAB 解析与四桶比对（`--file`）；发现层另有 `--refs`（共识 + 反向核对）与 `--fetch`（重抓派生域集，原始文件不入库）。它刻意**不**静默转绿：基准未钉死与"无一手声明的保留项"两种缺口都会打印在每次运行里，CI 里未钉死还会打 `::warning` 注解。溯源结论（首版叙述如何被证伪）留在 `SOURCE.json.baseline.provenance_audit`，由用例守住不许回流。
+
+## 附七：汽水音乐（抖音音乐版，2026-09-30）
+
+第 3 个做**接口级净化**的 App（前两个：起点、京东）。与二者最大的不同：**没有任何一手响应体样本** —— 字段名全部来自第三方去广告配置里的 jq/path 表达式。故本附的写法是"**字段名 = 证据，语义 = 推断**"，逐条按来源份数分档，单来源一律不落地。
+
+### 1. App 身份（一手）
+
+| 项 | 值 | 来源 |
+|---|---|---|
+| iOS bundle id | **`com.soda.music`** v21.0.0（2026-09-20 发布） | iTunes Lookup `id=1605585211`（中国区；美区 `resultCount=0` 未上架） |
+| 安卓包名 | **`com.luna.music`**（19.7.0 / 19.8.0 抓包与开放库一致） | CSDN 抓包文 / music-lib / Lyricify |
+| seller | Beijing Douyin Technology Co., Ltd. | 同上 |
+
+⚠️ `com.luna.music` **不是** iOS bundle id —— 两者混写会让后续取证张冠李戴（本仓 2026-09-30 修正过一次）。
+
+### 2. 接口面（一手探针，可复跑）
+
+**luna 接口有 4 个等价接入点**：`api.qishui.com`、`api3.qishui.com`、`api5-lq.qishui.com`、`beta-luna.douyin.com` —— 四者 `GET /luna/me?` 返回**同一结构**的 200 JSON（183 B）。`api2/luna/ad/ads/monitor/push/static .qishui.com` 全部 NXDOMAIN（未注册子域，不是"域已死"）。
+
+**取证陷阱（本轮最容易踩的一个）**：`/luna/card`、`/luna/feed/song-tab`、`/luna/more-panel`、`/luna/search-block`、`/luna/media_ads`、`/luna/commerce/v2/commerce_info` 的**裸 GET 全是 404**，**POST（或带 query）才 200**。只看 GET 会把真实端点当成死路由。同理会看错 `/luna/ads/`：裸路径与 `/luna/ads/list` 是 404，而 `/luna/ads/config` 是 200 ⇒ 它是**前缀路由**，上游写 `\/luna\/ads\/` 前缀匹配是对的。
+
+| 路由 | 探针 | 处置 |
+|---|---|---|
+| `/luna/me?` | GET 200 JSON | 字段级净化 |
+| `/luna/me/recently-played-media?` | GET 200 | 字段级净化 |
+| `/luna/activities?` | GET 200 | 字段级净化 |
+| `/luna/card?` · `/luna/search-block` · `/luna/feed/song-tab?` · `/luna/more-panel?` · `/luna/media_ads` | POST 200 | 净化 / 一条整条转空 |
+| `/luna/commerce/upsells?`（GET）· `upsells_config?` · `v2/commerce_info?`（POST） | 200 | 整条转空 |
+| `/luna/treasure/entrance/config?` · `/luna/listen-video/reminder?` · `/luna/hashtag/recommend` | 200 | 前两条整条转空；第三条停发现项 |
+| `/luna/ads/config` | POST 200（裸路径 404） | 前缀整条转空 |
+| `webcast-open.douyin.com/webcast/openapi/feed/?` | 400（缺参=路由通） | 整条转空 |
+| `/luna/splash` | 3 host × GET/POST 全 **404** | **不落地**（且仅单来源） |
+| `/location/info` | GET 404 / POST 307 | **不落地**（属 M3 隐私面） |
+
+### 3. 处置分层与来源分档
+
+**整条 `reject_dict(200)`（8 条）= 纯广告/纯推广端点**，每条 ≥2 份上游一致：`/luna/ads/`(前缀) · `/luna/media_ads` · `/luna/commerce/{upsells,upsells_config,v2/commerce_info}` · `/luna/treasure/entrance/config` · `/luna/listen-video/reminder` · `webcast-open…/feed/`。
+
+**字段级 `delete`/`jq`（7 条）= 业务+广告同响应**（纪律：「一个接口既下发业务数据又下发广告，就不能整条拒」，京东 `functionId=start` 白屏是前车之鉴）：
+
+| 接口 | 字段 / 表达式 | 来源份数 |
+|---|---|---|
+| `/luna/me?` | `del reward_ad_banner` | 3（kelee · ddgksf2013 · BOB） |
+| `/luna/activities?` | `del activity_map` | 3（ddgksf2013 · jnlaoshu · lihx） |
+| `/luna/search-block` | `del search_chart_block` | 2（ddgksf2013 · lihx） |
+| `/luna/card?` | `del preview_guide` + `del(.card_items[] \| select(has("priority_display")))` | 4（kelee · QingRex · BOB · jnlaoshu） |
+| `/luna/feed/song-tab?` | `del(.items[] \| select(.type=="video_track_mix"))` | 4（kelee · QingRex · BOB · ddgksf2013） |
+| `/luna/more-panel?` | `.blocks \|= map(select(.type != "related_video"))` | 4（kelee · QingRex · BOB · fmz200） |
+| `/luna/me/recently-played-media?` | `.media \|= map(select(.type != "video"))` | 2（edcjason · kelee JS） |
+
+**两条口径差异（记录，非照抄）**：
+- `/luna/feed/song-tab` 上游 ddgksf2013 用**白名单**（`items |= map(select(.type=="track"))`），本仓用**黑名单**（只删 `video_track_mix`）—— 白名单会把未来新增的**正常** type 一起清掉，属过度断言。
+- `/luna/card` 上游有"删元素"与"把 `priority_display`/`is_show` 置 false"两种写法，本仓取前者（3 源 vs 1 源）。
+- `recently-played-media` 上游因"响应体太大"改走第三方 JS 脚本，本仓仍用 jq：少一份第三方运行时依赖，且 jq 不生效时响应原样透传。
+
+**L2 域名（3 域 + 2 条 AND）**：`dm.bytedance.com` / `dm.pstatp.com` / `dm.toutiao.com`（fmz200 逐条列出 + 主配置 385 行注释已定性「dm./pglstatp 广告域不放行」）· `AND((DOMAIN-KEYWORD,-ad-sign),(DOMAIN-SUFFIX,byteimg.com))` · `AND((DOMAIN-KEYWORD,tnc),(DOMAIN-SUFFIX,zijieapi.com))`。
+
+**自带 HTTPDNS 收编为什么不用上游的响应改写**：kelee/QingRex/BOB/egern 都是改写 `/get_domains/` 响应（`opaque_data_enabled`/`ttnet_http_dns_enabled`/`ttnet_quic_enabled`/`ttnet_tt_http_dns` 置 0 + 过滤 `ttnet_dispatch_actions`）。那需要 MitM `tnc*-*.zijieapi.com` —— **通配 host 会被 mitm-orphan 判 generic 而恒报孤儿**，且把整个 `zijieapi.com` 拉进解密面。域名级收编效果等价（自带解析拿不到调度 ⇒ 回落系统 DNS），零证书成本。实测 `tnc3-bjlgy.zijieapi.com/get_domains/v5/?` 返回 200 且**动态下发** `tnc0-*` ⇒ 穷举必然过时；上游 `tnc\d-(bjlgy|ali[a-z]{2})\d?` 亦被证伪（`tnc3-bjlgy1`/`tnc1-alibj1` NXDOMAIN）。
+
+### 4. 明确不落地（发现项，防后人"看着像漏了"补进来）
+
+| 面 | 依据缺口 | 处置 |
+|---|---|---|
+| `/luna/splash`（"精准开屏"） | **单来源**（仅 edcjason），且 3 host × GET/POST **全 404**；无任何来源给出其响应字段名 | 停在发现项：先拿到真实端点再谈 |
+| `/luna/hashtag/recommend`（TAGS 推荐） | 端点实测 200，但仅 ddgksf2013 一份按 `reject-200`，无语义证据说明它"纯推广"，也无字段证据 | 停在发现项（纪律：不得整条拒业务接口） |
+| `/location/info` | ddgksf2013/lihx 按 reject-200，但语义是**位置隐私**＝ M3 | 交 M3，不塞进 M2 插件 |
+| `mon.zijieapi.com` / `mssdk.volces.com` / `lf3-short.ibytedapm.com` | A 存活（后两者 HTTPS 因本机解析器过滤名单不可测；`lf3-short` 实测 403 JSON = APM 端点） | 属 M3 上报拦截 → `probe-block` 通道扩展 |
+| `analytics.bytescm.com` / `ad.snssdk.com` / `ads.snssdk.com` / `gromore.snssdk.com` / `tosv.byted.org` / `static.i18n-pglstatp.com` / `be-pack.pglstatp-toutiao.com` / `ttcdn-tos.pstatp.com` / `s3a.pstatp.com` 等 | 上游（fmz200 等）有规则，但四解析器实测 **NXDOMAIN 或不可测**，或语义与内容 CDN 混同（`s3a.pstatp.com`） | 全部不落地 —— **不照搬上游的域清单**，尤其"最像广告"的 `ad./ads./gromore.snssdk.com` 实测根本不存在 |
+
+### 5. 已知残留风险（诚实记录，未解决）
+
+1. **iOS 端可能证书固定**：有第三方逆向文记录安卓 `libsscronet.so` 存在证书固定（修补 `VerifyCert` 才能抓包）。若 iOS 同样固定，则本插件 `[Rewrite]` 段**全部静默失效**（症状：日志命中但 App 无变化）。故纯广告端点同时放在 **L2 域名层**（不依赖解密）。离线无法证伪，需要真机验证 —— 这是本附最大的未闭合项。
+2. **字段语义是推断**：`reward_ad_banner` / `activity_map` / `search_chart_block` / `preview_guide` / `priority_display` / `video_track_mix` / `related_video` 均无一手 JSON 样本；字段名有 URL 可复跑，语义靠上游注释。若某字段被客户端用于非广告用途，症状是功能缺失而非报错。
+3. **域名层的跨 App 影响**：`AND(tnc, zijieapi.com)` 与 `dm.*` 是字节系共用面，装了本插件对**其他字节 App**同样生效（主配置本就 REJECT 了 `tnc3-alisc1`）。这是插件级取舍，不是缺陷，但需知情。
+
+### 6. 复跑命令
+
+```bash
+curl -sS -m12 'https://api.qishui.com/luna/me?'                      # 200 JSON（业务接口, 不可整条拒）
+curl -sS -m12 -X POST -H 'Content-Type: application/json' -d '{}' \
+     'https://api5-lq.qishui.com/luna/card'                          # 200（GET 是 404 —— 取证陷阱）
+curl -sS -m12 -X POST -d '{}' 'https://api5-lq.qishui.com/luna/ads/config'   # 200 ⇒ /luna/ads/ 是前缀路由
+curl -sS -m12 'https://tnc3-bjlgy.zijieapi.com/get_domains/v5/?'      # 200 且动态下发 tnc0-*
+curl -sS -m12 'https://tnc3-bjlgy.zijieapi.com/get_domains/v5/'       # 同上（无 ? 时 404）
+```
+
+**门禁**：`test/cases/soda.test.js` 把本附的 15 条台账、4 条红线（业务接口不得整条拒 / 单来源不得落地 / 每条必须带开关 / 解密面无通配且全被消费）与 App 身份固化 —— 台账与插件注释互为正本，改一处不改另一处即判红。
+**顺带修掉的门禁盲区**：`tools/argument-contract-check.mjs` 原先把**所有** `${…}` 当 JS 模板字面量排除，而新语法里 `${KEY}` 才是开关的唯一引用形式 —— 纯新语法插件会被判"死开关"（把正确写法判红）。判据已收敛为"仅新语法行（`request|response if …`）里的 `${KEY}` 算引用，且排除内置变量 `${url}`/`${request.*}`/`${response.*}` 与捕获槽 `${item.1}`"。
+
+---
+
+## 附八：智慧房东（施王物联，2026-09-30）
+
+本 App 的取证结构与本仓其它单 App 插件**都不同**，因此它的产出形态也不同：
+**没有一条社区上游规则可抄**（它是 B 端 SaaS，不是内容 App），广告面证据全部来自
+① App 自家的一手声明 + ② 运营后台前端 + ③ 端点探针。
+
+### 1. App 身份与入口
+
+| 项 | 值 | 取证 |
+|---|---|---|
+| 安卓包名 | `com.zhihuifangdong.wisdom` v6.5.9（2026-09-16） | 应用宝 appdetail 页 `YYBAppInfo` |
+| iOS | `id1529842057` | 官网 `/pages/download` 的 App Store 链接 |
+| 运营主体 | 浙江施王物联科技有限公司 | 官网页脚 + 备案号 |
+| 官网 | `www.zhihuifangdong.net` | — |
+| SaaS 后台 | `landlord.` / `guandian.` / `board.`（三个 Vue SPA） | crt.sh + 逐个探针 |
+| 开放平台 | `openapi.`（Apifox 托管文档：电表/水表/门锁接口） | 同上 |
+| 隐私政策 | `aixin-down-file.oss-cn-beijing.aliyuncs.com/zhfd_privacy.html`（2026-04-14 生效） | 应用宝详情页外链 |
+
+**官网本身没有广告域可拦**：它是**建站宝盒（71360）托管的企业站**，第三方只有
+七鱼客服 widget（`ykf-webchat.7moor.com`）、百度收录推送（`zz.bdstatic.com/linksubmit/push.js`）、
+高德地图 —— 三者都是站点功能而非广告面，拦了只会破站（客服不可用 / 地图空白）。
+`img03./sitecdn./cmsimg01.71360.com` 是站点自身的图片与静态资源，拦了整站白屏。
+⇒ **真正的广告面在 App 及其 SaaS 后台**，这也是本轮的去广告对象。
+
+### 2. 平台层证据：隐私政策的一手声明（本仓目前最硬的一类）
+
+隐私政策第十一节「第三方SDK说明」由 **App 自己**列出 **41 个第三方 SDK**，其中 **22 个**
+声明用途含"广告投放 / 归因 / 监测 / 反作弊"。
+
+**为什么它比 `app-ads.txt` 语料更硬**（两种证据的语义不同，不是同一把尺子）：
+
+| | app-ads.txt 语料 | App 隐私政策声明 |
+|---|---|---|
+| 谁说的 | 第三方发行商（Rovio/King/Zynga…） | **App 运营者自己** |
+| 说的是什么 | "这些 ad system 获授权卖**我的**库存" | "**我**集成了这些 SDK，用途是广告投放" |
+| 与本仓的关系 | 西方发行生态，**结构性不覆盖**国内 SDK | 直接覆盖国内全部主流广告 SDK |
+
+22 个广告 SDK：优量汇 `com.qq.e` · MMA 中国广告监测 · 图灵盾 · 穿山甲 `openadsdk` ·
+快手 `kwad` · SigMob `windad` · 倍孜 `beizi.ad` · GroMore · 百度联盟 · Tanx（阿里妈妈） ·
+趣盟 `com.dcloudym` · 章鱼 `com.octopus.ad` · 京媒 · 优推 `com.alliance.ssp.ad` · uni-ad ·
+推啊 `engine.tuifish.com` · 百度百青藤 · HUAWEI Ads · 泛连 `com.fl.saas.s2s` ·
+火山引擎 `com.bytedance.volc` · 七巧板 `yaq.pro.getVresult` · MSA 移动安全联盟（广告归因/反作弊）。
+
+### 3. 端点层：这 22 个平台的域**已被 L0 覆盖 21/22**
+
+逐条比对现有 `ad-block.plugin` + 主配置的域集后，**只有一个缺口**：
+
+| 平台 | 端点 | 探针（Cloudflare + DNS.google 双解析器 + 泛解析对照） | 处置 |
+|---|---|---|---|
+| **趣盟 / DCloud** | `api.qttunion.com` | 10 条 A（152.136.165.32 / 49.233.244.218 / 211.159.174.153…），随机子域 NXDOMAIN ⇒ **非泛解析**；HTTPS 根路径及 9 个路径均 `404 text/plain` ⇒ 服务端在、端点型 | ✅ 加进 `ad-block.plugin`（L0）+ 登记 `OUT_OF_CORPUS_ROOTS` |
+| uni-ad | `uniad.dcloud.net.cn` | 2 A 非泛解析，但 HTTPS `200 text/html` = **平台官网/文档站** | ❌ 不加（判据④） |
+| HUAWEI Ads | `ads.huawei.com` | A 存活但 HTTPS `301 text/html` = 平台站；`hmsads./adx./ads-api.` 全 NX | ❌ 不加 |
+| MMA | `mmachina.cn` | 1 A，HTTPS `200 text/html` = 协会官网 | ❌ 不加 |
+| MSA（OAID） | `oaid.masdk.cn` | 双解析器全 NX（该 SDK 走本地接口不发网络请求） | ❌ 不加 |
+| TalkingData | `api.talkingdata.com` | 2 A 存活，但 HTTPS **不可测**；且用途是"数据分析与统计" ⇒ M3 隐私面不是广告面 | 只登记 |
+
+**其余 15 个平台**（优量汇 6 域 / 穿山甲 / 快手 / SigMob / 倍孜 / GroMore / 百度联盟+百青藤 9 域 /
+Tanx 13 域 / 章鱼 2 域 / 京媒 4 域 / 优推 / 推啊 4 域 / 泛连 2 域 / 火山引擎 / 七巧板·图灵盾 18 域）
+**已由 L0 覆盖**，本轮不重复登记 —— 这正是"单一真源"纪律的收益：单 App 接入不重造轮子。
+
+### 4. 自营活动位（`Plugin/zhifu-fangdong.plugin` 的处置对象）
+
+这是本 App **真正的"广告"** —— 平台自己卖/推的运营活动位，落在 App 首页。
+
+取证链（全部一手，无 HAR）：
+
+1. **运营后台**（`landlord.`）路由 `/standard/Advertisement/*` 是「活动设置」CRUD：
+   `activityListMore` / `addMore` / `changeMore` / `upMore` / `down` / `deleteMore` /
+   `topMoveMore` / `details`。
+2. **实体字段**（读 `chunk-47120da8` 列表页与 `chunk-d436595e` 表单页的前端代码得到）：
+   `picType`（只有 `BANNER` 首页轮播 与 `POP_UP_BOX` 弹窗两种）、`title`、`coverPic`、
+   `pushPic`、`url`、`adcDelivery`（开启跳转）、`advRedio`（每次/每天一次/仅一次）、
+   `bounces`、`goTop`（置顶）、`clickSize`（活动点击量）、`communityIds`（定向小区）、
+   `gmtStart`~`gmtEnd`（有效期）、`status`（UP/DOWN/SAVE）、`userType: RENTER`。
+   **没有一个业务字段** ⇒ 该实体是**纯广告**，不是"业务+广告同响应"。
+3. **App 端读取口** = `GET /core/app/activity/bannerPic`（后台前端里函数名 `getSwiper`），
+   **点击上报口** = `POST /core/app/activity/clickAdd`。
+4. **端点探针**：`bannerPic` 无 token 返 `401 {"code":"TOKEN_EMPTY","success":false}`
+   ⇒ 路由通、端点真实存在（对照组：去掉前缀的 `/activity/bannerPic` 返 Spring Boot 404，
+   证明这条路径前缀是敏感的，401 不是"路径写错了"）。
+
+处置：**一条** `reject_dict(200)` 同时清掉轮播与弹窗（同一接口，由 `picType` 区分两种形态）。
+
+**为什么不写字段级**：响应外层数组字段名未取证（探针拿不到 token，无 HAR），而官方
+《Rewrite 新语法》规定 JSON 值只支持 String/Number/Boolean/null/变量、**不含数组**
+（传 `[]` 会被加载期拒绝）⇒ 写 `.data = []` 里的 `.data` 就是臆造字段名。
+按本标准第 1 节的纪律，宁可少清一个字段，不留猜出来的名字。
+
+### 5. 明确**不处置**的面（台账已进 `test/cases/zhifu-fangdong.test.js`，防后人顺手补）
+
+| 面 | 不处置理由 |
+|---|---|
+| `POST /core/app/activity/clickAdd` | 写操作（点击上报），响应无广告内容；拦它是断上报不是去广告 |
+| `/core/web/activity/*` | **后台运营侧** CRUD，拦了破运营后台 |
+| `/standard/OnlinePromotion/*`（线上推广 / 智租推广） | 租户**自费的房源推广功能**，属业务不是广告 |
+| `/core/web/promotionRecord/*` | 同上，推广记录台账 |
+| 官网第三方（七鱼 / 百度推送 / 高德） | 站点功能非广告，拦了破站 |
+
+### 6. 遗留待验证项
+
+**`reject_dict(200)` 会丢掉响应封套里的 `code/success`**。本仓无真机，后果只能登记：
+若 App 端对缺失 `success` 的处理是"弹错误提示"而非"静默不展示"，症状是**首页偶发 toast**。
+届时正确处置是**改字段级**（拿到 HAR 后按真实字段名 jq 置空），**不是**回退成放行。
+同 `soda.plugin` 的 luna 纯广告接口是同一形态、同一未验证前提。
+
+### 7. 复跑命令
+
+```bash
+# 平台层一手声明(广告 SDK 清单, 第十一节)
+curl -sS -m15 'https://aixin-down-file.oss-cn-beijing.aliyuncs.com/zhfd_privacy.html' | \
+  grep -oE '[0-9]+、使用SDK名称：[^<]*' | head -45
+
+# 端点探针: 401 = 路由通(端点存在); 对照组去掉前缀应得 404
+curl -sS -m12 'https://api.zhihuifangdong.net/core/app/activity/bannerPic'      # 401 TOKEN_EMPTY
+curl -sS -m12 'https://api.zhihuifangdong.net/activity/bannerPic'              # 404 Spring Boot
+
+# 趣盟端点(双解析器 + 泛解析对照)
+curl -sS -m10 -H 'accept: application/dns-json' \
+  'https://cloudflare-dns.com/dns-query?name=api.qttunion.com&type=A' | head -c 400
+curl -sS -m10 'https://dns.google/resolve?name=zznp-x9k2.api.qttunion.com&type=A'  # Status 3 = 非泛解析
+curl -sS -m12 -o /dev/null -w '%{http_code} %{content_type}\n' 'https://api.qttunion.com/'
+```
+
+**门禁**：`test/cases/zhifu-fangdong.test.js`（8 例）把处置台账、5 条不处置面、
+证据留档（41/22 数字、`picType` 判据、`TOKEN_EMPTY` 探针、隐私政策 URL）、
+L0 分工（插件内 `[Rule]` 必须为空、趣盟必须在 ad-block + 排除台账）、
+开关覆盖、解密面最小化、未验证风险留档、`[Plugin]` 段登记固化。
+
+**顺带补掉的一处门禁盲区**：`OUT_OF_CORPUS_ROOTS`（平台层门禁的**结构性豁免**清单）
+此前只有文字纪律「死豁免判红」，`test/cases/appads-check.test.js` 里**没有对应断言** ——
+即"看起来有门禁其实没有"。本轮新增豁免条目时一并补上：① 排除项必须是平台根域而非端点主机；
+② 每条必须仍被至少一条 `ad-*` 规则命中（删了规则却不删豁免 ⇒ 门禁对该根域永久静默）；
+③ 未登记域仍走判红路径。两种破坏形态（改成端点主机 / 指向不存在的根域）已实测能判红。
+
+---
+
+## 附九：微信（WeChat，2026-09-30）
+
+第 5 个做接口级净化的 App（起点、京东、汽水音乐、智慧房东之后）。**前四者的难点是"字段名/端点在哪"，微信的难点是"根本没有 HTTP 面"** —— 故本附的主体是**负结果取证**：把"为什么只有 3 条规则"写成可复跑的结论，避免后人把"不可达"误判成"没写完"而反复劳动，或按域名字义补出一堆死规则。
+
+### 1. App 身份（一手）
+
+| 项 | 值 | 来源 |
+|---|---|---|
+| iOS bundle id | **`com.tencent.xin`** v8.0.79（2026-09-29 发布，min iOS 15.0，967 MB） | iTunes Lookup `id=414478124`（中国区） |
+| 安卓包名 | **`com.tencent.mm`** | 通行事实（与 iOS 包名**不同名**，混写会张冠李戴） |
+| seller | Tencent Technology (Shenzhen) Company Limited | 同上 |
+
+⚠️ `weixin` / `wechat` 是品牌词与主配置里 `DIRECT` 白名单的**根域**，不是包名。
+
+### 2. 覆盖天花板：三条硬结论（主题是"无面可打"）
+
+**① 朋友圈 / 视频号 / 开屏 / 激励视频广告走 MMTLS 私有协议 —— HTTP 层不可达。**
+与之一一对应的连接面主机 `long` / `short` / `szlong` / `szshort` / `szminorshort` / `szextshort` / `hklong` / `hkshort.weixin.qq.com` 全部**有 A 记录（2–10 条）**，但 443 一律 `curl(35) SSL_ERROR_SYSCALL`（无法完成 TLS）⇒【推断】即 MMTLS 承载层。Rewrite/Script 只见 HTTP(S)，**结构性碰不到**。
+旁证有三：① 全网 11 个规则仓 / 41 条微信相关规则里，命中这些面的 **HTTP 层规则 0 条**；② 现成方案只有 UI 层（Xposed `Johnny520/wcx` 的 `RemoveMomentsAds.kt`、GKD 规则 `分段广告-朋友圈广告`）；③ 上游自述 —— `ddgksf2013/Rewrite` 的 `WeChat.conf` 文件头逐字：「微信公众号去广告**[已失效][不包含公众号信息流AD、朋友圈AD]**[推荐开启青少年模式可去除朋友圈AD]」。
+
+**② "朋友圈广告"字面候选域整族已未注册。**
+`wxsnsad.qq.com` · `wxsnsad.weixin.qq.com` · `wxsnsdy.qq.com` · `wxsnsdythumb.qq.com` · `wxsns.weixin.qq.com` · `ads.weixin.qq.com` · `finder.weixin.qq.com` · `finds.weixin.qq.com` · `szvip./szfav.weixin.qq.com` · `t.l.qq.com` · `wxad.qq.com` · `wxs.qq.com` · `mmsns.qlogo.cn` 在 **Cloudflare / Google / AliDNS / doh.pub（腾讯自家）/ AdGuard-Unfiltered 五路一致 `Status=3, 0 A`**，而所属根域（`qq.com` / `weixin.qq.com` / `qlogo.cn`）**SOA 活跃** ⇒ 「子域未注册」≠「域已死」，但对拦截而言**没有可拦的名字**。
+泛解析对照：9 个根域（qq.com / weixin.qq.com / gtimg.com / gtimg.cn / qpic.cn / qlogo.cn / servicewechat.com / wxaurl.cn / tc.qq.com）的随机 6 位子域四路全 `st3/0A` ⇒ **本批不存在泛解析区**；唯二例外 `adsview.qq.com` / `gtimg.cn` 返回**权威 `0.0.0.1`**（腾讯自建黑洞，写 REJECT 亦为死规则）。
+
+**③ 名字里带 ad 的活域全是"广告主侧后台/官网"，不是 App 内广告下发端点。**
+
+| 主机 | 实测 | 真实角色 | 拦它的后果 |
+|---|---|---|---|
+| `ad.weixin.qq.com` | 200 `text/html` 17 KB | **微信广告官网 SPA**（任意路径回同一 index；与 `mp.weixin.qq.com` 共享 `mpv6.weixin.qq.com → sh.mp.weixin.qq.com` CNAME 链） | 官网 404，App 内广告**毫发无伤** |
+| `ad.qq.com` | 200 HTML 4.7 KB | 腾讯营销投放管理平台 | 广告主后台不可达 |
+| `e.qq.com` | 200 HTML 2.6 KB | 腾讯广告营销平台 | 营销站不可达 |
+| `ads.weixin.qq.com`（复数） | **NXDOMAIN ×5** | 未注册 | 死规则 |
+
+同族还有两个"名字骗人"的样本：`wxapp.tc.qq.com`（16 A，看着像小程序，实为 CNAME `socwxsns.video.qq.com`、证书 `*.video.qq.com` = **SNS/视频 CDN**）；`res.wx.qq.com` 根路径 404 但 `/a/wx_fed/assets/res/*.ico` = **200 image/x-icon** ⇒ **根路径 404 ≠ 死主机**。
+
+### 3. 唯一可达面：`mp.weixin.qq.com`（路由探针 + 3 条处置）
+
+**探针判据（控制组是这张表成立的前提）**：对明知不存在的路径，服务端稳定 **404 + 0 字节 + 无 Content-Type** —— `/mp/zz-not-exist-q7x2m9`、`/mp/getappmsgadx`、`/zz-not-exist-q7x2m9`、`/cgi-bin/zz-not-exist-q7x2m9`，GET/POST 全部 404。故下表 **200 = 路由真实存在**。
+
+| 路由 | 探针结果 | 处置 |
+|---|---|---|
+| `/mp/getappmsgad` | GET 200 `text/html` 2138 B（`<title>验证</title>` + `retkey:11`/`logicret:-3`）；POST 200 `application/json` 111 B `{"base_resp":{"ret":-3,"errmsg":"no session"}}` | **字段级净化**（文中/文末广告） |
+| `/mp/getappmsgext?__biz=…` | **200 JSON 374 B**（无 `__biz` 时 45 B `ret:-2`） | **字段级净化**（业务+广告同体） |
+| `/mp/cps_product_info?action=1` | 200（裸路径 404） | **整条转空**（纯推广端点） |
+| `/mp/profile_ext` · `/mp/homepage` · `/s?__biz=` | 200 | 业务入口，**不处置** |
+| `/mp/ad` · `/mp/report` | POST 200（同一 `no session` 封套）；GET 返回验证页 | **不落地**：路由存在但**角色无证据**（无上游提及、拿不到内容级响应） |
+| `/mp/getadinfo` · `/mp/advertisement` · `/mp/getadvertisement` · `/mp/getad` · `/mp/adinfo` · `/mp/getads` · `/mp/getappmsgadinfo` · `/mp/getappmsgadlist` · `/mp/appmsg_ad` · `/mp/getadvert` · `/mp/getadsinfo` · `/mp/getappmsgad/get` · `/mp/getappmsginfo` · `/mp/getcomment` · `/mp/getappmsglikes` · `/mp/getappmsglist` · `/mp/waplogin` · `/mp/getrecommend` · `/mp/getflowcontrol` · `/mp/getweappad` · `/mp/getwxagamead` · `/mp/getgamead` | **404（GET 与 POST 都是）** | 写上去即**死规则** |
+
+**处置 1｜`/mp/getappmsgad` → `response.json.jq(".advertisement_num = 0 | .advertisement_info = []")`**
+- 上游两份**直接挂本路径**的脚本逐字一致：`NobyDa/Script` `QuantumultX/File/Wechat.js` 与 `chxm1023/Advertising` `wxgzhad.js` 都是 `advertisement_num = 0; advertisement_info = []; delete appid`。二者脚本体与字段集逐字相同 ⇒ **按"作者+字符串"去重只能算 1 份强证据**（本仓 §2 判据）。
+- 因此叠加**本仓一手观测**：`advertisement_info` 是 2026-09 活响应里真实存在的字段名（见处置 2 的 374 B 样本），且**空数组就是服务端自己的"无广告"状态** ⇒ 置空而非删 key，客户端拿到的结构与无广告时完全一致。
+- **不整条拒**的理由：保留 `base_resp` 封套与结构（AGENTS.md《字段重命名法》条：结构保留比整条拒抗异常分支）。上游确实有三源整条拒（QingRex `Map Local data="{}"` / zirawell `reject-dict` / AWAvenue `||mp.weixin.qq.com/mp/getappmsgad^`），但 AWAvenue 把该条放在 `Replenish` 补充列表并自述「开启后对订阅号拦截会相当激进」。
+- **不 `delete appid`**：该字段名语义泛化，无证据说明它只服务广告；广告载荷已由 `advertisement_*` 覆盖。
+- **未采纳的旧字段名**：`advertisement`（ddgksf2013 文件头自述**已失效**、奶思 2023 旧形态）—— 留作真机回归后的第一顺位补充。
+
+**处置 2｜`/mp/getappmsgext` → `response.json.jq(".advertisement_info = []")`（一手样本）**
+
+```
+$ curl -sS 'https://mp.weixin.qq.com/mp/getappmsgext?__biz=MzA5&mid=1&idx=1&sn=abc'   # 200, 374 B
+{"advertisement_info":[],"appmsg_album_videos":[],"base_resp":{"exportkey_token":"","ret":0},
+ "effective_content_last_html_node":[],"feeds_click_trigger_list":[],"link_component_list":[],
+ "more_read_list":[],"neg_feedback_groups":[],"neg_feedback_options":[],"related_tag_video":[],
+ "reward_head_img_infos":[],"reward_head_imgs":[],"sec_control":{"ad_violation_middle_page":0}}
+```
+
+`advertisement_info` 与 `more_read_list` / `appmsg_album_videos` / `link_component_list` 等**业务字段同体** ⇒ **绝不允许整条拒**（京东 `functionId=start` 白屏教训）。`sec_control` 是风控/中间页开关，**不碰**。
+
+**处置 3｜`/mp/cps_product_info?action` → `reject_dict(200)`**
+上游三源一致：`fmz200(奶思)` `^https?://mp\.weixin\.qq\.com/mp/cps_product_info\?action reject-dict` · `QingRex` `Map Local data="{}" status-code=200 header=Content-Type:application/json`（等价物，独立作者）· `zirawell` 并进 reject-dict 组。一手探针确认 `?action=1` = 200 而裸路径 = 404 ⇒ **带 `action` 才是业务分支**（正则据此写 `\?action`）。它是"文章内插入的商品推广卡"下发口，不承载正文 ⇒ 纯推广端点判据成立。
+
+**为什么这三条都必须在 MitM 下**：`[Rewrite]` 只对 HTTP 与**经 MitM 解密**的 HTTPS 生效。解密面刻意只列 `mp.weixin.qq.com` 一个具体 host（无通配）—— 同一后缀下还挂着 `channels`/`open`/`res`/`dns` 等业务与解析主机。
+
+### 4. 明确不落地（发现项 / 已否决面，防上游误伤回流）
+
+| 面 | 依据缺口 | 处置 |
+|---|---|---|
+| 小程序广告素材 CDN：`wxsnsdy.wxs.qq.com`(6A) · `wxsnsdythumb.wxs.qq.com`(6A) · `wxsnsdy.video.qq.com`(6A) · `wxsnsad.tc.qq.com`(2A) · `wxsnsdy.tc.qq.com`(7A) · `wxa.wxs.qq.com`(2A) · `wximg.wxs.qq.com`(1A) · `wxsmw.wxs.qq.com`(**15A**) | 上游多源按域 REJECT（可莉/kelee 三镜像 · Kuroba `NextIDSeeRules` · 045200 · 8680 · FuGfConfig）+ DoH 存活，**但角色证据只有域名与上游**：本机对该族 80 **与** 443 一律 `curl(7)`@2–3 ms（本地过滤名单即时拒绝），拿不到内容级证据；且可莉原文的 **`wxsmsdy.video.qq.com`（sm）实测 NXDOMAIN**，被 Moli-X / Repcz / fmz200 三个镜像复制传播 ⇒「多源一致」是**假象**（本仓最需防的失效模式） | 停在发现项。落地前置：① 内容级角色证据（真机抓包或可达网络）；② **只写精确子域**，不得写 `DOMAIN-SUFFIX, wxs.qq.com`（会连带拒掉存活的 `wxa.`/`wximg.`/`wxsmw.`） |
+| `masonryfeed` · `relatedarticle` · `relatedsearchword` · `searchkeywordreport` · `geticon` · `getainfo` · `jsmonitor` | zirawell 整条拒 + QingRex 置 `{}`，但语义是**相关阅读/推荐/图标**（非纯广告），且无字段证据可删 | 不落地（整条拒会清掉非广告内容） |
+| `dl.wechat.com/checkresupdate` | `blackmatrix7` / `BOBOLAOSHIV587` 把 `dl.wechat.com` 当微信本体业务域分流（`HOST,dl.wechat.com,WeChat`）；收益（去开屏）与代价均未验证 | 不落地 |
+| `payapp.weixin.qq.com/mchopenapp/goldplan/adpage` | **上游自相矛盾**：zirawell 拒该路径，而 Kuroba `FuLingAllowList` 写 `@@||payapp.weixin.qq.com^` 白名单整域；且属支付面（M4） | 不落地 |
+| `ad.weixin.qq.com` / `adn.` / `adtest.` / `adcdn.weixin.qq.com` | 实测是官网 SPA（§2 ③） | **已否决面**（零收益） |
+| `mmgame.qpic.cn` · `mmsns.qpic.cn` · 任何 `qpic.cn` 系 | 与本仓 `DOMAIN-SUFFIX, qpic.cn, DIRECT` **跨层矛盾**；既有先例 `qidian.qpic.cn` 因"书封面图床"被撤销 | **已否决面** |
+| `finder.weixin.qq.com` / `finds.weixin.qq.com` | 045200 的规则已过期（实测 NXDOMAIN） | 不落地 |
+| `static.wxqcloud.qq.com.cn`(3A) | AWAvenue 自述逐字「部小程序依赖此域名加载 css, well, he's here now.」；实测 403 `application/xml` = 对象存储桶 | 不落地（上游自己承认会破小程序） |
+| `dns.weixin.qq.com` / `aedns.weixin.qq.com` | 微信自带 DNS 下发口（见 §5） | 归 L0 `dns-httpdns.plugin`，**不在本插件** |
+
+### 5. 跨层矛盾登记（本轮新发现，附新门禁方向）
+
+`Plugin/dns-httpdns.plugin` 的 `DOMAIN, aedns.weixin.qq.com, REJECT` 与 `DOMAIN, dns.weixin.qq.com, REJECT` 被主配置 `template/loon.tpl` 的 `DOMAIN-SUFFIX, weixin.qq.com, DIRECT` 罩住 —— 官方《规则》「规则来源优先级：**本地规则 > 插件规则 > 订阅规则**」+ 域名类规则首次命中即停 ⇒ **这两条永不生效**。同组第三条 `dns.weixin.qq.com.cn` 不在 `weixin.qq.com` 后缀下，是唯一真生效的一条。
+后果：微信自带 DNS 下发口实际未被收编 —— `dns.weixin.qq.com`（14 A）的 `/` 与 `/dns-query` 均 404（47 B 通用 404），但 `/cgi-bin/micromsg-bin/newgetdns` = **200 `text/xml` 2792 B（加密体）** ⇒ 它是**客户端专用 DNS 下发业务接口**，不是标准 DoH 解析器（`/dns-query` 探针判据在这台上不成立）。
+
+**门禁补向**：`tools/plugin-lint-check.mjs` 原先只有「插件 `DIRECT` 被主配置 `REJECT` 覆盖」这一个方向，反方向（插件 `REJECT` 被主配置 `DIRECT` 覆盖）**没有任何检查** —— 微信白名单组就是这个方向的活样板。本轮补上，**只报告不判红**（与既有跨层条一致：冲突要显式化，不替用户选边）。
+**若要真收编**：把两条例外写在主配置该 `DIRECT` **之前**（`apple.com` 顺序纪律样板，由 `test/cases/rule-shadow.test.js` 守）。本轮**未改路由** —— 拦微信自带 DNS 存在未验证的功能性权衡（微信是否优雅回落系统 DNS），按「跨层矛盾让用户决定改哪边」的纪律只登记、不擅自改。
+
+### 6. 已知残留风险（诚实记录，未闭合）
+
+1. **真机回归未做**：匿名请求拿不到带会话的响应体（`ret:-3 no session`）⇒ ① `advertisement_num`/`advertisement_info` 是否为 `getappmsgad` 的**顶层字段**，证据来自上游两份同源脚本 + `getappmsgext` 一手样本，**不是本端点的样本**；② 置空后客户端是否只是留白广告位。若真机发现无效：第一顺位补 `.advertisement = []`，第二顺位改 `reject_dict(200)`。
+2. **证书固定**：若微信对 `mp.weixin.qq.com` 启用证书固定，本插件 `[Rewrite]` 全部静默失效（症状：Loon 日志命中但文章广告不变）。该主机是 WebView 承载的 H5 业务域，与原生 MMTLS 面不同，概率低但**无法离线证伪**。
+3. **解密面代价**：`mp.weixin.qq.com` 承载**全部公众号文章流量** ⇒ 装本插件即把微信 H5 文章流量纳入解密面。这是本插件唯一的成本（换取的是仅 3 条规则的收益），用户可按需在客户端停用。
+4. **字段元素结构未知**：一手样本里 `advertisement_info` 是**空数组**（服务端无广告时的状态），其元素结构无法观测 —— 本仓只做"置空"，不依赖元素结构，故不受影响；但这也意味着**无法从样本推断广告位的渲染条件**。
+
+### 7. 复跑命令
+
+```bash
+UA='Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) MicroMessenger/8.0.49'
+
+# 1) 「朋友圈广告」候选域五路 NXDOMAIN（含腾讯自家 doh.pub 与不过滤的 AdGuard）
+for r in cloudflare-dns.com dns.google dns.alidns.com doh.pub; do
+  curl -sS -m10 -H 'accept: application/dns-json' "https://$r/dns-query?name=wxsnsad.qq.com&type=A"; echo; done
+curl -sS -m10 -H 'accept: application/dns-json' \
+  'https://unfiltered.adguard-dns.com/resolve?name=wxsnsad.qq.com&type=A'
+
+# 2) 控制组 + 路由存在性（顺序不能颠倒：先证控制组 404，再读 200）
+curl -sS -m10 -o /dev/null -w 'control %{http_code}\n' -A "$UA" 'https://mp.weixin.qq.com/mp/zz-not-exist-q7x2m9'  # 404
+curl -sS -m10 -o /dev/null -w 'getappmsgad %{http_code}\n' -A "$UA" 'https://mp.weixin.qq.com/mp/getappmsgad'     # 200
+curl -sS -m10 -X POST -A "$UA" -H 'Content-Type: application/json' -d '{}' \
+     'https://mp.weixin.qq.com/mp/getappmsgad'                                    # 200 JSON {"ret":-3,"errmsg":"no session"}
+
+# 3) 一手字段样本（374 B，含 advertisement_info）
+curl -sS -m10 -A "$UA" 'https://mp.weixin.qq.com/mp/getappmsgext?__biz=MzA5&mid=1&idx=1&sn=abc' | python3 -m json.tool
+
+# 4) 名义陷阱 + 根 404 ≠ 死主机
+curl -sS -m10 -o /dev/null -w 'ad.weixin %{http_code} %{content_type}\n' 'https://ad.weixin.qq.com/'
+curl -sS -m10 -o /dev/null -w 'res.wx root %{http_code}\n' 'https://res.wx.qq.com/'
+curl -sS -m10 -o /dev/null -w 'res.wx icon %{http_code}\n' 'https://res.wx.qq.com/a/wx_fed/assets/res/NTI4MWU5.ico'
+
+# 5) MMTLS 面（有 A 但 TLS 不通）+ 小程序素材族（本机过滤 ⇒ curl(7)，只能拿 DoH 存活）
+curl -sS -m10 -o /dev/null -w 'long.weixin %{http_code} rc=%{exitcode}\n' 'https://long.weixin.qq.com/' 2>&1 | tail -1
+curl -sS -m10 -H 'accept: application/dns-json' 'https://cloudflare-dns.com/dns-query?name=wxsnsdy.wxs.qq.com&type=A'
+
+# 6) 微信自带 DNS 下发口 + 跨层矛盾（新门禁方向）
+curl -sS -m10 -o /dev/null -w 'newgetdns %{http_code} %{content_type}\n' \
+  'https://dns.weixin.qq.com/cgi-bin/micromsg-bin/newgetdns'
+node tools/plugin-lint-check.mjs | grep 跨层空转
+```
+
+**门禁**：`test/cases/wechat.test.js`（6 例）把本附的 3 条台账、13 条不落地/已否决面、App 身份与覆盖天花板写进断言 —— 台账与插件注释互为正本，改一处不改另一处即判红。
+**顺带补上的门禁盲区**：`tools/plugin-lint-check.mjs` 的跨层矛盾扫描原为**单向**（只查"插件 DIRECT 被主配置 REJECT 覆盖"）。微信白名单组暴露了反方向同样成立且**后果更隐蔽**（规则语法合法、门禁全绿、实际永不命中）⇒ 本轮补上「插件非 DIRECT 规则被主配置 DIRECT 覆盖」的扫描（`AND` 锚定行不适用，方法/后缀两形态按官方优先级判），首跑即抓出上述 2 条。

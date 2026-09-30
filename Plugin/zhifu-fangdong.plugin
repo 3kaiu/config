@@ -1,0 +1,68 @@
+#!name=智慧房东去广告
+#!desc=施王智慧房东(房屋租赁管理)自营活动广告位净化: App 端轮播/弹窗活动接口整条转空。第三方广告 SDK 域由广告平台拦截器(L0)统一承担, 本插件不重复。
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.5.1(978)
+#!tag = 智慧房东,去广告
+#!type = normal
+
+# ── 单 App 接入取证 (照 APP-ONBOARDING.md §1; 全量台账见其附八) ──────────────
+# App 身份: 安卓包名 `com.zhihuifangdong.wisdom`(应用宝 appid 53928728, v6.5.9, 2026-09-16);
+#   iOS bundle `id1529842057`。运营主体 浙江施王物联科技有限公司, 官网 www.zhihuifangdong.net。
+#   官网自身是**企业站**(建站宝盒 71360 托管), 第三方只有七鱼客服 widget / 百度收录推送 /
+#   高德地图 —— 三者都是站点功能而非广告面, 官网无可拦的广告域(台账已登记)。
+#   ⇒ 真正的广告面在 **App + 其 SaaS 后台**。
+#
+# ── 广告面取证(平台层一手声明 + 端点层探针) ──────────────────────────────
+# ① **平台层**: 官方隐私政策(aixin-down-file.oss-cn-beijing.aliyuncs.com/zhfd_privacy.html,
+#    2026-04-14 生效)第十一节「第三方SDK说明」由 App 自己列出 **41 个 SDK**, 其中 **22 个
+#    声明用途含"广告投放/归因/监测/反作弊"**。这是比 app-ads.txt 更硬的一手声明 —— 语料是
+#    西方发行商自报"哪些 ad system 获授权卖我的库存", 这里是 App 自己承认"我嵌了这些广告 SDK"。
+# ② **端点层**: 这 22 个平台的广告出口域**已被 L0 `ad-block.plugin` 覆盖 21/22**
+#    (优量汇 6 / 穿山甲 / 快手 / SigMob / 倍孜 / GroMore / 百度联盟+百青藤 / Tanx / 章鱼 /
+#    京媒 / 优推 / 推啊 / 泛连 / 火山引擎 / 七巧板·图灵盾 逐条 DoH+HTTPS 核过, 台账见附八)。
+#    唯一缺口 **趣盟 `api.qttunion.com`**(10 条 A / 非泛解析 / HTTPS 404 text/plain = 端点存在)
+#    已加进 ad-block.plugin 的国内 SDK 段 —— 它是**跨 App 广告平台域**, 归 L0 而非本插件。
+#    另 4 个(uni-ad / HUAWEI Ads / MMA / MSA)经探针**无存活端点**(子域全 NX, 根域是平台官网),
+#    按纪律不写死规则。TalkingData 端点存活但 HTTPS 不可测且属统计面(M3), 只登记不加。
+# ③ **自营广告位**(本插件的处置对象, 也是本 App 真正的"广告"): SaaS 后台
+#    `/standard/Advertisement/*` 是运营侧「活动设置」CRUD, 展示形式只有 `BANNER`(首页轮播)
+#    与 `POP_UP_BOX`(弹窗) 两种, 实体字段全为广告语义 ——
+#    `picType/title/coverPic/pushPic/url/adcDelivery/advJump/advRedio/goTop/clickSize/communityIds`
+#    (有效期 gmtStart~gmtEnd、可置顶、定向小区、点击量统计)。**没有一个业务字段**
+#    ⇒ 该实体是纯广告, 不是"业务+广告同响应"。
+#    App 端读取口 = `GET /core/app/activity/bannerPic`(后台前端里名为 `getSwiper`),
+#    点击上报口 = `POST /core/app/activity/clickAdd`(写操作, 无广告内容, 不处置)。
+#    一条规则同时清掉轮播与弹窗两种形态(两者同一接口, 由 picType 区分)。
+# 探针: bannerPic 无 token 返 `401 {"code":"TOKEN_EMPTY"}` ⇒ 路由通、端点真实存在(对照
+#    `/activity/bannerPic` 返回 Spring Boot 404 证明路径前缀敏感)。
+
+[Argument]
+ZHIFUFANGDONG_ENABLE=switch,"true","false",tag=智慧房东去广告, desc=是否开启智慧房东活动广告位净化
+
+[Rewrite]
+# 新语法(Loon 3.5.1(978))。逐条带开关 —— 新语法**没有**全局 enable=, 漏写一条即等于把该条
+# 永久打开(APP-ONBOARDING §4.0 第 4 条坑)。正则保留 \/ 与 \. 转义(同 §4.0 第 3 条)。
+#
+# 整条转空(reject_dict = 200 + {})的依据是 AGENTS.md 的「整条 reject 只用于纯广告接口」:
+# 本接口下发的是运营活动位实体, 字段全为广告语义, 无业务数据混载 —— 不属于
+# 「既下发业务数据又下发广告」(京东 functionId=start 白屏那类), 故不适用字段级净化。
+# 刻意**不写** `json.jq(".data = []")`: 响应外层数组字段名未取证(无 HAR / 探针拿不到 token),
+# 官方《Rewrite 新语法》又规定 JSON 值不含数组(传 [] 会被加载期拒绝) ⇒ 写字段名就是臆造。
+#
+# ⚠️ **未经真机验证的已知风险(处置路径已备好, 不要静默删)**: reject_dict 会丢掉响应封套里的
+#   `code/success` 字段。若 App 端对缺失 success 的处理是"弹错误提示"而非"静默不展示",
+#   症状会是首页偶发 toast。届时正确处置是**改字段级**(拿到 HAR 后按真实字段名 jq 置空),
+#   而不是回退成放行。同 soda.plugin 的 luna 纯广告接口是同一形态与同一未验证前提。
+
+response if ${ZHIFUFANGDONG_ENABLE} == true && ${url} ~= /https:\/\/api\.zhihuifangdong\.net\/core\/app\/activity\/bannerPic/ then reject_dict(200)
+
+[MitM]
+# 解密面 = 1 个 host, 且被上面唯一那条 [Rewrite] 消费(经 mitm-coverage 门禁守)。
+# 不写通配 `*.zhihuifangdong.net`: 同集群的 sw-tool./wx./t./fdtapi. 等 20+ 个子域里只有
+# `api.` 承载 App 广告位(前端硬编码 `https://api.zhihuifangdong.net`), 通配会把整站
+# (官网 / 后台 SPA / 开放平台文档)拉进解密面 —— 与最小解密面原则相悖。
+# 加解密域前须复核主配置没有对该域 REJECT: `domain-reject-mode = DNS` 下域在 DNS 阶段
+# 即被拒, 到不了解密层, 留在 [MitM] 只是白背一份 CA 信任(APP-ONBOARDING §3 / 附一发现 2)。
+hostname = %APPEND% api.zhihuifangdong.net

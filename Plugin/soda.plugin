@@ -1,0 +1,130 @@
+#!name=汽水音乐去广告
+#!desc=抖音音乐版(汽水音乐)广告治理: luna 广告/会员推广/直播插入接口整条转空, 我的页 banner、播放器卡片、歌曲详情热门视频、首页视频流字段级净化。全部处置先取证后落规则。
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.5.1(978)
+#!tag = 汽水音乐,去广告
+#!type = normal
+
+# ── 单 App 接入取证 (2026-09-30, 照 APP-ONBOARDING.md §1 执行, 全量台账见附七) ──
+# App 身份: iOS bundle id `com.soda.music` v21.0.0 (iTunes Lookup id=1605585211, 中国区,
+#   seller=Beijing Douyin Technology); `com.luna.music` 是**安卓**包名 —— 两者不可混写。
+# 接口面(一手): luna 接口有 **4 个等价接入点** —— `api.qishui.com` / `api3.qishui.com` /
+#   `api5-lq.qishui.com` / `beta-luna.douyin.com`, 四者的 `GET /luna/me?` 返回**同一结构**
+#   的 200 JSON(各自独立探针确认) ⇒ 只覆盖 api.qishui.com 会漏 3/4 入口, 故规则 host 面
+#   向下取 `api[0-9]*(-[a-z]+)?` 且 [MitM] 逐 host 显式列举。`webcast-open.douyin.com`
+#   承载发现页直播插入。各 `/luna/...` 路由存活由落地前逐条探针确认
+#   (GET 无 query 多返回 404, **POST 或带 query 才 200** —— 只看 GET 会把真实端点误判为死路由):
+#     /luna/me 200 · /luna/me/recently-played-media 200 · /luna/activities 200 ·
+#     /luna/card 200(POST) · /luna/search-block 200(POST) · /luna/feed/song-tab 200(POST) ·
+#     /luna/more-panel 200(POST) · /luna/media_ads 200(POST) · /luna/ads/config 200(POST) ·
+#     /luna/commerce/upsells 200(GET) · /luna/commerce/upsells_config 200 ·
+#     /luna/commerce/v2/commerce_info 200(POST) · /luna/treasure/entrance/config 200 ·
+#     /luna/listen-video/reminder 200 · webcast-open /webcast/openapi/feed/ 400(缺参=路由通)
+#   注意 `/luna/ads/` 的**裸路径**与 `/luna/ads/list`、`/luna/ads/v1` 都是 404, 而
+#   `/luna/ads/config` 是 200 ⇒ 该接口是**前缀路由**, 上游写 `\/luna\/ads\/` 前缀匹配是对的。
+
+[Argument]
+SODA_ENABLE=switch,"true","false",tag=汽水音乐去广告, desc=是否开启汽水音乐广告净化
+
+[Rule]
+# ── L2 域名: 字节系广告素材/下发端点 (取证: 4 解析器 DoH + HTTPS 探针, 逐条区分「可测/不可测」) ──
+# 证据分两路, 且**必须分开记**(AGENTS.md「不可测 ≠ 不存在」):
+#   ① DNS 路(四解析器 1.1.1.1/8.8.8.8/223.5.5.5/119.29.29.29): 三者各有 28–48 条 A 记录,
+#      CNAME 落在 bytedns1 + cdngslb/queniuz 组合, 随机子域 NXDOMAIN ⇒ 非泛解析。
+#   ② HTTPS 路: **本轮不可测** —— 本机解析器带第三方过滤名单, 对这三个 host 返回 127.0.0.1
+#      (curl (7) Couldn't connect), 与"端点不存在"(curl (35) SSL_ERROR_SYSCALL)不是同一种
+#      信号。故**不主张**"443 无站点", 端点型判定由上游与主配置注释支撑。
+# 上游逐条列出三域: fmz200/wool_scripts `Loon/plugin/split/partQ/QiShuiMusic.lpx`;
+# 本仓主配置 385 行注释亦已定性「dm./pglstatp 广告域不放行」(此前未落地为规则)。
+DOMAIN, dm.bytedance.com, REJECT
+DOMAIN, dm.pstatp.com, REJECT
+DOMAIN, dm.toutiao.com, REJECT
+# 广告签名素材图: fmz200 原文是裸 `DOMAIN-KEYWORD, -ad-sign.byteimg.com, REJECT`, 裸 KEYWORD
+# 由 tools/plugin-lint-check.mjs 判红(官方《子规则》KEYWORD 随数量涨耗时) ⇒ 改 AND 锚定。
+# 实测 p6-ad-sign.byteimg.com / p9-ad-sign.byteimg.com 均有 A 记录且 403(素材 CDN 正常形态),
+# 随机子域 NXDOMAIN(非泛解析)。主配置只对 `p3-pack/p6-pack.byteimg.com` 放行, 不冲突。
+AND,((DOMAIN-KEYWORD,-ad-sign),(DOMAIN-SUFFIX,byteimg.com)),REJECT
+# 该 App 自带的 TTNet HTTPDNS 调度面。上游(kelee/QingRex/BOB/egern)一律**改写响应**
+# (opaque_data_enabled / ttnet_http_dns_enabled / ttnet_quic_enabled / ttnet_tt_http_dns 置 0 +
+# 过滤 ttnet_dispatch_actions) 逼其回落系统 DNS, 使域名 REJECT 真正生效。
+# 本仓不照搬响应改写的原因有两条, 都不是口味问题:
+#   ① 它需要 MitM `tnc*-*.zijieapi.com` —— 通配 host 会被 mitm-orphan 判 generic 而**恒报孤儿**,
+#      且解密面从「4 个具体 API host」涨成「整个 zijieapi.com 通配」, 与最小解密面原则相悖;
+#   ② 收编域名的效果与改写等价(自带解析拿不到调度 ⇒ 回落系统 DNS), 还零证书成本 ——
+#      这正是 L0 `dns-httpdns.plugin` 的既定姿态。
+# 实测: tnc3-bjlgy.zijieapi.com 的 `/get_domains/v5/?` 返回 200 且**动态下发** `tnc0-*`
+# 主机名(自更新面, 会漂移), 故穷举必然过时 —— 上游那种 `tnc\d-(bjlgy|ali[a-z]{2})\d?` 写法
+# 也已被证伪(tnc3-bjlgy1 / tnc1-alibj1 实测 NXDOMAIN, 不是可自由枚举的规则集)。用 AND 锚定
+# 一次覆盖整个家族, 与 L0 `dns-httpdns.plugin` 的姿态一致。
+AND,((DOMAIN-KEYWORD,tnc),(DOMAIN-SUFFIX,zijieapi.com)),REJECT
+
+[Rewrite]
+# 新语法(Loon 3.5.1(978)), 逐条带开关 —— 新语法**没有**全局 enable=, 漏写一条等于把该条永久打开。
+# 正则按官方示例保留 \/ 与 \. 转义。host 面向下取 api[0-9]*(-[a-z]+)? 覆盖实测同集群的
+# api / api3 / api5-lq / api3-lq / api5-hl 分片; 不跨出 luna API 集群(不写通配 qishui.com)。
+# 复核提醒(诚实记录, 未解决): 有第三方逆向文记录安卓侧 `libsscronet.so` 存在**证书固定**。
+# 若 iOS 端同样固定则本段全部失效(症状 = 规则在日志里命中但 App 无变化)。该风险无法离线证伪,
+# 故本插件额外把纯广告端点放在 L2 域名层(见 [Rule]) —— 那一层不依赖解密。若日后确认固定,
+# 处置是补一份 L2 域名清单, 而不是硬碰证书。
+
+# ── A. 纯广告/纯推广端点: 整条转空 (reject_dict = 200 + {}) ──
+# 判据: 上游 ≥2 份(多数 ≥3)配置一致按整条拒绝, 且端点语义不含业务数据(广告下发/销售配置/会员弹窗/
+# 签到入口运营位/抖音观看提醒/直播插入)。**不是**凭"名字像广告" —— 每条都过路由探针。
+# 广告下发 (前缀路由, 见头部取证: /luna/ads/config 200, 裸路径 404)
+response if ${SODA_ENABLE} == true && ${url} ~= /https:\/\/(beta-luna\.douyin\.com|api[0-9]*(-[a-z]+)?\.qishui\.com)\/luna\/ads\// then reject_dict(200)
+# 播放器视频广告
+response if ${SODA_ENABLE} == true && ${url} ~= /https:\/\/(beta-luna\.douyin\.com|api[0-9]*(-[a-z]+)?\.qishui\.com)\/luna\/media_ads\?/ then reject_dict(200)
+# 会员/销售推广三件套: 追加销售配置 · 免费听歌推广 · 邀请开通会员弹窗
+response if ${SODA_ENABLE} == true && ${url} ~= /https:\/\/(beta-luna\.douyin\.com|api[0-9]*(-[a-z]+)?\.qishui\.com)\/luna\/commerce\/upsells_config\?/ then reject_dict(200)
+response if ${SODA_ENABLE} == true && ${url} ~= /https:\/\/(beta-luna\.douyin\.com|api[0-9]*(-[a-z]+)?\.qishui\.com)\/luna\/commerce\/upsells\?/ then reject_dict(200)
+response if ${SODA_ENABLE} == true && ${url} ~= /https:\/\/(beta-luna\.douyin\.com|api[0-9]*(-[a-z]+)?\.qishui\.com)\/luna\/commerce\/v2\/commerce_info\?/ then reject_dict(200)
+# 签到入口运营位 (整条只下发签到/福利入口)
+response if ${SODA_ENABLE} == true && ${url} ~= /https:\/\/(beta-luna\.douyin\.com|api[0-9]*(-[a-z]+)?\.qishui\.com)\/luna\/treasure\/entrance\/config\?/ then reject_dict(200)
+# 播放页「抖音看过」悬浮窗提醒
+response if ${SODA_ENABLE} == true && ${url} ~= /https:\/\/(beta-luna\.douyin\.com|api[0-9]*(-[a-z]+)?\.qishui\.com)\/luna\/listen-video\/reminder\?/ then reject_dict(200)
+# 发现页「正在直播」插入 (webcast 开放接口, 缺参返回 400 ⇒ 路由通)
+response if ${SODA_ENABLE} == true && ${url} ~= /https:\/\/webcast-open\.douyin\.com\/webcast\/openapi\/feed\/\?/ then reject_dict(200)
+
+# ── B. 业务+广告同响应: 只删广告字段, 绝不整条拒 (AGENTS.md 广告面治理纪律) ──
+# 本组 7 条全部命中"一个接口既下发业务数据又下发广告"的形态 —— 除媒体的广告接口外, 每条
+# 都还有正常业务字段(我的页信息 / 搜索页活动 / 播放器卡片 / 首页流 / 歌曲详情面板 / 播放历史)。
+# 字段名来自 5+ 份上游 jq/path 表达式(Moli-X kelee · QingRex · BOBOLAOSHIV587 · ddgksf2013 ·
+# jnlaoshu · lihx · edcjason), **至少两源逐字一致**才落下; 无来源的字段名一律不臆造。
+# 我的页推广 banner「看视频免费听歌60分钟」
+response if ${SODA_ENABLE} == true && ${url} ~= /https:\/\/(beta-luna\.douyin\.com|api[0-9]*(-[a-z]+)?\.qishui\.com)\/luna\/me\?/ then response.json.delete(["reward_ad_banner"])
+# 搜索页横幅推广活动映射
+response if ${SODA_ENABLE} == true && ${url} ~= /https:\/\/(beta-luna\.douyin\.com|api[0-9]*(-[a-z]+)?\.qishui\.com)\/luna\/activities\?/ then response.json.delete(["activity_map"])
+# 热门搜索榜(搜索页运营位)
+response if ${SODA_ENABLE} == true && ${url} ~= /https:\/\/(beta-luna\.douyin\.com|api[0-9]*(-[a-z]+)?\.qishui\.com)\/luna\/search-block/ then response.json.delete(["search_chart_block"])
+# 播放器卡片: ①「会员免费听整月」引导 ②带 priority_display 的推广卡(比置 false 更彻底,
+# 且与置 false 口径同为上游主流 —— 两种写法都只动推广项, 不影响普通卡片)
+response if ${SODA_ENABLE} == true && ${url} ~= /https:\/\/(beta-luna\.douyin\.com|api[0-9]*(-[a-z]+)?\.qishui\.com)\/luna\/card\?/ then response.json.delete(["preview_guide"])
+response if ${SODA_ENABLE} == true && ${url} ~= /https:\/\/(beta-luna\.douyin\.com|api[0-9]*(-[a-z]+)?\.qishui\.com)\/luna\/card\?/ then response.json.jq("del(.card_items[] | select(has(\"priority_display\")))")
+# 首页歌单流里的视频混排(黑名单式, 不采用 ddgksf2013 的 `items |= map(select(.type=="track"))`
+# 白名单 —— 白名单会把未来新增的**正常** type 一起清掉, 属过度断言)
+response if ${SODA_ENABLE} == true && ${url} ~= /https:\/\/(beta-luna\.douyin\.com|api[0-9]*(-[a-z]+)?\.qishui\.com)\/luna\/feed\/song-tab\?/ then response.json.jq("del(.items[] | select(.type == \"video_track_mix\"))")
+# 歌曲详情面板「热门视频」模块
+response if ${SODA_ENABLE} == true && ${url} ~= /https:\/\/(beta-luna\.douyin\.com|api[0-9]*(-[a-z]+)?\.qishui\.com)\/luna\/more-panel\?/ then response.json.jq(".blocks |= map(select(.type != \"related_video\"))")
+# 播放历史里的视频条目(上游因"响应体太大"改用脚本, 本仓用 jq 直接过滤: 少一份第三方 JS 依赖,
+# 且失败时原样透传 —— 脚本路径的额外风险是没有的)
+response if ${SODA_ENABLE} == true && ${url} ~= /https:\/\/(beta-luna\.douyin\.com|api[0-9]*(-[a-z]+)?\.qishui\.com)\/luna\/me\/recently-played-media\?/ then response.json.jq(".media |= map(select(.type != \"video\"))")
+
+# ── C. 明确不落地 (发现项, 台账在 APP-ONBOARDING.md 附七; 防后人"看着像漏了"补进来) ──
+#   · `/luna/splash` 开屏: **单来源**(仅 edcjason 一份), 且本机对 3 个 API host × GET/POST 全 404
+#     ⇒ 端点不存在或已迁移, 写上去就是死规则。开屏广告的可靠处置要先拿到真实端点。
+#   · `/luna/hashtag/recommend`(TAGS 推荐): 端点实测存在(200), 但只有 ddgksf2013 一份按 reject-200,
+#     且无语义证据说明它是"纯推广"—— 按纪律不得整条拒, 又没有字段证据可删 ⇒ 停在发现项。
+#   · `/location/info`(位置隐私): ddgksf2013/lihx 按 reject-200; 但它是**隐私面(M3)**不是广告面,
+#     且探针 404/307 并存。归 M3 处置, 不塞进本 M2 插件。
+#   · `/luna/commerce`(裸路径): ddgksf2013 的前缀写法会覆盖上面三条已落地的具体路径; 裸路径本身
+#     两 host × GET/POST 全 404, 单独再写一条属重复。
+#   · 字节埋点/遥测面: `mon.zijieapi.com`(A 存活, HTTPS 超时)、`mssdk.volces.com`(A 存活,
+#     HTTPS 因本机解析器过滤名单不可测)、`lf3-short.ibytedapm.com`(403 JSON, 实测是 APM 端点)
+#     —— 属 M3 上报拦截, 归 `probe-block.plugin` 的通道扩展, 不在本插件(模块纪律)。
+
+[MitM]
+# 解密面 = 6 个具体 host(5 个 luna API 接入点/分片 + webcast), 每一个都被上面 [Rewrite] 消费(经 mitm-coverage 守)。
+# 不写 `*.qishui.com` / `*.douyin.com` 通配 —— 那会把整个字节主 App 族拉进解密面。
+hostname = %APPEND% beta-luna.douyin.com, api.qishui.com, api3.qishui.com, api3-lq.qishui.com, api5-lq.qishui.com, webcast-open.douyin.com

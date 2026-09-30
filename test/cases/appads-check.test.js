@@ -178,6 +178,34 @@ exports.tests = {
     a.ok(attributionOf("example.com") === null, "未登记的域必须返回 null(否则门禁失去判红能力)");
   },
 
+  "appads: 结构性排除清单不许养死条目 (死豁免判红)": async (a) => {
+    // 背景: OUT_OF_CORPUS_ROOTS 是平台层门禁的**结构性豁免**(国内 SDK/Google 族不在西方发行商
+    // app-ads.txt 语料里)。它每加一条, 门禁就少判一处 —— 于是「豁免」本身成了可被无声扩大的
+    // 后门: 删掉对应规则后豁免条目仍然在, 平台层从此对那个根域**完全不判红**, 而清单与文档
+    // 都还写着它在保护什么。这条断言把 AGENTS.md 与工具头注里已声明的「死豁免判红」真正落地
+    // (此前只有文字, 无断言 —— 属"看起来有门禁其实没有")。
+    const { OUT_OF_CORPUS_ROOTS, outOfCorpusOf } = await import("../../tools/lib/ad-platform-map.mjs");
+    const { collectRules } = await import("../../tools/lib/rule-scan.mjs");
+    const rules = collectRules().filter((r) => /^Plugin\/ad-/.test(r.source));
+    a.ok(OUT_OF_CORPUS_ROOTS.length >= 10, "结构性排除清单不应被清空");
+    const seen = new Set();
+    for (const e of OUT_OF_CORPUS_ROOTS) {
+      a.ok(!seen.has(e.root), `排除根域不得重复: ${e.root}`);
+      seen.add(e.root);
+      a.ok(e.platform && e.reason, `每条都要写明平台与结构性理由: ${e.root}`);
+      // 纪律①: 必须是**平台根域**, 不是端点主机(否则一条端点豁免会罩掉整族)。
+      a.ok(!/^(api|ad|sdk|log|mcs|img|report|track|init)\./.test(e.root), `排除项须为平台根域而非端点主机: ${e.root}`);
+      // 纪律③: 死豁免判红 —— 清单里的根域必须仍被至少一条真实规则命中。
+      const hit = rules.find((r) => {
+        const m = /^(?:DOMAIN|DOMAIN-SUFFIX),\s*([^,]+),/.exec(r.text.trim());
+        return m && (m[1].toLowerCase() === e.root || m[1].toLowerCase().endsWith("." + e.root));
+      });
+      a.ok(hit, `死豁免: 排除根域 ${e.root} 已不被任何 ad-* 规则命中 —— 请删掉该条目(否则门禁对它永久静默)`);
+    }
+    // 豁免只对 ad-* 范围生效: 未登记域仍必须落到平台层判红路径(否则这条断言会掩盖门禁失能)。
+    a.ok(outOfCorpusOf("api.evil-not-exempt.example") === null, "未登记域不得被当作已豁免");
+  },
+
   "appads: 抽查表与入库语料自洽 (committed ⊆ survey, 计数单调)": async (a) => {
     const { readSource, readReferences } = await load();
     const survey = readSource().baseline.survey;

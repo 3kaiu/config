@@ -110,6 +110,21 @@ DOMAIN, apissl.ksapisrv.com, REJECT
 DOMAIN, open.e.kuaishou.cn, REJECT
 
 #
+# ══ 趣盟 Qimeng / uni-ad (DCloud 广告聚合, 1 域) ══
+# ── 生效层: L2 域名 REJECT ──────────────────────────────────────
+# 平台层一手声明: 智慧房东(com.zhihuifangdong.wisdom)官方隐私政策第十一节「第三方SDK说明」
+#   第 29 项声明集成「趣盟SDK(com.dcloudym)」, 用途明写"广告投放、广告监测归因、广告反作弊",
+#   合作方 数字天堂(北京)网络技术 —— 与 DCloud 旗下 uni-ad 是同一家的两条产品线。
+#   声明全文: APP-ONBOARDING.md 附八 · 隐私政策 2026-04-14 版。
+# 端点层取证(2026-09-30 双解析器 Cloudflare + DNS.google + 泛解析对照):
+#   api.qttunion.com → 10 条 A(152.136.165.32 / 49.233.244.218 / 211.159.174.153 等, 阿里云+腾讯云
+#     混合), 随机子域 NXDOMAIN ⇒ **非泛解析**; HTTPS 根路径 404 `text/plain`(9 个路径探针同形态)
+#     ⇒ 服务端在、端点存在(非 200+HTML, 符合"端点型"判据)。同族 ad./sdk./adlog./api2. 全 NX。
+# 归 L0 而非单 App 插件: 趣盟是**跨 App 广告平台**, 不是一个 App 的私有域(模块纪律)。
+# 不拦 qttunion.com 裸域(200 HTML = 趣盟官网/文档站, 有正常内容); 只拦已取证的 api 端点。
+DOMAIN, api.qttunion.com, REJECT
+
+#
 # ══ 百度联盟 (原 Plugin/ad-baidu.plugin, 2 域) ══
 # ── 生效层: L2 域名 REJECT ──────────────────────────────────────
 # 本仓 domain-reject-mode = DNS + dns-reject-mode = LOOPBACKIP ⇒ 拒绝在

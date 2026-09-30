@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "plugin_count": 6,
-  "app_count": 6,
+  "plugin_count": 9,
+  "app_count": 9,
   "multi_owner": [],
   "fake_granularity": [],
   "undeclared_scripts": [],
@@ -72,6 +72,48 @@
           "rules": 0,
           "rules_basis": "plugin-total",
           "granularity": "global",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "微信",
+      "owners": [
+        {
+          "plugin": "wechat.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 3,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "智慧房东",
+      "owners": [
+        {
+          "plugin": "zhifu-fangdong.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 1,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
+          "covers": null
+        }
+      ]
+    },
+    {
+      "app": "汽水音乐",
+      "owners": [
+        {
+          "plugin": "soda.plugin",
+          "module": "M2",
+          "switch": null,
+          "rules": 16,
+          "rules_basis": "plugin-total",
+          "granularity": "single-app",
           "covers": null
         }
       ]
@@ -188,6 +230,51 @@
           "switch": "QDREADER_WEEKLY_EXCHANGE_ENABLE",
           "rules": 1,
           "tag": "每周兑换"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/soda.plugin",
+      "module": "M2",
+      "switches": 1,
+      "rules": 16,
+      "scripts": [],
+      "mitm_hosts": 6,
+      "switch_usage": [
+        {
+          "switch": "SODA_ENABLE",
+          "rules": 16,
+          "tag": "汽水音乐去广告"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/wechat.plugin",
+      "module": "M2",
+      "switches": 1,
+      "rules": 3,
+      "scripts": [],
+      "mitm_hosts": 1,
+      "switch_usage": [
+        {
+          "switch": "WECHAT_ENABLE",
+          "rules": 3,
+          "tag": "微信去广告"
+        }
+      ]
+    },
+    {
+      "file": "Plugin/zhifu-fangdong.plugin",
+      "module": "M2",
+      "switches": 1,
+      "rules": 1,
+      "scripts": [],
+      "mitm_hosts": 1,
+      "switch_usage": [
+        {
+          "switch": "ZHIFUFANGDONG_ENABLE",
+          "rules": 1,
+          "tag": "智慧房东去广告"
         }
       ]
     }

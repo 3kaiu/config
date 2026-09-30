@@ -928,6 +928,15 @@ FINAL, Final
 #     京东字段级净化 (7 个 functionId, 一律改写不整条 reject), 无 [Rule] 行。
 #   · probe-block.plugin —— M3 上报/埋点拦截(友盟/厂商遥测/前端埋点/Bugly/ARMS/Firebase 六通道零重叠并集, 37 条)。
 #     2026-09-30 由 6 个 probe-*.plugin 合并(与 ad-block 同形): 形状完全一致、无独立生命周期, 4 个还各只有 1–2 条域。
+#   · soda.plugin —— 汽水音乐(抖音音乐版) M2: luna 广告/推广接口整条转空 + 业务同响应字段级净化,
+#     另带 3 条字节广告素材域 L2。解密面 4 个具体 API host + webcast(无通配)。取证见 APP-ONBOARDING 附七。
+#   · zhifu-fangdong.plugin —— 智慧房东(施王物联) M2: SaaS 自营活动位(轮播+弹窗)整条转空,
+#     解密面仅 api.zhihuifangdong.net 1 个 host。其 22 个第三方广告 SDK 域由 L0 ad-block 统一承担,
+#     本插件不重复登记。取证与台账见 APP-ONBOARDING 附八。
+#   · wechat.plugin —— 微信(WeChat) M2: 公众号文章广告接口字段级净化(广告计数/列表)、文章扩展接口
+#     同名字段净化、商品推广(CPS)接口整条转空; 解密面仅 mp.weixin.qq.com 1 个 host(无通配)。
+#     **覆盖天花板是取证结论**: 朋友圈/视频号/开屏广告走 MMTLS 私有协议(HTTP 层不可达), 且
+#     「朋友圈广告」字面候选域整族已未注册 ⇒ 本插件刻意不含任何域名规则。台账见 APP-ONBOARDING 附九。
 # L0 三项 + probe-block = 4 个**纯 L2** 插件(无 [MitM]/[Script], 零证书成本), 合计 131 条
 # 域级/端口级 REJECT(59 + 13 + 19 + 38 + 端口/协议兜底, 逐条取证见各插件头部)。
 # 默认姿态 enabled=true (2026-09-29 用户决策): 5 个非 qidian 插件随入口默认生效(2026-09-30 合并后)。
@@ -939,6 +948,9 @@ https://ws.wenn.in/main/Plugin/dns-leak.plugin, enabled=true, tag=DNS 防泄漏�
 https://ws.wenn.in/main/Plugin/qidian.plugin, enabled=true, tag=起点全能助手 Pro
 https://ws.wenn.in/main/Plugin/jd.plugin, enabled=true, tag=京东去广告 Pro
 https://ws.wenn.in/main/Plugin/probe-block.plugin, enabled=true, tag=上报与埋点拦截器（M3·6 通道并集）
+https://ws.wenn.in/main/Plugin/soda.plugin, enabled=true, tag=汽水音乐去广告（M2·luna 接口净化）
+https://ws.wenn.in/main/Plugin/zhifu-fangdong.plugin, enabled=true, tag=智慧房东去广告（M2·活动位净化）
+https://ws.wenn.in/main/Plugin/wechat.plugin, enabled=true, tag=微信去广告（M2·公众号文章广告净化）
 
 [Rewrite]
 # 本段为空。历史曾有 5 条针对公共 DoH 端点 (/d 路径) 的 reject-200, 因两重死因失效:

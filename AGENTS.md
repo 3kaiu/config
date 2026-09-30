@@ -7,7 +7,7 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 ## 命令
 
 - `npm run build`：注入 `src/env.ts` 与 `src/lib/*.ts`，把 `src/*.ts` 压缩到 `Scripts/`。改源码后必须执行。
-- `npm test`：198 个行为级用例（含复写×脚本互斥门禁），引用全部 2 个 Scripts 产物（`Qidian.js` 手工轨 + `jingdong.js` 构建轨）；随后执行规则顺序与接线检查。关键文档数字由 `tools/doc-claims-check.mjs` 对照实测（该系统扫 `AGENTS.md` + `MODULES.md` + `MODULE-MANIFEST.json` 三份，跨文件矛盾判红）。
+- `npm test`：220 个行为级用例（含复写×脚本互斥门禁），引用全部 2 个 Scripts 产物（`Qidian.js` 手工轨 + `jingdong.js` 构建轨）；随后执行规则顺序与接线检查。关键文档数字由 `tools/doc-claims-check.mjs` 对照实测（该系统扫 `AGENTS.md` + `MODULES.md` + `MODULE-MANIFEST.json` 三份，跨文件矛盾判红）。
 - `npm run lint`：ESLint flat config，检查 `Scripts/`、`test/`、`tools/`。
 - `npm run generate`：Surgio 3.19 从纯静态模板生成 `Profile/Loon.lcf`。该命令会创建空 `dist/`，`.gitignore` 中对应规则必须保留。
 - `npm run check:all`：串行执行 sync、rewrite、src、orphan、plugin、contract、workflows、scripts、index、secrets、profile-hash、**coverage** 门禁；不包含 build、test、lint、generate。`scripts` 把 build 命令重定向到**临时目录**重建后与 `Scripts/` 逐字节比对 —— 补的是本地盲区：手改产物或改了 src 没 build 时，其余门禁会全绿。
@@ -37,7 +37,7 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 | `src/env.ts` | `Env` 兼容与宿主封装 | 只经 `--inject` 注入 |
 | `Scripts/*.js` | CDN 运行时脚本 | **仅 `Qidian.js` 存在**（手工轨，无 src）；新增脚本须走 src/ 构建并由 CI 检查漂移 |
 | `Scripts/Qidian.js` | 无源码手工轨 | 引擎 marker 内变更须同步 `ENGINE-MANIFEST.json` |
-| `Plugin/*.plugin` | Loon 插件外壳（**6 个**，**分两层**：L0 依赖层 = `ad-block.plugin` 广告平台拦截器（967 = 人工策展 + 418 生成 + 490 社区复核）+ `dns-httpdns.plugin` HTTPDNS 拦截器（72）+ `dns-leak.plugin` DNS 防泄漏（35）；L1 消费层 = `qidian.plugin` 起点 + `jd.plugin` 京东 + `probe-block.plugin` 上报/埋点拦截（M3·6 通道并集）。L0 必须是 `[Plugin]` 段最前三条） | `[Script]`/`[Rewrite]`/`[MitM]` 与参数必须配套；**新增插件必须同时登记进 `template/loon.tpl` 的 `[Plugin]` 段**（该段是唯一分发渠道），否则 `npm test` 的 wiring-check 判红；插件元数据只用官方 `#!` 集合（**10 个**：name/desc/author/homepage/icon/system/system_version/loon_version/tag/type）—— 由 `tools/plugin-lint-check.mjs` 的 `META_KEYS` 白名单**判红**（2026-09-30 前是纸面纪律：`#!version` 曾照抄本仓基准里的错记录混进两个插件）；`#!name` 内不得嵌数量（会漂移）；参数唯一真源是 `[Argument]`。扩展名官方无规定（转换器接受 `.lpx/.plugin/.conf/.txt`），详见 [LOON-FEATURES.md](LOON-FEATURES.md) §1.9 |
+| `Plugin/*.plugin` | Loon 插件外壳（**9 个**，**分两层**：L0 依赖层 = `ad-block.plugin` 广告平台拦截器（968 = 人工策展 + 418 生成 + 490 社区复核）+ `dns-httpdns.plugin` HTTPDNS 拦截器（72）+ `dns-leak.plugin` DNS 防泄漏（35）；L1 消费层 = `qidian.plugin` 起点 + `jd.plugin` 京东 + `soda.plugin` 汽水音乐（M2·luna 接口净化）+ `zhifu-fangdong.plugin` 智慧房东（M2·活动位净化）+ `wechat.plugin` 微信（M2·公众号文章广告净化）+ `probe-block.plugin` 上报/埋点拦截（M3·6 通道并集）。L0 必须是 `[Plugin]` 段最前三条） | `[Script]`/`[Rewrite]`/`[MitM]` 与参数必须配套；**新增插件必须同时登记进 `template/loon.tpl` 的 `[Plugin]` 段**（该段是唯一分发渠道），否则 `npm test` 的 wiring-check 判红；插件元数据只用官方 `#!` 集合（**10 个**：name/desc/author/homepage/icon/system/system_version/loon_version/tag/type）—— 由 `tools/plugin-lint-check.mjs` 的 `META_KEYS` 白名单**判红**（2026-09-30 前是纸面纪律：`#!version` 曾照抄本仓基准里的错记录混进两个插件）；`#!name` 内不得嵌数量（会漂移）；参数唯一真源是 `[Argument]`。扩展名官方无规定（转换器接受 `.lpx/.plugin/.conf/.txt`），详见 [LOON-FEATURES.md](LOON-FEATURES.md) §1.9 |
 | `template/loon.tpl` | Loon 模板 | 修改后 regenerate + `check:sync`；`Proxy` 必须直接聚合外部订阅策略组"东京"；`[Plugin]` 增删 URL 后须同步 `.github/workflows/upstream-health.yml` 的 CDN 探活（`upstream-coverage` 双向断言） |
 | `template/snippet/*.tpl` | 分流规则片段 | 归 M1（5 个）或 M4（1 个） |
 | `MODULE-MANIFEST.json` | 资源归类真源 | 改插件/脚本必须同步，否则 `module-manifest` 门禁判红 |
@@ -79,7 +79,7 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 
 ## CI 门禁
 
-- `script-tests.yml`：lint、build、Scripts 漂移、198 用例（含复写×脚本互斥、app-ads.txt 平台层取证、插件分层、插件↔插件死规则、密钥扫描、Profile 校验和、候选流水线、L0 覆盖管线与台账新鲜度、社区清单准入、JD 新协议 base64）、构建出处 attestation。
+- `script-tests.yml`：lint、build、Scripts 漂移、220 用例（含复写×脚本互斥、app-ads.txt 平台层取证、插件分层、插件↔插件死规则、密钥扫描、Profile 校验和、候选流水线、L0 覆盖管线与台账新鲜度、社区清单准入、JD 新协议 base64）、构建出处 attestation。
 - `config-validate.yml`：MitM、插件结构、参数契约、源码反模式、workflow bash、模板同步、密钥扫描、Profile 校验和、**L0 覆盖管线产物一致性**、Qidian 哈希、规则冗余、模块清单、接线与银行域名断言；独立 job 重生成 Loon 配置验证幂等。
 - `surgio-build.yml`：模板/构建配置变化后自动生成 PR；发布前检查无凭据且 `[Proxy]` 无静态节点。
 - `upstream-health.yml`：客户端直连的 GeoIP mmdb + 自建 CDN（Plugin/Scripts）可用性。探活目标由 `upstream-coverage` 门禁双向锁死（漏探活与探死资源都判红）。**自建 CDN 不只是探状态码**（2026-09-30 吸纳 SukkaW/Surge 的 post-deploy marker 判据）：`ws.wenn.in/main/<path>` 实测是 `origin/main` 的纯字节镜像 ⇒ 同路径比对 sha256（不一致复取一次再判，避免边缘节点竞态开 issue），补三类静默失效：CDN 缓存滞后（200 但内容是旧版）、200 的 HTML 错误页/截断、产物改了没重新发布；「CDN 有内容但仓库无此文件」= 模板引用与仓库脱节，同样判红。
@@ -92,14 +92,14 @@ Loon 单入口配置仓库：`Profile/Loon.lcf` 由 `template/` + `surgio.conf.j
 - 不提交 secret。机场订阅由用户在 Loon 外部导入，仓库不保存 provider、节点或订阅 URL。
 - 发布面是公开 GitHub 与 `ws.wenn.in` CDN；GitHub Pages 已退役。
 - **单插件基线（2026-09-29 起为「双插件」，京东由 M2 接入）的已知代价**（均为用户决策，非缺陷；详见 git 历史）：
-  - **App 内部结构化广告位仅覆盖 2 个 App**：去广告 = 主配置 127 条 REJECT（全部已取证）+ `[Plugin]` 段 4 个纯 L2 插件（1 广告平台拦截器 + 2 DNS 收编 + 1 上报拦截）的 **1111 条**域级 REJECT + bank-ad-reject snippet + 起点(15 条新语法 [Rewrite] 字段级)/京东(**整个 client.action** 字段级, 含 15.9.50+ base64 新协议) 两处净化。其余 App 仍只剩 L2 硬拦截。46 个 CDN 插件下线前实测全 200 存活（2130 条规则 / 994 个解密 host）。
+  - **App 内部结构化广告位仅覆盖 5 个 App**：去广告 = 主配置 127 条 REJECT（全部已取证）+ `[Plugin]` 段 4 个纯 L2 插件（1 广告平台拦截器 + 2 DNS 收编 + 1 上报拦截）的 **1112 条**域级 REJECT + bank-ad-reject snippet + 起点(15 条新语法 [Rewrite] 字段级)/京东(**整个 client.action** 字段级, 含 15.9.50+ base64 新协议)/汽水音乐(16 条新语法 [Rewrite]: 8 条纯广告端点整条转空 + 7 条业务接口字段级 + 1 组 L2 域名)/智慧房东(1 条 [Rewrite] 整条转空)/微信(3 条 [Rewrite]: 1 条纯推广端点整条转空 + 2 条广告字段级; 朋友圈/视频号走 MMTLS 结构性不可达) 五处净化。其余 App 仍只剩 L2 硬拦截。46 个 CDN 插件下线前实测全 200 存活（2130 条规则 / 994 个解密 host）。
   - **长尾广告域不再被 REJECT，一律走 `Final`**：原 12 万条通用广告域名表 + 7 个镜像规则列表已移除。
   - 失去镜像供应链门禁（sha256 + 投毒/体积 + 漂移/孤儿）。
   - 失去 `check:shadow`（远程列表顺序遮蔽检测）—— 无远程列表后该失效面本身已不存在。
-- [Rule] 490 行（其中 127 条 REJECT：124 条域名 REJECT + `DEST-PORT` 3 条 + `PROTOCOL` 1 条端口/协议级；行数与 REJECT 计数由 tools/doc-claims-check.mjs 实测）；**6 个插件 = 分两层**（2026-09-30 架构分层，顺序由 `test/cases/plugin-layering.test.js` 钉死）：
-  - **L0 依赖层（必须排在 `[Plugin]` 段最前三条，`enabled=true`）**：`ad-block.plugin` **广告平台拦截器**（**967 条** = 59 人工策展〔2026-09-30 由 7 个 `ad-*.plugin` 零重叠并集〕+ 418 生成式覆盖 + **490 条社区清单复核收录**：449 精确 + 41 整域 `DOMAIN-SUFFIX`，整域拦只对「apex 是端点型(非 200/非 HTML)」的根域开放；中文平台结构性不在 app-ads.txt 语料里，故这是第二准入路径，红线过滤见 `tools/ad-coverage.mjs`）/ `dns-httpdns.plugin` **HTTPDNS 拦截器**（**72 域** = 11 人工 + 4 生成 + **57 条 2026-09-30 从 kelee `Block_HTTPDNS.lpx` 复核收录**，另 2 条 `AND` 锚定兜底 + 4 条 SDK UA + 2 条 IP 形态明文 `URL-REGEX` + 2 条定向放行）/ `dns-leak.plugin` **DNS 防泄漏**（35 域 = 19 人工 + 16 生成）。**生成式覆盖**由 `tools/ad-coverage.mjs` 按五道判据产出，逐条证据在 `test/fixtures/ad-coverage/ledger.json`，产物漂移判红、台账超 45 天判红、`coverage-refresh.yml` 每月重跑并开 PR（死域自动移除/新域自动加入）。三者共同构成"广告域 REJECT 真正生效"的前置条件：域名 REJECT 在 DNS 阶段完成，而自带解析的 SDK/浏览器会绕过系统 DNS 拿到真实 IP。
-  - **L1 消费层**：`qidian.plugin` 起点 M7（全部 `[Script]` 能力寄生于此，停用即全灭）/ `jd.plugin` 京东 M2（唯一带 `[Script]`+`[MitM]`，解密面 +1）/ `probe-block.plugin` 上报/埋点拦截（M3·6 通道零重叠并集 —— 2026-09-30 由 6 个 `probe-*.plugin` 按 `ad-block` 同形合并，通道分类保留为 ①–⑥ 小节注释）。
-  - L0 三项 + `probe-block` 共 4 个**纯 L2** 插件（无 `[MitM]`/`[Script]`，零证书成本）合计 **1111 条域级 REJECT**（967+72+35+37，其中 418 条生成式覆盖、490+57 条社区复核收录）；**6 条全部已登记进 `template/loon.tpl` 的 `[Plugin]` 段**，启停插件即开关。**关掉 L0 任一项 = 加密 DNS/HTTPDNS 绕过面回归**，不只是"少拦几条广告"。
+- [Rule] 490 行（其中 127 条 REJECT：124 条域名 REJECT + `DEST-PORT` 3 条 + `PROTOCOL` 1 条端口/协议级；行数与 REJECT 计数由 tools/doc-claims-check.mjs 实测）；**9 个插件 = 分两层**（2026-09-30 架构分层，顺序由 `test/cases/plugin-layering.test.js` 钉死）：
+  - **L0 依赖层（必须排在 `[Plugin]` 段最前三条，`enabled=true`）**：`ad-block.plugin` **广告平台拦截器**（**968 条** = 60 人工策展〔2026-09-30 由 7 个 `ad-*.plugin` 零重叠并集 + 智慧房东接入补 1 域 `api.qttunion.com`〕+ 418 生成式覆盖 + **490 条社区清单复核收录**：449 精确 + 41 整域 `DOMAIN-SUFFIX`，整域拦只对「apex 是端点型(非 200/非 HTML)」的根域开放；中文平台结构性不在 app-ads.txt 语料里，故这是第二准入路径，红线过滤见 `tools/ad-coverage.mjs`）/ `dns-httpdns.plugin` **HTTPDNS 拦截器**（**72 域** = 11 人工 + 4 生成 + **57 条 2026-09-30 从 kelee `Block_HTTPDNS.lpx` 复核收录**，另 2 条 `AND` 锚定兜底 + 4 条 SDK UA + 2 条 IP 形态明文 `URL-REGEX` + 2 条定向放行）/ `dns-leak.plugin` **DNS 防泄漏**（35 域 = 19 人工 + 16 生成）。**生成式覆盖**由 `tools/ad-coverage.mjs` 按五道判据产出，逐条证据在 `test/fixtures/ad-coverage/ledger.json`，产物漂移判红、台账超 45 天判红、`coverage-refresh.yml` 每月重跑并开 PR（死域自动移除/新域自动加入）。三者共同构成"广告域 REJECT 真正生效"的前置条件：域名 REJECT 在 DNS 阶段完成，而自带解析的 SDK/浏览器会绕过系统 DNS 拿到真实 IP。
+  - **L1 消费层**：`qidian.plugin` 起点 M7（全部 `[Script]` 能力寄生于此，停用即全灭）/ `jd.plugin` 京东 M2（唯一带 `[Script]`+`[MitM]`，解密面 +1）/ `soda.plugin` 汽水音乐 M2（L2+L4：3 域 + 2 条 AND 锚定的字节广告素材/自带 HTTPDNS 收编 + 16 条 luna 接口 [Rewrite]，解密面 5 个具体 host、无通配 —— 取证与不落地台账见 `APP-ONBOARDING.md` 附七）/ `zhifu-fangdong.plugin` 智慧房东 M2（L4：1 条自营活动位 [Rewrite]，解密面 1 个 host —— 台账见附八）/ `wechat.plugin` 微信 M2（L4：3 条 [Rewrite] 全在 `mp.weixin.qq.com`，解密面 1 个 host、**零 L2 域名** —— 覆盖天花板与已否决面台账见附九）/ `probe-block.plugin` 上报/埋点拦截（M3·6 通道零重叠并集 —— 2026-09-30 由 6 个 `probe-*.plugin` 按 `ad-block` 同形合并，通道分类保留为 ①–⑥ 小节注释）。
+  - L0 三项 + `probe-block` 共 4 个**纯 L2** 插件（无 `[MitM]`/`[Script]`，零证书成本）合计 **1112 条域级 REJECT**（968+72+35+37，其中 418 条生成式覆盖、490+57 条社区复核收录）；**9 条全部已登记进 `template/loon.tpl` 的 `[Plugin]` 段**，启停插件即开关。**关掉 L0 任一项 = 加密 DNS/HTTPDNS 绕过面回归**，不只是"少拦几条广告"。
 
 - 依赖仅 3 个 devDependencies（esbuild、eslint、surgio）；`engines.node >= 22`。
 - 仓库不引入 `tsc`：esbuild 只转译，不检查类型。修改 `src/` 必须用行为测试兜底。

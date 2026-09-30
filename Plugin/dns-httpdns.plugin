@@ -142,6 +142,16 @@ DOMAIN, twns.p2ptun.qq.com, REJECT
 DOMAIN, httpdns.kg.qq.com, REJECT
 DOMAIN, tp2p.kg.qq.com, REJECT
 # [腾讯 微信] aedns.weixin.qq.com(A×2), dns.weixin.qq.com(A×2), dns.weixin.qq.com.cn(A×2)
+#   ⚠️ 跨层矛盾登记 (2026-09-30, 微信接入轮发现, 见 APP-ONBOARDING.md 附九 §5):
+#   前两条被主配置 `template/loon.tpl` 的 `DOMAIN-SUFFIX, weixin.qq.com, DIRECT` 罩住 ——
+#   官方《规则》"本地规则 > 插件规则" + 域名类首次命中即停 ⇒ **这两条永不生效**, 只有
+#   `dns.weixin.qq.com.cn`(不在 weixin.qq.com 后缀下) 真生效。由 tools/plugin-lint-check.mjs
+#   的新增反方向扫描 [跨层空转] 持续报告。**本轮不擅自改路由**: 拦微信自带 DNS 有未验证的
+#   功能性权衡(微信是否优雅回落系统 DNS), 按"跨层矛盾让用户决定改哪边"的纪律只登记;
+#   若要真收编, 把两条例外写在主配置该 DIRECT 之前 (apple.com 顺序纪律样板)。
+#   实测补充: dns.weixin.qq.com(14 A) 的 `/`、`/dns-query` 均 404(47B 通用 404), 但
+#   `/cgi-bin/micromsg-bin/newgetdns` = 200 text/xml(2792B 加密体) ⇒ 它是微信客户端专用
+#   DNS 下发业务口, 不是标准 DoH 解析器。
 DOMAIN, aedns.weixin.qq.com, REJECT
 DOMAIN, dns.weixin.qq.com, REJECT
 DOMAIN, dns.weixin.qq.com.cn, REJECT

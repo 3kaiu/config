@@ -18,11 +18,11 @@ Loon 官方文档分 12 个域（交互UI / 节点订阅 / 规则系统 / 策略
 | **L5** 脚本 | `[Script]` | **是** | 任意 JS | 广告照显 / **请求挂死** |
 | **L6** 解密面 | `[MitM]` | — | 域名通配 | HTTPS 静默失效 / 证书暴露面 |
 
-`[Plugin]` **不是一层**，是聚合容器 —— 它把 L1–L6 任意组合打包复用。本仓 6 个插件全部经 `template/loon.tpl` 的 `[Plugin]` 段分发（该段是**唯一分发渠道**，漏登记即 `npm test` 的 wiring-check 判红）。
+`[Plugin]` **不是一层**，是聚合容器 —— 它把 L1–L6 任意组合打包复用。本仓 9 个插件全部经 `template/loon.tpl` 的 `[Plugin]` 段分发（该段是**唯一分发渠道**，漏登记即 `npm test` 的 wiring-check 判红）。
 
 **插件内部再分两层**（2026-09-30 架构分层，顺序由 `test/cases/plugin-layering.test.js` 钉死 —— 官方《规则》页：插件之间按 `[Plugin]` 登记顺序匹配）：
-- **L0 依赖层（必须最前三条）**：`ad-block` 广告平台拦截器（M2，482 域 = 59 人工 + 423 生成式覆盖）+ `dns-httpdns` HTTPDNS 拦截器（M3，15）+ `dns-leak` DNS 防泄漏（M3，35）。生成式覆盖见 `tools/ad-coverage.mjs`（五道判据 + 证据台账 + 每月自动刷新 PR）。三者是"域名 REJECT 真正生效"的**前置条件**：域名拒绝在 DNS 阶段完成，而自带 HTTPDNS/DoH 的 SDK 与浏览器会绕过系统 DNS 拿到真实 IP。用户仍需 L1 插件搭配使用。
-- **L1 消费层**：`qidian` 聚合容器（L4+L5+L6，全部 `[Script]` 能力寄生于此）+ `jd`（M2，唯一带 `[MitM]`）+ `probe-block`（M3 上报/埋点拦截, 6 通道零重叠并集）。
+- **L0 依赖层（必须最前三条）**：`ad-block` 广告平台拦截器（M2，968 域 = 60 人工策展 + 418 生成式覆盖 + 490 社区清单复核收录）+ `dns-httpdns` HTTPDNS 拦截器（M3，72）+ `dns-leak` DNS 防泄漏（M3，35）。生成式覆盖见 `tools/ad-coverage.mjs`（五道判据 + 证据台账 + 每月自动刷新 PR）。三者是"域名 REJECT 真正生效"的**前置条件**：域名拒绝在 DNS 阶段完成，而自带 HTTPDNS/DoH 的 SDK 与浏览器会绕过系统 DNS 拿到真实 IP。用户仍需 L1 插件搭配使用。
+- **L1 消费层**：`qidian` 聚合容器（L4+L5+L6，全部 `[Script]` 能力寄生于此）+ `jd`（M2, 带 `[Script]`+`[MitM]`）+ `soda`（M2, 汽水音乐 luna 接口净化, 8 条整条转空 + 7 条字段级 + 3 域）+ `zhifu-fangdong`（M2, 智慧房东自营活动位, 1 条整条转空, 解密面 1 host）+ `wechat`（M2, 微信公众号文章广告, 2 条字段级净化 + 1 条纯推广端点整条转空, **零域名规则** —— 朋友圈/视频号走 MMTLS 不可达）+ `probe-block`（M3 上报/埋点拦截, 6 通道零重叠并集）。
 
 ## 六个模块
 
@@ -32,24 +32,24 @@ Loon 官方文档分 12 个域（交互UI / 节点订阅 / 规则系统 / 策略
 **资源**：`template/snippet/{ai-services,developer,gaming,social,streaming}.tpl`（实测 49+79+25+62+57 = **272 条规则**）、主配置的分流段（Apple/微信/STUN/局域网/DNS泄漏/Google/误杀白名单/GEOIP+FINAL）。原 `Plugin/ai.plugin` 与 `Plugin/apple-services-pro.plugin` 已随收敛删除 —— 分流职责现全部由 snippet + 主配置承担。
 **关键约束**：`FINAL, Final` 是全局兜底；`IP-CIDR` 必须带 `no-resolve`，否则触发无效 DNS 查询（官方明文：域名类规则优先，域名命中后不再走 IP 匹配）。
 
-### M2 广告治理 · L2+L4+L5 · 2 插件 / 1 脚本 · **唯一跨 3 层的模块**
+### M2 广告治理 · L2+L4+L5 · 5 插件 / 1 脚本 · **唯一跨 3 层的模块**
 
 **职责**：拦广告。这是本仓的核心，也是唯一**无法用单一 L 层描述**的模块，因此内部必须再按处置方式分层：
 
 | 处置方式 | 层 | 本仓实例 | 适用前提 |
 |---|---|---|---|
-| 硬拦截域 | L2 | 主配置 **127 条 REJECT** + 9 个（1 广告平台拦截器 + 2 DNS 收编 + 6 探针）插件的 **570 条域级 REJECT**（其中 443 条生成式覆盖，逐条证据在台账） | 广告域与业务域不同 host |
-| 整条 reject | L4 | 已随插件删除（`startup-adblock-pro` 493 条） | **纯**广告接口（丢整个响应可接受） |
+| 硬拦截域 | L2 | 主配置 **127 条 REJECT** + 4 个纯 L2 插件（1 广告平台拦截器 + 2 DNS 收编 + 1 上报拦截）的 **1112 条域级 REJECT**（968+72+35+37，其中 418 条生成式覆盖，逐条证据在台账） | 广告域与业务域不同 host |
+| 整条 reject | L4 | `soda.plugin`（8 条纯广告端点）+ `zhifu-fangdong.plugin`（1 条自营活动位）+ `wechat.plugin`（1 条商品推广 CPS 端点） | **纯**广告接口（丢整个响应可接受） |
 | 字段重命名 | L4 | 已随插件删除（京喜系 `response-body-replace-regex`） | 广告字段与业务同响应，客户端认不出改名即消失 |
-| 字段级净化 | L5 | `Scripts/jingdong.js`（京东 7 个 functionId，一律改写不整条拒）+ `Scripts/Qidian.js`（起点广告/福利/发现页白名单） | 广告内嵌在业务数据里 |
+| 字段级净化 | L4+L5 | `Scripts/jingdong.js`（京东 7 个 functionId，一律改写不整条拒）+ `Scripts/Qidian.js`（起点广告/福利/发现页白名单）+ `soda.plugin`（7 条 luna 业务接口）+ `wechat.plugin`（2 条文章接口：`advertisement_num`/`advertisement_info` 置空） | 广告内嵌在业务数据里 |
 | DNS 整域 | L2 | 已随插件删除（`privacy-shield`） | 纯追踪域 |
 
 > M2 的 L2 面已从「CDN 插件 + 12 万条长尾域名表」收敛为「主配置 REJECT + 1 个广告平台集合插件（7 平台 59 域）+ 6 个探针插件」（2026-09-30 集合化：原 7 个 ad-* 合并，域级零重叠）；L4/L5 面自 `jd.plugin`（2026-09-29）起重新有资源，故 M2 再次跨 L2+L4+L5。
 
-**粒度分布**：2 个插件成员 —— 1 个 `global`（`ad-block.plugin`：7 平台 59 域集合，2026-09-30 由 7 个 ad-* 合并）+ 1 个 `single-app`（`jd.plugin`，京东）。
+**粒度分布**：5 个插件成员 —— 1 个 `global`（`ad-block.plugin`：7 平台 60 域集合，2026-09-30 由 7 个 ad-* 合并）+ 4 个 `single-app`（`jd.plugin` 京东；`soda.plugin` 汽水音乐 —— 8 条纯广告端点整条转空 + 7 条业务接口字段级净化 + 3 域 + 2 条 AND 锚定，解密面 5 个具体 host；`zhifu-fangdong.plugin` 智慧房东 —— 1 条活动位整条转空，解密面 1 host；`wechat.plugin` 微信 —— 2 条字段级净化 + 1 条纯推广端点整条转空，解密面 1 host、零域名规则）。
 **关键约束**：整条 reject 只用于纯广告接口。京东 `functionId=start` 同时下发启动配置与开屏图，整条 reject 会白屏 —— 已改为响应体改写；该处置台账随 `test/cases/jingdong.test.js` 一并删除。
 
-### M3 隐私 · L2 · 6 插件 / 0 脚本
+### M3 隐私 · L2 · 3 插件 / 0 脚本
 
 **职责**：拦追踪/统计/归因 SDK 与 DNS 泄漏，纯 DNS 级 REJECT，不解密内容。
 **资源**：主配置的常见分析 SDK 段（GA/AppsFlyer/Adjust/Sentry 等）+ DNS 泄漏检测域（18 条 → 强制走代理远端解析）。原 `Plugin/privacy-shield.plugin`（11 条 + 1 开关）已随收敛删除。现行拦截面是 `probe-block.plugin`（友盟 15 + 厂商遥测 11 + 前端监控 7 + Bugly 2 + ARMS 1 + Firebase 1 = **37 域**），全部 L2 DNS 级 REJECT、无 `[MitM]`。2026-09-30 由 6 个 `probe-*.plugin` 按 `ad-block` 同形合并（形状一致、无独立生命周期；通道分类保留为 ①–⑥ 小节注释，代价是通道级开关收敛为单插件开关）；并集时移出 `resolver.msg.xiaomi.net`（已由 L0 的 `dns-httpdns` 拦，留着是死规则）。
@@ -118,7 +118,7 @@ Loon 官方文档分 12 个域（交互UI / 节点订阅 / 规则系统 / 策略
 
 **已解决**（DoH 绕过面，2026-09-30）：`hijack-dns` 只收编**明文 UDP 53**；内置 DoH 的客户端（Chrome→`dns.google`、Firefox→`mozilla.cloudflare-dns.com`、Android 私有 DNS 等）自己加密解析，广告/追踪域拿到真实 IP 后 DNS 阶段域名 REJECT 被整体绕过 → 落到 IP 规则 → 境内 CDN 广告被 `GEOIP,CN,DIRECT` 直连放行。现封堵 6 个**纯公共解析器端点**（dns.google / cloudflare-dns.com / mozilla.cloudflare-dns.com / dns.quad9.net / doh.opendns.com / dns.adguard.com，双解析器 A 一致 + HTTPS `/dns-query` 探针取证），客户端回落明文 53 被 hijack 收编、拒绝面恢复。扩列判据：同语义（纯解析器端点）+ 双解析器取证 + 不与既有 REJECT/分流冲突，逐条登记。代价（用户接受）：手动配置上述解析器的客户端会失败回落明文 DNS —— 这正是收编目标。
 
-已用满的（`Profile/Loon.lcf` `[Rule]` 段 490 行）：`DOMAIN-SUFFIX` 364 / `DOMAIN` 112 / `DOMAIN-KEYWORD` 4 / `PROTOCOL` 1（关键词少是**优点** —— 官方警告该类型耗时随数量线性增长）/ `IP-CIDR` 4 / `DEST-PORT` 3（含 DoT/DoQ 853 框架层兜底） / `GEOIP` 1 / `FINAL` 1。插件层另有：`qidian.plugin` `AND` 3 / `DOMAIN` 11 / `DOMAIN-SUFFIX` 1（共 15），4 个纯 L2 插件：`ad-block`(人工策展 + 生成块) / `dns-httpdns` / `dns-leak` / `probe-block`(37) —— 生成块由 `tools/ad-coverage.mjs` 维护, 逐条证据在台账。
+已用满的（`Profile/Loon.lcf` `[Rule]` 段 490 行）：`DOMAIN-SUFFIX` 364 / `DOMAIN` 112 / `DOMAIN-KEYWORD` 4 / `PROTOCOL` 1（关键词少是**优点** —— 官方警告该类型耗时随数量线性增长）/ `IP-CIDR` 4 / `DEST-PORT` 3（含 DoT/DoQ 853 框架层兜底） / `GEOIP` 1 / `FINAL` 1。插件层另有：`qidian.plugin` `AND` 3 / `DOMAIN` 11 / `DOMAIN-SUFFIX` 1（共 15），`soda.plugin` `DOMAIN` 3 / `AND` 2（共 5），4 个纯 L2 插件：`ad-block`(人工策展 + 生成块) / `dns-httpdns` / `dns-leak` / `probe-block`(37) —— 生成块由 `tools/ad-coverage.mjs` 维护, 逐条证据在台账。
 
 **已停用**（随插件下线而失去，非主动选择）：`URL-REGEX` / `USER-AGENT` / `IP-ASN` / `IP-CIDR6` / `OR` / `NOT`。
 

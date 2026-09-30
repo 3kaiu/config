@@ -10,8 +10,13 @@
  * 断言 (当前实现 #1/#2, #3 为观察级):
  *   1. 插件内使用的每个 {PLACEHOLDER} 必须在 [Argument] 有同名声明
  *      (排除: 纯数字正则量词 \d{4} / [A-Z]{2} / JS 模板字面量 ${url} / ${item.1})
- *   2. [Argument] 内声明的每个 switch 必须在插件某处被引用 (enable={X} 或 {X})
+ *   2. [Argument] 内声明的每个 switch 必须在插件某处被引用 (enable={X} / {X} / 新语法 ${X})
  *      (排除: select 类型 — 如 AI_Policy 作为策略位替换是正确用法)
+ *      ⚠️ 2026-09-30 补的盲区: 旧实现把**所有** `${…}` 都当 JS 模板字面量排除, 而 Loon
+ *      3.5.1(978) 新语法里 `${KEY}` 才是开关的唯一引用形式 (`response if ${KEY} == true && …`)。
+ *      于是一个纯新语法的插件(Plugin/soda.plugin)会被判成"死开关" —— 即"门禁把正确写法
+ *      判红"。判据收敛为: 仅当该行是新语法形态 (`request|response if …`) 时, `${KEY}` 才算引用;
+ *      其余 `${…}` 仍按模板字面量排除(旧写法里确实存在)。
  *   3. (TODO) 脚本若读取 $argument, 则调用它的 script-path 行必须传 argument=
  *
  * 用法: node tools/argument-contract-check.mjs [--quiet]
@@ -49,13 +54,21 @@ function analyze(file) {
       }
       continue;
     }
+    // 新语法形态: `request|response if <条件> then <action>` —— 这里的 ${KEY} 是**开关引用**
+    const isV2Rewrite = /^(request|response)\s+if\b/.test(t);
     for (const m of t.matchAll(/\{([A-Za-z0-9_]+)\}/g)) {
       const k = m[1];
       // 排除纯数字 token (正则量词: \d{4}, [A-Z]{2}, (…){3})
       if (/^\d+$/.test(k)) continue;
-      // 排除 ${…} JS 模板字面量 (rewrite 正则里的 request-if-then-redirect 写法)
       const idx = m.index;
-      if (idx > 0 && lines[i][idx - 1] === "$") continue;
+      const isTemplateLiteral = idx > 0 && lines[i][idx - 1] === "$";
+      // 排除 ${…} JS 模板字面量 —— 但新语法行里的 ${KEY} 正是参数引用, 不得一起排除
+      if (isTemplateLiteral) {
+        if (!isV2Rewrite) continue;
+        // 新语法行内仍有两类**内置**变量不是插件参数: Loon 内置变量 ${url}/${request.*}/${response.*}
+        // 与条件捕获槽 ${item.1} (官方《Rewrite 新语法》变量表) ⇒ 按形状排除
+        if (/^(url|request\.|response\.)/.test(k) || k.includes(".")) continue;
+      }
       if (!used.has(k)) used.set(k, []);
       used.get(k).push(i + 1);
     }

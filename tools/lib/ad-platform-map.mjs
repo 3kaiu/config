@@ -100,6 +100,7 @@ export const OUT_OF_CORPUS_ROOTS = [
   { root: "bcebos.com", platform: "百度联盟", reason: "百度对象存储上的广告配置域, 语料不覆盖" },
   { root: "guannin.com", platform: "百度联盟", reason: "百度联盟静态域, 语料不覆盖" },
   { root: "17admob.com", platform: "Google/AdMob", reason: "Google 族 SDK 出口 —— 语料里 Google 以 google.com 出现, 与 SDK 出口域不同源(工具头注已写明)" },
+  { root: "qttunion.com", platform: "趣盟/DCloud", reason: "DCloud(数字天堂)旗下广告聚合 SDK 出口, 与同家的 snssdk 族一样属国内 SDK 生态, 西方发行商清单结构性不覆盖。平台层依据是 App 自家隐私政策的一手声明(智慧房东 com.zhihuifangdong.wisdom 政策第 29 项「趣盟SDK(com.dcloudym)」明写广告投放/归因/反作弊), 不是社区清单" },
 ];
 
 /** 域是否落在结构性豁免清单内 (返回命中条目或 null) */

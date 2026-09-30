@@ -144,8 +144,10 @@ jobs:
           # 双向覆盖由 test/cases/upstream-coverage.test.js 锁定: 此处每加一条, 模板
           # [Plugin] 段必须有对应引用; 反过来模板新增引用而此处漏加会判红。
           # 2026-09-30: 7 个 ad-* 合并为 1 个 ad-block 集合插件; 同日架构分层再增
-          # dns-httpdns / dns-leak 两个 L0 依赖层插件 ⇒ 插件探活 10 条
-          # (qidian 在上一区, 加 Scripts 共 11 条 URL, 与模板 [Plugin] 段一一对应)。
+          # dns-httpdns / dns-leak 两个 L0 依赖层插件; 同日起三个单 App 插件接入
+          # (soda 汽水音乐 / zhifu-fangdong 智慧房东 / wechat 微信) ⇒ 模板 [Plugin] 段
+          # 现有 **9 条 URL**, 本文件逐条对应(qidian 在上一区, 其余 8 条在下区),
+          # 另加 Scripts/Qidian.js 与 Profile/Loon.lcf 两条内容哈希通道。
           # 2026-09-30 架构分层: L0 依赖层新增 dns-httpdns / dns-leak —— 它们与广告平台
           # 拦截器同属"所有去广告插件的前置条件", 挂掉即加密 DNS/HTTPDNS 绕过面回归, 必须探活。
           check_url "ws.wenn.in CDN (ad-block)" "https://ws.wenn.in/main/Plugin/ad-block.plugin"
@@ -153,6 +155,9 @@ jobs:
           check_url "ws.wenn.in CDN (dns-leak)" "https://ws.wenn.in/main/Plugin/dns-leak.plugin"
           check_url "ws.wenn.in CDN (probe-block)" "https://ws.wenn.in/main/Plugin/probe-block.plugin"
           check_url "ws.wenn.in CDN (jd)" "https://ws.wenn.in/main/Plugin/jd.plugin"
+          check_url "ws.wenn.in CDN (soda)" "https://ws.wenn.in/main/Plugin/soda.plugin"
+          check_url "ws.wenn.in CDN (zhifu-fangdong)" "https://ws.wenn.in/main/Plugin/zhifu-fangdong.plugin"
+          check_url "ws.wenn.in CDN (wechat)" "https://ws.wenn.in/main/Plugin/wechat.plugin"
 
           # 当前无第三方 GitHub 直连脚本 (决定: 暂时只留自己维护的)。若日后重新集成,
           # 须同时在 Plugin/ 加 script-path 引用 + 在此加 check_url, 二者缺一判红。

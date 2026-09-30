@@ -39,8 +39,8 @@
       "layer": "L2+L4+L5",
       "purpose": "拦广告。唯一跨 3 层的模块",
       "internal_layers": {
-        "L2": "tpl 本地 [Rule] 的 REJECT 段 (127 条 REJECT(全部裸 REJECT)) + 1 个广告平台拦截器 ad-block.plugin (59 人工策展 + 423 生成式覆盖 = 482 域, 均为 DNS 阶段拦截, 无解密面), 2 个 DNS 收编插件 dns-httpdns(15)/dns-leak(35); 另有 6 个 probe-* 插件 38 域归 M3",
-        "L4": "Plugin/ 京东广告位字段级净化 (qidian 的 15 [Rewrite] + jingdong 的 1 [Script] 覆盖 7 个 functionId)",
+        "L2": "tpl 本地 [Rule] 的 REJECT 段 (127 条 REJECT(全部裸 REJECT)) + 1 个广告平台拦截器 ad-block.plugin (59 人工策展 + 423 生成式覆盖 = 482 域, 均为 DNS 阶段拦截, 无解密面), 2 个 DNS 收编插件 dns-httpdns(15)/dns-leak(35); 另有 6 个 probe-* 插件 38 域归 M3 + 1 个单 App 插件 soda.plugin(3 域 + 2 条 AND 锚定, 汽水音乐/抖音音乐版)",
+        "L4": "Plugin/ 京东广告位字段级净化 (qidian 的 15 [Rewrite] + jingdong 的 1 [Script] 覆盖 7 个 functionId) + soda.plugin 的 16 条 luna 接口 [Rewrite](8 条整条转空 + 7 条字段级净化) + wechat.plugin 的 3 条 [Rewrite](2 条广告字段级净化 + 1 条纯推广端点整条转空; 朋友圈/视频号走 MMTLS 不可达, 见 APP-ONBOARDING 附九)",
         "L5": "Scripts/jingdong.js (京东, src/ 构建轨)"
       },
       "tpl_resources": {
@@ -59,7 +59,28 @@
           "app": "广告平台集合（7 平台）",
           "layer": "L2",
           "granularity": "global",
-          "reason": "967 域(域级 REJECT 总条数) = 59 人工策展(2026-09-30 由 7 个 ad-*.plugin 零重叠并集) + 418 生成式覆盖(app-ads.txt 语料路径) + **490 条社区清单复核收录**(kelee/VirgilClyne `BlockAdvertisers.lpx`, 2026-09-28 版经镜像取得, sha256 锚定在 test/fixtures/ad-coverage/community/): 449 精确 DOMAIN + 41 整域 DOMAIN-SUFFIX。整域拦**只对 apex 是端点型(非 200/非 HTML)的根域**开放, 逐条台账留档; 红线过滤 = 支付/银行(含 ads.cup.com.cn 银联、amdc.alipay.com) + Apple 与系统(含 app-analytics-services.com) + 推送; 归因/统计类(adjust/appsflyer/amplitude/umeng 等 7 条)按模块纪律转 M3 台账 defer, 不进本块。【2026-09-30 生成式覆盖】tools/ad-coverage.mjs 从 10,573 个候选中按五道判据生成 423 条(平台声明≥8/15 · 双解析器 A 存活 · HTTPS 非 200+HTML · 非多业务大厂/功能即产品 · 非泛解析根域);逐条证据 test/fixtures/ad-coverage/ledger.json, 产物漂移由 npm run check:coverage 判红。人工策展部分: 7 平台 59 域(穿山甲/广点通/快手/百度/Google/国际聚合/国际变现), 仅拦 SDK/上报子域不拦平台主域。人工策展 59 条 = 7 平台并集 (穿山甲/字节 17 + 广点通 8 + 快手 7 + 百度 2 + Google/AdMob 1 + 国际聚合 3 + 国际变现 21), DNS 阶段 REJECT, 无 [MitM] ⇒ 零证书成本。2026-09-30 用户决策由 7 个 ad-* 插件合并 (合并前实测 ad×ad = ad×probe = ad×主配置 = 0 重叠 ⇒ 分散的是结构不是内容); ⚠️ 平台级开关随之收敛为**单插件开关** (纯 [Rule] 挂不了条件参数, 集合化与逐平台启停不可兼得, 需单平台开关时按平台拆回)。国际变现 21 条的真实来源 = 社区清单 + 候选子域枚举 + DoH 探针 (首版自称的『某份 App 的 app-ads.txt』不成立 —— 清单声明的是 ad system 根域, 而这 21 条是端点主机, 在 44 份真实清单 200005 行里出现 0 次); 由 tools/appads-check.mjs 平台层取证门禁 + tools/lib/ad-platform-map.mjs 归属台账守住 (13 个被拦平台有一手声明, admost.com 0 声明标 declaration_gap 属待裁决), 国内 SDK 与 Google 族按 OUT_OF_CORPUS_ROOTS 结构性排除且每次运行打印。只拦 SDK/上报子域, 排除 unity3d(引擎本体)/mopub(已并入 AppLovin)/streamkey.tv(站点内容) 【2026-09-30 生成式覆盖】tools/ad-coverage.mjs 按五道判据从 10,573 个候选中生成 423 条;逐条证据在 test/fixtures/ad-coverage/ledger.json;产物漂移由 npm run check:coverage 判红"
+          "reason": "968 域(域级 REJECT 总条数) = 60 人工策展(2026-09-30 由 7 个 ad-*.plugin 零重叠并集) + 418 生成式覆盖(app-ads.txt 语料路径) + **490 条社区清单复核收录**(kelee/VirgilClyne `BlockAdvertisers.lpx`, 2026-09-28 版经镜像取得, sha256 锚定在 test/fixtures/ad-coverage/community/): 449 精确 DOMAIN + 41 整域 DOMAIN-SUFFIX。整域拦**只对 apex 是端点型(非 200/非 HTML)的根域**开放, 逐条台账留档; 红线过滤 = 支付/银行(含 ads.cup.com.cn 银联、amdc.alipay.com) + Apple 与系统(含 app-analytics-services.com) + 推送; 归因/统计类(adjust/appsflyer/amplitude/umeng 等 7 条)按模块纪律转 M3 台账 defer, 不进本块。【2026-09-30 生成式覆盖】tools/ad-coverage.mjs 从 10,573 个候选中按五道判据生成 423 条(平台声明≥8/15 · 双解析器 A 存活 · HTTPS 非 200+HTML · 非多业务大厂/功能即产品 · 非泛解析根域);逐条证据 test/fixtures/ad-coverage/ledger.json, 产物漂移由 npm run check:coverage 判红。人工策展部分: 7 平台 59 域(穿山甲/广点通/快手/百度/Google/国际聚合/国际变现), 仅拦 SDK/上报子域不拦平台主域。人工策展 59 条 = 7 平台并集 (穿山甲/字节 17 + 广点通 8 + 快手 7 + 百度 2 + Google/AdMob 1 + 国际聚合 3 + 国际变现 21), DNS 阶段 REJECT, 无 [MitM] ⇒ 零证书成本。2026-09-30 用户决策由 7 个 ad-* 插件合并 (合并前实测 ad×ad = ad×probe = ad×主配置 = 0 重叠 ⇒ 分散的是结构不是内容); ⚠️ 平台级开关随之收敛为**单插件开关** (纯 [Rule] 挂不了条件参数, 集合化与逐平台启停不可兼得, 需单平台开关时按平台拆回)。国际变现 21 条的真实来源 = 社区清单 + 候选子域枚举 + DoH 探针 (首版自称的『某份 App 的 app-ads.txt』不成立 —— 清单声明的是 ad system 根域, 而这 21 条是端点主机, 在 44 份真实清单 200005 行里出现 0 次); 由 tools/appads-check.mjs 平台层取证门禁 + tools/lib/ad-platform-map.mjs 归属台账守住 (13 个被拦平台有一手声明, admost.com 0 声明标 declaration_gap 属待裁决), 国内 SDK 与 Google 族按 OUT_OF_CORPUS_ROOTS 结构性排除且每次运行打印。只拦 SDK/上报子域, 排除 unity3d(引擎本体)/mopub(已并入 AppLovin)/streamkey.tv(站点内容) 【2026-09-30 生成式覆盖】tools/ad-coverage.mjs 按五道判据从 10,573 个候选中生成 423 条;逐条证据在 test/fixtures/ad-coverage/ledger.json;产物漂移由 npm run check:coverage 判红 【2026-09-30 智慧房东接入】新增人工策展 1 域 `api.qttunion.com`(趣盟/DCloud 广告聚合): 平台层依据是智慧房东官方隐私政策第 29 项一手声明, 端点层双解析器 10 A + 非泛解析 + HTTPS 404 text/plain; 归 L0 因趣盟是跨 App 广告平台。"
+        },
+        {
+          "file": "soda.plugin",
+          "app": "汽水音乐",
+          "layer": "L2+L4",
+          "granularity": "single-app",
+          "reason": "抖音音乐版(汽水音乐, iOS bundle id `com.soda.music`)单 App 插件: **8 条整条转空 + 7 条字段级净化 + 3 域 L2**(实为 3 域/DOMAIN 行 + 2 条 AND 锚定 + 16 条 [Rewrite])。整条 reject_dict(200) 只用于**纯广告/纯推广**端点(先过路由探针): /luna/ads/(前缀路由, /luna/ads/config 实测 200) · /luna/media_ads · /luna/commerce/{upsells,upsells_config,v2/commerce_info} · /luna/treasure/entrance/config · /luna/listen-video/reminder · webcast-open/webcast/openapi/feed/。字段级净化用于**业务+广告同响应**的接口(纪律: 一个接口既下发业务数据又下发广告就不能整条拒): /luna/me 删 reward_ad_banner · /luna/activities 删 activity_map · /luna/search-block 删 search_chart_block · /luna/card 删 preview_guide + 过滤 priority_display 推广卡 · /luna/feed/song-tab 删 video_track_mix · /luna/more-panel 过滤 related_video · /luna/me/recently-played-media 过滤 video。字段名一律 ≥2 份上游逐字一致(Moli-X kelee / QingRex / BOBOLAOSHIE587 / ddgksf2013 / jnlaoshu / lihx / edcjason), 无来源字段名不臆造。L2 三条 = dm.bytedance|pstatp|toutiao.com(4 解析器 A 记录 + 443 无站点) + AND 锚定 -ad-sign.byteimg.com 与 tnc*.zijieapi.com(自带 HTTPDNS 收编, 因通配 MitM 会恒报孤儿故不走响应改写)。解密面 5 个具体 host(qishui/字节 API 集群 + webcast), 无通配。**不落地项**: /luna/splash(单来源且 3 host×GET/POST 全 404) · /luna/hashtag/recommend(端点存在但仅单源且无字段证据) · /location/info(属 M3 隐私面) —— 台账在 APP-ONBOARDING.md 附七。"
+        },
+        {
+          "file": "wechat.plugin",
+          "app": "微信",
+          "layer": "L4",
+          "granularity": "single-app",
+          "reason": "微信(WeChat, iOS bundle id `com.tencent.xin` v8.0.79 / 安卓 `com.tencent.mm`)单 App 插件: **0 域(L2 面无一条规则) + 3 条 [Rewrite]**(2 条广告字段级净化 + 1 条纯推广端点整条转空)。**覆盖天花板是取证结论, 不是省略**: ① 朋友圈/视频号/开屏/激励视频广告走 MMTLS 私有协议 —— long/short/szlong/szshort/szminorshort/szextshort/hklong/hkshort.weixin.qq.com 全部有 A 记录但 443 无法完成 TLS, Rewrite/Script 只见 HTTP(S) ⇒ 结构性不可达(全网 11 仓 41 条微信规则无一条命中该面, 现成方案只有 UI 层 Xposed/GKD); ② 「朋友圈广告」字面候选域整族已未注册(wxsnsad.qq.com / wxsnsad.weixin.qq.com / wxsnsdy.qq.com / wxsnsdythumb.qq.com / mmsns.qlogo.cn 在 CF/Google/AliDNS/doh.pub/AdGuard-Unfiltered 五路一致 NXDOMAIN) ⇒ 没有可拦的域名; ③ 名字带 ad 的活域实测全是广告主后台/官网(ad.qq.com / e.qq.com / ad.weixin.qq.com 是微信广告官网 SPA) ⇒ 拦它零收益, 已列已否决面防回流。**唯一 HTTPS 可达面** = mp.weixin.qq.com(路由判据: 控制组 /mp/zz-not-exist-* 稳定 404, 而 /mp/getappmsgad、/mp/getappmsgext、/mp/profile_ext、/mp/homepage 均 200): ① `getappmsgad`(文章内广告) 字段级 `.advertisement_num = 0 | .advertisement_info = []` —— 上游 NobyDa/chxm1023 两份脚本逐字一致(同源, 算 1 强证据) + 本仓一手观测的活字段名; ② `getappmsgext`(业务+广告同体) 只净化 `.advertisement_info = []` —— 一手 374B 活响应里 `advertisement_info` 与 `more_read_list`/`appmsg_album_videos` 并存 ⇒ 整条拒 = 京东 functionId=start 白屏同源风险; ③ `cps_product_info?action`(商品推广 CPS) 整条 reject_dict(200) —— 上游三源(fmz200 奶思/QingRex/zirawell)一致 + 一手探针 ?action=1 返回 200(裸路径 404)。**不落地**: 小程序广告素材 CDN(wxsnsdy*/wxsad.tc/wxa.wxs/wxsmw 等 7 个候选域 —— 上游多源 + DoH 存活, 但本机对该族 80/443 一律 curl(7) 拿不到内容级角色证据, 且可莉原文 wxsmsdy 拼写已被镜像复制成假多源) / masonryfeed·relatedarticle·relatedsearchword(相关阅读类, 非纯广告) / dl.wechat.com/checkresupdate(本体业务域) / payapp 支付页(上游自相矛盾: Kuroba 白名单整域) / 任何 qpic.cn 系(跨层矛盾, 图床)。解密面 **1 个 host**(mp.weixin.qq.com), 不写 *.weixin.qq.com 通配。台账与复跑命令见 APP-ONBOARDING.md 附九。"
+        },
+        {
+          "file": "zhifu-fangdong.plugin",
+          "app": "智慧房东",
+          "layer": "L4",
+          "granularity": "single-app",
+          "reason": "智慧房东(施王物联, 安卓 `com.zhihuifangdong.wisdom` v6.5.9 / iOS id1529842057)单 App 插件: **1 条整条转空 + 0 条 L2**。**平台层一手声明**: 官方隐私政策(2026-04-14 生效)第十一节由 App 自列 **41 个第三方 SDK, 其中 22 个用途含广告投放/归因/监测/反作弊** —— 比 app-ads.txt 更硬(语料是西方发行商自报哪些 ad system 获授权卖其库存; 这里是 App 自己承认嵌了哪些广告 SDK)。**端点层**: 这 22 个平台的广告出口域已被 L0 ad-block 覆盖 **21/22**(优量汇/穿山甲/快手/SigMob/倍孜/GroMore/百度联盟+百青藤/Tanx/章鱼/京媒/优推/推啊/泛连/火山引擎/七巧板·图灵盾 逐条 DoH+HTTPS 核过); 唯一缺口**趣盟 `api.qttunion.com`**(10 A / 非泛解析 / HTTPS 404 text/plain)是**跨 App 广告平台域** ⇒ 落 ad-block.plugin 而非本插件; 另 4 个(uni-ad/HUAWEI Ads/MMA/MSA)探针**无存活端点**(子域全 NX, 根域是平台官网)不写死规则; TalkingData 端点存活但 HTTPS 不可测且属统计面(M3)只登记。 **自营广告位(本插件处置对象)**: SaaS 后台 `/standard/Advertisement/*` 是运营侧「活动设置」CRUD, 展示形式只有 `BANNER`(首页轮播)与 `POP_UP_BOX`(弹窗)两种, 实体字段全为广告语义(`picType/title/coverPic/pushPic/url/adcDelivery/advRedio/goTop/clickSize/communityIds` + 有效期 + 置顶 + 定向小区), **零业务字段** ⇒ 符合「整条 reject 只用于纯广告接口」, 不属于京东 functionId=start 那类混载。App 端读取口 `GET /core/app/activity/bannerPic`(后台前端名 getSwiper), 一条规则同清轮播与弹窗(同一接口由 picType 区分); 点击上报口 `POST /core/app/activity/clickAdd` 是写操作无广告内容不处置。刻意**不写** `json.jq(\".data = []\")`: 响应外层数组字段名未取证(无 HAR), 官方《Rewrite 新语法》又规定 JSON 值不含数组 ⇒ 写字段名即臆造。 解密面 **1 个 host**(api.zhihuifangdong.net), 不写 `*.zhihuifangdong.net` 通配(同集群 20+ 子域里只有 api. 承载广告位, 通配会把官网/后台 SPA/开放平台文档全拉进解密面)。**⚠️ 未经真机验证的已知风险**: reject_dict 丢封套 code/success, 若 App 对此弹错误提示则症状是首页偶发 toast, 届时改字段级(需 HAR)而非放行。台账见 APP-ONBOARDING.md 附八。"
         }
       ],
       "scripts": [
@@ -75,9 +96,12 @@
       "granularity_actual": [],
       "responsibilities": [
         "广告平台拦截: 1 个集合插件 ad-block.plugin 内含 7 平台 59 域 (穿山甲17/广点通8/快手7/百度2/Google1/国际聚合3/国际变现21); ⚠️ 集合化后平台级开关收敛为单插件开关 (原 7 个 ad-* 文件已删除)",
+        "汽水音乐(抖音音乐版): 8 条纯广告端点整条转空 + 7 条业务接口字段级净化 (soda.plugin, L2+L4; 取证与不落地台账见 APP-ONBOARDING.md 附七)",
+        "微信(公众号文章广告): 2 条字段级净化 + 1 条纯推广端点整条转空 (wechat.plugin, L4; 覆盖天花板与不落地台账见 APP-ONBOARDING.md 附九)",
         "京东: 7 个 functionId 的字段级净化 (Scripts/jingdong.js, L4+L5)",
         "起点: 15 条 [Rewrite] 字段级净化 (qidian.plugin, L4)",
-        "主配置 127 条 REJECT(全部裸 REJECT) 硬拦截面 (L2, 全部经 DoH 双解析器 + 协议探针取证)"
+        "主配置 127 条 REJECT(全部裸 REJECT) 硬拦截面 (L2, 全部经 DoH 双解析器 + 协议探针取证)",
+        "字节系广告素材域: dm.bytedance.com / dm.pstatp.com / dm.toutiao.com + AND 锚定的 -ad-sign.byteimg.com(3 域, 归 soda.plugin)"
       ],
       "also_members": []
     },
