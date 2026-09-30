@@ -1,0 +1,28 @@
+# 合成夹具 —— 仅用于验证 tools/appads-check.mjs 的解析与分类逻辑。
+# ⚠️ 这不是任何真实 App 的授权清单, 只是按 IAB app-ads.txt 格式构造的样本。
+# 真实基准须由同目录 SOURCE.json 的 url 抓取 (当前未钉死, 见其 reason 字段)。
+CONTACT=adops@example.com
+SUBDOMAIN=www
+OWNERDOMAIN=example.com
+
+# ① 本仓已有规则 → 期望 covered
+applovin.com, 1234567890, DIRECT
+vungle.com, 5678901234, DIRECT
+chartboost.com, 9876543210, RESELLER, f08c47fec0942fa0
+unity3d.com, 4444444444, DIRECT
+
+# ② 台账已登记排除 → 期望 excluded (不是 gap, 别把已决定的事再报一遍)
+mopub.com, 1111111111, DIRECT
+supersonicads.com, 2222222222, DIRECT
+streamkey.tv, 3333333333, DIRECT
+
+# ③ 本仓未拦且未排除 → 期望 gap (这正是"缺域"比对该找出来的东西)
+smaato.com, 5555555555, DIRECT
+ironsrc.com, 6666666666, DIRECT
+
+# ④ 畸形行与边缘情况: 必须被计入 malformed, 不许静默当成条目
+this line is malformed
+ads.example.net, 7777, DIRECT
+
+# ⑤ 重复行应去重 (同一 ad system 多次声明是合法的)
+applovin.com, 1234567890, DIRECT

@@ -38,6 +38,11 @@ jobs:
       - name: Generate configs with Surgio
         run: npx surgio generate --skip-lint
 
+      # 2026-09-30: 产物变更必须同步发布校验和, 否则 auto-PR 会被 config-validate 的
+      # Profile checksum 步骤判红 (旁文件 = 用户侧验真入口, 不允许漂移)。
+      - name: Refresh profile checksum
+        run: node tools/profile-hash.mjs --write
+
       - name: Assert no credentials in generated config
         run: |
           if grep -niE '(^|,) *(password|uuid|bob|encryption) *=' Profile/Loon.lcf; then
@@ -53,7 +58,7 @@ jobs:
       - name: Check for changes
         id: check
         run: |
-          if git diff --quiet Profile/Loon.lcf; then
+          if git diff --quiet Profile/Loon.lcf Profile/Loon.lcf.sha256; then
             echo "No changes to generated configs"
             echo "changed=false" >> $GITHUB_OUTPUT
           else
@@ -74,7 +79,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
           BRANCH="surgio-auto"
           git checkout -B "$BRANCH"
-          git add Profile/Loon.lcf
+          git add Profile/Loon.lcf Profile/Loon.lcf.sha256
           git commit -m "chore(surgio): auto-update generated configs ($(date +%Y-%m-%d))"
           # 2026-08-29 审计修复: push / gh pr 的 `2>/dev/null || echo skipped` 改为失败即红
           # 此前静默失败让 auto-PR 门禁失效且日志不可见。

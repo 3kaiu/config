@@ -16,8 +16,9 @@
 #    GEOIP, 插件 IP-ASN 永不可能求值 —— 设置即每次白拉 12MB。若将来确有 IP-ASN
 #    规则, 须排在**本地** GEOIP 之前, 且 dns-geoip.test.js 的消费者断言放行。
 # ④ real-ip 须含 captive.apple.com / *.msftconnecttest.com / time.*.com 等系统服务域:
-#    它们会缓存 Fake IP, 被伪 IP 污染即断网或对时失败。*.lan/*.local 族不在此列,
-#    由 bypass-tun + skip-proxy 在进 Loon 前就绕开了。
+#    它们会缓存 Fake IP, 被伪 IP 污染即断网或对时失败。
+#    值中仍保留 *.local/*.lan/*.home.arpa: bypass-tun + skip-proxy 已在进 Loon 前绕开
+#    它们, 此处属纵深防御冗余 (2026-09-30 修正: 原注释称"不在此列"与实际值矛盾)。
 # ⚠️ 必须与下方 ipv6-vif 保持一致 (2026-09-29 对抗审计发现的自相矛盾):
 #   原值 dual 会并发查 A + AAAA 并把结果交给 App, 而 ipv6-vif = off 不接管 TUN 的
 #   IPv6 转发 —— 两条并置的结果无论官方对 "不处理" 作何解释都不可接受:
@@ -25,7 +26,7 @@
 #     · 若 IPv6 绕过 TUN → 静默泄漏, 而本仓恰恰有 M3 隐私模块在防这件事。
 #   ipv4-only 从源头消除矛盾: 不发起 AAAA 查询, App 永远拿不到 IPv6 地址。
 #   代价: 无 IPv6 (happy-eyeballs 失效, 少一个 CDN 选路维度)。对本配置可接受 ——
-#   全仓 485 条规则**零条 IPv6 规则**, 4 条 IP-CIDR 亦全为 IPv4, IPv6 本就无路可走。
+#   全仓规则**零条 IPv6 规则**, IP-CIDR 亦全为 IPv4, IPv6 本就无路可走。
 #   若要启用 IPv6: 改 dual + ipv6-vif = auto, 并保留下方 bypass-tun/skip-proxy
 #   已补齐的 IPv6 局域网段, 否则 mDNS/ULA 流量会被卷进隧道。
 ip-mode = ipv4-only
@@ -35,6 +36,8 @@ doh-server = https://dns.alidns.com/dns-query, https://doh.pub/dns-query
 doh3-server = h3://dns.alidns.com/dns-query, h3://doh.pub/dns-query
 doq-server = quic://dns.alidns.com:853
 hijack-dns = *:53
+# ⚠️ 未收录于现行官方《通用配置》参数表 (2026-09-30 全参数核对): 保留现值,
+#    生效性待实测 —— 任何论证不得以官方文档为本参数背书。
 sni-sniffing = true
 disable-stun = false
 # 回落策略 = REJECT 而非 DIRECT (2026-09-29 对抗审计, 用户决策)。
@@ -46,6 +49,9 @@ disable-stun = false
 # 没开时 UDP 请求直接失败, 便于发现"节点该开 UDP"而不是默默用真实 IP 出门。
 # ⚠️ 前提: 请在 Loon 节点详情确认东京组已启用 UDP, 否则 FaceTime/游戏会连不上。
 udp-fallback-mode = REJECT
+# ⚠️ 未收录于现行官方《通用配置》参数表 (2026-09-30 全参数核对): 保留 off 与
+#    ip-mode=ipv4-only 自洽, 生效性待实测。上方 ipv4-only 的论证**不依赖**本参数
+#    是否被客户端实现 —— 官方对 ipv4-only 的定义已包含"拒绝 IPv6 连接"。
 ipv6-vif = off
 domain-reject-mode = DNS
 dns-reject-mode = LOOPBACKIP
@@ -61,8 +67,8 @@ test-timeout = 5
 #      阶段**、客户端真的收到一个 HTTP 响应时, 它们才有意义。
 #   ② 本配置 domain-reject-mode = DNS(官方《通用配置》): 域名拒绝在 **DNS 阶段**
 #      用 LOOPBACKIP 回环地址完成, 请求根本到不了 HTTP 响应层。
-#   ③ 官方《HTTP 规则》明言"HTTP 规则仅匹配 HTTP 和 HTTPS 请求", 而本配置 483 条
-#      规则中 URL-REGEX / USER-AGENT 合计 **0 条** —— 变体唯一的适用场景不存在。
+#   ③ 官方《HTTP 规则》明言"HTTP 规则仅匹配 HTTP 和 HTTPS 请求", 而本配置规则中
+#      URL-REGEX / USER-AGENT 合计 **0 条** —— 变体唯一的适用场景不存在。
 #   ⇒ 结论: 裸 REJECT 在本配置下**行为等价**, 不是缺口。把变体当"待优化项"登记
 #      是对台账的误读 —— 它把"未使用的功能"误记为"未做好的功能"。
 #   ⇒ 何时才需要变体: ①domain-reject-mode 改为 Request ②或引入 URL-REGEX/USER-AGENT
@@ -76,7 +82,9 @@ proxy-test-url = http://connectivitycheck.gstatic.com/generate_204
 skip-proxy = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32, ::1/128, fc00::/7, fe80::/10, ff00::/8, localhost, *.local, *.lan, *.home.arpa
 # IPv6 局域网段为前向冗余: 当前 ip-mode = ipv4-only 用不到, 但一旦切到 dual,
 # 缺了它们会让 mDNS(ff02::/16)/ULA/链路本地流量被卷进隧道 —— 组播与 ULA 走隧道必坏。
-bypass-tun = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32, ::1/128, fc00::/7, fe80::/10, ff00::/8
+# 2026-09-30 补齐主机名条目 (localhost/*.local/*.lan/*.home.arpa) 对齐 skip-proxy
+#   与官方 bypass-tun 示例 (首例即含 localhost,*.local): TUN 下主机名型流量同样绕行。
+bypass-tun = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 255.255.255.255/32, ::1/128, fc00::/7, fe80::/10, ff00::/8, localhost, *.local, *.lan, *.home.arpa
 real-ip = *.cmpassport.com, *.jegotrip.com.cn, id6.me, *.boc.cn, *.abchina.com, *.ccb.com, *.psbc.com, *.cmbchina.com, *.icbc.com.cn, *.bankofchina.com, *.spdb.com.cn, *.cib.com.cn, *.cebbank.com, *.unionpay.com, *.pingan.com.cn, *.pingan.com, *.bankcomm.com, *.citicbank.com, *.hxb.com.cn, *.cgbchina.com.cn, *.push.apple.com, *.apns.apple.com, captive.apple.com, *.local, *.lan, *.home.arpa, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, *.msftconnecttest.com, *.msftncsi.com, *.battlenet.com.cn, time.*.com
 # real-ip 条目已按 DNS 存活性核验(2026-09-29): 已删 *.icitymobile.mobi(四解析器
 # NXDOMAIN 且无 NS, 域名已注销)。保留但公网无解的 *.srv.nintendo.net 属**不确定项** ——
@@ -195,14 +203,40 @@ DOMAIN-KEYWORD, xboxlive.com, DIRECT
 PROTOCOL, STUN, REJECT
 DEST-PORT, 3478, REJECT
 
+# ── 加密 DNS 端口级兜底 (2026-09-30 架构分层: 框架层, 插件开关动不了它) ──────
+# 为什么留在本地而不进 dns-leak.plugin: 域名级名单(可按需启停、可经 CDN 独立更新)在插件,
+#   而**端口级**是插件的开关一旦被关就失效的最后一道闸, 属框架层兜底。
+# 依据: 端口 853 是 IANA 分配给 DoT(DNS over TLS)的端口; 官方《DNS》页亦把 853 写作 DoQ
+#   默认端口(官方《通用配置》页写 784 —— 两页口径漂移已有记载, 本仓 doq-server 显式写 `:853`)。
+#   TCP 853 = DoT, UDP 853 = DoQ, 一条端口规则同时覆盖两者; 非 853 的自定义端口不受此约束。
+# 自伤分析(必须留档, 因为它动的是本仓自己的解析上游): 本仓 `doq-server = quic://dns.alidns.com:853`
+#   与 DoT 同端口 ⇒ **若** Loon 自身的上游查询也经过 `[Rule]` 匹配, 该 DoQ 并发源会被自己拦掉。
+#   缓解事实(官方《DNS》页): "普通 DNS 与加密 DNS(DoH、DoQ、DoH3)同时配置时, Loon 优先使用
+#   加密 DNS; 会并发查询**所有有效服务器**" ⇒ 最坏结果是少一个并发源, 而不是解析中断。
+#   实机验证清单(落地后确认): ① 正常上网观察解析是否正常; ② 临时只留 doq-server(注掉 doh/doh3)
+#   再观察 —— 若解析仍正常, 说明引擎自身流量不过规则, 本条可无顾虑保留; 若异常, 改为按域名
+#   白名单放行本仓解析链后再启用。
+# 残留面(已知未覆盖, 见 LOON-FEATURES.md「DNS 收编与残留面」): IP 直连型 DoH
+#   (如 `https://8.8.8.8/dns-query`) 既无域名可匹配也不走 853 ⇒ 需 IP-CIDR 级封堵, 未落地。
+DEST-PORT, 853, REJECT
+
+# ── DNS 收编的域名级清单已迁至 L0 依赖层插件 (2026-09-30 架构分层) ──────────
+# 原在此处的 `DOMAIN-KEYWORD, httpdns` 与 6 条公共 DoH 端点 REJECT 已迁入:
+#   Plugin/dns-httpdns.plugin   HTTPDNS 端点(11 条逐条取证 + 2 条 AND 锚定兜底)
+#   Plugin/dns-leak.plugin      公共加密解析器端点(19 条逐条取证)
+# 迁移判据: 这两类名单是**插件层的分发面**(改名单不必重导入 Profile, 客户端拉插件即生效),
+#   且属"所有去广告插件的依赖"⇒ 与广告平台拦截器同列 L0, 必须排在 [Plugin] 段最前
+#   (顺序由 test/cases/plugin-layering.test.js 断言)。
+# 单一真源: 本文件不再重复声明这些域 —— 重复会让插件规则成为永不命中的死条目
+#   (官方《规则》页: 本地规则 > 插件规则), 而 tools/plugin-lint-check.mjs 的跨层扫描
+#   正是为抓这种"插件规则被本地规则遮蔽"的空转。若日后要收回本地, 须同时删插件的对应行。
+
+
 # 局域网
 IP-CIDR, 192.168.0.0/16, DIRECT, no-resolve
 IP-CIDR, 10.0.0.0/8, DIRECT, no-resolve
 IP-CIDR, 172.16.0.0/12, DIRECT, no-resolve
 IP-CIDR, 127.0.0.0/8, DIRECT, no-resolve
-
-# HTTPDNS 拦截
-DOMAIN-KEYWORD, httpdns, REJECT
 
 # DNS/隐私泄漏检测 (需走代理远端解析)
 DOMAIN-SUFFIX, dnsleaktest.com, Proxy
@@ -860,13 +894,55 @@ FINAL, Final
 [Remote Rule]
 # 本段为空。历史曾挂 7 个第三方镜像规则列表 (末位一个 12 万条的通用广告域名表),
 # 2026-09-29 全部移除 —— 代价是**失去长尾广告域兜底**: 未登记的广告域不再被 REJECT,
-# 一律走 Final (默认 Proxy)。保留的拦截面是 [Rule] 段的 122 条已取证 REJECT。
+# 一律走 Final (默认 Proxy)。保留的拦截面是 [Rule] 段的已取证 REJECT 集 (计数以 doc-claims 实测为准)
+# (实测口径: [Rule] 段非注释行中含 REJECT 者) + [Plugin] 段 7 个纯 L2 插件的
+# 97 条域级 REJECT (jd.plugin 的净化在 [Script], 不计入此数)。
 
 [Plugin]
-# 唯一自维护插件。其余 45 个 CDN 插件已下线 —— 本配置的去广告能力只剩本段
-# [Rule] 的 122 条 REJECT + bank-ad-reject snippet + 本插件的字段级净化,
-# **App 内部结构化广告位无法清理**。恢复方式: 在本段补回对应 URL。
+# ── 本段是插件的**唯一分发渠道** ──
+# 2026-09-29 修正: 14 个插件 (7 ad-* + 6 probe-* + jd.plugin) 此前只存在于 Plugin/
+# 与 MODULE-MANIFEST.json, 没有进本段 —— 用户导入 Profile/Loon.lcf 实际一条都拿不到
+# ("门禁全绿"是因为 wiring-check 挂在 npm test 而非 check:all)。新增 Plugin/*.plugin
+# 必须在此登记, 否则 npm test 第一条判据 ("每个 Plugin/*.plugin 必须被 loon.tpl 引用")
+# 判红。注释统一放段首: 11 条 URL 保持连续, 不交错注释。
+#
+# ── 分层与顺序 (2026-09-30 架构分层, 由 test/cases/plugin-layering.test.js 钉死) ──
+# 顺序不是审美问题: 官方《规则》页规定规则来源优先级 = 本地 > 插件 > 订阅, **插件之间按
+# 本段登记顺序**。故 L0 依赖层必须排在最前, 否则后置插件的 DIRECT/Proxy 对同域会先命中。
+# **L0 依赖层(必须最前)**: 只放"所有去广告插件都需要"的共享域集, 不含任何单 App 逻辑。
+#   ① ad-block.plugin     广告平台拦截器 —— 人工策展(7 平台 59 条) + **生成式覆盖**
+#   ② dns-httpdns.plugin  HTTPDNS 拦截器 —— 人工策展(11 条) + 生成式覆盖
+#   ③ dns-leak.plugin     DNS 防泄漏 —— 人工策展(19 条) + 生成式覆盖
+# **生成式覆盖**(2026-09-30 新增, tools/ad-coverage.mjs): 手工逐条写域名无法覆盖 500+ 个
+#   有一手声明的平台, 故把判据固化成管线 —— ① 平台在 app-ads.txt 语料里有 ≥N 份声明
+#   ② 双解析器 A 记录存活 ③ HTTPS 根路径非 200+HTML ④ 非多业务大厂/功能即产品
+#   ⑤ 非泛解析根域(随机子域对照)。五道判据全过才生成规则, 逐条证据在
+#   test/fixtures/ad-coverage/ledger.json, 产物漂移由 `npm run check:coverage` 判红。
+#   实测: 5,694 个候选里 5,093 个无 A 记录、348 个转人工复核, 只有 253 条能自动生成 ——
+#   "批量"与"取证"并不矛盾, 但批量必须过判据。
+#   三者共同构成"广告域 REJECT 真正生效"的前置条件: 域名 REJECT 在 DNS 阶段完成, 而
+#   自带解析的 SDK/浏览器会绕过系统 DNS 拿到真实 IP ⇒ 必须先收编解析面。
+# **L1 消费层(依次在后)**: 单 App/单通道的处置, 依赖 L0 提供的基础面。
+#   · qidian.plugin —— M7 脚本容器, 本仓全部 [Script] 能力寄生于此, 停用即全灭 (M5 单点)。
+#   · jd.plugin —— 唯一带 [Script]+[MitM] 的自维护插件: 解密面 +1 (api.m.jd.com),
+#     京东字段级净化 (7 个 functionId, 一律改写不整条 reject), 无 [Rule] 行。
+#   · 6 个 probe-* (38 条) —— 上报通道拦截。
+# L0 三项 + 6 个 probe-* = 9 个**纯 L2** 插件(无 [MitM]/[Script], 零证书成本), 合计 132 条
+# 域级/端口级 REJECT(59 + 13 + 19 + 38 + 端口/协议兜底, 逐条取证见各插件头部)。
+# 默认姿态 enabled=true (2026-09-29 用户决策): 10 个非 qidian 插件随入口默认生效。
+# 关闭方式: 改本行 enabled=false, 或客户端插件面板逐个停用。
+# ⚠️ 关掉 L0 任一项 = 该层收编失效(加密 DNS/HTTPDNS 绕过回归), 而不是"少拦几条广告"。
+https://ws.wenn.in/main/Plugin/ad-block.plugin, enabled=true, tag=广告平台拦截器（L0·人工+生成式覆盖）
+https://ws.wenn.in/main/Plugin/dns-httpdns.plugin, enabled=true, tag=HTTPDNS 拦截器（L0·去广告依赖）
+https://ws.wenn.in/main/Plugin/dns-leak.plugin, enabled=true, tag=DNS 防泄漏（L0·DoH/DoT 收编）
 https://ws.wenn.in/main/Plugin/qidian.plugin, enabled=true, tag=起点全能助手 Pro
+https://ws.wenn.in/main/Plugin/jd.plugin, enabled=true, tag=京东去广告 Pro
+https://ws.wenn.in/main/Plugin/probe-umeng.plugin, enabled=true, tag=友盟+ 上报拦截
+https://ws.wenn.in/main/Plugin/probe-oem.plugin, enabled=true, tag=厂商自有遥测上报拦截
+https://ws.wenn.in/main/Plugin/probe-webtrack.plugin, enabled=true, tag=前端监控/埋点上报拦截
+https://ws.wenn.in/main/Plugin/probe-bugly.plugin, enabled=true, tag=腾讯 Bugly 上报拦截
+https://ws.wenn.in/main/Plugin/probe-arms.plugin, enabled=true, tag=阿里云 ARMS/SLS 上报拦截
+https://ws.wenn.in/main/Plugin/probe-firebase.plugin, enabled=true, tag=Firebase/Segment 统计拦截
 
 [Rewrite]
 # 本段为空。历史曾有 5 条针对公共 DoH 端点 (/d 路径) 的 reject-200, 因两重死因失效:

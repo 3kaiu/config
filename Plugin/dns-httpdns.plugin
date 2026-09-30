@@ -1,0 +1,206 @@
+#!name=HTTPDNS 拦截器（应用内解析收编）
+#!desc=拦截常见 App SDK 的 HTTPDNS 服务端点, 让应用内解析回落到系统 DNS ⇒ 进入 Loon 的 DNS 框架。所有去广告插件的依赖之一。
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+#!tag = DNS,HTTPDNS,去广告依赖
+#!type = normal
+# ── L0 依赖层契约 (2026-09-30 架构分层) ────────────────────────────────
+# 本插件与 `ad-block.plugin`(广告平台拦截器) / `dns-leak.plugin`(DNS 防泄漏) 同属 **L0 依赖层**:
+#   · 只放"所有去广告插件都需要"的域集, 不放任何单 App 的广告位逻辑;
+#   · 必须排在 `[Plugin]` 段**最前** —— 否则后置插件的 DIRECT/Proxy 对同域会先命中
+#     (官方《规则》页: 规则来源优先级 = 本地 > 插件 > 订阅, 插件之间按登记顺序);
+#   · 用户仍需安装其他去广告插件(单 App 广告位净化在 jd.plugin / qidian.plugin 等)。
+# 顺序与依赖由 test/cases/plugin-layering.test.js 钉死, 不靠注释自觉。
+# 无 [Argument]/[Script]/[Rewrite]/[MitM]: `[Rule]` 行挂不了条件参数(声明即死参数);
+#   纯 L2 域名 REJECT 零证书成本(本仓 domain-reject-mode = DNS + dns-reject-mode = LOOPBACKIP,
+#   拒绝在 DNS 阶段用回环地址完成, 请求到不了 HTTP 响应层)。
+#
+# ── 为什么必须拦 (官方依据 + 缺口分析) ─────────────────────────────────
+# 官方《通用配置》: `hijack-dns` 只收编**明文 UDP DNS**。而自带 HTTPDNS 的 App SDK 用
+# HTTP(S) API 直接取 IP, 完全绕过系统 DNS ⇒ 广告/追踪域拿到**真实 IP** ⇒ DNS 阶段的域名
+# REJECT 整体失效 ⇒ 请求落到 IP 规则上被 GEOIP,CN,DIRECT 直连放行。
+# 拦掉 HTTPDNS 端点后, SDK 只能回落系统 DNS ⇒ 进入 Loon 的 hijack-dns + doh-server 链,
+# 拒绝面恢复。这一层是所有去广告插件生效的**前置条件**, 故与广告平台拦截器同列 L0。
+#
+# ── 取证 (2026-09-30: 双解析器 @223.5.5.5 AliDNS + @119.29.29.29 DNSPod, A 记录 + 端口探针) ──
+# 逐条登记(括号内为双解析器实测 A 记录; "一致" = 两解析器返回同一集合):
+#   httpdns-api.aliyuncs.com  106.11.232.13                       (一致)
+#   httpdns.aliyun.com        112.87.86.2/112.87.86.3/139.227.225.151/139.227.225.152 (一致)
+#   httpdns.qq.com            182.254.116.120                     (一致)
+#   httpdns.baidu.com         110.242.69.16                       (一致)
+#   httpdns.baidubce.com      103.211.221.200                     (一致)
+#   httpdns.volces.com        多 A 集合(双解析器均 NOERROR, 按机房不同)
+#   httpdns.bytedance.com     多 A 集合(同上)
+#   httpdns.umengcloud.com    110.75.96.12                        (一致)
+#   httpdns.jd.com            111.206.227.147/120.52.148.28       (一致)
+#   httpdns.meituan.com       101.236.69.43/103.37.152.92         (一致)
+#   httpdns.taobao.com        59.82.29.204 | 203.119.169.240      (解析器视角不同, 均 NOERROR)
+# **全部 11 条 443 与 80 端口均无站点响应**(curl 连接失败, 非 4xx/5xx) ⇒ 典型的"只有 SDK 的
+# HTTP API 会连"的端点, 不存在功能页, 拦截不产生功能损失 —— 这正是本仓"可拦"判据。
+# 已剔除(NXDOMAIN, 不许凭名字写规则): httpdns.dnspod.com / httpdns.umeng.com / httpdns.miui.com /
+#   httpdns.huawei.com / httpdns.iqiyi.com / httpdns.dnsv1.com / httpdns.kuaishou.com /
+#   httpdns.duxiaoman.com; httpdns.ksyun.com = NOERROR 但 0 条 A, 同样不写。
+# **绝不拦(本仓解析链)**: `dns.alidns.com` / `doh.pub` —— 见 dns-leak.plugin 同名排除段。
+#
+# ── 兜底策略 ──────────────────────────────────────────────────────────
+# 上面 11 条是**可枚举**的已知厂商端点(本仓纪律: 可枚举即不用宽匹配, 官方《规则》页亦记
+# DOMAIN-KEYWORD 耗时随数量线性恶化)。未收录的新厂商靠末尾两条**锚定**关键词规则兜住 ——
+# 插件内裸 DOMAIN-KEYWORD 被 tools/plugin-lint-check.mjs 判红, 必须 AND 锚定(与
+# qidian.plugin 的 AND 样板同形)。锚定限制: 只覆盖 .com/.cn, 其他 TLD 的 httpdns 主机不在兜底内。
+[Rule]
+#
+# ══ HTTPDNS 服务端点 (逐条取证, 见上方登记) ══
+DOMAIN, httpdns-api.aliyuncs.com, REJECT
+DOMAIN, httpdns.aliyun.com, REJECT
+DOMAIN, httpdns.qq.com, REJECT
+DOMAIN, httpdns.baidu.com, REJECT
+DOMAIN, httpdns.baidubce.com, REJECT
+DOMAIN, httpdns.volces.com, REJECT
+DOMAIN, httpdns.bytedance.com, REJECT
+DOMAIN, httpdns.umengcloud.com, REJECT
+DOMAIN, httpdns.jd.com, REJECT
+DOMAIN, httpdns.meituan.com, REJECT
+DOMAIN, httpdns.taobao.com, REJECT
+
+# ── 厂商私有 DNS / HTTPDNS 端点 (2026-09-30 扩面) ──────────────────────────
+# 来源: kelee/VirgilClyne `Block_HTTPDNS.lpx`(kelee.one 2026-09-28 版; 该站对非 Loon 客户端返回
+#   Turnstile 403, 故经镜像 deanxizian/loon_to_surge 取得同版文件)。
+# 判据(本仓标准, 不照抄): 双解析器 @Cloudflare/@Google A 记录存活 + HTTPS 根路径非 200+HTML。
+# 实测 64 条候选 → 存活 60 · 无 A 4(未收录) · 200+HTML 2(转人工) · 支付面 1(未收录)。
+# 分组仅为人眼复核方便, 与规则语义无关; 括号内 A 记录数来自探针。
+# [B站直播] httpdns.bcelive.com(A×20)
+DOMAIN, httpdns.bcelive.com, REJECT
+# [OPPO] httpdns.ocloud.oppomobile.com(A×2), httpdns.push.oppomobile.com(A×2)
+DOMAIN, httpdns.ocloud.oppomobile.com, REJECT
+DOMAIN, httpdns.push.oppomobile.com, REJECT
+# [OPPO/欢太] httpdns.ocloud.heytapmobi.com(A×2), httpdns.push.heytapmobi.com(A×2)
+DOMAIN, httpdns.ocloud.heytapmobi.com, REJECT
+DOMAIN, httpdns.push.heytapmobi.com, REJECT
+# [Q2CDN] dns2.q2cdn.com(A×1)
+DOMAIN, dns2.q2cdn.com, REJECT
+# [YY] union-httpdns.gslb.yy.com(A×3), yuyin-httpdns.gslb.yy.com(A×3), yyapp-httpdns.gslb.yy.com(A×3)
+DOMAIN, union-httpdns.gslb.yy.com, REJECT
+DOMAIN, yuyin-httpdns.gslb.yy.com, REJECT
+DOMAIN, yyapp-httpdns.gslb.yy.com, REJECT
+# [云信] httpdns.yunxindns.com(A×2)
+DOMAIN, httpdns.yunxindns.com, REJECT
+# [京东] dns.jd.com(A×1)
+DOMAIN, dns.jd.com, REJECT
+# [优酷] pre-xpis-xcdn.youku.com(A×1), xpis-mob-xcdn.youku.com(A×1), xpis-tel-xcdn.youku.com(A×1), xpis-xcdn.youku.com(A×1)
+DOMAIN, pre-xpis-xcdn.youku.com, REJECT
+DOMAIN, xpis-mob-xcdn.youku.com, REJECT
+DOMAIN, xpis-tel-xcdn.youku.com, REJECT
+DOMAIN, xpis-xcdn.youku.com, REJECT
+# [作业帮] httpdns.zybang.com(A×6)
+DOMAIN, httpdns.zybang.com, REJECT
+# [其他] httpsdns.baidu.com(A×1)
+DOMAIN, httpsdns.baidu.com, REJECT
+# [华为] httpdns-browser.platform.dbankcloud.cn(A×4), httpdns.c.cdnhwc2.com(A×12), httpdns.huaweicloud.com(A×7), httpdns.platform.dbankcloud.cn(A×4), httpdns.platform.dbankcloud.com(A×2), httpdns1.cc.cdnhwc5.com(A×5)
+DOMAIN, httpdns-browser.platform.dbankcloud.cn, REJECT
+DOMAIN, httpdns.c.cdnhwc2.com, REJECT
+DOMAIN, httpdns.huaweicloud.com, REJECT
+DOMAIN, httpdns.platform.dbankcloud.cn, REJECT
+DOMAIN, httpdns.platform.dbankcloud.com, REJECT
+DOMAIN, httpdns1.cc.cdnhwc5.com, REJECT
+# [央视] httpdns.cctv.com(A×1)
+DOMAIN, httpdns.cctv.com, REJECT
+# [夸克] ucdc.upaas.quark.cn(A×2)
+DOMAIN, ucdc.upaas.quark.cn, REJECT
+# [小米] httpdns.browser.miui.com(A×2), resolver.msg.xiaomi.net(A×1)
+DOMAIN, httpdns.browser.miui.com, REJECT
+DOMAIN, resolver.msg.xiaomi.net, REJECT
+# [快手] kuaishou.httpdns.pro(A×4)
+DOMAIN, kuaishou.httpdns.pro, REJECT
+# [快看漫画] apidns-js.kwd.inkuai.com(A×4), apidns.kwd.inkuai.com(A×4), httpdns.kwd.inkuai.com(A×4)
+DOMAIN, apidns-js.kwd.inkuai.com, REJECT
+DOMAIN, apidns.kwd.inkuai.com, REJECT
+DOMAIN, httpdns.kwd.inkuai.com, REJECT
+# [斗鱼] dotserver.douyucdn.cn(A×8)
+DOMAIN, dotserver.douyucdn.cn, REJECT
+# [滴滴] hd.xiaojukeji.com(A×4)
+DOMAIN, hd.xiaojukeji.com, REJECT
+# [爱奇艺] doh.iqiyi.com(A×1)
+DOMAIN, doh.iqiyi.com, REJECT
+# [爱奇艺 TV] doh.ptqy.gitv.tv(A×1)
+DOMAIN, doh.ptqy.gitv.tv, REJECT
+# [百度] httpdns.n.shifen.com(A×1)
+DOMAIN, httpdns.n.shifen.com, REJECT
+# [网易] httpdns-sdk.n.netease.com(A×1), httpdns.music.163.com(A×2), httpdns.n.netease.com(A×2), lofter.httpdns.c.163.com(A×2), music.httpdns.c.163.com(A×2)
+DOMAIN, httpdns-sdk.n.netease.com, REJECT
+DOMAIN, httpdns.music.163.com, REJECT
+DOMAIN, httpdns.n.netease.com, REJECT
+DOMAIN, lofter.httpdns.c.163.com, REJECT
+DOMAIN, music.httpdns.c.163.com, REJECT
+# [美团] httpdnsmultiapi.meituan.com(A×2), httpdnsmultiapivip.meituan.com(A×1)
+DOMAIN, httpdnsmultiapi.meituan.com, REJECT
+DOMAIN, httpdnsmultiapivip.meituan.com, REJECT
+# [腾讯 P2P 隧道] twns.p2ptun.qq.com(A×10)
+DOMAIN, twns.p2ptun.qq.com, REJECT
+# [腾讯 全民K歌] httpdns.kg.qq.com(A×1), tp2p.kg.qq.com(A×3)
+DOMAIN, httpdns.kg.qq.com, REJECT
+DOMAIN, tp2p.kg.qq.com, REJECT
+# [腾讯 微信] aedns.weixin.qq.com(A×2), dns.weixin.qq.com(A×2), dns.weixin.qq.com.cn(A×2)
+DOMAIN, aedns.weixin.qq.com, REJECT
+DOMAIN, dns.weixin.qq.com, REJECT
+DOMAIN, dns.weixin.qq.com.cn, REJECT
+# [薄荷健康] httpdns.calorietech.com(A×1)
+DOMAIN, httpdns.calorietech.com, REJECT
+# [酷狗] serveraddr.service.kugou.com(A×5)
+DOMAIN, serveraddr.service.kugou.com, REJECT
+# [金山云] hdns.k-dyn.com(A×2), hdns.ksyun.com(A×12)
+DOMAIN, hdns.k-dyn.com, REJECT
+DOMAIN, hdns.ksyun.com, REJECT
+# [阿里] httpdns.alicdn.com(A×2)
+DOMAIN, httpdns.alicdn.com, REJECT
+# [阿里/淘宝] httpdns.danuoyi.tbcache.com(A×2)
+DOMAIN, httpdns.danuoyi.tbcache.com, REJECT
+# [阿里云] httpdns-sc.aliyuncs.com(A×2)
+DOMAIN, httpdns-sc.aliyuncs.com, REJECT
+# [陌陌] httpdns.immomo.com(A×1)
+DOMAIN, httpdns.immomo.com, REJECT
+#
+# ── 三种新技法(同源吸纳, 各带独立判据) ─────────────────────────────────
+# ① SDK 的 UA 面: HTTPDNS SDK 走**明文 HTTP** 时带 httpdns*/httpsdns* 的 UA; 明文请求头可见
+#    ⇒ **无需 MitM**, 本插件仍零解密面。四种大小写是实测变体。
+USER-AGENT, "httpdns*", REJECT
+USER-AGENT, "httpsdns*", REJECT
+USER-AGENT, "Httpdns*", REJECT
+USER-AGENT, "Httpsdns*", REJECT
+# ② IP 形态的明文 HTTPDNS: 域名规则够不着裸 IP 请求(本仓此前列为残留面), 而这类请求路径形状
+#    固定(/d? /d4? /ss6? /resolve?)。只匹配 **http://** —— 加 https 就要 MitM, 与零解密面冲突
+#    (plugin-layering 用例断言 dns-* 的 URL-REGEX 必须是明文)。行尾 \? 是字面问号, 故 /download 不误命中。
+URL-REGEX, "^http:\/\/((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:\/v?[0-9]+)?\/(?:sign_)?(?:(?:d|ss)[46]?|resolve)\?", REJECT
+URL-REGEX, "^http:\/\/\[[0-9a-fA-F:]+\](?:\/v?[0-9]+)?\/(?:sign_)?(?:(?:d|ss)[46]?|resolve)\?", REJECT
+# ③ 上述 IP 形态会误伤正常用 HTTPDNS 的出行类 App ⇒ 两条定向放行(同源): 嘀嗒出行(UA 为中文的
+#    URL 编码)走 119.29.29.90 / 119.28.28.90 的 /d? 保持直连。carve-out 是社区踩出来的;
+#    我们照搬形态但留复核记录, 便于社区 UA 变更时定位。
+AND, ((URL-REGEX, ^http:\/\/119\.29\.29\.90\/d\?), (USER-AGENT, %E5%98%80%E5%97%92%E5%87%BA%E8%A1%8C*)), DIRECT
+AND, ((URL-REGEX, ^http:\/\/119\.28\.28\.90\/d\?), (USER-AGENT, %E5%98%80%E5%97%92%E5%87%BA%E8%A1%8C*)), DIRECT
+#
+# ── 已评估**未采纳**(附理由, 免得后人再抄一遍) ─────────────────────────
+# · 裸 DOMAIN-KEYWORD httpdns/httpsdns: 本仓 plugin-lint-check 判红(插件内裸关键词禁止; 官方记
+#   其耗时随数量线性增长), 且已有 AND 锚定兜底 + 上述 60 条枚举, 覆盖等价。
+# · 67 条 IP-CIDR …/32: 逐 IP 钉死有共享 IP 误伤风险(同 IP 可能兼作他服务); 技法② 已用路径
+#   形态覆盖明文 IP HTTPDNS —— 不钉 IP 也能拦。厂商专属段(如 203.107.1.0/24)可另行裁决。
+# · 4 条实测无 A(死规则): dns.iqiyi.com / dns.qiyipic.iqiyi.com / httpdns.bilivideo.com /
+#   httpdns-v6.gslb.yy.com。
+# · 2 条 200+HTML(转人工): cdndns.kwd.inkuai.com / dns.weibo.cn —— 疑站点页, 按「有功能页不拦」不收。
+# · amdc.alipay.com: 支付宝**服务下发面**(302+html); 与 M4 银行/支付免解密免广告姿态冲突, 可能影响
+#   支付链路 ⇒ 未收录; 若要动须按 APP-ONBOARDING 单独取证。
+
+#
+# ══ 未收录厂商的锚定兜底 (AND + DOMAIN-SUFFIX, 同 qidian 样板) ══
+AND,((DOMAIN-KEYWORD,httpdns),(DOMAIN-SUFFIX,com)),REJECT
+AND,((DOMAIN-KEYWORD,httpdns),(DOMAIN-SUFFIX,cn)),REJECT
+
+# >>> GENERATED:httpdns (tools/ad-coverage.mjs) >>>
+# 本块由覆盖管线生成, **勿手改** —— 改判据请改 tools/ad-coverage.mjs 后重跑 --run。
+# 生成时间: 2026-09-30 | 判据: ① 平台声明 ≥8/15(app-ads.txt 语料) ② 双解析器 A 记录存活 ③ HTTPS 根路径非 200+HTML ④ 非多业务大厂/功能即产品 ⑤ 非泛解析根域(随机子域对照); 另过滤 已拦/排除台账/推送商店系统红线
+# 逐条证据: test/fixtures/ad-coverage/ledger.json (平台/声明数/A 记录/HTTP 结果)
+DOMAIN, httpdns.xiaojukeji.com, REJECT
+DOMAIN, httpdns.tencentcloudapi.com, REJECT
+DOMAIN, httpdns.sohu.com, REJECT
+DOMAIN, httpdns.vivo.com, REJECT
+# <<< GENERATED:httpdns <<<

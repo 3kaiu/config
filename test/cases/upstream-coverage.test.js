@@ -46,6 +46,15 @@ function checkedUrls() {
   return out;
 }
 
+// APP-ONBOARDING「0. 分发与验真」公开声明的导入地址 —— 用户按文档导入的东西必须被探活。
+// 双向: 文档里声明了就必须在探活清单里; 探活清单里的 CDN 地址也必须在文档里出现过。
+function documentedImportUrls() {
+  const doc = fs.readFileSync(path.join(REPO, "APP-ONBOARDING.md"), "utf8");
+  const out = new Set();
+  for (const m of doc.matchAll(/https:\/\/ws\.wenn\.in\/main\/[^\s`|)]+/g)) out.add(m[0]);
+  return out;
+}
+
 // loon.tpl 的 [General] 里会引用外部 URL 的键
 function generalExternalUrls() {
   const tpl = fs.readFileSync(path.join(REPO, "template", "loon.tpl"), "utf8");
@@ -101,7 +110,14 @@ exports.tests = {
         cdnPluginUrls.set(m[1], `Plugin/${fn} script-path`);
       }
     }
-    const dead = [...checked.entries()].filter(([url]) => !live.has(url) && !general.has(url) && !cdnPluginUrls.has(url));
+    const documented = documentedImportUrls();
+    a.ok(documented.size >= 1, "APP-ONBOARDING 应公开声明至少一个导入地址(用户按文档导入的东西必须可被探活)");
+    for (const u of documented) {
+      a.ok(checked.has(u), `文档声明的导入地址 ${u} 不在 upstream-health 探活清单里 —— 挂了没人告警`);
+    }
+    const dead = [...checked.entries()].filter(
+      ([url]) => !live.has(url) && !general.has(url) && !cdnPluginUrls.has(url) && !documented.has(url)
+    );
     a.equal(
       dead.length,
       0,
@@ -121,5 +137,27 @@ exports.tests = {
         [...live.keys()].map((u) => `  ${u}`).join("\n") +
         `\n若确需集成: ①确认上游可信 ②在 upstream-health.yml 加 check_url ③改本断言`
     );
+  },
+  "upstream: 自建 CDN 探活必须做内容哈希比对 (只探状态码即静默失效)": async (a) => {
+    // 2026-09-30 (吸纳 SukkaW/Surge 的 post-deploy marker 判据): ws.wenn.in/main/<path> 是
+    // origin/main 的**纯字节镜像**(实测 qidian.plugin 两边 sha256 同为 3b81e1de…,
+    // Scripts/Qidian.js 逐字节一致) ⇒ 同路径 sha256 是精确不变量。
+    // 只探状态码漏三类失效: CDN 缓存滞后(200 但内容是旧版)、200 的 HTML 错误页/截断、
+    // 产物改了没重新发布。本断言守住"这个比对存在且对每一条自建 CDN 探活生效"。
+    const yml = fs.readFileSync(WORKFLOW, "utf8");
+    const cdnProbes = [...checkedUrls().keys()].filter((u) => u.startsWith("https://ws.wenn.in/"));
+    // 数量随分发面变化 (2026-09-30 平台集合化: 7 个 ad-* 合并为 ad-block ⇒ 15 条降为 10 条),
+    // 故此处只做地板断言; 真正的"漏探活/探死资源"由本文件另两条双向覆盖用例锁死。
+    a.ok(cdnProbes.length >= 5, `自建 CDN 探活应 ≥5 条, 实为 ${cdnProbes.length}`);
+    a.ok(/https:\/\/ws\.wenn\.in\/\*\)\s*tmp=\$\(mktemp\)/.test(yml), "自建 CDN 资源必须落盘取正文(否则无从比对内容)");
+    a.ok(/rel="\$\{url#https:\/\/ws\.wenn\.in\/main\/\}"/.test(yml), "必须把 CDN URL 映射回仓库相对路径同路径比对");
+    a.ok(/sha256sum "\$tmp"/.test(yml) && /sha256sum "\$rel"/.test(yml), "必须两侧都算 sha256");
+    a.ok(/CDN 内容 ≠ 仓库/.test(yml), "不一致必须改写成非 200 的显式串 (下游判红/开 issue 逻辑才自动生效)");
+    a.ok(/CDN 有内容但仓库无此文件/.test(yml), "CDN 有而仓库无(模板引用与仓库脱节)同样要判红");
+    // 每条 CDN 探活的路径都必须真的存在于仓库 —— 否则立刻就是"引用与仓库脱节"。
+    for (const u of cdnProbes) {
+      const rel = u.replace("https://ws.wenn.in/main/", "");
+      a.ok(fs.existsSync(path.join(REPO, rel)), `探活指向仓库内不存在的路径: ${rel}`);
+    }
   },
 };

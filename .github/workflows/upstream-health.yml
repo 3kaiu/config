@@ -54,6 +54,13 @@ jobs:
               local body="/dev/null" tmp="" mt=30
               case "$url" in
                 *.mmdb) tmp=$(mktemp); body="$tmp"; mt=60 ;;
+                # ── 2026-09-30 (吸纳 SukkaW/Surge 的 post-deploy marker 判据): 自建 CDN 资源
+                # 从"只探状态码"升级为**内容哈希一致**。机制已取证: ws.wenn.in/main/<path>
+                # 是 origin/main 的**纯字节镜像** (实测 qidian.plugin 两边 sha256 都是
+                # 3b81e1de…, Scripts/Qidian.js 逐字节一致) ⇒ 同路径比对 sha256 是精确不变量。
+                # 补的三类静默失效: ① CDN 缓存滞后, 推送后客户端仍拉旧规则(状态 200, 内容旧);
+                # ② 200 但正文是 HTML 错误页/被截断; ③ 构建产物改了没重新发布。
+                https://ws.wenn.in/*) tmp=$(mktemp); body="$tmp" ;;
               esac
               # 不用 -f: 失败状态码 (403/404) 也要拿到真实数字; 网络层异常时才记 000。
               # --retry 2 (2026-09-18 优化审计): 调度任务单次抖动即开 issue, 与镜像重试实践对齐。
@@ -63,12 +70,36 @@ jobs:
                 if [ "$status" = "200" ]; then
                   local size marker
                   size=$(wc -c < "$tmp" | tr -d '[:space:]')
-                  marker=$(tail -c 4096 "$tmp" | grep -ac "MaxMind.com" || true)
-                  if [ "${size:-0}" -lt 5000000 ]; then
-                    status="200 (mmdb 体积异常 ${size}B < 5MB)"
-                  elif [ "${marker:-0}" = "0" ]; then
-                    status="200 (mmdb 缺 MaxMind metadata marker, 可能是错误页/截断)"
-                  fi
+                  case "$url" in
+                    *.mmdb)
+                      marker=$(tail -c 4096 "$tmp" | grep -ac "MaxMind.com" || true)
+                      if [ "${size:-0}" -lt 5000000 ]; then
+                        status="200 (mmdb 体积异常 ${size}B < 5MB)"
+                      elif [ "${marker:-0}" = "0" ]; then
+                        status="200 (mmdb 缺 MaxMind metadata marker, 可能是错误页/截断)"
+                      fi
+                      ;;
+                    https://ws.wenn.in/*)
+                      # 同路径比对: URL 去掉 CDN 前缀即仓库内相对路径。
+                      local rel cdnh repo_h
+                      rel="${url#https://ws.wenn.in/main/}"
+                      if [ ! -f "$rel" ]; then
+                        status="200 (CDN 有内容但仓库无此文件: $rel —— 模板引用与仓库脱节)"
+                      else
+                        cdnh=$(sha256sum "$tmp" | cut -d' ' -f1)
+                        repo_h=$(sha256sum "$rel" | cut -d' ' -f1)
+                        if [ "$cdnh" != "$repo_h" ]; then
+                          # 单次不一致可能是边缘节点回源竞态 ⇒ 复取一次再判, 避免抖动开 issue。
+                          sleep 3
+                          curl -sSL -m "$mt" --retry 2 -o "$tmp" "$url" || true
+                          cdnh=$(sha256sum "$tmp" | cut -d' ' -f1)
+                        fi
+                        if [ "$cdnh" != "$repo_h" ]; then
+                          status="200 (CDN 内容 ≠ 仓库: ${cdnh:0:12}… vs ${repo_h:0:12}… @ $rel)"
+                        fi
+                      fi
+                      ;;
+                  esac
                 fi
                 rm -f "$tmp"
               fi
@@ -102,6 +133,31 @@ jobs:
           # test/cases/upstream-coverage.test.js 的双向覆盖断言锁死。
           check_url "ws.wenn.in CDN (Plugin)" "https://ws.wenn.in/main/Plugin/qidian.plugin"
           check_url "ws.wenn.in CDN (Scripts)" "https://ws.wenn.in/main/Scripts/Qidian.js"
+          # 2026-09-30: Profile 是用户**真正导入**的那个文件 —— 与插件同一条内容哈希通道
+          # (URL 去前缀即 Profile/Loon.lcf, 自动比对 sha256)。地址由 APP-ONBOARDING
+          # 「0. 分发与验真」公开声明, upstream-coverage 用例双向断言(必须被声明且被探活)。
+          check_url "ws.wenn.in CDN (Profile)" "https://ws.wenn.in/main/Profile/Loon.lcf"
+
+          # 2026-09-29: 14 个插件接入 [Plugin] 段 (7 个 ad-* + 6 个 probe-* + jd.plugin)
+          # 后, 它们从"仓库里的文件"变成"客户端每次启动拉取的资源" ——
+          # 不探活则 CDN 404/被投毒时无人告警, 而配置本身仍然语法合法、门禁全绿。
+          # 双向覆盖由 test/cases/upstream-coverage.test.js 锁定: 此处每加一条, 模板
+          # [Plugin] 段必须有对应引用; 反过来模板新增引用而此处漏加会判红。
+          # 2026-09-30: 7 个 ad-* 合并为 1 个 ad-block 集合插件; 同日架构分层再增
+          # dns-httpdns / dns-leak 两个 L0 依赖层插件 ⇒ 插件探活 10 条
+          # (qidian 在上一区, 加 Scripts 共 11 条 URL, 与模板 [Plugin] 段一一对应)。
+          # 2026-09-30 架构分层: L0 依赖层新增 dns-httpdns / dns-leak —— 它们与广告平台
+          # 拦截器同属"所有去广告插件的前置条件", 挂掉即加密 DNS/HTTPDNS 绕过面回归, 必须探活。
+          check_url "ws.wenn.in CDN (ad-block)" "https://ws.wenn.in/main/Plugin/ad-block.plugin"
+          check_url "ws.wenn.in CDN (dns-httpdns)" "https://ws.wenn.in/main/Plugin/dns-httpdns.plugin"
+          check_url "ws.wenn.in CDN (dns-leak)" "https://ws.wenn.in/main/Plugin/dns-leak.plugin"
+          check_url "ws.wenn.in CDN (jd)" "https://ws.wenn.in/main/Plugin/jd.plugin"
+          check_url "ws.wenn.in CDN (probe-umeng)" "https://ws.wenn.in/main/Plugin/probe-umeng.plugin"
+          check_url "ws.wenn.in CDN (probe-oem)" "https://ws.wenn.in/main/Plugin/probe-oem.plugin"
+          check_url "ws.wenn.in CDN (probe-webtrack)" "https://ws.wenn.in/main/Plugin/probe-webtrack.plugin"
+          check_url "ws.wenn.in CDN (probe-bugly)" "https://ws.wenn.in/main/Plugin/probe-bugly.plugin"
+          check_url "ws.wenn.in CDN (probe-arms)" "https://ws.wenn.in/main/Plugin/probe-arms.plugin"
+          check_url "ws.wenn.in CDN (probe-firebase)" "https://ws.wenn.in/main/Plugin/probe-firebase.plugin"
 
           # 当前无第三方 GitHub 直连脚本 (决定: 暂时只留自己维护的)。若日后重新集成,
           # 须同时在 Plugin/ 加 script-path 引用 + 在此加 check_url, 二者缺一判红。

@@ -1,0 +1,101 @@
+{
+  "_comment": "app-ads.txt 输入分两层: baseline = 本仓基准(决定『该不该拦』), 现为**多份第三方发行商公开清单的一手声明语料**(first-party-attestation; URL + sha256 可复核), 不再是某一份不可复核的单文件; references = 同一批语料的来源登记(URL/说明)。tools/appads-check.mjs 读本文件。",
+  "format": "IAB app-ads.txt —— 每行 <ad system domain>, <publisher account id>, DIRECT|RESELLER[, <certification authority id>]; # 注释, KEY=VALUE 为变量行",
+  "baseline": {
+    "kind": "first-party-attestation",
+    "pinned": true,
+    "basis": "N 份第三方发行商公开站点上的 app-ads.txt 的**一手声明**: 每份由该发行商自己发布, URL 与 sha256 入库可复核。判据 = 被拦平台至少要在 threshold_files 份声明里出现过。",
+    "threshold_files": 3,
+    "settled_on": "2026-09-30",
+    "corpus": "references.sources —— 派生域集已入库(reference/*.json), 原始文件靠 URL + sha256 重抓核对。",
+    "survey": {
+      "what": "一次性全网抽查: 57 个全球/超休闲/中国出海发行商站点直接请求 /app-ads.txt, 44 份 200 且为清单内容, 共 200005 行声明。",
+      "files": 44,
+      "declared_lines": 200005,
+      "recipe": "对候选发行商列表逐个 GET https://<domain>/app-ads.txt(唯一入库的是 reference/ 里那 15 份); 域名列表: saygames.io azurgames.com homagames.com kwalee.com tap-nation.io rollicgames.com goodjobgames.com dreamgames.com peakgames.net gram.gs lionstudios.cc playrix.com melsoft-games.com wildlifestudios.com miniclip.com outfit7.com sciplay.com productmadness.com pixelfederation.com jamcity.com tiltingpoint.com playgendary.com panteon.com crazylabs.com voodoo.io tripledotstudios.com zynga.com huuugegames.com playtika.com rovio.com king.com supersonic.com ironsrc.com admost.com startapp.com smartadserver.com tapjoy.com ogury.com fyber.com chartboost.com mintegral.com mobvista.com adjoe.io socialpoint.es bitmango.com lilith.com funplus.com igg.com yottagames.com habby.com centurygame.com elex-tech.com tap4fun.com mihoyo.com netease.com",
+      "attested": [
+        { "domain": "smartadserver.com", "files": 34, "direct": 22 },
+        { "domain": "applovin.com", "files": 33, "direct": 33 },
+        { "domain": "adcolony.com", "files": 33, "direct": 15 },
+        { "domain": "inmobi.com", "files": 33, "direct": 27 },
+        { "domain": "chartboost.com", "files": 31, "direct": 19 },
+        { "domain": "mintegral.com", "files": 31, "direct": 28 },
+        { "domain": "vungle.com", "files": 30, "direct": 30 },
+        { "domain": "ogury.com", "files": 29, "direct": 12 },
+        { "domain": "ironsrc.com", "files": 28, "direct": 28 },
+        { "domain": "startapp.com", "files": 28, "direct": 6 },
+        { "domain": "fyber.com", "files": 27, "direct": 27 },
+        { "domain": "advangelists.com", "files": 19, "direct": 0 },
+        { "domain": "tapjoy.com", "files": 18, "direct": 18 },
+        { "domain": "streamkey.tv", "files": 14, "direct": 8 },
+        { "domain": "unity3d.com", "files": 10, "direct": 9 },
+        { "domain": "mopub.com", "files": 8, "direct": 8 },
+        { "domain": "supersonicads.com", "files": 0, "direct": 0 },
+        { "domain": "admost.com", "files": 0, "direct": 0 },
+        { "domain": "startappservice.com", "files": 0, "direct": 0 },
+        { "domain": "startappexchange.com", "files": 0, "direct": 0 }
+      ],
+      "conclusion": "本仓实际拦的 8 个国际平台(applovin/vungle/chartboost/fyber/mintegral/tapjoy/ogury/adcolony)+ unity3d 全部有一手声明(18–33/44); 0 声明的 4 个域(supersonicads / admost / startappservice / startappexchange)**从未**出现在任何一手清单里 —— 它们是 SDK 端点主机(api./init./images.), 不是 ad system 根域。"
+    },
+    "provenance_audit": {
+      "claim_under_review": "首版 21 域自称『基准取自广告主 App 的 AdMob appads.txt(变现平台自报来源域)』(提交 b31188f)。",
+      "verdict": "**不成立(不可复核 + 类别不符)**; 真实来源是『社区清单 + 平台根域知识』再经候选子域枚举 + DoH 探针收敛。",
+      "evidence": [
+        "留痕为零: git 全历史没有任何 app-ads.txt 的 URL; .dsh 会话库只剩 2026-09-30 两个会话, 2026-09-29 那次已不在, 该文件既未入库也未记 URL。",
+        "**类别不符(决定性)**: 首版 21 条全是**子域**(d.applovin.com / ads.api.vungle.com / cdn1.smartadserver.com / ww251.smartadserver.com / images.startappservice.com / init.startappexchange.com …)。IAB app-ads.txt 声明的是 ad system 的**根域**; 在 44 份真实清单 200005 行声明里, 这 21 条出现 **0 次**。",
+        "平台集合**不唯一**: 6 份公开清单(zynga / kwalee / rollicgames / peakgames / gram.gs / tripledot)各自都声明了同一批 16 个平台 —— 『某一份 App 的文件』无法被唯一指认, 但规则也不依赖它。",
+        "21 条中 9 条能在社区清单里找到出处: HaGeZi/dns-blocklists 5 条(d.applovin.com, config.ads.vungle.com, cdn1/ww251/www6.smartadserver.com)、anti-AD 8 条、GOODBYEADS 1 条 —— 本仓历史里就有这份镜像(见下条)。",
+        "**本仓自己的物证**: `git show 4d4b8f7:Mirror/rules/goodbyeads-qx.list`(115076 行, sha256 fe6a469affc6dab4…)含 `d.applovin.com`; 该镜像在 57e7a6e 被移除, 域集随后在 b31188f 以插件形式重生。",
+        "剩余 12 条(api.applovin.com / api.chartboost.com / api.fyber.com / api.mintegral.com / api.tapjoy.com / api.ogury.com / api.admost.com / ads.applovin.com / ads.adcolony.com / events.api.vungle.com / adx-cn.ads.vungle.com / init.startappservice.com)在上述 6 份社区清单里**一条都查不到** ⇒ 形状是『枚举候选子域(api./ads./init./req./images./cdn1./ww251./www6.)+ DoH 只留解析得到的』, 与插件注释里『24 个子域实测已死故未写入』的生成-探针流程一致。",
+        "反向证据: supersonicads.com / admost.com / startappservice.com / startappexchange.com 在 44 份一手声明里 0 次出现 —— 首版把 admost/startapp 端点当作平台级基准, 属**类别误标**。"
+      ],
+      "kept_but_relabelled": "规则本身(13 条)不因此作废: 其平台(applovin/vungle/chartboost/fyber/mintegral/tapjoy/ogury/adcolony)与 unity3d 均有 18–33/44 的一手声明, 端点在 dns-liveness 门禁下持续复核。被否掉的只是**来源叙述**。",
+      "lesson": "**平台声明 ≠ 端点存在**: app-ads.txt 只能告诉你『谁是 ad system』(根域), 告诉你不了『SDK 连哪个主机』(子域)。规则因此要两把钥匙 —— 平台有一手声明 + 端点有 DoH/HTTPS 证据。"
+    },
+    "ruled_out": [
+      {
+        "candidate": "「某一份 App 的 app-ads.txt」当唯一基准(首版做法)",
+        "measured": "不可复核(URL/内容均无留痕); 且平台集合被 6 份公开清单各自完整覆盖 ⇒ 非唯一",
+        "why_not": "单文件既无法核验, 也不比多份一手声明更强。已由 kind=first-party-attestation 取代。"
+      },
+      {
+        "candidate": "广告平台的 sellers.json (看起来最像'平台自报')",
+        "measured": "vungle.com/sellers.json → 200, 2399 条 seller **全部** seller_type=PUBLISHER, domain 是接入方站点(microsoftcasualgames.com / tripledotstudios.com …), 列表里没有 vungle.com 自身",
+        "why_not": "它的语义是「谁获授权卖我的库存」, 不是「平台自己用哪些来源域」。拿它当'平台自报来源域'属于误标来源 —— 正是本仓明令禁止的形状(凭看起来像就写)。"
+      },
+      {
+        "candidate": "各平台自己站点上的 app-ads.txt",
+        "measured": "chartboost.com/app-ads.txt → 301; mintegral/ogury/tapjoy → 301/302; admost.com/app-ads.txt → 200 但非清单内容",
+        "why_not": "IAB 语义同 ads.txt: 声明哪些 ad system 获授权卖**该站点自己的**库存, 与 SDK 出口域无关。"
+      },
+      {
+        "candidate": "把自己站点的 app-ads.txt 当作必需(首版把缺口挂在用户身上)",
+        "measured": "ws.wenn.in / 3kaiu.github.io / wenn.in 三处 app-ads.txt 全 404 —— 本仓没有自有 App 的清单",
+        "why_not": "把基准绑在一个本仓拿不到的文件上, 等于让缺域比对永久停摆。多份第三方一手声明同样是一手证据, 且可复跑。"
+      }
+    ],
+    "optional_overlay": "若将来要判『本 App 自己的清单里声明了谁』, 仍可 `--file <path>` 或写入 baseline_publisher_file(同一 IAB 解析 + 四桶比对), 作为叠加层而不是前置条件。"
+  },
+  "references": {
+    "_what": "一手声明语料(公开发行商站点上的 app-ads.txt)。**入库的是派生域集 + URL + sha256**(原始文件最大 645KB 不入库), 任何人可重新抓取核对。它既是发现输入, 也是 baseline 的声明来源。",
+    "_fetched_via": "node tools/appads-check.mjs --fetch",
+    "sources": [
+      { "slug": "rovio", "url": "https://www.rovio.com/app-ads.txt", "note": "Rovio (Angry Birds) —— 手游发行商, SDK 面广" },
+      { "slug": "king", "url": "https://www.king.com/app-ads.txt", "note": "King / Activision Blizzard Media" },
+      { "slug": "zynga", "url": "https://zynga.com/app-ads.txt", "note": "Zynga —— 声明量大" },
+      { "slug": "playtika", "url": "https://playtika.com/app-ads.txt", "note": "Playtika" },
+      { "slug": "voodoo", "url": "https://www.voodoo.io/app-ads.txt", "note": "Voodoo —— 超休闲, 广告 SDK 依赖最重" },
+      { "slug": "tripledot", "url": "https://tripledotstudios.com/app-ads.txt", "note": "Tripledot Studios (亦见于 Vungle 的 sellers.json)" },
+      { "slug": "huuuge", "url": "https://huuugegames.com/app-ads.txt", "note": "Huuuge Games" },
+      { "slug": "kwalee", "url": "https://kwalee.com/app-ads.txt", "note": "Kwalee —— 一手声明覆盖面与 Tripledot 并列最广" },
+      { "slug": "rollicgames", "url": "https://rollicgames.com/app-ads.txt", "note": "Rollic Games (Zynga) —— 土耳其超休闲, 长尾平台多" },
+      { "slug": "peakgames", "url": "https://peakgames.net/app-ads.txt", "note": "Peak Games (Zynga 土耳其) —— 声明密度最高(191 域级)" },
+      { "slug": "gram", "url": "https://gram.gs/app-ads.txt", "note": "Gram Games (Zynga)" },
+      { "slug": "azurgames", "url": "https://azurgames.com/app-ads.txt", "note": "Azur Games —— 声明量大" },
+      { "slug": "tapnation", "url": "https://tap-nation.io/app-ads.txt", "note": "TapNation" },
+      { "slug": "miniclip", "url": "https://miniclip.com/app-ads.txt", "note": "Miniclip" },
+      { "slug": "lionstudios", "url": "https://lionstudios.cc/app-ads.txt", "note": "Lion Studios (AppLovin) —— 与 AppLovin 同源, 反查闭环" }
+    ]
+  },
+  "gap_policy": "平台层 gap(有一手声明、本仓既没拦也没登记排除)与子域层 gap(清单声明了、规则没覆盖)都只**报告**, 不判红 —— 发现项要人做 DoH + HTTPS 端点取证后才能变规则(见 AGENTS.md『域名 REJECT 必须先取证』)。反向:**被拦平台若 0 手声明**判红(平台声明与端点证据是两把钥匙, 缺前者即类别误标)。"
+}

@@ -1,0 +1,69 @@
+name: L0 Coverage Refresh
+
+# 生成式覆盖的"保鲜"机制: 广告端点上下线极快(实测 10,573 个候选里 9,490 个无 A 记录),
+# 故生成式规则**必须定期重跑管线** —— 死掉的自动移除、新出现的自动加入, 证据台账带日期。
+# 判据与产物一致性由 config-validate 的 Coverage pipeline sync 步骤守; 本 workflow 只负责刷新。
+# 输出走 PR 而非直推: 生成块会一次变动几十到几百条, 必须有人过一眼 diff。
+on:
+  schedule:
+    - cron: '41 4 1 * *'   # 每月 1 日 (与每周的 ad-baseline 错开)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          token: ${{ secrets.MIRROR_TOKEN || github.token }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '22'
+
+      # 零依赖: 管线只用 node 内置 fetch 与 fs, 不需要 npm ci
+      - name: Refresh coverage ledger and generated blocks
+        run: node tools/ad-coverage.mjs --fetch-community
+          node tools/ad-coverage.mjs --run --source ad,httpdns,dnsleak --min-attestation 8
+
+      - name: Show summary
+        run: node tools/ad-coverage.mjs --report | tee -a $GITHUB_STEP_SUMMARY
+
+      - name: Check for changes
+        id: check
+        run: |
+          if git diff --quiet test/fixtures/ad-coverage/ledger.json Plugin/; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "覆盖面无变化"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            git diff --stat test/fixtures/ad-coverage/ledger.json Plugin/ | tail -5
+          fi
+
+      - name: Open or update PR
+        if: steps.check.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.MIRROR_TOKEN || github.token }}
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          BRANCH="coverage-auto"
+          git checkout -B "$BRANCH"
+          git add test/fixtures/ad-coverage/ledger.json Plugin/
+          git commit -m "chore(coverage): refresh L0 coverage ($(date +%Y-%m-%d))"
+          git push -f origin "$BRANCH" || { echo "::error::push failed"; exit 1; }
+          BODY="## L0 覆盖管线自动刷新\n\n重跑 tools/ad-coverage.mjs 后的产物: 生成块(死域移除/新域加入)与证据台账。\n\n### 审核清单\n- [ ] diff 里没有出现功能域(播放器/评论/App 后端)或大厂 api.\n- [ ] 移除项确为已下线端点\n- [ ] CI 全绿"
+          EXISTING=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' || true)
+          if [ -n "$EXISTING" ]; then
+            gh pr edit "$EXISTING" --body "$BODY" && echo "PR #$EXISTING 已更新"
+          else
+            gh pr create --base main --head "$BRANCH" \
+              --title "chore(coverage): refresh L0 coverage ($(date +%Y-%m-%d))" --body "$BODY"
+          fi

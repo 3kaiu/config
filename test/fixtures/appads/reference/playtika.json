@@ -1,0 +1,1468 @@
+{
+  "slug": "playtika",
+  "url": "https://playtika.com/app-ads.txt",
+  "note": "Playtika",
+  "fetched_at": "2026-09-30",
+  "sha256": "4d6319f12ca363e22a9654a829dae3700f2ae42077007ae34d755a7f6b0f8b71",
+  "bytes": 103925,
+  "declared_lines": 291,
+  "malformed_lines": 0,
+  "_warning": "一手声明语料(第三方发行商自报的 ad system 根域): 平台层判定依据, **不得直接当规则** —— 端点层须另做 DoH + HTTPS 取证。原始文件未入库, 用 url + sha256 可重抓核对。",
+  "systems": [
+    {
+      "domain": "adipolo.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "adipolosolutions.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "admagnetix.io",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "admatic.de",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "amxrtb.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "applovin.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "aps.amazon.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "atlas5.co",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "bidfuse.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "contxtful.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "didna.io",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "evolutionadv.it",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "first.media",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "firstimpression.io",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "flashb.id",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "fyber.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "gamoshi.io",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "gannett.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "google.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "incrementx.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "ironsrc.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "nextmillennium.io",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "one.co.il",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "opamarketplace.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "optimovid.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "pmbmonetize.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "ppc.buzz",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "qntv.io",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "reklamup.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "seedtag.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "smartadline.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "spotim.market",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "teal.works",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "unity.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "vidverto.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "viously.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "voletix.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "vungle.com",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "walletcircle.co",
+      "direct": 1,
+      "reseller": 0
+    },
+    {
+      "domain": "152media.info",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "33across.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "acd.op.hicloud.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "adagio.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "adcolony.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "adelement.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "adform.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "adiiix.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "adingenious.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "adingo.jp",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "admanmedia.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "admatic.com.tr",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "admixer.co.kr",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "admixer.net",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "adnimation.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "adorphic.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "ads.vk.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "adsinteractive.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "adswizz.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "advertising.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "advlion.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "adwmg.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "adx-dra.op.hicloud.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "adx-dre.op.hicloud.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "adx-drru.op.hicloud.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "adyoulike.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "algogear.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "algorix.co",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "aniview.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "antipodesdigital.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "anzu.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "aol.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "apester.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "app-stock.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "appads.in",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "appaspire.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "appnerve.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "appnexus.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "appsheep.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "aralego.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "atasdigital.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "audiobranch.co",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "auxoads.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "axis-marketplace.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "axonix.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "azberry.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "balloonlabs.ai",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "beachfront.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "beintoo.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "bematterfull.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "betweendigital.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "bid-matrix.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "bidease.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "bidence.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "bidline.net",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "bidmachine.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "bidnex.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "bigo.sg",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "bildapp.net",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "blis.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "blueseasx.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "bluexad.ai",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "bold-win.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "brightcom.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "brightmountainmedia.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "caerulus.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "carambo.la",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "carliba.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "castify.ai",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "ced-ns.sascdn.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "cgnl.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "chartboost.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "chocolateplatform.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "cignal.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "connatix.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "connekt.ai",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "consumable.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "contextweb.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "conversantmedia.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "copper6.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "criteo.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "datacygnal.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "dauup.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "display.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "districtm.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "e-planning.net",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "eliteappgrade.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "emxdgt.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "engagebdr.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "entravision.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "epom.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "equativ.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "eskimi.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "flat-ads.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "freewheel.tv",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "fromthetop.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "gadsme.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "gamaigroup.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "gitberry.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "gothamads.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "groundtruth.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "growintech.co",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "hyperad.tech",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "hyperaudience.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "ignitemediatech.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "iion.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "imds.tv",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "improvedigital.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "inceptionmedia.ai",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "indexexchange.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "inmobi.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "insticator.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "instreamatic.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "kargo.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "kidoz.net",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "krushmedia.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "kubient.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "kueez.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "lacunads.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "lijit.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "limpid.tv",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "lkqd.net",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "loopme.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "lunamedia.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "markappmedia.site",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "mars.media",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "max-mobi.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "meazy.co",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "media.net",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "mediafuse.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "meitu.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "metup.it",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "mgid.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "mindtos.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "mintegral.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "mobupps.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "motorik.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "my-cast.tv",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "myfeature.tv",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "nativo.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "netaddiction.it",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "netmarvel.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "nobid.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "octopus-x.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "odeeo.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "ogury.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "olaex.biz",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "omgstudios.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "omnifytv.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "onairglobal.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "onetag.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "onlinemediasolutions.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "openx.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "opera.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "osgdigital.net",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "outbrain.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "pangleglobal.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "peak226.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "performist.net",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "playdigo.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "playwire.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "pokkt.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "prado.co",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "prequel.tv",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "prismamedia.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "programmaticx.ai",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "pubeasy.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "pubmatic.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "pubnative.net",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "refine.direct",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "rhebus.works",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "rhythmone.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "richaudience.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "risecodes.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "rtbhouse.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "rtbmax.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "rubiconproject.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "sabio.us",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "saharmedia.net",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "screenil.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "se7en.es",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "selectmedia.asia",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "serpensx.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "sharethrough.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "shinka.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "showheroes.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "silvermob.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "singularads.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "sipo-inc.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "smaato.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "smartadserver.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "smartbid.ai",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "smartclip.net",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "smartyads.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "smilewanted.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "sonobi.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "sovrn.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "spinx.biz",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "spotx.tv",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "spotxchange.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "ssp.e-volution.ai",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "ssp.logan.ai",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "ssp.zetaglobal.net",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "start.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "startapp.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "stroeer.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "supply.colossusssp.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "synacor.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "targetbetter.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "targetspot.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "taurusx.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "thebrave.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "themediagrid.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "thunder-monetize.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "toponad.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "tpmn.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "tradplusad.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "tredio.io",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "tremorhub.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "triplelift.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "tritondigital.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "trustedstack.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "ucfunnel.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "uis.mobfox.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "undertone.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "unrulymedia.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "ushareit.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "verve.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "vidazoo.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "video.unrulymedia.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "videoheroes.tv",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "vidoomy.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "visiblemeasures.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "voisetech.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "weamcom.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "webeyemob.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "x.adprime.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "xad.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "xandr.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "xapads.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "xe.works",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "yahoo.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "yandex.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "yeahmobi.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "yieldlab.net",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "yieldmo.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "yieldnexus.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "ylhglobal.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "zetaglobal.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "zetaglobal.net",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "zmaticoo.com",
+      "direct": 0,
+      "reseller": 1
+    },
+    {
+      "domain": "zoomd.com",
+      "direct": 0,
+      "reseller": 1
+    }
+  ]
+}

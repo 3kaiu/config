@@ -194,8 +194,25 @@ exports.tests = {
   },
 
   // 兜底: HTTPDNS 拦截面本身不能消失 —— 上一条把零值映射清空后, 拦截责任全落在这里。
-  "dns-geoip: HTTPDNS 拦截规则须存在 (零值映射已移除)": async (a) => {
-    const found = ruleSection().some((f) => f[0] === "DOMAIN-KEYWORD" && f[1] === "httpdns" && /REJECT/.test(f[2] || ""));
-    a.ok(found, "应有 DOMAIN-KEYWORD, httpdns, REJECT —— [Host] 零值映射已于 2026-09-29 移除, 此规则是唯一的 HTTPDNS 拦截面");
+  "dns-geoip: HTTPDNS 拦截面须存在 (2026-09-30 起在 L0 插件)": async (a) => {
+    // 2026-09-29: [Host] 零值映射移除后, HTTPDNS 拦截面曾落在主配置的裸关键词规则上。
+    // 2026-09-30 架构分层: 域名级收编清单迁入 L0 依赖层插件(单一真源, 改名单不必重导入 Profile;
+    // 裸 DOMAIN-KEYWORD 在插件里被 plugin-lint-check 禁止, 故改为精确 DOMAIN + AND 锚定兜底)。
+    // 本用例守的是**拦截面本身不能消失**, 位置随分层走。
+    const plugin = path.join(__dirname, "..", "..", "Plugin", "dns-httpdns.plugin");
+    a.ok(fs.existsSync(plugin), "缺少 Plugin/dns-httpdns.plugin —— HTTPDNS 拦截面不可为空");
+    const rules = fs
+      .readFileSync(plugin, "utf8")
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter((l) => l && !l.startsWith("#") && /REJECT/.test(l));
+    const exact = rules.filter((l) => /^DOMAIN,\s*httpdns[\w.-]*,\s*REJECT$/.test(l));
+    const anchored = rules.filter((l) => /^AND,\(\(DOMAIN-KEYWORD,httpdns\),\(DOMAIN-SUFFIX,[\w.-]+\)\),REJECT$/.test(l));
+    a.ok(exact.length >= 5, `dns-httpdns.plugin 的精确 HTTPDNS 端点应 ≥5 条(逐条取证), 实为 ${exact.length}`);
+    a.ok(anchored.length >= 1, "应有 AND 锚定的 httpdns 关键词兜底(未收录厂商)");
+    a.ok(
+      !/^DOMAIN-KEYWORD,\s*httpdns\s*,\s*REJECT\s*$/m.exec(fs.readFileSync(path.join(__dirname, "..", "..", "template", "loon.tpl"), "utf8")),
+      "主配置不应再留裸 httpdns 关键词 —— 重复声明会让插件行永不命中"
+    );
   },
 };

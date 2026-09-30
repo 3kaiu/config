@@ -17,7 +17,10 @@
     "check:workflows": "node tools/workflow-bash-check.mjs",
     "check:scripts": "node tools/build-drift-check.mjs",
     "check:index": "node tools/app-index.mjs --check",
-    "check:all": "npm run check:sync && npm run check:rewrite && npm run check:src && npm run check:orphan && npm run check:plugin && npm run check:contract && npm run check:workflows && npm run check:scripts && npm run check:index",
+    "check:secrets": "node tools/secret-scan.mjs",
+    "check:profile-hash": "node tools/profile-hash.mjs",
+    "check:coverage": "node tools/ad-coverage.mjs --check",
+    "check:all": "npm run check:sync && npm run check:rewrite && npm run check:src && npm run check:orphan && npm run check:plugin && npm run check:contract && npm run check:workflows && npm run check:scripts && npm run check:index && npm run check:secrets && npm run check:profile-hash && npm run check:coverage",
     "audit:ci": "npm audit --registry=https://registry.npmjs.org"
   },
   "engines": {

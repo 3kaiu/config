@@ -6,6 +6,30 @@
 
 ---
 
+## 0. 分发与验真（用户侧第一步）
+
+配置的唯一入口是 `Profile/Loon.lcf`（由 `template/` + `surgio.conf.js` 生成，**勿手改**）：
+
+| 用途 | 地址 |
+|---|---|
+| 导入（客户端订阅） | `https://ws.wenn.in/main/Profile/Loon.lcf` |
+| 同源镜像（自建 CDN 不可用时） | `https://raw.githubusercontent.com/3kaiu/config/main/Profile/Loon.lcf` |
+| **完整性校验和** | `Profile/Loon.lcf.sha256`（仓库内，`sha256sum -c` 兼容格式） |
+
+**验真**（下载后、导入前，仓库根目录执行）：
+
+```bash
+shasum -a 256 -c Profile/Loon.lcf.sha256     # macOS / Linux(shasum)
+sha256sum -c Profile/Loon.lcf.sha256         # Linux
+```
+
+**为什么可信**：旁文件由 `tools/profile-hash.mjs` 生成，`npm run check:all` 与 CI 的
+`Profile checksum integrity` 步骤守住"产物变则旁文件必须同步变"；自建 CDN 上的那份还有
+`upstream-health.yml` 每日按**同路径 sha256** 与仓库比对（不只是探状态码）。插件与脚本同理
+（同一条内容哈希通道），所以"我导入的这份是否就是仓库里那份"是可验证的，不需要信任中间环节。
+
+---
+
 ## 0. 前置：先决定这个 App 属于哪个模块
 
 对照 [`MODULE-MANIFEST.json`](MODULE-MANIFEST.json)：
@@ -340,16 +364,23 @@ response … enable={CAPTURE_ENABLE}        ← 消费
 
 **设计前提**（决定了整套形态）：本仓 `domain-reject-mode = DNS` ⇒ 域名拒绝在 DNS 阶段用回环地址完成，请求到不了 HTTP 响应层。⇒ 广告平台拦截**一律 L2 纯 `[Rule] REJECT`、无 `[MitM]`、零 CA 证书成本**。官方《策略》的 REJECT-IMG/DICT/ARRAY 等变体描述的都是 HTTP 响应内容，在 DNS 拒绝场景下**不适用**。
 
-**为什么拆成 6 个独立插件、而不是一个带开关的大插件**：官方《插件》明确策略位只有 `DIRECT`/`REJECT 系列`/`PROXY`，插件参数只作用于 `Script`(`enable={}`) 与 `Rewrite`(`${}`) —— **普通 `[Rule]` 行挂不了条件**。在一个纯 REJECT 插件里声明 6 个 switch 会得到 6 个**死参数**，误导用户以为能开关。拆成独立插件、**启停插件即按平台开关**，是 Loon 原生且无死参数的做法。
+**为什么是「一个集合插件、内部按平台分节」，而不是带开关的大插件**：官方《插件》明确策略位只有 `DIRECT`/`REJECT 系列`/`PROXY`，插件参数只作用于 `Script`(`enable={}`) 与 `Rewrite`(`${}`) —— **普通 `[Rule]` 行挂不了条件**。在一个纯 REJECT 插件里声明 N 个 switch 会得到 N 个**死参数**，误导用户以为能开关。
 
-| 插件 | 平台 | 域数 | 明确排除（拦了会破功能） |
+**2026-09-30 用户决策（全局整合第一步）**：原 7 个按平台拆分的 ad-* 插件合并为 1 个 `Plugin/ad-block.plugin`（7 平台 **59 域并集，逐条不变**）—— 合并前实测 **ad×ad = ad×probe = ad×主配置 = 0 重叠**，即「重复」不在域而在结构（7 份分发 / 7 条 `[Plugin]` 登记 / 7 次 CDN 探活 / 7 个 manifest 成员）。⚠️ **代价**：平台级开关收敛为**单插件开关**（集合化与"逐平台启停"不可兼得）；需要单平台开关时按平台拆回即可。
+
+| 插件 | 范围 | 域数 | 明确排除（拦了会破功能） |
 |---|---|---|---|
-| `ad-pangolin.plugin` | 穿山甲/字节 | 17 | aweme 内容流 / video-cn 视频CDN / temai 电商 / tnc3 内容 / bytescm 通用CDN / gecko-pangle 落地页 |
-| `ad-gdt.plugin` | 广点通/腾讯广告 | 8 | `e.qq.com` 父域（企微/公众号）/ trace·btrace·imgcache（全站埋点非广告专有） |
-| `ad-kuaishou.plugin` | 快手联盟 | 7 | `kuaishou.com` 主域（短视频本体）/`e.kuaishou.com` 主域级电商 |
-| `ad-baidu.plugin` | 百度联盟 | 2 | `union.baidu.com` 主站（含落地页） |
-| `ad-google.plugin` | Google/AdMob | 1 | `doubleclick.net`/`googlesyndication.com` 主配置已有 SUFFIX 覆盖，不重复 |
-| `ad-intl.plugin` | 国际聚合 | 3 | Sigmob/TradPlus/AnyThink 已部分被主配置 SUFFIX 覆盖，只留未覆盖的 |
+| `ad-block.plugin` | **7 平台集合** | **59** | 见下逐平台列（原 7 文件证据注释全量保留在插件内） |
+
+| 平台（集合插件内分节） | 域数 | 明确排除（拦了会破功能） |
+|---|---|---|
+| 穿山甲/字节 | 17 | aweme 内容流 / video-cn 视频CDN / temai 电商 / tnc3 内容 / bytescm 通用CDN / gecko-pangle 落地页 |
+| 广点通/腾讯广告 | 8 | `e.qq.com` 父域（企微/公众号）/ trace·btrace·imgcache（全站埋点非广告专有） |
+| 快手联盟 | 7 | `kuaishou.com` 主域（短视频本体）/`e.kuaishou.com` 主域级电商 |
+| 百度联盟 | 2 | `union.baidu.com` 主站（含落地页） |
+| Google/AdMob | 1 | `doubleclick.net`/`googlesyndication.com` 主配置已有 SUFFIX 覆盖，不重复 |
+| 国际聚合 | 3 | Sigmob/TradPlus/AnyThink 已部分被主配置 SUFFIX 覆盖，只留未覆盖的 |
+| 国际聚合/变现平台 | 21 | 见插件内 ad-intl-mediation 溯源段（unity3d 引擎本体 / mopub 已并入 AppLovin / streamkey.tv 站点内容等） |
 
 **筛选漏斗**（101 候选 → 38 实装，每一步都有门禁或探针支撑）：
 1. 从两份上游规则提取广告平台域 → 101 个活域候选
@@ -384,18 +415,63 @@ response … enable={CAPTURE_ENABLE}        ← 消费
 - **绝不拦推送通道**：`jpush.cn`/`jpush.io`/`getui.com`/`getui.net`/`gepush.com`/厂商 `xmpush·api-push·upush·config.umeng` 任一被拦即判红 —— 断推送是功能损失不是少条统计。
 - **不拦商店/系统更新域**：`ad.apk.vivo`/`apps.oppomobile`/`pandora.xiaomi` 系被拦即判红 —— 拦了 App 无法更新，属灾难级误伤。
 
-## 附六：国际广告聚合/变现平台（2026-09-29）
+## 附六：国际广告聚合/变现平台（2026-09-29 建，2026-09-30 基准换层 + 溯源更正）
 
-**基准来源换了一层**：不再只靠社区规则，而是取广告主 App 的 **AdMob `appads.txt`** —— 由变现平台**自报**的来源域（`applovin` / `vungle` / `chartboost` / `fyber` / `ironsrc` / `mintegral` / `mopub` / `tapjoy` / `unity3d` / `ogury` / `streamkey.tv` …）。这比任何第三方清单都硬：平台自己声明自己是谁。
+**基准换了一层，而且换对了**：不再靠社区规则，也不靠"某一份 App 的 `app-ads.txt`"，而是取 **多份第三方发行商公开清单** 的一手声明语料（现 15 份：Rovio / King / Zynga / Playtika / Voodoo / Tripledot / Huuuge / Rollic / Peak / Gram / Kwalee / Miniclip / Lion / TapNation / Azur，共 **7908 条声明、979 个唯一 ad system 域**）。**证据类别**比任何社区清单硬：**发行方自己声明哪些 ad system 获授权卖它的库存**。
+
+**首版叙述已被证伪（2026-09-30 溯源，证据可复跑）**：原写"基准 = 广告主 App 的 AdMob `appads.txt`"以及更早的"变现平台自报来源域，证据强度高于任何第三方清单"——**不成立**，两条独立证据：
+
+1. **类别不符**：IAB `app-ads.txt` 声明的是 ad system **根域**（`applovin.com`），而本仓首版 21 条规则**全是端点主机**（`d.applovin.com` / `ww251.smartadserver.com` / `init.startappservice.com` / `cdn1.smartadserver.com` …）。在 44 份真实清单的 **200005 行**声明里，这 21 条出现 **0 次** —— 清单**给不出**这些域名，所以"基准取自 app-ads.txt"在类别上就不可能。
+2. **说不出出处**：全文与 git 历史里没有任何 URL、文件名或快照；而本仓**自己的**历史镜像里就有其中一条 —— `git show 4d4b8f7:Mirror/rules/goodbyeads-qx.list`（115076 行，sha256 `fe6a469a…`）含 `d.applovin.com`；该镜像在 `57e7a6e` 被移除、域集在 `b31188f`（提交名"21 域"）重生。社区清单覆盖率实测 9/21（HaGeZi 5 / anti-AD 8 / GOODBYEADS 1），剩下 12 条 `api.`/`ads.`/`init.` 主机在任何清单里都查不到 ⇒ 真实来源是**候选子域枚举 + DoH 探针**（与"24 子域实测已死"的记录一致），不是任何一份清单。
+
+⇒ **结论**：这些规则**没有** app-ads.txt 级的一手背书，只有**端点级**证据。据此定下**两把钥匙**（写进 `AGENTS.md`）：**平台层**（该不该拦）= 被拦平台在一手声明语料里出现过；**端点层**（拦哪个子域）= DoH + HTTPS 逐 host 实测。**缺一即类别误标** —— "端点活着"不能代替"平台有声明"。
+
+**平台层取证现状（`node tools/appads-check.mjs`，离线可复跑）**：14 个被拦平台 —— 13 个有一手声明（`adcolony`/`vungle`/`inmobi`/`chartboost`/`fyber`/`mintegral`/`smartadserver`/`applovin`/`startapp` 均 15/15；`ogury`/`adview` 14/15；`tapjoy` 10/15；`unity3d` 8/15），**1 个 0 声明**：`admost.com`（标 `declaration_gap`，每次运行都列出来，属**待裁决**：keep 还是撤，不由门禁自动决定）。另有 **807 个平台缺口**（有一手声明、本仓未拦也未登记排除）只报告 —— 平台有声明 ≠ 端点存在。
+
+**端点→平台归属不能靠后缀猜**（`tools/lib/ad-platform-map.mjs` 台账）：`init.startappservice.com` 的平台是 `startapp.com`（品牌同、域不同）；`bid.adview.cn` 的平台是 **`adview.com`**（语料里 14/15 声明的是 `.com`，`.cn` 是对外站点）—— 两条都是后缀回退抓不到的跨域别名，必须显式记账，否则平台层门禁要么误红、要么空转。
 
 **只拦子域，不拦平台主域**（逐条有理由，不是保守）：
 | 主域 | 处置 | 理由 |
 |---|---|---|
-| `unity3d.com` | ❌ 排除 | Unity **引擎本体**，整域拦直接破 Unity 游戏运行与资源加载 |
+| `unity3d.com` | 只拦广告子域 | Unity **引擎本体**，整域拦直接破 Unity 游戏运行与资源加载；仅拦已取证的广告端点 `config.unityads.unity3d.com`（`ad-block.plugin`） |
 | `mopub.com` | ❌ 排除 | 已并入 AppLovin（探针 302 → `applovin.com/max`），拦了是重复 |
-| `supersonicads.com` | ❌ 排除 | 实测已死域（CF 解析 0 条），不占资源 |
+| `supersonicads.com` | ⚠️ **未决**（已撤出排除台账） | 原写"实测已死域（CF 解析 0 条）"**不成立**：2026-09-30 复核发现只探了 apex —— apex 确无 A，但 `init.`/`outcome.` **各 4 条 A 且非泛解析**（随机子域 NXDOMAIN），仅 TCP 80/443 不可达；且它在 44 份语料里 **0 声明**（`AGENTS.md` 的两条反向教训之一） |
 | `streamkey.tv` | ❌ 排除 | 直播广告主站且有正常站点内容，非 SDK 出口 |
-| `applovin.com` / `startapp.com` | 只拦 SDK 子域 | 含开发者后台与站点 |
+| `applovin.com` / `startapp.com` | 只拦 SDK 子域 | 含开发者后台与站点（已拦的 StartApp 出口在 `startappservice.com`/`startappexchange.com`，**归 `startapp.com` 平台**，该平台 15/15 有声明） |
+
+**上表已固化门禁**：台账（域 + 语义 + 理由 + 取证）在 `tools/lib/ad-exclusions.mjs`，`test/cases/ad-exclusions.test.js` 断言「整域排除的域不得有任何规则命中（含子域）」「只拦子域的平台裸域不得被拦」，并带扫描面地板。注意 `unity3d.com` 由上表首版字面上的「❌ 排除」改为「只拦广告子域」—— 首版与原意（反对**整域**拦）和实际配置（拦的是 `config.unityads.` 广告端点）互相矛盾，按实际意图统一。
+
+**基准可复跑化（2026-09-30 收口）**：`tools/appads-check.mjs` + `test/fixtures/appads/SOURCE.json` 把基准钉成**多源一手声明语料**（`kind=first-party-attestation`，`pinned=true`，`threshold_files=3`）：派生域集入库（`reference/*.json`，692K，含 URL + sha256 + bytes，原始文件最大 669KB 不入库）⇒ 平台层判定**离线可复跑**；`--check` 另做**语料 sha256 漂移检测**（上游清单变了 ⇒ 证据基础变了，判红并要求复核后 `--fetch`）。首版叙述与证伪过程留在 `SOURCE.json.baseline.provenance_audit` 里（`kept_but_relabelled`：规则保留，但标签从"一手清单推导"改为"端点评分 + 平台层待补"）。
+
+已排除的替代源（附实测依据，免得后人重试一遍）：
+
+| 替代源 | 实测 | 为什么不能当基准 |
+|---|---|---|
+| **某一份 App 的 `app-ads.txt` 当唯一基准** | 首版就是这么写的，实测**说不出是哪一份**；且 6 份公开清单各自都声明了同一批 16 个平台 | ① 单文件不可复核就等于没有基准；② 平台集合非唯一 ⇒ 规则不依赖任何单份文件，多源语料才既硬又稳 |
+| 广告平台 `sellers.json`（看着最像"平台自报来源域"） | `vungle.com/sellers.json` → 200，2399 条 seller **全部** `seller_type=PUBLISHER`，`domain` 是接入方站点（`microsoftcasualgames.com`/`tripledotstudios.com`…），列表里**没有** `vungle.com` 自身 | 它的语义是「谁获授权卖我的库存」，不是「平台自己用哪些来源域」。拿它当平台来源域属于**误标来源**——正是本仓明令禁止的形状（凭看起来像就写） |
+| 各平台自己站点上的 `app-ads.txt` | `chartboost.com/app-ads.txt` → 301；`mintegral`/`ogury`/`tapjoy` → 301/302；`admost.com` → 200 但非清单内容 | 同 `ads.txt` 语义：声明哪些 ad system 获授权卖**该站点自己的**库存，与 SDK 出口域无关 |
+| 第三方聚合清单 / 社区规则 | HaGeZi 5 / anti-AD 8 / GOODBYEADS 1 覆盖首版 21 条中的 9 条 | 证据强度低于一手声明 —— 而且它正是首版域集的**真实**来源，作为基准等于回到原点 |
+
+⇒ **本仓的基准是"发行方一手声明语料 + 端点探针"的组合，不需要向任何人再要一份文件**；若将来有**自己 App** 的 `app-ads.txt`，可以当**可选叠加层**（`--file`）做四桶比对（`covered`/`excluded`/`gap`/`undeclared`），那是"该不该拦这一条"，与平台层判据互不替代。
+
+**参考清单层与基准同源（`--refs`，2026-09-30）**：同一批 15 份公开清单既做基准（平台层），也做**发现**输入 —— 它回答"业界在声明哪些 ad system"（979 个唯一域，807 个 gap 候选），命令 `node tools/appads-check.mjs --refs`。
+
+发现结果与**逐 host 取证**（2026-09-30 DoH + HTTPS，泛解析对照）：
+
+| 候选 / 信号 | 语料共识 | host 层实测 | 判定 |
+|---|---|---|---|
+| `unity.com` | **15/15** 声明 | 所有广告子域（`config.unityads.unity.com`/`unityads.unity.com`/`ads.unity.com`/`gateway.unityads.unity.com`）**NXDOMAIN**；apex 是公司站。同品牌 `unity3d.com` 8/15 声明且端点活 | ❌ **高共识被证伪**：声明域迁移了，服务端点没迁（我们拦的 `config.unityads.unity3d.com` 仍活，CNAME → `ads-config.`）⇒ **不加规则** |
+| `ironsrc.com` | **15/15**（DIRECT 13） | apex 1A；`api.ironsrc.com` CNAME → `api.ironsrc.com.edgesuite.net`（Akamai）2A；`init.ironsrc.com` NXDOMAIN | ⚠️ 候选（真出口疑在 `supersonicads` 家族） |
+| `init.` / `outcome.supersonicads.com` | **0/15** | 各 4A、非泛解析；TCP 80/443 不可达 | ⚠️ 未决（原判"已死"已撤回；平台层 0 声明有正面证据） |
+| `aps.amazon.com` | 14/15（DIRECT 12） | 302 活；亚马逊真实广告域 `amazon-adsystem.com` 3A 活、`aax-us-east.amazon-adsystem.com` 4A 活 | ⚠️ 候选（强） |
+| `smaato.com` / `hyprmx.com` / `openx.com` / `vrtcal.com` / `lkqd.net` / `advertising.com` / `target.my.com` | 3–15/15 | A 记录活 | ⚠️ 候选（待端点取证） |
+| `ironsource.mobi` | — | **泛解析**：随机子域也解析，`init.ironsource.mobi` 的 1A + HTTPS 200 是假信号 | ❌ 不作依据 |
+
+**两条反向教训**（都是本仓自己犯的过度断言，已写进 `AGENTS.md`）：
+1. **apex 无 A ≠ 域已死** —— 原 `supersonicads.com` 台账条目就是这么错的；
+2. **A 记录存在 ≠ 端点存在** —— 泛解析域会给每个子域发 A 记录，必须先探一个随机子域对照。
+
+**本轮没有新增任何规则**：807 个 gap 里绝大多数是交易所/reseller 长尾，而"语料里有声明"**不等于**"该拦"。候选要变成规则，仍需 ① 平台层有一手声明（或有台账理由），② 逐 host DoH + HTTPS 取证，③ 只拦精确子域不拦主域。
 
 **探针省下 24 条无效规则**：对每个候选子域单独跑 DoH，`sdk.applovin.com` / `init.ironsrc.com` / `mcs.mintegral.com` / `sdk.mbridge.cc` / `api.adcolony.com` / `ads.advangelists.com` 等实测**解析 0 条**。写进配置就是 24 条永不生效的规则 —— 平台子域变更频繁，死子域比预期多。⇒ **子域级拦截必须逐条探针，不能按父域推定**。
 
@@ -417,3 +493,7 @@ response … enable={CAPTURE_ENABLE}        ← 消费
 **修复过程中发现门禁自身的一个缺口**（值得记，属"看起来有门禁其实没有"）：段定位用了 `txt.indexOf("[MitM]")`，会命中 `[Script]` 段注释里**提到的** `[MitM]` 字样（本插件就有一处："…无法被 MitM 解密面门禁静态识别"），导致取到错误的段、`hostname` 正则不匹配、**检查静默失效**。已改为行首锚定 `^\[MitM\]\s*$`。修好后立刻多报出 5 条。
 
 **这 3 条中前两条是本次审计新发现的，第 3 条是既有事实。**
+
+另有一条**判红**门禁（上表两项只报告，与此不同）：`test/cases/ad-exclusions.test.js` + `tools/lib/ad-exclusions.mjs` 守住附六的排除决策 —— 「整域排除的域不得有任何规则命中（含子域）」「只拦子域的平台裸域不得被拦」，外加扫描面地板（主配置与插件都必须真的扫到）。理由：排除决策的失效方式是**后人顺手补一条规则**，没有任何运行时症状，只有断言能抓。
+
+**基准类门禁**（附六）：`tools/appads-check.mjs` + `test/cases/appads-check.test.js` —— **平台层取证门禁**（被拦平台须有一手声明，或经 `tools/lib/ad-platform-map.mjs` 台账记账且**每次运行都列出**；0 声明且无归属即判红）、语料 sha256 漂移检测（`--check`）、IAB 解析与四桶比对（`--file`）；发现层另有 `--refs`（共识 + 反向核对）与 `--fetch`（重抓派生域集，原始文件不入库）。它刻意**不**静默转绿：基准未钉死与"无一手声明的保留项"两种缺口都会打印在每次运行里，CI 里未钉死还会打 `::warning` 注解。溯源结论（首版叙述如何被证伪）留在 `SOURCE.json.baseline.provenance_audit`，由用例守住不许回流。

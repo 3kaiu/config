@@ -289,6 +289,34 @@ jobs:
           node tools/tpl-sync-check.mjs 2>&1 | tee -a $GITHUB_STEP_SUMMARY
           exit ${PIPESTATUS[0]}
 
+      # ── 5e. 密钥/凭据扫描 (2026-09-30 新增) ──
+      # surgio-build 只查生成产物里的 4 个 Loon 订阅键名; 本步扫**全部跟踪 ∪ 未跟踪未忽略**文件,
+      # 覆盖 src/tools/test/docs/workflow 里的 API token / 私钥 / 带凭据 URL。
+      # 发布面是公开 GitHub + CDN ⇒ 提交即公开, 历史删不干净, 必须提交前拦。
+      - name: Secret scan
+        run: |
+          echo "## Secret Scan" >> $GITHUB_STEP_SUMMARY
+          node tools/secret-scan.mjs 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          exit ${PIPESTATUS[0]}
+
+      # ── 5f. Profile 发布完整性 (2026-09-30 新增) ──
+      # check:sync 只证 模板↔产物 一致, 证不了**分发出去的那份**没被动过。
+      # 旁文件 Profile/Loon.lcf.sha256 是用户侧验真入口 (shasum -a 256 -c)。
+      - name: Profile checksum integrity
+        run: |
+          echo "## Profile Checksum" >> $GITHUB_STEP_SUMMARY
+          node tools/profile-hash.mjs 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          exit ${PIPESTATUS[0]}
+
+      # ── 5g. L0 覆盖管线产物一致性 (2026-09-30 新增) ──
+      # 三个 L0 插件的生成块必须与证据台账 (test/fixtures/ad-coverage/ledger.json) 一致:
+      # 手改生成块、或改了判据没重跑 --run, 都在这里判红。
+      - name: Coverage pipeline sync
+        run: |
+          echo "## L0 Coverage Pipeline" >> $GITHUB_STEP_SUMMARY
+          node tools/ad-coverage.mjs --check 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          exit ${PIPESTATUS[0]}
+
       # ── 6. HTTPDNS Rewrite 检查 ──
       - name: HTTPDNS rewrite check
         run: |

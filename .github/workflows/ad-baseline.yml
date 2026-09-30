@@ -1,0 +1,38 @@
+name: Ad Baseline (app-ads.txt)
+
+# 广告拦截基准 = 多份第三方发行商的一手声明语料 + 端点探针（见 APP-ONBOARDING.md 附六）。
+# 判红两项: ① 平台层 —— 被拦平台在一手声明语料里 0 声明且归属台账无理由（类别误标）;
+#           ② 语料漂移 —— 上游清单 sha256 变了 ⇒ 证据基础变了, 复核后跑 --fetch 更新。
+# 基准未钉死时本 workflow **不静默通过**: 工具会打 ::warning 注解, 把"当前不可判"
+# 显性留在运行记录里 —— 一个输入缺失就静默转绿的定时任务比没有这个任务更坏。
+on:
+  schedule:
+    - cron: '23 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  appads:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      # 只用 node 内置模块, 不需要 npm ci (工具零依赖)。
+      - name: app-ads.txt 平台层取证 + 语料漂移
+        run: node tools/appads-check.mjs --check
+
+      # 2026-09-30: 候选流水线 —— 把"有平台声明但本仓未拦"的缺口变成可跟踪队列。
+      # 只报告: 平台声明(钥匙①) + 端点实测(钥匙②) 齐备也只是候选, 第三问(是否广告专有)
+      # 仍需人按 APP-ONBOARDING 第 1 节判断 ⇒ 本步永不判红、永不改文件。
+      - name: 候选流水线 (两把钥匙)
+        if: always()
+        run: |
+          echo "## 候选流水线 (app-ads.txt 声明 × 端点实测)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          node tools/appads-check.mjs --triage --top 10 --probe 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true

@@ -1,5 +1,5 @@
 {
-  "$comment": "资源归类真源。2026-09-29 起点收尾 + 京东接入：起点(M7) + 京东(M2) 两个插件 + 完整 M1 分流。外部依赖归零 (仅自建 CDN ws.wenn.in 的 qidian.plugin + geoip-url 的 mmdb 分流地基)。同日移除了原 46 条 CDN 插件引用 —— 那是用户可见的功能回退 (2130 条规则 / 994 个解密 host),取舍记录在 template/loon.tpl 的 [Plugin] 段头注。",
+  "$comment": "资源归类真源。2026-09-29 起点收尾 + 京东接入：起点(M7) + 京东(M2) 两个插件 + 完整 M1 分流。外部依赖归零 (仅自建 CDN ws.wenn.in 的 qidian.plugin + geoip-url 的 mmdb 分流地基)。同日移除了原 46 条 CDN 插件引用 —— 那是用户可见的功能回退 (2130 条规则 / 994 个解密 host),取舍记录在 template/loon.tpl 的 [Plugin] 段头注。2026-09-29 追加: 13 个 ad-*/probe-* 插件与 jd.plugin 此前只在本文件登记、未进 template/loon.tpl 的 [Plugin] 段 —— 用户导入 Loon.lcf 实际拿不到任何一条, 已补齐 (enabled=true, 由 npm test 的 wiring-check 第一条判据长期守住; 该判据不在 check:all 内, 故 check:all 全绿时仍可能漏)。 2026-09-30 平台集合化: 7 个 ad-* 合并为 1 个 ad-block.plugin(59 域并集, 域级零重叠), [Plugin] 段随之 15 条 → 9 条 URL。",
   "schema_version": 1,
   "axes": {
     "module": "职责模块 M1-M6",
@@ -13,7 +13,7 @@
       "layer": "L2+L3",
       "purpose": "决定请求走哪条链路, 不改写内容",
       "tpl_resources": {
-        "loon_tpl": "template/loon.tpl ([Rule] 483 条: DOMAIN-SUFFIX 361 / DOMAIN 108 / DOMAIN-KEYWORD 5 / IP-CIDR 4 / DEST-PORT 2 / PROTOCOL 1 / GEOIP 1 / FINAL 1)",
+        "loon_tpl": "template/loon.tpl ([Rule] 490 条: DOMAIN-SUFFIX 364 / DOMAIN 112 / DOMAIN-KEYWORD 4 / IP-CIDR 4 / DEST-PORT 3 / PROTOCOL 1 / GEOIP 1 / FINAL 1; 计数口径 = 非注释非空行, 2026-09-30 实测)",
         "snippets": [
           "ai-services.tpl",
           "developer.tpl",
@@ -29,18 +29,18 @@
         "10 个策略组: Proxy(url-test 东京) / Fallback(fallback 东京) / Apple / Final / Streaming / AI / Developer / Gaming / Social / OpenCode",
         "Final 兜底: Proxy 默认, Fallback 容灾, DIRECT 零代理姿态; 尾部 GEOIP,CN,DIRECT + FINAL,Final",
         "银行域 16 条 DIRECT 保障免解密 (域名命中后不再走 IP 匹配)",
-        "122 条 REJECT 经 DoH 双解析器 + 协议探针取证, 后缀白名单按 4 类锁定"
+        "127 条 REJECT 经 DoH 双解析器 + 协议探针取证, 后缀白名单按 4 类锁定; 另有 1 个 ad-block 集合 + 6 个 probe-* 插件的 97 条域级 REJECT (插件层, 随 [Plugin] 段默认启用)"
       ],
       "also_members": []
     },
     {
       "id": "M2",
       "name": "广告治理",
-      "layer": "L2+L4",
+      "layer": "L2+L4+L5",
       "purpose": "拦广告。唯一跨 3 层的模块",
       "internal_layers": {
-        "L2": "tpl 本地 [Rule] 的 REJECT 段 (127 条裸 REJECT) + 6 个按广告平台拆分的独立插件 (穿山甲/广点通/快手/百度/Google/国际聚合, 共 38 域, 均为 DNS 阶段拦截, 无解密面)",
-        "L4": "Plugin/ 京东广告位字段级净化 (qidian 的 13 [Rewrite] + jingdong 的 6 [Script])",
+        "L2": "tpl 本地 [Rule] 的 REJECT 段 (127 条 REJECT(全部裸 REJECT)) + 1 个广告平台拦截器 ad-block.plugin (59 人工策展 + 423 生成式覆盖 = 482 域, 均为 DNS 阶段拦截, 无解密面), 2 个 DNS 收编插件 dns-httpdns(15)/dns-leak(35); 另有 6 个 probe-* 插件 38 域归 M3",
+        "L4": "Plugin/ 京东广告位字段级净化 (qidian 的 15 [Rewrite] + jingdong 的 1 [Script] 覆盖 7 个 functionId)",
         "L5": "Scripts/jingdong.js (京东, src/ 构建轨)"
       },
       "tpl_resources": {
@@ -52,56 +52,14 @@
           "app": "京东",
           "layer": "L4+L5",
           "granularity": "single-app",
-          "reason": "1 条 [Script] 命中 7 个 functionId, 全部由 Scripts/jingdong.js 字段级净化; 解密面仅 api.m.jd.com 单域"
+          "reason": "**匹配整个 api.m.jd.com/client.action**(2026-09-30 扩面: 京东 15.9.50+ 把响应体 base64 化并把 functionId 藏进 POST body ⇒ 按 functionId 匹配的脚本在新版上一条都不触发); 脚本内部以**形状判据**兜风险: 体积 >2MB 放行 / 非 JSON 非 base64 放行 / 每个字段要求广告专有形状(mId·type 名单, showTimesDaily 与 images 同时出现) / 无实际改动即 $done({}) 不回写。覆盖面 = 开屏·首页·我的(floors **与 others.floors** 双路径)·订单·物流·新品; 证据 = fmz200/wool_scripts(主口径) + zbsdsb/loon-adblock-plugins JD_remove_ads_v2(新协议, 2026-08-12) 两源。逐条台账与取舍见 src/jingdong.ts 头部; 行为回归 test/cases/jingdong.test.js(10 例, 含 base64 回写格式与不误伤用例)。"
         },
         {
-          "file": "ad-pangolin.plugin",
-          "app": "穿山甲/字节 Pangolin",
+          "file": "ad-block.plugin",
+          "app": "广告平台集合（7 平台）",
           "layer": "L2",
           "granularity": "global",
-          "reason": "17 个域, DNS 阶段 REJECT, 无 [MitM] ⇒ 零证书成本。snssdk 埋点/日志域; 排除 aweme 内容流/video-cn 视频CDN/temai 电商/tnc3/bytescm 通用CDN/gecko-pangle 落地页"
-        },
-        {
-          "file": "ad-gdt.plugin",
-          "app": "广点通 GDT/腾讯广告",
-          "layer": "L2",
-          "granularity": "global",
-          "reason": "8 个域, DNS 阶段 REJECT, 无 [MitM] ⇒ 零证书成本。gdt.qq.com 广告子域+素材域; 不拦 e.qq.com 父域(企微/公众号)与全站埋点"
-        },
-        {
-          "file": "ad-kuaishou.plugin",
-          "app": "快手联盟 Kwai",
-          "layer": "L2",
-          "granularity": "global",
-          "reason": "7 个域, DNS 阶段 REJECT, 无 [MitM] ⇒ 零证书成本。ksapisrv 广告 API; 不拦 kuaishou.com 主域(短视频本体)"
-        },
-        {
-          "file": "ad-baidu.plugin",
-          "app": "百度联盟",
-          "layer": "L2",
-          "granularity": "global",
-          "reason": "2 个域, DNS 阶段 REJECT, 无 [MitM] ⇒ 零证书成本。广告配置域; 不拦 union.baidu.com 主站(含落地页)"
-        },
-        {
-          "file": "ad-google.plugin",
-          "app": "Google/AdMob",
-          "layer": "L2",
-          "granularity": "global",
-          "reason": "1 个域, DNS 阶段 REJECT, 无 [MitM] ⇒ 零证书成本。仅 trk1.17admob.com; doubleclick/googlesyndication 主配置已有 SUFFIX 覆盖故插件内不重复"
-        },
-        {
-          "file": "ad-intl.plugin",
-          "app": "国际广告聚合",
-          "layer": "L2",
-          "granularity": "global",
-          "reason": "3 个域, DNS 阶段 REJECT, 无 [MitM] ⇒ 零证书成本。Sigmob/TradPlus/AnyThink 已部分被主配置 SUFFIX 覆盖, 插件只留未覆盖的 Unity/InMobi/AdView"
-        },
-        {
-          "file": "ad-intl-mediation.plugin",
-          "app": "国际广告聚合/变现平台",
-          "layer": "L2",
-          "granularity": "global",
-          "reason": "21 域, DNS 阶段 REJECT, 无 [MitM] ⇒ 零证书成本。基准取自广告主 App 的 AdMob appads.txt(变现平台自报) + 社区规则交叉; 只拦 SDK/上报子域, 排除 unity3d(引擎本体)/mopub(已并入 AppLovin)/streamkey.tv(站点内容); 24 个子域经 DoH 实测已死或已覆盖故未写入"
+          "reason": "967 域(域级 REJECT 总条数) = 59 人工策展(2026-09-30 由 7 个 ad-*.plugin 零重叠并集) + 418 生成式覆盖(app-ads.txt 语料路径) + **490 条社区清单复核收录**(kelee/VirgilClyne `BlockAdvertisers.lpx`, 2026-09-28 版经镜像取得, sha256 锚定在 test/fixtures/ad-coverage/community/): 449 精确 DOMAIN + 41 整域 DOMAIN-SUFFIX。整域拦**只对 apex 是端点型(非 200/非 HTML)的根域**开放, 逐条台账留档; 红线过滤 = 支付/银行(含 ads.cup.com.cn 银联、amdc.alipay.com) + Apple 与系统(含 app-analytics-services.com) + 推送; 归因/统计类(adjust/appsflyer/amplitude/umeng 等 7 条)按模块纪律转 M3 台账 defer, 不进本块。【2026-09-30 生成式覆盖】tools/ad-coverage.mjs 从 10,573 个候选中按五道判据生成 423 条(平台声明≥8/15 · 双解析器 A 存活 · HTTPS 非 200+HTML · 非多业务大厂/功能即产品 · 非泛解析根域);逐条证据 test/fixtures/ad-coverage/ledger.json, 产物漂移由 npm run check:coverage 判红。人工策展部分: 7 平台 59 域(穿山甲/广点通/快手/百度/Google/国际聚合/国际变现), 仅拦 SDK/上报子域不拦平台主域。人工策展 59 条 = 7 平台并集 (穿山甲/字节 17 + 广点通 8 + 快手 7 + 百度 2 + Google/AdMob 1 + 国际聚合 3 + 国际变现 21), DNS 阶段 REJECT, 无 [MitM] ⇒ 零证书成本。2026-09-30 用户决策由 7 个 ad-* 插件合并 (合并前实测 ad×ad = ad×probe = ad×主配置 = 0 重叠 ⇒ 分散的是结构不是内容); ⚠️ 平台级开关随之收敛为**单插件开关** (纯 [Rule] 挂不了条件参数, 集合化与逐平台启停不可兼得, 需单平台开关时按平台拆回)。国际变现 21 条的真实来源 = 社区清单 + 候选子域枚举 + DoH 探针 (首版自称的『某份 App 的 app-ads.txt』不成立 —— 清单声明的是 ad system 根域, 而这 21 条是端点主机, 在 44 份真实清单 200005 行里出现 0 次); 由 tools/appads-check.mjs 平台层取证门禁 + tools/lib/ad-platform-map.mjs 归属台账守住 (13 个被拦平台有一手声明, admost.com 0 声明标 declaration_gap 属待裁决), 国内 SDK 与 Google 族按 OUT_OF_CORPUS_ROOTS 结构性排除且每次运行打印。只拦 SDK/上报子域, 排除 unity3d(引擎本体)/mopub(已并入 AppLovin)/streamkey.tv(站点内容) 【2026-09-30 生成式覆盖】tools/ad-coverage.mjs 按五道判据从 10,573 个候选中生成 423 条;逐条证据在 test/fixtures/ad-coverage/ledger.json;产物漂移由 npm run check:coverage 判红"
         }
       ],
       "scripts": [
@@ -116,10 +74,10 @@
       ],
       "granularity_actual": [],
       "responsibilities": [
-        "广告平台拦截: 7 个独立插件按平台分组 (穿山甲17/广点通8/快手7/百度2/Google1/国际3/国际变现21), 启停插件即按平台开关",
-        "京东: 6 个 functionId 的字段级净化 (Scripts/jingdong.js, L4+L5)",
+        "广告平台拦截: 1 个集合插件 ad-block.plugin 内含 7 平台 59 域 (穿山甲17/广点通8/快手7/百度2/Google1/国际聚合3/国际变现21); ⚠️ 集合化后平台级开关收敛为单插件开关 (原 7 个 ad-* 文件已删除)",
+        "京东: 7 个 functionId 的字段级净化 (Scripts/jingdong.js, L4+L5)",
         "起点: 15 条 [Rewrite] 字段级净化 (qidian.plugin, L4)",
-        "主配置 127 条裸 REJECT 硬拦截面 (L2, 全部经 DoH 双解析器 + 协议探针取证)"
+        "主配置 127 条 REJECT(全部裸 REJECT) 硬拦截面 (L2, 全部经 DoH 双解析器 + 协议探针取证)"
       ],
       "also_members": []
     },
@@ -132,6 +90,20 @@
         "snippets": []
       },
       "plugins": [
+        {
+          "file": "dns-httpdns.plugin",
+          "app": "HTTPDNS 拦截器 (L0 依赖层)",
+          "layer": "L2",
+          "granularity": "global",
+          "reason": "72 域(11 人工策展 + 4 生成式覆盖 + **57 条 2026-09-30 从 kelee/VirgilClyne `Block_HTTPDNS.lpx` 复核收录**, 逐条双解析器 A + HTTPS 探针: 64 候选→60 存活, 4 条无 A 未收录, 2 条 200+HTML 转人工, amdc.alipay.com 因支付面未收录); 另有 2 条 AND 锚定关键词兜底、4 条 HTTPDNS SDK UA(明文)、2 条 IP 形态明文 URL-REGEX、2 条定向放行(DIRECT, AND 门控)。形状白名单收敛在 tools/lib/dns-rule-shapes.mjs。DNS 阶段拦截, 无 [MitM] ⇒ 零证书成本。已是所有去广告插件的前置条件; 绝不拦本仓解析链 dns.alidns.com/doh.pub(plugin-layering 用例断言)。"
+        },
+        {
+          "file": "dns-leak.plugin",
+          "app": "DNS 防泄漏 (L0 依赖层)",
+          "layer": "L2",
+          "granularity": "global",
+          "reason": "35 域(19 人工策展 + 16 生成式覆盖)公共加密解析器端点(DoH/DoT), 逐条双解析器 A + HTTPS /dns-query 取证; DNS 阶段 REJECT, 无 [MitM]。2026-09-30 架构分层: 原主配置 6 条 DoH 封堵迁入并扩到 19 条; 与主配置框架层 `DEST-PORT, 853, REJECT`(DoT/DoQ 端口兜底)分工 —— 域名级在插件(可按需启停/独立更新), 端口级在本地(插件关掉也在); 残留面 = IP 直连型 DoH, 见 LOON-FEATURES.md 【2026-09-30 生成式覆盖】公共解析器候选 25 个→16 条(8 个无 A、1 个 200+HTML 转人工), 台账同上"
+        },
         {
           "file": "probe-umeng.plugin",
           "app": "友盟+ Umeng",
@@ -254,7 +226,7 @@
           "app": "起点",
           "layer": "L4+L5",
           "granularity": "single-app",
-          "reason": "18 [Rule] + 17 [Rewrite] + 10 [Script] (cron 自动签到含高阶任务 + http-response 广告/福利/发现页白名单改写), 全部由 Scripts/Qidian.js 执行"
+          "reason": "15 [Rule] + 15 [Rewrite] + 6 [Script] + 0 [MitM] (本插件的解密面写在 template/loon.tpl 的 [MitM] 段), 全部由 Scripts/Qidian.js 执行; 计数口径 = 各段非注释非空行, 2026-09-29 实测 (原记 18/17/10 已漂移)。**2026-09-30 社区探索复核**(fmz200/app2smile/ddgksf2013 三源 + 逐条探针): 未新增规则 —— v1/adv 与裸 followsubscribe 实测 404(社区规则已过期), bookshelf/refresh 与旧配置接口 GetConfIOS 存活但社区用整条拒(无字段级证据前不采纳), qidian.qpic.cn 维持 2026-09-29 的撤销决定(跨层矛盾 + 书封图床)。本仓字段级覆盖已超过社区口径。"
         }
       ],
       "scripts": [
@@ -288,7 +260,7 @@
       "owner": "M2",
       "status": "open",
       "capability": "插件层去广告 (Rewrite 字段改写 / reject-dict 通道)",
-      "used": "45 个插件已随外部依赖清理全部删除, 仅余主配置 120 条 REJECT (含 1 条 PROTOCOL, STUN)",
+      "used": "45 个插件已随外部依赖清理全部删除, 仅余主配置 127 条 REJECT (含 1 条 PROTOCOL, STUN) + [Plugin] 段 9 个纯 L2 插件的 127 条域级 REJECT (1 个广告平台拦截器 + 2 个 DNS 收编 + 6 个 probe-*)",
       "impact": "App 内部结构化广告位无法清理 —— 需用户逐个重新接入插件"
     },
     {
@@ -392,7 +364,7 @@
       "source": "官方文档"
     },
     {
-      "question": "[Rule] 策略层 120 条 REJECT 是否该分派为 REJECT-IMG/-DICT/-ARRAY",
+      "question": "[Rule] 策略层 127 条 REJECT 是否该分派为 REJECT-IMG/-DICT/-ARRAY",
       "answer": "**不该**。当前 domain-reject-mode=DNS 下三者行为等价, 且 HTTP 类规则为 0",
       "consequence": "官方《策略》定义三变体为 HTTP 响应内容(1x1 GIF / {} / []); 官方《通用配置》定义 DNS 阶段拒绝用回环 IP; 官方《HTTP 规则》限定 HTTP 规则仅匹配 HTTP/HTTPS。本配置三条前提全不满足。台账口径改为 closed-no-action, 触发条件已写明",
       "source": "官方文档三页交叉"

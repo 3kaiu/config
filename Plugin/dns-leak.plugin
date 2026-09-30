@@ -1,0 +1,98 @@
+#!name=DNS 防泄漏拦截器（公共加密解析器收编）
+#!desc=封堵公共 DoH/DoT 解析器端点, 把浏览器与系统的"私有 DNS/加密 DNS"收编回 Loon 的 DNS 框架。所有去广告插件的依赖之一。
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+#!tag = DNS,防泄漏,DoH,去广告依赖
+#!type = normal
+# ── L0 依赖层契约 (2026-09-30 架构分层) ────────────────────────────────
+# 与 `ad-block.plugin`(广告平台拦截器) / `dns-httpdns.plugin`(HTTPDNS 拦截器) 同属 **L0 依赖层**:
+# 只放"所有去广告插件都需要"的域集, 必须排在 `[Plugin]` 段最前(顺序由
+# test/cases/plugin-layering.test.js 断言)。无 [Argument]/[Script]/[Rewrite]/[MitM]。
+#
+# ── 三条加密 DNS 绕过面与本仓处置 (2026-09-30) ─────────────────────────
+#   ① 明文 UDP 53 → 已被 `hijack-dns = *:53` 收编(General 层, 插件的开关动不了它);
+#   ② 加密 DNS 到**已知公共解析器** → **本插件**(域名级: 可按需启停, 且改名单不必重导入 Profile);
+#   ③ 加密 DNS 到未知服务器或自定义端口 → 主配置的框架级兜底 `DEST-PORT, 853, REJECT`
+#      (DoT/DoQ 端口级, 连 IP 直连型也拦); **残留面** = IP 直连的 DoH(如 `https://8.8.8.8/dns-query`)
+#      不受域名规则与端口规则约束, 需 IP-CIDR 级封堵 —— 代价与待决理由见
+#      LOON-FEATURES.md「DNS 收编与残留面」。
+#
+# ── 取证 (2026-09-30: 双解析器 @223.5.5.5 AliDNS + @119.29.29.29 DNSPod A 记录, + HTTPS 探针) ──
+# 判据同主配置原有的 6 条: **纯公共解析器端点** + 双解析器 A 一致 + 不在本仓解析链内。
+# `/dns-query` 响应是"是不是解析器"的正面证据: 400/415/505 = 解析器对缺参请求的标准应答,
+# 200 + DNS 报文 = 正常 DoH 应答。
+#   dns.google                 8.8.8.8/8.8.4.4                    /dns-query 400
+#   cloudflare-dns.com         104.16.248.249/104.16.249.249     /dns-query 400
+#   mozilla.cloudflare-dns.com 162.159.61.4/172.64.41.4          /dns-query 400
+#   dns.quad9.net              9.9.9.9/149.112.112.112           /dns-query 505
+#   doh.opendns.com            146.112.41.2                      /dns-query 400
+#   dns.adguard.com            94.140.14.14/94.140.15.15         /dns-query 400
+#   dns.adguard-dns.com        94.140.14.14/94.140.15.15         /dns-query 400   (AdGuard 现行默认域)
+#   dot.pub                    1.12.12.12/120.53.53.53           (腾讯 DoT 专用域; DoH 域 doh.pub 在链内, 见下)
+#   sm2.doh.pub                106.55.91.174                     /dns-query 415   (腾讯 SM2 加密 DoH 变体)
+#   one.one.one.one            1.0.0.1/1.1.1.1                   /dns-query 400
+#   dns.nextdns.io             37.252.249.233/45.11.104.186      /dns-query 400
+#   anycast.dns.nextdns.io     45.90.28.0/45.90.30.0             /dns-query 400
+#   freedns.controld.com       76.76.2.11                        /dns-query 400
+#   doh.cleanbrowsing.org      185.228.168.10/185.228.168.168    /dns-query 301
+#   doh.libredns.gr            116.202.176.26                    /dns-query 400
+#   public.dns.iij.jp          103.2.57.5/103.2.57.6             /dns-query 400
+#   basic.rethinkdns.com       104.26.14.30/104.26.15.30/172.67.70.254  /dns-query 404
+#   private.canadianshield.cira.ca 149.112.121.10/149.112.122.10 /dns-query 400
+#   doh.360.cn                 101.199.254.118/112.65.69.15/123.6.48.18 | 101.198.191.4  /dns-query 400
+# 唯一带落地页的一条: `one.one.one.one`(80 端口 301 → 1.1.1.1 宣传页)。它是 Cloudflare 官方
+#   文档里的 DoH URL(与已被拦的 cloudflare-dns.com 同一服务), 收编价值 > 一个宣传页; 若在意,
+#   删这一行即可(其余 18 条都是无站点点端)。
+# **绝不拦(本仓解析链, 见 surgio.conf.js customParams)**: `dns.alidns.com`(doh_primary /
+#   doh3_primary / doq_server) 与 `doh.pub`(doh_fallback) —— 拦它们等于自断解析链。
+#   plugin-layering 用例断言这两个域不出现在**任何** REJECT 规则里。
+# 已评估未纳入(取证不足或有功能页, 留档以免反复评审): `doh.sb`/`dns.sb`(双解析器均返回
+#   127.0.0.1, 被污染取不到真值), `dns0.eu`(A 一致但 HTTPS 连接被重置)/`zero.dns0.eu`(NXDOMAIN),
+#   `dns.mullvad.net`(双解析器 A 不一致), `common.dot.dns.yandex.net`(HTTPS 不可达),
+#   `dns.360.cn`(301 跳产品页, 非纯端点), `dns.163.com`(NXDOMAIN)。
+[Rule]
+#
+# ══ 公共加密解析器端点 (逐条取证, 见上方登记) ══
+DOMAIN, dns.google, REJECT
+DOMAIN, cloudflare-dns.com, REJECT
+DOMAIN, mozilla.cloudflare-dns.com, REJECT
+DOMAIN, dns.quad9.net, REJECT
+DOMAIN, doh.opendns.com, REJECT
+DOMAIN, dns.adguard.com, REJECT
+DOMAIN, dns.adguard-dns.com, REJECT
+DOMAIN, dot.pub, REJECT
+DOMAIN, sm2.doh.pub, REJECT
+DOMAIN, one.one.one.one, REJECT
+DOMAIN, dns.nextdns.io, REJECT
+DOMAIN, anycast.dns.nextdns.io, REJECT
+DOMAIN, freedns.controld.com, REJECT
+DOMAIN, doh.cleanbrowsing.org, REJECT
+DOMAIN, doh.libredns.gr, REJECT
+DOMAIN, public.dns.iij.jp, REJECT
+DOMAIN, basic.rethinkdns.com, REJECT
+DOMAIN, private.canadianshield.cira.ca, REJECT
+DOMAIN, doh.360.cn, REJECT
+
+# >>> GENERATED:dnsleak (tools/ad-coverage.mjs) >>>
+# 本块由覆盖管线生成, **勿手改** —— 改判据请改 tools/ad-coverage.mjs 后重跑 --run。
+# 生成时间: 2026-09-30 | 判据: ① 平台声明 ≥8/15(app-ads.txt 语料) ② 双解析器 A 记录存活 ③ HTTPS 根路径非 200+HTML ④ 非多业务大厂/功能即产品 ⑤ 非泛解析根域(随机子域对照); 另过滤 已拦/排除台账/推送商店系统红线
+# 逐条证据: test/fixtures/ad-coverage/ledger.json (平台/声明数/A 记录/HTTP 结果)
+DOMAIN, dns9.quad9.net, REJECT
+DOMAIN, dns10.quad9.net, REJECT
+DOMAIN, dns11.quad9.net, REJECT
+DOMAIN, dns.controld.com, REJECT
+DOMAIN, doh.dnsforge.de, REJECT
+DOMAIN, dns0.eu, REJECT
+DOMAIN, dns.mullvad.net, REJECT
+DOMAIN, protected.canadianshield.cira.ca, REJECT
+DOMAIN, sky.rethinkdns.com, REJECT
+DOMAIN, doh.sb, REJECT
+DOMAIN, common.dot.dns.yandex.net, REJECT
+DOMAIN, dns.nju.edu.cn, REJECT
+DOMAIN, dns.twnic.tw, REJECT
+DOMAIN, doh.applied-privacy.net, REJECT
+DOMAIN, doh-de.blahdns.com, REJECT
+DOMAIN, dns.bebasid.com, REJECT
+# <<< GENERATED:dnsleak <<<
