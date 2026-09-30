@@ -1,0 +1,217 @@
+#!name=广告平台集合去广告（7 平台）
+#!desc=穿山甲·广点通·快手·百度·Google AdMob·国际聚合·国际变现 的广告域统一拦截集合。DNS 阶段生效, 零证书成本。
+#!author=3kaiu
+#!homepage=https://github.com/3kaiu/config
+#!system = iOS,iPadOS,macOS
+#!loon_version = 3.2.4(787)
+#!tag = 去广告,广告平台,集合
+#!type = normal
+# ── 2026-09-30 用户决策: 平台集合化 (全局整合第一步) ──────────────────
+# 原 7 个按平台拆分的插件 (ad-pangolin / ad-gdt / ad-kuaishou / ad-baidu / ad-google /
+# ad-intl / ad-intl-mediation) 合并为本文件。此前它们是 7 份独立分发、7 条 [Plugin]
+# 登记、7 次 CDN 探活、7 个 manifest 成员, 而域集**零重叠** (2026-09-30 实测:
+# ad×ad = ad×probe = ad×主配置 = 0) —— 分散的是结构, 不是内容。
+# 本文件域集 = 原 7 文件的**并集, 逐条不变 (59 域)**, 按平台分节, 原始取证注释全量保留。
+# ⚠️ 代价 (用户已知并接受): 平台级开关收敛为**一个插件开关** —— 纯 [Rule] 插件挂不了
+#   条件参数, 集合化与"逐平台启停"不可兼得; 需要单平台开关时按平台拆回即可。
+# ⚠️ 无 [Argument]: 理由同各原文件 —— [Rule] 行挂不了条件, 声明即死参数会误导用户。
+# 平台层取证门禁 (tools/appads-check.mjs) 范围已随之从 `Plugin/ad-intl*` 改到本文件;
+# 国内 SDK 与 Google 那族按 OUT_OF_CORPUS_ROOTS (tools/lib/ad-platform-map.mjs) 显式
+# 排除 —— 西方发行商清单结构性不覆盖它们, 拿同一把尺子量只会产生假红。
+
+[Rule]
+#
+# ══ 穿山甲/字节 Pangolin (原 Plugin/ad-pangolin.plugin, 17 域) ══
+# ── 生效层: L2 域名 REJECT ──────────────────────────────────────
+# 本仓 domain-reject-mode = DNS + dns-reject-mode = LOOPBACKIP ⇒ 拒绝在
+# **DNS 阶段**用回环地址完成, 请求到不了 HTTP 响应层。故本插件**无 [MitM]**,
+# 拦广告零 CA 证书成本 (不进解密面 = 不多背一份证书信任)。
+# 官方《策略》: REJECT-DICT/IMG/ARRAY 等变体描述的都是 HTTP 响应内容,
+# 在 DNS 阶段拒绝的场景下**不适用** (见 AGENTS.md 策略层 REJECT 变体定论)。
+#
+# snssdk 系只取**埋点/日志**域; 已排除 aweme 内容流 / video-cn 视频CDN / temai 电商 / tnc3 内容 / bytescm 通用CDN / gecko-pangle 落地页 —— 拦这些会破抖音内容与功能。
+# 取证: DoH(Cloudflare + DNS.google 双解析器) + HTTPS 探针; 已剔除已死域、
+# 平台主域、以及主配置已覆盖的域(避免跨层重复)。
+
+DOMAIN, i.snssdk.com, REJECT
+DOMAIN, is.snssdk.com, REJECT
+DOMAIN, i-lq.snssdk.com, REJECT
+DOMAIN, is-lq.snssdk.com, REJECT
+DOMAIN, security-lq.snssdk.com, REJECT
+DOMAIN, pangolin.snssdk.com, REJECT
+DOMAIN, mercury-sdk.snssdk.com, REJECT
+DOMAIN, log.snssdk.com, REJECT
+DOMAIN, xlog.snssdk.com, REJECT
+DOMAIN, mcs.snssdk.com, REJECT
+DOMAIN, extlog.snssdk.com, REJECT
+DOMAIN, sdfp.snssdk.com, REJECT
+DOMAIN, gurd.snssdk.com, REJECT
+DOMAIN, bds.snssdk.com, REJECT
+# [已由主配置覆盖而移除] ether-pack.pangolin-sdk-toutiao.com ⊂ pangolin-sdk-toutiao.com
+DOMAIN, api-access.pangolin-sdk-toutiao-b.com, REJECT
+DOMAIN, log-api.pangolin-sdk-toutiao-b.com, REJECT
+DOMAIN, sf3-be-pack.pglstatp-toutiao.com, REJECT
+
+#
+# ══ 广点通 GDT/腾讯广告 (原 Plugin/ad-gdt.plugin, 8 域) ══
+# ── 生效层: L2 域名 REJECT ──────────────────────────────────────
+# 本仓 domain-reject-mode = DNS + dns-reject-mode = LOOPBACKIP ⇒ 拒绝在
+# **DNS 阶段**用回环地址完成, 请求到不了 HTTP 响应层。故本插件**无 [MitM]**,
+# 拦广告零 CA 证书成本 (不进解密面 = 不多背一份证书信任)。
+# 官方《策略》: REJECT-DICT/IMG/ARRAY 等变体描述的都是 HTTP 响应内容,
+# 在 DNS 阶段拒绝的场景下**不适用** (见 AGENTS.md 策略层 REJECT 变体定论)。
+#
+# 只拦 gdt.qq.com 广告子域 + 素材域; **不拦 e.qq.com 父域**(含企微/公众号)、trace/btrace/imgcache(全站埋点非广告专有)。
+# 取证: DoH(Cloudflare + DNS.google 双解析器) + HTTPS 探针; 已剔除已死域、
+# 平台主域、以及主配置已覆盖的域(避免跨层重复)。
+
+DOMAIN, c2.gdt.qq.com, REJECT
+DOMAIN, t.gdt.qq.com, REJECT
+DOMAIN, xs.gdt.qq.com, REJECT
+DOMAIN, v2.gdt.qq.com, REJECT
+DOMAIN, v2mi.gdt.qq.com, REJECT
+DOMAIN, adsfile.qq.com, REJECT
+DOMAIN, adslvfile.qq.com, REJECT
+DOMAIN, tangram.e.qq.com, REJECT
+
+#
+# ══ 快手联盟 Kwai (原 Plugin/ad-kuaishou.plugin, 7 域) ══
+# ── 生效层: L2 域名 REJECT ──────────────────────────────────────
+# 本仓 domain-reject-mode = DNS + dns-reject-mode = LOOPBACKIP ⇒ 拒绝在
+# **DNS 阶段**用回环地址完成, 请求到不了 HTTP 响应层。故本插件**无 [MitM]**,
+# 拦广告零 CA 证书成本 (不进解密面 = 不多背一份证书信任)。
+# 官方《策略》: REJECT-DICT/IMG/ARRAY 等变体描述的都是 HTTP 响应内容,
+# 在 DNS 阶段拒绝的场景下**不适用** (见 AGENTS.md 策略层 REJECT 变体定论)。
+#
+# **不拦 kuaishou.com 主域**(短视频本体)与 e.kuaishou.com 主域级电商, 只拦 ksapisrv 广告 API。
+# 取证: DoH(Cloudflare + DNS.google 双解析器) + HTTPS 探针; 已剔除已死域、
+# 平台主域、以及主配置已覆盖的域(避免跨层重复)。
+
+DOMAIN, az2-api.ksapisrv.com, REJECT
+DOMAIN, az2-api-idc.ksapisrv.com, REJECT
+DOMAIN, az4-api.ksapisrv.com, REJECT
+DOMAIN, az4-api-idc.ksapisrv.com, REJECT
+DOMAIN, az2-live.ksapisrv.com, REJECT
+DOMAIN, apissl.ksapisrv.com, REJECT
+DOMAIN, open.e.kuaishou.cn, REJECT
+
+#
+# ══ 百度联盟 (原 Plugin/ad-baidu.plugin, 2 域) ══
+# ── 生效层: L2 域名 REJECT ──────────────────────────────────────
+# 本仓 domain-reject-mode = DNS + dns-reject-mode = LOOPBACKIP ⇒ 拒绝在
+# **DNS 阶段**用回环地址完成, 请求到不了 HTTP 响应层。故本插件**无 [MitM]**,
+# 拦广告零 CA 证书成本 (不进解密面 = 不多背一份证书信任)。
+# 官方《策略》: REJECT-DICT/IMG/ARRAY 等变体描述的都是 HTTP 响应内容,
+# 在 DNS 阶段拒绝的场景下**不适用** (见 AGENTS.md 策略层 REJECT 变体定论)。
+#
+# **不拦 union.baidu.com 主站**(含落地页)与 baidu.com 本身, 只拦广告配置域。
+# 取证: DoH(Cloudflare + DNS.google 双解析器) + HTTPS 探针; 已剔除已死域、
+# 平台主域、以及主配置已覆盖的域(避免跨层重复)。
+
+DOMAIN, mobads-pre-config.cdn.bcebos.com, REJECT
+DOMAIN, union.baidustatic.guannin.com, REJECT
+
+#
+# ══ Google/AdMob (原 Plugin/ad-google.plugin, 1 域) ══
+# ── 生效层: L2 域名 REJECT ──────────────────────────────────────
+# 本仓 domain-reject-mode = DNS + dns-reject-mode = LOOPBACKIP ⇒ 拒绝在
+# **DNS 阶段**用回环地址完成, 请求到不了 HTTP 响应层。故本插件**无 [MitM]**,
+# 拦广告零 CA 证书成本 (不进解密面 = 不多背一份证书信任)。
+# 官方《策略》: REJECT-DICT/IMG/ARRAY 等变体描述的都是 HTTP 响应内容,
+# 在 DNS 阶段拒绝的场景下**不适用** (见 AGENTS.md 策略层 REJECT 变体定论)。
+#
+# 均为 AdMob/AdSense 官方广告域, 无功能页, 整域拦安全。
+# 取证: DoH(Cloudflare + DNS.google 双解析器) + HTTPS 探针; 已剔除已死域、
+# 平台主域、以及主配置已覆盖的域(避免跨层重复)。
+
+# [已由主配置覆盖而移除] googleads.g.doubleclick.net ⊂ doubleclick.net
+# [已由主配置覆盖而移除] pubads.g.doubleclick.net ⊂ doubleclick.net
+# [已由主配置覆盖而移除] securepubads.g.doubleclick.net ⊂ doubleclick.net
+# [已由主配置覆盖而移除] pagead2.googlesyndication.com ⊂ googlesyndication.com
+# [已由主配置覆盖而移除] afs.googlesyndication.com ⊂ googlesyndication.com
+# [已由主配置覆盖而移除] tpc.googlesyndication.com ⊂ googlesyndication.com
+# [已由主配置覆盖而移除] video-ad-stats.googlesyndication.com ⊂ googlesyndication.com
+DOMAIN, trk1.17admob.com, REJECT
+
+#
+# ══ 国际广告聚合 (原 Plugin/ad-intl.plugin, 3 域) ══
+# ── 生效层: L2 域名 REJECT ──────────────────────────────────────
+# 本仓 domain-reject-mode = DNS + dns-reject-mode = LOOPBACKIP ⇒ 拒绝在
+# **DNS 阶段**用回环地址完成, 请求到不了 HTTP 响应层。故本插件**无 [MitM]**,
+# 拦广告零 CA 证书成本 (不进解密面 = 不多背一份证书信任)。
+# 官方《策略》: REJECT-DICT/IMG/ARRAY 等变体描述的都是 HTTP 响应内容,
+# 在 DNS 阶段拒绝的场景下**不适用** (见 AGENTS.md 策略层 REJECT 变体定论)。
+#
+# 均为纯广告 SDK 域, 无功能页, 整域拦安全。
+# 取证: DoH(Cloudflare + DNS.google 双解析器) + HTTPS 探针; 已剔除已死域、
+# 平台主域、以及主配置已覆盖的域(避免跨层重复)。
+
+# [已由主配置覆盖而移除] adservice.sigmob.cn ⊂ sigmob.cn
+DOMAIN, config.unityads.unity3d.com, REJECT
+# [已由主配置覆盖而移除] api.tradplusad.com ⊂ tradplusad.com
+# [已由主配置覆盖而移除] adx-bj.anythinktech.com ⊂ anythinktech.com
+# [已由主配置覆盖而移除] adx-cn.anythinktech.com ⊂ anythinktech.com
+DOMAIN, ads.inmobi.com, REJECT
+DOMAIN, bid.adview.cn, REJECT
+
+#
+# ══ 国际广告聚合/变现平台 (原 Plugin/ad-intl-mediation.plugin, 21 域) ══
+# ── 生效层: L2 域名 REJECT (DNS 阶段) ────────────────────────────────
+# 本仓 domain-reject-mode = DNS ⇒ 拒绝在 DNS 阶段回环完成, 请求到不了解密层。
+# 故本插件**无 [MitM]**, 零 CA 证书成本。
+#
+# 基准来源(**已按取证更正, 2026-09-30**): 本插件的域集**不是**来自某一份 App 的 app-ads.txt。
+# 首版曾自称"一次性人工读取的 AdMob app-ads.txt / 变现平台自报来源域, 比第三方清单更硬" ——
+# 溯源判定该叙述**不成立**, 两条独立证据:
+#   ① 类别不符: IAB app-ads.txt 声明的是 ad system **根域**(applovin.com), 而这里 21 条全是
+#      **端点主机**(d.applovin.com / ww251.smartadserver.com / init.startappservice.com …),
+#      在 44 份真实清单的 200005 行声明里出现 **0 次** —— 清单给不出这些域名。
+#   ② 说不出出处: 全文与 git 历史里没有任何 URL/文件名; 而本仓自己的历史镜像
+#      (git show 4d4b8f7:Mirror/rules/goodbyeads-qx.list, 115076 行) 里就有 d.applovin.com
+#      ⇒ 真实来源是**社区清单 + 候选子域枚举 + DoH 探针**(与"24 子域实测已死"的记录一致)。
+# 现由 tools/appads-check.mjs + test/fixtures/appads/SOURCE.json 接管, 基准换成**多份第三方
+# 发行商的一手声明语料**(kind=first-party-attestation, 现 15 份, 派生物入库可复跑):
+#   平台层(该不该拦) = 被拦平台在语料里有声明; 端点层(拦哪个子域) = DoH + HTTPS 实测。
+#   **两把钥匙缺一即类别误标** —— 端点活着不能代替平台声明。
+# 逐条归属与声明数见 `node tools/appads-check.mjs`(平台层取证门禁); 端点→平台归属台账在
+# tools/lib/ad-platform-map.mjs(startappservice.com→startapp.com 15/15; adview.cn→adview.com
+# 14/15; admost.com 0 声明, 标 declaration_gap 每次运行都列出, 属待裁决项)。
+#
+# 处置口径: **只拦已取证的 SDK/上报子域, 不拦平台主域**。逐条理由:
+#   ① unity3d.com  = Unity 引擎本体(实测 config.unity3d.com / cdp.cloud.unity3d.com 是
+#      与广告端点**不同的 host 且都活着**) → 整域拦会破 Unity 游戏运行与资源加载 ❌
+#      注意 app-ads.txt 里 7/7 发行商声明的已迁到 **unity.com**, 但 unity.com 下所有
+#      广告子域实测 NXDOMAIN(共识在 host 层被证伪) ⇒ 保留本条, 不新增 unity.com ❌
+#   ② mopub.com     = 已并入 AppLovin(探针 302 → applovin.com/max) ⇒ 不重复
+#   ③ supersonicads.com = **原判"已死域(解析 0 条)"不成立**(2026-09-30 复核): apex 确无 A,
+#      但 init./outcome. 各 4 条 A 且非泛解析; 仅 TCP 80/443 不可达 ⇒ 已从排除台账**移出**,
+#      转"未决候选"(详见 APP-ONBOARDING.md 附六), 不再宣称规则永不命中
+#   ④ streamkey.tv = 直播广告主站且有正常站点内容, 非 SDK 出口 ❌
+#   ⑤ applovin.com / startapp.com 含开发者后台与站点 → 只拦其 SDK 子域
+# 另有 24 个子域经 DoH 实测**已死**或已被主配置覆盖, 未写入 —— 逐条探针的处置理由与
+# 主域排除表见 APP-ONBOARDING.md 附六(原写"见 tools 探针留证"是悬空引用, tools/ 无该工具);
+# 存活复核自 2026-09-29 起由 test/cases/dns-liveness.test.js 的插件层用例长期守住。
+#
+# 取证: Cloudflare + DNS.google 双解析器逐条核验存在性, 不凭印象写域名。
+DOMAIN, d.applovin.com, REJECT
+DOMAIN, ads.applovin.com, REJECT
+DOMAIN, api.applovin.com, REJECT
+DOMAIN, ads.api.vungle.com, REJECT
+DOMAIN, events.api.vungle.com, REJECT
+DOMAIN, config.ads.vungle.com, REJECT
+DOMAIN, adx-cn.ads.vungle.com, REJECT
+DOMAIN, api.chartboost.com, REJECT
+DOMAIN, api.fyber.com, REJECT
+DOMAIN, api.mintegral.com, REJECT
+DOMAIN, api.tapjoy.com, REJECT
+DOMAIN, api.ogury.com, REJECT
+DOMAIN, ads.adcolony.com, REJECT
+DOMAIN, api.admost.com, REJECT
+DOMAIN, init.startappservice.com, REJECT
+DOMAIN, req.startappservice.com, REJECT
+DOMAIN, images.startappservice.com, REJECT
+DOMAIN, init.startappexchange.com, REJECT
+DOMAIN, cdn1.smartadserver.com, REJECT
+DOMAIN, ww251.smartadserver.com, REJECT
+DOMAIN, www6.smartadserver.com, REJECT
+

@@ -1,4 +1,5 @@
 /**
+const { Buffer } = require("node:buffer");
  * jingdong.js 行为回归 (2026-09-29 新增)
  *
  * 核心不变量, 每条都对应一次真实踩坑或治理纪律:
@@ -15,20 +16,24 @@ const JD = "https://api.m.jd.com/client.action";
 const url = (fid) => `${JD}?functionId=${fid}`;
 
 /** 跑一次并断言 $done 被调用 */
-async function run(a, h, fid, body) {
+async function run(a, h, fid, body, rawBody = null) {
+  const bodyText = rawBody !== null ? rawBody : typeof body === "string" ? body : JSON.stringify(body);
   const sb = h.createSandbox({
     request: { method: "POST", url: url(fid), headers: {} },
-    response: { status: 200, headers: {}, body: typeof body === "string" ? body : JSON.stringify(body) },
+    response: { status: 200, headers: {}, body: bodyText },
   });
   const s = await h.runScript("Scripts/jingdong.js", sb);
   a.equal(s.scriptError, null, `functionId=${fid} 脚本抛错: ${s.scriptError && s.scriptError.message}`);
   a.equal(s.doneCalls.length, 1, `functionId=${fid} 必须恰好调用一次 $done (0 次 = Loon 请求悬挂)`);
+  s.__original = bodyText;
   return s;
-};
+}
 
-/** 取唯一一次 $done 的参数; body 缺失表示未改写 */
+/** 取唯一一次 $done 的参数; body 缺失表示**未改写**(2026-09-30 起"无实际改动就不回写") */
 const doneArg = (s) => s.doneCalls[0];
-const parsed = (s) => JSON.parse(doneArg(s).body);
+const parsed = (s) => JSON.parse(doneArg(s).body ?? s.__original);
+/** 回写后的原始字符串(用于断言 base64 协议保持) */
+const rawOut = (s) => doneArg(s).body ?? s.__original;
 
 exports.tests = {
   "start: 只清开屏图, 启动配置必须保留 (白屏回归)": async (a, h) => {
@@ -53,6 +58,55 @@ exports.tests = {
     const s2 = await run(a, h, "start", { images: "not-array", showTimesDaily: 2 });
     a.equal(parsed(s2), { images: "not-array", showTimesDaily: 2 }, "images 结构异常时应整条放行, 不半改");
   },
+
+  "无实际改动时不回写 ($done({}) 而非原样 re-serialize)": async (a, h) => {
+    // 契约: 没有可清的广告字段 ⇒ 不调用 body 改写。少一次 JSON 往返 = 少一类编码/体积风险
+    const s = await run(a, h, "start", { launchConfig: { appName: "京东" }, privacyAgreed: true });
+    a.equal(doneArg(s).body, undefined, "无可清字段时必须 $done({}), 不得回写 body");
+  },
+
+  "新协议 (15.9.50+ base64): 解码 → 清洗 → 按原格式回写 base64": async (a, h) => {
+    // 证据: zbsdsb/loon-adblock-plugins JD_remove_ads_v2.js (2026-08-12 适配 15.9.50+)。
+    // 关键不变量: 回写必须仍是 base64 —— 回写成明文 JSON 会让新版客户端解析失败。
+    const payload = { code: 0, data: { images: [{ url: "ad" }], showTimesDaily: 5, launchConfig: { appName: "京东" } } };
+    const b64 = Buffer.from(JSON.stringify(payload), "utf8").toString("base64");
+    const s = await run(a, h, "start", null, b64);
+    const out = rawOut(s);
+    a.ok(/^[A-Za-z0-9+/=]+$/.test(out), "回写必须仍是 base64(回写成明文 = 新版客户端解析失败)");
+    const decoded = JSON.parse(Buffer.from(out, "base64").toString("utf8"));
+    a.equal(decoded.data.showTimesDaily, 0, "base64 响应里的 showTimesDaily 应归零");
+    a.equal(decoded.data.images.length, 0, "base64 响应里的开屏图应置空");
+    a.ok(decoded.data.launchConfig, "❌ 业务配置必须保留(白屏红线对新协议同样成立)");
+  },
+
+  "新协议: 形状不符不得误伤 (无 showTimesDaily 的 images 数组原样放行)": async (a, h) => {
+    // 判据: 只有"开屏配置"才同时有 images 与展示次数; 商品图集也有 images ⇒ 单见 images 不能动
+    const s = await run(a, h, "unknownFid", { images: [{ url: "https://img.jd.com/1.jpg" }], productName: "手机" });
+    a.equal(doneArg(s).body, undefined, "无 showTimesDaily 标记时不得清 images");
+  },
+
+  "我的页: floors 与 others.floors 双路径都清 (新版把楼层挪到 others)": async (a, h) => {
+    const s = await run(a, h, "personinfoBusiness", {
+      floors: [{ mId: "basefloorinfo", data: { commonPopup: { x: 1 }, commonTips: [1] } }],
+      others: {
+        floors: [
+          { mId: "recommendfloor", data: {} },
+          { mId: "orderIdFloor", data: { commentRemindInfo: { infos: [{ a: 1 }] } } },
+          { mId: "keyToolsFloor", data: { keep: true } },
+        ],
+      },
+    });
+    const o = parsed(s);
+    a.equal(o.floors.length, 1, "floors 里的推广字段应被清但楼层保留");
+    a.equal(o.floors[0].data.commonPopup, undefined, "basefloorinfo.commonPopup 应删除");
+    a.equal(o.floors[0].data.commonTips.length, 0, "commonTips 应置空");
+    const ids = o.others.floors.map((f) => f.mId);
+    a.ok(!ids.includes("recommendfloor"), "others.floors 里的推广楼层应整层删除(新版路径)");
+    a.ok(ids.includes("keyToolsFloor"), "❌ 功能入口楼层(keyToolsFloor)不得误删 = 破功能");
+    const order = o.others.floors.find((f) => f.mId === "orderIdFloor");
+    a.equal(order.data.commentRemindInfo.infos.length, 0, "评价提醒应置空");
+  },
+
 
   "welcomeHome: 过滤 7 类推广层, 保留业务层": async (a, h) => {
     const s = await run(a, h, "welcomeHome", {
@@ -139,13 +193,16 @@ exports.tests = {
   },
 
   "无 functionId 的请求原样放行": async (a, h) => {
+    const original = JSON.stringify({ images: [{ u: 1 }] });
     const sb = h.createSandbox({
       request: { method: "POST", url: JD, headers: {} },
-      response: { status: 200, headers: {}, body: JSON.stringify({ images: [{ u: 1 }] }) },
+      response: { status: 200, headers: {}, body: original },
     });
     const s = await h.runScript("Scripts/jingdong.js", sb);
     a.equal(s.doneCalls.length, 1, "无 query 也必须 $done");
-    a.equal(parsed(s).images.length, 1, "无 functionId 时不得清理任何字段");
+    // 未改写 = $done({}) ⇒ 原响应原样透传(2026-09-30 契约: 无实际改动不回写)
+    a.equal(s.doneCalls[0].body, undefined, "无 functionId 时不得回写任何字段");
+    a.equal(JSON.parse(original).images.length, 1, "原响应体不得被就地修改");
   },
 
   "台账自洽: 已登记 functionId 全部有代码落地": async (a) => {

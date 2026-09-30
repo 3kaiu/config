@@ -1,11 +1,10 @@
 #!name=京东去广告 Pro
-#!desc=开屏/首页/订单/物流/新品页广告字段级净化。基于 fmz200/wool_scripts jingdong.js 字段口径, 一律 delete/filter 不整条 reject。
+#!desc=开屏/首页/我的/订单/物流/新品页广告字段级净化, 兼容京东 15.9.50+ base64 新协议。一律 delete/filter, 不整条 reject。
 #!version=1.0
 #!author=3kaiu
 #!homepage=https://github.com/3kaiu/config
 #!system = iOS,iPadOS,macOS
 #!loon_version = 3.2.4(787)
-#!arguments-desc=\n- \{JINGDONG_ENABLE}: switch,"true","false",tag=京东去广告, desc=是否开启京东广告净化\n
 
 [Argument]
 JINGDONG_ENABLE = switch,true,tag=京东去广告,desc=是否开启京东广告净化
@@ -15,7 +14,17 @@ JINGDONG_ENABLE = switch,true,tag=京东去广告,desc=是否开启京东广告�
 # 数据又下发广告, 就不能整条拒」; 本仓 AGENTS.md 记的 functionId=start 白屏正是
 # 整条 reject 的后果。zqzess 上游对该接口用 reject-array 是反例, 不采纳。
 # 脚本内对未取证 functionId 一律原样放行 (不因同域批量照搬)。
-http-response ^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(start|welcomeHome|myOrderInfo|deliverLayer|orderTrackBusiness|getTabHomeInfo|personinfoBusiness) script-path=https://ws.wenn.in/main/Scripts/jingdong.js, requires-body=true, timeout=10, tag=京东广告字段级净化, enable={JINGDONG_ENABLE}
+# ── 匹配面为什么是**整个 client.action**, 而不是 7 个 functionId (2026-09-30 改) ──
+# 京东 App **15.9.50+ 换了协议**: 响应体整体 base64 化, 且 functionId 被塞进 base64 POST body
+# —— URL 上再也取不到 functionId ⇒ 按 functionId 匹配的脚本在新版本上**一条都不会触发**。
+# 证据: zbsdsb/loon-adblock-plugins `JD_remove_ads_v2.js`(该仓 2026-08-12 标注"适配 15.9.50+, 已验证"),
+#   我们独立探针复核: api.m.jd.com 存活且返回 JSON 错误封套(未签名请求), 与 base64 化不矛盾。
+# 风险由脚本内部的**形状判据**兜住(而不是靠 URL 白名单): 体积 >2MB 放行、非 JSON 非 base64 放行、
+#   每个字段都要求广告专有形状(mId 名单 / type 名单 / showTimesDaily 与 images 同时出现)、
+#   一处不符或**无实际改动**即原样放行(不回写)。见 src/jingdong.ts 的 handleByContent。
+http-response ^https:\/\/api\.m\.jd\.com\/client\.action script-path=https://ws.wenn.in/main/Scripts/jingdong.js, requires-body=true, timeout=10, tag=京东广告字段级净化, enable={JINGDONG_ENABLE}
+# 取证来源与逐 functionId 台账见 src/jingdong.ts 头部; 处置面 = fmz200/wool_scripts(主口径, 含我的页
+# 完整楼层清单与 others.floors 新版路径) + zbsdsb v2(base64 新协议) 两源交叉。
 
 [MitM]
 # 单一解密面: 京东 client.action 网关。子域分流 (api.m / api.* / xxx.m) 由网关
