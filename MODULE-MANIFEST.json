@@ -13,7 +13,7 @@
       "layer": "L2+L3",
       "purpose": "决定请求走哪条链路, 不改写内容",
       "tpl_resources": {
-        "loon_tpl": "template/loon.tpl ([Rule] 490 条: DOMAIN-SUFFIX 364 / DOMAIN 112 / DOMAIN-KEYWORD 4 / IP-CIDR 4 / DEST-PORT 3 / PROTOCOL 1 / GEOIP 1 / FINAL 1; 计数口径 = 非注释非空行, 2026-09-30 实测)",
+        "loon_tpl": "template/loon.tpl ([Rule] 492 条: DOMAIN-SUFFIX 364 / DOMAIN 114 / DOMAIN-KEYWORD 4 / IP-CIDR 4 / DEST-PORT 3 / PROTOCOL 1 / GEOIP 1 / FINAL 1; 计数口径 = 非注释非空行, 2026-09-30 实测)",
         "snippets": [
           "ai-services.tpl",
           "developer.tpl",
@@ -29,7 +29,7 @@
         "10 个策略组: Proxy(url-test 东京) / Fallback(fallback 东京) / Apple / Final / Streaming / AI / Developer / Gaming / Social / OpenCode",
         "Final 兜底: Proxy 默认, Fallback 容灾, DIRECT 零代理姿态; 尾部 GEOIP,CN,DIRECT + FINAL,Final",
         "银行域 16 条 DIRECT 保障免解密 (域名命中后不再走 IP 匹配)",
-        "127 条 REJECT 经 DoH 双解析器 + 协议探针取证, 后缀白名单按 4 类锁定; 另有 1 个 ad-block 集合 + 6 个 probe-* 插件的 97 条域级 REJECT (插件层, 随 [Plugin] 段默认启用)"
+        "129 条 REJECT 经 DoH 双解析器 + 协议探针取证, 后缀白名单按 4 类锁定; 另有 1 个 ad-block 集合 + 6 个 probe-* 插件的 97 条域级 REJECT (插件层, 随 [Plugin] 段默认启用)"
       ],
       "also_members": []
     },
@@ -39,7 +39,7 @@
       "layer": "L2+L4+L5",
       "purpose": "拦广告。唯一跨 3 层的模块",
       "internal_layers": {
-        "L2": "tpl 本地 [Rule] 的 REJECT 段 (127 条 REJECT(全部裸 REJECT)) + 1 个广告平台拦截器 ad-block.plugin (59 人工策展 + 423 生成式覆盖 = 482 域, 均为 DNS 阶段拦截, 无解密面), 2 个 DNS 收编插件 dns-httpdns(15)/dns-leak(35); 另有 6 个 probe-* 插件 38 域归 M3 + 1 个单 App 插件 soda.plugin(3 域 + 2 条 AND 锚定, 汽水音乐/抖音音乐版)",
+        "L2": "tpl 本地 [Rule] 的 REJECT 段 (129 条 REJECT(全部裸 REJECT)) + 1 个广告平台拦截器 ad-block.plugin (59 人工策展 + 423 生成式覆盖 = 482 域, 均为 DNS 阶段拦截, 无解密面), 2 个 DNS 收编插件 dns-httpdns(15)/dns-leak(35); 另有 6 个 probe-* 插件 38 域归 M3 + 1 个单 App 插件 soda.plugin(3 域 + 2 条 AND 锚定, 汽水音乐/抖音音乐版)",
         "L4": "Plugin/ 京东广告位字段级净化 (qidian 的 15 [Rewrite] + jingdong 的 1 [Script] 覆盖 7 个 functionId) + soda.plugin 的 16 条 luna 接口 [Rewrite](8 条整条转空 + 7 条字段级净化) + wechat.plugin 的 3 条 [Rewrite](2 条广告字段级净化 + 1 条纯推广端点整条转空; 朋友圈/视频号走 MMTLS 不可达, 见 APP-ONBOARDING 附九)",
         "L5": "Scripts/jingdong.js (京东, src/ 构建轨)"
       },
@@ -100,7 +100,8 @@
         "微信(公众号文章广告): 2 条字段级净化 + 1 条纯推广端点整条转空 (wechat.plugin, L4; 覆盖天花板与不落地台账见 APP-ONBOARDING.md 附九)",
         "京东: 7 个 functionId 的字段级净化 (Scripts/jingdong.js, L4+L5)",
         "起点: 15 条 [Rewrite] 字段级净化 (qidian.plugin, L4)",
-        "主配置 127 条 REJECT(全部裸 REJECT) 硬拦截面 (L2, 全部经 DoH 双解析器 + 协议探针取证)",
+        "主配置 129 条 REJECT(全部裸 REJECT) 硬拦截面 (L2, 全部经 DoH 双解析器 + 协议探针取证)",
+        "钉钉(DingTalk): 2 条域级 REJECT 落在**主配置**而非插件 (L2 唯一层, 无插件; 取证与不落地台账见 APP-ONBOARDING.md 附十) —— **本仓第一个「去广告只落 L2」的接入**。① 平台层一手声明: 官方《钉钉第三方SDK收集使用信息说明》自列 26 个 SDK, **唯一广告 SDK 是 BeiZi 倍孜(开屏广告)** ⇒ 其域早已被 beizi.biz 覆盖, 即「抄 SDK 清单」得到的全是已覆盖的部分; ② 真实缺口 2 条 = `adashx.ut.dingtalk.com`(UT 广告交换主域, 多条境内 CDN A, 随机子域 NXDOMAIN 非泛解析, TCP 80/443 可连但 TLS 被服务端重置⇒本机不可测) + `adash-emas.cn-hangzhou.aliyuncs.com`(6 A, 非泛解析, HTTPS 403 aserver/2.0.0 + 9 路径 404⇒端点型, 证书属阿里云, AS37963 Hangzhou Alibaba Advertising); ③ **这两条不是钉钉私有域**而是跨 App 阿里广告平台基础设施(同族 `adashx.ut.{alibaba,cainiao,taobao,amap,1688}` 实测全存活) ⇒ 归 M2 但物理落在 M1 主配置, 跨层张力已登记待裁决; ④ **落主配置而不落插件的理由**: 两域 A 记录实测**全部境内**(ipinfo CN Shanghai/Guangdong/Chongqing), 而插件 [Rule] 优先级低于本地 [Rule], 会被 `GEOIP,CN,DIRECT` 截胡成死规则; ⑤ **无 L4 是取证结论**: 开放平台 `oapi/topapi/v2` 是可枚举 oracle(未知 ApiName=errcode22, 存在但缺 token=errcode88), 13 个广告命名空间全部 errcode22 ⇒ 无广告 API; 客户端主链路是 DTIM 私有二进制协议 + 加密长连接 ⇒ Rewrite 结构上不可达; ⑥ 已否决 6 组候选(uni-ad/HUAWEI Ads/MMA/MSA 无存活端点 · TalkingData HTTPS 不可测且属 M3 · Tanx 平台层无一手声明) 理由逐条留档; ⑦ 业务事实: 官方关闭广告已改为**付费钉钉365会员**, 无 App 内开关可抄 ⇒ 网络层是唯一不花钱路径。",
         "字节系广告素材域: dm.bytedance.com / dm.pstatp.com / dm.toutiao.com + AND 锚定的 -ad-sign.byteimg.com(3 域, 归 soda.plugin)"
       ],
       "also_members": []
@@ -249,7 +250,7 @@
       "owner": "M2",
       "status": "open",
       "capability": "插件层去广告 (Rewrite 字段改写 / reject-dict 通道)",
-      "used": "45 个插件已随外部依赖清理全部删除, 仅余主配置 127 条 REJECT (含 1 条 PROTOCOL, STUN) + [Plugin] 段 9 个纯 L2 插件的 127 条域级 REJECT (1 个广告平台拦截器 + 2 个 DNS 收编 + 6 个 probe-*)",
+      "used": "45 个插件已随外部依赖清理全部删除, 仅余主配置 129 条 REJECT (含 1 条 PROTOCOL, STUN) + [Plugin] 段 9 个纯 L2 插件的 127 条域级 REJECT (1 个广告平台拦截器 + 2 个 DNS 收编 + 6 个 probe-*)",
       "impact": "App 内部结构化广告位无法清理 —— 需用户逐个重新接入插件"
     },
     {
@@ -353,7 +354,7 @@
       "source": "官方文档"
     },
     {
-      "question": "[Rule] 策略层 127 条 REJECT 是否该分派为 REJECT-IMG/-DICT/-ARRAY",
+      "question": "[Rule] 策略层 129 条 REJECT 是否该分派为 REJECT-IMG/-DICT/-ARRAY",
       "answer": "**不该**。当前 domain-reject-mode=DNS 下三者行为等价, 且 HTTP 类规则为 0",
       "consequence": "官方《策略》定义三变体为 HTTP 响应内容(1x1 GIF / {} / []); 官方《通用配置》定义 DNS 阶段拒绝用回环 IP; 官方《HTTP 规则》限定 HTTP 规则仅匹配 HTTP/HTTPS。本配置三条前提全不满足。台账口径改为 closed-no-action, 触发条件已写明",
       "source": "官方文档三页交叉"

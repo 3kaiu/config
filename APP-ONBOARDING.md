@@ -864,3 +864,121 @@ node tools/plugin-lint-check.mjs | grep 跨层空转
 
 **门禁**：`test/cases/wechat.test.js`（6 例）把本附的 3 条台账、13 条不落地/已否决面、App 身份与覆盖天花板写进断言 —— 台账与插件注释互为正本，改一处不改另一处即判红。
 **顺带补上的门禁盲区**：`tools/plugin-lint-check.mjs` 的跨层矛盾扫描原为**单向**（只查"插件 DIRECT 被主配置 REJECT 覆盖"）。微信白名单组暴露了反方向同样成立且**后果更隐蔽**（规则语法合法、门禁全绿、实际永不命中）⇒ 本轮补上「插件非 DIRECT 规则被主配置 DIRECT 覆盖」的扫描（`AND` 锚定行不适用，方法/后缀两形态按官方优先级判），首跑即抓出上述 2 条。
+
+---
+
+## 附十：钉钉 DingTalk（2026-09-30）
+
+本 App 是本仓**第一个「去广告只落在 L2、没有 L4」的接入**，且取证过程推翻了两个先入为主的判断。
+
+### 1. App 身份
+
+| 项 | 值 | 取证 |
+|---|---|---|
+| iOS bundle | `com.laiwang.DingTalk` v9.0.2（2026-09-28 发布） | iTunes Lookup `id=930368978` / `bundleId` 查询 |
+| 运营主体 | DingTalk Technology Co., Ltd. | iTunes Lookup `sellerName` |
+| 安卓包名 | `com.alibaba.android.rimelight` | 沿用公开资料，**本轮未复核**（应用宝无该包页面） |
+
+### 2. 平台层一手声明：官方自列 26 个第三方 SDK，**广告 SDK 只有 1 个**
+
+《钉钉第三方SDK收集使用信息说明》（`terms.alicdn.com/legal-agreement/terms/suit_bu1_dingtalk/suit_bu1_dingtalk202010091407_23127.html`）
+逐个列出 26 个 SDK（荣耀/华为/VIVO/OPPO/小米/魅族推送 · 支付宝 · 高德 · 优酷投屏 · 淘宝SDK/UT/开放平台 ·
+阿里安全 · UC浏览 · 阿里体育 · 新浪/腾讯分享 · 阿里云号码认证 · WPS · 安恒密盾 · 金格手写签注 · 华为手写笔 ·
+Google Chromium/FCM · Rokid RealityCraft · **BeiZi SDK**）。
+
+**26 个里只有 `BeiZi SDK`（上海倍孜网络技术有限公司）用途写明「用于为用户推送开屏广告」。**
+⇒ 平台层判据成立，且该 SDK 的域**本仓早已覆盖**（`DOMAIN-SUFFIX, beizi.biz, REJECT` 在主配置，
+`beizi.info` / `beizi.online` 在 ad-block 生成块）。
+
+**这一条本身就说明"抄 SDK 清单"不够** —— 清单给出的是**已覆盖**的部分，真正缺的在下面。
+
+### 3. 端点层：真正的缺口是两条**阿里广告域**，与钉钉 App 无绑定关系
+
+上游社区（`afwfv/DD-AD` 私有规则，钉钉节 + 字节系节）给出 3 条钉钉相关域，逐条对账本仓：
+
+| 域 | 本仓状态 | 探针（双解析器 + 泛解析对照） |
+|---|---|---|
+| `h-adashx.ut.dingtalk.com` | **已覆盖**（主配置，2026-08 HAR 审计轮引入） | 1 A（47.246.182.10），随机子域 clean |
+| `adashx.ut.dingtalk.com` | ❌ 缺 → **本轮补** | 多条境内 CDN A 轮换（183.240.215.66 / 112.51.127.14 / 203.119.213.226 / 101.206.204.89），随机子域 NXDOMAIN ⇒ 非泛解析；TCP 80/443 可连但 **TLS 握手被服务端重置**（`SSL_ERROR_SYSCALL`）⇒ 本机不可测 |
+| `adash-emas.cn-hangzhou.aliyuncs.com` | ❌ 缺 → **本轮补** | 6 条 A（8.132.237.135/161 · 47.116.84.225 · 106.15.83.128/130 · 139.196.135.6），随机子域 NXDOMAIN ⇒ 非泛解析；HTTPS 根 `403 aserver/2.0.0`、其余 9 路径 `404 text/html`（同 170B）⇒ **端点型**；证书 `CN=*.cn-hangzhou.aliyuncs.com`，AS37963 **Hangzhou Alibaba Advertising Co.,Ltd.**（ipinfo 实测） |
+
+**为什么它们不构成"钉钉专属广告面"**（这一条决定了归属，也是本轮最容易被做错的地方）：
+`adashx.ut.<app>` 是一个**跨 App 的阿里 UT 广告交换家族** —— 实测 `adashx.ut.alibaba.com` /
+`adashx.ut.cainiao.com` / `adashx.ut.taobao.com` / `adashx.ut.amap.com` / `adashx.ut.1688.com`
+**全部存活**。而 `adash-emas` 挂在**阿里云** `*.cn-hangzhou.aliyuncs.com` 下，归属是广告公司主体。
+⇒ 它们是**阿里广告平台的基础设施**，不是钉钉私有域。拦它们对淘宝/菜鸟/高德等同样生效（跨 App 影响）。
+
+### 4. 已否决的候选（不写规则，逐条给理由）
+
+| 候选 | 否决理由 |
+|---|---|
+| uni-ad / HUAWEI Ads / MMA / MSA | 前缀枚举**无存活端点**（`ad-api.uniad.dcloud.net.cn` 等全 NX；`ads.huawei.com` 301 平台站、`hmsads.hicloud.com` 全 NX；`mmachina.cn` 200 HTML 协会官网） |
+| TalkingData `api.talkingdata.com` | A 存活但 **HTTPS 不可测**，且用途是"数据分析与统计" ⇒ M3 隐私面非广告面，按模块纪律不塞进 M2 |
+| Tanx 家族（`task./sdk-config./videoproxy.tanx.com` 等 6 条） | 端点存活（`task.tanx.com` 200 / `sdk-config` 302），但**钉钉隐私政策未声明 Tanx**、社区清单把它挂在别的小节 ⇒ 平台层无一手依据，不凭域名字义加 REJECT |
+| 官网 / H5 面 | `www./h5./app.dingtalk.com` 与 `n.dingtalk.com` 全部**无任何广告域**（逐页扫第三方域，amap/aplus 属地图与统计非广告）；`n.dingtalk.com` 全部路径返同一 2857B HTML（catch-all SPA） |
+
+### 5. 为什么**没有 L4**：开放平台逐路径枚举证明钉钉无广告 API
+
+钉钉的 HTTP 面分两层，都探过了：
+
+- **开放平台**（`oapi.dingtalk.com/topapi/v2/<ns>/<action>`）：网关对**未知 ApiName** 返
+  `errcode=22 不合法ApiName`，对**存在但缺 token** 的返 `errcode=88 access_token is blank`
+  —— 这是一个**可用的枚举 oracle**。据此逐一探测 `ad / advert / advertisement / splash / splashad /
+  banner / promotion / promo / recommend / feed / marketing / ut / adconfig / adlist` 共 13 个命名空间：
+  **全部 errcode=22**（对照 `user/get` 返 88 ⇒ oracle 本身有效）。⇒ 开放平台**不存在广告 API**。
+- **App 数据面**：`app./biz./n./oapi.` 上的 `/ad /splash /getAd /adConfig /adlist …` 全部是
+  catch-all 或 Spring Boot 404；`nc./conn./longconn./gw.dingtalk.com`（钉钉自有长连接）**四个全 NXDOMAIN**。
+  结合阿里 IM 技术公开资料，钉钉客户端主链路是 **DTIM 私有二进制协议 + 加密长连接**，
+  与微信 MMTLS 同类 ⇒ 即使有广告下发，它也**不在 HTTP 面上**，`[Rewrite]` 结构上不可达。
+
+### 6. 关键业务事实：官方关闭广告是**付费**的
+
+媒体报道（界面新闻 2024-11《钉钉向广告低头》、2025-04）一致：钉钉客服的答复先是"提供手机号为您反馈关闭广告"，
+后改为"**开通钉钉365会员后支持关闭广告**"。广告位已扩散到**开屏 + 下班打卡 / 签到 / 加班审批 / 工作日志 / 直播回放**。
+
+⇒ **网络层是唯一不花钱的处置路径**，这正是本轮补那两条域的现实意义；
+但也意味着**不存在"App 内开关"可抄**（钉钉是 To B，SaaS 侧无个人版广告设置项）。
+
+### 7. 为什么落**主配置**而不是 L0 插件（跨层判断，本轮的关键决策）
+
+主配置「国内广告 SDK 硬拦截」段的纪律 ① 写明：**插件 `[Rule]` 优先级低于本地 `[Rule]`，国内域会被
+`GEOIP,CN,DIRECT` 直连截胡**。本轮实测这两个域的 A 记录**全部落在境内**
+（ipinfo：`CN Chongqing AS134420` / `CN Guangdong AS56040` / `CN Shanghai AS37963 Alibaba Advertising`）
+⇒ 放插件有被本地 GEOIP 截胡的风险，**放主配置 `GEOIP,CN,DIRECT` 之前**才是有效拦截。
+
+同一家族既有的 `h-adashx.ut.dingtalk.com` 与 `adashbc.ut.taobao.com` 也都在主配置同段，口径一致。
+
+⚠️ **未解决的开放问题**（登记待裁决，不静默）：这两条域归 M2 广告治理、但**物理落在 M1 分流的主配置里**，
+与"广告域单一真源在 ad-block.plugin"的集合化决策有张力。可能的处置：
+① 维持主配置（当前，本轮选择 —— 有效性优先）② 把国内广告域整体移进一个专用 L0 插件并重排优先级
+③ 两者都做但用门禁断言无重复。**在真机验证"插件能否拦境内域"之前不做结构性调整**。
+
+### 8. 复跑命令
+
+```bash
+# 平台层一手声明: 26 个 SDK 里只有 BeiZi 是广告 SDK
+curl -sS -m15 'https://terms.alicdn.com/legal-agreement/terms/suit_bu1_dingtalk/suit_bu1_dingtalk202010091407_23127.html' \
+  | grep -oE '(BeiZi|倍孜)[^<]{0,80}' | head
+
+# 端点层: 双解析器 + 泛解析对照
+for d in adashx.ut.dingtalk.com adash-emas.cn-hangzhou.aliyuncs.com; do
+  curl -sS -m10 "https://dns.google/resolve?name=$d&type=A" | head -c 300; echo
+  curl -sS -m10 "https://dns.google/resolve?name=zznp-\$RANDOM.$d&type=A" | head -c 120; echo  # Status 3 = 非泛解析
+done
+curl -sS -m12 -o /dev/null -w '%{http_code} %{content_type}\n' 'https://adash-emas.cn-hangzhou.aliyuncs.com/'  # 403 aserver/2.0.0
+
+# 跨 App 家族证明(它们不是钉钉私有域)
+for a in dingtalk alibaba cainiao taobao amap 1688; do
+  printf '%s ' "$a"; curl -sS -m8 "https://dns.google/resolve?name=adashx.ut.$a.com&type=A" \
+    | python3 -c 'import sys,json;d=json.load(sys.stdin);print("ALIVE" if any(x["type"]==1 for x in d.get("Answer",[])) else "-")'
+done
+
+# L4 不存在的证明: 开放平台枚举 oracle (errcode 22 = 无此 API; 88 = 存在但缺 token)
+for a in user/get ad/list splash/list banner/list recommend/list; do
+  printf '%-18s ' "$a"; curl -sS -m10 "https://oapi.dingtalk.com/topapi/v2/$a" | head -c 60; echo
+done
+```
+
+**门禁**：`test/cases/dingtalk.test.js` 把本附的处置台账（2 条补 + 1 条既有）、否决清单、
+"插件 `[Rule]` 不得承载这两个域"（跨层纪律 ①）、以及**开放平台 oracle 探测必须在仓库里留下取样**
+等属性固化 —— 台账与主配置注释互为正本，改一处不改另一处即判红。

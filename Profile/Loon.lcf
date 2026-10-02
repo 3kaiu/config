@@ -862,6 +862,32 @@ DOMAIN, rmonitor.qq.com, REJECT
 DOMAIN, unitelogreport.reader.qq.com, REJECT
 DOMAIN, ywab.reader.qq.com, REJECT
 DOMAIN, h-adashx.ut.dingtalk.com, REJECT
+# ── 钉钉 DingTalk 广告面补全 (2026-09-30, 取证见 APP-ONBOARDING.md 附十) ──
+# 背景: 钉钉自营广告已商业化(开屏 + 打卡/签到/审批/工作日志/直播回放多环节植入),
+#   官方关闭入口是**付费的钉钉365会员** ⇒ 网络层是唯一不花钱的处置路径。
+# 平台层一手声明: 官方《钉钉第三方SDK收集使用信息说明》(terms.alicdn.com/legal-agreement/
+#   terms/suit_bu1_dingtalk/suit_bu1_dingtalk202010091407_23127.html) 自列 26 个第三方 SDK,
+#   其中**仅 1 个是广告 SDK**(BeiZi 倍孜 = 开屏广告) ⇒ 该 SDK 的域已被本段 beizi.biz 覆盖。
+#   下面两条不是从那份清单推出来的, 而是**端点层取证 + 社区清单**补上的(见附十逐条)。
+# 端点层取证 (双解析器 Cloudflare + DNS.google + 随机子域泛解析对照):
+#   adashx.ut.dingtalk.com → 多条 A 轮换(183.240.215.66 / 112.51.127.14 / 203.119.213.226 /
+#     101.206.204.89, 均为境内 CDN 调度), 随机子域 NXDOMAIN ⇒ 非泛解析。
+#     TCP 80/443 可连但 TLS 握手被服务端重置(SSL_ERROR_SYSCALL) ⇒ **本机不可测**;
+#     同族的 h-adashx.ut.dingtalk.com 早已在本段拦截(2026-08 HAR 审计轮), 两者同属 UT 广告交换。
+#   adash-emas.cn-hangzhou.aliyuncs.com → 6 条 A(8.132.237.135/161 · 47.116.84.225 ·
+#     106.15.83.128/130 · 139.196.135.6), 随机子域 NXDOMAIN ⇒ 非泛解析;
+#     HTTPS 根路径 `403 aserver/2.0.0`、其余 9 个路径 `404 text/html`(同尺寸 170B)
+#     ⇒ 服务端在、**端点型**(非 200+HTML)。证书 CN=*.cn-hangzhou.aliyuncs.com,
+#     归属 AS37963 Hangzhou Alibaba Advertising Co.,Ltd.(ipinfo 实测) ⇒ 阿里广告服务。
+# 为什么落**主配置**而不是插件: 本段纪律① —— 插件 [Rule] 优先级低于本地 [Rule],
+#   而本地 `GEOIP,CN,DIRECT` 是 IP 类兜底; 这两个域的 A 记录**全部落在境内**
+#   (CN Chongqing/Guangdong/Shanghai, 见上), 放插件有被 GEOIP 直连截胡的风险。
+#   与既有的 h-adashx.ut.dingtalk.com / adashbc.ut.taobao.com 同段落, 口径一致。
+# 已否决(不写规则, 理由见附十 §4): uni-ad/HUAWEI Ads/MMA/MSA 无存活端点;
+#   TalkingData 端点存活但 HTTPS 不可测且属统计面(M3); oapi/api.dingtalk.com 开放平台
+#   **无任何广告 API**(逐路径探针全部 errcode=22 不合法 ApiName) ⇒ 无 L4 可做。
+DOMAIN, adashx.ut.dingtalk.com, REJECT
+DOMAIN, adash-emas.cn-hangzhou.aliyuncs.com, REJECT
 DOMAIN, adashbc.ut.taobao.com, REJECT
 DOMAIN, statistical-report.djiservice.org, REJECT
 DOMAIN, analytics-api-01.smzdm.com, REJECT
